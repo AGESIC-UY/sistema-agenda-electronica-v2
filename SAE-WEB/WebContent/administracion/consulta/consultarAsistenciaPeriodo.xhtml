@@ -1,0 +1,63 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}"
+			beforePhaseListener="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}">
+			<p:outputPanel
+				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<h:form id="form">
+					<fieldset>
+						<legend>
+							<h:outputText
+								value="#{sessionMBean.textos['reporte_asistencia_por_periodo']}" />
+						</legend>
+						<p:outputPanel styleClass="form-horizontal">
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['fecha_de_inicio']}"
+									for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText value="#{reporteMBean.fechaDesde}"
+										styleClass="datepicker" id="fechaDesde">
+										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+											timeZone="GMT" />
+									</h:inputText>
+									<p:message for="fechaDesde" />
+								</p:outputPanel>
+
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['fecha_de_fin']}"
+									for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText value="#{reporteMBean.fechaHasta}"
+										styleClass="datepicker" id="fechaHasta">
+										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+											timeZone="GMT" />
+									</h:inputText>
+									<p:message for="fechaHasta" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+					<ul class="form-action-buttons">
+						<li class="action-buttons-primary"><h:commandButton
+								value="#{sessionMBean.textos['consultar']}"
+								actionListener="#{reporteMBean.reporteAsistenciaFecha}"
+								styleClass="btn-lg btn-primario" /></li>
+					</ul>
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

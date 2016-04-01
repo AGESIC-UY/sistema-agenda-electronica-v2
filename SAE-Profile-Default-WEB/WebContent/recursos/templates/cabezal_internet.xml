@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html"
+	class="Cabezal" border="0" cellpadding='0' cellspacing='0' >
+	<tr>
+		<td id="titulo" class="CabezalTitulo">
+			<ui:insert name="titulo">
+				<h:outputText value="TITULO DE LA PAGINA" />
+			</ui:insert>
+		</td>
+	</tr>
+	<tr>
+		<td width="612px" id="menu" class="CabezalTituloMenu">
+			<ui:insert name="menu">
+				<h:commandLink value="&#187; Menu 1" />
+				<h:commandLink value="&#187; Menu 2" />
+				<h:commandLink value="&#187; Menu 3" />
+			</ui:insert>
+		</td>
+	</tr>
+</table>
+				

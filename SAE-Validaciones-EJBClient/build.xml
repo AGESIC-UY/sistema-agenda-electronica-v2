@@ -1,0 +1,61 @@
+<project name="SAE-Validaciones-EJBClient" basedir=".">
+
+	<!-- PROPERTIES -->
+	<property environment="env" />
+	<property name="manifest.file" value="build/MANIFEST.MF" />
+	<!-- dependencias de compilacion -->
+	<property name="java.src" value="ejbModule" />
+	<property name="SAE-EAR.lib" value="../SAE-EAR/EarContent/lib" />
+
+
+	
+	
+	
+	
+	
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+	
+	<!-- PATH -->
+	<path id="base.path">
+		<fileset dir="../SAE-Config/libs">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+
+		<sequential>
+			<mkdir dir="build" />
+			<delete quiet="true">
+				<fileset dir="build">
+					<include name="**/*" />
+				</fileset>
+			</delete>
+
+			<mkdir dir="build/classes" />
+			<mkdir dir="build/jar" />
+
+		</sequential>
+	</target>
+	
+
+	<target name="compile" depends="clean">
+
+		<manifest file="build/MANIFEST.MF">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Built-Date" value="${TODAY}" />
+		</manifest>
+
+		<javac srcdir="${java.src}" destdir="build/classes" target="1.7" encoding="UTF-8" includeantruntime="false" debug="true">
+			<classpath>
+				<path refid="base.path" />
+			</classpath>
+		</javac>
+        <copy todir="build/classes">
+            <fileset dir="${java.src}" excludes="**/*.java" />
+        </copy>
+	</target>
+
+</project>

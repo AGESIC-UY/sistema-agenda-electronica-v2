@@ -1,0 +1,45 @@
+<project name="SAE-Config" default="build" basedir=".">
+
+	<target name="init" >
+	
+		<!-- PROPERTIES -->
+    <property name="build.type" value="default"/>
+		<property file="build-${build.type}.properties" />
+		<property environment="env" />
+
+	</target>
+
+	<target name="clean" depends="init">
+		<path id="cleanlist">
+			<pathelement location="../SAE-EJBClient/build.xml"/>
+      <pathelement location="../SAE-EJB/build.xml"/>
+      <pathelement location="../SAE-Profile-${build.profile}-EJBClient/build.xml"/>
+      <pathelement location="../SAE-Profile-${build.profile}-EJB/build.xml"/>
+      <pathelement location="../SAE-Profile-${build.profile}-WEB/build.xml"/>
+      <pathelement location="../SAE-Componentes/build.xml"/>
+      <pathelement location="../SAE-WEB/build.xml"/>
+      <pathelement location="../SAE-EAR/build.xml"/>
+		</path>
+		<subant target="clean" buildpathref="cleanlist" failonerror="true" inheritall="true"/>
+	</target>
+	
+	
+	<target name="build" depends="init">
+
+		<path id="buildlist">
+			<pathelement location="../SAE-EJBClient/build.xml"/>
+			<pathelement location="../SAE-EJB/build.xml"/>
+			<pathelement location="../SAE-Profile-${build.profile}-EJBClient/build.xml"/>
+			<pathelement location="../SAE-Profile-${build.profile}-EJB/build.xml"/>
+			<pathelement location="../SAE-Profile-${build.profile}-WEB/build.xml"/>
+			<pathelement location="../SAE-Componentes/build.xml"/>
+		 	<pathelement location="../SAE-WEB/build.xml"/>
+			<pathelement location="../SAE-EAR/build.xml"/>
+		</path>
+
+		<!-- Se llama a cada tarea build con las propiedades ya seteadas para todo el proceso de build -->
+		<subant target="build" buildpathref="buildlist" failonerror="true" inheritall="true"/>
+
+	</target>
+	
+</project>

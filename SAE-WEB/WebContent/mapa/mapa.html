@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="es">
+
+  <head>
+    <script src="https://maps.google.com/maps/api/js?sensor=false" type="text/javascript"></script>
+    <link  href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700' rel='stylesheet' type='text/css' />
+    <link href="/sae/resources/css/agenda.css" rel="stylesheet" />
+
+	  <script type="text/javascript">
+	    function initializeMap(lat, lon, zoom, icono) {
+	      var mapCanvas = document.getElementById('map-canvas');
+	      var mapOptions = {
+	        center : new google.maps.LatLng(lat, lon),
+	        zoom : zoom,
+	        mapTypeId : google.maps.MapTypeId.ROADMAP
+	      }
+	      var map = new google.maps.Map(mapCanvas, mapOptions)
+	      console.log('map=' + map)
+	      if (icono != '') {
+	        var image = {
+	          url : icono,
+	        };
+	        var marker = new google.maps.Marker({
+	          position : new google.maps.LatLng(lat, lon),
+	          icon : image,
+	          map : map
+	        });
+	      } else {
+	
+	        var marker = new google.maps.Marker({
+	          position : new google.maps.LatLng(lat, lon),
+	          map : map
+	        });
+	
+	      }
+	    }
+	    
+	    //Tomado de: http://stackoverflow.com/a/3717465
+	    function getUrlVars() {
+	        var vars = [], hash;
+	        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	        for (var i = 0; i < hashes.length; i++) {
+	            hash = hashes[i].split('=');
+	            vars.push(hash[0]);
+	            vars[hash[0]] = hash[1];
+	        }
+	        return vars;
+	    }
+	    
+    </script>
+
+  </head>
+  <body class="mapa-body">
+     <div class="mapa">
+       <div id="map-canvas" class="map-canvas"></div>
+     </div>
+    
+    <script>
+      var params = getUrlVars();
+      var lat = params['lat'];
+      var lon = params['lon'];
+      var zoom = 16;
+      if((lat=="" || lat=="0") && (lon=="" || lon=="0")) {
+    	  lat = "-32.5476626";
+    	  lon = "-55.4411862";
+    	  zoom = 7; 
+      }
+      initializeMap(lat, lon, zoom, "");
+    </script>
+    
+  </body>
+</html>

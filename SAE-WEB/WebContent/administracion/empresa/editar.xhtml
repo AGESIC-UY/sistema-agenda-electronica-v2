@@ -1,0 +1,319 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{empresaMBean.beforePhaseCrear}"
+			beforePhaseListener="#{empresaMBean.beforePhaseCrear}">
+
+			<h:form id="form">
+				<fieldset id="basic">
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['datos_de_la_empresa']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['identificador']}"
+								for="codigoEmpresa" styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-10">
+								<h:inputText id="codigoEmpresa"
+									value="#{empresaMBean.empresaEditar.id}" maxlength="10"
+									disabled="true" styleClass="form-control" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['organismo']}"
+								for="organismo" styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-3">
+								<h:selectOneMenu id="organismo"
+									value="#{empresaMBean.empresaEditar.organismoId}"
+									valueChangeListener="#{empresaMBean.cambioOrganismo}"
+									styleClass="form-control">
+									<p:ajax update="@all" process="@this" />
+									<f:selectItems value="#{empresaSessionMBean.organismos}" />
+								</h:selectOneMenu>
+							</p:outputPanel>
+							<p:outputLabel value="#{sessionMBean.textos['codigo']}"
+								for="codigoOrganismo" styleClass="col-sm-1 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-1">
+								<p:inputText id="codigoOrganismo" maxlength="5"
+									value="#{empresaMBean.empresaEditar.organismoCodigo}"
+									disabled="#{empresaMBean.empresaEditar.organismoId != null and empresaMBean.empresaEditar.organismoId != 0}"
+									styleClass="form-control" />
+							</p:outputPanel>
+							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
+								for="nombreOrganismo" styleClass="col-sm-1 control-label label" />
+							<p:outputPanel styleClass="col-sm-3">
+								<p:inputText id="nombreOrganismo"
+									value="#{empresaMBean.empresaEditar.organismoNombre}"
+									maxlength="100"
+									disabled="#{empresaMBean.empresaEditar.organismoId != null and empresaMBean.empresaEditar.organismoId != 0}"
+									styleClass="form-control" />
+							</p:outputPanel>
+							<p:outputPanel styleClass="col-sm-1 no-padding">
+								<p:commandLink
+									actionListener="#{empresaMBean.recargarOrganismos}"
+									immediate="true"
+									update="organismo codigoOrganismo nombreOrganismo">
+									<h:outputText
+										value="#{sessionMBean.textos['recargar_listado']}" />
+									<h:outputText styleClass="ui-helper-hidden-accessible"
+										value="#{sessionMBean.textos['organismo']}" />
+								</p:commandLink>
+							</p:outputPanel>
+							<p:message for="codigoOrganismo" />
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['unidad_ejecutora']}"
+								for="unidadEjecutora" styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-3">
+								<h:selectOneMenu id="unidadEjecutora"
+									value="#{empresaMBean.empresaEditar.unidadEjecutoraId}"
+									valueChangeListener="#{empresaMBean.cambioUnidadEjecutora}"
+									styleClass="form-control">
+									<p:ajax update="@all" process="@this" />
+									<f:selectItems
+										value="#{empresaSessionMBean.unidadesEjecutoras}" />
+								</h:selectOneMenu>
+							</p:outputPanel>
+							<p:outputLabel value="#{sessionMBean.textos['codigo']}"
+								for="codigoUnidadEjecutora"
+								styleClass="col-sm-1 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-1">
+								<p:inputText id="codigoUnidadEjecutora"
+									value="#{empresaMBean.empresaEditar.unidadEjecutoraCodigo}"
+									maxlength="5"
+									disabled="#{empresaMBean.empresaEditar.unidadEjecutoraId != null and empresaMBean.empresaEditar.unidadEjecutoraId != 0}"
+									styleClass="form-control" />
+							</p:outputPanel>
+							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
+								for="nombreUnidadEjecutora"
+								styleClass="col-sm-1 control-label label" />
+							<p:outputPanel styleClass="col-sm-3">
+								<p:inputText id="nombreUnidadEjecutora"
+									value="#{empresaMBean.empresaEditar.unidadEjecutoraNombre}"
+									maxlength="100"
+									disabled="#{empresaMBean.empresaEditar.unidadEjecutoraId != null and empresaMBean.empresaEditar.unidadEjecutoraId != 0}"
+									styleClass="form-control" />
+							</p:outputPanel>
+							<p:outputPanel styleClass="col-sm-1 no-padding">
+								<p:commandLink
+									actionListener="#{empresaMBean.recargarUnidadesEjecutoras}"
+									immediate="true"
+									update="unidadEjecutora codigoUnidadEjecutora nombreUnidadEjecutora">
+									<h:outputText
+										value="#{sessionMBean.textos['recargar_listado']}" />
+									<h:outputText styleClass="ui-helper-hidden-accessible"
+										value="#{sessionMBean.textos['unidad_ejecutora']}" />
+								</p:commandLink>
+							</p:outputPanel>
+              <p:message for="codigoUnidadEjecutora"></p:message>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
+								for="nombreEmpresa"
+								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:inputText id="nombreEmpresa"
+									value="#{empresaMBean.empresaEditar.nombre}" maxlength="100"
+									styleClass="form-control" />
+								<p:message for="nombreEmpresa"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['oid']}"
+								for="oidEmpresa"
+								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-8">
+								<p:inputText id="oidEmpresa"
+									value="#{empresaMBean.empresaEditar.oid}" maxlength="25"
+									styleClass="form-control" />
+								<h:outputText styleClass="input-msg"
+									value="#{sessionMBean.textos['empresa_oid_ayuda']}" />
+								<p:message for="oidEmpresa"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel id="pnlLogo" styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['logo']}"
+								for="logoImg_input" styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:fileUpload mode="advanced" id="logoImg" 
+									fileUploadListener="#{empresaMBean.cambioLogo}" auto="true"
+									process="@this" update="form:pnlLogo"
+									label="#{sessionMBean.textos['seleccionar']}"
+									cancelLabel="#{sessionMBean.textos['cancelar']}"
+									uploadLabel="#{sessionMBean.textos['subir']}"
+									dragDropSupport="false" sizeLimit="1000000"
+									invalidSizeMessage="#{sessionMBean.textos['el_tamano_maximo_admitido_para_el_logo_es_de_1mb']}"
+									/>
+								<p:graphicImage id="logo" value="#{empresaMBean.empresaLogo}" styleClass="logoEmpresa"  
+								  alt="#{empresaMBean.empresaEditar.logoTexto}" cache="false" rendered="#{empresaMBean.empresaLogo != null}"/>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['logo_texto_alternativo']}"
+								for="textoLogoEmpresa" styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:inputText id="textoLogoEmpresa"
+									value="#{empresaMBean.empresaEditar.logoTexto}" maxlength="100"
+									styleClass="form-control" />
+									<p:message for="textoLogoEmpresa"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['zona_horaria']}"
+								for="timezoneEmpresa" styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-10">
+								<h:selectOneMenu id="timezoneEmpresa"
+									value="#{empresaMBean.empresaEditar.timezone}"
+									styleClass="form-control">
+									<f:selectItems value="#{empresaSessionMBean.timezones}" />
+								</h:selectOneMenu>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['formato_de_fecha']}"
+								for="formatoFechaEmpresa"
+								styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-10">
+								<h:selectOneMenu id="formatoFechaEmpresa"
+									value="#{empresaMBean.empresaEditar.formatoFecha}"
+									styleClass="form-control">
+									<f:selectItems value="#{empresaSessionMBean.formatosFecha}" />
+								</h:selectOneMenu>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['formato_de_hora']}"
+								for="formatoHoraEmpresa"
+								styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-10">
+								<h:selectOneMenu id="formatoHoraEmpresa"
+									value="#{empresaMBean.empresaEditar.formatoHora}"
+									styleClass="form-control">
+									<f:selectItems value="#{empresaSessionMBean.formatosHora}" />
+								</h:selectOneMenu>
+							</p:outputPanel>
+						</p:outputPanel>
+
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['origen_de_datos']}"
+								for="datasourceEmpresa"
+								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-8">
+								<p:inputText id="datasourceEmpresa"
+									value="#{empresaMBean.empresaEditar.datasource}" maxlength="20"
+									styleClass="form-control" />
+                <h:outputText styleClass="input-msg"
+                  value="#{sessionMBean.textos['consulte_al_administrador_de_bases_de_datos']}" />
+								<p:message for="datasourceEmpresa"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['datos_para_la_clausula_de_consentimiento']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['finalidad']}"
+								for="ccFinalidad"
+								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:inputText id="ccFinalidad"
+									value="#{empresaMBean.empresaEditar.ccFinalidad}"
+									maxlength="100" styleClass="form-control" />
+								<p:message for="ccFinalidad"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['responsable']}"
+								for="ccResponsable"
+								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:inputText id="ccResponsable"
+									value="#{empresaMBean.empresaEditar.ccResponsable}"
+									maxlength="100" styleClass="form-control" />
+								<p:message for="ccResponsable"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['direccion']}"
+								for="ccDireccion"
+								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:inputText id="ccDireccion"
+									value="#{empresaMBean.empresaEditar.ccDireccion}"
+									maxlength="100" styleClass="form-control" />
+								<p:message for="ccDireccion"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['personalizacion_de_apariencia']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel
+								value="#{sessionMBean.textos['pie_de_pagina_publico']}"
+								for="piePublico_input" styleClass="col-sm-2 control-label label" />
+							<p:outputPanel styleClass="col-sm-10">
+								<p:editor maxlength="1000" id="piePublico"
+									value="#{empresaMBean.empresaEditar.piePublico}">
+								</p:editor>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<ul class="form-action-buttons">
+					<li class="action-buttons-primary">
+						<ul>
+							<li><p:commandButton
+									value="#{sessionMBean.textos['guardar']}"
+									actionListener="#{empresaMBean.guardar}"
+									styleClass="btn-lg btn-primario" update="@all" /></li>
+						</ul>
+					</li>
+					<li class="action-buttons-second">
+						<ul>
+							<li class="float-left"><p:commandButton
+									value="#{sessionMBean.textos['cancelar']}" action="cancelar"
+									immediate="true" styleClass="btn-lg btn-link" /></li>
+						</ul>
+					</li>
+				</ul>
+
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

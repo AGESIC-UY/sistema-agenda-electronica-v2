@@ -1,0 +1,96 @@
+/*
+ * SAE - Sistema de Agenda Electronica
+ * Copyright (C) 2009  IMM - Intendencia Municipal de Montevideo
+ *
+ * This file is part of SAE.
+
+ * SAE is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+package uy.gub.imm.sae.web.common;
+
+public class CeldaDia {
+	
+	private Boolean esGrupo;
+	private Boolean primera;
+	private Boolean ultima;
+	private Boolean esGrupoPar;  //Indica si el numero de grupo es par, contando los grupos dentro del dia desde 1.
+	private String  contenido;
+	
+	public CeldaDia() {
+		esGrupo = false;
+		primera = false;
+		ultima = false;
+		esGrupoPar = false;
+		contenido = "";
+	}
+
+
+	
+	public Boolean getEsGrupo() {
+		return esGrupo;
+	}
+
+
+
+	public void setEsGrupo(Boolean esGrupo) {
+		this.esGrupo = esGrupo;
+	}
+
+
+
+	public Boolean getPrimera() {
+		return primera;
+	}
+
+
+
+	public void setPrimera(Boolean primera) {
+		this.primera = primera;
+	}
+
+
+
+	public Boolean getUltima() {
+		return ultima;
+	}
+
+
+
+	public void setUltima(Boolean ultima) {
+		this.ultima = ultima;
+	}
+
+
+
+	public Boolean getEsGrupoPar() {
+		return esGrupoPar;
+	}
+
+
+
+	public void setEsGrupoPar(Boolean esGrupoPar) {
+		this.esGrupoPar = esGrupoPar;
+	}
+
+
+
+	public String getContenido() {
+		return contenido;
+	}
+
+	public void setContenido(String contenido) {
+		this.contenido = contenido;
+	}
+}

@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{crearDisponibilidadMBean.beforePhaseCrearDisponibilidades}"
+			beforePhaseListener="#{crearDisponibilidadMBean.beforePhaseCrearDisponibilidades}">
+
+			<p:outputPanel
+				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<h:form id="formCrearDisponibilidad">
+
+					<fieldset>
+						<legend>
+							<h:outputText
+								value="#{sessionMBean.textos['fecha_para_la_cual_generar']}" />
+						</legend>
+						<p:outputPanel id="fechaConsultar" styleClass="form-horizontal">
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['fecha']}"
+									for="fecha" styleClass="col-sm-3 control-label label" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="fecha"
+										value="#{crearDispSessionMBean.fechaCrear}"
+										styleClass="datepicker">
+										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+											timeZone="GMT" />
+									</h:inputText>
+									<h:outputText styleClass="input-msg"
+										value="#{crearDisponibilidadMBean.mensajePeriodoDisponibilidad}" />
+									<p:message for="fecha"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+							<p:outputPanel styleClass="form-group">
+								<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+									<p:commandButton id="consultar"
+										value="#{sessionMBean.textos['consultar_disponibilidades']}"
+										actionListener="#{crearDisponibilidadMBean.consultarDisponibilidadesDelDia}"
+										update="formCrearDisponibilidad:tablaMatutina formCrearDisponibilidad:tablaVespertina formCrearDisponibilidad:fechaConsultar formCrearDisponibilidad:campos"
+										styleClass="btn btn-secundario" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+
+					<div class="row margen_inf">
+						<div class="col-sm-6">
+							<p:dataTable id="tablaMatutina"
+								value="#{crearDispSessionMBean.disponibilidadesDelDiaMatutina}"
+								var="rowMM"
+								caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}"
+								emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+
+								<f:facet name="header">
+									<h:panelGroup>
+										<h:outputText value="#{sessionMBean.textos['por_la_manana']}"></h:outputText>
+									</h:panelGroup>
+								</f:facet>
+
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
+									</f:facet>
+									<h:outputText value="#{rowMM.data.horaInicio}">
+										<f:convertDateTime type="time"
+											pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+									</h:outputText>
+								</p:column>
+
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowMM.data.cupo}"
+										rendered="#{(rowMM.data.cupo > 0 ? true  : false)}"
+										styleClass="verde"></h:outputText>
+									<h:outputText value="#{rowMM.data.cupo}"
+										rendered="#{(rowMM.data.cupo > 0 ? false  : true)}"
+										styleClass="rojo"></h:outputText>
+								</p:column>
+
+								<p:column>
+									<f:facet name="header">
+										<h:outputText
+											value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowMM.data.cantReservas}"></h:outputText>
+								</p:column>
+							</p:dataTable>
+						</div>
+
+						<div class="col-sm-6">
+							<p:dataTable id="tablaVespertina"
+								value="#{crearDispSessionMBean.disponibilidadesDelDiaVespertina}"
+								var="rowVM"
+								caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}"
+								emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+
+								<f:facet name="header">
+									<h:panelGroup>
+										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}"></h:outputText>
+									</h:panelGroup>
+								</f:facet>
+
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
+									</f:facet>
+									<h:outputText value="#{rowVM.data.horaInicio}">
+										<f:convertDateTime type="time"
+											pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+									</h:outputText>
+								</p:column>
+
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowVM.data.cupo}"
+										rendered="#{(rowVM.data.cupoDisponible > 0 ? true  : false)}"
+										styleClass="verde"></h:outputText>
+									<h:outputText value="#{rowVM.data.cupo}"
+										rendered="#{(rowVM.data.cupoDisponible > 0 ? false  : true)}"
+										styleClass="rojo"></h:outputText>
+								</p:column>
+
+								<p:column>
+									<f:facet name="header">
+										<h:outputText
+											value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowVM.data.cantReservas}"></h:outputText>
+								</p:column>
+
+							</p:dataTable>
+						</div>
+					</div>
+
+					<fieldset>
+						<legend>
+							<h:outputText
+								value="#{sessionMBean.textos['nuevas_disponibilidades_para_la_fecha_consultada']}" />
+						</legend>
+						<p:outputPanel id="campos" styleClass="form-horizontal">
+						
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['hora_de_inicio']}" for="seleccionHoraD" styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
+								<p:outputPanel styleClass="col-sm-9">
+									<h:selectOneMenu id="seleccionHoraD" styleClass="hora form-control" value="#{crearDispSessionMBean.horaD}">
+										<f:selectItems value="#{crearDisponibilidadMBean.horas}" />
+									</h:selectOneMenu>
+									<h:outputText value=" : "></h:outputText>
+									<h:outputLabel value="minutos:" for="seleccionMinD" styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
+									<h:selectOneMenu id="seleccionMinD" styleClass="hora form-control" value="#{crearDispSessionMBean.minD}">
+										<f:selectItems value="#{crearDisponibilidadMBean.minutos}" />
+									</h:selectOneMenu>
+									<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+									<p:message for="seleccionHoraD"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['hora_de_fin']}" for="seleccionHoraH" styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
+								<p:outputPanel styleClass="col-sm-9">
+									<h:selectOneMenu id="seleccionHoraH" styleClass="hora form-control" value="#{crearDispSessionMBean.horaH}">
+										<f:selectItems value="#{crearDisponibilidadMBean.horas}" />
+									</h:selectOneMenu>
+									<h:outputText value=" : "></h:outputText>
+									<h:outputLabel value="minutos:" for="seleccionMinH" styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
+									<h:selectOneMenu id="seleccionMinH" styleClass="hora form-control" value="#{crearDispSessionMBean.minH}">
+										<f:selectItems value="#{crearDisponibilidadMBean.minutos}" />
+									</h:selectOneMenu>
+									<h:outputText styleClass="comentario" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+									<p:message for="seleccionHoraH"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['frecuencia']}"
+									for="frecuencia"
+									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="frecuencia" value="#{crearDispSessionMBean.frecuencia}" maxlength="5"
+										styleClass="form-control textoCorto" converter="integerConverter" />
+									<p:message for="frecuencia"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['cupo_por_periodo']}"
+									for="cupos"
+									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="cupos" value="#{crearDispSessionMBean.cupo}" maxlength="5" 
+									 styleClass="form-control textoCorto" converter="integerConverter" />
+									<p:message for="cupos"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+					<ul class="form-action-buttons">
+						<li class="action-buttons-primary">
+							<ul>
+								<li><p:commandButton id="crear"
+										value="#{sessionMBean.textos['crear_disponibilidades']}"
+										actionListener="#{crearDisponibilidadMBean.crearDisponibilidades}"
+										update="formCrearDisponibilidad:tablaMatutina :formCrearDisponibilidad:tablaVespertina formCrearDisponibilidad:campos formCrearDisponibilidad:fechaConsultar"
+										styleClass="btn-lg btn-primario" /></li>
+							</ul>
+						</li>
+						<li class="action-buttons-second"></li>
+					</ul>
+
+				</h:form>
+
+			</p:outputPanel>
+
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

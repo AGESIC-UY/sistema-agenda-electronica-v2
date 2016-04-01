@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+<wb-module deploy-name="SAE-EAR">
+<wb-resource deploy-path="/" source-path="/EarContent"/>
+        <dependent-module archiveName="SAE-Profile-Default-EJB.jar" deploy-path="/" handle="module:/resource/SAE-Profile-Default-EJB/SAE-Profile-Default-EJB">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-EJBClient.jar" deploy-path="/lib" handle="module:/resource/SAE-EJBClient/SAE-EJBClient">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-EJB.jar" deploy-path="/" handle="module:/resource/SAE-EJB/SAE-EJB">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-Profile-Default-WEB.war" deploy-path="/" handle="module:/resource/SAE-Profile-Default-WEB/SAE-Profile-Default-WEB">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-Acciones-EJBClient.jar" deploy-path="/lib" handle="module:/resource/SAE-Acciones-EJBClient/SAE-Acciones-EJBClient">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-Autocompletados-EJBClient.jar" deploy-path="/lib" handle="module:/resource/SAE-Autocompletados-EJBClient/SAE-Autocompletados-EJBClient">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-Validaciones-EJBClient.jar" deploy-path="/lib" handle="module:/resource/SAE-Validaciones-EJBClient/SAE-Validaciones-EJBClient">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-Profile-Default-EJBClient.jar" deploy-path="/lib" handle="module:/resource/SAE-Profile-Default-EJBClient/SAE-Profile-Default-EJBClient">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+</wb-module>
+</project-modules>

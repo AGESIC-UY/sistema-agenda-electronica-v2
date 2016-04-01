@@ -1,0 +1,31 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:p="http://primefaces.org/ui">
+
+<ui:component>
+	<h:form id="disenioFormularioForm">
+		<p:dialog shadowOpacity="0.4" autosized="false"
+			widgetVar="disenioFormularioModalBox" zindex="1000" modal="true">
+			<f:facet name="header">
+				<h:outputText
+					value="#{sessionMBean.textos['vista_preliminar_del_formulario_de_ingreso_de_datos_de_la_reserva']}" />
+			</f:facet>
+
+			<div style="overflow: auto; height: 28em;">
+				<p:outputPanel id="disenioFormularioBody">
+
+					<h:panelGroup binding="#{disenioFormularioMBean.campos}" />
+
+				</p:outputPanel>
+			</div>
+		</p:dialog>
+		<div class="ui-helper-hidden-accessible">
+			<h:commandButton value="dummy"></h:commandButton>
+		</div>
+	</h:form>
+</ui:component>
+
+</html>

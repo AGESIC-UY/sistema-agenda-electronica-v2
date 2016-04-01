@@ -1,0 +1,85 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{sessionMBean.beforePhaseSeleccionAgendaRecurso}"
+			beforePhaseListener="#{sessionMBean.beforePhaseSeleccionAgendaRecurso}">
+
+			<h:form id="formSeleccionAgendaRecruso">
+				<div class="row" id="mpTablas">
+					<div class="col-sm-6">
+						<p:dataTable value="#{sessionMBean.agendas}" var="row"
+							id="tablaAgendas" selectionMode="single"
+							selection="#{sessionMBean.rowSelectAgenda}"
+							rowKey="#{row.data.id}" caption="Lista de agendas"
+							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+
+							<f:facet name="header">
+								<h:outputText value="Agendas"></h:outputText>
+							</f:facet>
+
+							<p:ajax event="rowSelect"
+								listener="#{sessionMBean.seleccionarAgenda}"
+								update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:tablaRecursos" />
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Nombre" />
+								</f:facet>
+								<h:outputText value="#{row.data.nombre}" />
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Descripción" />
+								</f:facet>
+								<h:outputText value="#{row.data.descripcion}" escape="false" />
+							</p:column>
+
+						</p:dataTable>
+					</div>
+
+					<div class="col-sm-6">
+						<p:dataTable value="#{sessionMBean.recursos}" var="row" id="tablaRecursos" 
+						  selection="#{sessionMBean.rowSelectRecurso}" rowKey="#{row.data.id}" selectionMode="single" 
+						  caption="#{sessionMBean.textos['listado_de_recursos']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+							<f:facet name="header">
+								<h:outputText value="Recursos"></h:outputText>
+							</f:facet>
+
+							<p:ajax event="rowSelect"
+								listener="#{sessionMBean.desseleccionarRecurso}"
+								update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:tablaRecursos" />
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Nombre" />
+								</f:facet>
+								<h:outputText value="#{row.data.nombre}"></h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="Descripción" />
+								</f:facet>
+								<h:outputText value="#{row.data.descripcion}" escape="false"></h:outputText>
+							</p:column>
+
+						</p:dataTable>
+					</div>
+				</div>
+				<div class="ui-helper-hidden-accessible">
+					<h:commandButton value="dummy"></h:commandButton>
+				</div>
+			</h:form>
+
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

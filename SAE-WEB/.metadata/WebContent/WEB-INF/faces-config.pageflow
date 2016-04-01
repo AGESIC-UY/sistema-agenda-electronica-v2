@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pageflow:Pageflow xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pageflow="http://www.sybase.com/suade/pageflow" id="pf14490901520419" configfile="/SAE-WEB/WebContent/WEB-INF/faces-config.xml">
+  <nodes xsi:type="pageflow:PFPage" name="*" x="338" y="946" id="pf144909015742910" referenceLink="//@navigationRule.0/@fromViewId|" outlinks="pf144909015742911" path="*"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/inicio.xhtml" x="554" y="2098" id="pf144909015742912" referenceLink="//@navigationRule.29/@navigationCase.0/@toViewId|" inlinks="pf144909015742911 pf144909015742919 pf144909015742920 pf144909015742921 pf144909015742922 pf144909015742923 pf144909015742924 pf144909015742925 pf144909015742927 pf144909015742928 pf14497706655140" path="/administracion/inicio.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/agenda/crear.xhtml" x="122" y="178" id="pf144909015742929" referenceLink="//@navigationRule.1/@fromViewId|" outlinks="pf14581529593420" path="/administracion/agenda/crear.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/agenda/modificarConsultar.xhtml" x="338" y="562" id="pf144909015742930" referenceLink="//@navigationRule.4/@navigationCase.0/@toViewId|" outlinks="pf144909015742931" inlinks="pf144909015742932 pf144909015742933 pf14581529593420 pf14585861435280" path="/administracion/agenda/modificarConsultar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/agenda/modificar.xhtml" x="122" y="562" id="pf144909015742935" referenceLink="//@navigationRule.3/@fromViewId|" outlinks="pf144909015742932 pf144909015742933" inlinks="pf144909015742931" path="/administracion/agenda/modificar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/agenda/eliminar.xhtml" x="122" y="1457" id="pf144909015742936" referenceLink="//@navigationRule.4/@fromViewId|" path="/administracion/agenda/eliminar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/agenda/consultar.xhtml" x="122" y="1969" id="pf144909015742937" referenceLink="//@navigationRule.5/@fromViewId|" path="/administracion/agenda/consultar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/agenda/modificarTextos.xhtml" x="122" y="946" id="pf144909015742938" referenceLink="//@navigationRule.4/@fromViewId|" outlinks="pf14585861435280" path="/administracion/agenda/modificarTextos.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/recurso/crear.xhtml" x="338" y="1330" id="pf144909015742939" referenceLink="//@navigationRule.5/@fromViewId|" outlinks="pf144909015742919 pf144909015742920" path="/administracion/recurso/crear.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/recurso/modificarTextos.xhtml" x="338" y="1714" id="pf144909015742940" referenceLink="//@navigationRule.8/@fromViewId|" outlinks="pf144909015742921 pf144909015742922" path="/administracion/recurso/modificarTextos.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/recurso/modificarConsultar.xhtml" x="338" y="2866" id="pf144909015742941" referenceLink="//@navigationRule.10/@navigationCase.0/@toViewId|" outlinks="pf144909015742942 pf144909015742923 pf144909015742943" inlinks="pf144909015742944 pf14497706655141" path="/administracion/recurso/modificarConsultar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/recurso/modificar.xhtml" x="122" y="2482" id="pf144909015742945" referenceLink="//@navigationRule.9/@navigationCase.0/@toViewId|" outlinks="pf14497706655141" inlinks="pf144909015742942" path="/administracion/recurso/modificar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/recurso/consultarDatos.xhtml" x="122" y="2866" id="pf144909015742946" referenceLink="//@navigationRule.10/@fromViewId|" outlinks="pf144909015742944 pf144909015742947" inlinks="pf144909015742943" path="/administracion/recurso/consultarDatos.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/datoASolicitar/modificarConsultar.xhtml" x="338" y="4402" id="pf144909015742948" referenceLink="//@navigationRule.28/@navigationCase.0/@toViewId|" outlinks="pf144909015742927 pf144909015742949" inlinks="pf144909015742947 pf144909015742952 pf14585861435291" path="/administracion/datoASolicitar/modificarConsultar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/reserva/Paso1.xhtml" x="554" y="6322" id="pf144909015742953" referenceLink="//@navigationRule.12/@navigationCase.1/@toViewId|" outlinks="pf144909015742954" inlinks="pf144909015742955" path="/administracion/reserva/Paso1.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/reserva/Paso2.xhtml" x="338" y="6322" id="pf144909015742956" referenceLink="//@navigationRule.13/@navigationCase.1/@toViewId|" outlinks="pf144909015742957 pf144909015742955" inlinks="pf144909015742954 pf144909015742958" path="/administracion/reserva/Paso2.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/reserva/Paso3.xhtml" x="122" y="6322" id="pf144909015742959" referenceLink="//@navigationRule.13/@fromViewId|" outlinks="pf144909015742960 pf144909015742958" inlinks="pf144909015742957" path="/administracion/reserva/Paso3.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/reserva/PasoFinal.xhtml" x="338" y="6706" id="pf144909015742961" referenceLink="//@navigationRule.13/@navigationCase.0/@toViewId|" inlinks="pf144909015742960" path="/administracion/reserva/PasoFinal.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/reserva/cancelarReservaId.xhtml" x="338" y="2098" id="pf144909015742962" referenceLink="//@navigationRule.14/@fromViewId|" outlinks="pf144909015742924" path="/administracion/reserva/cancelarReserva.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/reserva/detalleReserva.xhtml" x="122" y="3250" id="pf144909015743065" referenceLink="//@navigationRule.17/@fromViewId|" path="/administracion/reserva/detalleReserva.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/Paso1.xhtml" x="338" y="7090" id="pf144909015743066" referenceLink="//@navigationRule.18/@navigationCase.0/@toViewId|" outlinks="pf144909015743067" inlinks="pf144909015743068" path="/agendarReserva/Paso1.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/Paso2.xhtml" x="554" y="5938" id="pf144909015743069" referenceLink="//@navigationRule.17/@navigationCase.1/@toViewId|" outlinks="pf144909015743070" inlinks="pf144909015743067 pf144909015743071" path="/agendarReserva/Paso2.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/Paso3.xhtml" x="338" y="5938" id="pf144909015743072" referenceLink="//@navigationRule.17/@fromViewId|" outlinks="pf144909015743073 pf144909015743071" inlinks="pf144909015743070" path="/agendarReserva/Paso3.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/PasoFinal.xhtml" x="554" y="5554" id="pf144909015743074" referenceLink="//@navigationRule.17/@navigationCase.0/@toViewId|" inlinks="pf144909015743073" path="/agendarReserva/PasoFinal.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/Paso.template.xhtml" x="122" y="7666" id="pf144909015743075" referenceLink="//@navigationRule.18/@fromViewId|" outlinks="pf144909015743068 pf144909015743076 pf144909015743077 pf144909015743078" path="/agendarReserva/Paso.template.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="error/agendaInvalida.xhtml" x="338" y="7474" id="pf144909015743079" referenceLink="//@navigationRule.18/@navigationCase.1/@toViewId|" inlinks="pf144909015743076" path="/error/agendaInvalida.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="error/estadoInvalido.xhtml" x="338" y="7858" id="pf144909015743080" referenceLink="//@navigationRule.18/@navigationCase.2/@toViewId|" inlinks="pf144909015743077" path="/error/estadoInvalido.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="error/periodoInvalido.xhtml" x="338" y="8242" id="pf144909015743081" referenceLink="//@navigationRule.18/@navigationCase.3/@toViewId|" inlinks="pf144909015743078" path="/error/periodoInvalido.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/empresa/consultar.xhtml" x="338" y="8710" id="pf144909015743082" referenceLink="//@navigationRule.20/@navigationCase.0/@toViewId|" outlinks="pf144909015743083" inlinks="pf144909015743084" path="/administracion/empresa/consultar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/empresa/editar.xhtml" x="122" y="8710" id="pf144909015743085" referenceLink="//@navigationRule.20/@fromViewId|" outlinks="pf144909015743084" inlinks="pf144909015743083" path="/administracion/empresa/editar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/usuario/consultar.xhtml" x="338" y="9094" id="pf144909015743086" referenceLink="//@navigationRule.22/@navigationCase.0/@toViewId|" outlinks="pf144909015743087" inlinks="pf144909015743088" path="/administracion/usuario/consultar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/usuario/editar.xhtml" x="122" y="9094" id="pf144909015743089" referenceLink="//@navigationRule.22/@fromViewId|" outlinks="pf144909015743088" inlinks="pf144909015743087" path="/administracion/usuario/editar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/disponibilidad/crearDisponibilidades.xhtml" x="338" y="2482" id="pf144909015743090" referenceLink="//@navigationRule.23/@fromViewId|" outlinks="pf144909015742925" path="/administracion/disponibilidad/crearDisponibilidades.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/datoASolicitar/crear.xhtml" x="122" y="4402" id="pf144909015743091" referenceLink="//@navigationRule.26/@fromViewId|" outlinks="pf14585861435291" path="/administracion/datoASolicitar/crear.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/datoASolicitar/consultarDatos.xhtml" x="122" y="3634" id="pf144909015743092" referenceLink="//@navigationRule.30/@navigationCase.2/@toViewId|" path="/administracion/datoASolicitar/consultarDatos.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/datoASolicitar/modificar.xhtml" x="122" y="4786" id="pf144909015743093" referenceLink="//@navigationRule.28/@fromViewId|" outlinks="pf144909015742952" inlinks="pf144909015742949" path="/administracion/datoASolicitar/modificar.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/datoASolicitar/modificarAgrupaciones.xhtml" x="338" y="3250" id="pf144909015743094" referenceLink="//@navigationRule.29/@fromViewId|" outlinks="pf144909015742928" path="/administracion/datoASolicitar/modificarAgrupaciones.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/cancelarReserva.xhtml" x="122" y="4018" id="pf14497501271341" referenceLink="//@navigationRule.22/@fromViewId|" path="/agendarReserva/cancelarReserva.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="agendarReserva/detalleReserva.xhtml" x="122" y="5170" id="pf14497501271343" referenceLink="//@navigationRule.22/@navigationCase.0/@toViewId|" path="/agendarReserva/detalleReserva.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/disponibilidad/consultarDisponibilidad.xhtml" x="122" y="5938" id="pf14497501271344" referenceLink="//@navigationRule.28/@navigationCase.0/@toViewId|" path="/administracion/disponibilidad/consultarDisponibilidad.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/disponibilidad/consultarPorDia.xhtml" x="122" y="9478" id="pf14497501271347" referenceLink="//@navigationRule.28/@fromViewId|" path="/administracion/disponibilidad/consultarPorDia.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/disponibilidad/consultarDisponibilidades.xhtml" x="338" y="5554" id="pf14497706655152" referenceLink="//@navigationRule.25/@navigationCase.0/@toViewId|" outlinks="pf14497706655140 pf14497706655153" inlinks="pf14497706655154" path="/administracion/disponibilidad/consultarDisponibilidades.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/disponibilidad/consultarDia.xhtml" x="122" y="5554" id="pf14497706655155" referenceLink="//@navigationRule.25/@fromViewId|" outlinks="pf14497706655154" inlinks="pf14497706655153" path="/administracion/disponibilidad/consultarDia.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/consulta/consultarReservaDatos.xhtml" x="122" y="9862" id="pf14514028024030" referenceLink="//@navigationRule.30/@fromViewId|" outlinks="pf14514028024031" path="/administracion/consulta/consultarReservaDatos.xhtml"/>
+  <nodes xsi:type="pageflow:PFPage" name="administracion/consulta/detalleReserva.xhtml" x="338" y="9862" id="pf14514028024032" referenceLink="//@navigationRule.30/@navigationCase.0/@toViewId|" inlinks="pf14514028024031" path="/administracion/consulta/detalleReserva.xhtml"/>
+  <links id="pf144909015742911" target="pf144909015742912" source="pf144909015742910" outcome="inicio" redirect="true"/>
+  <links id="pf144909015742931" target="pf144909015742935" source="pf144909015742930" outcome="modificar" redirect="true"/>
+  <links id="pf144909015742932" target="pf144909015742930" source="pf144909015742935" outcome="guardar"/>
+  <links id="pf144909015742933" target="pf144909015742930" source="pf144909015742935" outcome="cancelar"/>
+  <links id="pf144909015742919" target="pf144909015742912" source="pf144909015742939" outcome="cancelar"/>
+  <links id="pf144909015742920" target="pf144909015742912" source="pf144909015742939" outcome="volver"/>
+  <links id="pf144909015742921" target="pf144909015742912" source="pf144909015742940" outcome="volver"/>
+  <links id="pf144909015742922" target="pf144909015742912" source="pf144909015742940" outcome="refrescar" redirect="true"/>
+  <links id="pf144909015742942" target="pf144909015742945" source="pf144909015742941" outcome="modificar" redirect="true"/>
+  <links id="pf144909015742923" target="pf144909015742912" source="pf144909015742941" outcome="volver" redirect="true"/>
+  <links id="pf144909015742943" target="pf144909015742946" source="pf144909015742941" outcome="consultarDatos" redirect="true"/>
+  <links id="pf144909015742944" target="pf144909015742941" source="pf144909015742946" outcome="consultarRecursos"/>
+  <links id="pf144909015742947" target="pf144909015742948" source="pf144909015742946" outcome="volverConsultar"/>
+  <links id="pf144909015742954" target="pf144909015742956" source="pf144909015742953" outcome="siguientePaso" redirect="true"/>
+  <links id="pf144909015742957" target="pf144909015742959" source="pf144909015742956" outcome="siguientePaso" redirect="true"/>
+  <links id="pf144909015742955" target="pf144909015742953" source="pf144909015742956" outcome="pasoAnterior" redirect="true"/>
+  <links id="pf144909015742960" target="pf144909015742961" source="pf144909015742959" outcome="reservaConfirmada" redirect="true"/>
+  <links id="pf144909015742958" target="pf144909015742956" source="pf144909015742959" outcome="pasoAnterior" redirect="true"/>
+  <links id="pf144909015742924" target="pf144909015742912" source="pf144909015742962" outcome="volver"/>
+  <links id="pf144909015743067" target="pf144909015743069" source="pf144909015743066" outcome="siguientePaso" redirect="true"/>
+  <links id="pf144909015743070" target="pf144909015743072" source="pf144909015743069" outcome="siguientePaso" redirect="true"/>
+  <links id="pf144909015743073" target="pf144909015743074" source="pf144909015743072" outcome="reservaConfirmada" redirect="true"/>
+  <links id="pf144909015743071" target="pf144909015743069" source="pf144909015743072" outcome="pasoAnterior" redirect="true"/>
+  <links id="pf144909015743068" target="pf144909015743066" source="pf144909015743075" outcome="inicio" redirect="true"/>
+  <links id="pf144909015743076" target="pf144909015743079" source="pf144909015743075" outcome="agendaInvalida" redirect="true"/>
+  <links id="pf144909015743077" target="pf144909015743080" source="pf144909015743075" outcome="estadoInvalido" redirect="true"/>
+  <links id="pf144909015743078" target="pf144909015743081" source="pf144909015743075" outcome="periodoInvalido" redirect="true"/>
+  <links id="pf144909015743083" target="pf144909015743085" source="pf144909015743082" outcome="modificar"/>
+  <links id="pf144909015743084" target="pf144909015743082" source="pf144909015743085" outcome="cancelar"/>
+  <links id="pf144909015743087" target="pf144909015743089" source="pf144909015743086" outcome="modificar" redirect="true"/>
+  <links id="pf144909015743088" target="pf144909015743086" source="pf144909015743089" outcome="cancelar" redirect="true"/>
+  <links id="pf144909015742925" target="pf144909015742912" source="pf144909015743090" outcome="volver"/>
+  <links id="pf144909015742927" target="pf144909015742912" source="pf144909015742948" outcome="volver" redirect="true"/>
+  <links id="pf144909015742949" target="pf144909015743093" source="pf144909015742948" outcome="modificar" redirect="true"/>
+  <links id="pf144909015742952" target="pf144909015742948" source="pf144909015743093" outcome="volver"/>
+  <links id="pf144909015742928" target="pf144909015742912" source="pf144909015743094" outcome="volver"/>
+  <links id="pf14497706655141" target="pf144909015742941" source="pf144909015742945" outcome="cancelar"/>
+  <links id="pf14497706655140" target="pf144909015742912" source="pf14497706655152" outcome="volver"/>
+  <links id="pf14497706655153" target="pf14497706655155" source="pf14497706655152" outcome="consultarPorDia"/>
+  <links id="pf14497706655154" target="pf14497706655152" source="pf14497706655155" outcome="volver" redirect="true"/>
+  <links id="pf14514028024031" target="pf14514028024032" source="pf14514028024030" outcome="detalleReserva"/>
+  <links id="pf14581529593420" target="pf144909015742930" source="pf144909015742929" outcome="cancelar"/>
+  <links id="pf14585861435280" target="pf144909015742930" source="pf144909015742938" outcome="cancelar"/>
+  <links id="pf14585861435291" target="pf144909015742948" source="pf144909015743091" outcome="cancelar"/>
+</pageflow:Pageflow>

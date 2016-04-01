@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<table  xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:h="http://java.sun.com/jsf/html"
+	class="Pie" border='0' cellspacing='0' cellpadding='0'>
+	<tr>
+		<td>
+			<div class="PieTitulo1" align="left">
+				<h:outputText value="#{saeLabels['organizacion_nombre']}"></h:outputText>
+			</div>
+			<div class="PieTitulo2" align="left">
+				<h:outputText value="#{saeLabels['organizacion_direccion']}"></h:outputText>
+			</div>
+		</td>
+	</tr>
+</table>

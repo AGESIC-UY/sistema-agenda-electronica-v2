@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+
+	<ui:composition template="/agendarReserva/Paso.template.xhtml">
+
+		<ui:param name="soloCuerpo" value="#{sesionMBean.soloCuerpo}" />
+		<ui:param name="parametroBean" value="#{pasoFinalMBean}" />
+		<ui:param name="bodyId" value="pasoFinal" />
+
+		<ui:param name="agenda_nombre" value="#{pasoFinalMBean.agendaNombre}" />
+		<ui:param name="paso_numero" value="4" />
+		<ui:param name="paso_texto" value="#{sesionMBean.textos['reserva_confirmada']}" />
+
+		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-12" />
+		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />
+
+		<ui:define name="descripcion">
+			<div class="botonesConfirmacion">
+				<h:commandLink value="#{sesionMBean.textos['guardar_ticket']}"
+					action="#{pasoFinalMBean.generarTicket(false)}" styleClass="btn btn-primario" />
+				<h:commandLink value="#{sesionMBean.textos['imprimir_ticket']}" target="_blank"
+					action="#{pasoFinalMBean.generarTicket(true)}" styleClass="btn btn-link" />
+				 <h:outputLink value="#{pasoFinalMBean.urlTramite}" target="_blank" rendered="#{sesionMBean.urlTramite != null}"
+					styleClass="btn btn-link">
+					 <h:outputText value="#{sesionMBean.textos['continuar_tramite']}"/>
+				 </h:outputLink>
+				<h:outputLink value="#{pasoFinalMBean.urlCancelacion}" target="_blank" styleClass="btn btn-link">
+					 <h:outputText value="#{sesionMBean.textos['cancelar_reserva']}" />
+				 </h:outputLink>
+				
+			</div>
+		</ui:define>
+
+		<ui:define name="mensaje">
+			<div class="box box-grey datosReservaConfirmada">
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{sesionMBean.textos['reserva_confirmada']}" />
+				</div>
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{pasoFinalMBean.diaSeleccionado}"
+						styleClass="resaltado">
+						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy"
+							timeZone="GMT" locale="#{sesionMBean.locale}" />
+					</h:outputText>
+					<h:outputText value=" #{sesionMBean.textos['a_las']} " />
+					<h:outputText value="#{pasoFinalMBean.horaSeleccionada}"
+						styleClass="resaltado">
+						<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}"
+							timeZone="GMT" />
+					</h:outputText>
+					<h:outputText value=", " />
+					<h:outputText value="#{pasoFinalMBean.reservaNumero}"
+						styleClass="resaltado" />
+				</div>
+				<div>
+					<h:outputText value="#{pasoFinalMBean.recursoDescripcion}" />
+				</div>
+				<div class="seguridad">
+					<h:outputText value="#{sesionMBean.textos['codigo_de_trazabilidad']}:" />
+					<h:outputText
+						value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}"
+						styleClass="negrita" />
+				</div>
+        <div class="seguridad">
+          <h:outputText value="#{sesionMBean.textos['codigo_de_seguridad']}:" />
+          <h:outputText
+            value="#{sesionMBean.reservaConfirmada.codigoSeguridad}"
+            styleClass="negrita" />
+        </div>
+			</div>
+		</ui:define>
+
+		<ui:define name="contenido">
+			<div class="infoAdicional box-grey">
+				<h:outputFormat escape="false" value="#{pasoFinalMBean.descripcion}" />
+			</div>
+		</ui:define>
+
+		<ui:define name="botones">
+			<h:commandButton styleClass="" value="Dummy" style="display:none" />
+		</ui:define>
+
+
+	</ui:composition>
+</body>
+</html>

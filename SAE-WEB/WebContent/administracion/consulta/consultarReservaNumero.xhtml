@@ -1,0 +1,182 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{consultaMBean.beforePhaseConsultarReservaNumero}"
+			beforePhaseListener="#{consultaMBean.beforePhaseConsultarReservaNumero}">
+			<p:outputPanel
+				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<h:form id="form">
+					<fieldset>
+						<legend>
+							<h:outputText
+								value="#{sessionMBean.textos['fecha_y_numero_de_la_reserva']}" />
+						</legend>
+						<p:outputPanel styleClass="form-horizontal">
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['fecha']}"
+									for="fechaHoraReserva"
+									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText value="#{consultaMBean.fechaHoraReserva}" styleClass="datepicker" id="fechaHoraReserva">
+										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+											timeZone="GMT" />
+									</h:inputText>
+									<p:message for="fechaHoraReserva"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+
+								<h:outputLabel value="#{sessionMBean.textos['hora']}"
+									for="seleccionHora"
+									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:selectOneMenu id="seleccionHora"
+										styleClass="hora form-control" value="#{consultaMBean.hora}">
+										<f:selectItems value="#{consultaMBean.horas}" />
+									</h:selectOneMenu>
+									<h:outputText value=" : "></h:outputText>
+									<h:outputLabel value="#{sessionMBean.textos['minutos']}"
+										for="seleccionMinD"
+										styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
+									<h:selectOneMenu id="seleccionMin"
+										styleClass="hora form-control" value="#{consultaMBean.min}">
+										<f:selectItems value="#{consultaMBean.minutos}" />
+									</h:selectOneMenu>
+									<h:outputText styleClass="input-msg"
+										value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+									<p:message for="seleccionHora"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['numero']}"
+									for="nroRes"
+									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText value="#{consultaMBean.numeroReserva}"
+										styleClass="form-control textoCorto" id="nroRes" />
+                  <p:message for="nroRes"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+
+					<ul class="form-action-buttons">
+						<li class="action-buttons-primary"><p:commandButton
+								value="#{sessionMBean.textos['consultar']}"
+								actionListener="#{consultaMBean.buscarReservaPorNumero}"
+								update="@form"
+								styleClass="btn-lg btn-primario" /></li>
+					</ul>
+
+					<p:outputPanel id="resultadosBusqueda">
+						<fieldset>
+							<legend>
+								<h:outputText
+									value="#{sessionMBean.textos['datos_de_la_reserva']}" />
+							</legend>
+							<p:outputPanel styleClass="form-horizontal">
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['fecha']}"
+										styleClass="col-sm-3 control-label label" for="dispFecha" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText
+											value="#{consultaMBean.reservaConsultada.disponibilidades[0].fecha}"
+											styleClass="form-control datepicker-dis" readonly="true"
+											disabled="true" id="dispFecha">
+											<f:convertDateTime type="date"
+												pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
+												locale="es" />
+										</h:inputText>
+
+									</p:outputPanel>
+								</p:outputPanel>
+
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['hora']}"
+										styleClass="col-sm-3 control-label label" for="horaInicio" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText styleClass="form-control textoCorto"
+											readonly="true" disabled="true" id="horaInicio"
+											value="#{consultaMBean.reservaConsultada.disponibilidades[0].horaInicio}">
+											<f:convertDateTime type="time"
+												pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+										</h:inputText>
+									</p:outputPanel>
+								</p:outputPanel>
+
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['numero']}"
+										styleClass="col-sm-3 control-label label" for="numero" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText value="#{consultaMBean.reservaConsultada.numero}"
+											styleClass="form-control textoCorto" readonly="true"
+											disabled="true" id="numero">
+										</h:inputText>
+										<h:outputText styleClass="input-msg"
+											value="(Id: #{consultaMBean.reservaConsultada.id})" />
+									</p:outputPanel>
+								</p:outputPanel>
+
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['estado']}"
+										styleClass="col-sm-3 control-label label" for="estado" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText
+											value="#{consultaMBean.reservaConsultada.estadoDescripcion}"
+											styleClass="form-control" id="estado" readonly="true"
+											disabled="true">
+										</h:inputText>
+
+									</p:outputPanel>
+								</p:outputPanel>
+
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['observaciones']}"
+										styleClass="col-sm-3 control-label label" for="observacion" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText
+											value="#{consultaMBean.reservaConsultada.observaciones}"
+											styleClass="form-control" id="observacion" readonly="true"
+											disabled="true">
+										</h:inputText>
+									</p:outputPanel>
+								</p:outputPanel>
+
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel
+										value="#{sessionMBean.textos['fecha_de_creacion']}"
+										styleClass="col-sm-3 control-label label" for="fechaCreacion" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText styleClass="form-control datepicker-dis"
+											readonly="true" disabled="true"
+											value="#{consultaMBean.reservaConsultada.fechaCreacion}"
+											id="fechaCreacion">
+											<f:convertDateTime type="date"
+												pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
+												locale="es" />
+										</h:inputText>
+									</p:outputPanel>
+								</p:outputPanel>
+							</p:outputPanel>
+						</fieldset>
+						<h:panelGroup id="camposDin" binding="#{consultaMBean.campos}"
+							layout="block">
+						</h:panelGroup>
+					</p:outputPanel>
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

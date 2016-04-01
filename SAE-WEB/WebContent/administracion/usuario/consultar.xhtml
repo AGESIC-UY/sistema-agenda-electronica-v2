@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{usuarioMBean.beforePhaseConsultar}"
+			beforePhaseListener="#{usuarioMBean.beforePhaseConsultar}">
+
+			<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
+				widgetVar="eliminarUsuario" zindex="2000" modal="true">
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+				</f:facet>
+				<h:form id="elimRec">
+					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_usuario']}" />
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btn_eliminar" update="form:tablaUsuarios"
+								actionListener="#{usuarioMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarUsuario').hide();"
+								styleClass="btn-primario btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton onclick="PF('eliminarUsuario').hide();"
+								value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+
+			<h:form id="form">
+				<p:dataTable value="#{usuarioMBean.usuariosSeleccion}" var="row"
+					id="tablaUsuarios" rows="25" paginator="true"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					binding="#{usuarioMBean.usuariosDataTable}"
+					caption="#{sessionMBean.textos['listado_de_usuarios']}"
+					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['cedula_de_identidad']}"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.data.codigo}"></h:outputText>
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['nombre_y_apellido']}"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.data.nombre}"></h:outputText>
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['correo_electronico']}"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.data.correoe}"></h:outputText>
+					</p:column>
+
+					<p:column styleClass="alinCentro">
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+						</f:facet>
+
+						<p:commandButton id="modificarUsuario"
+							action="#{usuarioMBean.modificar}" update="tablaUsuarios"
+							icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
+						</p:commandButton>
+						<p:tooltip value="#{sessionMBean.textos['modificar']}" for="modificarUsuario" />
+
+						<p:commandButton id="eliminarUsuario"
+							oncomplete="PF('eliminarUsuario').show();" icon="ui-icon-trash"
+							actionListener="#{usuarioMBean.selecUsuarioEliminar}"
+							title="#{sessionMBean.textos['eliminar']}">
+						</p:commandButton>
+						<p:tooltip value="#{sessionMBean.textos['eliminar']}" for="eliminarUsuario" />
+					</p:column>
+				</p:dataTable>
+			</h:form>
+
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

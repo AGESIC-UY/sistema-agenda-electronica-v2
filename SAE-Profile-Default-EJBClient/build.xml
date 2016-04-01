@@ -1,0 +1,107 @@
+<project name="SAE-Profile-Default-EJBClient" default="build" basedir=".">
+
+	<!-- dependencias de compilacion -->
+	<property name="java.src" value="ejbModule" />
+	<property name="SAE-EAR.lib" value="../SAE-EAR/EarContent/lib" />
+	<!-- dependencias de compilacion con los proyectos client -->
+	<property name="SAE-EJBClient.lib" value="../SAE-EJBClient/build/jar" />
+
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+	<!-- PATH -->
+	<path id="base.path">
+		<fileset dir="../SAE-Config/libs">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${SAE-EJBClient.lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	
+	<target name="clean">
+
+		<sequential>
+			<mkdir dir="build" />
+			<delete quiet="true">
+				<fileset dir="build">
+					<include name="**/*" />
+				</fileset>
+			</delete>
+
+			<mkdir dir="build/classes" />
+			<mkdir dir="build/jar" />
+			<mkdir dir="build/jar/${build.sae.escenario.backend}"/>
+			<mkdir dir="build/jar/${build.sae.escenario.frontend}"/>				
+								
+		</sequential>
+	</target>
+	
+
+	<target name="compile" depends="clean">
+
+		<manifest file="build/MANIFEST.MF">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Built-Date" value="${TODAY}" />
+		</manifest>
+
+		<javac srcdir="${java.src}" destdir="build/classes" target="1.7" encoding="UTF-8" includeantruntime="false" debug="true">
+			<classpath>
+				<path refid="base.path" />
+			</classpath>
+		</javac>
+        <copy todir="build/classes">
+            <fileset dir="${java.src}" excludes="**/*.java" />
+        </copy>
+	
+	</target>	
+	
+	
+	
+	<target name="build" depends="compile,clean">
+		
+		<build_profile_jar escenario="${build.sae.escenario.backend}"/>
+		<build_profile_jar escenario="${build.sae.escenario.frontend}"/>		
+		
+	</target>
+
+	<macrodef name="build_profile_jar">
+		<attribute name="escenario"/>
+		
+		<sequential>
+			
+			<copy todir="build/classes" overwrite="true">
+					<fileset dir="${java.src}">
+						<include name="**/profile.properties" />
+					</fileset>
+
+					<filterset>
+						<filter token="SAE_ESCENARIO" value="@{escenario}" />
+						<filter token="SAE_PROFILE" value="${build.profile}" />
+						<filter token="SAE_WS_CONTEXT_ROOT" value="${build.sae.service.ws.contextroot}" />
+						
+						<filter token="SAE_EJB_JNDI_BASE" value="${build.sae.service.ejb.jndi_base}" />
+						<filter token="SAE_EJB_JNDI_AGENDAR_RESERVAS" value="${build.sae.service.ejb.jndi_agendar_reservas_bean}" />
+						<filter token="SAE_EJB_JNDI_RECURSOS" value="${build.sae.service.ejb.jndi_recursos_bean}" />
+						<filter token="SAE_EJB_JNDI_DEPURAR_RESERVAS" value="${build.sae.service.ejb.jndi_depurar_reservas_bean}" />
+						<filter token="SAE_EJB_JNDI_CONSULTAS" value="${build.sae.service.ejb.jndi_consultas_bean}" />
+					</filterset>
+			</copy>		
+			
+			
+			<jar destfile="build/jar/@{escenario}/${build.sae.profile.jar}.jar" 
+				 filesetmanifest="merge" manifest="build/MANIFEST.MF"
+				 duplicate="fail">
+				
+				<metainf dir="build/classes/META-INF" />
+				<fileset dir="build/classes">
+					<exclude name="META-INF/**"/>
+				</fileset>
+			</jar>
+		
+		</sequential>
+	</macrodef>
+	
+</project>

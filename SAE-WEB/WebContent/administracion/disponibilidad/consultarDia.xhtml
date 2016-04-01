@@ -1,0 +1,123 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+
+		<f:view beforePhase="#{disponibilidadMBean.beforePhaseConsultarXdia}"
+			beforePhaseListener="#{disponibilidadMBean.beforePhaseConsultarXdia}">
+
+			<h:form>
+				<h2>
+					<h:outputText value="#{sessionMBean.textos['disponibilidades_para_el_dia']} " />
+					<h:outputText value="#{dispSessionMBean.fechaActual}">
+						<f:convertDateTime type="both" pattern="dd 'de' MMMM 'de' yyyy"
+							timeZone="GMT" locale="#{sessionMBean.locale}" />
+					</h:outputText>
+				</h2>
+
+				<div class="row">
+					<div class="col-sm-6">
+						<p:dataTable id="tablaMatutina"
+							binding="#{disponibilidadMBean.tablaDispMatutina}"
+							value="#{dispSessionMBean.disponibilidadesDelDiaMatutina}"
+							var="row" caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}"
+							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+							>
+
+							<f:facet name="header">
+								<h:panelGroup>
+									<h:outputText value="#{sessionMBean.textos['por_la_manana']}"></h:outputText>
+								</h:panelGroup>
+							</f:facet>
+
+							<p:column>
+								<f:facet name="header"><h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" /></f:facet>
+								<h:outputText value="#{row.data.horaInicio}">
+									<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
+										timeZone="GMT" />
+								</h:outputText>
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.data.cupo}"
+									rendered="#{(row.data.cupoDisponible > 0 ? true  : false)}"
+									styleClass="verde"></h:outputText>
+								<h:outputText value="#{row.data.cupo}"
+									rendered="#{(row.data.cupoDisponible > 0 ? false  : true)}"
+									styleClass="rojo"></h:outputText>
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.data.cantReservas}"></h:outputText>
+							</p:column>
+						</p:dataTable>
+					</div>
+					<div class="col-sm-6">
+						<p:dataTable id="tablaVespertina"
+							binding="#{disponibilidadMBean.tablaDispVespertina}"
+							value="#{dispSessionMBean.disponibilidadesDelDiaVespertina}"
+							var="row" caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}"
+							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+
+							<f:facet name="header">
+								<h:panelGroup>
+									<h:outputText value="#{sessionMBean.textos['por_la_tarde']}"></h:outputText>
+								</h:panelGroup>
+							</f:facet>
+
+							<p:column>
+								<f:facet name="header"><h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" /></f:facet>
+								<h:outputText value="#{row.data.horaInicio}">
+									<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
+										timeZone="GMT" />
+								</h:outputText>
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.data.cupo}"
+									rendered="#{(row.data.cupoDisponible > 0 ? true  : false)}"
+									styleClass="verde"></h:outputText>
+								<h:outputText value="#{row.data.cupo}"
+									rendered="#{(row.data.cupoDisponible > 0 ? false  : true)}"
+									styleClass="rojo"></h:outputText>
+							</p:column>
+
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.data.cantReservas}"></h:outputText>
+							</p:column>
+						</p:dataTable>
+					</div>
+				</div>
+
+				<ul class="form-action-buttons">
+					<li class="action-buttons-primary"></li>
+					<li class="action-buttons-second">
+						<ul>
+							<li class="float-left"><h:commandButton
+									styleClass="btn-lg btn-link" value="#{sessionMBean.textos['volver']}" action="volver" /></li>
+						</ul>
+					</li>
+				</ul>
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

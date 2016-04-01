@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	lang="#{sessionMBean.idiomaActual}">
+
+<h:head>
+	<title>Ingreso electrónico</title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<!-- 	<link href="/sae-admin/resources/css/estilos-login.css"	rel="stylesheet" /> -->
+
+	<h:outputScript library="primefaces" name="jquery/jquery.js" />
+	<script src="/sae/resources/js/jquery-ui.js" type="text/javascript"></script>
+	<script src="/sae/resources/js/funcionesJS.js" type="text/javascript"></script>
+
+	<!-- Latest compiled JavaScript -->
+	<script src="/sae/resources/js/bootstrap.min.js" type="text/javascript"></script>
+
+	<!-- Bootstrap core CSS -->
+	<link href="/sae/resources/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/sae/resources/css/formulario-tipo.css" rel="stylesheet" />
+	<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
+</h:head>
+<h:body>
+	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar
+		al contenido</a>
+	<div class="cabezalLogin">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8 cabezalEmpresa">
+					<div id="logo">
+						<div>
+							<h:outputText styleClass="nombre-activo"
+								value="#{sessionMBean.textos['nombre_aplicacion']}" />
+						</div>
+					</div>
+				</div>
+				<div class="col-sm-4 cabezalTramites">
+					<div class="logosSecundarios">
+						<ul class="listaHorizontal">
+							<li><a href="https://www.presidencia.gub.uy/"
+								title="Ir al sitio de Presidencia"> <img
+									src="/sae-admin/resources/images/logoPresidencia.png"
+									alt="Presidencia" /></a></li>
+							<li><a href="http://uruguaydigital.gub.uy/"
+								title="Ir al sitio de Uruguay Digital"> <img
+									src="/sae-admin/resources/images/logo-uruguayDigital.png"
+									alt="Uruguay Digital" /></a></li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<h:form styleClass="login" id="formLogin">
+		<!-- 		<fieldset> -->
+		<!-- 			<legend>Seleccionar el tipo de acceso</legend> -->
+
+		<!-- 			<div class="selector-header"> -->
+		<!--         	<h1><h:outputText value="# {sessionMBean.textos['ingrese_al_sistema']}" /></h1> -->
+		<!-- 			</div> -->
+		<!-- 			<div class="selector-wrap"> -->
+		<!-- 				<div class="selector seleccionado usuario"></div> -->
+		<!-- 			</div> -->
+
+		<!-- 			<div id="tab1"> -->
+		<!-- 				<p:messages id="messages" showDetail="true" autoUpdate="true" -->
+		<!-- 					styleClass="msg errorGrande" -->
+		<!-- 	  		 /> -->
+		<!--         	<h2><h:outputText value="# {sessionMBean.textos['ingrese_usuario_y_contrasena']}" /></h2> -->
+		<!-- 				<div class="row"> -->
+		<!-- 					<h:outputLabel for="username" value="# {sessionMBean.textos['codigo_de_usuario']}:" /> -->
+		<!-- 					<span class="input-col"> <p:inputText id="username" required="true" label="username" /> -->
+		<!-- 					</span> -->
+		<!-- 				</div> -->
+
+		<!-- 				<div class="row"> -->
+		<!-- 					<h:outputLabel for="password" value="# {sessionMBean.textos['contrasena']}: " /> -->
+		<!-- 					<span class="input-col"> <p:password id="password" required="true" label="password" /> -->
+		<!-- 					</span> -->
+		<!-- 				</div> -->
+
+		<!-- 				<div class="row"> -->
+		<!-- 					<div> -->
+		<!-- 						<p:commandButton value="# {sessionMBean.textos['ingresar']}" action="# {sessionMBean.iniciarSesion}" process="@this" update="@all" /> -->
+		<!-- 					</div> -->
+		<!-- 				</div> -->
+
+		<!--         <div class="row"> -->
+		<!--           <div> -->
+		<!--             <h:outputText value="# {sessionMBean.textos['version']} #{sessionMBean.version}" /> -->
+		<!--           </div> -->
+		<!--         </div> -->
+
+		<!-- 			</div> -->
+		<!-- 		</fieldset> -->
+
+
+
+
+
+		<div class="container">
+			<h1>
+				<h:outputText value="#{sessionMBean.textos['ingrese_al_sistema']}" />
+			</h1>
+			<fieldset>
+				<legend>
+					<h:outputText value="Ingreso de usuario" />
+					<!-- HACER DINÁMICO -->
+				</legend>
+				<p:messages id="messages" showDetail="true" showSummary="false" autoUpdate="true"
+					styleClass="msg errorGrande"
+					errorTitle="#{sessionMBean.textos['mensajes_login_error']}" />
+
+				<div class="form-horizontal">
+					<div class="form-group">
+						<h:outputLabel value="#{sessionMBean.textos['codigo_de_usuario']}"
+							for="username" styleClass="col-sm-3 control-label label" />
+						<div class="col-sm-9">
+							<p:inputText id="username" required="true"
+								styleClass="form-control" />
+						</div>
+					</div>
+					<div class="form-group">
+						<h:outputLabel for="password"
+							value="#{sessionMBean.textos['contrasena']}"
+							styleClass="col-sm-3 control-label label" />
+						<div class="col-sm-9">
+							<p:password id="password" required="true"
+								styleClass="form-control" />
+							<div>
+								<p class="input-msg">#{sessionMBean.textos['olvido_su_contraseña']}</p>
+							</div>
+						</div>
+					</div>
+					<div class="form-group">
+						<div class="col-sm-9 col-sm-offset-3">
+							<p:commandButton value="#{sessionMBean.textos['ingresar']}"
+								styleClass="btn-lg btn-primario"
+								action="#{sessionMBean.iniciarSesion}" process="@this"
+								update="@all" />
+							<!--  div>
+								<a href="#" class="input-msg">No estoy registrado</a>
+							</div -->
+						</div>
+					</div>
+				</div>
+			</fieldset>
+			<div class="version">
+				<h:outputText
+					value="#{sessionMBean.textos['version']} #{sessionMBean.version}" />
+			</div>
+		</div>
+
+	</h:form>
+</h:body>
+</html>

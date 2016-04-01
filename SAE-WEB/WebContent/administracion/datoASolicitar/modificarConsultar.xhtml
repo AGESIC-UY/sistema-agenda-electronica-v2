@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{datoASolicitarMBean.beforePhaseModificarConsultar}"
+			beforePhaseListener="#{datoASolicitarMBean.beforePhaseModificarConsultar}">
+
+			<p:outputPanel
+				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<p:dialog shadowOpacity="0.4" autosized="false"
+					widgetVar="eliminarDato" zindex="2000" modal="true">
+					<f:facet name="header">
+						<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+					</f:facet>
+					<h:form id="elimRec">
+						<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_campo']}" />
+						<p:outputPanel styleClass="row panelBotonesPopUp">
+							<p:outputPanel styleClass="col-sm-6">
+								<p:commandButton id="btn_eliminar"
+									update="formDatosMod:tablaDatosSolicitarMod"
+									actionListener="#{datoASolicitarMBean.eliminarDato}"
+									value="#{sessionMBean.textos['eliminar']}" onclick="PF('eliminarDato').hide();"
+									styleClass="btn-primario btn-100 btn">
+								</p:commandButton>
+							</p:outputPanel>
+							<p:outputPanel styleClass="col-sm-6">
+								<p:commandButton onclick="PF('eliminarDato').hide();"
+									value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
+								</p:commandButton>
+							</p:outputPanel>
+						</p:outputPanel>
+					</h:form>
+				</p:dialog>
+
+				<ui:include
+					src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
+
+				<h:form id="formDatosMod">
+					<p:outputPanel styleClass="botonesDerecha">
+						<ui:include
+							src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+					</p:outputPanel>
+
+					<p:dataTable value="#{datoASSessionMBean.datosASolicitar}"
+						var="row" id="tablaDatosSolicitarMod" rows="25" paginator="true"
+						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						rowIndexVar="rowIndex" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+						>
+						
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['identificador']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.id}"></h:outputText>
+						</p:column>
+						
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.nombre}"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['etiqueta']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.etiqueta}"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['tipo_de_dato']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{sessionMBean.textos[row.tipo.descripcion]}"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['requerido']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.requerido}" converter="booleanConverter"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['clave']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.esClave}" converter="booleanConverter"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['incluir_en_el_reporte']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.incluirEnReporte}" converter="booleanConverter"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['agrupacion']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.agrupacionDato.orden}"></h:outputText>
+						</p:column>
+
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['fila']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.fila}"></h:outputText>
+						</p:column>
+
+						<p:column styleClass="alinCentro">
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+							</f:facet>
+							<p:commandButton id="modificarLink" reRender="pantalla"
+								actionListener="#{datoASolicitarMBean.seleccionarDato(rowIndex)}"
+								action="modificar" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
+							</p:commandButton>
+							<p:tooltip for="modificarLink" value="#{sessionMBean.textos['modificar']}" />
+							<p:commandButton id="eliminarLink"
+								oncomplete="PF('eliminarDato').show();"
+								actionListener="#{datoASolicitarMBean.seleccionarDatoParaEliminar(rowIndex)}"
+								icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+							</p:commandButton>
+							<p:tooltip for="eliminarLink" value="#{sessionMBean.textos['eliminar']}" />
+						</p:column>
+					</p:dataTable>
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

@@ -1,0 +1,522 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificar}"
+			beforePhaseListener="#{datoASolicitarMBean.beforePhaseModificar}">
+			<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
+				widgetVar="eliminarValor" zindex="2000" modal="true">
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+				</f:facet>
+				<h:form id="elimValor">
+					<h:outputText
+						value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_valor']}" />
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btn_eliminar"
+								update="formModif2:tablaValores"
+								actionListener="#{datoASolicitarValoresMBean.eliminarValor}"
+								value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarValor').hide();"
+								styleClass="btn-primario btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton onclick="PF('eliminarValor').hide();"
+								value="#{sessionMBean.textos['cancelar']}"
+								styleClass="btn-link btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+
+			<ui:include
+				src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
+
+			<h:form id="form">
+				<p:outputPanel styleClass="botonesDerecha">
+					<ui:include
+						src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+				</p:outputPanel>
+
+				<fieldset>
+					<legend>
+						<h:outputText value="#{sessionMBean.textos['datos_generales']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['agenda']}"
+								for="agenda" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="agenda"
+									value="#{datoASSessionMBean.datoSeleccionado.recurso.agenda.nombre}"
+									readonly="true" styleClass="form-control" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['recurso']}"
+								for="recurso" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="recurso"
+									value="#{datoASSessionMBean.datoSeleccionado.recurso.nombre}"
+									readonly="true" styleClass="form-control" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText value="#{sessionMBean.textos['diseno_del_formulario']}" />
+					</legend>
+					
+					<p:outputPanel styleClass="form-horizontal">
+            
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['agrupacion']}"
+                for="agrupacion"
+                styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:selectOneListbox size="1" id="agrupacion"
+                  value="#{datoASSessionMBean.agrupacionDatoId}"
+                  styleClass="form-control">
+                  <f:selectItems value="#{datoASolicitarMBean.listaAgrupaciones}" />
+                </h:selectOneListbox>
+                <p:message for="agrupacion" errorClass="mensajeError"></p:message>
+              </p:outputPanel>
+            </p:outputPanel>
+					
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
+								for="VName"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="VName"
+									value="#{datoASSessionMBean.datoSeleccionado.nombre}"
+									maxlength="50" styleClass="form-control">
+
+								</h:inputText>
+								<p:message for="VName" errorClass="mensajeError"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['etiqueta']}"
+								for="etiqueta"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="etiqueta"
+									value="#{datoASSessionMBean.datoSeleccionado.etiqueta}"
+									maxlength="50" styleClass="form-control" />
+								<p:message for="etiqueta" errorClass="mensajeError"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['texto_de_ayuda']}"
+								for="ayuda" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="ayuda"
+									value="#{datoASSessionMBean.datoSeleccionado.textoAyuda}"
+									maxlength="100" styleClass="form-control textoLargo" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['tipo_de_dato']}"
+								for="tipo"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:selectOneMenu id="tipo"
+									value="#{datoASSessionMBean.datoSeleccionado.tipo}"
+									styleClass="form-control textoMedio">
+									<p:ajax update=":form:largoMax :valoresPosibles" listener="#{datoASolicitarMBean.selectOneTipoDatoSeleccionado}"/>
+									<f:selectItems value="#{datoASolicitarMBean.listaTipos}" />
+								</h:selectOneMenu>
+								<p:message for="tipo" errorClass="mensajeError"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+						
+						<p:outputPanel id="largoMax">
+							<p:outputPanel styleClass="form-group"
+							rendered="#{datoASolicitarMBean.visualizarLargoMax}">
+								<p:outputLabel value="#{sessionMBean.textos['largo_maximo']}"
+									for="vLargoDS"
+									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText
+										value="#{datoASSessionMBean.datoSeleccionado.largo}"
+										id="vLargoDS" maxlength="5"
+										styleClass="form-control textoCorto" />
+									<p:message for="vLargoDS" errorClass="mensajeError"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['clave']}"
+								for="clave" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectBooleanCheckbox id="clave"
+									value="#{datoASSessionMBean.datoSeleccionado.esClave}" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['requerido']}"
+								for="requerido" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectBooleanCheckbox id="requerido"
+									value="#{datoASSessionMBean.datoSeleccionado.requerido}" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['fila']}"
+								for="vFilaDS"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText value="#{datoASSessionMBean.datoSeleccionado.fila}"
+									id="vFilaDS" maxlength="5" styleClass="form-control textoCorto" />
+								<p:message for="vFilaDS" errorClass="mensajeError"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText value="#{sessionMBean.textos['diseno_del_reporte']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['incluir_en_el_reporte']}"
+								for="reporte" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectBooleanCheckbox id="reporte"
+									value="#{datoASSessionMBean.datoSeleccionado.incluirEnReporte}">
+									<p:ajax update="form:vAnchoDS"
+										listener="#{datoASolicitarMBean.limpiarAnchoDespliegueReporteSeleccionado}" />
+								</p:selectBooleanCheckbox>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['ancho']}"
+								for="vAnchoDS"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText
+									value="#{datoASSessionMBean.datoSeleccionado.anchoDespliegue}"
+									id="vAnchoDS" maxlength="3"
+									styleClass="form-control textoCorto"
+									readonly="#{!datoASSessionMBean.datoSeleccionado.incluirEnReporte}" />
+								<p:message for="vAnchoDS" errorClass="mensajeError"></p:message>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<ul class="form-action-buttons">
+					<li class="action-buttons-primary">
+						<ul>
+							<li><p:commandButton
+									value="#{sessionMBean.textos['guardar']}"
+									actionListener="#{datoASolicitarMBean.modificarDato}"
+									reRender="pantalla, mostrarAgendaRecurso" update=":form"
+									styleClass="btn-lg btn-primario" /></li>
+						</ul>
+					</li>
+					<li class="action-buttons-second">
+						<ul>
+							<li class="float-left">
+               <h:commandButton
+                  styleClass="btn-lg btn-link"
+                  value="#{sessionMBean.textos['cancelar']}" action="#{datoASolicitarMBean.cancelarModificarDato}"
+                  immediate="true" />
+						  </li>
+						</ul>
+					</li>
+				</ul>
+			</h:form>
+
+      <p:outputPanel id="valoresPosibles">
+				<h:form id="formModif2" rendered="#{datoASolicitarMBean.visualizarValoresPosibles}">
+					<fieldset>
+						<legend>
+							<h:outputText
+								value="#{sessionMBean.textos['valores_posibles_para_el_dato']}" />
+						</legend>
+						<p:outputPanel styleClass="botonesDerecha">
+							<p:commandButton id="agregarValorLink"
+								value="#{sessionMBean.textos['agregar_valor']}"
+								styleClass="btn btn-secundario"
+								actionListener="#{datoASolicitarValoresMBean.mostrarCrearValor}"
+								update=":formModif2" />
+						</p:outputPanel>
+	
+						<p:dataTable value="#{datoASSessionMBean.valoresDelDato}" var="row"
+							id="tablaValores" rows="25" rowKeyVar="rowIndex"
+							rowKeyConverter="conversor" paginator="true"
+							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							rowIndexVar="rowIndex"
+							caption="#{sessionMBean.textos['valores_posibles_para_el_dato']}"
+							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['etiqueta']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.etiqueta}"></h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['valor']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.valor}"></h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['vigencia_desde']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.fechaDesde}">
+									<f:convertDateTime type="both"
+										pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								</h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['vigencia_hasta']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.fechaHasta}">
+									<f:convertDateTime type="both"
+										pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								</h:outputText>
+							</p:column>
+							<p:column>
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['orden']}"></h:outputText>
+								</f:facet>
+								<h:outputText value="#{row.orden}"></h:outputText>
+							</p:column>
+							<p:column styleClass="alinCentro">
+								<f:facet name="header">
+									<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+								</f:facet>
+								<p:commandButton id="modificarValorLink" ajaxSingle="true"
+									actionListener="#{datoASolicitarValoresMBean.seleccionarValor(rowIndex)}"
+									update=":formModif2" icon="ui-icon-pencil"
+									title="#{sessionMBean.textos['modificar']}">
+								</p:commandButton>
+								<p:tooltip for="modificarValorLink"
+									value="#{sessionMBean.textos['modificar']}" />
+	
+								<p:commandButton id="eliminarValorLink"
+									oncomplete="PF('eliminarValor').show();"
+									actionListener="#{datoASolicitarValoresMBean.seleccionarValorParaEliminar(rowIndex)}"
+									icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+								</p:commandButton>
+								<p:tooltip for="eliminarValorLink"
+									value="#{sessionMBean.textos['eliminar']}" />
+							</p:column>
+						</p:dataTable>
+	
+						<p:outputPanel id="ap_modifValor">
+							<p:outputPanel id="modifValor"
+								header="Modificación de Valor posible"
+								rendered="#{datoASSessionMBean.mostrarModifValor}">
+								<fieldset>
+									<legend>
+										<h:outputText
+											value="#{sessionMBean.textos['modificar_valor_posible']}" />
+									</legend>
+	
+									<p:outputPanel styleClass="form-horizontal">
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel value="#{sessionMBean.textos['etiqueta']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="modEtiqueta" />
+											<p:outputPanel styleClass="col-sm-9">
+												<h:inputText id="modEtiqueta"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.etiqueta}"
+													maxlength="50" styleClass="form-control" />
+												<p:message for="modEtiqueta" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel value="#{sessionMBean.textos['valor']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="modValor" />
+											<p:outputPanel styleClass="col-sm-9">
+												<h:inputText id="modValor"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.valor}"
+													maxlength="100" styleClass="form-control" />
+												<p:message for="modValor" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel value="#{sessionMBean.textos['orden']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="VOrden" />
+											<p:outputPanel styleClass="col-sm-9">
+												<h:inputText id="VOrden"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.orden}"
+													maxlength="5" styleClass="form-control textoCorto" />
+												<p:message for="VOrden" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel
+												value="#{sessionMBean.textos['vigencia_desde']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="fechaDesde" />
+											<p:outputPanel styleClass="col-sm-9">
+												<p:calendar id="fechaDesde"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaDesde}"
+													pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
+													showWeeksBar="false" locale="es"></p:calendar>
+												<p:message for="fechaDesde" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel
+												value="#{sessionMBean.textos['vigencia_hasta']}"
+												styleClass="col-sm-3 control-label label" for="fechaHasta" />
+											<p:outputPanel styleClass="col-sm-9">
+												<p:calendar id="fechaHasta"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaHasta}"
+													pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
+													showWeeksBar="false" locale="es"></p:calendar>
+												<p:message for="fechaHasta" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+												<p:commandButton value="#{sessionMBean.textos['guardar']}"
+													actionListener="#{datoASolicitarValoresMBean.modificarValor}"
+													update=":formModif2" styleClass="btn btn-secundario" />
+	
+												<p:commandButton value="#{sessionMBean.textos['cancelar']}"
+													immediate="true"
+													actionListener="#{datoASolicitarValoresMBean.cancelarModificarValor}"
+													update=":formModif2" styleClass="btn btn-link" />
+											</p:outputPanel>
+										</p:outputPanel>
+									</p:outputPanel>
+								</fieldset>
+							</p:outputPanel>
+						</p:outputPanel>
+	
+						<p:outputPanel id="ap_agregarValor">
+							<p:outputPanel bodyClass="formulario"
+								rendered="#{datoASSessionMBean.mostrarAgregarValor}"
+								id="agregarValor">
+	
+								<fieldset>
+									<legend>
+										<h:outputText
+											value="#{sessionMBean.textos['crear_valor_posible']}" />
+									</legend>
+	
+									<p:outputPanel styleClass="form-horizontal">
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel value="#{sessionMBean.textos['etiqueta']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="crearEti" />
+											<p:outputPanel styleClass="col-sm-9">
+												<h:inputText id="crearEti"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.etiqueta}"
+													maxlength="50" styleClass="form-control" />
+												<p:message for="crearEti"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel value="#{sessionMBean.textos['valor']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="crearValor" />
+											<p:outputPanel styleClass="col-sm-9">
+												<h:inputText id="crearValor"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.valor}"
+													maxlength="100" styleClass="form-control" />
+												<p:message for="crearValor"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel value="#{sessionMBean.textos['orden']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="VOrdValor" />
+											<p:outputPanel styleClass="col-sm-9">
+												<h:inputText id="VOrdValor"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.orden}"
+													maxlength="5" styleClass="form-control textoCorto" />
+												<p:message for="VOrdValor" ajaxRendered="true"
+													errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel
+												value="#{sessionMBean.textos['vigencia_desde']}"
+												styleClass="col-sm-3 control-label label formularioCampoRequerido"
+												for="CfechaDesde" />
+											<p:outputPanel styleClass="col-sm-9">
+												<p:calendar id="CfechaDesde"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaDesde}"
+													datePattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
+													showWeeksBar="false" locale="es"></p:calendar>
+												<p:message for="CfechaDesde" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputLabel
+												value="#{sessionMBean.textos['vigencia_hasta']}"
+												styleClass="col-sm-3 control-label label" for="CfechaHasta" />
+											<p:outputPanel styleClass="col-sm-9">
+												<p:calendar id="CfechaHasta"
+													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaHasta}"
+													datePattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
+													showWeeksBar="false" locale="es"></p:calendar>
+												<p:message for="CfechaHasta" errorClass="mensajeError"></p:message>
+											</p:outputPanel>
+										</p:outputPanel>
+	
+										<p:outputPanel styleClass="form-group">
+											<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+												<p:commandButton value="#{sessionMBean.textos['guardar']}"
+													actionListener="#{datoASolicitarValoresMBean.crearValor}"
+													update=":formModif2" styleClass="btn btn-secundario" />
+												<p:commandButton value="#{sessionMBean.textos['cancelar']}"
+													immediate="true"
+													actionListener="#{datoASolicitarValoresMBean.cancelarCrearValor}"
+													update=":formModif2" styleClass="btn btn-link" />
+											</p:outputPanel>
+										</p:outputPanel>
+									</p:outputPanel>
+								</fieldset>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+	
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

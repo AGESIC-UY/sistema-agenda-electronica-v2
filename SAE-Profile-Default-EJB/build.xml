@@ -1,0 +1,80 @@
+<project name="SAE-Profile-Default-EJB" default="build" basedir=".">
+
+	<!-- dependencias de compilacion -->
+	<property name="java.src" value="ejbModule" />
+	<property name="SAE-EAR.lib" value="../SAE-EAR/EarContent/lib" />
+	<!-- dependencias de compilacion con los proyectos client -->
+	<property name="SAE-EJBClient.lib" value="../SAE-EJBClient/build/jar" />
+
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+	<!-- PATH -->
+	<path id="base.path">
+		<fileset dir="../SAE-Config/libs">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${SAE-EJBClient.lib}">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<sequential>
+			<mkdir dir="build" />
+			<delete quiet="true">
+				<fileset dir="build">
+					<include name="**/*" />
+				</fileset>
+			</delete>
+			<mkdir dir="build/classes" />
+			<mkdir dir="build/jar" />
+		</sequential>
+	</target>
+
+	<target name="compile" depends="clean">
+		<manifest file="build/MANIFEST.MF">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Built-Date" value="${TODAY}" />
+		</manifest>
+		<javac srcdir="${java.src}" destdir="build/classes" target="1.7" encoding="UTF-8" includeantruntime="false" debug="true">
+			<classpath>
+				<path refid="base.path" />
+			</classpath>
+		</javac>
+    <copy todir="build/classes">
+        <fileset dir="${java.src}" excludes="**/*.java" />
+    </copy>
+		<copy todir="build/META-INF" overwrite="true">
+			<fileset dir="${java.src}/META-INF">
+				<exclude name="jboss-template.xml" />
+			</fileset>
+		</copy>		
+		<copy todir="build/META-INF" overwrite="true">
+			<fileset dir="${java.src}/META-INF">
+				<include name="jboss-template.xml" />
+			</fileset>
+			<mapper type="regexp" from="(.*)-template.*" to="\1.xml" />
+			<filterset>
+				<filter token="SAE_SECURITY_DOMAIN" value="${build.security.domain.jndi}" />
+				<filter token="SAE_WS_CONTEXT_ROOT" value="${build.sae.service.ws.contextroot}" />
+				<!-- ¿Cual es la ruta base de publicacion en el arbol jndi de los EJBs de SAE, 
+				      en este caso de los EJBs del profile-ejb que implementan validaciones, acciones, etc.? -->
+				<filter token="SAE_EJB_JNDI_BASE" value="${build.sae.service.ejb.jndi_base}" />					
+			</filterset>
+		</copy>		
+	</target>	
+	
+	<target name="build" depends="compile,clean">
+		<jar destfile="build/jar/${build.sae.profile.ejb}.jar" 
+			 filesetmanifest="merge" manifest="build/MANIFEST.MF"
+			 duplicate="fail">
+			<metainf dir="build/META-INF" />
+			<fileset dir="build/classes">
+				<exclude name="META-INF/**"/>
+			</fileset>
+		</jar>
+	</target>
+
+</project>

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+<body>
+
+	<ui:composition template="/templates/layoutPublico.xhtml">
+		<ui:param name="onload" value="" />
+
+		<ui:define name="css">
+		</ui:define>
+
+		<ui:define name="script">
+		</ui:define>
+
+		<ui:define name="titulo">
+			<h:outputText value="#{agenda_nombre}"></h:outputText>
+		</ui:define>
+
+		<ui:define name="menu">
+			<h:form id="formMenu">
+				<h:panelGroup>
+					<h:outputLink value="#{sesionMBean.paginaDeRetorno}">
+						<h:outputText
+							value="&#187; #{sesionMBean.textos['volver_a_la_pagina_principal']}" />
+					</h:outputLink>
+
+					<h:commandLink
+						value="&#187; #{sesionMBean.textos['nueva_reserva']}"
+						action="inicio" />
+				</h:panelGroup>
+			</h:form>
+		</ui:define>
+
+		<ui:define name="cuerpo">
+			<h:form id="form">
+				<div class="idioma">
+					<h:panelGroup rendered="#{not empty sesionMBean.idiomasSoportados}"
+						layout="block">
+						<div class="form-inline">
+							<div class="form-group">
+								<h:outputLabel for="idioma"
+									value="#{sesionMBean.textos['idioma']}" class="label" />
+								<h:selectOneMenu id="idioma" value="#{sesionMBean.idiomaActual}"
+									valueChangeListener="#{sesionMBean.cambioIdiomaActual}"
+									styleClass="form-control">
+									<p:ajax update="@all" process="@this" />
+									<f:selectItems value="#{sesionMBean.idiomasSoportados}" />
+								</h:selectOneMenu>
+							</div>
+						</div>
+					</h:panelGroup>
+				</div>
+				<div class="tituloPagina">
+					<h1>
+						<h:outputText value="#{agenda_nombre}" />
+					</h1>
+				</div>
+
+				<div>
+					<h:outputText value="#{mensaje_error}"
+						rendered="#{mensaje_error != null}" styleClass="mensajeError" />
+
+					<h:panelGroup rendered="#{mensaje_error == null}"
+						id="contenedorPaso" layout="block">
+
+						<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
+							<ul class="wizard-nav-tabs wizard-nav-tabs-3">
+								<li class="#{(paso_numero == 1) ? 'active' : ''}"><h:outputText
+										value="1" styleClass="wizard-step" /> <h:outputText
+										value="#{sesionMBean.textos['detalle_y_ubicacion']}"
+										styleClass="wizard-step-description" /></li>
+								<li class="#{(paso_numero == 2) ? 'active' : ''}"><h:outputText
+										value="2" styleClass="wizard-step" /> <h:outputText
+										value="#{sesionMBean.textos['dia_y_hora']}"
+										styleClass="wizard-step-description" /></li>
+								<li class="#{(paso_numero == 3) ? 'active' : ''}"><h:outputText
+										value="3" styleClass="wizard-step" /> <h:outputText
+										value="#{sesionMBean.textos['datos_necesarios']}"
+										styleClass="wizard-step-description" /></li>
+							</ul>
+						</h:panelGroup>
+
+						<ui:insert name="mensaje">
+							<h:outputText value="CONFIRMACIÓN DE HORA SELECCIONADA"
+								rendered="#{paso_numero==2 or paso_numero==3}" />
+						</ui:insert>
+
+						<fieldset>
+							<legend>#{paso_texto}</legend>
+							<p:messages id="mensajes" for="form"
+								infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+                infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}" 
+                warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}" 
+								errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" 
+							/>
+
+							<div class="row">
+								<div class="#{clase_columna_izq}">
+									<ui:insert name="contenido">CONTENIDO DEL PASO</ui:insert>
+								</div>
+
+								<div class="#{clase_columna_der}">
+									<ui:insert name="descripcion">DESCRIPCION DEL PASO</ui:insert>
+								</div>
+							</div>
+						</fieldset>
+
+						<ui:insert name="botones">
+
+						</ui:insert>
+
+					</h:panelGroup>
+				</div>
+			</h:form>
+		</ui:define>
+	</ui:composition>
+
+</body>
+</html>

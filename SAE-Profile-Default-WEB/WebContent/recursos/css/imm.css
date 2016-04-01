@@ -1,0 +1,725 @@
+/* text-align:center; Esta propiedad no se propaga bien en firefox, por lo cual
+   se optó por usar el tatibuto algin de table en la tabla principal del template base.
+ */
+BODY {
+    
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    font-size:7pt;
+    font-weight:normal;
+    color:#000000;
+    background-color:#ffffff;
+    border:0pt;
+	margin: 0;
+	padding: 0;
+}   
+/* BOTONES: CommandButton 
+   NOTA: Estiliza los botones manejados por el browser 
+*/
+input
+{
+   font-family:Arial, sans-serif;
+   font-size:8pt;
+   font-weight:normal;
+}
+textarea {
+   font-family:Arial, sans-serif;
+   font-size:8pt;
+   font-weight:normal;
+}
+	
+
+.Cabezal   
+{
+ 	background-image: url(../images/CabezalIMM.gif);
+    background-position: top left;
+    background-repeat: no-repeat;
+    background-color:transparent;
+    color: #FFFFFF;
+    height: 75px;
+    width: 780px;
+    padding-left: 15px;
+    padding-right: 15px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.Cabezal a   
+{
+ 	color: #FFFFFF;
+	text-decoration: none;
+    border:0pt;
+    padding-right: 5px;
+}
+
+.CabezalTitulo   
+{
+	text-align:center;
+	vertical-align: middle;
+	font-size: 10pt;
+	font-weight:bold;
+	color:#000000;
+	border: 0pt;
+	padding-right: 165px;
+	height: 50px;
+}
+
+.CabezalTituloMenu   
+{
+	vertical-align: top;
+	height: 25px;
+	font-size: 8pt;
+}
+
+.Cuerpo   
+{
+    width: 780px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.CuerpoSuperiorIzquierda   
+{
+   background-color: transparent;
+   background-image: url(../images/BlaTopLeft.gif);
+   background-position: top left;
+   background-repeat: no-repeat;
+   height: 16px;
+   width: 16px;
+}
+
+.CuerpoSuperiorCentral   
+{
+   background-color: white;
+   background-position: top center;
+   background-repeat: no-repeat;
+   width: 748px;
+}
+
+.CuerpoSuperiorDerecha   
+{
+   	background-color: transparent;
+    background-image: url(../images/BlaTopRight.gif);
+    background-position: top right;
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+.CuerpoMedioIzquierda   
+{
+	background-color: white;
+    background-position: left;
+    background-repeat: no-repeat;
+}
+
+.CuerpoMedioCentral   
+{
+   	background-color: white;
+    width: 780px;
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+.CuerpoMedioDerecha   
+{
+    background-color: white;
+    background-position: center right;
+    background-repeat: no-repeat;
+}
+
+.CuerpoInferiorIzquierda   
+{
+    background-color: transparent;
+    background-image: url(../images/BlaBottomLeft.gif);
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+.CuerpoInferiorCentral   
+{
+    background-color: white;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+}
+
+.CuerpoInferiorDerecha   
+{
+    background-color:  transparent;
+    background-image: url(../images/BlaBottomRight.gif);
+    background-position: bottom right;
+    background-repeat: no-repeat;
+    height: 16px;
+    width: 16px;
+}
+
+.Pie   
+{
+    background-image: url(../images/PieIMM-GPL.gif);
+    background-position: bottom left;
+    background-repeat: no-repeat;
+    background-color:  transparent;
+    color: #FFFFFF;
+    height: 69px;
+    width: 780px;
+    vertical-align: middle;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.PieTitulo1   
+{
+    font-size: 8pt;
+    font-weight: bold;
+    color: #FFFFFF;
+    position: relative;
+    left: 140px;
+    vertical-align:text-top;
+}
+
+.PieTitulo2   
+{
+    font-size: 7pt;
+	color: #FFFFFF;
+    position: relative;
+    left: 140px;
+    vertical-align:text-top ;
+}
+
+
+
+.Texto {
+	font-family:Arial, sans-serif;
+    font-size:7pt;
+    font-weight:normal;
+    color:#000000;
+}
+
+
+
+
+/* ############################################################ */
+/* ############################################################ */
+/* ############################################################ */
+/* ############################################################ */
+
+
+
+
+.TablaCentradaMenu   
+{
+	text-align: center;
+	width: 50%;	 
+}
+
+.TablaGenerica  
+{
+    padding:4px;
+    width:100%;
+    padding:0;
+    border-spacing:0;
+
+	}
+
+.filapar   
+{
+    text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    background-color: #CCCCCC;
+    font-size:8pt;
+    font-weight:normal;
+    color:#000000;
+    border:0pt;
+
+	}
+	
+.filaimpar   
+{
+   text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    background-color: #E0E0E0;
+    font-size:8pt;
+    font-weight:normal;
+    color:#000000;
+    border:0pt;
+
+	}
+
+.PaginaGral   
+{
+    text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    font-size:2pt;
+    font-weight:normal;
+    color:#000000;
+    /*background-color:#E0E0E0;*/
+    background-color:#C0C0C0;
+    border:0pt;
+
+}
+
+
+
+.HeaderNaranja   
+{
+ 	text-align:center;
+ 	vertical-align: middle;
+ 	font-family:Arial, sans-serif;
+ 	font-size: 10pt;
+ 	font-weight:bold;
+ 	color:#000000;
+    background-color:#FF9113;
+}
+
+
+.TxtNormal   
+{
+   text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    font-size:8pt;
+    font-weight:normal;
+    color:#000000;
+    border:0pt;
+
+	}
+
+.TxtNormalLabel   
+{
+   text-align:center;
+    vertical-align:bottom;
+    font-family:Arial, sans-serif;
+    font-size:8pt;
+    font-weight:normal;
+    color:#000000;
+    border:0pt;
+
+	}
+
+
+.TxtMessageError   
+{
+   text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    font-size:8pt;
+    font-weight:bold;
+    color:#ff0000;
+    border:0pt;
+
+}
+
+.TxtMessageOK   
+{
+   text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    font-size:8pt;
+    font-weight:bold;
+    color:#0000ff;
+    border:0pt;
+
+}
+
+
+
+.TxtNormalInput   
+{
+   text-align:left;
+    vertical-align:top;
+    font-family:Arial, sans-serif;
+    font-size:10pt;
+    font-weight:normal;
+    color:#000000;
+  	border: 1px solid;
+ 	border-color: #000000;
+ 	border-spacing:1px;
+
+}	
+	
+.TxtTitulo1   
+{
+   text-align:left;
+    vertical-align:top;
+    font-family:"Arial", sans-serif;
+    font-size:8pt;
+    font-weight:bold;
+    color:#000000;
+
+}
+
+.TxtTitulo2   
+{
+   text-align:left;
+   vertical-align:top;
+   font-family: "Arial", sans-serif;
+   font-size:12pt;
+   font-weight:bold;
+   color:#000000;
+   border:0pt;
+
+   }
+
+.TxtVacio   
+{
+   font-size:2pt;
+    font-family:Arial, sans-serif;
+    color:white;
+    text-align:center;
+
+	}
+
+.TxtBoton  
+{
+   text-align:center;
+    vertical-align:center;
+    font-family:"Arial", sans-serif;
+    font-size:8pt;
+    font-weight:bold;
+    color:#000000;
+
+}
+
+.Enlace   
+{
+ 	color: #FFFFFF;
+	text-decoration: none;
+    border:0pt;
+}
+
+.EnlaceComun   
+{
+    font-family:Arial, sans-serif;
+    font-size:8pt;
+    font-weight:normal;
+    border:0pt;
+    text-decoration: none;
+}
+
+.EnlaceComunSubrayado   
+{
+    font-family:Arial, sans-serif;
+    font-size:8pt;
+    font-weight:normal;
+    border:0pt;
+    text-decoration: underline;
+    
+}
+
+.EnlaceComunSubrayado:visited    
+{
+    color:#0000FF;
+
+}
+
+.EnlaceComun:visited   
+{
+    color:#0000FF;
+
+}
+.EnlaceTipo1   
+{
+    font-family:Arial, sans-serif;
+    font-size:10pt;
+    font-weight:normal;
+    border:0pt;
+    text-decoration: none;
+}
+
+.BodyPlantilla  
+{
+font: 8pt Arial;
+font-family: 8pt Arial;
+font-size: 8pt;
+margin: auto;
+text-align:center ;
+}
+
+.EstiloLogo   
+{
+     width: 348px;
+}
+#Tbl1 TR  
+{
+    padding:4px;
+}
+
+
+
+/* ESTILOS NUEVOS SEGUN DEFINICION DE LA GENTE DE COMUNICACION */
+.arriba
+{
+	vertical-align: top;	
+}
+.abajo
+{
+	vertical-align: bottom;
+}
+.medio
+{
+	vertical-align: middle;
+}
+.izquierda 
+{
+	text-align: left;
+}
+.derecha
+{
+	text-align: right;
+}
+.centrado 
+{ 
+	text-align: center;
+}
+.verde 
+{
+	color: #428922;
+}
+.rojo
+{
+	color: #CB0A1D;
+}
+.negrita
+{
+	font-weight: bold;
+}
+.sinBorde 
+{
+	border: none;
+}
+a   
+{
+ 	color: #EE7F00;
+	text-decoration: underline;
+}
+.mensajeError 
+{
+	font-size: 14px;
+	font-weight: bold;
+	color: #CB0A1D;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.mensajeWarn 
+{
+	font-size: 14px;
+	font-weight: bold;
+	color: #CB0A1D;
+	padding-left: 10px;
+	padding-right: 10px;
+}
+.mensajeInfo 
+{
+	font-size: 14px;
+	font-weight: bold;
+	color: #428922;	
+	padding-left: 10px;
+	padding-right: 10px;
+}
+
+.pasoTitulo1
+{
+	font-weight: bold;
+	font-size: 16px;
+	color: #707173;
+	padding: 0px;
+}
+.pasoTitulo2
+{
+	font-weight: bold;
+	font-size: 16px;
+	color: #EE7F00;	
+	padding: 0px;	
+}
+.pasoTitulo3
+{
+	font-weight: bold;
+	font-size: 14px;
+	color: #333333;	
+}
+.pasoEtiqueta1
+{
+	font-weight: bold;
+	font-size: 12px;
+	color: #333333;	
+}
+.pasoEtiqueta2
+{
+	font-weight: normal;
+	font-size: 12px;
+	color: #333333;	
+}
+.pasoTexto
+{
+	font-weight: normal;
+	font-size: 12px;
+	color: #333333;	
+}
+.textoDeshabilitado 
+{
+	font-weight: normal;
+	font-size: 12px;
+	color: #C6C7C8;	
+}
+.pasoCabezal 
+{
+	height: 70px;
+	border-top-width: 1px;
+	border-top-color: #9C9E9F;
+	border-top-style: solid;
+	border-bottom-width: 1px;
+	border-bottom-color: #D9DADB;
+	border-bottom-style: solid;
+	padding: 0px;
+	vertical-align: middle;
+	width: 100%;	
+}
+.pasoCabezal1 
+{
+	height: 35px;
+	vertical-align: bottom;
+}
+.pasoCabezal2
+{
+	height: 35px;
+	vertical-align: top;
+}
+.columnaIzquierda
+{
+	width: 60%;
+	padding: 0px;
+	padding-top: 10px;
+	padding-left: 40px;
+	padding-right: 20px;
+	text-align: left;
+	vertical-align: top;
+	border: none;
+	border-right-width: 2px; 
+	border-right-color: #C6C7C8;
+	border-right-style: dotted;
+}
+.columnaDerecha
+{
+	width: 40%;
+	padding: 0px;
+	padding-top: 10px;
+	padding-left: 20px;
+	padding-right: 40px;
+	text-align: left;
+	vertical-align: top;
+	border: none;
+}
+.tablaBorde 
+{
+	border-width: 1px;
+	border-color: #C6C7C8;
+	border-style: solid;	
+}
+.rich-panel 
+{
+	border-color:#C6C7C8;
+}
+.rich-panel-header {
+  	background-image : url();
+  	background-color : #C6C7C8;
+}
+.rich-datalist 
+{ 
+	list-style-image: url(../images/bullet_arrow.gif); 
+	list-style-position: outside;
+	padding: 0px;
+	padding-left: 15px;
+}
+.tips 
+{ 
+	list-style-image: url(../images/tip.png); 
+	list-style-position: outside;
+	padding: 10px;
+}
+
+.formulario 
+{
+	border: none;
+	padding: 0px;
+	padding-bottom: 30px;
+}
+.formulario .formularioCabezal {
+	background-color: white;
+	border: none;
+	border-top-style: solid;
+	border-top-color: #C6C7C8;
+	border-top-width: 1px;
+	
+	text-align: left;
+	vertical-align: middle;
+
+	font-weight: bold;
+	font-size: 12px;
+	color: #333333;		
+}
+
+.formulario .formularioCuerpo {
+	border: none;	
+	text-align: left;
+	padding: 0px;
+	padding-top: 15px;
+}
+.formulario .formularioEtiqueta {
+	border: none;
+	padding: 0px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	padding-right: 5px;
+	
+	font-weight: normal;
+	font-size: 12px;
+	color: #333333;		
+}
+.formulario .formularioEtiquetaAlineacionEdicion {
+	vertical-align: middle;
+	text-align: right;
+}
+.formulario .formularioEtiquetaAlineacionLectura {
+	vertical-align: top;
+	text-align: left;
+}
+.formulario .formularioEtiquetaAncho
+{
+	width: 150px;
+}
+.formulario .formularioCampo 
+{
+	border: none;
+	padding: 0px;
+	padding-top: 5px;
+	padding-bottom: 5px;
+	
+	font-weight: normal;
+	font-size: 12px;
+	color: #333333;		
+}
+.formulario .formularioCampoAlineacionEdicion {
+	vertical-align: middle;
+	text-align: left;
+}
+.formulario .formularioCampoAlineacionLectura {
+	vertical-align: top;
+	text-align: left;
+}
+.formularioCampoRequerido 
+{
+	color: #CB0A1D;	
+}
+.formulario .formularioCampoSinError {
+	background-color: white;	
+}
+.formulario .formularioCampoConError {
+	border-style:solid;
+	border-width: 2px;
+	border-color: #CB0A1D;
+}

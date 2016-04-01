@@ -1,0 +1,213 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{validacionAsignacionMBean.beforePhase}"
+			beforePhaseListener="#{validacionAsignacionMBean.beforePhase}">
+
+			<h:form id="form">
+				<p:outputPanel styleClass="botonesDerecha">
+					<p:commandButton id="agregarValidacion" value="Crear Asociación"
+						styleClass="btn btn-secundario"
+						actionListener="#{validacionAsignacionMBean.crear}" update="form" />
+				</p:outputPanel>
+
+
+				<p:dataTable
+					value="#{validacionAsignacionMBean.validacionesDelRecurso}"
+					var="row"
+					binding="#{validacionAsignacionMBean.validacionesDelRecursoTable}"
+					id="tablaValidacionesDelRecurso" rows="5" paginator="true"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					>
+
+					<f:facet name="header">
+						<h:outputText value="Validaciones del Recurso" />
+					</f:facet>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Nombre"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.validacion.nombre}"></h:outputText>
+						<p:tooltip value="#{row.validacion.descripcion}"></p:tooltip>
+					</p:column>
+
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="Orden de ejecución"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.ordenEjecucion}"></h:outputText>
+					</p:column>
+
+					<p:column>
+						<p:commandButton id="modificarLink" update="form:panelAsignacion"
+							actionListener="#{validacionAsignacionMBean.editar}"
+							icon="ui-icon-pencil">
+
+						</p:commandButton>
+						<p:tooltip for="modificarLink"
+							value="#{sessionMBean.textos['modificar']}" />
+
+						<p:commandButton id="elimLink"
+							actionListener="#{validacionAsignacionMBean.eliminar}"
+							icon="ui-icon-trash">
+						</p:commandButton>
+						<p:tooltip for="elimLink"
+							value="#{sessionMBean.textos['eliminar']}" />
+					</p:column>
+
+				</p:dataTable>
+
+
+				<p:spacer height="5px">
+				</p:spacer>
+
+				<p:outputPanel id="panelAsignacion"
+					rendered="#{validacionAsignacionSessionMBean.modoEdicion || validacionAsignacionSessionMBean.modoCreacion}">
+
+					<fieldset>
+						<legend>
+							<h:outputText value="Creando Asociación"
+								rendered="#{validacionAsignacionSessionMBean.modoCreacion}" />
+							<h:outputText value="Editando Asociación"
+								rendered="#{validacionAsignacionSessionMBean.modoEdicion}" />
+						</legend>
+
+
+						<p:outputPanel styleClass="form-horizontal">
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="Validación:"
+									styleClass="col-sm-3 control-label label" for="validacion" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:selectOneMenu id="validacion"
+										value="#{validacionAsignacionSessionMBean.validacionDelRecurso.validacion}"
+										disabled="#{validacionAsignacionMBean.hayAlgunaValidacionPorDato}"
+										valueChangeListener="#{validacionAsignacionMBean.cambioValidacionDelRecurso}"
+										update="tablaValidacionesPorDato">
+										<f:selectItem itemLabel="- - Seleccione una validacion - -" />
+										<f:selectItems
+											value="#{validacionAsignacionMBean.validacionesItems}" />
+									</h:selectOneMenu>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="Orden de ejecución:"
+									styleClass="col-sm-3 control-label label" for="ordenEjecucion" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText
+										value="#{validacionAsignacionSessionMBean.validacionDelRecurso.ordenEjecucion}"
+										id="ordenEjecucion" size="3">
+									</h:inputText>
+									<p:message for="ordenEjecucion" />
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+
+								<p:outputPanel styleClass="botonesDerecha">
+									<p:commandButton id="agregarParm" value="Agregar Parámetro"
+										styleClass="btn btn-secundario"
+										actionListener="#{validacionAsignacionMBean.crearValidacionPorDato}"
+										update="tablaValidacionesPorDato" />
+								</p:outputPanel>
+
+								<h:outputLabel value="Parámetros:"
+									styleClass="col-sm-3 control-label label" for="parametros" />
+								<p:outputPanel styleClass="col-sm-9">
+									<p:dataTable
+										value="#{validacionAsignacionSessionMBean.validacionDelRecurso.validacionesPorDato}"
+										var="row" paginator="true"
+										paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+										binding="#{validacionAsignacionMBean.validacionesPorDatoTable}"
+										id="tablaValidacionesPorDato" rows="4" width="404px">
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText value="Dato a solicitar"></h:outputText>
+											</f:facet>
+											<h:selectOneMenu value="#{row.datoASolicitar}"
+												valueChangeListener="#{validacionAsignacionMBean.refrescarListaDatosASolicitar}"
+												update="tablaValidacionesPorDato">
+												<f:selectItem itemLabel="#{row.datoASolicitar.nombre}"
+													itemValue="#{row.datoASolicitar}" />
+												<f:selectItems
+													value="#{validacionAsignacionMBean.datosASolicitarItems}" />
+											</h:selectOneMenu>
+										</p:column>
+
+										<p:column>
+											<f:facet name="header">
+												<h:outputText value="Parámetro"></h:outputText>
+											</f:facet>
+
+											<h:selectOneMenu value="#{row.nombreParametro}"
+												valueChangeListener="#{validacionAsignacionMBean.refrescarListaParametros}"
+												update="tablaValidacionesPorDato">
+												<f:selectItem itemLabel="#{row.nombreParametro}"
+													itemValue="#{row.nombreParametro}" />
+												<f:selectItems
+													value="#{validacionAsignacionMBean.parametrosDeLaValidacionItems}" />
+											</h:selectOneMenu>
+										</p:column>
+
+										<p:column>
+											<p:commandLink update="tablaValidacionesPorDato"
+												actionListener="#{validacionAsignacionMBean.eliminarValidacionPorDato}"
+												icon="ui-icon-trash"
+												title="#{sessionMBean.textos['eliminar']}">
+
+
+											</p:commandLink>
+											<p:tooltip for="elimLink"
+												value="#{sessionMBean.textos['eliminar']}" />
+										</p:column>
+
+
+
+
+									</p:dataTable>
+								</p:outputPanel>
+							</p:outputPanel>
+
+						</p:outputPanel>
+
+						<h:panelGroup>
+							<p:commandButton value="Guardar"
+								actionListener="#{validacionAsignacionMBean.guardarEdicion}"
+								reRender="pantalla"
+								rendered="#{validacionAsignacionSessionMBean.modoEdicion}">
+							</p:commandButton>
+							<p:commandButton value="Cancelar"
+								actionListener="#{validacionAsignacionMBean.cancelarEdicion}"
+								immediate="true" reRender="pantalla"
+								rendered="#{validacionAsignacionSessionMBean.modoEdicion}">
+							</p:commandButton>
+
+							<p:commandButton value="Guardar"
+								actionListener="#{validacionAsignacionMBean.guardarCreacion}"
+								reRender="pantalla"
+								rendered="#{validacionAsignacionSessionMBean.modoCreacion}">
+							</p:commandButton>
+							<p:commandButton value="Cancelar"
+								actionListener="#{validacionAsignacionMBean.cancelarCreacion}"
+								immediate="true" reRender="pantalla"
+								rendered="#{validacionAsignacionSessionMBean.modoCreacion}">
+							</p:commandButton>
+						</h:panelGroup>
+					</fieldset>
+				</p:outputPanel>
+
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

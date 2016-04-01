@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<jboss-deployment-structure xmlns="urn:jboss:deployment-structure:1.1">
+     <deployment>
+        <dependencies>
+          <module name="org.hibernate" export="true"/>
+          <module name="org.jdom" export="true"/>
+          <module name="org.apache.xerces" export="true"/>
+          <module name="org.apache.commons.fileupload" export="true"/>
+          <module name="org.apache.commons.io" export="true"/>
+          <module name="org.jboss.as.web" export="true"/>
+          <module name="org.apache.commons.collections" export="true"/>
+          <module name="net.sourceforge.jasperreports" export="true"/>
+          <module name="org.apache.commons.logging" export="true"/>
+          <module name="pge" export="true"/>
+          <module name="org.jboss.ws.native.jbossws-native-core" export="true"/>
+          <module name="org.apache.cxf" export="true"/>
+        </dependencies>
+     </deployment>
+</jboss-deployment-structure>

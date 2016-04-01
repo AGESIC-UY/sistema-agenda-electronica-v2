@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	lang="#{sesionMBean.idiomaActual}">
+
+<f:view beforePhase="#{parametroBean.beforePhase}"
+	beforePhaseListener="#{parametroBean.beforePhase}">
+
+	<h:head>
+		<title><h:outputText
+				value="#{sesionMBean.textos['nombre_aplicacion']}" /></title>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+
+		<h:outputScript library="primefaces" name="jquery/jquery.js" />
+		<script src="/sae/resources/js/jquery-ui.js" type="text/javascript"></script>
+		<script src="/sae/resources/js/funcionesJS.js" type="text/javascript"></script>
+
+		<!-- Latest compiled JavaScript -->
+		<script src="/sae/resources/js/bootstrap.min.js"
+			type="text/javascript"></script>
+
+		<!-- Bootstrap core CSS -->
+		<link href="/sae/resources/css/bootstrap.min.css" rel="stylesheet" />
+		<link href="/sae/resources/css/formulario-tipo.css" rel="stylesheet" />
+		<link href="/sae/resources/css/layout.css" rel="stylesheet" />
+		<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
+
+	</h:head>
+
+	<h:body onload="#{onload}" class="body">
+		<a class="sr-only sr-only-focusable saltar" href="#content">Saltar
+			al contenido</a>
+
+		<input type="hidden" id="formatoFecha"
+			value="#{sesionMBean.formatoFechaDatepicker}" />
+
+		<div class="cabezalPublico">
+			<div class="container">
+				<div class="row">
+					<div class="col-sm-8 cabezalEmpresa">
+						<div id="logo">
+							<div>
+								<p:graphicImage
+									value="#{sesionMBean.empresaActualLogo}"
+									styleClass="logoEmpresa"
+									alt="#{sesionMBean.empresaActualLogoTexto}"
+									rendered="#{sesionMBean.empresaActualLogo != null}" />
+							</div>
+							<div>
+								<h:outputText styleClass="nombre-activo"
+									value="#{sesionMBean.empresaActualNombre}" />
+							</div>
+						</div>
+					</div>
+					<div class="col-sm-4 cabezalTramites">
+						<div class="logosSecundarios">
+							<ul class="listaHorizontal">
+								<li><a href="https://www.presidencia.gub.uy/"
+									title="Ir al sitio de Presidencia"> <img
+										src="../resources/images/logoPresidencia.png"
+										alt="Presidencia" /></a></li>
+								<li><a href="http://uruguaydigital.gub.uy/"
+									title="Ir al sitio de Uruguay Digital"> <img
+										src="../resources/images/logo-uruguayDigital.png"
+										alt="Uruguay Digital" /></a></li>
+							</ul>
+						</div>
+						<h:panelGroup rendered="#{sesionMBean.usuarioCda != null}"
+							styleClass="cabezalUsuario">
+							<h:outputText value="Usuario: #{sesionMBean.usuarioCda}"></h:outputText>
+							<h:outputLink value="/sae/logoutcda">Salir</h:outputLink>
+						</h:panelGroup>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="container" id="content" tabindex="-1">
+			<ui:insert name="cuerpo">
+			</ui:insert>
+		</div>
+
+		<ui:insert name="script">
+		</ui:insert>
+
+		<ui:insert name="js">
+		</ui:insert>
+
+		<p:outputPanel styleClass="piePublico"
+			rendered="#{not empty sesionMBean.empresaActual.piePublico}">
+			<p:outputPanel styleClass="container">
+				<h:outputText value="#{sesionMBean.empresaActual.piePublico}"
+					escape="false"></h:outputText>
+			</p:outputPanel>
+		</p:outputPanel>
+
+	</h:body>
+</f:view>
+</html>

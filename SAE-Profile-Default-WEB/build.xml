@@ -1,0 +1,64 @@
+<project name="SAE-Profile-Default-WEB" default="build" basedir=".">
+
+	<!-- dependencias de compilacion -->
+	<property name="java.src" value="src" />
+	<property name="SAE-EAR.lib" value="../SAE-EAR/EarContent/lib" />
+	<!-- dependencias de compilacion con los proyectos client -->
+	<property name="SAE-EJBClient.lib" value="../SAE-EJBClient/build/jar" />
+
+	<tstamp>
+		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+	</tstamp>
+
+	<!-- PATH -->
+	<path id="base.path">
+		<fileset dir="../SAE-Config/libs">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="${SAE-EJBClient.lib}">
+			<include name="**/*.jar" />
+		</fileset>
+		<fileset dir="WebContent/WEB-INF/lib">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
+	<target name="clean">
+		<sequential>
+			<mkdir dir="build" />
+			<delete quiet="true">
+				<fileset dir="build">
+					<include name="**/*" />
+				</fileset>
+			</delete>
+
+			<mkdir dir="build/classes" />
+			<mkdir dir="build/jar" />
+
+		</sequential>
+	</target>
+
+
+	<target name="compile" depends="clean">
+		<manifest file="build/MANIFEST.MF">
+			<attribute name="Built-By" value="${user.name}" />
+			<attribute name="Built-Date" value="${TODAY}" />
+		</manifest>
+	</target>
+
+	<target name="build" depends="compile,clean">
+		<war destfile="build/jar/sae-recursos.war" 
+			 webxml="WebContent/WEB-INF/web.xml" 
+			filesetmanifest="merge" manifest="build/MANIFEST.MF" duplicate="fail">
+
+			<classes dir="build/classes" />
+			<fileset dir="WebContent">
+				<exclude name="WebContent/META-INF" />
+				<exclude name="WEB-INF/web*.xml" />
+			</fileset>
+			<metainf dir="WebContent/META-INF" />
+		</war>
+
+	</target>
+
+</project>

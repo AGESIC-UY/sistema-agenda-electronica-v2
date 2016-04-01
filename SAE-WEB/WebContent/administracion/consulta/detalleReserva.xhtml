@@ -1,0 +1,105 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{consultaReservaDatosMBean.beforePhaseDetalleReserva}"
+			beforePhaseListener="#{consultaReservaDatosMBean.beforePhaseDetalleReserva}">
+
+			<h:form id="form">
+				<fieldset id="basic">
+					<legend>
+						<h:outputText value="#{sessionMBean.textos['datos_de_la_reserva']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="Fecha:" for="dispFecha"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText
+									value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.disponibilidad.fecha}"
+									styleClass="form-control datepicker-dis" readonly="true"
+									disabled="true" id="dispFecha" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['hora']}:" for="horaInicio"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText styleClass="form-control textoCorto"
+									readonly="true" disabled="true"
+									value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.disponibilidad.horaInicio}"
+									id="horaInicio">
+									<f:convertDateTime type="time"
+										pattern="#{sessionMBean.formatoHora}"
+										timeZone="GMT" />
+								</h:inputText>
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['numero']}:" for="nro"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText
+									value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.reservaDatos.numero}"
+									styleClass="form-control textoCorto" readonly="true"
+									disabled="true" id="nro" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['estado']}:" for="resEstado"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText
+									value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.reservaDatos.estadoDescripcion}"
+									styleClass="form-control" id="resEstado" readonly="true"
+									disabled="true" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['observaciones']}:" for="obs"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText
+									value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.reservaDatos.observaciones}"
+									styleClass="form-control" id="obs" readonly="true"
+									disabled="true" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['fecha_de_creacion']}:" for="fechCrea"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText
+									value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.reservaDatos.fechaCreacion}"
+									styleClass="form-control datepicker-dis" readonly="true"
+									disabled="true" id="fechCrea">
+									<f:convertDateTime type="date"
+										pattern="#{sessionMBean.formatoFecha}"
+										timeZone="GMT" locale="es" />
+								</h:inputText>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+				<h:panelGroup id="camposFiltro"
+					binding="#{consultaReservaDatosMBean.campos}" layout="block">
+				</h:panelGroup>
+			</h:form>
+
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

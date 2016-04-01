@@ -1,0 +1,326 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="WebApp_ID" version="2.5"
+	xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+	<!--@WEB_XML_DATA@-->
+<context-param>
+    <param-name>com.sun.faces.autoCompleteOffOnViewState</param-name>
+    <param-value>false</param-value>
+</context-param>
+<context-param>
+    <param-name>com.sun.faces.enableViewStateIdRendering</param-name>
+    <param-value>false</param-value>
+</context-param>
+	<context-param>
+		<param-name>facelets.DEVELOPMENT</param-name>
+		<param-value>false</param-value>
+	</context-param>
+	<context-param>
+		<param-name>com.sun.faces.validateXml</param-name>
+		<param-value>false</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.STATE_SAVING_METHOD</param-name>
+		<param-value>server</param-value>
+	</context-param>
+	<context-param>
+		<param-name>javax.faces.DEFAULT_SUFFIX</param-name>
+		<param-value>.xhtml</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>uy.gub.imm.core.seguridad.paginaLoginSeguro</param-name>
+		<param-value>/login/loginSeguro.xhtml</param-value>
+	</context-param>
+	<context-param>
+		<param-name>uy.gub.imm.core.seguridad.paginaLoginSSO</param-name>
+		<param-value>/login/loginSSO.xhtml</param-value>
+	</context-param>
+	
+	<context-param>
+		<param-name>javax.faces.CONFIG_FILES</param-name>
+		<param-value>/WEB-INF/faces-config.xml</param-value>
+	</context-param>
+	
+	<filter>
+    <filter-name>PrimeFaces FileUpload Filter</filter-name>
+    <filter-class>org.primefaces.webapp.filter.FileUploadFilter</filter-class>
+  </filter>
+  <filter-mapping>
+    <filter-name>PrimeFaces FileUpload Filter</filter-name>
+    <servlet-name>Faces Servlet</servlet-name>
+	</filter-mapping>
+	<!-- AGREGADOOOOOOO 
+	<context-param>  
+     	<param-name>javax.faces.DISABLE_FACELET_JSF_VIEWHANDLER</param-name>  
+     	<param-value>true</param-value>  
+	</context-param> 
+	
+	<context-param>
+       <param-name>org.ajax4jsf.VIEW_HANDLERS</param-name>
+       <param-value>com.sun.facelets.FaceletViewHandler</param-value>
+	</context-param> 
+	
+	<context-param>
+	    <param-name>facelets.RECREATE_VALUE_EXPRESSION_ON_BUILD_BEFORE_RESTORE</param-name>
+	    <param-value>true</param-value>
+	</context-param>
+	
+	<context-param>
+	    <param-name>facelets.BUILD_BEFORE_RESTORE</param-name>
+	    <param-value>true</param-value>
+	</context-param>
+	
+	<context-param>
+	 <param-name>org.richfaces.LoadScriptStrategy</param-name>
+	 <param-value>DEFAULT</param-value>
+	</context-param>
+	<context-param>
+	 <param-name>org.richfaces.LoadStyleStrategy</param-name>
+	 <param-value>ALL</param-value>
+	</context-param>
+	
+	<context-param>
+	  <param-name>org.ajax4jsf.COMPRESS_SCRIPT</param-name>
+	  <param-value>false</param-value>
+	</context-param>
+	
+	 <context-param>
+       <param-name>org.ajax4jsf.RESOURCE_URI_PREFIX</param-name>
+       <param-value>rfRes</param-value>
+ 	</context-param>
+ 	
+	<context-param>
+	    <param-name>org.richfaces.resourceOptimization.enabled</param-name>
+	    <param-value>true</param-value>
+	</context-param>
+	
+	<context-param>
+	    <param-name>javax.faces.PROJECT_STAGE</param-name>
+	    <param-value>Development</param-value>
+	</context-param>
+	  -->
+	
+	
+	<!-- Requerido si da error el reRender de la imagen en Firefox
+	<filter>
+		<filter-name>RichfacesFirefoxFilter</filter-name>
+		<filter-class>uy.gub.imm.sae.filter.RichfacesFirefoxFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>RichfacesFirefoxFilter</filter-name>
+		
+		<url-pattern>/a4j/*</url-pattern>
+
+	</filter-mapping>
+
+	<filter>
+		<display-name>RichFaces Filter</display-name>
+		<filter-name>richfaces</filter-name>
+		<filter-class>org.ajax4jsf.Filter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>richfaces</filter-name>
+		<servlet-name>Faces Servlet</servlet-name>
+		<dispatcher>REQUEST</dispatcher>
+		<dispatcher>FORWARD</dispatcher>
+		<dispatcher>INCLUDE</dispatcher>
+	</filter-mapping>
+	
+	<filter>
+       <display-name>Ajax4jsf Filter</display-name>
+       <filter-name>ajax4jsf</filter-name>
+       <filter-class>org.ajax4jsf.Filter</filter-class>
+   </filter>
+
+   <filter-mapping>
+       <filter-name>ajax4jsf</filter-name>
+       <servlet-name>Faces Servlet</servlet-name>
+       <dispatcher>FORWARD</dispatcher>
+       <dispatcher>REQUEST</dispatcher>
+       <dispatcher>INCLUDE</dispatcher>
+   </filter-mapping-->
+	
+	<!--listener>
+		<listener-class>uy.gub.imm.sae.web.timer.StartupContextListener</listener-class>
+	</listener-->
+	<servlet>
+		<servlet-name>Faces Servlet</servlet-name>
+		<servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
+		<load-on-startup>1</load-on-startup>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>Faces Servlet</servlet-name>
+		<url-pattern>*.xhtml</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<session-timeout>30</session-timeout>
+	</session-config>
+	<welcome-file-list>
+		<welcome-file>administracion/inicio.xhtml</welcome-file>
+	</welcome-file-list>
+	<error-page>
+		<error-code>500</error-code>
+		<location>/error/errorRedirect.xhtml</location>
+	</error-page>
+  <error-page>
+    <error-code>403</error-code>
+    <location>/administracion/inicio.xhtml</location>
+  </error-page>
+  <error-page>
+    <exception-type>javax.faces.application.ViewExpiredException</exception-type>
+    <location>/administracion/inicio.xhtml</location>
+  </error-page>
+  
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Paginas no protegidas</web-resource-name>
+      <!-- url-pattern>/administracion/inicio.xhtml</url-pattern -->
+      <url-pattern>/administracion/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>RA_AE_ANONIMO</role-name>
+      <role-name>RA_AE_ADMINISTRADOR</role-name>
+      <role-name>RA_AE_PLANIFICADOR</role-name>
+      <role-name>RA_AE_FCALL_CENTER</role-name>
+      <role-name>RA_AE_FATENCION</role-name>
+      <role-name>RA_AE_LLAMADOR</role-name>
+    </auth-constraint>
+  </security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Paginas protegidas</web-resource-name>
+			<url-pattern>/administracion/recurso/*</url-pattern>
+			<url-pattern>/administracion/disponibilidad/*</url-pattern>
+			<url-pattern>/administracion/datoASolicitar/*</url-pattern>
+			<url-pattern>/administracion/consulta/*</url-pattern>
+			<url-pattern>/administracion/reserva/*</url-pattern>
+			<url-pattern>/administracion/validaciones/*</url-pattern>
+			<url-pattern>/administracion/acciones/*</url-pattern>
+			<url-pattern>/administracion/datoAutocompletar/*</url-pattern>
+			<url-pattern>/administracion/agenda/*</url-pattern>
+      <url-pattern>/administracion/empresa/*</url-pattern>
+      <url-pattern>/administracion/usuario/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RA_AE_ADMINISTRADOR</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Paginas protegidas</web-resource-name>
+			<url-pattern>/administracion/recurso/consultar.xhtml</url-pattern>
+			<url-pattern>/administracion/recurso/consultarDatos.xhtml</url-pattern>
+			<url-pattern>/administracion/recurso/modificar.xhtml</url-pattern>
+			<url-pattern>/administracion/recurso/modificarConsultar.xhtml</url-pattern>
+			<url-pattern>/administracion/recurso/modificarTextos.xhtml</url-pattern>
+			<url-pattern>/administracion/disponibilidad/*</url-pattern>
+			<url-pattern>/administracion/datoASolicitar/consultar.xhtml</url-pattern>
+			<url-pattern>/administracion/datoASolicitar/consultarDatos.xhtml</url-pattern>
+			<url-pattern>/administracion/datoASolicitar/modificar.xhtml</url-pattern>
+			<url-pattern>/administracion/datoASolicitar/modificarConsultar.xhtml</url-pattern>
+			<url-pattern>/administracion/consulta/*</url-pattern>
+			<url-pattern>/administracion/reserva/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RA_AE_ADMINISTRADOR</role-name>
+			<role-name>RA_AE_PLANIFICADOR</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Paginas protegidas</web-resource-name>
+			<url-pattern>/administracion/disponibilidad/consultar.xhtml</url-pattern>
+			<url-pattern>/administracion/disponibilidad/consultarPorDia.xhtml</url-pattern>
+			<url-pattern>/administracion/reserva/*</url-pattern>
+			<url-pattern>/administracion/llamador/*</url-pattern>
+			<url-pattern>/administracion/consulta/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RA_AE_FATENCION</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Paginas protegidas</web-resource-name>
+			<url-pattern>/administracion/reserva/*</url-pattern>
+			<url-pattern>/administracion/consulta/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RA_AE_FCALL_CENTER</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Paginas protegidas</web-resource-name>
+			<url-pattern>/agendarReserva/*</url-pattern>
+			<url-pattern>/administracion/mostrarAgendaRecurso.xhtml</url-pattern>
+			<url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
+			<url-pattern>/administracion/index.xhtml</url-pattern>
+			<url-pattern>/administracion/menuTitulo.xhtml</url-pattern>
+			<!-- url-pattern>/administracion/inicio.xhtml</url-pattern -->
+			<url-pattern>/administracion/reserva/*</url-pattern>
+			<url-pattern>/administracion/llamador/*</url-pattern>
+			<url-pattern>/administracion/consulta/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RA_AE_ADMINISTRADOR</role-name>
+			<role-name>RA_AE_PLANIFICADOR</role-name>
+			<role-name>RA_AE_FCALL_CENTER</role-name>
+			<role-name>RA_AE_FATENCION</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Pagina Login Seguro</web-resource-name>
+			<url-pattern>/login/loginSeguro.xhtml</url-pattern>
+			<url-pattern>/login/loginSSO.xhtml</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>RA_AE_ADMINISTRADOR</role-name>
+			<role-name>RA_AE_PLANIFICADOR</role-name>
+			<role-name>RA_AE_FCALL_CENTER</role-name>
+			<role-name>RA_AE_FATENCION</role-name>
+		</auth-constraint>
+		<user-data-constraint>
+			<transport-guarantee>CONFIDENTIAL</transport-guarantee>
+		</user-data-constraint>
+	</security-constraint>
+  <security-constraint>
+    <web-resource-collection>
+      <web-resource-name>Paginas protegidas</web-resource-name>
+      <url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
+      <url-pattern>/administracion/llamador/*</url-pattern>
+    </web-resource-collection>
+    <auth-constraint>
+      <role-name>RA_AE_LLAMADOR</role-name>
+    </auth-constraint>
+  </security-constraint>
+	
+	<login-config>
+		<auth-method>FORM</auth-method>
+		<form-login-config>
+			<form-login-page>/login/login.xhtml</form-login-page>
+			<form-error-page>/login/error.xhtml</form-error-page>
+		</form-login-config>
+	</login-config>
+	<security-role>
+		<role-name>RA_AE_ADMINISTRADOR</role-name>
+	</security-role>
+	<security-role>
+		<role-name>RA_AE_PLANIFICADOR</role-name>
+	</security-role>
+	<security-role>
+		<role-name>RA_AE_FATENCION</role-name>
+	</security-role>
+	<security-role>
+		<role-name>RA_AE_FCALL_CENTER</role-name>
+	</security-role>
+  <security-role>
+    <role-name>RA_AE_LLAMADOR</role-name>
+  </security-role>
+  <security-role>
+    <role-name>RA_AE_ANONIMO</role-name>
+  </security-role>
+</web-app>

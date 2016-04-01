@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+
+<body>
+
+	<ui:composition template="/administracion/reserva/Paso.template.xhtml">
+
+		<ui:param name="parametroBean" value="#{pasoAdminFinalMBean}" />
+		<ui:param name="bodyId" value="pasoFinal" />
+
+		<ui:param name="agenda_nombre" value="#{pasoAdminFinalMBean.agendaNombre}" />
+		<ui:param name="paso_numero" value="4" />
+		<ui:param name="paso_texto" value="#{sessionMBean.textos['reserva_confirmada']}" />
+		
+		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-12" />
+		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />
+
+		<ui:define name="descripcion">
+			<div id="form:j_idt30" aria-live="polite" class="ui-message ui-message-warn ui-widget ui-corner-all" style="margin: 20px 0 0;">
+				<span class="ui-message-warn-icon"></span>
+				<span class="ui-message-warn-detail">
+          <h:outputText styleClass="negrita" value="#{sessionMBean.textos['no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva']}" />
+        </span>
+			</div>
+		</ui:define>
+
+		<ui:define name="mensaje">
+			<div class="box box-grey datosReservaConfirmada">
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{sessionMBean.textos['la_reserva_esta_confirmada']}" />
+				</div>
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{pasoAdminFinalMBean.diaSeleccionado}"
+						styleClass="resaltado">
+						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy"
+							timeZone="GMT" locale="#{sessionMBean.locale}" />
+					</h:outputText>
+					<h:outputText value=" a las " />
+					<h:outputText value="#{pasoAdminFinalMBean.horaSeleccionada}"
+						styleClass="resaltado">
+						<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
+							timeZone="GMT" />
+					</h:outputText>
+					<h:outputText value=", " />
+					<h:outputText value="#{pasoAdminFinalMBean.reservaNumero}"
+						styleClass="resaltado" />
+				</div>
+				<div>
+					<h:outputText value="#{pasoAdminFinalMBean.recursoDescripcion}" />
+				</div>
+        <div class="seguridad">
+          <h:outputText value="#{sessionMBean.textos['codigo_de_trazabilidad']}:" />
+          <h:outputText value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}" styleClass="negrita" />
+        </div>
+				<div class="seguridad">
+					<h:outputText value="#{sessionMBean.textos['codigo_de_seguridad']}: " />
+					<h:outputText value="#{sessionMBean.reservaConfirmada.codigoSeguridad}" styleClass="negrita" />
+				</div>
+			</div>
+		</ui:define>
+
+		<ui:define name="contenido">
+			<div class="infoAdicional box-grey">
+				<h:outputFormat escape="false" value="#{pasoAdminFinalMBean.descripcion}" />
+			</div>
+		</ui:define>
+		
+    <ui:define name="botones">
+      <h:commandButton styleClass="" value="Dummy" style="display:none"/>
+    </ui:define>
+		
+	</ui:composition>
+</body>
+</html>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="SAE-Profile-Default-EAR">
+        <wb-resource deploy-path="/" source-path="/EarContent" tag="defaultRootSource"/>
+        <dependent-module archiveName="SAE-Profile-Default-EJB.jar" deploy-path="/" handle="module:/resource/SAE-Profile-Default-EJB/SAE-Profile-Default-EJB">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="SAE-Profile-Default-WEB.war" deploy-path="/" handle="module:/resource/SAE-Profile-Default-WEB/SAE-Profile-Default-WEB">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

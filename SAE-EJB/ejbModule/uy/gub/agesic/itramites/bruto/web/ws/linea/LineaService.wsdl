@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="http://ws.web.bruto.itramites.agesic.gub.uy/lineaService" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:ns1="http://schemas.xmlsoap.org/soap/http" name="lineaService" targetNamespace="http://ws.web.bruto.itramites.agesic.gub.uy/lineaService">
+  <wsdl:types>
+    <xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:tns="http://ws.web.bruto.itramites.agesic.gub.uy/lineaService" elementFormDefault="unqualified" targetNamespace="http://ws.web.bruto.itramites.agesic.gub.uy/lineaService" version="1.0">
+      <xs:element name="lineaDTO" type="tns:lineaDTO"/>
+      <xs:element name="persist" type="tns:persist"/>
+      <xs:element name="persistResponse" type="tns:persistResponse"/>
+      <xs:element name="responseDTO" type="tns:responseDTO"/>
+      <xs:complexType name="persist">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="traza" type="tns:lineaDTO"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="lineaDTO">
+        <xs:sequence>
+          <xs:element name="idTransaccion" type="xs:string"/>
+          <xs:element name="edicionModelo" type="xs:long"/>
+          <xs:element minOccurs="0" name="idOficina" type="xs:string"/>
+          <xs:element minOccurs="0" name="oficina" type="xs:string"/>
+          <xs:element name="fechaHoraOrganismo" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="tipoRegistroTrazabilidad" type="tns:tipoRegistroTrazabilidadEnum"/>
+          <xs:element minOccurs="0" name="paso" type="xs:long"/>
+          <xs:element minOccurs="0" name="descripcionDelPaso" type="xs:string"/>
+          <xs:element minOccurs="0" name="aclaraciones" type="xs:string"/>
+          <xs:element minOccurs="0" name="pasoDelProceso" type="xs:long"/>
+          <xs:element minOccurs="0" name="idOficinaDestino" type="xs:string"/>
+          <xs:element minOccurs="0" name="oficinaDestino" type="xs:string"/>
+          <xs:element minOccurs="0" name="estadoProceso" type="tns:estadoProcesoEnum"/>
+          <xs:element minOccurs="0" name="datoExtra1" type="xs:string"/>
+          <xs:element minOccurs="0" name="datoExtra2" type="xs:string"/>
+          <xs:element minOccurs="0" name="datoExtra3" type="xs:string"/>
+          <xs:element minOccurs="0" name="datoExtra4" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="persistResponse">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="return" type="tns:responseDTO"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="responseDTO">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="estado" type="tns:estadoRespuestaEnum"/>
+          <xs:element minOccurs="0" name="mensaje" type="xs:string"/>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:simpleType name="tipoRegistroTrazabilidadEnum">
+        <xs:restriction base="xs:int">
+          <xs:enumeration value="1"/>
+          <xs:enumeration value="2"/>
+          <xs:enumeration value="3"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="estadoProcesoEnum">
+        <xs:restriction base="xs:int">
+          <xs:enumeration value="1"/>
+          <xs:enumeration value="2"/>
+          <xs:enumeration value="3"/>
+          <xs:enumeration value="4"/>
+        </xs:restriction>
+      </xs:simpleType>
+      <xs:simpleType name="estadoRespuestaEnum">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="OK"/>
+          <xs:enumeration value="ERROR"/>
+          <xs:enumeration value="EXCEPTION"/>
+          <xs:enumeration value="EXCEPTION_MENSAJE"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:schema>
+  </wsdl:types>
+  <wsdl:message name="persistResponse">
+    <wsdl:part element="tns:persistResponse" name="parameters"></wsdl:part>
+  </wsdl:message>
+  <wsdl:message name="persist">
+    <wsdl:part element="tns:persist" name="parameters"></wsdl:part>
+  </wsdl:message>
+  <wsdl:portType name="LineaWS">
+    <wsdl:documentation>La numeración de los enumerados está basada en el modelo de trazas definido por Unit</wsdl:documentation>
+    <wsdl:operation name="persist">
+      <wsdl:input message="tns:persist" name="persist"></wsdl:input>
+      <wsdl:output message="tns:persistResponse" name="persistResponse"></wsdl:output>
+    </wsdl:operation>
+  </wsdl:portType>
+  <wsdl:binding name="lineaServiceSoapBinding" type="tns:LineaWS">
+    <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="persist">
+      <soap:operation soapAction="" style="document"/>
+      <wsdl:input name="persist">
+        <soap:body use="literal"/>
+      </wsdl:input>
+      <wsdl:output name="persistResponse">
+        <soap:body use="literal"/>
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+  <wsdl:service name="lineaService">
+    <wsdl:port binding="tns:lineaServiceSoapBinding" name="LineaWSPort">
+      <soap:address location="https://testservicios.pge.red.uy:6224/itramites/lineaService"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>
