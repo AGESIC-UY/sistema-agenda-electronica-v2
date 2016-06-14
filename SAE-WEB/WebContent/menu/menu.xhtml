@@ -6,7 +6,7 @@
 	xmlns:h="http://java.sun.com/jsf/html">
 <h:body>
 	<ui:composition>
-		<h:form>
+		<h:form id="formMenu">
 			<div class="ui-helper-hidden-accessible">
 				<h1>
 					<h:outputText value="#{sessionMBean.textos['sae']}" />
@@ -33,8 +33,8 @@
 					<h:outputText value="#{sessionMBean.textos['menu']}" />
 				</h2>
 			</div>
-			<p:panelMenu>
-				<p:submenu label="#{sessionMBean.textos['empresas']}"
+			<p:panelMenu id="menuLateral" aria-level="1">
+				<p:submenu id="submenuEmpresas" label="#{sessionMBean.textos['empresas']}" aria-level="2"
 					rendered="#{sessionMBean.usuarioActual.superadmin}">
 					<p:menuitem value="#{sessionMBean.textos['crear_empresa']}"
 						icon="ui-icon-plus" url="/administracion/empresa/editar.xhtml?n=t" />
@@ -42,7 +42,7 @@
 						icon="ui-icon-search"
 						url="/administracion/empresa/consultar.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['usuarios']}"
+				<p:submenu id="submenuUsuarios" label="#{sessionMBean.textos['usuarios']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
 					<p:menuitem value="#{sessionMBean.textos['crear_usuario']}"
 						icon="ui-icon-plus" url="/administracion/usuario/editar.xhtml?n=t" />
@@ -50,7 +50,7 @@
 						icon="ui-icon-search"
 						url="/administracion/usuario/consultar.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['agendas']}"
+				<p:submenu id="submenuAgendas" label="#{sessionMBean.textos['agendas']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
 					<p:menuitem value="#{sessionMBean.textos['crear_agenda']}"
 						icon="ui-icon-plus" url="/administracion/agenda/crear.xhtml" />
@@ -62,7 +62,7 @@
 						icon="ui-icon-pencil"
 						url="/administracion/agenda/modificarTextos.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['recursos']}"
+				<p:submenu id="submenuRecursos" label="#{sessionMBean.textos['recursos']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
 					<p:menuitem value="#{sessionMBean.textos['crear_recurso']}"
 						icon="ui-icon-plus" url="/administracion/recurso/crear.xhtml" />
@@ -74,7 +74,7 @@
 						icon="ui-icon-pencil"
 						url="/administracion/recurso/modificarTextos.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['datos_a_solicitar']}"
+				<p:submenu id="submenuDatosASolicitar" label="#{sessionMBean.textos['datos_a_solicitar']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
 					<p:menuitem value="#{sessionMBean.textos['agrupaciones']}"
 						icon="ui-icon-radio-on"
@@ -86,8 +86,7 @@
 						icon="ui-icon-search"
 						url="/administracion/datoASolicitar/modificarConsultar.xhtml" />
 				</p:submenu>
-
-				<p:submenu label="#{sessionMBean.textos['disponibilidades']}"
+				<p:submenu id="submenuDisponibilidades" label="#{sessionMBean.textos['disponibilidades']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_PLANIFICADOR')}">
 					<p:menuitem
 						value="#{sessionMBean.textos['consultar_disponibilidades']}"
@@ -107,14 +106,14 @@
 						icon="ui-icon-copy"
 						url="/administracion/disponibilidad/eliminarDisponibilidades.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['reservas']}"
+				<p:submenu id="submenuReservas" label="#{sessionMBean.textos['reservas']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_FCALL_CENTER')}">
 					<p:menuitem value="#{sessionMBean.textos['reservar']}"
 						icon="ui-icon-calendar" url="/administracion/reserva/Paso1.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['cancelar_reserva']}"
 						icon="ui-icon-close" url="/administracion/reserva/cancelarReserva.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['llamador']}"
+				<p:submenu id="submenuLlamador" label="#{sessionMBean.textos['llamador']}" aria-level="2"
 					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}">
 					<p:menuitem value="#{sessionMBean.textos['lista_de_espera']}"
 						icon="ui-icon-clock"
@@ -123,12 +122,12 @@
 						icon="ui-icon-volume-on"
 						url="/administracion/llamador/configurarLlamador.xhtml" />
 				</p:submenu>
-				<p:submenu label="#{sessionMBean.textos['consultas']}"
+				<p:submenu id="submenuConsultas" label="#{sessionMBean.textos['consultas']}" aria-level="2"
 					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR')}">
 					<p:menuitem value="#{sessionMBean.textos['por_id.']}" icon="ui-icon-search"
 						url="/administracion/consulta/consultarReservaId.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['por_numero']}" icon="ui-icon-search"
-						url="/administracion/consulta/consultarReservaNumero.xhtml?parm=numero" />
+						url="/administracion/consulta/consultarReservaNumero.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['por_datos']}" icon="ui-icon-search"
 						url="/administracion/consulta/consultarReservaDatos.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['reporte_reservas']}" icon="ui-icon-search"
@@ -137,10 +136,10 @@
 						url="/administracion/consulta/consultarAsistenciaPeriodo.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['reporte_atencion_funcionario']}"
 						icon="ui-icon-search"
-						url="/administracion/consulta/consultarAtencionFuncPeriodo.xhtml?parm=atencion" />
+						url="/administracion/consulta/consultarAtencionFuncPeriodo.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['reporte_tiempo_atencion_funcionario']}"
 						icon="ui-icon-search"
-						url="/administracion/consulta/consultarTiempoAtencionFun.xhtml?parm=atencion" />
+						url="/administracion/consulta/consultarTiempoAtencionFun.xhtml" />
 				</p:submenu>
 			</p:panelMenu>
 

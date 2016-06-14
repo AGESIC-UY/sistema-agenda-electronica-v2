@@ -25,7 +25,7 @@
 
 				<p:outputPanel styleClass="infoDireccion"  rendered="#{sessionMBean.agendaMarcada != null}">
 					<h:panelGroup>
-            <iframe  src="#{paso1AdminMBean.urlMapa}" height="235px" width="100%" >
+            <iframe  src="#{paso1AdminMBean.urlMapa}"  class="iframeMapa"  title="mapa de locación" >
             </iframe>
 					</h:panelGroup>
 					<div class="direccion">
@@ -40,11 +40,8 @@
 					<h:outputFormat escape="false" value="#{paso1AdminMBean.descripcion}" />
 				</p:outputPanel>
 
-				<!-- Esto no se que sentido tiene -->
-				<h:panelGroup rendered="#{paso1AdminMBean.infoRecurso != null}"
-					styleClass="infoAdicional box-grey" layout="block">
-					<h:outputText value="Información adicional: "
-						styleClass="tituloResalte" />
+				<h:panelGroup rendered="#{paso1AdminMBean.infoRecurso != null}" styleClass="infoAdicional box-grey" layout="block">
+					<h:outputText value="Información adicional: " styleClass="tituloResalte" />
 						
 					<p:dataList value="#{paso1AdminMBean.infoRecurso}" var="row">
 						<h:outputText value="#{row.etiqueta}: " />
@@ -83,7 +80,7 @@
 				<li class="action-buttons-primary">
 					<ul>
 						<li><h:commandButton styleClass="btn-lg btn-primario"
-								value="#{sessionMBean.textos['elegir_dia_y_hora']} &#12299;"
+								value="#{sessionMBean.textos['elegir_dia_y_hora']} #{paso1AdminMBean.simboloSiguiente}"
 								action="#{paso1AdminMBean.siguientePaso}"></h:commandButton></li>
 					</ul>
 				</li>

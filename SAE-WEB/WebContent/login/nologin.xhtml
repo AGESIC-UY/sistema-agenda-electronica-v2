@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	lang="#{sessionMBean.idiomaActual}">
+
+<h:head>
+	<title><h:outputText value="#{sessionMBean.textos['ingreso_electronico']}" /></title>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<h:outputScript library="primefaces" name="jquery/jquery.js" />
+	<script src="/sae/resources/js/jquery-ui.js" type="text/javascript"></script>
+	<script src="/sae/resources/js/funcionesJS.js" type="text/javascript"></script>
+	<script src="/sae/resources/js/bootstrap.min.js" type="text/javascript"></script>
+	<link href="/sae/resources/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/sae/resources/css/formulario-tipo.css" rel="stylesheet" />
+	<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
+</h:head>
+<h:body>
+	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar al contenido</a>
+	<div class="cabezalLogin">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-8 cabezalEmpresa">
+					<div id="logo">
+						<div>
+							<h:outputText styleClass="nombre-activo"
+								value="#{sessionMBean.textos['nombre_aplicacion']}" />
+						</div>
+					</div>
+				</div>
+        <div class="col-sm-4 cabezalTramites">
+				  <div class="logosSecundarios">
+					 <ul class="listaHorizontal">
+					   <li>
+						  <a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia"> 
+							 <img	src="/sae-admin/resources/images/logoPresidencia.png"	alt="Presidencia" /></a></li>
+							 <li>
+							   <a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital"> <img
+									src="/sae-admin/resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" /></a>
+							</li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<h:form styleClass="login" id="formLogin">
+		<div class="container">
+			<h1>
+				<h:outputText value="#{sessionMBean.textos['ingrese_al_sistema']}" />
+			</h1>
+			<fieldset>
+				<legend>
+					<h:outputText value="#{sessionMBean.textos['ingreso_de_usuario']}" />
+				</legend>
+				
+        <div aria-live="polite" class="ui-messages ui-widget msg errorGrande" id="formLogin:messages">				
+					<div class="ui-messages-error ui-corner-all">
+					  <span class="ui-messages-error-icon"></span>
+					  <p class="ui-messages-error-title"><h:outputText value="#{sessionMBean.textos['login_deshabilitado']}" /></p>
+					  <ul>
+					    <li>
+					      <span class="ui-messages-error-detail"><h:outputText value="#{sessionMBean.textos['el_login_ha_sido_deshabilitado']}" /></span>
+				      </li>
+	            <li>
+	              <span class="ui-messages-error-detail"><h:outputText value="#{sessionMBean.textos['debe_configurar_cda']}" /></span>
+	            </li>
+			      </ul>
+		      </div>
+	      </div>
+			</fieldset>
+			<div class="version">
+				<h:outputText
+					value="#{sessionMBean.textos['version']} #{sessionMBean.version}" />
+			</div>
+		</div>
+
+	</h:form>
+</h:body>
+</html>

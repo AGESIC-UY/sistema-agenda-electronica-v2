@@ -277,8 +277,7 @@ public class ReservaMBean extends BaseMBean {
 		this.campos = campos;
 		try {
 			List<AgrupacionDato> agrupaciones = recursosEJB
-					.consultarDefinicionDeCampos(sessionMBean
-							.getRecursoMarcado());
+					.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
 			FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), 
 					this.reservaSessionMBean.getReservaDatos(), this.campos, agrupaciones, sessionMBean.getFormatoFecha());
 		} catch (BusinessException be) {

@@ -75,18 +75,5 @@
 			<local-jndi-name>@SAE_EJB_JNDI_BASE@/DepurarReservasBean/local</local-jndi-name>
 		</session>
 		
-		
-		
-		<!-- session>
-			<ejb-name>xBean</ejb-name>
-			<jndi-name>@SAE_EJB_JNDI_BASE@/xBean/remote</jndi-name>
-			<local-jndi-name>@SAE_EJB_JNDI_BASE@/xBean/local</local-jndi-name>
-			<ejb-local-ref>
-				<ejb-ref-name>ejb/xxx</ejb-ref-name>
-				<local-jndi-name>xxxEAR/zzzBean/local</local-jndi-name>
-			</ejb-local-ref>
-			
-		</session -->		
-
 	</enterprise-beans>
 </jboss>

@@ -417,9 +417,6 @@ public class DisponibilidadMBean extends BaseMBean {
 		
 		limpiarMensajesError();
 		
-		//RowList<DisponibilidadReserva> listDispReservaVespertina = dispSessionMBean.getDisponibilidadesDelDiaVespertinaModif();
-		//RowList<DisponibilidadReserva> listDispReservaMatutina = dispSessionMBean.getDisponibilidadesDelDiaMatutinaModif();
-		
 		int valorCupo = 0;
 
 		if(this.valor == null || this.valor.trim().isEmpty()) {
@@ -448,10 +445,9 @@ public class DisponibilidadMBean extends BaseMBean {
 		RowList<DisponibilidadReserva> listDispReserva = new RowList<>(); 
 		listDispReserva.addAll(dispSessionMBean.getDisponibilidadesDelDiaMatutinaModif());
 		listDispReserva.addAll(dispSessionMBean.getDisponibilidadesDelDiaVespertinaModif());
-		
+
 		for (Row<DisponibilidadReserva> row : listDispReserva) {
-			if(row.getData().isSeleccionado())
-			{
+			if(row.getData().isSeleccionado()) {
 				int cupo = row.getData().getCupo();
 				if(this.tipoOperacion==1) {//Aumentar valor
 					cupo = cupo+valorCupo;
@@ -463,12 +459,13 @@ public class DisponibilidadMBean extends BaseMBean {
 				}else {//Valor Exacto
 					cupo = valorCupo;
 				}
-				Disponibilidad d = new Disponibilidad();
-				d.setId(row.getData().getId());
-				d.setCupo(cupo);
-				if (dispSessionMBean.getModificarTodos()) {					
+				Disponibilidad disp = new Disponibilidad();
+				disp.setId(row.getData().getId());
+				disp.setCupo(cupo);
+				
+				if (dispSessionMBean.getModificarTodos()) {
 					try {
-						List<String> advertencias = disponibilidadesEJB.modificarCupoPeriodoValorOperacion(d,valorCupo,this.tipoOperacion);
+						List<String> advertencias = disponibilidadesEJB.modificarCupoPeriodoValorOperacion(disp, sessionMBean.getTimeZone(), valorCupo, this.tipoOperacion);
 						for(String advertencia : advertencias) {
 							addAdvertenciaMessage(sessionMBean.getTextos().get("para_diahora_el_cupo_se_modifico_parcialmente_porque_hay_mas_reservas").replace("{diahora}",  advertencia), MSG_ID);
 						}
@@ -478,8 +475,8 @@ public class DisponibilidadMBean extends BaseMBean {
 		 			}					
 				}else {
 					try {
-						Integer nuevoCupo = disponibilidadesEJB.modificarCupoDeDisponibilidad(d);
-						if(nuevoCupo!=null && !nuevoCupo.equals(d.getCupo())) {
+						Integer nuevoCupo = disponibilidadesEJB.modificarCupoDeDisponibilidad(disp);
+						if(nuevoCupo!=null && !nuevoCupo.equals(disp.getCupo())) {
 							addAdvertenciaMessage(sessionMBean.getTextos().get("el_cupo_se_modifico_parcialmente_porque_hay_mas_reservas"), MSG_ID);
 						}
 					} catch (Exception e) {

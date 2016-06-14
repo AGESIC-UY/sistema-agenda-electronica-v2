@@ -75,18 +75,21 @@ public class PasoFinalMBean extends PasoMBean {
 	
 	private Logger logger = Logger.getLogger(PasoFinalMBean.class);
 
+	private boolean errorInit;
 	
 	@PostConstruct
 	public void init() {
+		errorInit = false;
 		try {
 			recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
 			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null || sesionMBean.getReservaConfirmada() == null) {
-				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+				errorInit = true;
 				return;
 			}
 		} catch (ApplicationException ex) {
-			ex.printStackTrace();
-			redirect(ERROR_PAGE_OUTCOME);
+			addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+			errorInit = true;
 		}
 	}	
 
@@ -108,7 +111,6 @@ public class PasoFinalMBean extends PasoMBean {
 	}	
 	
 	public String getEtiquetaDelRecurso() {
-		//TextoAgenda textoAgenda = sesionMBean.getAgenda().getTextosAgenda();
 		TextoAgenda textoAgenda = getTextoAgenda(sesionMBean.getAgenda(), sesionMBean.getIdiomaActual());
 		if (textoAgenda != null) {
 			return textoAgenda.getTextoSelecRecurso();
@@ -145,13 +147,11 @@ public class PasoFinalMBean extends PasoMBean {
 		String mensajeError = "";
 		try {
 			Recurso recurso = sesionMBean.getRecurso();
-
-			
 			//El chequeo de recurso != null es en caso de un acceso directo a la pagina, es solo
 			//para que no salte la excepcion en el log, pues de todas formas sera redirigido a una pagina de error.
 			if (campos.getChildCount() == 0 && recurso != null) {
 				mensajeError = "RESERVA: ";
-				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sesionMBean.getTimeZone());
 				Reserva rtmp = sesionMBean.getReservaConfirmada();
 				if (rtmp == null) {
 					mensajeError += "nulo";
@@ -170,7 +170,8 @@ public class PasoFinalMBean extends PasoMBean {
 			}
 		} catch (Exception e) {
 			logger.error(mensajeError, e);
-			redirect(ERROR_PAGE_OUTCOME);
+			addErrorMessage(sesionMBean.getTextos().get("ha_ocurrido_un_error_grave"));
+			errorInit = true;
 		}
 	}
 
@@ -255,6 +256,16 @@ public class PasoFinalMBean extends PasoMBean {
 			ByteArrayOutputStream os = new ByteArrayOutputStream();
 			
 			PdfWriter pdfWriter = PdfWriter.getInstance(document, os);
+
+			document.addTitle(sesionMBean.getTextos().get("confirmacion"));
+			document.addSubject("SAE");
+			document.addAuthor("SAE");
+			document.addKeywords("SAE,ticket,"+sesionMBean.getTextos().get("confirmacion")+","+sesionMBean.getTextos().get("reserva"));
+			document.addProducer();
+			document.addCreator("SAE");
+			document.addHeader("Producer", "SAE 1");
+			document.addHeader("Sofis", "SAE 2");
+			
 			document.open();
 			
 			PdfContentByte pdfContent = pdfWriter.getDirectContent();
@@ -456,10 +467,12 @@ public class PasoFinalMBean extends PasoMBean {
 		return null;
 	}
 	
-	public String getUrlTramite()
-	{
-		
+	public String getUrlTramite() {
 		return sesionMBean.getUrlTramite();
+	}
+	
+	public boolean isErrorInit() {
+		return errorInit;
 	}
 	
 }

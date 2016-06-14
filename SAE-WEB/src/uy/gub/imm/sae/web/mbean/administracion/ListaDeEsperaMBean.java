@@ -74,7 +74,7 @@ public class ListaDeEsperaMBean extends BaseMBean {
 		}
 		if (listaDeEsperaSessionMBean.getAgrupaciones() == null && sessionMBean.getRecursoMarcado() != null) {
 			try {
-				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado());
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
 				listaDeEsperaSessionMBean.setAgrupaciones(agrupaciones);
 
 				if (listaDeEsperaSessionMBean.getHorarios() == null) {

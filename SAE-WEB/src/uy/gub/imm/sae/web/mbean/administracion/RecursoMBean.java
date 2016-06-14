@@ -378,22 +378,17 @@ public class RecursoMBean extends BaseMBean{
 	@SuppressWarnings("unchecked")
 	public String modificar() {
 
-    Recurso r = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
+    Recurso recurso1 = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
 		
-		if (r != null) {
-			sessionMBean.setRecursoSeleccionado(r);
-			
+		if (recurso1 != null) {
+			recursoNuevo = new Recurso(recurso1);
+
+			sessionMBean.setRecursoSeleccionado(recursoNuevo);
 			//Se agrega para que si cambiamos de recurso no queden cargados los datos viejos 
 			sessionMBean.setDatoDelRecursoSeleccionado(null);
 			sessionMBean.setMostrarAgregarDato(false);
-
-			//sessionMBean.cargarDatosDelRecurso();
-			
-			recursoNuevo = r;
-			
 			return "modificar";
-		}
-		else {
+		} else {
 			sessionMBean.setRecursoSeleccionado(null);
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 			return null;
@@ -423,9 +418,6 @@ public class RecursoMBean extends BaseMBean{
 		if (sessionMBean.getRecursoSeleccionado() != null) {
  			try {
  				boolean error = false;
- 				
- 				// Se hace un trim del nombre del recurso, para evitar que
- 				// tenga blancos al principio o al final
  				sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(0);
  				sessionMBean.getRecursoSeleccionado().setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
  				sessionMBean.getRecursoSeleccionado().setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
@@ -538,12 +530,10 @@ public class RecursoMBean extends BaseMBean{
  				
  				try {
  					
- 					if(r.getAgenda()==null)
- 					{
+ 					if(r.getAgenda()==null) {
  						r.setAgenda(sessionMBean.getAgendaMarcada());
  					}
- 					if(recursosEJB.existeRecursoPorNombre(r))
- 					{
+ 					if(recursosEJB.existeRecursoPorNombre(r)) {
  						error = true;
  						addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_recurso_con_el_nombre_especificado"), FORM_ID+":nombre");
  					}
@@ -562,8 +552,7 @@ public class RecursoMBean extends BaseMBean{
  			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
  			}
-		}
-		else {
+		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
 		
@@ -882,9 +871,14 @@ public class RecursoMBean extends BaseMBean{
 			String tramiteId = agenda.getTramiteId();
 			List<Oficina> oficinas = empresasEJB.obtenerOficinasTramite(tramiteId, true);
 			setOficinas(oficinas);
+			
+			String msg = sessionMBean.getTextos().get("se_cargaron_n_oficinas");
+			if(msg!=null) {
+				addInfoMessage(msg.replace("{cant}", ""+(oficinas==null?"0":""+oficinas.size())));
+			}
 		} catch (ApplicationException aEx) {
 			setOficinas(null);
-			addErrorMessage(aEx.getMessage());
+			addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_cargar_oficinas"));
 		}
 		return null;
 	}

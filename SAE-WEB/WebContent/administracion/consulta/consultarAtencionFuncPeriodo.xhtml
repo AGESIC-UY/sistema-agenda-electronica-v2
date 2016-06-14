@@ -44,11 +44,13 @@
 						</p:outputPanel>
 						<p:outputPanel styleClass="form-group"
 							rendered="#{sessionMBean.usuarioActual.superadmin}">
-							<p:outputLabel value="#{sessionMBean.textos['considerar_todas_las_empresas']}"
-								for="checkEmpresas" styleClass="col-sm-3 control-label label" />
+							<h:outputText value="#{sessionMBean.textos['empresas']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox
 									value="#{reporteMBean.todasLasEmpresas}" id="checkEmpresas" />
+								<p:outputLabel value="#{sessionMBean.textos['considerar_todas']}"
+								for="checkEmpresas" />
 							</p:outputPanel>
 						</p:outputPanel>
 					</p:outputPanel>

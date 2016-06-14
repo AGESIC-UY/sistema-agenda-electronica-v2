@@ -10,32 +10,22 @@
 	beforePhaseListener="#{parametroBean.beforePhase}">
 
 	<h:head>
-		<title><h:outputText
-				value="#{sesionMBean.textos['nombre_aplicacion']}" /></title>
+		<title><h:outputText value="#{sesionMBean.textos['nombre_aplicacion']}" /></title>
 		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
 		<h:outputScript library="primefaces" name="jquery/jquery.js" />
 		<script src="/sae/resources/js/jquery-ui.js" type="text/javascript"></script>
 		<script src="/sae/resources/js/funcionesJS.js" type="text/javascript"></script>
-
-		<!-- Latest compiled JavaScript -->
-		<script src="/sae/resources/js/bootstrap.min.js"
-			type="text/javascript"></script>
-
-		<!-- Bootstrap core CSS -->
+		<script src="/sae/resources/js/bootstrap.min.js" type="text/javascript"></script>
 		<link href="/sae/resources/css/bootstrap.min.css" rel="stylesheet" />
 		<link href="/sae/resources/css/formulario-tipo.css" rel="stylesheet" />
 		<link href="/sae/resources/css/layout.css" rel="stylesheet" />
 		<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
-
 	</h:head>
 
 	<h:body onload="#{onload}" class="body">
-		<a class="sr-only sr-only-focusable saltar" href="#content">Saltar
-			al contenido</a>
+		<a class="sr-only sr-only-focusable saltar" href="#content">Saltar al contenido</a>
 
-		<input type="hidden" id="formatoFecha"
-			value="#{sesionMBean.formatoFechaDatepicker}" />
+		<input type="hidden" id="formatoFecha" value="#{sesionMBean.formatoFechaDatepicker}" />
 
 		<div class="cabezalPublico">
 			<div class="container">
@@ -68,10 +58,11 @@
 										alt="Uruguay Digital" /></a></li>
 							</ul>
 						</div>
-						<h:panelGroup rendered="#{sesionMBean.usuarioCda != null}"
-							styleClass="cabezalUsuario">
+						<h:panelGroup rendered="#{sesionMBean.usuarioCda != null}" styleClass="cabezalUsuario">
 							<h:outputText value="Usuario: #{sesionMBean.usuarioCda}"></h:outputText>
-							<h:outputLink value="/sae/logoutcda">Salir</h:outputLink>
+						  <h:outputLink value="/sae/logoutcda">
+							 <h:outputText value="#{sesionMBean.textos['cerrar_sesion']}" />
+							</h:outputLink>
 						</h:panelGroup>
 					</div>
 				</div>
@@ -89,6 +80,10 @@
 
 		<ui:insert name="js">
 		</ui:insert>
+
+    <div class="version">
+      <h:outputText value="#{sesionMBean.textos['version']} #{sesionMBean.version}" />
+    </div>
 
 		<p:outputPanel styleClass="piePublico"
 			rendered="#{not empty sesionMBean.empresaActual.piePublico}">

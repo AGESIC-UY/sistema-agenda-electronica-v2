@@ -61,7 +61,6 @@ import uy.gub.imm.sae.web.common.SAECalendarioDataSource;
  * Invocación desde un sistema externo:
  * https://192.168.1.13:8443/sae/agendarReserva/Paso1.xhtml?e=1000001&a=29&u=http%3A%2F%2Fgoogle.com.uy&p=13.61.789456;13.60.CI;13.62.@@email
  * 
- * 
  */
 
 
@@ -110,13 +109,14 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 
-			String sEmpresaId = request.getParameter("e");
-			String sAgendaId = request.getParameter("a");
-			String sRecursoId = request.getParameter("r");
+			String sEmpresaId = request.getParameter("e"); //Id de la empresa
+			String sAgendaId = request.getParameter("a"); //Id de la agenda
+			String sRecursoId = request.getParameter("r"); //Id del recurso
 			
-			String sIdioma = request.getParameter("i");
-			String sUrl = request.getParameter("u");
-			String sParms = request.getParameter("p");
+			String sIdioma = request.getParameter("i"); //Idioma (es,en,...)
+			String sUrl = request.getParameter("u"); //URL de retorno al confirmar (URL encoded)
+			String sParms = request.getParameter("p"); //Parámetros para autocompletar: <idagrupacion>.<iddato>.<valor>;)
+			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
 			
 			if(sParms!=null) {
 				sesionMBean.setParmsDatosCiudadano(sParms);
@@ -127,6 +127,11 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 				sesionMBean.setUrlTramite(sUrl);
 			}else {
 				sesionMBean.setUrlTramite(null);
+			}
+			if(sTraza!=null) {
+				sesionMBean.setCodigoTrazabilidadPadre(sTraza);
+			}else {
+				sesionMBean.setCodigoTrazabilidadPadre(null);
 			}
 			
 			if(sIdioma!=null) {
@@ -144,15 +149,8 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			Integer agendaId = null;
 			Integer recursoId = null;
 			
-			if(sEmpresaId==null)
-			{
-				addErrorMessage(sesionMBean.getTextos().get("debe_especificar_la_empresa"));
-				errorInit = true;
-				return;
-			}
-			if(sAgendaId ==null)
-			{
-				addErrorMessage(sesionMBean.getTextos().get("debe_especificar_la_agenda"));
+			if(sEmpresaId==null || sAgendaId ==null) {
+				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 				errorInit = true;
 				return;
 			}
@@ -224,17 +222,16 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			// Guardar la empresa en la sesion
 			try {
 				Empresa empresa = agendarReservasEJB.obtenerEmpresaPorId(empresaId);
-				if (empresa==null)
-				{
-					addErrorMessage(sesionMBean.getTextos().get("la_empresa_especificada_no_es_valida"));
+				if (empresa==null || empresa.getFechaBaja()!=null) {
+					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+					sesionMBean.setEmpresaActual(null);
 					errorInit = true;
 					return;
-				}else
-				{
+				}else {
 					sesionMBean.setEmpresaActual(empresa);
 				}
 			} catch (Exception e){
-				addErrorMessage(sesionMBean.getTextos().get("la_empresa_especificada_no_es_valida"));
+				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 				errorInit = true;
 				return;
 			}
@@ -250,7 +247,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 						sesionMBean.setPaginaDeRetorno(paginaDeRetorno);
 						sesionMBean.setSoloCuerpo(soloCuerpo);
 					} catch (Exception  ae) {
-						addErrorMessage(sesionMBean.getTextos().get("la_agenda_especificada_no_es_valida"));
+						addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 						errorInit = true;
 						return;
 					}
@@ -268,16 +265,13 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			if (sesionMBean.getAgenda() != null) {
 				try{
 					recursos = agendarReservasEJB.consultarRecursos(sesionMBean.getAgenda());
-					
-					if(recursos.size()==0)
-					{
-						addErrorMessage(sesionMBean.getTextos().get("la_agenda_especificada_no_tiene_recursos"));
+					if(recursos.size()==0) {
+						addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 						errorInit = true;
 						return;
 					}
-				}catch(Exception e)
-				{
-					addErrorMessage(sesionMBean.getTextos().get("la_agenda_especificada_no_tiene_recursos"));
+				}catch(Exception ex) {
+					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 					errorInit = true;
 					return;
 				}	
@@ -324,8 +318,6 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			setMensajeError(sesionMBean.getTextos().get("acceso_denegado"));
 		} catch (Exception e) {
 			addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
-			logger.error(e);
-			redirect(ERROR_PAGE_OUTCOME);
 		}
 	}
 
@@ -669,9 +661,8 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 		if(!domain.endsWith("/")) {
 			domain = domain + "/";
 		}
-	
-		//urlMapa = "http://localhost:8080/sae/mapa/mapa.html?";
-		urlMapa = schema+"://"+host+":"+port+domain+"mapa/mapa.html?";
+		
+		urlMapa = schema+"://"+host+":"+port+domain+"mapa/mapa2.html?";
 		String lat = "";
 		String lon = "";
 		if(recurso != null) {

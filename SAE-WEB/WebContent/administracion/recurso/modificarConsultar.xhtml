@@ -11,7 +11,7 @@
 		<f:view beforePhase="#{recursoMBean.beforePhaseModificarConsultar}"
 			beforePhaseListener="#{recursoMBean.beforePhaseModificarConsultar}">
 
-			<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarRecurso" zindex="2000" modal="true">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
@@ -43,7 +43,7 @@
 				<p:dataTable value="#{sessionMBean.recursos}" var="row"
 					id="tablaRecursos" rows="25" binding="#{recursoMBean.recursosDataTableConsultar}"
 					paginator="true" caption="#{sessionMBean.textos['listado_de_recursos']}"
-					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 
 					<p:column>

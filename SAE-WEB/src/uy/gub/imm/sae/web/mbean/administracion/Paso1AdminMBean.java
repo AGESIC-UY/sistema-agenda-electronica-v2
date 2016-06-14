@@ -410,7 +410,7 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 			domain = domain + "/";
 		}
 	
-		urlMapa = schema+"://"+host+":"+port+domain+"mapa/mapa.html?";
+		urlMapa = schema+"://"+host+":"+port+domain+"mapa/mapa2.html?";
 		String lat = "";
 		String lon = "";
 		if(recurso != null) {

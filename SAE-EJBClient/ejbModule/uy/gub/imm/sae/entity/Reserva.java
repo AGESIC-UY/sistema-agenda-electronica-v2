@@ -74,7 +74,6 @@ public class Reserva implements Serializable {
 
 	private List<Disponibilidad> disponibilidades;
 	private Set<DatoReserva> datosReserva;
-	// Se agrega para el reporte de Vino-No vino
 	private List<Atencion> atenciones;
 	
 	public Reserva () {
@@ -295,6 +294,19 @@ public class Reserva implements Serializable {
 			}
 		}
 		return documento;
+	}
+
+	@Transient
+	public String getTipoDocumento() {
+		String tipoDocumento = "";
+		for(DatoReserva dato : getDatosReserva()) {
+			DatoASolicitar datoSol = dato.getDatoASolicitar();
+			if("TipoDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+				tipoDocumento = dato.getValor();
+			}
+		}
+		
+		return tipoDocumento;
 	}
 
 	@Column(name="trazabilidad_guid")
