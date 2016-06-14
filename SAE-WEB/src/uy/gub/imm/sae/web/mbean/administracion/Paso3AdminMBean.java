@@ -214,7 +214,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			if (campos.getChildCount() == 0 && recurso != null) {
 
 				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
+					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,
 							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
@@ -367,8 +367,10 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			if (camposError.getChildCount() == 0 && recurso != null) {
 
 				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
+					List<AgrupacionDato> agrupaciones = recursosEJB
+							.consultarDefinicionDeCampos(recurso);
+					sessionMBean
+							.setDatosASolicitar(obtenerCampos(agrupaciones));
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,
 							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
 

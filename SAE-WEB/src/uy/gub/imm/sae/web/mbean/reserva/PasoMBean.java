@@ -32,7 +32,6 @@ public abstract class PasoMBean	extends BaseMBean{
 	static protected String ESTADO_INVALIDO_PAGE_OUTCOME = "estado_invalido";
 	static protected String PERIODO_INVALIDO_PAGE_OUTCOME = "periodo_invalido";
 
-	
 }
 
 

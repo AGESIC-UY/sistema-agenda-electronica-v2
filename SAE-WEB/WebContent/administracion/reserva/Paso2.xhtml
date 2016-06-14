@@ -27,10 +27,15 @@
 		<ui:define name="descripcion">
 
 			<ul class="tips pasoTexto">
-				<li><h:outputText value="#{sessionMBean.textos['dias_con_turnos_disponibles']}" /></li>
-				<li><h:outputText value="#{sessionMBean.textos['seleccione_el_dia']}" /></li>
-				<li><h:outputText value="#{sessionMBean.textos['debajo_del_calendario_horarios_disponibles']}" /></li>
-				<li><h:outputText value="#{sessionMBean.textos['seleccione_un_horario']}" /></li>
+				<li><h:outputText
+						value="#{sessionMBean.textos['dias_con_turnos_disponibles']}." /></li>
+				<li><h:outputText
+						value="#{sessionMBean.textos['seleccione_el_dia']}." /></li>
+				<li><h:outputText
+						value="#{sessionMBean.textos['debajo_del_calendario_horarios_disponibles']}." />
+				</li>
+				<li><h:outputText
+						value="#{sessionMBean.textos['seleccione_un_horario']}." /></li>
 			</ul>
 
 			<div class="descripcionAgenda">
@@ -58,10 +63,8 @@
 
 			<div class="form-horizontal">
 				<div class="form-group">
-				  <div class="sr-only">
-	          <h:outputLabel value="Fechas disponibles"  for="fechasdisp" styleClass="ui-helper-hidden-accessible" />
-	          <h:inputText type="hidden" id="fechasdisp" value="#{paso2AdminMBean.jsonArrayFchDisp}" disabled="true" />
-	         </div>
+					<h:inputHidden disabled="true" id="fechasdisp"
+						value="#{paso2AdminMBean.jsonArrayFchDisp}" />
 					<span class="control-label col-sm-4 col-md-5 label label-align-top">
 						<h:outputText value="#{sessionMBean.textos['seleccione_un_dia']}" />
 					</span>
@@ -104,12 +107,13 @@
 											update="form:panelVespertina" />
 										<p:column id="radioSel" selectionMode="single" />
 										<p:column>
-										<h:outputLabel for="radioSel" value="#{row.data.horaInicio}">
-											<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
-										</h:outputLabel>
-										<h:outputText value=" - " styleClass="comentario" />
-									 	<h:outputText value="#{row.data.cupo} #{sessionMBean.textos['lugar']}" rendered="#{row.data.cupo == 1}" styleClass="comentario" />
-									 	<h:outputText value="#{row.data.cupo} #{sessionMBean.textos['lugares']}" rendered="#{row.data.cupo != 1}" styleClass="comentario" />
+											<h:outputLabel for="radioSel" value="#{row.data.horaInicio}">
+												<f:convertDateTime type="time"
+													pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+											</h:outputLabel>
+											 - <h:outputText
+												value="#{row.data.cupo} lugar#{(row.data.cupo == 1 ? '' : 'es')}"
+												styleClass="comentario" />
 										</p:column>
 									</p:dataTable>
 								</p:panel>
@@ -154,7 +158,7 @@
 				<li class="action-buttons-primary">
 					<ul>
 						<li><h:commandButton styleClass="btn-lg btn-primario"
-								value="#{sessionMBean.textos['completar_datos']} #{paso2AdminMBean.simboloSiguiente}"
+								value="#{sessionMBean.textos['completar_datos']} &#12299;"
 								action="#{paso2AdminMBean.siguientePaso}"></h:commandButton></li>
 					</ul>
 				</li>
@@ -162,7 +166,7 @@
 					<ul>
 						<li class="float-left"><h:commandButton
 								styleClass="btn-lg btn-link"
-								value="#{paso2AdminMBean.simboloAnterior} #{sessionMBean.textos['detalle_y_ubicacion']}"
+								value="&#12298; #{sessionMBean.textos['detalle_y_ubicacion']}"
 								action="pasoAnterior" /></li>
 					</ul>
 				</li>

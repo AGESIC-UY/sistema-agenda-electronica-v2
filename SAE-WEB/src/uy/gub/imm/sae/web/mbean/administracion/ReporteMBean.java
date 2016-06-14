@@ -20,18 +20,24 @@
 
 package uy.gub.imm.sae.web.mbean.administracion;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.model.SelectItem;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
@@ -43,8 +49,6 @@ import uy.gub.imm.opencsv.ext.printer.CSVWebFilePrinter;
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
 import uy.gub.imm.sae.business.dto.AtencionReporteDT;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
-import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
-import uy.gub.imm.sae.business.ejb.facade.Agendas;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
@@ -61,17 +65,12 @@ import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.reporte.Columna;
+import uy.gub.imm.sae.web.common.reporte.ReporteProvider;
 
 public class ReporteMBean extends BaseMBean {
 
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/ConsultasBean!uy.gub.imm.sae.business.ejb.facade.ConsultasRemote")
 	private Consultas consultaEJB;
-	
-	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
-	private AgendaGeneral generalEJB;
-	
-	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendasBean!uy.gub.imm.sae.business.ejb.facade.AgendasRemote")
-	private Agendas agendasEJB;
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
@@ -95,14 +94,14 @@ public class ReporteMBean extends BaseMBean {
 	
 	@PostConstruct
 	public void cargarDatos(){
-		limpiarMensajesError();
 		cargarListaEstados();
 	}
 	
 	
 	private void cargarListaEstados(){
 		estadosReserva =  new ArrayList<SelectItem>();
-	  Reserva r = new Reserva();
+	    Reserva r = new Reserva();
+		
 		for(Estado e: Estado.values()){
 			if (! e.equals(Estado.P)){
 				SelectItem s = new SelectItem();
@@ -123,6 +122,16 @@ public class ReporteMBean extends BaseMBean {
 		Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
 		
+		if (sessionMBean.getAgendaMarcada() == null){
+			error = true;
+			addErrorMessage("debe_haber_una_agenda_seleccionada", MSG_ID);
+		}
+		
+		if (sessionMBean.getRecursoMarcado() == null){
+			error = true;
+			addErrorMessage("debe_haber_un_recurso_seleccionado", MSG_ID);
+		}
+	
 		if (fechaDesde == null){
 			error = true;
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
@@ -150,67 +159,73 @@ public class ReporteMBean extends BaseMBean {
 		}
 
 		if (!error){
+			
 			VentanaDeTiempo periodo = new VentanaDeTiempo();
 			periodo.setFechaInicial(fechaDesde);
 			periodo.setFechaFinal(fechaHasta);
+			
+			InputStream inputStream = null;
+			
 			try {
-				List<Recurso> recursos = new ArrayList<Recurso>();
-				if(recursoMarcado != null) {
-					//Hay un recurso marcado, el reporte es para ese recurso
-					recursos.add(recursoMarcado);
-				}else if(agendaMarcada != null) {
-					//No hay un recurso marcado pero sí una agenda, se hace para todos los recursos de esa agenda
-				  recursos.addAll(generalEJB.consultarRecursos(agendaMarcada));
-				}else {
-					//Se hace para todos los recursos de todas las agendas de la empresa
-					List<Agenda> agendas = agendasEJB.consultarAgendas();
-					if(agendas != null) {
-						for(Agenda agenda : agendas) {
-						  recursos.addAll(generalEJB.consultarRecursos(agenda));
+				
+				//Diseño basico del reporte al que se le agregará la definición de los campos dinamicos.
+				String archivoJrxml = null;				
+				if (unaPaginaPorHora) {
+					archivoJrxml = "/uy/gub/imm/sae/web/reporte/ReservaPeriodoEstadoHoraPlanilla.jrxml";				
+				}
+				else {
+					archivoJrxml = "/uy/gub/imm/sae/web/reporte/ReservaPeriodoEstadoPlanilla.jrxml";				
+				}
+				
+				//Definicion de los campos dinamicos del reporte
+				List<Columna> defColumnas = new ArrayList<Columna>();
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recursoMarcado);
+				for(AgrupacionDato grupo: agrupaciones) {
+					for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
+						if (campo.getIncluirEnReporte()) {
+							Columna col = new Columna();
+							col.setId(campo.getNombre());
+							col.setNombre(campo.getEtiqueta());
+							col.setClase(String.class);
+							col.setAncho(campo.getAnchoDespliegue());
+							defColumnas.add(col);
 						}
 					}
 				}
 				
-				List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
-				for(Recurso recurso : recursos) {
-					//Definicion de los campos dinamicos del reporte
-					List<Columna> defColumnas = new ArrayList<Columna>();
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					for(AgrupacionDato grupo: agrupaciones) {
-						for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
-							if (campo.getIncluirEnReporte()) {
-								Columna col = new Columna();
-								col.setId(campo.getNombre());
-								col.setNombre(campo.getEtiqueta());
-								col.setClase(String.class);
-								col.setAncho(campo.getAnchoDespliegue());
-								defColumnas.add(col);
-							}
-						}
-					}
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estadoReservaSeleccionado);
-					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
-					contenido.addAll(contenido1);
-					
-				}
+				//Nombre del atributo en el que se espera encontrar un Map con los campos dinamicos
+				//En este caso el objeto de iteracion es ReservaDTO y el atributo ReservaDTO.getDatos es el
+				//Map que contendra las parejas <nombreCampo, valor> para cada campo dinamico del reporte.
+				String atributoCamposDinamicos = "datos";
 				
-				String[] defColPlanilla = {};
-				LabelValue[] filtros = {
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("estado")+": ", estadoReservaSeleccionado.getDescripcion() )
-				};
+				//Armo los parametros esperados por el reporte de reservas por fecha y hora
+				Map<String, Object> params = new HashMap<String, Object>();
+				params.put("ID_AGENDA", agendaMarcada.getId());
+				params.put("ID_RECURSO", recursoMarcado.getId());
+				params.put("FECHA_DESDE", fechaDesde);
+				params.put("FECHA_HASTA", fechaHasta);
+				params.put("ESTADO", estadoReservaSeleccionado);
+				params.put("NOMBRE_AGENDA", agendaMarcada.getDescripcion());
+				params.put("NOMBRE_RECURSO", recursoMarcado.getDescripcion());
 				
-        StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
-        
-        String nombre = sessionMBean.getTextos().get("reporte_reservas");
-        nombre = nombre.replace(" ", "_");
-        
-        CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
-        printer.print(); 
+				//Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
+				List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recursoMarcado, periodo, estadoReservaSeleccionado);
+
+				FacesContext ctx = FacesContext.getCurrentInstance();
+				HttpServletResponse response = (HttpServletResponse) ctx.getExternalContext().getResponse();
+				inputStream = this.getClass().getResourceAsStream(archivoJrxml);
 				
+				byte[] pdf = ReporteProvider.generarReporteDinamico(inputStream, defColumnas, atributoCamposDinamicos, params, reservas);
+				ReporteProvider.exportarReporteComoPdf(response, pdf);
+
 			} catch (Exception e1) {
 				addErrorMessage(e1);
+			} finally{
+				try {
+					if (inputStream != null) inputStream.close();
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 			}
 
 		}
@@ -226,6 +241,16 @@ public class ReporteMBean extends BaseMBean {
 		Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
 		
+		if (sessionMBean.getAgendaMarcada() == null){
+			error = true;
+			addErrorMessage("debe_haber_una_agenda_seleccionada", MSG_ID);
+		}
+		
+		if (sessionMBean.getRecursoMarcado() == null){
+			error = true;
+			addErrorMessage("debe_haber_un_recurso_seleccionado", MSG_ID);
+		}
+	
 		if (fechaDesde == null){
 			error = true;
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
@@ -247,6 +272,7 @@ public class ReporteMBean extends BaseMBean {
 			}
 		}
 
+		
 		estadoReservaSeleccionado=Estado.U;
 
 		if (!error){
@@ -254,48 +280,48 @@ public class ReporteMBean extends BaseMBean {
 			periodo.setFechaInicial(fechaDesde);
 			periodo.setFechaFinal(fechaHasta);
 			
+			InputStream inputStream = null;
 			try {
-				String[] defColPlanilla = {};
-				//Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
-				LabelValue[] filtros = {
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA))
-				};
-
-				List<Recurso> recursos = new ArrayList<Recurso>();
-				if(recursoMarcado != null) {
-					//Hay un recurso marcado, el reporte es para ese recurso
-					recursos.add(recursoMarcado);
-				}else if(agendaMarcada != null) {
-					//No hay un recurso marcado pero sí una agenda, se hace para todos los recursos de esa agenda
-				  recursos.addAll(generalEJB.consultarRecursos(agendaMarcada));
-				}else {
-					//Se hace para todos los recursos de todas las agendas de la empresa
-					List<Agenda> agendas = agendasEJB.consultarAgendas();
-					if(agendas != null) {
-						for(Agenda agenda : agendas) {
-						  recursos.addAll(generalEJB.consultarRecursos(agenda));
-						}
-					}
-				}
-				List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
-				for(Recurso recurso : recursos) {
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasUsadasPeriodo(recurso, periodo);
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
-					contenido.addAll(contenido1);
-				}
+				//Definicion de los campos dinamicos del reporte
+				//List<Columna> defColumnas = new ArrayList<Columna>();
 				
-        StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
-        
-        String nombre = sessionMBean.getTextos().get("reporte_asistencias");
-        nombre = nombre.replace(" ", "_");
-        
-        CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
-        printer.print(); 
+				// TODO: Se debe ver bien que campos se cargan en la planilla.
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recursoMarcado);
+				String[] defColPlanilla = armarCabezales(agrupaciones) ;
+				//Nombre del atributo en el que se espera encontrar un Map con los campos dinamicos
+				//En este caso el objeto de iteracion es ReservaDTO y el atributo ReservaDTO.getDatos es el
+				//Map que contendra las parejas <nombreCampo, valor> para cada campo dinamico del reporte.
+				//String atributoCamposDinamicos = "datos";
+				//Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
+				List<ReservaDTO> reservas = consultaEJB.consultarReservasUsadasPeriodo(recursoMarcado, periodo);
+				// Aqu� se debe armar la lista de listas de valores, para pasarle al archivo
+				
+				List<List<TableCellValue>> contenido = armarContenido(reservas, agrupaciones); 
+
+				//TODO: transformar(reservas);
+//				StandardCSVFile fileCSV = null;
+	               LabelValue[] filtros = {new CommonLabelValueImpl("Agenda: ",agendaMarcada.getDescripcion() ), 
+	            		   new CommonLabelValueImpl("Recurso: ",recursoMarcado.getDescripcion()),
+	            		   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
+	            		   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
+	               };
+	            
+	            StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
+	                CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, "ReporteAsistencia");
+	                printer.print(); 
+	                
 			} catch (Exception e1) {
+				
 				addErrorMessage(e1);
+			} finally{
+				try {
+					
+					if (inputStream != null) inputStream.close();
+				} catch (IOException e1) {
+					
+				}
 			}
+
 		}
 	}
 	
@@ -330,23 +356,28 @@ public class ReporteMBean extends BaseMBean {
 			if (this.todasLasEmpresas) {
 					Empresa empresaActual = sessionMBean.getEmpresaActual();
 					try {
-						for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas()) {
+						for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas())
+						{
 							try {
 								sessionMBean.seleccionarEmpresa(emp.getId());
 								List<AtencionReporteDT> listAtencionReport = obtenerDatosReporteAtencionPeriodo(this.fechaDesde,this.fechaHasta);
 								listAtencionReportDT.addAll(listAtencionReport);
 							} catch (Exception e1) {
+								// TODO Auto-generated catch block
 								logger.info("Empresa "+emp.getNombre()+" con esquema mal definida");
+								//e1.printStackTrace();
 							}
 						}
 						
 					} catch (ApplicationException e1) {
+						// TODO Auto-generated catch block
 						e1.printStackTrace();
-					}finally {
+					}finally
+					{
 						sessionMBean.seleccionarEmpresa(empresaActual.getId());
 					}
 			}else {
-				listAtencionReportDT = obtenerDatosReporteAtencionPeriodo(this.fechaDesde, this.fechaHasta);
+				listAtencionReportDT = obtenerDatosReporteAtencionPeriodo(this.fechaDesde,this.fechaHasta);
 			}
 			
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
@@ -365,9 +396,9 @@ public class ReporteMBean extends BaseMBean {
 				contenido.add(filaDatos);
 			}
 			LabelValue[] filtros = { 
-			   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
-			   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
-			};
+	          		   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
+	          		   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
+	             };
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
 				String[]  cabezales = {"Empresa","Tramite","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
@@ -377,12 +408,13 @@ public class ReporteMBean extends BaseMBean {
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
 						
-			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, sessionMBean.getTextos().get("reporte_tiempo_atencion_funcionario"));
+			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, "ReporteAtencionFuncionario");
       printer.print(); 
 		}
 	}
 	
-	private List<AtencionReporteDT> obtenerDatosReporteAtencionPeriodo(Date fechaDesde, Date fechaHasta) {
+	private List<AtencionReporteDT> obtenerDatosReporteAtencionPeriodo(Date fechaDesde, Date fechaHasta)
+	{
 		List<Atencion> atenciones =consultaEJB.consultarTodasAtencionesPeriodo(fechaDesde,fechaHasta);
 		Collections.sort(atenciones, new AtencionComparator());
 		String AgendaProcesada = "";
@@ -392,44 +424,67 @@ public class ReporteMBean extends BaseMBean {
 		List<AtencionReporteDT> listAtencionReport = new ArrayList<AtencionReporteDT>(); 
 		for (Atencion atencion : atenciones) {
 			Agenda a = atencion.getReserva().getDisponibilidades().get(0).getRecurso().getAgenda();
-			if (!AgendaProcesada.equals(a.getNombre()) || !FuncionarioProcesado.equals(atencion.getFuncionario()) ) {
+			
+			if (!AgendaProcesada.equals(a.getNombre()) || !FuncionarioProcesado.equals(atencion.getFuncionario()) ) 
+			{
 				int total = asistencias + inasistencias; 
-				if(total != 0) {
+				if(total != 0)
+				{
 					AtencionReporteDT itemAtencion;
-					if(this.todasLasEmpresas) {
+					if(this.todasLasEmpresas)
+					{
 						itemAtencion = new AtencionReporteDT(sessionMBean.getEmpresaActual().getNombre(),AgendaProcesada, FuncionarioProcesado, asistencias, inasistencias);
-					}else {
+					}else
+					{
 						itemAtencion = new AtencionReporteDT(null,AgendaProcesada, FuncionarioProcesado, asistencias, inasistencias);
 					}
+					
 					listAtencionReport.add(itemAtencion);
 				}
 				//se inician contadores
-				if(atencion.getAsistio()) {
+				if(atencion.getAsistio())
+				{
 					asistencias = 1;
 					inasistencias = 0;
-				}else {
+				}else
+				{
 					asistencias = 0;
 					inasistencias = 1;
 				}
+				
+				
 				AgendaProcesada = a.getNombre();
 				FuncionarioProcesado = atencion.getFuncionario();
-			}else {
-				if(atencion.getAsistio()) {
+				
+			}else
+			{
+				if(atencion.getAsistio())
+				{
 					asistencias++;
 					
-				}else {
+				}else
+				{
 					inasistencias++;
 				}
+				
+				
 			}
+			
+			
+			
 		}
 		int total = asistencias + inasistencias; 
-		if(total != 0) {
+		if(total != 0)
+		{
 			AtencionReporteDT itemAtencion;
-			if(this.todasLasEmpresas) {
+			if(this.todasLasEmpresas)
+			{
 				itemAtencion = new AtencionReporteDT(sessionMBean.getEmpresaActual().getNombre(),AgendaProcesada, FuncionarioProcesado, asistencias, inasistencias);
-			}else {
+			}else
+			{
 				itemAtencion = new AtencionReporteDT(null,AgendaProcesada, FuncionarioProcesado, asistencias, inasistencias);
 			}
+			
 			listAtencionReport.add(itemAtencion);
 		}
 		
@@ -475,6 +530,7 @@ public class ReporteMBean extends BaseMBean {
 						{
 							try {
 								sessionMBean.seleccionarEmpresa(emp.getId());
+								Empresa empresaActualaux = sessionMBean.getEmpresaActual();
 								List<AtencionLLamadaReporteDT> listAtencionLlamada	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
 								Collections.sort(listAtencionLlamada, new AtencionLlamadaReporteComparator());
 								int i=0;
@@ -486,13 +542,21 @@ public class ReporteMBean extends BaseMBean {
 								listAtencionLLamadaReportDT.addAll(listAtencionLlamada);
 								
 							} catch (Exception e1) {
+								// TODO Auto-generated catch block
+								logger.info("Empresa "+emp.getNombre()+" con esquema mal definida");
+								//e1.printStackTrace();
 							}
 						}
 						
 					} catch (ApplicationException e1) {
-					}finally {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}finally
+					{
 						sessionMBean.seleccionarEmpresa(empresaActual.getId());
 					}
+					
+				
 			}else
 			{
 				listAtencionLLamadaReportDT	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
@@ -626,8 +690,7 @@ public class ReporteMBean extends BaseMBean {
 
 	// Arma la lista de etiquetas para encabezar la planilla excel
 	private String[] armarCabezales(List<AgrupacionDato> datos){
-		String[] cabezales = {sessionMBean.getTextos().get("identificador"), sessionMBean.getTextos().get("fecha"),
-				sessionMBean.getTextos().get("hora"), sessionMBean.getTextos().get("numero")};
+		String[] cabezales = {"Fecha","Hora","Numero"};
 		
 		for(AgrupacionDato grupo: datos) {
 			for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
@@ -646,67 +709,38 @@ public class ReporteMBean extends BaseMBean {
 		for (i=0;i<cabezales.length; i++){
 			aux[i]=cabezales[i];
 		}
-		aux[i]= sessionMBean.getTextos().get("numero_de_puesto");
-		aux[i+1]= sessionMBean.getTextos().get("asistio");
+		aux[i]= "Puesto";
+		aux[i+1]= "Asistio";
 		cabezales = aux;
 		return cabezales;
 	}
 
 	// Arma el contenido de la planilla excel
-	private List<List<TableCellValue>> armarContenido(Recurso recurso, List<ReservaDTO> reservas, List<AgrupacionDato> agrupaciones) {
+	private List<List<TableCellValue>> armarContenido(List<ReservaDTO> reservas, List<AgrupacionDato> agrupaciones) {
 		List<List<TableCellValue>> resultado = new ArrayList<List<TableCellValue>>();
 
-		//Una linea en blanco
-		List<TableCellValue> filaCabezal = new ArrayList<TableCellValue>();
-		resultado.add(filaCabezal);
-		
-		//Cabezal de agenda
-		filaCabezal = new ArrayList<TableCellValue>();
-		filaCabezal.add(new TableCellValue(sessionMBean.getTextos().get("agenda")+": "));
-		filaCabezal.add(new TableCellValue(recurso.getAgenda().getNombre()));
-		resultado.add(filaCabezal);
-
-		filaCabezal = new ArrayList<TableCellValue>();
-		filaCabezal.add(new TableCellValue(sessionMBean.getTextos().get("recurso")+": "));
-		filaCabezal.add(new TableCellValue(recurso.getNombre()));
-		resultado.add(filaCabezal);
-		
-		String[] cabezales = armarCabezales(agrupaciones);
-		filaCabezal = new ArrayList<TableCellValue>();
-		for(String cabezal : cabezales) {
-			filaCabezal.add(new TableCellValue(cabezal));
-		}
-		resultado.add(filaCabezal);
-		
 		for (ReservaDTO reserva:reservas) {
 			List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
-			filaDatos.add(new TableCellValue(reserva.getId().toString()));
 			filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getFecha(), Utiles.DIA)));
 			filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
 			filaDatos.add(new TableCellValue(reserva.getNumero()));
 			for(AgrupacionDato grupo: agrupaciones) {
-				for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
-					if (campo.getIncluirEnReporte()) {
-						String clave = campo.getNombre();
-						TableCellValue valor;
-						if (reserva.getDatos().containsKey(clave)){
-							valor = new TableCellValue(reserva.getDatos().get(clave).toString());
-						}
-						else {
-							valor = new TableCellValue("");
-						}
-						filaDatos.add(valor);
+			for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
+				if (campo.getIncluirEnReporte()) {
+					String clave = campo.getNombre();
+					TableCellValue valor;
+					if (reserva.getDatos().containsKey(clave)){
+						valor = new TableCellValue(reserva.getDatos().get(clave).toString());
 					}
+					else {
+						valor = new TableCellValue("");
+					}
+					filaDatos.add(valor);
+				}
 				}
 			}
-			
-			filaDatos.add(new TableCellValue(reserva.getPuestoLlamada()!=null?reserva.getPuestoLlamada().toString():""));
-			
-			if(reserva.getAsistio()==null) {
-				filaDatos.add(new TableCellValue(""));
-			}else {
-				filaDatos.add(new TableCellValue(reserva.getAsistio().booleanValue()?sessionMBean.getTextos().get("si"):sessionMBean.getTextos().get("no")));
-			}
+			filaDatos.add(new TableCellValue(reserva.getPuestoLlamada()));
+			filaDatos.add(new TableCellValue(reserva.getAsistio()));
 			resultado.add(filaDatos);
 		}
 		

@@ -88,14 +88,14 @@
 								rendered="#{paso_numero==2 or paso_numero==3}" />
 						</ui:insert>
 
-						<p:messages id="mensajes" for="form" infoClass="mensajeInfo"
-							warnClass="mensajeWarn" errorClass="mensajeError"
-							infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}"
-							warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}"
-							errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" />
 						<fieldset>
 							<legend>#{paso_texto}</legend>
-
+							<p:messages id="mensajes" for="form"
+								infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+                infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}" 
+                warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}" 
+								errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" 
+							/>
 
 							<div class="row">
 								<div class="#{clase_columna_izq}">

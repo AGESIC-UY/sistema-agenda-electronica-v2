@@ -19,7 +19,7 @@
 	beforePhaseListener="#{llamadorMBean.beforePhaseListaDeLlamadas}">
 
 	<h:body>
-		<p:dialog closable="false" widgetVar="llamadaDestacada" showEffect="puff"
+		<p:dialog widgetVar="llamadaDestacada" showEffect="puff"
 			hideEffect="clip" modal="true" resizable="false" draggable="false"
 			responsive="true" onShow="despliegaPopup();" onHide="ocultaPopup();"
 			styleClass="popUpLlamador">
@@ -75,6 +75,7 @@
       errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" 
 		/>
 
+		<!-- Page Content -->
 		<div id="page-content-wrapper">
 
 			<h:form id="formPoll">

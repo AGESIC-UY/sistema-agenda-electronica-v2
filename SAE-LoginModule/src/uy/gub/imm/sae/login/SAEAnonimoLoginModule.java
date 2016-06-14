@@ -18,19 +18,6 @@ import javax.sql.DataSource;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.auth.spi.AbstractServerLoginModule;
 
-/**
- * Esta clase es utilizada para permitir la autenticación anónima de usuarios para la parte pública de la aplicación.
- * Básicamente, se trata de autenticar a un usuario "inventado" y temporal, de forma de poder registrarlo en una empresa
- * y así lograr que la aplicación pueda utilizar un EntityManager asociado al esquema de dicha empresa.
- * 
- * El código de usuario debe estar compuesto por un nombre y el identificador de la empresa separados por una barra.
- * Por ejemplo "usuario12345/3". El nombre debería ser único o al menos no tener probabilidad de colisionar con el nombre
- * de otro usuario. La contraseña debe ser el MD5 mismo código de usuario. No hay un problema de seguridad con esto ya
- * que lo único que se puede lograr es autenticar un usuario cuyo rol es "RA_AE_ANONIMO".
- * 
- * @author spio
- *
- */
 public class SAEAnonimoLoginModule extends AbstractServerLoginModule {
 
 	private String codigo = null;
@@ -76,7 +63,8 @@ public class SAEAnonimoLoginModule extends AbstractServerLoginModule {
 		password = new String(passwordCallback.getPassword());
 		
 		if(codigo==null || codigo.trim().isEmpty() || password==null || password.trim().isEmpty()) {
-			loginOk = false;
+			//throw new FailedLoginException("Código de usuario o contraseña no válidos");
+			return false;
 		}else {
 			//validar los datos
 			String dsJndiName = (String) options.get("dsJndiName");
@@ -84,12 +72,17 @@ public class SAEAnonimoLoginModule extends AbstractServerLoginModule {
 			try {
 				String password0 = Utilidades.encriptarPassword(username); 
 				String password1 = password;
-				if(password0==null || password1==null || !password0.equals(password1)) {
-					throw new FailedLoginException("Código de usuario o contraseña no válidos");
+				if(password0==null || password1==null) {
+					//throw new FailedLoginException("Código de usuario o contraseña no válidos");
+					return false;
 				}
+				loginOk = password0.equals(password1);
 				
 				//La identidad se crea concatenando el codigo con un numero aleatorio 
 				//Por si el mismo usuario se autentica desde dos navegadores diferentes
+				//identity = createIdentity(codigo);
+				//String codigoAumentado = codigo + "-" + ((new Date()).getTime());
+				//identity = createIdentity(codigoAumentado);
 				String tenant = "default";
 				if(empresa != null) {
 					Context initContext = new InitialContext();
@@ -103,10 +96,11 @@ public class SAEAnonimoLoginModule extends AbstractServerLoginModule {
 						tenant = rs.getString(1);
 					}
 				}
-				loginOk = true;
+				//identity = new SAEPrincipal(codigoAumentado, tenant, false);
 				identity = new SAEPrincipal(codigo, tenant, false);
 			}catch(Exception ex) {
-				loginOk = false;
+				ex.printStackTrace();
+				throw new FailedLoginException("No se pudo validar las credenciales: "+ex.getMessage());
 			}finally {
 				try {
 					conn.close();
@@ -114,8 +108,10 @@ public class SAEAnonimoLoginModule extends AbstractServerLoginModule {
 					//
 				}
 			}
+			
+			return loginOk;
 		}
-		return loginOk;
+
 	}
 
 	@Override

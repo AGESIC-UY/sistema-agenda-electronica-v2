@@ -144,8 +144,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
   	agendaActual.setTramiteId(a.getTramiteId());
   	agendaActual.setTramiteCodigo(a.getTramiteCodigo());
   	agendaActual.setConCda(a.getConCda());
-  	agendaActual.setConTrazabilidad(a.getConTrazabilidad());
-  	agendaActual.setPublicarNovedades(a.getPublicarNovedades());
     	
   	for(TextoAgenda viejo : agendaActual.getTextosAgenda().values()) {
   		entityManager.remove(viejo);
@@ -188,8 +186,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 		aCopia.setTramiteId(a.getTramiteId());
 		aCopia.setTramiteCodigo(a.getTramiteCodigo());
 		aCopia.setConCda(a.getConCda());
-		aCopia.setConTrazabilidad(a.getConTrazabilidad());
-		aCopia.setPublicarNovedades(a.getPublicarNovedades());
 		
 		int contador = 0;
 		do{

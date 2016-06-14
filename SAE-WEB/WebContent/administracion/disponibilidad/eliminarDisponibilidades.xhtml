@@ -10,7 +10,7 @@
 		<f:view beforePhase="#{eliminarDispMBean.beforePhase}"
 			beforePhaseListener="#{eliminarDispMBean.beforePhase}">
 
-      <p:dialog closable="false" shadowOpacity="0.4" autosized="false"
+      <p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
         widgetVar="eliminarDisp" zindex="2000" modal="true">
         <f:facet name="header">
           <h:outputText value="#{sessionMBean.textos['confirmacion']}" />
@@ -20,7 +20,7 @@
           <p:outputPanel styleClass="row panelBotonesPopUp">
             <p:outputPanel styleClass="col-sm-7">
               <p:commandButton id="btn_eliminar"
-                update="form:panelForm"
+                update="form"
                 actionListener="#{eliminarDispMBean.eliminar}"
                 value="#{sessionMBean.textos['si']}" onclick="PF('eliminarDisp').hide();"
                 styleClass="btn-primario btn-100 btn">
@@ -29,7 +29,7 @@
             <p:outputPanel styleClass="col-sm-5">
               <p:commandButton onclick="PF('eliminarDisp').hide();"
                 value="#{sessionMBean.textos['no']}" styleClass="btn-link btn-100 btn" 
-                update="form:panelForm" actionListener="#{eliminarDispMBean.consultarSemana}">
+                update="form" actionListener="#{eliminarDispMBean.consultarSemana}">
               </p:commandButton>
             </p:outputPanel>
           </p:outputPanel>
@@ -42,7 +42,6 @@
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 
 				<h:form id="form">
-				  <p:outputPanel id="panelForm">
 					<fieldset>
 						<legend><h:outputText value="#{sessionMBean.textos['seleccionar_semana']}" /></legend>
 						<p:outputPanel styleClass="form-horizontal">
@@ -105,7 +104,7 @@
 						</li>
 						<li class="action-buttons-second"></li>
 					</ul>
-          </p:outputPanel>
+
 				</h:form>
 
 			</p:outputPanel>

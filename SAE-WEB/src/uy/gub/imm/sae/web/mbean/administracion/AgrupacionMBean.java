@@ -168,8 +168,7 @@ public class AgrupacionMBean extends BaseMBean {
 		}
 	}
 
-	//public void mostrarCrearAgrupacion(ActionEvent e) {
-	public void mostrarCrearAgrupacion() {
+	public void mostrarCrearAgrupacion(ActionEvent e) {
 		setAgrupacionDatoNuevo(new AgrupacionDato());
 		datoASSessionMBean.setAgrupacionSeleccionada(null);
 	}

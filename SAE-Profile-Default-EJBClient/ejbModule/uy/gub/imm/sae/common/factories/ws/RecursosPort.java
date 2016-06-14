@@ -1,7 +1,6 @@
 package uy.gub.imm.sae.common.factories.ws;
 
 import java.util.List;
-import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.common.factories.ws.client.recursos.ApplicationException_Exception;
@@ -74,11 +73,11 @@ public class RecursosPort implements Recursos{
 		throw new UnsupportedOperationException();
 	}
 
-	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone)
+	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso)
 			throws BusinessException {
 
 		try {
-			return this.recursos.consultarDefinicionDeCampos(recurso, timezone);
+			return this.recursos.consultarDefinicionDeCampos(recurso);
 		} catch (BusinessException_Exception e) {
 			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
 		}

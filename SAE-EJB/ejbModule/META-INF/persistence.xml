@@ -15,14 +15,15 @@
 		<class>uy.gub.imm.sae.entity.global.Usuario</class>
     <class>uy.gub.imm.sae.entity.global.TextoGlobal</class>
     <class>uy.gub.imm.sae.entity.global.Trazabilidad</class>
-    <class>uy.gub.imm.sae.entity.global.Novedad</class>
 		<properties>
 			<property name="hibernate.default_schema" value="global" />
 			<property name="hibernate.format_sql" value="false" />
 			<property name="hibernate.show_sql" value="false" />
+
 			<property name="hibernate.cache.use_query_cache" value="false" />
 			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheproviders" />
-			<property name="hibernate.cache.use_second_level_cache" value="false" />
+			<property name="hibernate.cache.use_second_level_cache"
+				value="false" />
 		</properties>
 	</persistence-unit>
 
@@ -65,17 +66,25 @@
     <class>uy.gub.imm.sae.entity.Comunicacion</class>
     <class>uy.gub.imm.sae.entity.TextoTenant</class>
     <class>uy.gub.imm.sae.entity.FraseCaptcha</class>
-    <class>uy.gub.imm.sae.entity.PreguntaCaptcha</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
       <property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.format_sql" value="false" />
 			<property name="hibernate.multiTenancy" value="SCHEMA" />
-			<property name="hibernate.tenant_identifier_resolver" value="uy.gub.imm.sae.business.em.CurrentTenantIdentifierResolverImpl" />
-			<property name="hibernate.multi_tenant_connection_provider" value="uy.gub.imm.sae.business.em.MultiTenantConnectionProviderImpl" />
+			<property name="hibernate.tenant_identifier_resolver"
+				value="uy.gub.imm.sae.business.em.CurrentTenantIdentifierResolverImpl" />
+			<property name="hibernate.multi_tenant_connection_provider"
+				value="uy.gub.imm.sae.business.em.MultiTenantConnectionProviderImpl" />
 			<property name="hibernate.cache.use_query_cache" value="false" />
 			<property name="hibernate.cache.provider_class" value="org.hibernate.cache.NoCacheproviders" />
-			<property name="hibernate.cache.use_second_level_cache" value="false" />
+			<property name="hibernate.cache.use_second_level_cache"
+				value="false" />
+			<!-- property name="hibernate.query.plan_cache_max_strong_references" 
+				value="0" / -->
+			<!-- property name="hibernate.query.plan_cache_max_soft_references" value="0" 
+				/ -->
+
+
 		</properties>
 	</persistence-unit>
 </persistence>

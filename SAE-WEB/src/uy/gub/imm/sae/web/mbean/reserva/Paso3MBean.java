@@ -19,6 +19,8 @@ package uy.gub.imm.sae.web.mbean.reserva;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+
+
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -36,6 +38,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -95,25 +98,31 @@ public class Paso3MBean extends PasoMBean {
 	
 	private String aceptaCondiciones;
 
-	private boolean errorInit;
-	
 	public void beforePhase (PhaseEvent event) {
+		disableBrowserCache(event);
+		
+		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+			if (sesionMBean.getReserva() == null) {
+				//Se ha apretado el boton de back o algun acceso directo
+				FacesContext ctx = FacesContext.getCurrentInstance();
+				ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "pasoAnterior");
+			}
+		}
 	}
 	
 	@PostConstruct
 	public void init() {
-		errorInit = false;
 		try {
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
 			recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
+			
 			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null) {
-				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-				errorInit = true;
+				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
 				return;
 			}
 		} catch (ApplicationException ex) {
-			addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-			errorInit = true;
+			ex.printStackTrace();
+			redirect(ERROR_PAGE_OUTCOME);
 		}
 	}
 	
@@ -128,7 +137,8 @@ public class Paso3MBean extends PasoMBean {
 	public String getAgendaNombre() {
 		if (sesionMBean.getAgenda() != null) {
 			return sesionMBean.getAgenda().getNombre();
-		} else {
+		}
+		else {
 			return null;
 		}
 	}	
@@ -214,12 +224,14 @@ public class Paso3MBean extends PasoMBean {
 			if (campos.getChildCount() == 0 && recurso != null) {
 				
 				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sesionMBean.getTimeZone());
+					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
 					sesionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
 					
 					String valoresCampos = sesionMBean.getParmsDatosCiudadano();
-					if(valoresCampos!=null) {
+					if(valoresCampos!=null)
+					{
 						cargarCamposPorDefecto(valoresCampos, agrupaciones);
+						
 					}
 					
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
@@ -249,7 +261,7 @@ public class Paso3MBean extends PasoMBean {
 			if (camposError.getChildCount() == 0 && recurso != null) {
 				
 				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sesionMBean.getTimeZone());
+					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
 					sesionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
 							FormularioDinamicoReserva.TipoFormulario.EDICION, sesionMBean.getFormatoFecha());
@@ -340,19 +352,9 @@ public class Paso3MBean extends PasoMBean {
 				return null;
 			}
 			
+			//ToDo: determinar estos valores de la sesion (deben ser recibidos por parametro en el paso 1)
 			String transaccionPadreId = null;
 			Long pasoPadre = null;
-			if(sesionMBean.getCodigoTrazabilidadPadre()!=null) {
-				String transaccionPadre[] = sesionMBean.getCodigoTrazabilidadPadre().split("-");
-				if(transaccionPadre.length==2) {
-					transaccionPadreId = transaccionPadre[0];
-					try {
-						pasoPadre = Long.valueOf(transaccionPadre[1]);
-					}catch(Exception ex) {
-						pasoPadre = null;
-					}
-				}
-			}
 			
 			boolean confirmada = false;
 			while (!confirmada) {
@@ -590,25 +592,36 @@ public class Paso3MBean extends PasoMBean {
 	{
 		String parametros[] = valoresCampos.split("\\;");
 		for (String parm : parametros) {
+			
 			String agrupCampoValor[] = parm.split("\\.");
 			boolean largoCorrecto = false;
 		
-			if (agrupCampoValor.length > 3 && agrupCampoValor[2].contains("@")) {
+			if (agrupCampoValor.length > 3 && agrupCampoValor[2].contains("@"))
+			{
+				
 				String mail = agrupCampoValor[2]+"."+agrupCampoValor[3];
 				agrupCampoValor[2] = mail;
+				
 				largoCorrecto = true;
-			}else {
+			}else
+			{
 				largoCorrecto = (agrupCampoValor.length == 3);
 			}
-			if (largoCorrecto) {
+			
+			if (largoCorrecto)
+			{
 				String sAgrupacionId = agrupCampoValor[0];
 				String sDatoSolId = agrupCampoValor[1];
 				String valor = agrupCampoValor[2];
-				try {
+				try
+				{
 					Integer agrupId = Integer.valueOf(sAgrupacionId);
 					Integer datoSolId = Integer.valueOf(sDatoSolId);
+					
+					
 					boolean salirWhile = false;
 					Iterator<AgrupacionDato> it = agrupaciones.iterator();
+					
 					while (!salirWhile && it.hasNext()) {
 						AgrupacionDato agrupDato = (AgrupacionDato) it.next();
 						if (agrupDato.getId()==agrupId)
@@ -660,21 +673,30 @@ public class Paso3MBean extends PasoMBean {
 		Random rand = new Random();
 		
 		//Elegir una frase de todas las disponibles
-		String pregunta = "test";
-		String respuesta = "test";
-		Map<String, String> preguntasCaptcha = sesionMBean.getPreguntasCaptcha();
-		
-		if(preguntasCaptcha != null && !preguntasCaptcha.isEmpty()) {
-			String[] preguntas = preguntasCaptcha.keySet().toArray(new String[preguntasCaptcha.size()]);
-			int ind = rand.nextInt(preguntas.length);
-			pregunta = preguntas[ind];
-			respuesta = preguntasCaptcha.get(pregunta);
+		//String frase = "Esto es una prueba del captcha";
+		String frase = "test";
+		List<String> frasesCaptcha = sesionMBean.getFrasesCaptcha();
+		if(frasesCaptcha != null && !frasesCaptcha.isEmpty()) {
+			int ind = rand.nextInt(frasesCaptcha.size());
+			frase = frasesCaptcha.get(ind);
 		}
-		textoIndicativoCaptcha = pregunta;
-		sesionMBean.setPaso3Captcha(respuesta);
+		//Separar la frase en palabras
+		String[] palabras = frase.split(" ");
+		//Elegir una palabra
+		int maxPos = Math.min(palabras.length, 5);
+		int pos = rand.nextInt(maxPos);
+		String palabra = palabras[pos];
+		sesionMBean.setPaso3Captcha(palabra);
+		//Armar el texto indicativo
+		String clave = "cual_es_la_palabra_"+(pos+1)+"_de_la_frase";
+		textoIndicativoCaptcha = sesionMBean.getTextos().get(clave);
+		if(textoIndicativoCaptcha == null) {
+			textoIndicativoCaptcha = "Cuál es la palabra "+pos+" de la frase {frase}";
+		}
+		textoIndicativoCaptcha = textoIndicativoCaptcha.replace("{frase}", frase);
 		return textoIndicativoCaptcha;
 	}
-
+	
 	public String getTextoCaptchaUsuario() {
 		return textoCaptchaUsuario;
 	}
@@ -695,10 +717,6 @@ public class Paso3MBean extends PasoMBean {
 		}
 	}
 
-	public boolean isErrorInit() {
-		return errorInit;
-	}
-	
 
 }
 

@@ -1,6 +1,8 @@
 --
 -- PostgreSQL database dump
 --
+-- SAE template para esquema de tenant versión 1.8
+--
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -10,22 +12,22 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
--- Name: {empresa}; Type: SCHEMA; Schema: -; Owner: sae
+-- Name: {esquema}; Type: SCHEMA; Schema: -; Owner: sae
 --
 
-CREATE SCHEMA {empresa};
+CREATE SCHEMA {esquema};
 
 
-ALTER SCHEMA {empresa} OWNER TO sae;
+ALTER SCHEMA {esquema} OWNER TO sae;
 
-SET search_path = {empresa}, pg_catalog;
+SET search_path = {esquema}, pg_catalog;
 
 SET default_tablespace = '';
 
 SET default_with_oids = false;
 
 --
--- Name: ae_acciones; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_acciones; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_acciones (
@@ -41,7 +43,7 @@ CREATE TABLE ae_acciones (
 ALTER TABLE ae_acciones OWNER TO sae;
 
 --
--- Name: ae_acciones_por_dato; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_acciones_por_dato; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_acciones_por_dato (
@@ -56,7 +58,7 @@ CREATE TABLE ae_acciones_por_dato (
 ALTER TABLE ae_acciones_por_dato OWNER TO sae;
 
 --
--- Name: ae_acciones_por_recurso; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_acciones_por_recurso; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_acciones_por_recurso (
@@ -72,7 +74,7 @@ CREATE TABLE ae_acciones_por_recurso (
 ALTER TABLE ae_acciones_por_recurso OWNER TO sae;
 
 --
--- Name: ae_agendas; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_agendas; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_agendas (
@@ -84,16 +86,14 @@ CREATE TABLE ae_agendas (
     timezone character varying(25),
     idiomas character varying(100),
     con_cda boolean DEFAULT false,
-    tramite_codigo character varying(10),
-    publicar_novedades boolean DEFAULT false NOT NULL,
-    con_trazabilidad boolean DEFAULT false NOT NULL
+    tramite_codigo character varying(10)
 );
 
 
 ALTER TABLE ae_agendas OWNER TO sae;
 
 --
--- Name: ae_agrupaciones_datos; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_agrupaciones_datos; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_agrupaciones_datos (
@@ -109,7 +109,7 @@ CREATE TABLE ae_agrupaciones_datos (
 ALTER TABLE ae_agrupaciones_datos OWNER TO sae;
 
 --
--- Name: ae_anios; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_anios; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_anios (
@@ -122,7 +122,7 @@ CREATE TABLE ae_anios (
 ALTER TABLE ae_anios OWNER TO sae;
 
 --
--- Name: ae_atencion; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_atencion; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_atencion (
@@ -139,7 +139,7 @@ CREATE TABLE ae_atencion (
 ALTER TABLE ae_atencion OWNER TO sae;
 
 --
--- Name: ae_comunicaciones; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_comunicaciones; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_comunicaciones (
@@ -156,7 +156,7 @@ CREATE TABLE ae_comunicaciones (
 ALTER TABLE ae_comunicaciones OWNER TO sae;
 
 --
--- Name: ae_constante_validacion; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_constante_validacion; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_constante_validacion (
@@ -172,7 +172,7 @@ CREATE TABLE ae_constante_validacion (
 ALTER TABLE ae_constante_validacion OWNER TO sae;
 
 --
--- Name: ae_datos_a_solicitar; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_datos_a_solicitar; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_datos_a_solicitar (
@@ -201,7 +201,7 @@ CREATE TABLE ae_datos_a_solicitar (
 ALTER TABLE ae_datos_a_solicitar OWNER TO sae;
 
 --
--- Name: ae_datos_del_recurso; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_datos_del_recurso; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_datos_del_recurso (
@@ -216,7 +216,7 @@ CREATE TABLE ae_datos_del_recurso (
 ALTER TABLE ae_datos_del_recurso OWNER TO sae;
 
 --
--- Name: ae_datos_reserva; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_datos_reserva; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_datos_reserva (
@@ -230,7 +230,7 @@ CREATE TABLE ae_datos_reserva (
 ALTER TABLE ae_datos_reserva OWNER TO sae;
 
 --
--- Name: ae_dias_del_mes; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_dias_del_mes; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_dias_del_mes (
@@ -243,7 +243,7 @@ CREATE TABLE ae_dias_del_mes (
 ALTER TABLE ae_dias_del_mes OWNER TO sae;
 
 --
--- Name: ae_dias_semana; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_dias_semana; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_dias_semana (
@@ -256,7 +256,7 @@ CREATE TABLE ae_dias_semana (
 ALTER TABLE ae_dias_semana OWNER TO sae;
 
 --
--- Name: ae_disponibilidades; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_disponibilidades; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_disponibilidades (
@@ -276,7 +276,7 @@ CREATE TABLE ae_disponibilidades (
 ALTER TABLE ae_disponibilidades OWNER TO sae;
 
 --
--- Name: ae_frases_captcha; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_frases_captcha; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_frases_captcha (
@@ -289,7 +289,7 @@ CREATE TABLE ae_frases_captcha (
 ALTER TABLE ae_frases_captcha OWNER TO sae;
 
 --
--- Name: ae_llamadas; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_llamadas; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_llamadas (
@@ -307,7 +307,7 @@ CREATE TABLE ae_llamadas (
 ALTER TABLE ae_llamadas OWNER TO sae;
 
 --
--- Name: ae_meses; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_meses; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_meses (
@@ -320,7 +320,7 @@ CREATE TABLE ae_meses (
 ALTER TABLE ae_meses OWNER TO sae;
 
 --
--- Name: ae_parametros_accion; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_parametros_accion; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_parametros_accion (
@@ -336,7 +336,7 @@ CREATE TABLE ae_parametros_accion (
 ALTER TABLE ae_parametros_accion OWNER TO sae;
 
 --
--- Name: ae_parametros_autocompletar; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_parametros_autocompletar; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_parametros_autocompletar (
@@ -352,7 +352,7 @@ CREATE TABLE ae_parametros_autocompletar (
 ALTER TABLE ae_parametros_autocompletar OWNER TO sae;
 
 --
--- Name: ae_parametros_validacion; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_parametros_validacion; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_parametros_validacion (
@@ -368,7 +368,7 @@ CREATE TABLE ae_parametros_validacion (
 ALTER TABLE ae_parametros_validacion OWNER TO sae;
 
 --
--- Name: ae_plantillas; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_plantillas; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_plantillas (
@@ -386,21 +386,7 @@ CREATE TABLE ae_plantillas (
 ALTER TABLE ae_plantillas OWNER TO sae;
 
 --
--- Name: ae_preguntas_captcha; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
---
-
-CREATE TABLE ae_preguntas_captcha (
-    clave character varying(100) NOT NULL,
-    pregunta character varying(1024),
-    respuesta character varying(25),
-    idioma character varying(5) NOT NULL
-);
-
-
-ALTER TABLE ae_preguntas_captcha OWNER TO sae;
-
---
--- Name: ae_recursos; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_recursos; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_recursos (
@@ -442,7 +428,7 @@ CREATE TABLE ae_recursos (
 ALTER TABLE ae_recursos OWNER TO sae;
 
 --
--- Name: ae_reservas; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_reservas; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_reservas (
@@ -464,7 +450,7 @@ CREATE TABLE ae_reservas (
 ALTER TABLE ae_reservas OWNER TO sae;
 
 --
--- Name: ae_reservas_disponibilidades; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_reservas_disponibilidades; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_reservas_disponibilidades (
@@ -476,7 +462,7 @@ CREATE TABLE ae_reservas_disponibilidades (
 ALTER TABLE ae_reservas_disponibilidades OWNER TO sae;
 
 --
--- Name: ae_serv_autocomp_por_dato; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_serv_autocomp_por_dato; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_serv_autocomp_por_dato (
@@ -491,7 +477,7 @@ CREATE TABLE ae_serv_autocomp_por_dato (
 ALTER TABLE ae_serv_autocomp_por_dato OWNER TO sae;
 
 --
--- Name: ae_serv_autocompletar; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_serv_autocompletar; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_serv_autocompletar (
@@ -507,7 +493,7 @@ CREATE TABLE ae_serv_autocompletar (
 ALTER TABLE ae_serv_autocompletar OWNER TO sae;
 
 --
--- Name: ae_servicio_por_recurso; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_servicio_por_recurso; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_servicio_por_recurso (
@@ -521,7 +507,7 @@ CREATE TABLE ae_servicio_por_recurso (
 ALTER TABLE ae_servicio_por_recurso OWNER TO sae;
 
 --
--- Name: ae_textos; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_textos; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_textos (
@@ -534,7 +520,7 @@ CREATE TABLE ae_textos (
 ALTER TABLE ae_textos OWNER TO sae;
 
 --
--- Name: ae_textos_agenda; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_textos_agenda; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_textos_agenda (
@@ -555,7 +541,7 @@ CREATE TABLE ae_textos_agenda (
 ALTER TABLE ae_textos_agenda OWNER TO sae;
 
 --
--- Name: ae_textos_recurso; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_textos_recurso; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_textos_recurso (
@@ -576,7 +562,7 @@ CREATE TABLE ae_textos_recurso (
 ALTER TABLE ae_textos_recurso OWNER TO sae;
 
 --
--- Name: ae_validaciones; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_validaciones; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_validaciones (
@@ -592,7 +578,7 @@ CREATE TABLE ae_validaciones (
 ALTER TABLE ae_validaciones OWNER TO sae;
 
 --
--- Name: ae_validaciones_por_dato; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_validaciones_por_dato; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_validaciones_por_dato (
@@ -607,7 +593,7 @@ CREATE TABLE ae_validaciones_por_dato (
 ALTER TABLE ae_validaciones_por_dato OWNER TO sae;
 
 --
--- Name: ae_validaciones_por_recurso; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_validaciones_por_recurso; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_validaciones_por_recurso (
@@ -622,7 +608,7 @@ CREATE TABLE ae_validaciones_por_recurso (
 ALTER TABLE ae_validaciones_por_recurso OWNER TO sae;
 
 --
--- Name: ae_valor_constante_val_rec; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_valor_constante_val_rec; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_valor_constante_val_rec (
@@ -637,7 +623,7 @@ CREATE TABLE ae_valor_constante_val_rec (
 ALTER TABLE ae_valor_constante_val_rec OWNER TO sae;
 
 --
--- Name: ae_valores_del_dato; Type: TABLE; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_valores_del_dato; Type: TABLE; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 CREATE TABLE ae_valores_del_dato (
@@ -655,7 +641,7 @@ CREATE TABLE ae_valores_del_dato (
 ALTER TABLE ae_valores_del_dato OWNER TO sae;
 
 --
--- Name: s_ae_accion; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_accion; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_accion
@@ -669,7 +655,7 @@ CREATE SEQUENCE s_ae_accion
 ALTER TABLE s_ae_accion OWNER TO sae;
 
 --
--- Name: s_ae_acciondato; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_acciondato; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_acciondato
@@ -683,7 +669,7 @@ CREATE SEQUENCE s_ae_acciondato
 ALTER TABLE s_ae_acciondato OWNER TO sae;
 
 --
--- Name: s_ae_accionrecurso; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_accionrecurso; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_accionrecurso
@@ -697,7 +683,7 @@ CREATE SEQUENCE s_ae_accionrecurso
 ALTER TABLE s_ae_accionrecurso OWNER TO sae;
 
 --
--- Name: s_ae_agenda; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_agenda; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_agenda
@@ -711,7 +697,7 @@ CREATE SEQUENCE s_ae_agenda
 ALTER TABLE s_ae_agenda OWNER TO sae;
 
 --
--- Name: s_ae_agrupacion_dato; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_agrupacion_dato; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_agrupacion_dato
@@ -725,7 +711,7 @@ CREATE SEQUENCE s_ae_agrupacion_dato
 ALTER TABLE s_ae_agrupacion_dato OWNER TO sae;
 
 --
--- Name: s_ae_anio; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_anio; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_anio
@@ -739,7 +725,7 @@ CREATE SEQUENCE s_ae_anio
 ALTER TABLE s_ae_anio OWNER TO sae;
 
 --
--- Name: s_ae_atencion; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_atencion; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_atencion
@@ -753,7 +739,7 @@ CREATE SEQUENCE s_ae_atencion
 ALTER TABLE s_ae_atencion OWNER TO sae;
 
 --
--- Name: s_ae_comunicaciones; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_comunicaciones; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_comunicaciones
@@ -767,7 +753,7 @@ CREATE SEQUENCE s_ae_comunicaciones
 ALTER TABLE s_ae_comunicaciones OWNER TO sae;
 
 --
--- Name: s_ae_constval; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_constval; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_constval
@@ -781,7 +767,7 @@ CREATE SEQUENCE s_ae_constval
 ALTER TABLE s_ae_constval OWNER TO sae;
 
 --
--- Name: s_ae_datoasolicitar; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_datoasolicitar; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_datoasolicitar
@@ -795,7 +781,7 @@ CREATE SEQUENCE s_ae_datoasolicitar
 ALTER TABLE s_ae_datoasolicitar OWNER TO sae;
 
 --
--- Name: s_ae_datodelrecurso; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_datodelrecurso; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_datodelrecurso
@@ -809,7 +795,7 @@ CREATE SEQUENCE s_ae_datodelrecurso
 ALTER TABLE s_ae_datodelrecurso OWNER TO sae;
 
 --
--- Name: s_ae_datoreserva; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_datoreserva; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_datoreserva
@@ -823,7 +809,7 @@ CREATE SEQUENCE s_ae_datoreserva
 ALTER TABLE s_ae_datoreserva OWNER TO sae;
 
 --
--- Name: s_ae_dia_mes; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_dia_mes; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_dia_mes
@@ -837,7 +823,7 @@ CREATE SEQUENCE s_ae_dia_mes
 ALTER TABLE s_ae_dia_mes OWNER TO sae;
 
 --
--- Name: s_ae_dia_semana; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_dia_semana; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_dia_semana
@@ -851,7 +837,7 @@ CREATE SEQUENCE s_ae_dia_semana
 ALTER TABLE s_ae_dia_semana OWNER TO sae;
 
 --
--- Name: s_ae_disponibilidad; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_disponibilidad; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_disponibilidad
@@ -865,7 +851,7 @@ CREATE SEQUENCE s_ae_disponibilidad
 ALTER TABLE s_ae_disponibilidad OWNER TO sae;
 
 --
--- Name: s_ae_llamada; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_llamada; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_llamada
@@ -879,7 +865,7 @@ CREATE SEQUENCE s_ae_llamada
 ALTER TABLE s_ae_llamada OWNER TO sae;
 
 --
--- Name: s_ae_mes; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_mes; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_mes
@@ -893,7 +879,7 @@ CREATE SEQUENCE s_ae_mes
 ALTER TABLE s_ae_mes OWNER TO sae;
 
 --
--- Name: s_ae_paramaccion; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_paramaccion; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_paramaccion
@@ -907,7 +893,7 @@ CREATE SEQUENCE s_ae_paramaccion
 ALTER TABLE s_ae_paramaccion OWNER TO sae;
 
 --
--- Name: s_ae_parametros_autocompletar; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_parametros_autocompletar; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_parametros_autocompletar
@@ -921,7 +907,7 @@ CREATE SEQUENCE s_ae_parametros_autocompletar
 ALTER TABLE s_ae_parametros_autocompletar OWNER TO sae;
 
 --
--- Name: s_ae_paramval; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_paramval; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_paramval
@@ -935,7 +921,7 @@ CREATE SEQUENCE s_ae_paramval
 ALTER TABLE s_ae_paramval OWNER TO sae;
 
 --
--- Name: s_ae_plantilla; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_plantilla; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_plantilla
@@ -949,7 +935,7 @@ CREATE SEQUENCE s_ae_plantilla
 ALTER TABLE s_ae_plantilla OWNER TO sae;
 
 --
--- Name: s_ae_recurso; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_recurso; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_recurso
@@ -963,7 +949,7 @@ CREATE SEQUENCE s_ae_recurso
 ALTER TABLE s_ae_recurso OWNER TO sae;
 
 --
--- Name: s_ae_reserva; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_reserva; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_reserva
@@ -977,7 +963,7 @@ CREATE SEQUENCE s_ae_reserva
 ALTER TABLE s_ae_reserva OWNER TO sae;
 
 --
--- Name: s_ae_serv_autocompletar; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_serv_autocompletar; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_serv_autocompletar
@@ -991,7 +977,7 @@ CREATE SEQUENCE s_ae_serv_autocompletar
 ALTER TABLE s_ae_serv_autocompletar OWNER TO sae;
 
 --
--- Name: s_ae_servdato; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_servdato; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_servdato
@@ -1005,7 +991,7 @@ CREATE SEQUENCE s_ae_servdato
 ALTER TABLE s_ae_servdato OWNER TO sae;
 
 --
--- Name: s_ae_servrecurso; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_servrecurso; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_servrecurso
@@ -1019,7 +1005,7 @@ CREATE SEQUENCE s_ae_servrecurso
 ALTER TABLE s_ae_servrecurso OWNER TO sae;
 
 --
--- Name: s_ae_texto_agenda; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_texto_agenda; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_texto_agenda
@@ -1033,7 +1019,7 @@ CREATE SEQUENCE s_ae_texto_agenda
 ALTER TABLE s_ae_texto_agenda OWNER TO sae;
 
 --
--- Name: s_ae_textorecurso; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_textorecurso; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_textorecurso
@@ -1047,7 +1033,7 @@ CREATE SEQUENCE s_ae_textorecurso
 ALTER TABLE s_ae_textorecurso OWNER TO sae;
 
 --
--- Name: s_ae_valconstante; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valconstante; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_valconstante
@@ -1061,7 +1047,7 @@ CREATE SEQUENCE s_ae_valconstante
 ALTER TABLE s_ae_valconstante OWNER TO sae;
 
 --
--- Name: s_ae_valdato; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valdato; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_valdato
@@ -1075,7 +1061,7 @@ CREATE SEQUENCE s_ae_valdato
 ALTER TABLE s_ae_valdato OWNER TO sae;
 
 --
--- Name: s_ae_validacion; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_validacion; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_validacion
@@ -1089,7 +1075,7 @@ CREATE SEQUENCE s_ae_validacion
 ALTER TABLE s_ae_validacion OWNER TO sae;
 
 --
--- Name: s_ae_valorposible; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valorposible; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_valorposible
@@ -1103,7 +1089,7 @@ CREATE SEQUENCE s_ae_valorposible
 ALTER TABLE s_ae_valorposible OWNER TO sae;
 
 --
--- Name: s_ae_valrecurso; Type: SEQUENCE; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valrecurso; Type: SEQUENCE; Schema: {esquema}; Owner: sae
 --
 
 CREATE SEQUENCE s_ae_valrecurso
@@ -1117,513 +1103,462 @@ CREATE SEQUENCE s_ae_valrecurso
 ALTER TABLE s_ae_valrecurso OWNER TO sae;
 
 --
--- Data for Name: ae_acciones; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_acciones; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_acciones_por_dato; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_acciones_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_acciones_por_recurso; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_acciones_por_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_agendas; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_agendas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_agrupaciones_datos; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_agrupaciones_datos; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_anios; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_anios; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_atencion; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_atencion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_comunicaciones; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_comunicaciones; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_constante_validacion; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_constante_validacion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_datos_a_solicitar; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_datos_a_solicitar; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_datos_del_recurso; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_datos_del_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_datos_reserva; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_datos_reserva; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_dias_del_mes; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_dias_del_mes; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_dias_semana; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_dias_semana; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_disponibilidades; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_disponibilidades; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_frases_captcha; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_frases_captcha; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('esto_es_un_ejemplo', 'Esto es un ejemplo', 'es');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('esto_es_un_ejemplo_1', 'Esto es un ejemplo 1', 'es');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('esto_es_un_ejemplo_2', 'Esto es un ejemplo 2', 'es');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('esto_es_un_ejemplo_3', 'Esto es un ejemplo 3', 'es');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('this_is_an_example', 'This is an example', 'en');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('this_is_an_example_1', 'This is an example 1', 'en');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('this_is_an_example_2', 'This is an example 2', 'en');
+INSERT INTO ae_frases_captcha (clave, frase, idioma) VALUES ('this_is_an_example_3', 'This is an example 3', 'en');
 
 
 --
--- Data for Name: ae_llamadas; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_llamadas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_meses; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_meses; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_parametros_accion; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_parametros_accion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_parametros_autocompletar; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_parametros_autocompletar; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_parametros_validacion; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_parametros_validacion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_plantillas; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_plantillas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_preguntas_captcha; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_recursos; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000001', '¿De qué color era el caballo blanco de Artigas?', 'blanco', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000002', '¿Cuánto es dos más dos? Responde con palabras', 'cuatro', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000003', 'Escribe la tercera palabra de: Hoy está lloviendo', 'lloviendo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000004', '¿Cuánto es tres más uno? Responde con palabras', 'cuatro', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000005', 'Escribe la segunda palabra de: Hoy es Lunes', 'es', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000006', '¿Cuánto es uno más uno? Responde con palabras', 'dos', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000007', '¿Cuánto es cinco más dos? Responde con palabras', 'siete', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000008', 'Escribe la primera palabra de: Hoy está soleado', 'hoy', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000009', 'De los números uno, cuatro y dos, ¿cuál es el menor?', 'uno', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000010', '¿Cuántos colores hay en la lista: torta, verde, hotel?', 'uno', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000011', '¿Cuál es el segundo dígito de 7101712? Responde con palabras', 'uno', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000012', 'Si el león es amarillo, ¿de qué color es el león?', 'amarillo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000013', '¿Cuál de los siguientes es un color: libro, nariz, verde, queso?', 'verde', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000014', 'Si mañana es sábado, ¿qué día es hoy?', 'viernes', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000016', 'Escribe la segunda palabra de: Ayer tuve frío', 'tuve', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000017', 'Escribe la última palabra de: me caigo y no me levanto', 'levanto', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000018', 'Escribe la quinta palabra de: más vale pájaro en mano que cien volando', 'mano', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000020', 'Escribe la quinta palabra de: cuanto menos se piensa salta la liebre', 'salta', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000021', 'Un día en la vida, ¿cuántos días son? escribe en letras', 'uno', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000022', 'Tres tristes tigres comen trigo, ¿qué comen los tigres?', 'trigo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000023', 'Si hoy me acuesto, despierto mañana; ¿cuándo me acuesto?', 'hoy', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000024', '¿Qué animal es mayor, el mono  o el elefante?', 'elefante', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000025', '¿Cuál es el primer mes del año?', 'enero', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000026', '¿Cuál es el segundo mes del año?', 'febrero', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000027', '¿Cuál es el tercer mes del año?', 'marzo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000028', '¿Cuál es el cuarto mes del año?', 'abril', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000029', '¿Cuál es el quinto mes del año?', 'mayo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000030', '¿Cuál es el sexto mes del año?', 'junio', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000031', '¿Cuál es el séptimo mes del año?', 'julio', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000032', '¿Cuál es el octavo mes del año?', 'agosto', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000033', '¿Cuál es el noveno mes del año?', 'setiembre', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000034', '¿Cuál es el décimo mes del año?', 'octubre', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000035', '¿Cuál es el penúltimo mes del año?', 'noviembre', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000036', '¿Cuál es el último mes del año?', 'diciembre', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000037', '¿Cuántos días tiene enero? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000038', '¿Cuántos días tiene febrero? Responde con números', '28', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000039', '¿Cuántos días tiene marzo? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000040', '¿Cuántos días tiene abril? Responde con números', '30', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000041', '¿Cuántos días tiene mayo? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000042', '¿Cuántos días tiene junio? Responde con números', '30', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000043', '¿Cuántos días tiene julio? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000044', '¿Cuántos días tiene agosto? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000045', '¿Cuántos días tiene setiembre? Responde con números', '30', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000046', '¿Cuántos días tiene octubre? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000047', '¿Cuántos días tiene noviembre? Responde con números', '30', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000048', '¿Cuántos días tiene diciembre? Responde con números', '31', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000049', 'Hola dijo Bartola; ¿quién dijo hola?', 'Bartola', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000050', '¿Cuál palabra es un color: amarillo, abejorro, mono?', 'amarillo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000051', '¿Cuál palabra es un color: violeta, araña, morsa?', 'violeta', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000052', '¿Cuál palabra es un color: blanco, alce, mosca?', 'blanco', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000053', '¿Cuál palabra es un color: azul, almeja, mosquito?', 'azul', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000054', '¿Cuál palabra es un color: rojo, ardilla, casa?', 'rojo', 'es');
-INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P000055', '¿Cuál palabra es un color: negro, vaca, auto?', 'negro', 'es');
 
 
 --
--- Data for Name: ae_recursos; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_reservas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_reservas; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_reservas_disponibilidades; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_reservas_disponibilidades; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_serv_autocomp_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_serv_autocomp_por_dato; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_serv_autocompletar; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_serv_autocompletar; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_servicio_por_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_servicio_por_recurso; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_textos; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_textos; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_textos_agenda; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_textos_agenda; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_textos_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_textos_recurso; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_validaciones; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_validaciones; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_validaciones_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_validaciones_por_dato; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_validaciones_por_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_validaciones_por_recurso; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_valor_constante_val_rec; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_valor_constante_val_rec; Type: TABLE DATA; Schema: {empresa}; Owner: sae
+-- Data for Name: ae_valores_del_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
 
 
 --
--- Data for Name: ae_valores_del_dato; Type: TABLE DATA; Schema: {empresa}; Owner: sae
---
-
-
-
---
--- Name: s_ae_accion; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_accion; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_accion', 1, false);
 
 
 --
--- Name: s_ae_acciondato; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_acciondato; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_acciondato', 1, false);
 
 
 --
--- Name: s_ae_accionrecurso; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_accionrecurso; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_accionrecurso', 1, false);
 
 
 --
--- Name: s_ae_agenda; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_agenda; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_agenda', 1, true);
 
 
 --
--- Name: s_ae_agrupacion_dato; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_agrupacion_dato; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_agrupacion_dato', 1, true);
 
 
 --
--- Name: s_ae_anio; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_anio; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_anio', 1, false);
 
 
 --
--- Name: s_ae_atencion; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_atencion; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_atencion', 1, true);
 
 
 --
--- Name: s_ae_comunicaciones; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_comunicaciones; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_comunicaciones', 1, true);
 
 
 --
--- Name: s_ae_constval; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_constval; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_constval', 1, false);
 
 
 --
--- Name: s_ae_datoasolicitar; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_datoasolicitar; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_datoasolicitar', 1, true);
 
 
 --
--- Name: s_ae_datodelrecurso; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_datodelrecurso; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_datodelrecurso', 1, true);
 
 
 --
--- Name: s_ae_datoreserva; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_datoreserva; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_datoreserva', 1, true);
 
 
 --
--- Name: s_ae_dia_mes; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_dia_mes; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_dia_mes', 1, false);
 
 
 --
--- Name: s_ae_dia_semana; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_dia_semana; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_dia_semana', 1, false);
 
 
 --
--- Name: s_ae_disponibilidad; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_disponibilidad; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_disponibilidad', 1, true);
 
 
 --
--- Name: s_ae_llamada; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_llamada; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_llamada', 1, true);
 
 
 --
--- Name: s_ae_mes; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_mes; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_mes', 1, false);
 
 
 --
--- Name: s_ae_paramaccion; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_paramaccion; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_paramaccion', 1, false);
 
 
 --
--- Name: s_ae_parametros_autocompletar; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_parametros_autocompletar; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_parametros_autocompletar', 1, false);
 
 
 --
--- Name: s_ae_paramval; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_paramval; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_paramval', 1, false);
 
 
 --
--- Name: s_ae_plantilla; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_plantilla; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_plantilla', 1, false);
 
 
 --
--- Name: s_ae_recurso; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_recurso; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_recurso', 1, true);
 
 
 --
--- Name: s_ae_reserva; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_reserva; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_reserva', 1, true);
 
 
 --
--- Name: s_ae_serv_autocompletar; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_serv_autocompletar; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_serv_autocompletar', 1, false);
 
 
 --
--- Name: s_ae_servdato; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_servdato; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_servdato', 1, false);
 
 
 --
--- Name: s_ae_servrecurso; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_servrecurso; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_servrecurso', 1, false);
 
 
 --
--- Name: s_ae_texto_agenda; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_texto_agenda; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_texto_agenda', 1, true);
 
 
 --
--- Name: s_ae_textorecurso; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_textorecurso; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_textorecurso', 1, true);
 
 
 --
--- Name: s_ae_valconstante; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valconstante; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_valconstante', 1, false);
 
 
 --
--- Name: s_ae_valdato; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valdato; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_valdato', 1, false);
 
 
 --
--- Name: s_ae_validacion; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_validacion; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_validacion', 1, false);
 
 
 --
--- Name: s_ae_valorposible; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valorposible; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_valorposible', 1, true);
 
 
 --
--- Name: s_ae_valrecurso; Type: SEQUENCE SET; Schema: {empresa}; Owner: sae
+-- Name: s_ae_valrecurso; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae
 --
 
 SELECT pg_catalog.setval('s_ae_valrecurso', 1, false);
 
 
 --
--- Name: ae_acciones_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_acciones_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_acciones
@@ -1631,7 +1566,7 @@ ALTER TABLE ONLY ae_acciones
 
 
 --
--- Name: ae_acciones_por_dato_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_acciones_por_dato_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_acciones_por_dato
@@ -1639,7 +1574,7 @@ ALTER TABLE ONLY ae_acciones_por_dato
 
 
 --
--- Name: ae_acciones_por_recurso_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_acciones_por_recurso_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_acciones_por_recurso
@@ -1647,7 +1582,7 @@ ALTER TABLE ONLY ae_acciones_por_recurso
 
 
 --
--- Name: ae_agendas_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_agendas_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_agendas
@@ -1655,7 +1590,7 @@ ALTER TABLE ONLY ae_agendas
 
 
 --
--- Name: ae_agrupaciones_datos_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_agrupaciones_datos_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_agrupaciones_datos
@@ -1663,7 +1598,7 @@ ALTER TABLE ONLY ae_agrupaciones_datos
 
 
 --
--- Name: ae_anios_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_anios_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_anios
@@ -1671,7 +1606,7 @@ ALTER TABLE ONLY ae_anios
 
 
 --
--- Name: ae_atencion_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_atencion_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_atencion
@@ -1679,7 +1614,7 @@ ALTER TABLE ONLY ae_atencion
 
 
 --
--- Name: ae_captchas_pk; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_captchas_pk; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_frases_captcha
@@ -1687,7 +1622,7 @@ ALTER TABLE ONLY ae_frases_captcha
 
 
 --
--- Name: ae_comunicaciones_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_comunicaciones_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_comunicaciones
@@ -1695,7 +1630,7 @@ ALTER TABLE ONLY ae_comunicaciones
 
 
 --
--- Name: ae_constante_validacion_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_constante_validacion_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_constante_validacion
@@ -1703,7 +1638,7 @@ ALTER TABLE ONLY ae_constante_validacion
 
 
 --
--- Name: ae_datos_a_solicitar_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_datos_a_solicitar_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_datos_a_solicitar
@@ -1711,7 +1646,7 @@ ALTER TABLE ONLY ae_datos_a_solicitar
 
 
 --
--- Name: ae_datos_del_recurso_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_datos_del_recurso_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_datos_del_recurso
@@ -1719,7 +1654,7 @@ ALTER TABLE ONLY ae_datos_del_recurso
 
 
 --
--- Name: ae_datos_reserva_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_datos_reserva_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_datos_reserva
@@ -1727,7 +1662,7 @@ ALTER TABLE ONLY ae_datos_reserva
 
 
 --
--- Name: ae_dias_del_mes_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_dias_del_mes_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_dias_del_mes
@@ -1735,7 +1670,7 @@ ALTER TABLE ONLY ae_dias_del_mes
 
 
 --
--- Name: ae_dias_semana_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_dias_semana_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_dias_semana
@@ -1743,7 +1678,7 @@ ALTER TABLE ONLY ae_dias_semana
 
 
 --
--- Name: ae_disponibilidades_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_disponibilidades_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_disponibilidades
@@ -1751,7 +1686,7 @@ ALTER TABLE ONLY ae_disponibilidades
 
 
 --
--- Name: ae_llamadas_aers_id_key; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_llamadas_aers_id_key; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_llamadas
@@ -1759,7 +1694,7 @@ ALTER TABLE ONLY ae_llamadas
 
 
 --
--- Name: ae_llamadas_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_llamadas_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_llamadas
@@ -1767,7 +1702,7 @@ ALTER TABLE ONLY ae_llamadas
 
 
 --
--- Name: ae_meses_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_meses_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_meses
@@ -1775,7 +1710,7 @@ ALTER TABLE ONLY ae_meses
 
 
 --
--- Name: ae_parametros_accion_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_parametros_accion_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_parametros_accion
@@ -1783,7 +1718,7 @@ ALTER TABLE ONLY ae_parametros_accion
 
 
 --
--- Name: ae_parametros_autocompletar_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_parametros_autocompletar_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_parametros_autocompletar
@@ -1791,7 +1726,7 @@ ALTER TABLE ONLY ae_parametros_autocompletar
 
 
 --
--- Name: ae_parametros_validacion_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_parametros_validacion_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_parametros_validacion
@@ -1799,7 +1734,7 @@ ALTER TABLE ONLY ae_parametros_validacion
 
 
 --
--- Name: ae_plantillas_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_plantillas_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_plantillas
@@ -1807,15 +1742,7 @@ ALTER TABLE ONLY ae_plantillas
 
 
 --
--- Name: ae_preguntas_pk; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
---
-
-ALTER TABLE ONLY ae_preguntas_captcha
-    ADD CONSTRAINT ae_preguntas_pk PRIMARY KEY (clave);
-
-
---
--- Name: ae_recursos_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_recursos_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_recursos
@@ -1823,7 +1750,7 @@ ALTER TABLE ONLY ae_recursos
 
 
 --
--- Name: ae_reservas_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_reservas_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_reservas
@@ -1831,7 +1758,7 @@ ALTER TABLE ONLY ae_reservas
 
 
 --
--- Name: ae_serv_autocomp_por_dato_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_serv_autocomp_por_dato_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_serv_autocomp_por_dato
@@ -1839,7 +1766,7 @@ ALTER TABLE ONLY ae_serv_autocomp_por_dato
 
 
 --
--- Name: ae_serv_autocompletar_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_serv_autocompletar_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_serv_autocompletar
@@ -1847,7 +1774,7 @@ ALTER TABLE ONLY ae_serv_autocompletar
 
 
 --
--- Name: ae_servicio_por_recurso_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_servicio_por_recurso_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_servicio_por_recurso
@@ -1855,7 +1782,7 @@ ALTER TABLE ONLY ae_servicio_por_recurso
 
 
 --
--- Name: ae_textos_agenda_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_textos_agenda_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_textos_agenda
@@ -1863,7 +1790,7 @@ ALTER TABLE ONLY ae_textos_agenda
 
 
 --
--- Name: ae_textos_pk; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_textos_pk; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_textos
@@ -1871,7 +1798,7 @@ ALTER TABLE ONLY ae_textos
 
 
 --
--- Name: ae_textos_recurso_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_textos_recurso_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_textos_recurso
@@ -1879,7 +1806,7 @@ ALTER TABLE ONLY ae_textos_recurso
 
 
 --
--- Name: ae_validaciones_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_validaciones_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_validaciones
@@ -1887,7 +1814,7 @@ ALTER TABLE ONLY ae_validaciones
 
 
 --
--- Name: ae_validaciones_por_dato_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_validaciones_por_dato_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_validaciones_por_dato
@@ -1895,7 +1822,7 @@ ALTER TABLE ONLY ae_validaciones_por_dato
 
 
 --
--- Name: ae_validaciones_por_recurso_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_validaciones_por_recurso_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_validaciones_por_recurso
@@ -1903,7 +1830,7 @@ ALTER TABLE ONLY ae_validaciones_por_recurso
 
 
 --
--- Name: ae_valor_constante_val_rec_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_valor_constante_val_rec_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_valor_constante_val_rec
@@ -1911,7 +1838,7 @@ ALTER TABLE ONLY ae_valor_constante_val_rec
 
 
 --
--- Name: ae_valores_del_dato_pkey; Type: CONSTRAINT; Schema: {empresa}; Owner: sae; Tablespace: 
+-- Name: ae_valores_del_dato_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae; Tablespace: 
 --
 
 ALTER TABLE ONLY ae_valores_del_dato
@@ -1919,7 +1846,7 @@ ALTER TABLE ONLY ae_valores_del_dato
 
 
 --
--- Name: fk1c09bf24104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk1c09bf24104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_disponibilidades
@@ -1927,7 +1854,7 @@ ALTER TABLE ONLY ae_disponibilidades
 
 
 --
--- Name: fk1c09bf249a9bb7b2; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk1c09bf249a9bb7b2; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_disponibilidades
@@ -1935,7 +1862,7 @@ ALTER TABLE ONLY ae_disponibilidades
 
 
 --
--- Name: fk28a15dc69a9bb7b2; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk28a15dc69a9bb7b2; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_dias_semana
@@ -1943,7 +1870,7 @@ ALTER TABLE ONLY ae_dias_semana
 
 
 --
--- Name: fk3360aa44104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk3360aa44104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_agrupaciones_datos
@@ -1951,7 +1878,7 @@ ALTER TABLE ONLY ae_agrupaciones_datos
 
 
 --
--- Name: fk3ce7cc09104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk3ce7cc09104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_datos_a_solicitar
@@ -1959,7 +1886,7 @@ ALTER TABLE ONLY ae_datos_a_solicitar
 
 
 --
--- Name: fk3ce7cc091876ae95; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk3ce7cc091876ae95; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_datos_a_solicitar
@@ -1967,7 +1894,7 @@ ALTER TABLE ONLY ae_datos_a_solicitar
 
 
 --
--- Name: fk3e0b63a4cc9035ed; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk3e0b63a4cc9035ed; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_parametros_autocompletar
@@ -1975,7 +1902,7 @@ ALTER TABLE ONLY ae_parametros_autocompletar
 
 
 --
--- Name: fk3f09314323ebf200; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk3f09314323ebf200; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_constante_validacion
@@ -1983,7 +1910,7 @@ ALTER TABLE ONLY ae_constante_validacion
 
 
 --
--- Name: fk42202b5436760caf; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk42202b5436760caf; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_valores_del_dato
@@ -1991,7 +1918,7 @@ ALTER TABLE ONLY ae_valores_del_dato
 
 
 --
--- Name: fk4da30a11e4b40066; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk4da30a11e4b40066; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_parametros_accion
@@ -1999,7 +1926,7 @@ ALTER TABLE ONLY ae_parametros_accion
 
 
 --
--- Name: fk5ff42436104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk5ff42436104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_datos_del_recurso
@@ -2007,7 +1934,7 @@ ALTER TABLE ONLY ae_datos_del_recurso
 
 
 --
--- Name: fk66d0a85036760caf; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk66d0a85036760caf; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_validaciones_por_dato
@@ -2015,7 +1942,7 @@ ALTER TABLE ONLY ae_validaciones_por_dato
 
 
 --
--- Name: fk66d0a8508d2f46a5; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk66d0a8508d2f46a5; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_validaciones_por_dato
@@ -2023,7 +1950,7 @@ ALTER TABLE ONLY ae_validaciones_por_dato
 
 
 --
--- Name: fk6e5144f336760caf; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk6e5144f336760caf; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_acciones_por_dato
@@ -2031,7 +1958,7 @@ ALTER TABLE ONLY ae_acciones_por_dato
 
 
 --
--- Name: fk6e5144f362f9440d; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk6e5144f362f9440d; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_acciones_por_dato
@@ -2039,7 +1966,7 @@ ALTER TABLE ONLY ae_acciones_por_dato
 
 
 --
--- Name: fk79b9a11211242882; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk79b9a11211242882; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_reservas_disponibilidades
@@ -2047,7 +1974,7 @@ ALTER TABLE ONLY ae_reservas_disponibilidades
 
 
 --
--- Name: fk79b9a112406004b7; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk79b9a112406004b7; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_reservas_disponibilidades
@@ -2055,7 +1982,7 @@ ALTER TABLE ONLY ae_reservas_disponibilidades
 
 
 --
--- Name: fk8a30e71e8d2f46a5; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk8a30e71e8d2f46a5; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_valor_constante_val_rec
@@ -2063,7 +1990,7 @@ ALTER TABLE ONLY ae_valor_constante_val_rec
 
 
 --
--- Name: fk96b86f5fe4ef2a07; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk96b86f5fe4ef2a07; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_textos_agenda
@@ -2071,7 +1998,7 @@ ALTER TABLE ONLY ae_textos_agenda
 
 
 --
--- Name: fk9e323ab1104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk9e323ab1104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_validaciones_por_recurso
@@ -2079,7 +2006,7 @@ ALTER TABLE ONLY ae_validaciones_por_recurso
 
 
 --
--- Name: fk9e323ab123ebf200; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk9e323ab123ebf200; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_validaciones_por_recurso
@@ -2087,7 +2014,7 @@ ALTER TABLE ONLY ae_validaciones_por_recurso
 
 
 --
--- Name: fk9ecc9f5911242882; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk9ecc9f5911242882; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_datos_reserva
@@ -2095,7 +2022,7 @@ ALTER TABLE ONLY ae_datos_reserva
 
 
 --
--- Name: fk9ecc9f5936760caf; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fk9ecc9f5936760caf; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_datos_reserva
@@ -2103,7 +2030,7 @@ ALTER TABLE ONLY ae_datos_reserva
 
 
 --
--- Name: fka0da2cfc104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fka0da2cfc104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_llamadas
@@ -2111,7 +2038,7 @@ ALTER TABLE ONLY ae_llamadas
 
 
 --
--- Name: fka0da2cfc11242882; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fka0da2cfc11242882; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_llamadas
@@ -2119,7 +2046,7 @@ ALTER TABLE ONLY ae_llamadas
 
 
 --
--- Name: fka1b7fd05e4ef2a07; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fka1b7fd05e4ef2a07; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_recursos
@@ -2127,7 +2054,7 @@ ALTER TABLE ONLY ae_recursos
 
 
 --
--- Name: fkacfc169736760caf; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkacfc169736760caf; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_serv_autocomp_por_dato
@@ -2135,7 +2062,7 @@ ALTER TABLE ONLY ae_serv_autocomp_por_dato
 
 
 --
--- Name: fkacfc1697bcb2c28e; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkacfc1697bcb2c28e; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_serv_autocomp_por_dato
@@ -2143,7 +2070,7 @@ ALTER TABLE ONLY ae_serv_autocomp_por_dato
 
 
 --
--- Name: fkade6372e104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkade6372e104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_acciones_por_recurso
@@ -2151,7 +2078,7 @@ ALTER TABLE ONLY ae_acciones_por_recurso
 
 
 --
--- Name: fkade6372ee4b40066; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkade6372ee4b40066; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_acciones_por_recurso
@@ -2159,7 +2086,7 @@ ALTER TABLE ONLY ae_acciones_por_recurso
 
 
 --
--- Name: fkc717af5423ebf200; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkc717af5423ebf200; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_parametros_validacion
@@ -2167,7 +2094,7 @@ ALTER TABLE ONLY ae_parametros_validacion
 
 
 --
--- Name: fkd1fddf1a9a9bb7b2; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkd1fddf1a9a9bb7b2; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_dias_del_mes
@@ -2175,7 +2102,7 @@ ALTER TABLE ONLY ae_dias_del_mes
 
 
 --
--- Name: fkd75adbaf104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkd75adbaf104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_servicio_por_recurso
@@ -2183,7 +2110,7 @@ ALTER TABLE ONLY ae_servicio_por_recurso
 
 
 --
--- Name: fkd75adbafcc9035ed; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkd75adbafcc9035ed; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_servicio_por_recurso
@@ -2191,7 +2118,7 @@ ALTER TABLE ONLY ae_servicio_por_recurso
 
 
 --
--- Name: fkd841909c11242882; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkd841909c11242882; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_atencion
@@ -2199,7 +2126,7 @@ ALTER TABLE ONLY ae_atencion
 
 
 --
--- Name: fke2ce44e59a9bb7b2; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fke2ce44e59a9bb7b2; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_anios
@@ -2207,7 +2134,7 @@ ALTER TABLE ONLY ae_anios
 
 
 --
--- Name: fke3736bee9a9bb7b2; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fke3736bee9a9bb7b2; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_meses
@@ -2215,7 +2142,7 @@ ALTER TABLE ONLY ae_meses
 
 
 --
--- Name: fkf9c6590b104398e1; Type: FK CONSTRAINT; Schema: {empresa}; Owner: sae
+-- Name: fkf9c6590b104398e1; Type: FK CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
 ALTER TABLE ONLY ae_plantillas
@@ -2223,17 +2150,16 @@ ALTER TABLE ONLY ae_plantillas
 
 
 --
--- Name: {empresa}; Type: ACL; Schema: -; Owner: sae
+-- Name: {esquema}; Type: ACL; Schema: -; Owner: sae
 --
 
-REVOKE ALL ON SCHEMA {empresa} FROM PUBLIC;
-REVOKE ALL ON SCHEMA {empresa} FROM sae;
-GRANT ALL ON SCHEMA {empresa} TO sae;
-GRANT ALL ON SCHEMA {empresa} TO postgres;
-GRANT ALL ON SCHEMA {empresa} TO PUBLIC;
+REVOKE ALL ON SCHEMA {esquema} FROM PUBLIC;
+REVOKE ALL ON SCHEMA {esquema} FROM sae;
+GRANT ALL ON SCHEMA {esquema} TO sae;
+GRANT ALL ON SCHEMA {esquema} TO postgres;
+GRANT ALL ON SCHEMA {esquema} TO PUBLIC;
 
 
 --
 -- PostgreSQL database dump complete
 --
-

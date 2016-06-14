@@ -46,8 +46,6 @@ import uy.gub.imm.sae.web.mbean.administracion.SessionMBean;
 import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
-	
-	public static final String version = "1.1";
 
 	protected static final String FORM_ID = "form";
 	
@@ -70,10 +68,7 @@ public abstract class BaseMBean {
 	
 	private static InitialContext ctx;
 	
-	public String getVersion() {
-		return version;
-	}
-
+	
 	protected void limpiarMensajesError() {
 		for(UIComponent comp : FacesContext.getCurrentInstance().getViewRoot().getChildren()) {
 			limpiarMensajeError(comp);
@@ -305,16 +300,4 @@ public abstract class BaseMBean {
 		}
 		return textoRecurso;
 	}
-	
-	public String getSimboloAnterior() {
-		//Hex: 25C0, Dec: 9664 -- &#9664;
-		return "◀";
-	}
-
-	public String getSimboloSiguiente() {
-		//Hex: 25B6, Dec: 9654 -- &#9654;
-		return "▶";
-	}
-	
-	
 }

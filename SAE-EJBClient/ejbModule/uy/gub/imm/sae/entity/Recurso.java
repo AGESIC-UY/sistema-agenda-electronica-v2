@@ -158,7 +158,7 @@ public class Recurso implements Serializable {
 		this.horarios = r.horarios;
 		
 		this.latitud = r.latitud;
-		this.longitud = r.longitud;
+		this.longitud = r.latitud;
 		
 	}
 

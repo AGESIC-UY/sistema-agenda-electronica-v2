@@ -147,6 +147,7 @@ public class UsuarioMBean extends BaseMBean {
 			try {
 				Empresa empresaActual = sessionMBean.getEmpresaActual();
 				Usuario usuario = getUsuarioEditar();
+				
 				boolean hayErrores = false;
 				if(usuario.getCodigo()==null || usuario.getCodigo().trim().isEmpty()) {
 					hayErrores = true;
@@ -160,7 +161,7 @@ public class UsuarioMBean extends BaseMBean {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_correo_electronico_del_usuario_es_obligatorio"), "form:correoeUsuario");
 				}else {
-					Pattern pat = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)+(.[a-z]{2,4})$");
+					Pattern pat = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,4})$");
 					Matcher mat = pat.matcher(usuario.getCorreoe());
 					if(!mat.find()){
 						addErrorMessage(sessionMBean.getTextos().get("correo_electronico_no_valido"), "form:correoeUsuario");
@@ -169,28 +170,26 @@ public class UsuarioMBean extends BaseMBean {
 				}
 				
 				UsuarioEmpresaRoles ueRoles = getUsuarioEmpresaRolesEditar();
-				
-				//Se vuelve a permitir tener más de un rol a cada usuario
-//				if(ueRoles.getRoles().size()>1) {
-//					for(String ueRol : ueRoles.getRoles()) {
-//						String campo = null;
-//						if("RA_AE_ADMINISTRADOR".equals(ueRol)) {
-//							campo = "form:administrador";
-//						}else if("RA_AE_PLANIFICADOR".equals(ueRol)) {
-//							campo = "form:planificador";
-//						}else if("RA_AE_FCALL_CENTER".equals(ueRol)) {
-//							campo = "form:callCenter";
-//						}else if("RA_AE_FATENCION".equals(ueRol)) {
-//							campo = "form:atencion";
-//						}else if("RA_AE_LLAMADOR".equals(ueRol)) {
-//							campo = "form:llamador";
-//						}
-//						if(campo != null) {
-//							addErrorMessage(sessionMBean.getTextos().get("solo_se_puede_asignar_un_rol"), campo);
-//						}
-//					}
-//				  hayErrores = true;
-//				}
+				if(ueRoles.getRoles().size()>1) {
+					for(String ueRol : ueRoles.getRoles()) {
+						String campo = null;
+						if("RA_AE_ADMINISTRADOR".equals(ueRol)) {
+							campo = "form:administrador";
+						}else if("RA_AE_PLANIFICADOR".equals(ueRol)) {
+							campo = "form:planificador";
+						}else if("RA_AE_FCALL_CENTER".equals(ueRol)) {
+							campo = "form:callCenter";
+						}else if("RA_AE_FATENCION".equals(ueRol)) {
+							campo = "form:atencion";
+						}else if("RA_AE_LLAMADOR".equals(ueRol)) {
+							campo = "form:llamador";
+						}
+						if(campo != null) {
+							addErrorMessage(sessionMBean.getTextos().get("solo_se_puede_asignar_un_rol"), campo);
+						}
+					}
+				  hayErrores = true;
+				}
 				
 				
 				if(hayErrores) {
@@ -216,10 +215,7 @@ public class UsuarioMBean extends BaseMBean {
 				usuariosEJB.guardarRolesUsuarioEmpresa(ueRoles);
 				//Generar y enviar contraseña
 				if(usuario.getPassword() == null || usuario.getPassword().trim().isEmpty()) {
-					//Si hay CDA no se envia el password
-					if(!sessionMBean.getBackendConCda()) {
-						usuariosEJB.generarYEnviarPassword(usuario);
-					}
+					usuariosEJB.generarYEnviarPassword(usuario);
 				}
 				//Recargar los datos del usuario
 				setUsuarioEditar(usuario);
@@ -276,11 +272,6 @@ public class UsuarioMBean extends BaseMBean {
 	}
 	
 	public String enviarPassword() {
-		//Si hay CDA no se envia el password
-		if(sessionMBean.getBackendConCda()) {
-			return null;
-		}
-		
 		Usuario usuario = getUsuarioEditar();
 		if (usuario != null) {
 			try {
@@ -350,16 +341,4 @@ public class UsuarioMBean extends BaseMBean {
 			sessionMBean.setPantallaTitulo("Consultar usuarios");
 		}
 	}
-	
-	public void cambioSuperadmin() {
-		if(getUsuarioEditar().getSuperadmin()!=null && getUsuarioEditar().getSuperadmin().booleanValue()) {
-			UsuarioEmpresaRoles uer = getUsuarioEmpresaRolesEditar();
-			uer.setAdministrador(false);
-			uer.setfAtencion(false);
-			uer.setfCallCenter(false);
-			uer.setLlamador(false);
-			uer.setPlanificador(false);
-		}
-	}
-	
 }

@@ -11,7 +11,7 @@
 		<f:view beforePhase="#{reservaMBean.beforePhaseCancelar}"
 			beforePhaseListener="#{reservaMBean.beforePhaseCancelar}">
 
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
+			<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarReserva" zindex="2000">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
@@ -61,7 +61,7 @@
 									<h:outputLabel for="codSeg" class="col-sm-3 control-label label"
 										value="#{sessionMBean.textos['ingrese_el_codigo_de_seguridad']}" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="codSeg" value="#{sessionMBean.codigoSeguridadReserva}" styleClass="form-control" />
+										<p:inputText id="codSeg" value="#{sessionMBean.codigoSeguridadReserva}"></p:inputText>
 										<p:message for="codSeg" />
 									</p:outputPanel>
 								</p:outputPanel>
@@ -71,7 +71,7 @@
 
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary"><p:commandButton
-								value="#{sessionMBean.textos['continuar']} #{reservaMBean.simboloSiguiente}"
+								value="#{sessionMBean.textos['continuar']} &gt;&gt;"
 								actionListener="#{reservaMBean.buscarReservaDatos}"
 								update="@form"
 								styleClass="btn-lg btn-primario" /></li>

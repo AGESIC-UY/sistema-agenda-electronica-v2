@@ -2,7 +2,6 @@
 package uy.gub.imm.sae.common.factories.ws.client.recursos;
 
 import java.util.List;
-import java.util.TimeZone;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -56,8 +55,8 @@ public interface RecursosWS {
     @RequestWrapper(localName = "consultarDefinicionDeCampos", targetNamespace = "http://montevideo.gub.uy/schema/sae/1.0/", className = "uy.gub.imm.sae.common.factories.ws.client.recursos.ConsultarDefinicionDeCampos")
     @ResponseWrapper(localName = "consultarDefinicionDeCamposResponse", targetNamespace = "http://montevideo.gub.uy/schema/sae/1.0/", className = "uy.gub.imm.sae.common.factories.ws.client.recursos.ConsultarDefinicionDeCamposResponse")
     public List<AgrupacionDato> consultarDefinicionDeCampos(
-        @WebParam(name = "recurso", targetNamespace = "") Recurso recurso, 
-        @WebParam(name = "timezone", targetNamespace = "") TimeZone timezone)
+        @WebParam(name = "recurso", targetNamespace = "")
+        Recurso recurso)
         throws BusinessException_Exception
     ;
 

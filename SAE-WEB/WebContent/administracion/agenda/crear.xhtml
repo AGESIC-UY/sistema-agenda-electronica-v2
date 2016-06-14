@@ -12,7 +12,6 @@
 			beforePhaseListener="#{agendaMBean.beforePhaseCrear}">
 
 			<h:form id="form" rendered="#{sessionMBean.empresaActual != null}">
-			   <p:outputPanel id="panelForm">
 				<fieldset id="basic">
 					<legend>
 						<h:outputText value="#{sessionMBean.textos['datos_de_la_agenda']}" />
@@ -28,7 +27,7 @@
 									valueChangeListener="#{agendaMBean.cambioTramite}"
 									styleClass="form-control textoLargo"
 									update="tramite nombreAgenda descripcionAgenda">
-									<p:ajax update="form:panelForm" process="@this" />
+									<p:ajax update="@all" process="@this" />
 									<f:selectItems value="#{agendaMBean.tramites}" />
 								</h:selectOneMenu>
                 <p:message for="codigoTramite" />
@@ -36,7 +35,7 @@
               <p:outputLabel value="#{sessionMBean.textos['codigo']}"
                 for="codigoTramite" styleClass="col-sm-1 control-label label formularioCampoRequerido" />
               <p:outputPanel styleClass="col-sm-1">
-	              <h:inputText id="codigoTramite" maxlength="5"
+	              <p:inputText id="codigoTramite" maxlength="5"
 	                value="#{agendaMBean.agendaNueva.tramiteCodigo}"
 	                disabled="#{agendaMBean.agendaNueva.tramiteId != null and agendaMBean.agendaNueva.tramiteId != '0'}"
 	                styleClass="form-control" />
@@ -54,7 +53,7 @@
 								for="nombreAgenda"
 								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="nombreAgenda"
+								<p:inputText id="nombreAgenda"
 									value="#{agendaMBean.agendaNueva.nombre}" maxlength="100"
 									styleClass="form-control" />
 								<p:message for="nombreAgenda"></p:message>
@@ -74,32 +73,11 @@
 						</p:outputPanel>
 
             <p:outputPanel styleClass="form-group">
-              <h:outputText value="#{sessionMBean.textos['requiere_cda']}"
-                styleClass="col-sm-3 control-label label" />
+              <p:outputLabel value="#{sessionMBean.textos['requiere_cda']}"
+                for="requiereCDA" styleClass="col-sm-3 control-label label" />
               <p:outputPanel styleClass="col-sm-9">
                 <p:selectBooleanCheckbox id="requiereCDA"
                   value="#{agendaMBean.agendaNueva.conCda}" />
-				<p:outputLabel value="#{sessionMBean.textos['requerido']}" for="requiereCDA"  />
-              </p:outputPanel>
-            </p:outputPanel>
-
-            <p:outputPanel styleClass="form-group">
-              <h:outputText value="#{sessionMBean.textos['seguimiento']}"
-                styleClass="col-sm-3 control-label label" />
-              <p:outputPanel styleClass="col-sm-9">
-                <p:selectBooleanCheckbox id="trazar"
-                  value="#{agendaMBean.agendaNueva.conTrazabilidad}" />
-                <p:outputLabel value="#{sessionMBean.textos['con_trazabilidad']}" for="trazar" />
-              </p:outputPanel>
-            </p:outputPanel>
-
-            <p:outputPanel styleClass="form-group">
-              <h:outputText value="#{sessionMBean.textos['novedades']}"
-                styleClass="col-sm-3 control-label label" />
-              <p:outputPanel styleClass="col-sm-9">
-                <p:selectBooleanCheckbox id="publicarNovedades"
-                  value="#{agendaMBean.agendaNueva.publicarNovedades}" />
-                <p:outputLabel value="#{sessionMBean.textos['publicar_novedades']}" for="publicarNovedades" />
               </p:outputPanel>
             </p:outputPanel>
 
@@ -136,7 +114,7 @@
 							<li><p:commandButton
 									value="#{sessionMBean.textos['guardar']}"
 									actionListener="#{agendaMBean.crear}"
-									styleClass="btn-lg btn-primario" update="form:panelForm" /></li>
+									styleClass="btn-lg btn-primario" update="@form" /></li>
 						</ul>
 					</li>
 					<li class="action-buttons-second">
@@ -147,7 +125,6 @@
 						</ul>
 					</li>
 				</ul>
-				</p:outputPanel>
 			</h:form>
 		</f:view>
 	</ui:define>

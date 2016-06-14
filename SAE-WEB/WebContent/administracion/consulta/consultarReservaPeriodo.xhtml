@@ -11,16 +11,18 @@
 		<f:view
 			beforePhase="#{consultaMBean.beforePhaseConsultarReservaPeriodo}"
 			beforePhaseListener="#{consultaMBean.beforePhaseConsultarReservaPeriodo}">
-      <p:outputPanel>
+			<p:outputPanel
+				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="form">
 					<fieldset id="basic">
 						<legend>
-							<h:outputText value="#{sessionMBean.textos['reporte_reserva_por_periodo_y_estado']}" />
+							<h:outputText
+								value="#{sessionMBean.textos['reporte_reserva_por_periodo_y_estado']}" />
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['fecha_desde']}"
+								<p:outputLabel value="#{sessionMBean.textos['fecha_desde']}:"
 									for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText value="#{reporteMBean.fechaDesde}"
@@ -33,7 +35,7 @@
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['fecha_hasta']}"
+								<p:outputLabel value="#{sessionMBean.textos['fecha_hasta']}:"
 									for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText value="#{reporteMBean.fechaHasta}"
@@ -46,7 +48,7 @@
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['estado']}"
+								<p:outputLabel value="#{sessionMBean.textos['estado']}:"
 									for="estado"
 									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
@@ -56,6 +58,15 @@
 										<f:selectItems value="#{reporteMBean.estadosReserva}" />
 									</h:selectOneMenu>
                   <p:message for="estado" />
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['una_pagina_por_hora']}?" for="pagPorHora"
+									styleClass="col-sm-3 control-label label" />
+								<p:outputPanel styleClass="col-sm-9">
+									<p:selectBooleanCheckbox
+										value="#{reporteMBean.unaPaginaPorHora}" id="pagPorHora" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>

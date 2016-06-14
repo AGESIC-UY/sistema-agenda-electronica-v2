@@ -24,7 +24,7 @@
 					var="row"
 					binding="#{validacionAsignacionMBean.validacionesDelRecursoTable}"
 					id="tablaValidacionesDelRecurso" rows="5" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 					>
 
 					<f:facet name="header">
@@ -90,7 +90,7 @@
 									<h:selectOneMenu id="validacion"
 										value="#{validacionAsignacionSessionMBean.validacionDelRecurso.validacion}"
 										disabled="#{validacionAsignacionMBean.hayAlgunaValidacionPorDato}"
-										valueChangeListener="#{validacionAsignacionMBean.cambioValidacionDelRecurso}" 
+										valueChangeListener="#{validacionAsignacionMBean.cambioValidacionDelRecurso}"
 										update="tablaValidacionesPorDato">
 										<f:selectItem itemLabel="- - Seleccione una validacion - -" />
 										<f:selectItems
@@ -126,7 +126,7 @@
 									<p:dataTable
 										value="#{validacionAsignacionSessionMBean.validacionDelRecurso.validacionesPorDato}"
 										var="row" paginator="true"
-										paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+										paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 										binding="#{validacionAsignacionMBean.validacionesPorDatoTable}"
 										id="tablaValidacionesPorDato" rows="4" width="404px">
 

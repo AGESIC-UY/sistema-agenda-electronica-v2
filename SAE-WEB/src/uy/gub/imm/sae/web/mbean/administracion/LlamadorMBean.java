@@ -340,7 +340,7 @@ public class LlamadorMBean extends BaseMBean {
 			String horaLLamada = df.format(llamada.getHora());
 			LlamadasPorHorario llamadasPorHorario = mapLlamadasPorHorario.get(horaLLamada);
 			if(llamadasPorHorario == null) {
-				llamadasPorHorario = new LlamadasPorHorario(llamada.getReserva().getDisponibilidades().get(0).getHoraInicio());
+				llamadasPorHorario = new LlamadasPorHorario(llamada.getHora());
 				mapLlamadasPorHorario.put(horaLLamada, llamadasPorHorario);
 			}
 			String puesto = llamada.getPuesto()!=null?llamada.getPuesto().toString():"";

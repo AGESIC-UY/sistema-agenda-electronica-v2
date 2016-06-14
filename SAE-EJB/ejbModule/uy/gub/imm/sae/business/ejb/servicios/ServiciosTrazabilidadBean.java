@@ -60,7 +60,6 @@ import uy.gub.agesic.jbossws.WSAddressingHandler;
 import uy.gub.agesic.sts.client.PGEClient;
 import uy.gub.imm.sae.business.ejb.facade.ConfiguracionBean;
 import uy.gub.imm.sae.business.ws.SoapHandler;
-import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.global.Empresa;
 /* */
@@ -117,17 +116,8 @@ public class ServiciosTrazabilidadBean {
 	public String registrarCabezal(Empresa empresa, Reserva reserva, String transaccionId, String procesoId, 
 			String transaccionPadreId, Long pasoPadre) {
 
-
 		boolean habilitado = false;
-		//Primero ver si la agenda soporta trazabilidad
-		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-		if(agenda.getConTrazabilidad()!=null) {
-			habilitado = agenda.getConTrazabilidad().booleanValue();
-		}
-		if (!habilitado) {
-			return null;
-		}
-		//Después ver si la instalación soporta trazabilidad 
+		int timeout = 5000;
 		try {
 			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
 		} catch (Exception nfEx) {
@@ -136,8 +126,6 @@ public class ServiciosTrazabilidadBean {
 		if (!habilitado) {
 			return null;
 		}
-		
-		int timeout = 5000;
 		try {
 			timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
 		} catch (Exception nfEx) {
@@ -198,9 +186,8 @@ public class ServiciosTrazabilidadBean {
 			//Ejemplo: 2015-11-16, 17:26:32 +03:00
 			traza.setFechaHoraOrganismo(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
 
-			String wsaTo = confBean.getString("WS_TRAZABILIDAD_WSATO_CABEZAL");
-			String wsaAction = confBean.getString("WS_TRAZABILIDAD_WSAACTION_CABEZAL");
-			configurarSeguridad(cabezalPort, wsaTo, wsaAction, timeout);
+			String service = confBean.getString("WS_TRAZABILIDAD_SERVICE_CABEZAL");
+			configurarSeguridad(cabezalPort, service, timeout);
 
 			CabezalResponseDTO cabezalResp = cabezalPort.persist(traza);
 			if (cabezalResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.cabezal.EstadoRespuestaEnum.OK)) {
@@ -228,18 +215,7 @@ public class ServiciosTrazabilidadBean {
 	 * @param paso
 	 */
 	public void registrarLinea(Empresa empresa, Reserva reserva, String transaccionId, String idOficina, Paso paso) {
-		
 		boolean habilitado = false;
-		
-		//Primero ver si la agenda soporta trazabilidad
-		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-		if(agenda.getConTrazabilidad()!=null) {
-			habilitado = agenda.getConTrazabilidad().booleanValue();
-		}
-		if (!habilitado) {
-			return;
-		}
-		//Después ver si la instalación soporta trazabilidad 
 		try {
 			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
 		} catch (NumberFormatException nfEx) {
@@ -361,39 +337,17 @@ public class ServiciosTrazabilidadBean {
 	@SuppressWarnings("unchecked")
 	@Schedule(second = "0", minute = "*/3", hour = "*", persistent = false)
 	public void reintentarTrazas() {
-
-		boolean habilitado = false;
-		try {
-			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
-		} catch (NumberFormatException nfEx) {
-			habilitado = false;
-		}
-		if (!habilitado) {
-			return;
-		}
-		
-		int maxIntentos = 15;
-		try {
-			maxIntentos = confBean.getLong("WS_TRAZABILIDAD_MAXINTENTOS").intValue();
-		} catch (Exception nfEx) {
-			maxIntentos = 15;
-		}
-		
-		String eql = "SELECT t FROM Trazabilidad t WHERE t.enviado=FALSE AND t.intentos<:maxIntentos ORDER BY id";
-		Query query = globalEntityManager.createQuery(eql);
-		query.setParameter("maxIntentos", maxIntentos);
+		Query query = globalEntityManager.createQuery("SELECT t FROM Trazabilidad t WHERE t.enviado=FALSE ORDER BY id");
 		List<Trazabilidad> trazas = (List<Trazabilidad>) query.getResultList();
 		if (!trazas.isEmpty()) {
 
 			CabezalService cabezalService = new CabezalService(CabezalService.class.getResource("CabezalService.wsdl"));
 			CabezalWS cabezalPort = cabezalService.getCabezalWSPort();
-			String wsaToCabezal = confBean.getString("WS_TRAZABILIDAD_WSATO_CABEZAL");
-			String wsaActionCabezal = confBean.getString("WS_TRAZABILIDAD_WSAACTION_CABEZAL");
+			String serviceCabezal = confBean.getString("WS_TRAZABILIDAD_SERVICE_CABEZAL");
 
 			LineaService lineaService = new LineaService(LineaService.class.getResource("LineaService.wsdl"));
 			LineaWS lineaPort = lineaService.getLineaWSPort();
-			String wsaToLinea = confBean.getString("WS_TRAZABILIDAD_WSATO_LINEA");
-			String wsaActionLinea = confBean.getString("WS_TRAZABILIDAD_WSAACTION_LINEA");
+			String serviceLinea = confBean.getString("WS_TRAZABILIDAD_SERVICE_LINEA");
 			
 			int timeout = 5000;
 			try {
@@ -401,7 +355,7 @@ public class ServiciosTrazabilidadBean {
 			} catch (Exception nfEx) {
 				timeout = 5000;
 			}
-
+			
 			//Determinar el nombre de la tabla de reservas
 			Table tabla = Reserva.class.getAnnotation(Table.class);
 			String nombreTablaReservas = "reservas";
@@ -410,13 +364,10 @@ public class ServiciosTrazabilidadBean {
 			}
 			
 			for (Trazabilidad traza : trazas) {
-				traza.setFechaUltIntento(new Date());
-				traza.setIntentos(traza.getIntentos() + 1);
-				
 				try {
 					if (traza.getEsCabezal()) {
 						CabezalDTO cabezal = xmlToCabezal(traza.getDatos());
-						configurarSeguridad(cabezalPort, wsaToCabezal, wsaActionCabezal, timeout);
+						configurarSeguridad(cabezalPort, serviceCabezal, timeout);
 						CabezalResponseDTO cabezalResp = cabezalPort.persist(cabezal);
 						if (cabezalResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.cabezal.EstadoRespuestaEnum.OK)) {
 							//Actualizar el codigo de trazabilidad en la tabla de reservas
@@ -452,16 +403,24 @@ public class ServiciosTrazabilidadBean {
 //									}
 									
 								}catch(Exception ex) {
+									//
 									ex.printStackTrace();
 								}
+								
 							}
+
+							
+							
 							traza.setEnviado(true);
+							
+							
+							
 						} else {
 							traza.setEnviado(false);
 						}
 					} else {
 						LineaDTO linea = xmlToLinea(traza.getDatos());
-						configurarSeguridad(lineaPort, wsaToLinea, wsaActionLinea, timeout);
+						configurarSeguridad(lineaPort, serviceLinea, timeout);
 						ResponseDTO lineaResp = lineaPort.persist(linea);
 						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
 							traza.setEnviado(true);
@@ -469,14 +428,12 @@ public class ServiciosTrazabilidadBean {
 							traza.setEnviado(false);
 						}
 					}
+					traza.setFechaUltIntento(new Date());
+					traza.setIntentos(traza.getIntentos() + 1);
+					globalEntityManager.merge(traza);
 				} catch (Exception ex) {
 					ex.printStackTrace();
-				} finally {
-					try {
-						globalEntityManager.merge(traza);
-					}catch(Exception ex) {
-						//
-					}
+					//
 				}
 			}
 		}
@@ -484,7 +441,8 @@ public class ServiciosTrazabilidadBean {
 	}
 
 	@SuppressWarnings("rawtypes")
-	private void configurarSeguridad(Object port, String wsaTo, String wsaAction, int timeout) throws Exception {
+	private void configurarSeguridad(Object port, String service, int timeout) throws Exception {
+
 		/* */
 		String urlSts = confBean.getString("WS_TRAZABILIDAD_URLSTS");
 		String rol = confBean.getString("WS_TRAZABILIDAD_ROL");
@@ -501,14 +459,14 @@ public class ServiciosTrazabilidadBean {
 		String sslTsPath = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PATH");
 		String sslTsPass = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PASS");
 
-		SAMLAssertion tokenSTS = obtenerTokenSTS(urlSts, rol, wsaTo, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias,
+		SAMLAssertion tokenSTS = obtenerTokenSTS(urlSts, rol, service, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias,
 				sslTsPath, sslTsPass, timeout);
 
 		AddressingBuilder addrBuilder = SOAPAddressingBuilder.getAddressingBuilder();
 		SOAPAddressingProperties addrProps = (SOAPAddressingProperties) addrBuilder.newAddressingProperties();
 
-		addrProps.setTo(new AttributedURIImpl(wsaTo));
-		addrProps.setAction(new AttributedURIImpl(wsaAction));
+		addrProps.setTo(new AttributedURIImpl(service));
+		addrProps.setAction(new AttributedURIImpl(service + "/persist"));
 
 		// Build handler chain
 		List<Handler> customHandlerChain = new ArrayList<Handler>();
@@ -535,12 +493,12 @@ public class ServiciosTrazabilidadBean {
 
 	}
 
-	private SAMLAssertion obtenerTokenSTS(String urlSts, String rol, String wsaTo, String policy, String orgKsPath, String orgKsPass,
+	private SAMLAssertion obtenerTokenSTS(String urlSts, String rol, String service, String policy, String orgKsPath, String orgKsPass,
 			String orgKsAlias, String sslKsPath, String sslKsPass, String sslKsAlias, String sslTsPath, String sslTsPass, int timeout) throws Exception {
 		RSTBean bean = new RSTBean();
 		bean.setUserName("SAE");
 		bean.setRole(rol);
-		bean.setService(wsaTo);
+		bean.setService(service);
 		bean.setPolicyName(policy);
 		bean.setIssuer("SAE");
 

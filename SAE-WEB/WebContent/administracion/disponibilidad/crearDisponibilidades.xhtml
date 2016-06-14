@@ -15,7 +15,7 @@
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="formCrearDisponibilidad">
-          <p:outputPanel id="panelCrearDisponibilidad">
+
 					<fieldset>
 						<legend>
 							<h:outputText
@@ -42,7 +42,7 @@
 									<p:commandButton id="consultar"
 										value="#{sessionMBean.textos['consultar_disponibilidades']}"
 										actionListener="#{crearDisponibilidadMBean.consultarDisponibilidadesDelDia}"
-										update="formCrearDisponibilidad:panelCrearDisponibilidad"
+										update="formCrearDisponibilidad:tablaMatutina formCrearDisponibilidad:tablaVespertina formCrearDisponibilidad:fechaConsultar formCrearDisponibilidad:campos"
 										styleClass="btn btn-secundario" />
 								</p:outputPanel>
 							</p:outputPanel>
@@ -216,7 +216,7 @@
 						</li>
 						<li class="action-buttons-second"></li>
 					</ul>
-          </p:outputPanel>
+
 				</h:form>
 
 			</p:outputPanel>

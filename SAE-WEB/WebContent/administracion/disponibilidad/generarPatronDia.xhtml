@@ -15,7 +15,6 @@
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="formGenerarPatronDia">
-				  <p:outputPanel id="panelGenerarPatronDia">
 					<fieldset>
 						<legend>
 							<h:outputText
@@ -37,7 +36,7 @@
 								<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
 									<p:commandButton value="#{sessionMBean.textos['consultar_disponibilidades']}"
 										actionListener="#{genDisponibilidadMBean.obtenerCuposModelo}"
-										update="formGenerarPatronDia:panelGenerarPatronDia"
+										update="formGenerarPatronDia:tablaMatutina :formGenerarPatronDia:tablaVespertina formGenerarPatronDia generarDisp"
 										styleClass="btn btn-secundario" />
 								</p:outputPanel>
 							</p:outputPanel>
@@ -45,7 +44,7 @@
 					</fieldset>
 
 					<div class="row margen_inf">
-					  <p:outputPanel id="panelTablaMatutina" styleClass="col-sm-6"> 
+						<div class="col-sm-6">
 							<p:dataTable id="tablaMatutina"
 								value="#{genDispSessionMBean.disponibilidadesDelDiaMatutinaModif}"
 								var="rowMM"
@@ -90,8 +89,8 @@
 								</p:column>
 
 							</p:dataTable>
-					  </p:outputPanel>
-            <p:outputPanel id="panelTablaVespertina" styleClass="col-sm-6"> 
+						</div>
+						<div class="col-sm-6">
 							<p:dataTable id="tablaVespertina"
 								value="#{genDispSessionMBean.disponibilidadesDelDiaVespertinaModif}"
 								var="rowVM"
@@ -135,7 +134,7 @@
 									<h:outputText value="#{rowVM.data.cantReservas}"></h:outputText>
 								</p:column>
 							</p:dataTable>
-						</p:outputPanel>
+						</div>
 					</div>
 
 					<fieldset>
@@ -184,12 +183,11 @@
 								<li><p:commandButton
 										value="#{sessionMBean.textos['crear_disponibilidades']}"
 										actionListener="#{genDisponibilidadMBean.generarDisponibilidades}"
-										update="formGenerarPatronDia:panelGenerarPatronDia" styleClass="btn-lg btn-primario" /></li>
+										update="@form" styleClass="btn-lg btn-primario" /></li>
 							</ul>
 						</li>
 						<li class="action-buttons-second"></li>
 					</ul>
-					</p:outputPanel>
 				</h:form>
 			</p:outputPanel>
 		</f:view>

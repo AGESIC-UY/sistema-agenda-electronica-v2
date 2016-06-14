@@ -50,11 +50,7 @@ public class Agenda implements Serializable {
 	private Integer id;
 	private String nombre;
 	private String descripcion;
-	
 	private Boolean conCda;
-	private Boolean conTrazabilidad;
-	private Boolean publicarNovedades;
-	
 	private Date   fechaBaja;
 	
 	private List<Recurso> recursos;
@@ -180,24 +176,6 @@ public class Agenda implements Serializable {
 
 	public void setTramiteCodigo(String tramiteCodigo) {
 		this.tramiteCodigo = tramiteCodigo;
-	}
-
-	@Column(name="publicar_novedades")
-	public Boolean getPublicarNovedades() {
-		return publicarNovedades;
-	}
-
-	public void setPublicarNovedades(Boolean publicarNovedades) {
-		this.publicarNovedades = publicarNovedades;
-	}
-
-	@Column(name="con_trazabilidad")
-	public Boolean getConTrazabilidad() {
-		return conTrazabilidad;
-	}
-
-	public void setConTrazabilidad(Boolean conTrazabilidad) {
-		this.conTrazabilidad = conTrazabilidad;
 	}
 
 	

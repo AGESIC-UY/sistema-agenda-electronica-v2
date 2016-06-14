@@ -47,7 +47,7 @@
 					</div>
 
 					<div class="col-sm-6">
-						<p:dataTable value="#{sessionMBean.recursosSeleccion}" var="row" id="tablaRecursos" 
+						<p:dataTable value="#{sessionMBean.recursos}" var="row" id="tablaRecursos" 
 						  selection="#{sessionMBean.rowSelectRecurso}" rowKey="#{row.data.id}" selectionMode="single" 
 						  caption="#{sessionMBean.textos['listado_de_recursos']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 							<f:facet name="header">

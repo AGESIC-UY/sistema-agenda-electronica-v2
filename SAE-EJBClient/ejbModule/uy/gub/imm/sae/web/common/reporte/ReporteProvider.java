@@ -20,7 +20,7 @@
 
 package uy.gub.imm.sae.web.common.reporte;
 
-import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +30,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.sf.jasperreports.engine.JRException;
 import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
 import net.sf.jasperreports.engine.JasperFillManager;
 import net.sf.jasperreports.engine.JasperPrint;
 import net.sf.jasperreports.engine.JasperReport;
@@ -39,8 +40,6 @@ import net.sf.jasperreports.engine.design.JRDesignField;
 import net.sf.jasperreports.engine.design.JRDesignGroup;
 import net.sf.jasperreports.engine.design.JRDesignTextField;
 import net.sf.jasperreports.engine.design.JasperDesign;
-import net.sf.jasperreports.engine.export.JRPdfExporter;
-import net.sf.jasperreports.engine.export.JRPdfExporterParameter;
 import net.sf.jasperreports.engine.xml.JRXmlLoader;
 
 public class ReporteProvider {
@@ -48,7 +47,7 @@ public class ReporteProvider {
 	private static final String CONTENT_TYPE_PDF = "application/pdf";
 	
 	
-	public static JasperPrint generarReporteDinamico(
+	public static byte[] generarReporteDinamico(
 			InputStream reporteJrxml, 
 			List<Columna> defColumnas, 
 			String atributoCamposDinamicos,
@@ -60,40 +59,19 @@ public class ReporteProvider {
 			JasperDesign reportDesign = JRXmlLoader.load(reporteJrxml);
 			
 			agregarColumnas(reportDesign, defColumnas);
+//			JasperCompileManager.writeReportToXmlFile(reportDesign, "c:/reporte.jrxml");
 			JasperReport report = JasperCompileManager.compileReport(reportDesign);
+//			JRBeanCollectionDataSource beansCollection = new JRBeanCollectionDataSource(beans);
 			JRDinamicBeanCollectionDataSource dataSource = new JRDinamicBeanCollectionDataSource(datos, atributoCamposDinamicos);
 			JasperPrint print = JasperFillManager.fillReport(report, params, dataSource);
 			
-			//return JasperExportManager.exportReportToPdf(print);
-			return print;
+			return JasperExportManager.exportReportToPdf(print);
 			
 		} catch (Exception e) {
 			throw new ReporteException("JasperReportsProvider_getReportAsByteArray_JR", e);
 		}
 	}
 	
-//	public static byte[] generarReporteDinamico(
-//			InputStream reporteJrxml, 
-//			List<Columna> defColumnas, 
-//			String atributoCamposDinamicos,
-//			Map<String,?> params, 
-//			List<?> datos) 
-//			throws ReporteException {
-//
-//		try{
-//			JasperDesign reportDesign = JRXmlLoader.load(reporteJrxml);
-//			
-//			agregarColumnas(reportDesign, defColumnas);
-//			JasperReport report = JasperCompileManager.compileReport(reportDesign);
-//			JRDinamicBeanCollectionDataSource dataSource = new JRDinamicBeanCollectionDataSource(datos, atributoCamposDinamicos);
-//			JasperPrint print = JasperFillManager.fillReport(report, params, dataSource);
-//			
-//			return JasperExportManager.exportReportToPdf(print);
-//			
-//		} catch (Exception e) {
-//			throw new ReporteException("JasperReportsProvider_getReportAsByteArray_JR", e);
-//		}
-//	}
 
 	/**
 	 * Modifica el diseño del reporte agregando las columnas indicadas en el ultimo grupo que tenga el reporte.
@@ -175,26 +153,21 @@ public class ReporteProvider {
 	}
 	
 	
-	public static void exportarReporteComoPdf(HttpServletResponse response, List<JasperPrint> reportes, String nombre){
+	public static void exportarReporteComoPdf(HttpServletResponse response, byte[] pdf){
 		try {
-			JRPdfExporter exp = new JRPdfExporter();
-      exp.setParameter(JRPdfExporterParameter.JASPER_PRINT_LIST, reportes);
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      exp.setParameter(JRPdfExporterParameter.OUTPUT_STREAM, bos);
-      exp.exportReport();
-      byte[] bytes = bos.toByteArray();
-			
 			response.setContentType(CONTENT_TYPE_PDF);
-			response.setContentLength(bytes.length);
+			response.setContentLength(pdf.length);
 			response.setContentType("application/octet-stream");
-			response.setHeader("Content-disposition", "attachment; filename=\""+nombre+"\"");
+			response.setHeader("Content-disposition", "attachment; filename=\"reporte.pdf\"");
+			//response.setHeader("Content-disposition", "inline; filename=\"reporte.pdf\"");
 			ServletOutputStream out = response.getOutputStream();
-			out.write(bytes);
+			out.write(pdf);
 			out.flush();
 			out.close();
-		} catch (Exception e) {
+		} catch (IOException e) {
 		  e.printStackTrace();
 		}
 	}
+	
 
 }

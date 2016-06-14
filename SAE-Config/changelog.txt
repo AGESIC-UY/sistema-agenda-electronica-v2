@@ -1,7 +1,0 @@
-Versión 1.1
--Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
--Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
--Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
--Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
--Se cambió la versión de OpenLayers para que funcione en IE 9.
--Se corrigieron problemas de visualización de los scrolls.

@@ -82,7 +82,6 @@ public class SesionMBean	extends BaseMBean {
 	private String urlPaso1Reserva;
 	private String urlTramite;
 	private String parmsDatosCiudadano;
-	private String codigoTrazabilidadPadre;
 	
 	private String paso3Captcha;
 
@@ -170,7 +169,9 @@ public class SesionMBean	extends BaseMBean {
 
 		try {
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
+			
 			cargarTextos();
+			
 		} catch (ApplicationException e) {
 			logger.error("NO SE PUDO OBTENER EJB AgendarReservas");
 			logger.error(e);
@@ -180,13 +181,11 @@ public class SesionMBean	extends BaseMBean {
 	
 	public void seleccionarAgenda(Integer agendaId) throws BusinessException, RolException, ApplicationException {
 		limpiarSesion();
-		this.agenda = null;
 		this.agenda = agendarReservasEJB.consultarAgendaPorId(agendaId);
 	}
 	
 	public void seleccionarAgendaPorReserva(Integer reservId) throws BusinessException, RolException, ApplicationException {
 		limpiarSesion();
-		this.agenda = null;
 		this.agenda = agendarReservasEJB.consultarAgendaPorId(agendaId);
 	}
 
@@ -510,8 +509,7 @@ public class SesionMBean	extends BaseMBean {
 	}
 
 	private Map<String, String> textos = new HashMap<String, String>();
-//	private List<String> frasesCaptcha = new ArrayList<String>();
-	private Map<String, String> preguntasCaptcha = new HashMap<String, String>();
+	private List<String> frasesCaptcha = new ArrayList<String>();
 
 	public void cargarTextos() {
 		try {
@@ -521,9 +519,9 @@ public class SesionMBean	extends BaseMBean {
 			e.printStackTrace();
 		}
 		try {
-			preguntasCaptcha = agendarReservasEJB.consultarPreguntasCaptcha(idiomaActual);
+			frasesCaptcha = agendarReservasEJB.consultarFrasesCaptcha(idiomaActual);
 		} catch (ApplicationException e) {
-			preguntasCaptcha = new HashMap<String, String>();
+			frasesCaptcha = new ArrayList<String>();
 			e.printStackTrace();
 		}
 	}
@@ -532,10 +530,10 @@ public class SesionMBean	extends BaseMBean {
     return textos;
   }
   
-	public Map<String, String> getPreguntasCaptcha() {
-		return preguntasCaptcha;
+	public List<String> getFrasesCaptcha() {
+		return frasesCaptcha;
 	}
-	
+
 	public List<SelectItem> getIdiomasSoportados() {
 		
 		List<SelectItem> idiomas = new ArrayList<SelectItem>();
@@ -574,14 +572,6 @@ public class SesionMBean	extends BaseMBean {
 
 	public void setParmsDatosCiudadano(String parmsDatosCiudadano) {
 		this.parmsDatosCiudadano = parmsDatosCiudadano;
-	}
-
-	public String getCodigoTrazabilidadPadre() {
-		return codigoTrazabilidadPadre;
-	}
-
-	public void setCodigoTrazabilidadPadre(String codigoTrazabilidadPadre) {
-		this.codigoTrazabilidadPadre = codigoTrazabilidadPadre;
 	}
 
 	public String getPaso3Captcha() {

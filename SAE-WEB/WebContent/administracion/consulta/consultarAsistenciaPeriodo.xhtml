@@ -11,7 +11,8 @@
 		<f:view
 			beforePhase="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}"
 			beforePhaseListener="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}">
-			<p:outputPanel>
+			<p:outputPanel
+				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="form">
 					<fieldset>
 						<legend>

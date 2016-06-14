@@ -75,27 +75,33 @@ public class Paso2MBean extends PasoMBean {
 
 	private String filtroHorarios = "MV";
 	
-	private boolean errorInit;
-	
 	@PostConstruct
 	public void init() {
-		errorInit = false;
 		try {
+
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
-			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null) {
-				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-				errorInit = true;
+
+			if (sesionMBean.getAgenda() == null
+					|| sesionMBean.getRecurso() == null) {
+
+				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
 				return;
 			}
+
+			// Previene una recarga de la pagina o si el usuario oprime la tecla
+			// Back del navegador.
+			// para minimizar la cantidad de reservas pendientes.
+
 			if (sesionMBean.getReserva() != null) {
 				agendarReservasEJB.desmarcarReserva(sesionMBean.getReserva());
 				sesionMBean.setReserva(null);
 			}
 			configurarCalendario();
 			configurarDisponibilidadesDelDia();
+
 		} catch (Exception aEx) {
-			addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-			errorInit = true;
+			aEx.printStackTrace();
+			redirect(ERROR_PAGE_OUTCOME);
 		}
 	}
 
@@ -194,9 +200,11 @@ public class Paso2MBean extends PasoMBean {
 		return this.disponibilidadesVespertina;
 	}
 
-	private void marcarReserva(Disponibilidad d) throws RolException, BusinessException, UserException {
-		Reserva reserva = agendarReservasEJB.marcarReserva(d);
-		sesionMBean.setReserva(reserva);
+	private void marcarReserva(Disponibilidad d) throws RolException,
+			BusinessException, UserException {
+
+		Reserva r = agendarReservasEJB.marcarReserva(d);
+		sesionMBean.setReserva(r);
 		sesionMBean.setDisponibilidad(d);
 	}
 
@@ -264,7 +272,8 @@ public class Paso2MBean extends PasoMBean {
 
 		List<Integer> listaCupos = null;
 		try {
-			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado);
+			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r,
+					ventanaMesSeleccionado);
 			// Se carga la fecha inicial
 			Calendar cont = Calendar.getInstance();
 			cont.setTime(Utiles.time2InicioDelDia(sesionMBean.getVentanaMesSeleccionado().getFechaInicial()));
@@ -277,14 +286,22 @@ public class Paso2MBean extends PasoMBean {
 			jsonArrayFchDisp = new JSONArray();
 			// Recorro la ventana dia a dia y voy generando la lista completa de
 			// cupos x dia con -1, 0, >0 según corresponda.
-			while (!cont.getTime().after(sesionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
-				if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
+			while (!cont.getTime().after(
+					sesionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
+				if (cont.getTime().before(inicio_disp)
+						|| cont.getTime().after(fin_disp)) {
 					listaCupos.set(i, -1);
 				} else {
 					if (listaCupos.get(i) > 0) {
-						String dateStr = String.valueOf(cont.get(Calendar.DAY_OF_MONTH))+"/"+ String.valueOf(cont.get(Calendar.MONTH) + 1)+ "/" + String.valueOf(cont.get(Calendar.YEAR));
+						String dateStr = String.valueOf(cont
+								.get(Calendar.DAY_OF_MONTH))
+								+ "/"
+								+ String.valueOf(cont.get(Calendar.MONTH) + 1)
+								+ "/" + String.valueOf(cont.get(Calendar.YEAR));
 						jsonArrayFchDisp.put(dateStr);
+
 					}
+
 				}
 				cont.add(Calendar.DAY_OF_MONTH, 1);
 				i++;
@@ -302,18 +319,6 @@ public class Paso2MBean extends PasoMBean {
 		Date date = null;
 		try {
 			date = format.parse(this.diaSeleccionadoStr);
-			
-			
-			//Verificar que la fecha esté en el rango permitido (que no la modifiquen en el medio)
-			Date inicio_disp = sesionMBean.getVentanaCalendario().getFechaInicial();
-			Date fin_disp = sesionMBean.getVentanaCalendario().getFechaFinal();
-			if(date.before(inicio_disp) || date.after(fin_disp)) {
-				addErrorMessage(sesionMBean.getTextos().get("fecha_no_valida"));
-				sesionMBean.setDiaSeleccionado(null);
-				configurarDisponibilidadesDelDia();
-				return;
-			}
-			
 			GregorianCalendar cal = new GregorianCalendar();
 			cal.setTime(date);
 			fechaFormatSelect = cal.get(Calendar.DAY_OF_MONTH)+" de "+deduccionMes(cal.get(Calendar.MONTH))+" "+cal.get(Calendar.YEAR);
@@ -329,12 +334,17 @@ public class Paso2MBean extends PasoMBean {
 	}
 
 	public void seleccionarHorarioMatutino(SelectEvent event) {
+		// al seleccionar un horario matutino se debe deseleccionar horario
+		// vespertino
 		if (this.rowSelectMatutina != null) {
 			setRowSelectVespertina(null);
 		}
 	}
 
 	public void seleccionarHorarioVespertino(SelectEvent event) {
+
+		// al seleccionar un horario vespertino se debe deseleccionar horario
+		// matutino
 		if (this.rowSelectVespertina != null) {
 			setRowSelectMatutina(null);
 		}
@@ -347,8 +357,10 @@ public class Paso2MBean extends PasoMBean {
 			if (!(rowSelectMatutina == null)) {
 				row = rowSelectMatutina;
 				if (row.getData().getCupo() > 0) {
-					sesionMBean.getDisponibilidadesDelDiaMatutina().setSelectedRow(row);
-					sesionMBean.getDisponibilidadesDelDiaVespertina().setSelectedRow(null);
+					sesionMBean.getDisponibilidadesDelDiaMatutina()
+							.setSelectedRow(row);
+					sesionMBean.getDisponibilidadesDelDiaVespertina()
+							.setSelectedRow(null);
 				} else {
 					addErrorMessage(sesionMBean.getTextos().get("debe_seleccionar_un_horario"));
 					return null;
@@ -356,13 +368,17 @@ public class Paso2MBean extends PasoMBean {
 			} else {
 				row = rowSelectVespertina;
 				if (row.getData().getCupo() > 0) {
-					sesionMBean.getDisponibilidadesDelDiaMatutina().setSelectedRow(null);
-					sesionMBean.getDisponibilidadesDelDiaVespertina().setSelectedRow(row);
+					sesionMBean.getDisponibilidadesDelDiaMatutina()
+							.setSelectedRow(null);
+					sesionMBean.getDisponibilidadesDelDiaVespertina()
+							.setSelectedRow(row);
 				} else {
 					addErrorMessage(sesionMBean.getTextos().get("debe_seleccionar_un_horario"));
 					return null;
 				}
+
 			}
+
 			try {
 				marcarReserva(row.getData());
 				return "siguientePaso";
@@ -370,10 +386,12 @@ public class Paso2MBean extends PasoMBean {
 				addErrorMessage(e);
 				return null;
 			}
+
 		} else {
 			addErrorMessage(sesionMBean.getTextos().get("debe_seleccionar_un_horario"));
 			return null;
 		}
+
 	}
 
 	public void beforePhase(PhaseEvent event) {
@@ -518,9 +536,6 @@ public class Paso2MBean extends PasoMBean {
 		this.filtroHorarios = filtroHorarios;
 	}
 
-	public boolean isErrorInit() {
-		return errorInit;
-	}
 	
 	
 }

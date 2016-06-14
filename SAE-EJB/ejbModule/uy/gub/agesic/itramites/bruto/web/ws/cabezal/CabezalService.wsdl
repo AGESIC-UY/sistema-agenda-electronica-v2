@@ -103,7 +103,7 @@
   <wsdl:binding name="cabezalServiceSoapBinding" type="tns:CabezalWS">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="persist">
-      <soap:operation soapAction="http://testservicios.pge.red.uy/agesic/cabezalService/preprod" style="document"/>
+      <soap:operation soapAction="" style="document"/>
       <wsdl:input name="persist">
         <soap:body use="literal"/>
       </wsdl:input>

@@ -85,33 +85,28 @@ public class ConsultaMBean extends SessionCleanerMBean {
 	@PostConstruct
 	public void initAgendaRecurso(){
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		
-		String servletPath = request.getServletPath();
-		
-		if(servletPath.contains("consultarReservaId.xhtml") || servletPath.contains("consultarReservaDatos.xhtml") || servletPath.contains("consultarReservaNumero.xhtml")) {
+		String parm = request.getParameter("parm");
+		if (parm == null || !parm.equals("atencion"))
+		{
+			//Se controla que se haya Marcado una agenda para trabajar con los recursos
 			if (sessionMBean.getAgendaMarcada() == null){
-				addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+				addErrorMessage("Debe tener una agenda seleccionada", MSG_ID);
 			}
+			
+			//Se controla que se haya Marcado un recurso
 			if (sessionMBean.getRecursoMarcado() == null){
-				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+				addErrorMessage("Debe tener un recurso seleccionado", MSG_ID);
 			}
+			
+			if (parm != null && parm.equals("numero"))
+			{
+				this.cargarListaHoras();
+				this.cargarListaMinutos();
+			}
+			
 		}
 		
-		if(servletPath.contains("consultarReservaNumero.xhtml")) {
-			this.cargarListaHoras();
-			this.cargarListaMinutos();
-		}
 		
-		if(servletPath.contains("consultarReservaPeriodo.xhtml") || servletPath.contains("consultarAsistenciaPeriodo.xhtml")) {
-			//En estos casos se permite no tener seleccionado un recurso o agenda porque el reporte se hace para todos
-			if (sessionMBean.getRecursoMarcado() == null){
-				if (sessionMBean.getAgendaMarcada() == null){
-					addAdvertenciaMessage("No tiene un recurso ni agenda seleccionada, el reporte se genera contemplando a todos los recursos y agendas");
-				}else {
-					addAdvertenciaMessage("No tiene un recurso seleccionado, el reporte se genera contemplando a todos los recursos de la agenda seleccionada");
-				}
-			}
-		}
 		
 	}
 	
@@ -161,7 +156,7 @@ public class ConsultaMBean extends SessionCleanerMBean {
 				} else {
 					this.consultaSessionMBean.setReserva(reservaAux);
 					this.consultaSessionMBean.setDisponibilidad(reservaAux.getDisponibilidades().get(0));
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
+					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado());
 					FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), this.consultaSessionMBean.getReserva(), this.campos, agrupaciones, sessionMBean.getFormatoFecha());
 				}	
 			
@@ -354,7 +349,7 @@ public class ConsultaMBean extends SessionCleanerMBean {
 			// Voy a negocio a buscar la reserva
 			try {
 				reservaConsultada = consultaEJB.consultarReservaPorNumero(sessionMBean.getRecursoMarcado(), c.getTime(), iNumeroReserva);
-				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado());
 				FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), reservaConsultada, this.campos, agrupaciones,sessionMBean.getFormatoFecha());
 			} catch (Exception ex) {
 				addErrorMessage(ex, MSG_ID);

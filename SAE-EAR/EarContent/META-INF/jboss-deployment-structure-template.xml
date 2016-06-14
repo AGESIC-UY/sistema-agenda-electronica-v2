@@ -7,7 +7,6 @@
           <module name="org.apache.xerces" export="true"/>
           <module name="org.apache.commons.fileupload" export="true"/>
           <module name="org.apache.commons.io" export="true"/>
-          <module name="org.apache.commons.lang" export="true"/>
           <module name="org.jboss.as.web" export="true"/>
           <module name="org.apache.commons.collections" export="true"/>
           <module name="net.sourceforge.jasperreports" export="true"/>

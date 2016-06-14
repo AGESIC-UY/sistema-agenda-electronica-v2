@@ -365,30 +365,38 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	}
 
 	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados) throws BusinessException {
+		
+	
 		if (recurso == null || periodo == null || estados == null || estados.size() == 0 || estados.get(0) == null) {
 			throw new BusinessException("-1", "Parametro nulo");
 		}
 		if (periodo.getFechaInicial() == null || periodo.getFechaFinal() == null) {
 			throw new BusinessException("-1", "El periodo debe tener inicio y fin");
 		}
+		
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
 			throw new BusinessException("-1", "No se encuentra el recurso indicado");
 		}		
+		
 		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, new ArrayList<Integer>());
 		
 	}
 
 	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, TimeZone timezone) throws BusinessException {
+		
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 		Date hoy = cal.getTime();
+		
 		VentanaDeTiempo periodo = new VentanaDeTiempo();
 		periodo.setFechaInicial(Utiles.time2FinDelDia(hoy));
 		periodo.setFechaFinal(Utiles.time2FinDelDia(hoy));
 		List<Estado> estados = new ArrayList<Estado>();
 		estados.add(Estado.R);
+
 		List<Integer> disponibilidadesIds = consultarDisponibilidadesReservadasYUtilizadas(recurso, periodo);
+		
 		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, disponibilidadesIds);
 	}
 
@@ -549,31 +557,41 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	
 	@SuppressWarnings("unchecked")	
 	private List<ReservaDTO> consultarReservasPorPeriodoEstadosDisponibilidades(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados, List<Integer> disponibilidadesIds ) throws BusinessException {
+
 		if (recurso == null) {
 			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
 		}
+		
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
 			throw new BusinessException("-1", "No se encuentra el recurso indicado");
 		}		
+		
+
 		Map<Integer, Map<String,String>> valoresPosiblesPorEtiqueta = armoMapaCampoValorEtiqueta(recurso);
+		
 		int i;
 		String whereEstados = null;
 		for (i=1; i <= estados.size(); i++) {
 			if (whereEstados != null) {
 				whereEstados += " or ";
-			} else {
+			}
+			else {
 				whereEstados = "";
 			}
+			
 			whereEstados += "r.estado = :estado" + i;
 		}
+
 		String whereDispIds = null;
 		for (i=1; i <= disponibilidadesIds.size(); i++) {
 			if (whereDispIds != null) {
 				whereDispIds += " or ";
-			} else {
+			}
+			else {
 				whereDispIds = "";
 			}
+			
 			whereDispIds += "d.id = :dispId" + i;
 		}
 		String where = "";
@@ -583,14 +601,17 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		if (whereDispIds != null) {
 			where += "and ( " + whereDispIds + " ) ";
 		}
+		
+
+		//Esta consulta no funciona con reserva multiples.
+		//Asumo que no existen reservas multiples
 		String queryString = 
-			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, a.asistio " +
+			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto " +
 			"from   Reserva r " +
 			"       join r.disponibilidades d " +
 			"       left join r.datosReserva dr " +
-			"		    left join dr.datoASolicitar das " +
+			"		left join dr.datoASolicitar das " +
 			"       left join r.llamada ll " +
-			"       left join r.atenciones a "+
 			"where   " +
 			"       d.recurso.id = :recurso and " +
 			"       d.fecha between :fi and :ff " +
@@ -614,17 +635,24 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			i++;
 		}
 
+		
+		
 		List<Object[]> resultados = query.getResultList();
+		
 		List<ReservaDTO> reservas = new ArrayList<ReservaDTO>();
+
 		Integer idReservaActual = null;
 		ReservaDTO reservaDTO = null;
+		
 		Iterator<Object[]> iterator = resultados.iterator();
 		while (iterator.hasNext()) {
+
 			Object[] rowReserva = iterator.next();
+		
 			Integer reservaId        = (Integer)rowReserva[0];
 			Integer reservaNumero    = (Integer)rowReserva[1];
 			String  reservaEstado    = ((Estado) rowReserva[2]).toString();
-			//Integer dispId           = (Integer)rowReserva[3];
+//			Integer dispId           = (Integer)rowReserva[3];
 			Date    dispFecha        = (Date) rowReserva[4];
 			Date    dispHoraInicio   = (Date) rowReserva[5];
 			Integer datoASolicitarId = (Integer) rowReserva[6];
@@ -632,38 +660,59 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Tipo    tipoDatoReserva  = (Tipo) rowReserva[8];
 			Object  valorDatoReserva = (Object) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
-			Boolean asistio          = (Boolean)rowReserva[11];
+
+
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
+				//recien arranco o cambio de reserva: 
+				
 				idReservaActual = reservaId;
+				
 				if (reservaDTO != null) {
 					//Cambio de reserva, guardo la actual como resultado
 					reservas.add(reservaDTO);
 				}
+				
 				reservaDTO = new ReservaDTO();
+				
 				reservaDTO.setId(reservaId);
 				reservaDTO.setNumero(reservaNumero);
 				reservaDTO.setEstado(reservaEstado);
 				reservaDTO.setFecha(dispFecha);
 				reservaDTO.setHoraInicio(dispHoraInicio);
-				reservaDTO.setPuestoLlamada(puesto);
-				reservaDTO.setAsistio(asistio);
+				if (puesto != null) {
+					reservaDTO.setPuestoLlamada(puesto);
+				}
+				
 			}
+			//El else indica que estoy iterando sobre los datos de la reserva
+			
 			if (nombreDatoReserva != null) {
+				
+				
 				if (tipoDatoReserva == Tipo.LIST) {
+					//Lista de valores: etiqueta del valor
 					String valor = valoresPosiblesPorEtiqueta.get(datoASolicitarId).get(valorDatoReserva);
 					reservaDTO.getDatos().put(nombreDatoReserva, valor);			
-				} else {
+				}
+				else {
+					//Tipo simple: valor
 					reservaDTO.getDatos().put(nombreDatoReserva, valorDatoReserva);			
 				}
+				
 				if("NroDocumento".equals(nombreDatoReserva) && nombreDatoReserva!=null) {
 					reservaDTO.setNumeroDocumento(valorDatoReserva.toString());
 				}
+				
+				
 			}
 		}
+
 		if (reservaDTO != null) {
 			//Al salir del loop, siempre me queda la ultima reserva para agregar al resultado
 			reservas.add(reservaDTO);
 		}
+		
+		
 		return reservas;
 	}
 	
@@ -791,7 +840,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Tipo    tipoDatoReserva  = (Tipo) rowReserva[8];
 			Object  valorDatoReserva = (Object) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
-			Boolean asistio          = (Boolean)rowReserva[11];
+			Boolean vino             = (Boolean)rowReserva[11];
 
 
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
@@ -815,9 +864,11 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 				if (puesto != null) {
 					reservaDTO.setPuestoLlamada(puesto);
 				}
-				if (asistio != null){
-					reservaDTO.setAsistio(asistio);
+				
+				if (vino != null){
+					reservaDTO.setAsistio(vino);
 				}
+				
 			}
 			//El else indica que estoy iterando sobre los datos de la reserva
 			

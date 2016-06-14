@@ -8,11 +8,11 @@
   <context-param>
     <param-name>com.sun.faces.autoCompleteOffOnViewState</param-name>
     <param-value>false</param-value>
-  </context-param>
-  <context-param>
+</context-param>
+<context-param>
     <param-name>com.sun.faces.enableViewStateIdRendering</param-name>
     <param-value>false</param-value>
-  </context-param>
+</context-param>
   <servlet>
     <servlet-name>Faces Servlet</servlet-name>
     <servlet-class>javax.faces.webapp.FacesServlet</servlet-class>
@@ -32,6 +32,7 @@
     <error-code>500</error-code>
     <location>/error/errorRedirect.xhtml</location>
   </error-page>
+  
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Paginas no protegidas</web-resource-name>
@@ -41,6 +42,8 @@
       <role-name>RA_AE_ANONIMO</role-name>
     </auth-constraint>
   </security-constraint>
+  
+  
   <security-constraint>
     <web-resource-collection>
       <web-resource-name>Paginas protegidas</web-resource-name>
@@ -108,6 +111,7 @@
       <url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
       <url-pattern>/administracion/index.xhtml</url-pattern>
       <url-pattern>/administracion/menuTitulo.xhtml</url-pattern>
+      <!-- url-pattern>/administracion/inicio.xhtml</url-pattern -->
       <url-pattern>/administracion/reserva/*</url-pattern>
       <url-pattern>/administracion/llamador/*</url-pattern>
       <url-pattern>/administracion/consulta/*</url-pattern>

@@ -91,7 +91,7 @@ public class DisenioFormularioMBean extends BaseMBean {
 			if (campos.getChildCount() == 0 && recurso != null) {
 				
 				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
+					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
 							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
@@ -122,7 +122,7 @@ public class DisenioFormularioMBean extends BaseMBean {
 			if (camposError.getChildCount() == 0 && recurso != null) {
 				
 				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
+					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
 							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
@@ -155,10 +155,12 @@ public class DisenioFormularioMBean extends BaseMBean {
 			//El chequeo de recurso != null es en caso de un acceso directo a la pagina, es solo
 			//para que no salte la excepcion en el log, pues de todas formas sera redirigido a una pagina de error.
 			if (recurso != null) {
-				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
 				sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
 				FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
 						FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
+				
+				//TODO: VER ESTOOO!!!!!!
 				formularioDin.armarFormulario(agrupaciones, null);
 				UIComponent formulario = formularioDin.getComponenteFormulario();
 				campos.getChildren().add(formulario);

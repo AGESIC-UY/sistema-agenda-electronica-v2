@@ -184,7 +184,6 @@ input[type="text"].texto100, input[type="tel"].texto100, select.texto100, textar
 	vertical-align: middle;
     margin-bottom: 0;
     margin-left: 7px;
-    display: inline-block;
 }
 .ui-chkbox + label:after, 
 .ui-selectmanycheckbox.ui-grid label:after,
@@ -778,9 +777,6 @@ label:after, .control-label:after{
 .cabezalPublico #logo {/*el logo del público*/
     height: 80px;
 }
-.cabezalPrivado #logo-correo {/*el logo del admin*/
-    height: 42px;
-}
 .cabezalPrivado #logo {/*el logo del admin*/
     height: 42px;
 }
@@ -832,10 +828,6 @@ label:after, .control-label:after{
 }
 iframe {
   border: 0;
-}
-iframe.iframeMapa {
-	width: 100%;
-	height: 235px;
 }
 .mapa-body{
   margin: 0;
@@ -1043,9 +1035,9 @@ input[type="text"].diaSeleccionado{
 	vertical-align: middle;
 }
 #sidebar-wrapper{
-	background: #EAEFF3;
+	background: #F5F5F5;
     border: 1px solid #d9d8d8;
-    padding-bottom: 55px;
+    padding-bottom: 60px;
 }
 .empresa {
 	padding: 5px 0;
@@ -1061,10 +1053,9 @@ input[type="text"].diaSeleccionado{
 	border: none;
 	border-bottom:1px solid #d9d8d8;
     font-size: 1.1em;
-    background: #EAEFF3;
 }
 .ui-panelmenu .ui-panelmenu-header:hover {
-	background: #e2e9ef;
+	background: #e4e4e4;
 }
 .ui-panelmenu .ui-panelmenu-header a {
     padding: .7em .5em .7em 2.2em;
@@ -1095,7 +1086,6 @@ input[type="text"].diaSeleccionado{
     margin-top: 20px;
     font-size: 0.9em;
     color: #4A4A4A;
-    margin-bottom: 15px;
 }
 .listaReservas table{
 	background: #F4F7FA;
@@ -1194,13 +1184,4 @@ input[type="text"].diaSeleccionado{
 	.form-group > div:last-child input, .form-group > div:last-child select, .form-group > div:last-child textarea, .form-group > div:last-child .ui-inputfield, .form-group > div:last-child .form-control {
 	    margin-bottom: 0;
 	}
-}
-
-
-/*
-Esto es para solucionar el problema que hace que el botón para subir archivos solo funcione cuando se hace
-clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
-*/
-.ui-fileupload-buttonbar .ui-fileupload-choose input {
-    transform: scale(3, 1);
 }

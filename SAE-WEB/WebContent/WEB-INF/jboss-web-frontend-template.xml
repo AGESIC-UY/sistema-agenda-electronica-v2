@@ -2,8 +2,9 @@
 <jboss-web >  
   <security-domain >@SAE_SECURITY_DOMAIN@</security-domain>
 <!-- Válvula para la integración con CDA (Control De Acceso) -->
+<!-- Está comentada porque Agesic está cambiando el sistema de CDA y este mecanismo no correría más -->
   <valve>
-    <class-name>com.sofis.agesic.sae.cda.CDAServiceProviderValve</class-name>
+    <class-name>com.sofis.agesic.sso.v2.SofisServiceProviderValve</class-name>
     <module>cda</module>
     <param><param-name>debug</param-name><param-value>false</param-value></param>
     <param><param-name>relaxValidityPeriod</param-name><param-value>true</param-value></param>
@@ -16,7 +17,7 @@
     <param><param-name>certAlias</param-name><param-value></param-value></param>
     <param><param-name>truststorePath</param-name><param-value></param-value></param>
     <param><param-name>truststorePass</param-name><param-value></param-value></param>
-    <param><param-name>validarFirma</param-name><param-value>true</param-value></param>
+    <param><param-name>validarFirma</param-name><param-value>false</param-value></param>
     <param><param-name>restrictedUrls</param-name><param-value>/sae/*</param-value></param>
     <param><param-name>excludedUrls</param-name><param-value>/sae/javax.faces.resource/*,/sae/resources/*,/sae/recursos/*,/sae/mapa/*</param-value></param>
     <param><param-name>defaultRoles</param-name><param-value>usuario_autenticado</param-value></param>
@@ -30,16 +31,62 @@
     <param><param-name>sqlDatasource</param-name><param-value>java:/postgres-sae-global-ds</param-value></param>
     <param><param-name>sqlSchemaResolverQuery</param-name><param-value>select datasource from global.ae_empresas where id={e}</param-value></param>
     <param><param-name>sqlCDARequiredQuery</param-name><param-value>select con_cda from {esquema}.ae_agendas where id={a}</param-value></param>
+    
   </valve>
- 
-<!--Descomentar esto solo si NO se utiliza un Apache delante del JBoss -->
-<!-- - ->  
-  <valve>
-    <class-name>uy.gub.imm.sae.web.security.SecurityHeadersValve</class-name>
-    <param><param-name>xFrameOptions</param-name><param-value>SAMEORIGIN</param-value></param>
-    <param><param-name>strictTransportSecurity</param-name><param-value>max-age=31536000; includeSubDomains</param-value></param>
-    <param><param-name>xContentTypeOptions</param-name><param-value>nosniff</param-value></param>
-  </valve>
-<!- - -->
- 
+	<!-- cuando es local de un ejb a otro: @EJB(beanInterface=InterfaceLocal.class) -->
+
+	<!-- ejb-local-ref> <ejb-ref-name>ejb/xxxBean</ejb-ref-name> <local-jndi-name>appEAR/xxxBean/local</local-jndi-name> 
+		</ejb-local-ref -->
+	
+	<ejb-ref>
+		<ejb-ref-name>ejb/AccionesBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/AccionesBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/RecursosBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/RecursosBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/AgendaGeneralBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/AgendaGeneralBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/AgendasBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/AgendasBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/AutocompletadosBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/AutocompletadosBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/ConsultasBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/ConsultasBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/AgendarReservasBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/AgendarReservasBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/DisponibilidadesBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/DisponibilidadesBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/LlamadasBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/LlamadasBean/remote</jndi-name>
+	</ejb-ref>
+
+	<ejb-ref>
+		<ejb-ref-name>ejb/ValidacionesBean</ejb-ref-name>
+		<jndi-name>@SAE_EJB_JNDI_BASE@/ValidacionesBean/remote</jndi-name>
+	</ejb-ref>
+
+
 </jboss-web>

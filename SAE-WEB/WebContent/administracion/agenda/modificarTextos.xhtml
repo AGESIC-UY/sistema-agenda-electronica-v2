@@ -26,10 +26,11 @@
 						</h:selectOneMenu>
 					</p:outputPanel>
 					<p:outputPanel styleClass="form-group">
+						<p:outputLabel for="idiomaDefecto"
+							value="#{sessionMBean.textos['establecer_como_idioma_por_defecto']}"
+							styleClass="control-label label" />
 						<p:selectBooleanCheckbox id="idiomaDefecto"
 							value="#{textoAgendaMBean.textoAux.porDefecto}"/>
-						<p:outputLabel for="idiomaDefecto"
-							value="#{sessionMBean.textos['establecer_como_idioma_por_defecto']}" />
 					</p:outputPanel>
 				</p:outputPanel>
 

@@ -45,19 +45,11 @@ public class ConfiguracionBean  {
 	}
 	
 	public Boolean getBoolean(String clave) {
-		String valor = getString(clave);
-		if(valor==null) {
-			return null;
-		}
-		return Boolean.valueOf(valor);
+		return Boolean.valueOf(getString(clave));
 	}
 	
 	public Long getLong(String clave) {
-		String valor = getString(clave);
-		if(valor==null) {
-			return null;
-		}
-		return Long.valueOf(valor);
+		return Long.valueOf(getString(clave));
 	}
 
 }

@@ -48,9 +48,7 @@ import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
 
-import uy.gub.agesic.novedades.Acciones;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
-import uy.gub.imm.sae.business.ejb.servicios.ServiciosNovedadesBean;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosTrazabilidadBean;
 import uy.gub.imm.sae.business.utilidades.MailUtiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
@@ -62,7 +60,7 @@ import uy.gub.imm.sae.entity.Comunicacion.Tipo2;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Disponibilidad;
-import uy.gub.imm.sae.entity.PreguntaCaptcha;
+import uy.gub.imm.sae.entity.FraseCaptcha;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
@@ -97,9 +95,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	@EJB
 	private ServiciosTrazabilidadBean trazaBean;
 	
-	@EJB
-	private ServiciosNovedadesBean novedadesBean;
-	
 	@Resource
 	private SessionContext ctx;
 	
@@ -122,7 +117,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		}
 		Agenda agenda = null;
 		try {
-			agenda = (Agenda) entityManager.createQuery("select a from Agenda a where a.id=:id and a.fechaBaja is null").setParameter("id", id).getSingleResult();
+			agenda = (Agenda) entityManager.createQuery("select a from Agenda a where a.id=:id and a.fechaBaja is null")
+					.setParameter("id", id)
+					.getSingleResult();
 			return agenda;
 		}catch(NonUniqueResultException nurEx) {
 			throw new ApplicationException("no_se_encuentra_la_agenda_especificada");
@@ -320,14 +317,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 
 		//Registrar la cancelacion en el sistema de trazas del PEU
 		Agenda agenda = r.getDisponibilidades().get(0).getRecurso().getAgenda();
+    //String transaccionId = e.getOid()+"."+agenda.getTramiteId()+"."+r.getId();
 		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), agenda.getTramiteCodigo(), r.getId());
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.CANCELACION);
 		}
-		
-		//Publicar la novedad
-		novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
-		
 	}
 
 	/**
@@ -443,7 +437,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			if (reserva.getEstado() != Estado.P) {
 				throw new BusinessException("no_es_posible_confirmar_su_reserva");
 			}
-			
 			//Armo las estructuras de Map necesarias para poder ejecutar las validaciones sobre los datos de la reserva
 			Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
 			List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
@@ -541,7 +534,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				}
 			}
 			
-			throw new ValidacionClaveUnicaException("no_es_posible_confirmar_su_reserva", nombreCamposClave);			
+			throw new ValidacionClaveUnicaException("ya_existe_una_reserva_para_el_dia_especificado_con_los_datos_proporcionados", nombreCamposClave);			
 		}
 
 		//Pase las validaciones, procedo a persistir los DatoReserva
@@ -553,8 +546,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			datoNuevo.setReserva(reserva);
 			datoNuevo.setDatoASolicitar(campo);
 			entityManager.persist(datoNuevo);
-			
-			reserva.getDatosReserva().add(datoNuevo);
 		}
 		
 		//Confirmo la reserva, paso el estado a Reservada y le asigno el numero de reserva dentro de la disponibilidad.
@@ -601,9 +592,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			//transaccionId = "2.16.858.0.0.2.3:ID_PROCESO_TEST_1:"+r.getId();
 			
 			//Registrar el cabezal en el sistema de trazabilidad del PEU
-			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, agenda.getTramiteCodigo(), transaccionPadreId, pasoPadre);
+			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, agenda.getTramiteCodigo(), 
+					transaccionPadreId, pasoPadre);
 			if(trazaGuid != null) {
 				reserva.setTrazabilidadGuid(trazaGuid);
+				
 			}else {
 				reserva.setTrazabilidadGuid("---");
 			}
@@ -612,9 +605,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			//ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
 			//en la base de datos para futuros intentos
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
-			
-			//Publicar la novedad
-			novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
 		}
 		
 		return reserva;
@@ -1177,41 +1167,23 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		return textos;		
 	}
 	
-//	@SuppressWarnings("unchecked")
-//	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException {
-//		List<String> frasesCaptcha = new ArrayList<String>();
-//		try {
-//			List<FraseCaptcha> frases = (List<FraseCaptcha>) entityManager.
-//					createQuery("SELECT c from FraseCaptcha c WHERE c.idioma=:idioma")
-//					.setParameter("idioma", idioma).getResultList();
-//			if(frases != null) {
-//				for(FraseCaptcha frase : frases) {
-//					frasesCaptcha.add(frase.getFrase());
-//				}
-//			}
-//		}catch(Exception pEx) {
-//			//pEx.printStackTrace();
-//		}
-//		
-//		return frasesCaptcha;		
-//	}
-
 	@SuppressWarnings("unchecked")
-	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException {
-		Map<String, String> preguntasCaptcha = new HashMap<String, String>();
+	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException {
+		List<String> frasesCaptcha = new ArrayList<String>();
 		try {
-			List<PreguntaCaptcha> pcs = (List<PreguntaCaptcha>) entityManager.
-					createQuery("SELECT p from PreguntaCaptcha p WHERE p.idioma=:idioma")
+			List<FraseCaptcha> frases = (List<FraseCaptcha>) entityManager.
+					createQuery("SELECT c from FraseCaptcha c WHERE c.idioma=:idioma")
 					.setParameter("idioma", idioma).getResultList();
-			if(pcs != null) {
-				for(PreguntaCaptcha pc : pcs) {
-					preguntasCaptcha.put(pc.getPregunta(), pc.getRespuesta());
+			if(frases != null) {
+				for(FraseCaptcha frase : frases) {
+					frasesCaptcha.add(frase.getFrase());
 				}
 			}
 		}catch(Exception pEx) {
 			//pEx.printStackTrace();
 		}
-		return preguntasCaptcha;		
+		
+		return frasesCaptcha;		
 	}
 	
 }

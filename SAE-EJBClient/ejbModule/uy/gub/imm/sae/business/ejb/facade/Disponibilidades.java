@@ -22,7 +22,6 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.Date;
 import java.util.List;
-import java.util.TimeZone;
 
 import uy.gub.imm.sae.common.DisponibilidadReserva;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
@@ -46,6 +45,6 @@ public interface Disponibilidades {
 	public void modificarCupoPeriodo(Disponibilidad d) throws UserException, BusinessException;
 	public Integer cantDisponibilidadesDia(Recurso r, Date f) throws UserException, BusinessException;
 	public Date ultFechaGenerada(Recurso r) throws UserException, BusinessException;
-	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor,int tipoOperacion) throws UserException, BusinessException ;
+	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, int valor,int tipoOperacion) throws UserException, BusinessException ;
 	public boolean esDiaHabil(Date fecha, Recurso r) throws ApplicationException;
 }

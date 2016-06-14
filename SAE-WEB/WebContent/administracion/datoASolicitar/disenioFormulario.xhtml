@@ -7,7 +7,7 @@
 
 <ui:component>
 	<h:form id="disenioFormularioForm">
-		<p:dialog shadowOpacity="0.4" autosized="false" closable="false"
+		<p:dialog shadowOpacity="0.4" autosized="false"
 			widgetVar="disenioFormularioModalBox" zindex="1000" modal="true">
 			<f:facet name="header">
 				<h:outputText
@@ -21,16 +21,10 @@
 
 				</p:outputPanel>
 			</div>
-			
-			<p:outputPanel>
-				<p:commandButton 
-			        value="#{sessionMBean.textos['cerrar']}"
-			        ajaxSingle="true" 
-			        update="disenioFormularioForm:disenioFormularioBody"
-			        oncomplete="PF('disenioFormularioModalBox').hide();"
-			        styleClass="btn-link btn pull-right"/>
-			</p:outputPanel>
 		</p:dialog>
+		<div class="ui-helper-hidden-accessible">
+			<h:commandButton value="dummy"></h:commandButton>
+		</div>
 	</h:form>
 </ui:component>
 

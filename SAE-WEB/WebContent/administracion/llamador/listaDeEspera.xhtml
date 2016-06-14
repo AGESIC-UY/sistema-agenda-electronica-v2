@@ -134,7 +134,7 @@
 						</p:outputPanel>
 
 						<p:outputPanel id="tablaReservas" rendered="#{listaDeEsperaMBean.mostrarDatosSiguiente or not empty listaDeEsperaSessionMBean.horarios}">
-							<p:dataTable  id="tablaLlamados"
+							<p:dataTable
 								rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}"
 								value="#{listaDeEsperaSessionMBean.horarios}" var="horario"
 								binding="#{listaDeEsperaMBean.tablaReservas}"
@@ -150,7 +150,7 @@
 									</p:row>
 								</p:columnGroup>
 
-								<p:subTable value="#{horario.listaEspera}" var="espera" id="tablaLlamadosPorHora"
+								<p:subTable value="#{horario.listaEspera}" var="espera"
 									binding="#{listaDeEsperaMBean.subTablaListaDeEspera}">
 									<f:facet name="header">
 										<h:outputText value="#{horario.hora}">
@@ -170,7 +170,7 @@
 											rendered="#{espera.reserva.puestoLlamada != null}" />
 									</p:column>
 									<p:column>
-										<p:commandLink id="volverALlamar" value="#{sessionMBean.textos['volver_a_llamar']}"
+										<p:commandLink value="#{sessionMBean.textos['volver_a_llamar']}"
 											rendered="#{espera.reserva.estado == 'U'}"
 											actionListener="#{listaDeEsperaMBean.llamar}"
 											update="form1:todo" ignoreDupResponses="true">

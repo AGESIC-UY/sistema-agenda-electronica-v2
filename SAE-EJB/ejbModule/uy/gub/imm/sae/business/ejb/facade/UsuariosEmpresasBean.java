@@ -42,7 +42,6 @@ import javax.persistence.Query;
 import javax.xml.ws.BindingProvider;
 import javax.xml.ws.handler.Handler;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.hibernate.internal.SessionImpl;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -291,13 +290,9 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				}
 			}
 		}
-
-		//Marcar la empresa recibida como eliminada (por si el invocante la sigue usando)
+		
 		empresa.setFechaBaja(new Date());
-		//Recuperar la empresa por si está detached
-		empresa = globalEntityManager.find(Empresa.class, empresa.getId());
-		//Eliminar la empresa
-		empresa.setFechaBaja(new Date());
+		
 		globalEntityManager.persist(empresa);
 		globalEntityManager.flush();
 	}
@@ -403,7 +398,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			if(schema == null) {
 				schema = "public";
 			}
-			
 			String sql = "DELETE FROM "+schema+".ae_rel_usuarios_roles r WHERE r.usuario_id=? AND r.empresa_id=?";
 			Query query = globalEntityManager.createNativeQuery(sql);
 			query.setParameter(1, roles.getIdUsuario());
@@ -431,8 +425,10 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		}
 		//Generar una contraseña nueva
 		
-		String password0 = RandomStringUtils.randomAscii(8);
-		
+		String password0 = ""+(new Date()).getTime();
+		if(password0.length()>6) {
+			password0 = password0.substring(password0.length()-6);
+		}
 		String password = encriptarPassword(password0);
 		usuarioEditar.setPassword(password);
 		//Guardar el usuario
@@ -441,8 +437,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		if(usuarioEditar.getCorreoe() == null) {
 			throw new ApplicationException("no_se_puede_enviar_el_correo_porque_el_usuario_no_tiene_direccion_de_correo_electronico");
 		}
-		String content = "El usuario "+usuarioEditar.getCodigo()+" tendrá la nueva contraseña ["+password0+"] (sin los corchetes).";
-		content = content+" Si la aplicación está configurada para utilizar CDA deberá utilizar su contraseña de CDA en lugar de esta contraseña";
+		String content = "El usuario "+usuarioEditar.getCodigo()+" tendrá la nueva contraseña "+password0+".";
 		try {
 			MailUtiles.enviarMail(usuarioEditar.getCorreoe(), "Nueva contraseña", content, MailUtiles.CONTENT_TYPE_HTML);
 			
@@ -489,8 +484,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
 				
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 2000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 2000);
 	      
 				String organismos = port.obtenerOrganismos(wsUser, wsPass);
 				
@@ -499,23 +494,14 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				is.setCharacterStream(new StringReader(organismos));
 			  SAXBuilder builder = new SAXBuilder();
 			  Document document = builder.build(is);
-			  Element root = document.getRootElement();
 
-			  //Ver si la invocación no dio un error
-			  Filter erroresFilter = new ElementFilter("errores");
-			  if(erroresFilter!=null) {
-			  	Iterator<Element> erroresIter = (Iterator<Element>)root.getDescendants(erroresFilter);
-			  	if(erroresIter.hasNext()) {
-			  		return null;
-			  	}
-			  }			  
-			  
 			  //Se pudo invocar el servicio y parsear el resultado
 				//Vaciar la tabla de organismos
 			  Query trunc = globalEntityManager.createQuery("DELETE FROM Organismo o");
 			  trunc.executeUpdate();
 			  
 			  //insertar los organismos nuevos
+			  Element root = document.getRootElement();
 			  Filter filter = new ElementFilter("organismo");
 			  Iterator<Element> iter = (Iterator<Element>)root.getDescendants(filter);
 			  while(iter.hasNext()) {
@@ -555,8 +541,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
 
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 2000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 2000);
 	      
 	      String uEjecutoras = port.obtenerUnidadesEjecutoras(wsUser, wsPass);
 				
@@ -565,22 +551,14 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				is.setCharacterStream(new StringReader(uEjecutoras));
 			  SAXBuilder builder = new SAXBuilder();
 			  Document document = builder.build(is);
-			  Element root = document.getRootElement();
 
-			  Filter erroresFilter = new ElementFilter("errores");
-			  if(erroresFilter!=null) {
-			  	Iterator<Element> erroresIter = (Iterator<Element>)root.getDescendants(erroresFilter);
-			  	if(erroresIter.hasNext()) {
-			  		return null;
-			  	}
-			  }			  
-			  
 			  //Se pudo invocar el servicio y parsear el resultado
 				//Vaciar la tabla de organismos
 			  Query trunc = globalEntityManager.createQuery("DELETE FROM UnidadEjecutora u");
 			  trunc.executeUpdate();
 			  
 			  //insertar las unidades ejecutoras nuevas
+			  Element root = document.getRootElement();
 			  Filter filter = new ElementFilter("ue");
 			  Iterator iter = (Iterator<Element>)root.getDescendants(filter);
 			  while(iter.hasNext()) {

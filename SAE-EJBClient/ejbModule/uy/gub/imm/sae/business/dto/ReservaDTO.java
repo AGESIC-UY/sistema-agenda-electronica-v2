@@ -41,7 +41,7 @@ public class ReservaDTO implements Serializable{
 		private String origen;
 		private String ucrea;
 		private String ucancela;
-		private Boolean asistio;	
+		private String asistio;	
 		private String numeroDocumento;	
 
 		public ReservaDTO() {
@@ -108,9 +108,14 @@ public class ReservaDTO implements Serializable{
 			this.ucancela = ucancela;
 		}
 		public void setAsistio(Boolean asistio) {
-			this.asistio = asistio;
+			if (asistio){
+			   this.asistio = "Si";
+			}
+			else {
+				this.asistio= "No";
+			}
 		}
-		public Boolean getAsistio() {
+		public String getAsistio() {
 			return asistio;
 		}
 		public String getNumeroDocumento() {

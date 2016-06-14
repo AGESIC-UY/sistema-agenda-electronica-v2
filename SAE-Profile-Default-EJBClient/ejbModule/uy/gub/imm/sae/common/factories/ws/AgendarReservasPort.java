@@ -265,16 +265,11 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-//	@Override
-//	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException {
-//		throw new UnsupportedOperationException();
-//	}
-
 	@Override
-	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException {
+	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException {
 		throw new UnsupportedOperationException();
 	}
-	
+
 	@Override
 	public void validarDatosReserva(Empresa e, Reserva r) throws BusinessException, ValidacionException,
 			ApplicationException {

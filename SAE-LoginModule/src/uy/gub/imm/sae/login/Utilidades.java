@@ -27,6 +27,9 @@ public class Utilidades {
 	
 	public static void main(String[] args) throws NoSuchAlgorithmException {
 		System.out.println("admin -> ["+encriptarPassword("admin")+"]");
+		System.out.println("111 -> ["+encriptarPassword("111")+"]");
+		System.out.println("222 -> ["+encriptarPassword("222")+"]");
+		System.out.println("333 -> ["+encriptarPassword("333")+"]");
 	}
 
 	

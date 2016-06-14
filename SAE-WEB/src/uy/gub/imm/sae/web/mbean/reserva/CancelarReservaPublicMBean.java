@@ -29,7 +29,6 @@ import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
@@ -63,7 +62,8 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 	@PostConstruct
 	public void init() {
 		try {
-			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			HttpServletRequest request = (HttpServletRequest) FacesContext
+					.getCurrentInstance().getExternalContext().getRequest();
 
 			//Estos dos son obligatorios
 			String sEmpresaId = request.getParameter("e");
@@ -308,17 +308,10 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				}
 				
 				tiposDocumento = new ArrayList<SelectItem>();
-				List<DatoASolicitar> datos = recursosEJB.consultarDatosSolicitar(sesionMBean.getRecurso());
-				if(datos!=null) {
-					for(DatoASolicitar dato : datos) {
-						if(!dato.getAgrupacionDato().getBorrarFlag() && dato.getNombre().equals("TipoDocumento")) {
-							for(ValorPosible valor : dato.getValoresPosibles()) {
-								tiposDocumento.add(new SelectItem(valor.getValor(), valor.getEtiqueta()));
-							}
-						}
-					}
-				}
-				
+				//ToDo: cargar estos valores de los datos del recurso
+				tiposDocumento.add(new SelectItem("CI", "** Cédula de identidad **"));
+				tiposDocumento.add(new SelectItem("P", "** Pasaporte **"));
+				tiposDocumento.add(new SelectItem("O", "** Otro **"));
 				tipoDocumento = (String) tiposDocumento.get(0).getValue();
 				numeroDocumento = "";
 			}else {
@@ -426,7 +419,8 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 	public void setCampos(UIComponent campos) {
 		this.campos = campos;
 		try {
-			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sesionMBean.getRecurso(), sesionMBean.getTimeZone());
+			List<AgrupacionDato> agrupaciones = recursosEJB
+					.consultarDefinicionDeCampos(sesionMBean.getRecurso());
 			FormularioDinReservaClient.armarFormularioLecturaDinamico(sesionMBean.getRecurso(),
 					this.sesionMBean.getReservaDatos(), this.campos, agrupaciones, sesionMBean.getFormatoFecha());
 		} catch (BusinessException be) {

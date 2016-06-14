@@ -11,7 +11,7 @@
 		<f:view beforePhase="#{usuarioMBean.beforePhaseConsultar}"
 			beforePhaseListener="#{usuarioMBean.beforePhaseConsultar}">
 
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
+			<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarUsuario" zindex="2000" modal="true">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
@@ -38,7 +38,7 @@
 			<h:form id="form">
 				<p:dataTable value="#{usuarioMBean.usuariosSeleccion}" var="row"
 					id="tablaUsuarios" rows="25" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					paginatorTemplate="{CurrentPageReport}  {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 					binding="#{usuarioMBean.usuariosDataTable}"
 					caption="#{sessionMBean.textos['listado_de_usuarios']}"
 					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">

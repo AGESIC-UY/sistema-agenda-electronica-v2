@@ -1,6 +1,8 @@
 --
 -- PostgreSQL database dump
 --
+-- SAE esquema global versión 1.8
+--
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -77,24 +79,6 @@ CREATE TABLE ae_empresas (
 
 
 ALTER TABLE ae_empresas OWNER TO sae;
-
---
--- Name: ae_novedades; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
---
-
-CREATE TABLE ae_novedades (
-    fecha_creacion timestamp with time zone NOT NULL,
-    fecha_ult_intento timestamp without time zone NOT NULL,
-    intentos integer DEFAULT 0 NOT NULL,
-    datos character varying(4096) NOT NULL,
-    enviado boolean DEFAULT false NOT NULL,
-    id integer NOT NULL,
-    reserva_id integer,
-    empresa_id integer
-);
-
-
-ALTER TABLE ae_novedades OWNER TO sae;
 
 --
 -- Name: ae_oficinas; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
@@ -246,20 +230,6 @@ CREATE SEQUENCE s_ae_empresa
 ALTER TABLE s_ae_empresa OWNER TO sae;
 
 --
--- Name: s_ae_novedades; Type: SEQUENCE; Schema: global; Owner: sae
---
-
-CREATE SEQUENCE s_ae_novedades
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER TABLE s_ae_novedades OWNER TO sae;
-
---
 -- Name: s_ae_trazabilidad; Type: SEQUENCE; Schema: global; Owner: sae
 --
 
@@ -297,46 +267,26 @@ ALTER TABLE s_ae_usuario OWNER TO sae;
 -- Data for Name: ae_configuracion; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', 'urn:tokensimple');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', 'AGESIC');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', 'SAENovedades');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', 'https://testservicios.pge.red.uy:6051/TrustServer/SecurityTokenServiceProtected');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', 'http://testservicios.pge.red.uy/SAENovedades/publicacion/nuevaNovedad');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', 'http://testservicios.pge.red.uy/SAENovedades/publicacion');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'TRUE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', 'urn:tokensimple');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', 'https://testservicios.pge.red.uy:6051/TrustServer/SecurityTokenServiceProtected');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'FALSE');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_CABEZAL', 'http://ws.web.bruto.itramites.agesic.gub.uy/cabezalService/persist');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_LINEA', 'http://ws.web.bruto.itramites.agesic.gub.uy/lineaService/persist');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_CABEZAL', 'http://testservicios.pge.red.uy/agesic/cabezalService/preprod');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA', 'http://testservicios.pge.red.uy/agesic/LineaService/preprod');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', 'https://testservicios.pge.red.uy:6051/TrustServer/SecurityTokenServiceProtected');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', 'urn:tokensimple');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SERVICE_CABEZAL', 'http://testservicios.pge.red.uy/agesic/cabezalService/preprod');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SERVICE_LINEA', 'http://testservicios.pge.red.uy/agesic/LineaService/preprod');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS', '');
+
 
 --
 -- Data for Name: ae_empresas; Type: TABLE DATA; Schema: global; Owner: sae
@@ -345,21 +295,73 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA
 
 
 --
--- Data for Name: ae_novedades; Type: TABLE DATA; Schema: global; Owner: sae
---
-
-
---
 -- Data for Name: ae_oficinas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-INSERT INTO ae_oficinas (id, tramite_id, nombre, direccion, localidad, departamento, telefonos, horarios, comentarios) VALUES ('1000003-1855-0', '1000003-1855', 'Edificio Sede: 18 de Julio 360, piso PLANTA BAJA, sector Santiago de Chile, puerta 70.', 'Edificio Sede: 18 de Julio 360, piso PLANTA BAJA, sector Santiago de Chile, puerta 70.', '', 'Montevideo', '[598 2] 1950 1209', 'Lunes a Viernes de 10:15 a 15:30hs ', '');
 
 
 --
 -- Data for Name: ae_organismos; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (1, '171', 'Administración Nacional de Educación Pública');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (2, '172', 'Administración Nacional de Puertos');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (3, '173', 'AFE');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (4, '174', 'Agencia Nacional de Vivienda');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (5, '191', 'alejo linardi');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (6, '175', 'ANCAP');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (7, '176', 'ANTEL');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (8, '177', 'ASSE');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (9, '178', 'Banco Comercial del Uruguay');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (10, '179', 'Banco de la Republica Oriental del Uruguay');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (11, '180', 'Banco de Previsión Social');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (12, '181', 'Banco de Seguros del Estado');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (13, '182', 'Banco Hipotecario del Uruguay');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (14, '183', 'CORREO');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (15, '188', 'dfhdfh');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (16, '130', 'Entes Autónomos y Servicios Descentralizados');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (17, '184', 'Instituto del Niño y el Adolescente del Uruguay');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (18, '185', 'Instituto Nacional de Colonización');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (19, '153', 'Intendencia de Artigas');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (20, '162', 'Intendencia de Canelones');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (21, '166', 'Intendencia de Cerro Largo');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (22, '157', 'Intendencia de Colonia');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (23, '168', 'Intendencia de Durazno');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (24, '159', 'Intendencia de Flores');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (25, '160', 'Intendencia de Florida');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (26, '163', 'Intendencia de Lavalleja');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (27, '161', 'Intendencia de Maldonado');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (28, '152', 'Intendencia de Montevideo');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (29, '170', 'Intendencia de Paysandú');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (30, '155', 'Intendencia de Río Negro');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (31, '167', 'Intendencia de Rivera');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (32, '164', 'Intendencia de Rocha');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (33, '154', 'Intendencia de Salto');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (34, '158', 'Intendencia de San José');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (35, '156', 'Intendencia de Soriano');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (36, '169', 'Intendencia de Tacuarembó');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (37, '165', 'Intendencia de Treinta y Tres');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (38, '2', 'Ministerio de Defensa Nacional');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (39, '44', 'Ministerio de Desarrollo Social');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (40, '19', 'Ministerio de Economía y Finanzas');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (41, '5', 'Ministerio de Educación y Cultura');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (42, '28', 'Ministerio de Ganadería, Agricultura y Pesca');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (43, '45', 'Ministerio de Industria, Energía y Minería');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (44, '51', 'Ministerio de Relaciones Exteriores');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (45, '52', 'Ministerio de Salud Pública');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (46, '64', 'Ministerio de Trabajo y Seguridad Social');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (47, '57', 'Ministerio de Transporte y Obras Públicas');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (48, '56', 'Ministerio de Turismo y Deporte');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (49, '73', 'Ministerio de Vivienda Ordenamiento Territorial y  Medio Ambiente');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (50, '34', 'Ministerio del Interior');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (51, '151', 'Obras Sanitarias del Estado');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (52, '131', 'Organismos con Autonomía Técnica');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (53, '186', 'OSE');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (54, '132', 'Otros Organismos');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (55, '138', 'Presidencia de la República');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (56, '189', 'testing1');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (57, '150', 'Universidad de la República');
+INSERT INTO ae_organismos (id, codigo, nombre) VALUES (58, '187', 'UTE');
 
 
 --
@@ -400,6 +402,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('detalle_y_ubicacion', 'Detalle y 
 INSERT INTO ae_textos (codigo, texto) VALUES ('dia_y_hora', 'Día y hora');
 INSERT INTO ae_textos (codigo, texto) VALUES ('datos_necesarios', 'Datos necesarios');
 INSERT INTO ae_textos (codigo, texto) VALUES ('confirmacion', 'Confirmación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_con_turnos_disponibles', 'Los días marcados en color verde tienen turnos disponibles.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('seleccione_el_dia', 'Seleccione el día de su preferencia haciendo click con el mouse');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debajo_del_calendario_horarios_disponibles', 'Luego de seleccionar el día, debajo del calendario se mostrarán los horarios disponibles para ese día');
 INSERT INTO ae_textos (codigo, texto) VALUES ('seleccione_un_horario', 'Seleccione un horario para continuar con la reserva');
@@ -423,22 +426,20 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('guardar_ticket', 'Guardar ticket'
 INSERT INTO ae_textos (codigo, texto) VALUES ('imprimir_ticket', 'Imprimir ticket');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cancelar_reserva', 'Cancelar reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('a_las', 'a las');
+INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad', 'Código de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('confirma_cancelar_la_reserva', '¿Esta seguro que desea cancelar la reserva?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cancelar_reserva_para_agenda', 'Cancelar reserva para');
+INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad_de_la_reserva', 'Código de seguridad de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_el_codigo_de_seguridad', 'Ingrese el código de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('continuar', 'Continuar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('su_reserva', 'Su reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_empresa', 'Debe especificar la empresa');
-INSERT INTO ae_textos (codigo, texto) VALUES ('dias_con_turnos_disponibles', 'Los días marcados en color verde tienen turnos disponibles');
-INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad', 'Código de cancelación');
-INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad_de_la_reserva', 'Código de cancelación de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_combinacion_de_parametros_especificada_no_es_valida', 'La combinación de parámetros especificada no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_registrar_un_usuario_anonimo', 'No se pudo registrar un usuario anónimo para permitir esta invocación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_empresa_especificada_no_es_valida', 'La empresa especificada no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_agenda_especificada_no_es_valida', 'La agenda especificada no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_reserva_o_ya_fue_cancelada', 'No se encuentra la reserva o la misma ya fue cancelada');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_el_codigo_de_seguridad', 'Ingrese el código de cancelación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_especificado_no_es_valido', 'El recurso especificado no es válido');
-INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_codigo_de_seguridad', 'Debe ingresar el código de cancelación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_al_menos_dos_de_los_datos_solicitados', 'Debe ingresar al menos dos de los datos solicitados en la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_agenda', 'Debe especificar la agenda.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_recurso', 'Debe especificar el recurso');
@@ -465,6 +466,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_el_texto_que_aparec
 INSERT INTO ae_textos (codigo, texto) VALUES ('verificacion_de_seguridad', 'Verificación de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_eliminar_la_empresa', '¿Está seguro que desea eliminar la empresa?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('eliminar', 'Eliminar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_codigo_de_seguridad', 'Debe ingresar el código de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cancelar', 'Cancelar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('listado_de_empresas', 'Listado de empresas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('identificador', 'Identificador');
@@ -478,7 +480,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('codigo', 'Código');
 INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado', 'Recargar listado');
 INSERT INTO ae_textos (codigo, texto) VALUES ('unidad_ejecutora', 'Unidad ejecutora');
 INSERT INTO ae_textos (codigo, texto) VALUES ('logo', 'Logo');
-INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_inicio_de_la_ventana_de_intranet', 'Días requeridos antes de comenzar a agendar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('subir', 'Subir');
 INSERT INTO ae_textos (codigo, texto) VALUES ('logo_texto_alternativo', 'Texto alternativo del logo');
 INSERT INTO ae_textos (codigo, texto) VALUES ('zona_horaria', 'Zona horaria');
@@ -506,11 +507,9 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('funcionario_de_call_center', 'Fun
 INSERT INTO ae_textos (codigo, texto) VALUES ('funcionario_de_atencion', 'Funcionario de atención');
 INSERT INTO ae_textos (codigo, texto) VALUES ('llamador', 'Llamador');
 INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_la_agenda', 'Datos de la agenda');
-INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_la_ventana_de_intranet', 'Duración de la ventana para agendar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('tramite', 'Trámite');
 INSERT INTO ae_textos (codigo, texto) VALUES ('descripcion', 'Descripción');
 INSERT INTO ae_textos (codigo, texto) VALUES ('misma_que_la_de_la_empresa', 'Misma que la de la empresa');
-INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_inicio_de_la_ventana_de_internet', 'Días requeridos antes de comenzar a agendar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('listado_de_agendas', 'Listado de agendas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('copiar', 'Copiar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('etiquetas', 'Etiquetas');
@@ -552,9 +551,9 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_cupos', 'Modificar cupo
 INSERT INTO ae_textos (codigo, texto) VALUES ('eliminar_disponibilidades', 'Eliminar disponibilidades');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reservas', 'Reservas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reservar', 'Reservar');
-INSERT INTO ae_textos (codigo, texto) VALUES ('considerar_el_sabado_como_dia_habil', 'Considerar como día hábil');
 INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_espera', 'Lista de espera');
 INSERT INTO ae_textos (codigo, texto) VALUES ('abrir_llamador', 'Abrir llamador');
+INSERT INTO ae_textos (codigo, texto) VALUES ('datos_del_recurso', 'Datos del recurso');
 INSERT INTO ae_textos (codigo, texto) VALUES ('oficina', 'Oficina');
 INSERT INTO ae_textos (codigo, texto) VALUES ('localidad', 'Localidad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('departamento', 'Departamento');
@@ -564,8 +563,19 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('telefonos', 'Teléfonos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('horarios', 'Horarios');
 INSERT INTO ae_textos (codigo, texto) VALUES ('inicio_de_vigencia', 'Inicio de vigencia');
 INSERT INTO ae_textos (codigo, texto) VALUES ('fin_de_vigencia', 'Fin de vigencia');
+INSERT INTO ae_textos (codigo, texto) VALUES ('inicio_de_disponibilidad', 'Inicio de disponibilidad');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fin_de_disponibilidad', 'Fin de disponibilidad');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_inicio_de_la_ventana_de_intranet', 'Días de inicio de la ventana de intranet');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_la_ventana_de_intranet', 'Días de la ventana de intranet');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_inicio_de_la_ventana_de_internet', 'Días de inicio de la ventana de internet');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_la_ventana_de_internet', 'Días de la ventana de internet');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cupos_minimos_de_la_ventana', 'Cupos mínimos de la ventana');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cantidad_de_dias_a_generar', 'Cantidad de días a generar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('largo_de_la_lista_de_espera', 'Largo de la lista de espera');
+INSERT INTO ae_textos (codigo, texto) VALUES ('disponible_para_internet', 'Disponible para internet');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_llamador', 'Mostrar número de reserva en el llamador');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_ticket', 'Mostrar número de reserva en el ticket');
+INSERT INTO ae_textos (codigo, texto) VALUES ('considerar_el_sabado_como_dia_habil', 'Considerar el sábado como día hábil');
 INSERT INTO ae_textos (codigo, texto) VALUES ('listado_de_recursos', 'Listado de recursos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_eliminar_el_dato', '¿Está seguro que desea eliminar el dato?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('informacion_adicional_del_recurso', 'Información adicional del recurso');
@@ -612,7 +622,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('vigencia_desde', 'Vigencia desde'
 INSERT INTO ae_textos (codigo, texto) VALUES ('vigencia_hasta', 'Vigencia hasta');
 INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_valor_posible', 'Modificar valor posible');
 INSERT INTO ae_textos (codigo, texto) VALUES ('crear_valor_posible', 'Crear valor posible');
-INSERT INTO ae_textos (codigo, texto) VALUES ('aplicar_a_todos_los_dias', 'Todos los días subsiguientes');
 INSERT INTO ae_textos (codigo, texto) VALUES ('agenda_eliminada', 'Agenda eliminada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('desde', 'Desde');
 INSERT INTO ae_textos (codigo, texto) VALUES ('hasta', 'Hasta');
@@ -646,6 +655,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('aumentar_disponibilidades_en_la_c
 INSERT INTO ae_textos (codigo, texto) VALUES ('disminuir_disponibilidades_en_la_cantidad_especificada', 'Disminuir disponibilidades en la cantidad especificada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('establecer_disponibilidades_en_la_cantidad_especificada', 'Establecer disponibilidades en la cantidad especificada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cantidad_de_cupos', 'Cantidad de cupos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('aplicar_a_todos_los_dias', 'Aplicar a todos los días subsiguientes');
 INSERT INTO ae_textos (codigo, texto) VALUES ('seleccionar_semana', 'Seleccionar semana');
 INSERT INTO ae_textos (codigo, texto) VALUES ('semana', 'Semana');
 INSERT INTO ae_textos (codigo, texto) VALUES ('disponibilidades_para_la_semana_consultada', 'Disponibilidades para la semana consultada');
@@ -655,6 +665,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('seleccione_ubicacion', 'Seleccion
 INSERT INTO ae_textos (codigo, texto) VALUES ('seleccione_dia_y_hora', 'Seleccione día y hora');
 INSERT INTO ae_textos (codigo, texto) VALUES ('disponibilidades_en_la_manana', 'Disponibilidades en la mañana');
 INSERT INTO ae_textos (codigo, texto) VALUES ('disponibilidades_en_la_tarde', 'Disponibilidades en la tarde');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva', 'No olvide comunicarle al ciudadano el código de seguridad de la reserva, ya que lo necesitará en caso de que decida cancelarla.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_esta_confirmada', 'La reserva está confirmada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('si', 'Sí');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no', 'No');
@@ -858,10 +869,12 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('usuario_creacion', 'Usuario de cr
 INSERT INTO ae_textos (codigo, texto) VALUES ('origen', 'Origen');
 INSERT INTO ae_textos (codigo, texto) VALUES ('accion', 'Acción');
 INSERT INTO ae_textos (codigo, texto) VALUES ('ver_detalle', 'Ver detalle');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_reserva_por_periodo_y_estado', 'Reporte de reserva por peróodo y estado');
 INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_desde', 'Fecha desde');
 INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_hasta', 'Fecha hasta');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_asistencia_por_periodo', 'Reporte de asistencia por período');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_atencion_por_periodo', 'Reporte de atención por período');
+INSERT INTO ae_textos (codigo, texto) VALUES ('considerar_todas_las_empresas', 'Considerar todas las empresas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_tiempos_de_atencion', 'Reporte de tiempos de atención');
 INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_y_numero_de_la_reserva', 'Fecha y número de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('una_pagina_por_hora', 'Una página por hora');
@@ -880,6 +893,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('existe_una_empresa_eliminada_con_
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_debe_ser_posterior_a_la_fecha_fdesde', 'La fecha de fin debe ser posterior a la fecha de inicio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas', 'No se puede eliminar la empresa porque hay reservas vivas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mail_no_valido', 'La dirección de correo electrónica no es válida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('requiere_cda', 'Requiere control de acceso');
 INSERT INTO ae_textos (codigo, texto) VALUES ('continuar_tramite', 'Contrinuar con el trámite');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_error', 'Hay {count} errores en el formulario que debe corregir');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_warn', 'Hay {count} advertencias a las cuales debe prestar atención');
@@ -892,8 +906,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('cual_es_la_palabra_2_de_la_frase'
 INSERT INTO ae_textos (codigo, texto) VALUES ('cual_es_la_palabra_3_de_la_frase', '¿Cuál es la tercera palabra de la frase "{frase}"?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_agrupacion_ya_esta_eliminada', 'La agrupación ya está eliminada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_eliminar_la_agrupación_porque_tiene_datos_asociados', 'No se puede eliminar la agrupación porque tiene datos a solicitar asociados');
-INSERT INTO ae_textos (codigo, texto) VALUES ('requiere_cda', 'Control de acceso');
-INSERT INTO ae_textos (codigo, texto) VALUES ('considerar_todas', 'Considerar todas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cual_es_la_palabra_4_de_la_frase', '¿Cuál es la cuarta palabra de la frase "{frase}"?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cual_es_la_palabra_5_de_la_frase', '¿Cuál es la quinta palabra de la frase "{frase}"?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('solicitar_otra_frase', 'Solicitar otra frase');
@@ -909,6 +921,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_login_error', 'Error de 
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_campo_campo_solo_puede_contener_digitos', 'El campo {campo} solo puede contener dígitos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_es_una_direccion_de_correo_electronico_valida', 'El valor ingresado no es una dirección de correo electrónico válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_valor_ingresado_no_es_aceptable', 'El valor ingresado no es aceptable');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_responder_la_pregunta_de_seguridad', 'Debe responser la pregunta de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_respuesta_a_la_pregunta_de_seguridad_no_es_correcta', 'La respuesta a la pregunta de seguridad no es correcta');
 INSERT INTO ae_textos (codigo, texto) VALUES ('olvido_su_contraseña', 'Si olvidó su contraseña póngase en contacto con soporte@agesic.com.uy');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cupo_por_periodo', 'Cupo por período');
@@ -927,12 +940,14 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('solo_se_puede_asignar_un_rol', 'S
 INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_para_intranet', 'Configuración para intranet');
 INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_inicio_de_la_ventana_de_intranet_descripcion', 'Cantidad de días que existen entre la fecha de hoy y la fecha en la cual se puede comenzar a hacer reservas. Por ejemplo, se puede reservar a partir de dos días desde que se ingresó al sistema.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cantidad_de_dias_siguientes_disponibles', 'Cantidad de días siguientes disponibles para hacer una reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_para_internet', 'Configuración para intranet');
 INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_inicio_de_la_ventana_de_internet_descripcion', 'Cantidad de días que existen entre la fecha de hoy y la fecha en la cual se puede comenzar a hacer reservas. Por ejemplo, se puede reservar a partir de dos días desde que se ingresó al sistema.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_del_llamador', 'Configuración del llamador');
 INSERT INTO ae_textos (codigo, texto) VALUES ('serie_asociada_a_los_numeros_de_reserva', 'Serie asociada a los números de reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('confirmacion_de_datos', 'Confirmación de datos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_tipo_de_documento_es_obligatorio', 'El tipo de documento es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_numero_de_documento_es_obligatorio', 'El número de documento es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_de_seguridad_es_obligatorio', 'El código de seguridad es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_datos_ingresados_no_son_correctos', 'Los datos ingresados no son correctos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_una_reserva_seleccionada', 'Debe haber una reserva seleccionada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('tipo_de_documento', 'Tipo de documento');
@@ -942,58 +957,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('el_estado_es_obligatorio', 'El es
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_reservas', 'Reporte de reservas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_asistencias', 'Reporte de asistencias');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_del_tramite_es_obligatorio', 'El código del trámite es obligatorio');
-INSERT INTO ae_textos (codigo, texto) VALUES ('lugar', 'lugar');
-INSERT INTO ae_textos (codigo, texto) VALUES ('lugares', 'lugares');
-INSERT INTO ae_textos (codigo, texto) VALUES ('datos_del_recurso', 'Datos generales');
-INSERT INTO ae_textos (codigo, texto) VALUES ('inicio_de_disponibilidad', 'Inicio de atención al público');
-INSERT INTO ae_textos (codigo, texto) VALUES ('fin_de_disponibilidad', 'Fin de atención al público');
-INSERT INTO ae_textos (codigo, texto) VALUES ('disponible_para_internet', 'Visible en internet');
-INSERT INTO ae_textos (codigo, texto) VALUES ('dias_de_la_ventana_de_internet', 'Duración de la ventana para agendar');
-INSERT INTO ae_textos (codigo, texto) VALUES ('largo_de_la_lista_de_espera', 'Número de filas en la lista de espera');
-INSERT INTO ae_textos (codigo, texto) VALUES ('con_trazabilidad', 'Integrar con trazabilidad');
-INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_para_internet', 'Configuración para internet');
-INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_reserva_por_periodo_y_estado', 'Reporte de reserva por período y estado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_de_seguridad_es_obligatorio', 'El código de cancelación es obligatorio');
-INSERT INTO ae_textos (codigo, texto) VALUES ('no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva', 'No olvide comunicarle al ciudadano el código de cancelación de la reserva, ya que lo necesitará en caso de que decida cancelarla.');
-INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_reservas_periodo', 'Reporte de reservas por período');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ninguna', 'Ninguna');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ninguno', 'Ninguno');
-INSERT INTO ae_textos (codigo, texto) VALUES ('reserva', 'Reserva');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ha_ocurrido_un_error_grave', 'Ha ocurrido un error grave que no permite continuar con su solicitud');
-INSERT INTO ae_textos (codigo, texto) VALUES ('recurso_no_encontrado', 'Recurso no encontrado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_solicitado_no_existe', 'El recurso solicitado no existe');
-INSERT INTO ae_textos (codigo, texto) VALUES ('verifique_la_direccion_especificada', 'Verifique que la dirección especificada sea correcta');
-INSERT INTO ae_textos (codigo, texto) VALUES ('error_no_solucionable', 'Error no solucionable');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ha_ocurrido_un_error_no_solucionable', 'Ha ocurrido un error no solucionable');
-INSERT INTO ae_textos (codigo, texto) VALUES ('cerrar', 'Cerrar');
-INSERT INTO ae_textos (codigo, texto) VALUES ('seguimiento', 'Seguimiento del trámite');
-INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_llamador', 'Visible en el llamador');
-INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_ticket', 'Visible en el ticket');
-INSERT INTO ae_textos (codigo, texto) VALUES ('debe_responder_la_pregunta_de_seguridad', 'Debe responder la pregunta de seguridad');
-INSERT INTO ae_textos (codigo, texto) VALUES ('publicar_novedades', 'Publicar en PDI');
-INSERT INTO ae_textos (codigo, texto) VALUES ('novedades', 'Novedades');
-INSERT INTO ae_textos (codigo, texto) VALUES ('dato_es', 'Este dato es');
-INSERT INTO ae_textos (codigo, texto) VALUES ('incluir', 'Incluir');
-INSERT INTO ae_textos (codigo, texto) VALUES ('aplicar_a', 'Aplicar a');
-INSERT INTO ae_textos (codigo, texto) VALUES ('sabado', 'Sábado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('tipo_usuario', 'Tipo de usuario');
-INSERT INTO ae_textos (codigo, texto) VALUES ('rol', 'Rol');
-INSERT INTO ae_textos (codigo, texto) VALUES ('mapa_de_locacion', 'Mapa de locación');
-INSERT INTO ae_textos (codigo, texto) VALUES ('fechas_disponibles', 'Fechas disponibles');
-INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_no_valida', 'La fecha especificada no es válida');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ingreso_electronico', 'Ingreso electrónico');
-INSERT INTO ae_textos (codigo, texto) VALUES ('login_deshabilitado', 'Inicio de sesión deshabilitado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('el_login_ha_sido_deshabilitado', 'El inicio de sesión local ha sido deshabilitado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('debe_configurar_cda', 'Debe configurar la autenticación mediante CDA');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ingreso_de_usuario', 'Ingreso de usuario');
-INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_tramites', 'No se pudo cargar la lista de trámites');
-INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_oficinas', 'No se pudo cargar la lista de oficinas');
-INSERT INTO ae_textos (codigo, texto) VALUES ('se_cargaron_n_oficinas', 'Se cargaron {cant} oficinas');
-INSERT INTO ae_textos (codigo, texto) VALUES ('se_cargaron_n_tramites', 'Se cargaron {cant} tramites');
-INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_actualizar_lista_de_organismos', 'No se pudo actualizar la lista de organismos');
-INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_actualizar_lista_de_unidades_ejecutoras', 'No se pudo actualizar la lista de unidades ejecutoras');
-INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_organismos_actualizada', 'La lista de organismos fue actualizada');
-INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_unidades_ejecutas_actualizada', 'La lista de unidades ejecutoras fue actualizada');
 
 
 --
@@ -1012,33 +975,175 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_unidades_ejecutas_actual
 -- Data for Name: ae_unidadesejecutoras; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (1, '1', 'Administración Nacional de Puertos');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (2, '3', 'ANTEL');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (3, '4', 'Antel Data');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (4, '6', 'Banco Hipotecario del Uruguay');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (5, '7', 'Corte Electoral');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (6, '8', 'Intendencia de Canelones');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (7, '9', 'Intendencia de Cerro Largo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (8, '10', 'Intendencia de Colonia');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (9, '11', 'Intendencia de Durazno');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (10, '12', 'Intendencia de Flores');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (11, '13', 'Intendencia de Florida');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (12, '14', 'Intendencia de Lavalleja');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (13, '15', 'Intendencia de Maldonado');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (14, '16', 'Intendencia de Montevideo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (15, '17', 'Intendencia de Paysandú');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (16, '18', 'Intendencia de Río Negro');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (17, '19', 'Intendencia de Rivera');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (18, '20', 'Intendencia de Rocha');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (19, '21', 'Intendencia de Salto');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (20, '22', 'Intendencia de San José');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (21, '23', 'Intendencia de Soriano');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (22, '24', 'Intendencia de Tacuarembó');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (23, '25', 'Intendencia de Treinta y Tres');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (24, '26', 'OSE');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (25, '28', 'Poder Judicial');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (26, '32', 'Tribunal de Cuentas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (27, '33', 'Universidad de la República');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (28, '34', 'URSEC');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (29, '35', 'UTE');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (30, '37', 'ANCAP');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (31, '38', 'Banco de la Republica Oriental del Uruguay');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (32, '39', 'Intendencia de Artigas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (33, '40', 'Banco de Seguros del Estado');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (34, '41', 'OPP');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (35, '42', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (36, '43', 'Dirección Nacional de Aviación Civil e Infraestructura Aeronáutica');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (37, '44', 'Servicios de Retiros y Pensiones de las Fuerzas Armadas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (38, '45', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (39, '46', 'Instituto de Investigaciones Biológicas Clemente Estable');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (40, '47', 'Museo Histórico Nacional');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (41, '48', 'Archivo General de la Nación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (42, '49', 'Biblioteca Nacional');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (43, '50', 'Servicio Oficial de Difusión, Radiotelevisión y Espectáculos - SODRE');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (44, '51', 'Dirección General de Registros');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (45, '52', 'Procurador del Estado en los Contencioso Administrativo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (46, '53', 'Dirección General de Registro de Estado Civil');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (47, '54', 'Comisión del Patrimonio Cultural de la Nación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (48, '55', 'Dirección Nacional de Innovación, Ciencia y Tecnología para el Desarrollo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (49, '56', 'Junta de Transparencia y Ética Pública');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (50, '57', 'Canal 5 – Servicio de Televisión Nacional');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (51, '58', 'Fiscalía de Corte y Procurador General de la Nación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (52, '59', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (53, '60', 'Dirección General Impositiva');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (54, '61', 'Contaduría General de la Nación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (55, '62', 'Dirección Nacional de Aduanas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (56, '63', 'Auditoría Interna de la Nación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (57, '64', 'Dirección Nacional de Loterías y Quinielas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (58, '65', 'Dirección Nacional de Catastro');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (59, '66', 'Dirección Nacional de Comercio - ADECO');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (60, '67', 'Dirección General de Comercio');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (61, '68', 'Dirección General de Secretaria');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (62, '69', 'Dirección Nacional de Recursos Acuáticos');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (63, '70', 'Dirección General de Recursos Naturales Renovables');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (64, '71', 'Dirección General de Servicios Agrícolas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (65, '72', 'Dirección General de Servicios Ganaderos');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (66, '73', 'Dirección General Forestal');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (67, '74', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (68, '75', 'Dirección Nacional de Migración');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (69, '76', 'Dirección Nacional de Policía Caminera');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (70, '77', 'Dirección Nacional de Bomberos');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (71, '78', 'Dirección Nacional de Asistencia Social Policial');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (72, '79', 'Instituto Nacional de Rehabilitación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (73, '80', 'Dirección Nacional de Información e Inteligencia');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (74, '81', 'Escuela Nacional de Policía');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (75, '82', 'Dirección Nacional de Sanidad Policial');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (76, '83', 'Dirección Nacional de Identificación Civil');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (77, '84', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (78, '85', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (79, '86', 'Dirección Nacional Propiedad Industrial');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (80, '87', 'Dirección Nacional de Minería y Geología');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (81, '88', 'Dirección Nacional de Industrias');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (82, '89', 'Dirección Nacional de Energía');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (83, '90', 'Dirección Nacional de Artesanías, Pequeñas y Medianas Empresas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (84, '91', 'Dirección de Asuntos Consulares');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (85, '92', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (86, '93', 'Dirección General de la Salud');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (87, '94', 'ASSE');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (88, '95', 'Dirección Nacional de Deporte');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (89, '96', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (90, '97', 'Dirección Nacional de Vialidad');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (91, '98', 'Dirección Nacional de Hidrografía');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (92, '99', 'Dirección Nacional de Arquitectura');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (93, '100', 'Dirección Nacional de Topografía');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (94, '101', 'Dirección Nacional de Transporte');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (95, '102', 'Dirección Nacional de Ines y Planificación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (96, '104', 'Dirección Nacional de Empleo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (97, '106', 'Dirección Nacional de Trabajo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (98, '107', 'Instituto Nacional de Alimentación - INDA');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (99, '109', 'Inspección General de Trabajo y Seguridad Social');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (100, '111', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (101, '112', 'Dirección Nacional de Ordenamiento Territorial');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (102, '113', 'Dirección Nacional de Aguas y Saneamiento');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (103, '114', 'Dirección Nacional de Medio Ambiente');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (104, '115', 'Dirección Nacional de Vivienda');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (105, '116', 'Dirección Nacional de Policía Técnica');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (106, '117', 'Dirección Nacional de Turismo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (107, '118', 'Autoridad Reguladora Nacional en Radioprotección');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (108, '119', 'Estado Mayor del Ejército');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (109, '120', 'División Administrativa');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (110, '121', 'Dirección Nacional de Meteorología');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (111, '122', 'CORREO');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (112, '123', 'Banco de Previsión Social');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (113, '124', 'IMPO');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (114, '125', 'Jefatura de Policía');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (115, '126', 'Dirección Nacional de Asistencia Crítica e Inclusión Social');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (116, '131', 'Oficina de Planeamiento y Presupuesto');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (117, '133', 'LATU');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (118, '139', 'Instituto del Niño y el Adolescente del Uruguay');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (119, '140', 'Agencia Nacional de Vivienda');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (120, '141', 'Dirección Nacional de Sanidad de las Fuerzas Armadas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (121, '143', 'Comando General de la Armada');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (122, '144', 'AFE');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (123, '145', 'Comando General del Ejército');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (124, '146', 'Administración Nacional de Educación Pública');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (125, '147', 'Banco Central del Uruguay');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (126, '148', 'Instituto Nacional de Colonización');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (127, '149', 'Universidad de la República - UDELAR');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (128, '150', 'Dirección General de Secretaría');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (129, '151', 'Jefatura de Policía de Artigas');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (130, '152', 'Jefatura de Policía de Canelones');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (131, '153', 'Jefatura de Policía de Colonia');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (132, '155', 'Dirección General de la Granja');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (133, '156', 'Agencia de Gobierno Electrónico y Sociedad de la Información');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (134, '157', 'Instituto Nacional de Estadística');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (135, '158', 'Unidad Reguladora y de Control de Datos Personales');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (136, '159', 'Jefatura de Maldonado');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (137, '160', 'Jefatura de Salto');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (138, '161', 'Oficina Nacional de Servicio Civil');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (139, '162', 'Centro Ceibal');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (140, '163', 'Instituto Nacional de la Juventud - INJU');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (141, '164', 'Facultad de Humanidades y Ciencias de la Educación');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (142, '165', 'Facultad de Ciencias Sociales');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (143, '166', 'Facultad de Ciencias');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (144, '167', 'Facultad de Psicología');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (145, '168', 'testing1.2');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (146, '169', 'Unidad Reguladora de Servicios de Energía y Agua');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (147, '170', 'alejo');
+INSERT INTO ae_unidadesejecutoras (id, codigo, nombre) VALUES (148, '171', 'UE alejo');
 
 
 --
 -- Data for Name: ae_usuarios; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
+INSERT INTO ae_usuarios (id, codigo, nombre, fecha_baja, password, correoe, superadmin) VALUES (1, 'admin', 'Superadministrador', NULL, 'ISMvKXpXpadDiUoOSoAfww==', 'admin@prueba.com.uy', true);
 
 
 --
 -- Name: s_ae_empresa; Type: SEQUENCE SET; Schema: global; Owner: sae
 --
 
-SELECT pg_catalog.setval('s_ae_empresa', 1, true);
-
-
---
--- Name: s_ae_novedades; Type: SEQUENCE SET; Schema: global; Owner: sae
---
-
-SELECT pg_catalog.setval('s_ae_novedades', 1, true);
+SELECT pg_catalog.setval('s_ae_empresa', 0, true);
 
 
 --
 -- Name: s_ae_trazabilidad; Type: SEQUENCE SET; Schema: global; Owner: sae
 --
 
-SELECT pg_catalog.setval('s_ae_trazabilidad', 1, true);
+SELECT pg_catalog.setval('s_ae_trazabilidad', 0, true);
 
 
 --
@@ -1070,14 +1175,6 @@ ALTER TABLE ONLY ae_configuracion
 
 ALTER TABLE ONLY ae_empresas
     ADD CONSTRAINT ae_empresas_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_novedades_pk; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
---
-
-ALTER TABLE ONLY ae_novedades
-    ADD CONSTRAINT ae_novedades_pk PRIMARY KEY (id);
 
 
 --
@@ -1185,6 +1282,13 @@ ALTER TABLE ONLY ae_usuarios
 
 
 --
--- PostgreSQL database dump complete
+-- Name: ae_rel_usuarios_roles_fkey; Type: FK CONSTRAINT; Schema: global; Owner: sae
 --
 
+ALTER TABLE ONLY ae_rel_usuarios_roles
+    ADD CONSTRAINT ae_rel_usuarios_roles_fkey FOREIGN KEY (usuario_id, empresa_id) REFERENCES ae_rel_usuarios_empresas(usuario_id, empresa_id);
+
+
+--
+-- PostgreSQL database dump complete
+--
