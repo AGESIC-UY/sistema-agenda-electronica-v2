@@ -4,16 +4,6 @@
 	xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-facesconfig_2_2.xsd"
 	version="2.2">
 
-	<application>
-		<locale-config>
-			<default-locale>es</default-locale>
-			<supported-locale>en</supported-locale>
-			<supported-locale>fr</supported-locale>
-			<supported-locale>it</supported-locale>
-			<supported-locale>pt</supported-locale>
-		</locale-config>
-	</application>
-
 	<managed-bean>
 		<managed-bean-name>saeProfile</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.SAEProfileMBean</managed-bean-class>
@@ -370,7 +360,7 @@
 	<managed-bean>
 		<managed-bean-name>consultaReservaDatosMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ConsultaReservaDatosMBean</managed-bean-class>
-		<managed-bean-scope>request</managed-bean-scope>
+		<managed-bean-scope>view</managed-bean-scope>
 		<managed-property>
 			<property-name>sessionMBean</property-name>
 			<property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
@@ -448,7 +438,6 @@
 		</managed-property>
 	</managed-bean>
 
-	<!--Lista de Espera -->
 	<managed-bean>
 		<managed-bean-name>listaDeEsperaMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ListaDeEsperaMBean</managed-bean-class>
@@ -458,7 +447,6 @@
 			<property-class>uy.gub.imm.sae.web.mbean.administracion.ListaDeEsperaSessionMBean</property-class>
 			<value>#{listaDeEsperaSessionMBean}</value>
 		</managed-property>
-		<!--Lista de Espera FIN -->
 		<managed-property>
 			<property-name>sessionMBean</property-name>
 			<property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
@@ -471,7 +459,6 @@
 		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 
-	<!-- Beans de reserva -->
 	<managed-bean>
 		<managed-bean-name>sesionMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</managed-bean-class>
@@ -588,7 +575,6 @@
 			<value>#{datosFiltroReservaMBean}</value>
 		</managed-property>
 	</managed-bean>
-	<!-- Navegacion -->
 
 	<navigation-rule>
 		<from-view-id>*</from-view-id>
@@ -597,14 +583,19 @@
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
 			<redirect />
 		</navigation-case>
+    <navigation-case>
+      <from-outcome>noAutorizado</from-outcome>
+      <to-view-id>/error/accesoNoAutorizado.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
 	</navigation-rule>
 
-	<!-- AGENDA -->
 	<navigation-rule>
 		<from-view-id>/administracion/agenda/crear.xhtml</from-view-id>
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/agenda/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 	
@@ -622,10 +613,12 @@
 		<navigation-case>
 			<from-outcome>guardar</from-outcome>
 			<to-view-id>/administracion/agenda/modificarConsultar.xhtml</to-view-id>
+			<redirect />
 		</navigation-case>
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/agenda/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -634,19 +627,21 @@
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/agenda/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- RECURSO -->
 	<navigation-rule>
 		<from-view-id>/administracion/recurso/crear.xhtml</from-view-id>
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -655,6 +650,7 @@
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/recurso/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -663,6 +659,7 @@
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 	<navigation-rule>
@@ -685,11 +682,6 @@
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
       <redirect />
 		</navigation-case>
-		<navigation-case>
-			<from-outcome>consultarDatos</from-outcome>
-			<to-view-id>/administracion/recurso/consultarDatos.xhtml</to-view-id>
-			<redirect />
-		</navigation-case>
 	</navigation-rule>
 
 	<navigation-rule>
@@ -697,14 +689,15 @@
 		<navigation-case>
 			<from-outcome>consultarRecursos</from-outcome>
 			<to-view-id>/administracion/recurso/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 		<navigation-case>
 			<from-outcome>volverConsultar</from-outcome>
 			<to-view-id>/administracion/datoASolicitar/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- AGENDAR RESERVAS PRIVADA -->
 	<navigation-rule>
 		<from-view-id>/administracion/reserva/Paso1.xhtml</from-view-id>
 		<navigation-case>
@@ -747,10 +740,10 @@
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- AGENDAR RESERVAS PUBLICA -->
 	<navigation-rule>
 		<from-view-id>/agendarReserva/Paso1.xhtml</from-view-id>
 		<navigation-case>
@@ -806,12 +799,12 @@
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- EMPRESAS y USUARIOS -->
 	<navigation-rule>
 		<from-view-id>/administracion/empresa/consultar.xhtml</from-view-id>
 		<navigation-case>
 			<from-outcome>modificar</from-outcome>
 			<to-view-id>/administracion/empresa/editar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 	<navigation-rule>
@@ -819,6 +812,7 @@
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/empresa/consultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 	<navigation-rule>
@@ -838,13 +832,12 @@
 		</navigation-case>
 	</navigation-rule>
 
-
-	<!-- DISPONIBILIDAD -->
 	<navigation-rule>
 		<from-view-id>/administracion/disponibilidad/crearDisponibilidades.xhtml</from-view-id>
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -853,10 +846,12 @@
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 		<navigation-case>
 			<from-outcome>consultarPorDia</from-outcome>
 			<to-view-id>/administracion/disponibilidad/consultarDia.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -869,12 +864,12 @@
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- DATOASOLICITAR -->
 	<navigation-rule>
 		<from-view-id>/administracion/datoASolicitar/crear.xhtml</from-view-id>
 		<navigation-case>
 			<from-outcome>cancelar</from-outcome>
 			<to-view-id>/administracion/datoASolicitar/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -897,6 +892,7 @@
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/datoASolicitar/modificarConsultar.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
@@ -905,19 +901,19 @@
 		<navigation-case>
 			<from-outcome>volver</from-outcome>
 			<to-view-id>/administracion/inicio.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- CONSULTAS -->
 	<navigation-rule>
 		<from-view-id>/administracion/consulta/consultarReservaDatos.xhtml</from-view-id>
 		<navigation-case>
 			<from-outcome>detalleReserva</from-outcome>
 			<to-view-id>/administracion/consulta/detalleReserva.xhtml</to-view-id>
+      <redirect />
 		</navigation-case>
 	</navigation-rule>
 
-	<!-- Validadores -->
 	<validator>
 		<validator-id>agendaNombreValidator</validator-id>
 		<validator-class>uy.gub.imm.sae.web.validator.AgendaNombreValidator</validator-class>
@@ -931,9 +927,6 @@
 		<validator-class>uy.gub.imm.sae.web.validator.XMLValidator</validator-class>
 	</validator>
 
-	<!--//////////////////// -->
-
-	<!-- converter -->
 	<converter>
 		<converter-id>estadosConverter</converter-id>
 		<converter-class>uy.gub.imm.sae.web.common.EstadosConverter</converter-class>

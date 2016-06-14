@@ -7,23 +7,17 @@
 	lang="#{sessionMBean.idiomaActual}">
 
 <h:head>
-	<title><h:outputText
-			value="#{sessionMBean.textos['nombre_aplicacion']}" /></title>
+	<title>
+	 <h:outputText value="#{sessionMBean.textos['nombre_aplicacion']}" /></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-
 	<h:outputScript library="primefaces" name="jquery/jquery.js" />
-	<script src="/sae-admin/resources/js/jquery-ui.js"
-		type="text/javascript"></script>
-	<script src="/sae-admin/resources/js/funcionesJS.js"
-		type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/jquery-ui.js" type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/funcionesJS.js" type="text/javascript"></script>
 	<script src="/sae-admin/resources/js/bootstrap.min.js"></script>
-	<link href="/sae-admin/resources/css/bootstrap.min.css"
-		rel="stylesheet" />
-	<link href="/sae-admin/resources/css/formulario-tipo.css"
-		rel="stylesheet" />
+	<link href="/sae-admin/resources/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/formulario-tipo.css" rel="stylesheet" />
 	<link href="/sae-admin/resources/css/layout.css" rel="stylesheet" />
 	<link href="/sae-admin/resources/css/agenda.css" rel="stylesheet" />
-
 	<script type="text/javascript">
 		redirect = function() {
 			window.location.href = '${pageContext.request.contextPath}';
@@ -31,23 +25,22 @@
 	</script>
 
 </h:head>
-<h:body styleClass="bodyAdmin">
+<h:body styleClass="bodyAdmin" >
+  <f:event type="preRenderView" listener="#{sessionMBean.controlarAccesoRestringido}"/>
 
-	<a class="sr-only sr-only-focusable saltar"
-		href="#page-content-wrapper"><h:outputText
-			value="#{sessionMBean.textos['saltar_al_contenido']}" /></a>
+	<a class="sr-only sr-only-focusable saltar" href="#page-content-wrapper">
+	 <h:outputText value="#{sessionMBean.textos['saltar_al_contenido']}" />
+  </a>
 
-	<input type="hidden" id="formatoFecha"
-		value="#{sessionMBean.formatoFechaDatepicker}" />
+	<input type="hidden" id="formatoFecha" value="#{sessionMBean.formatoFechaDatepicker}" />
 
 	<div class="cabezalPrivado navbar-fixed-top">
 		<div class="containerAdmin">
 			<div class="row">
 				<div class="col-xs-6 cabezalEmpresa">
-
 					<div id="logo">
 						<div>
-							<p:graphicImage id="logo"
+							<p:graphicImage id="logo-correo"
 								value="#{sessionMBean.empresaActualLogo}"
 								styleClass="logoEmpresa"
 								alt="#{sessionMBean.empresaActualLogoTexto}"
@@ -79,15 +72,13 @@
 
 	</div>
 	<div id="wrapper">
-		<!-- Sidebar -->
 		<div id="sidebar-wrapper">
-			<ui:insert name="menu">
-				<ui:include src="/menu/menu.xhtml" />
-			</ui:insert>
+			<div>
+				<ui:insert name="menu">
+					<ui:include src="/menu/menu.xhtml" />
+				</ui:insert>
+			</div>
 		</div>
-		<!-- /#sidebar-wrapper -->
-
-		<!-- Page Content -->
 		<div id="page-content-wrapper" tabindex="-1">
 			<div class="datosCabezal">
 				<div class="row">
@@ -98,8 +89,7 @@
 									<li>
 										<div class="form-inline">
 											<div class="form-group">
-												<h:outputLabel for="idioma"
-													value="#{sessionMBean.textos['idioma']}" class="label" />
+												<h:outputLabel for="idioma" value="#{sessionMBean.textos['idioma']}" class="label" />
 												<h:selectOneMenu id="idioma"
 													value="#{sessionMBean.idiomaActual}"
 													valueChangeListener="#{sessionMBean.cambioIdiomaActual}"
@@ -132,11 +122,18 @@
 									</a></li>
 									<li><h:outputText
 											value="#{sessionMBean.textos['usuario']}: #{sessionMBean.usuarioActual.nombre}" /></li>
-									<li><p:commandLink id="lnkCerrarSesion"
-											value="#{sessionMBean.textos['cerrar_sesion']}"
-											action="#{sessionMBean.cerrarSesion}" process="@this"
-											update="@all" oncomplete="redirect()" /></li>
+									<li>
+									 <p:commandLink id="lnkCerrarSesion" value="#{sessionMBean.textos['cerrar_sesion']}"
+											action="#{sessionMBean.cerrarSesion}" process="@this" update="@all" oncomplete="redirect()"
+											rendered="#{sessionMBean.tipoLogout == 'LOCAL'}" />
+										<h:outputLink value="/sae-admin/logoutcda" rendered="#{sessionMBean.tipoLogout == 'CDA'}">
+										  <h:outputText value="#{sessionMBean.textos['cerrar_sesion']}" />
+										</h:outputLink>
+									</li>
 								</ul>
+							<div class="ui-helper-hidden-accessible">
+								<h:commandButton value="dummy"></h:commandButton>
+					        </div>
 							</h:form>
 						</div>
 					</div>

@@ -19,7 +19,7 @@
 	</ui:define>
 
 	<ui:define name="cuerpo">
-		<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
+		<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 			widgetVar="eliminarReserva" zindex="2000" modal="true">
 
 			<f:facet name="header">
@@ -95,7 +95,7 @@
            
           <ul class="form-action-buttons" >
             <li class="action-buttons-primary">
-              <p:commandButton value="#{sesionMBean.textos['continuar']} &#12299;"
+              <p:commandButton value="#{sesionMBean.textos['continuar']} #{cancelarReservaPublicMBean.simboloSiguiente}"
                 actionListener="#{cancelarReservaPublicMBean.verificarDatos}"
                 update="@all" styleClass="btn-lg btn-primario" />
             </li>
@@ -132,7 +132,7 @@
 
         <ul class="form-action-buttons" >
           <li class="action-buttons-primary">
-            <p:commandButton value="#{sesionMBean.textos['continuar']} &#12299;"
+            <p:commandButton value="#{sesionMBean.textos['continuar']} #{cancelarReservaPublicMBean.simboloSiguiente}"
 							actionListener="#{cancelarReservaPublicMBean.buscarReservaDatos}"
 							update="@all" styleClass="btn-lg btn-primario" id="BtnContinuar" />
 					</li>
@@ -205,7 +205,7 @@
 		          <ul>
 		            <li class="float-left">
 		              <h:outputLink value="#{cancelarReservaPublicMBean.urlBuscarReservas}" rendered="#{not empty cancelarReservaPublicMBean.urlBuscarReservas}">
-		                <h:outputText value="&#12298; #{sesionMBean.textos['ir_a_la_busqueda_de_reservas']}"></h:outputText>
+		                <h:outputText value="#{cancelarReservaPublicMBean.simboloAnterior} #{sesionMBean.textos['ir_a_la_busqueda_de_reservas']}"></h:outputText>
 	                </h:outputLink>
                 </li>
 		          </ul>

@@ -15,8 +15,7 @@
 		<ui:param name="agenda_nombre" value="#{paso1MBean.agendaNombre}" />
 		<ui:param name="bodyId" value="paso1" />
 		<ui:param name="paso_numero" value="1" />
-		<ui:param name="paso_texto"
-			value="#{sesionMBean.textos['seleccione_ubicacion']}" />
+		<ui:param name="paso_texto" value="#{sesionMBean.textos['seleccione_ubicacion']}" />
 		<ui:param name="mensaje_error" value="#{paso1MBean.mensajeError}" />
 		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-6" />
 		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-5" />
@@ -27,11 +26,8 @@
 
 				<p:outputPanel styleClass="infoDireccion" rendered="#{!paso1MBean.errorInit}">
 					<h:panelGroup >
-					  <iframe  src="#{paso1MBean.urlMapa}" height="235px" width="100%" >
+					  <iframe  src="#{paso1MBean.urlMapa}"  class="iframeMapa"  title="#{sesionMBean.textos['mapa_de_locacion']}">
 					  </iframe>
-						<!-- div class="mapa">
-							<div id="map-canvas" class="map-canvas"></div>
-						</div -->
 					</h:panelGroup>
 					<div class="direccion">
 						<h:outputText value="#{paso1MBean.direccionCompleta}" />
@@ -41,18 +37,12 @@
 					</div>
 				</p:outputPanel>
 
-				<p:outputPanel styleClass="descripcionAgenda"
-					rendered="#{!paso1MBean.errorInit}">
+				<p:outputPanel styleClass="descripcionAgenda" rendered="#{!paso1MBean.errorInit}">
 					<h:outputFormat escape="false" value="#{paso1MBean.descripcion}" />
 				</p:outputPanel>
 
-				<!-- Esto no se que sentido tiene -->
-				<h:panelGroup rendered="#{paso1MBean.infoRecurso != null}"
-					styleClass="infoAdicional box-grey" layout="block">
-					<h:outputText
-						value="#{sesionMBean.textos['informacion_adicional']}: "
-						styleClass="tituloResalte" />
-
+				<h:panelGroup rendered="#{paso1MBean.infoRecurso != null}" styleClass="infoAdicional box-grey" layout="block">
+					<h:outputText value="#{sesionMBean.textos['informacion_adicional']}: " styleClass="tituloResalte" />
 					<p:dataList value="#{paso1MBean.infoRecurso}" var="row">
 						<h:outputText value="#{row.etiqueta}: " />
 						<h:outputText value="#{row.valor}" />
@@ -91,7 +81,7 @@
 						<ul>
 							<li><h:commandButton styleClass="btn-lg btn-primario"
 									name="botonElegirHora" id="botonElegirHora"
-									value="#{sesionMBean.textos['elegir_dia_y_hora']} &#12299;"
+									value="#{sesionMBean.textos['elegir_dia_y_hora']} #{paso1MBean.simboloSiguiente}"
 									action="#{paso1MBean.siguientePaso}"></h:commandButton></li>
 						</ul>
 					</li>

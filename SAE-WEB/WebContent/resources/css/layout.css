@@ -31,6 +31,10 @@
 	-o-transition: width 0.5s ease;
 	transition: width 0.5s ease;
 }
+#sidebar-wrapper > div{
+	max-height: 100%;
+	overflow-y: auto;
+}
 
 #wrapper.toggled #sidebar-wrapper {
 	width: 250px;

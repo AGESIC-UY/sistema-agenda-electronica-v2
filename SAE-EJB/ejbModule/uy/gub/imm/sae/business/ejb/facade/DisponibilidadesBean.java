@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -231,10 +232,6 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 		
-		//JPA utiliza lock optimista. En el momento de grabar los cambios
-		//si la entidad fue modificada levanta una excepción.
-		
-		//TODO esta dando una excepción, se comenta por esto se debe resolver
 		entityManager.lock(rManaged,LockModeType.WRITE);
 		entityManager.flush();
 		
@@ -298,29 +295,6 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 			throw new UserException("no_existen_disponibilidades_generadas_para_la_fecha_especificada");			
 		}
 
-		//Se controla que no existan disponibilidades generadas en el período dado por la ventana
-		// de tiempo v
-		List<Disponibilidad> dispCtrl =  entityManager
-		.createQuery(
-		"select d " +
-		"from  Disponibilidad d " +
-		"where d.recurso is not null and " +
-		"      d.recurso = :r and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha between :fi and :ff " +
-		"order by d.horaInicio ")
-		.setParameter("r", rManaged)
-		.setParameter("fi", v.getFechaInicial(), TemporalType.DATE)
-		.setParameter("ff", v.getFechaFinal(), TemporalType.DATE)		
-		.getResultList();		
-		
-		
-		//Si la lista obtenida es vacía no se puede continuar
-		if ( dispCtrl.size() > 0){
-			throw new UserException("ya_existen_disponibilidades_para_algun_dia_en_el_periodo_especificado");			
-		}
-
-
 		Calendar cal = new GregorianCalendar();
 
 		//Se inicializa en el primer día a generar.
@@ -329,10 +303,24 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 
 			if (esDiaHabil(cal.getTime(), r))	{
 				
-				//Se recorren las disponibilidades para la fecha ingresada como modelo.
-				for (Disponibilidad d : disponibilidades) {
-					generarNuevaDisponibilidad(rManaged, cal.getTime(), 
-							d.getHoraInicio(), d.getHoraFin(), d.getCupo());
+				//Se controla que no existan disponibilidades generadas para el día
+				List<Disponibilidad> dispCtrl =  entityManager.createQuery(
+						"select d " +
+						"from  Disponibilidad d " +
+						"where d.recurso is not null and " +
+						"      d.recurso = :r and " +
+						"      d.fechaBaja is null and " +
+						"      d.fecha between :fi and :ff " +
+						"order by d.horaInicio ")
+					.setParameter("r", rManaged)
+					.setParameter("fi", cal.getTime(), TemporalType.DATE)
+					.setParameter("ff", cal.getTime(), TemporalType.DATE)		
+					.getResultList();		
+				if ( dispCtrl.isEmpty()){
+					//Se recorren las disponibilidades para la fecha ingresada como modelo.
+					for (Disponibilidad d : disponibilidades) {
+						generarNuevaDisponibilidad(rManaged, cal.getTime(),	d.getHoraInicio(), d.getHoraFin(), d.getCupo());
+					}
 				}
 			}
 			cal.add(Calendar.DATE, 1);
@@ -770,11 +758,13 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, int valor, int tipoOperacion) throws UserException, BusinessException  {
+	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor, int tipoOperacion) throws UserException, BusinessException  {
 		
-		//String advertencia = "";
 		Disponibilidad dispActual = (Disponibilidad) entityManager.find(Disponibilidad.class, d.getId());
-		Date ahora = new Date();
+
+		Calendar cal = new GregorianCalendar();
+		cal.add(Calendar.MILLISECOND, timezone.getOffset((new Date()).getTime()));
+		Date ahora = cal.getTime();
 
 		if (dispActual == null) {
 			throw new UserException("AE10080","No existe la disponibilidad que se quiere modificar: " + d.getId().toString());
@@ -795,21 +785,23 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 			throw new UserException("AE10084","El valor del cupo no puede ser nulo.");
 		}
 		
+		String query = "select d " +
+				"from  Disponibilidad d " +
+				"where d.recurso is not null and " +
+				"      d.recurso = :r and " +
+				"      d.fechaBaja is null and " +
+				"      d.fecha >= :fi and " +
+		    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
+				"order by d.fecha asc, d.horaInicio ";
+
 		List<Disponibilidad> disponibilidades =  entityManager
-		.createQuery(
-		"select d " +
-		"from  Disponibilidad d " +
-		"where d.recurso is not null and " +
-		"      d.recurso = :r and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha >= :fi and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-		"order by d.fecha asc, d.horaInicio ")
+		.createQuery(query)
 		.setParameter("r", dispActual.getRecurso())
 		.setParameter("fi", dispActual.getFecha(), TemporalType.DATE)
 		.setParameter("hoy", ahora, TemporalType.DATE)
 		.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
 		.getResultList();
+		
 		Calendar hora = Calendar.getInstance();
 		hora.setTime(dispActual.getHoraInicio());
 
@@ -821,6 +813,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		Iterator<Disponibilidad> iDispon = disponibilidades.iterator();
 		while ( iDispon.hasNext()){
 			Disponibilidad disp = iDispon.next();
+			
 			Calendar horaPost = Calendar.getInstance();
 			horaPost.setTime(disp.getHoraInicio());
 
@@ -852,7 +845,6 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 						disp.setCupo(cantReservas);
 						Calendar diaError = Calendar.getInstance();
 						diaError.setTime(disp.getHoraInicio());
-						//advertencia += diaError.get(Calendar.DAY_OF_MONTH) + " / "+(diaError.get(Calendar.MONTH)+1) + " / " +diaError.get(Calendar.YEAR)+" "+diaError.get(Calendar.HOUR_OF_DAY)+":"+diaError.get(Calendar.MINUTE)+", ";
 						diasHorasWarn.add(df.format(diaError.getTime()));
 					}else {
 						disp.setCupo(cupoDisp);
@@ -860,10 +852,6 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 				}
 			}
 		}
-//		if (!advertencia.equals("")) {
-//			advertencia= "El valor del cupo debe ser mayor o igual a la cantidad de reservas existentes para: "+advertencia+", éstas disponibilidades no fueron modificadas";
-//		}
-//		return advertencia;
 		return diasHorasWarn;
 	}
 	@SuppressWarnings("unchecked")

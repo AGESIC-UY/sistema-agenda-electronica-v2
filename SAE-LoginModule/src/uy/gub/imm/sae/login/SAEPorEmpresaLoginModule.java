@@ -18,6 +18,21 @@ import javax.sql.DataSource;
 import org.jboss.security.SimpleGroup;
 import org.jboss.security.auth.spi.AbstractServerLoginModule;
 
+/**
+ * Esta clase es utilizada para permitir la autenticación normal de usuarios para la parte privada de la aplicación, 
+ * tanto en el login inicial (cuando no hay una empresa seleccioanda) como cuando el usuario logueado cambia de empresa.
+ * 
+ * El código de usuario debe estar compuesto por un nombre y el identificador de la empresa separados por una barra. 
+ * Por ejemplo "usuario12345/3". Si no se incluye el identificador de la empresa, y el usuario no es superadminsitrador,
+ * no se cargará ningún rol. Si es superadministrador se cargan todos los roles incluso si no se especifica la empresa. 
+ * Si no es superadministrador pero se especifica una empresa se cargan los roles del usuario en la empresa indicada. La 
+ * contraseña debe corresponder con la que está almacenada en la base de datos (por ahora con Base64(MD5(x))).
+ * 
+ * Nota: este módulo puede ser deshabilitado si se decide eliminar la autenticación local y solo usar CDA.
+ * 
+ * @author spio
+ *
+ */
 public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 
 	private String codigo = null;
@@ -30,11 +45,12 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 	public SAEPorEmpresaLoginModule() {
 		
 	}
-	
 
 	@Override
 	public boolean login() throws LoginException {
+		
 		loginOk = false;
+		
 		if (callbackHandler == null) {
 			throw new LoginException("No hay registrado un callback handler");
 		}
@@ -51,6 +67,7 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 		PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
 
 		String username = nameCallback.getName();
+		
 		String partes[] = username.split("/", 2);
 		
 		//Separar el codigo de usuario en sus dos partes: usuario/empresa
@@ -65,7 +82,7 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 		password = new String(passwordCallback.getPassword());
 		
 		if(codigo==null || codigo.trim().isEmpty() || password==null || password.trim().isEmpty()) {
-			throw new FailedLoginException("Código de usuario o contraseña no válidos");
+		 loginOk = false;
 		}else {
 			
 			//validar los datos
@@ -82,16 +99,13 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 				st.executeQuery();
 				ResultSet rs = st.getResultSet();
 				if(!rs.next()) {
-					//throw new FailedLoginException("Código de usuario o contraseña no válidos");
-					return false;
+					throw new FailedLoginException("No existe el usuario en la base de datos");
 				}
 				String password0 = rs.getString(1); //Password almacenado en la base de datos (con md5 y b64)
 				String password1 = Utilidades.encriptarPassword(password); //Password recibido (pasado a md5 y b64)
-				if(password0==null || password1==null) {
-					//throw new FailedLoginException("Código de usuario o contraseña no válidos");
-					return false;
+				if(password0==null || password1==null || !password0.equals(password1)) {
+					throw new FailedLoginException("Código de usuario o contraseña no válidos");
 				}
-				loginOk = password0.equals(password1);
 				
 				try {
 					superadmin = rs.getBoolean(2);
@@ -99,11 +113,6 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 					superadmin = false;
 				}
 				
-				//La identidad se crea concatenando el codigo con un numero aleatorio 
-				//Por si el mismo usuario se autentica desde dos navegadores diferentes
-				//identity = createIdentity(codigo);
-				//String codigoAumentado = codigo + "-" + ((new Date()).getTime());
-				//identity = createIdentity(codigoAumentado);
 				String tenant = "default";
 				if(empresa != null) {
 					st = conn.prepareStatement("select datasource from global.ae_empresas where id=?");
@@ -114,11 +123,10 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 						tenant = rs.getString(1);
 					}
 				}
-				//identity = new SAEPrincipal(codigoAumentado, tenant, superadmin);
+				loginOk = true;
 				identity = new SAEPrincipal(codigo, tenant, superadmin);
 			}catch(Exception ex) {
-				ex.printStackTrace();
-				throw new FailedLoginException("No se pudo validar las credenciales: "+ex.getMessage());
+				loginOk = false;
 			}finally {
 				try {
 					conn.close();
@@ -126,10 +134,8 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 					//
 				}
 			}
-			
-			return loginOk;
-		}
-
+		}	
+		return loginOk;
 	}
 
 	@Override
@@ -173,7 +179,6 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 			  		rolesGroup.addMember(new SimpleGroup(rolNombre));
 					}
 				}catch(Exception ex) {
-					ex.printStackTrace();
 					throw new FailedLoginException("No se pudo obtener los roles: "+ex.getMessage());
 				}finally {
 					try {

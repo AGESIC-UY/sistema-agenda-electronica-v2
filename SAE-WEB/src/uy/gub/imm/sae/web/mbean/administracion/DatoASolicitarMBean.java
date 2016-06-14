@@ -338,23 +338,18 @@ public class DatoASolicitarMBean extends BaseMBean {
 	 */
 
 	public void seleccionarDatoParaEliminar(int rowIndex) {
-		// glabandera
-		// datoASSessionMBean.setDatoSeleccionado((DatoASolicitar)
-		// this.getCamposDataTableBorrar().getRowData());
-		DatoASolicitar d = datoASSessionMBean.getDatosASolicitar()
-				.get(rowIndex);
+		DatoASolicitar d = datoASSessionMBean.getDatosASolicitar().get(rowIndex);
 		datoASSessionMBean.setDatoSeleccionado(d);
 	}
 
-	public void eliminarDato(ActionEvent event) {
+	public void eliminarDato() {
 
 		DatoASolicitar d = datoASSessionMBean.getDatoSeleccionado();
 		if (d != null && d.getBorrarFlag()) {
 
 			try {
 				recursosEJB.eliminarDatoASolicitar(d);
-				addInfoMessage(sessionMBean.getTextos().get("dato_eliminado"),
-						MSG_ID);
+				addInfoMessage(sessionMBean.getTextos().get("dato_eliminado"), MSG_ID);
 				datoASSessionMBean.setDatoSeleccionado(null);
 				datoASSessionMBean.clearDatosASolicitar();
 

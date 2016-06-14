@@ -46,7 +46,7 @@
 									</h:selectOneMenu>
 									<h:outputText value=" : "></h:outputText>
 									<h:outputLabel value="#{sessionMBean.textos['minutos']}"
-										for="seleccionMinD"
+										for="seleccionMin"
 										styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
 									<h:selectOneMenu id="seleccionMin"
 										styleClass="hora form-control" value="#{consultaMBean.min}">
@@ -117,11 +117,11 @@
 
 								<p:outputPanel styleClass="form-group">
 									<h:outputLabel value="#{sessionMBean.textos['numero']}"
-										styleClass="col-sm-3 control-label label" for="numero" />
+										styleClass="col-sm-3 control-label label" for="numeroRes" />
 									<p:outputPanel styleClass="col-sm-9">
 										<h:inputText value="#{consultaMBean.reservaConsultada.numero}"
 											styleClass="form-control textoCorto" readonly="true"
-											disabled="true" id="numero">
+											disabled="true" id="numeroRes">
 										</h:inputText>
 										<h:outputText styleClass="input-msg"
 											value="(Id: #{consultaMBean.reservaConsultada.id})" />

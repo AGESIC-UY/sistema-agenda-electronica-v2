@@ -140,7 +140,6 @@
         <exclude name="login/**"/>
 
       </fileset>
-      <!--metainf dir="WebContent/META-INF" /-->
 
       <zipfileset file="build/jboss-web-frontend.xml" fullpath="WEB-INF/jboss-web.xml" />
       

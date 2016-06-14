@@ -3,7 +3,6 @@ function disponibilidadFecha(date)
 	if(document.getElementById("form:fechasdisp")!=null)
 	{
 		var date_array = document.getElementById("form:fechasdisp").value;
-		console.log(date_array);
 		var day   = date.getDate();
 		var month = date.getMonth()+1;
 		var year  = date.getFullYear();
@@ -21,9 +20,6 @@ function disponibilidadFecha(date)
 			}
 				
 		}
-	}else
-	{
-		console.log("no se encuentro");
 	}
 	var today = new Date();
 	var hoy = today.getDate();
@@ -37,7 +33,7 @@ function disponibilidadFecha(date)
 	{
 		return [result, "fechaFutura"];
 	}else
-	{//year == anioActual
+	{
 		if(month < mesActual)
 		{
 			return [result, "fechaPasada"];

@@ -1,0 +1,72 @@
+<html lang="en">
+  <head>
+    <link rel="stylesheet" href="css/ol-3.5.css" type="text/css">
+    <script src="js/ol-3.5.js" type="text/javascript"></script>
+    <script type="text/javascript">
+	    //Tomado de: http://stackoverflow.com/a/3717465
+	    function getUrlVars() {
+	        var vars = [], hash;
+	        var hashes = window.location.href.slice(window.location.href.indexOf('?') + 1).split('&');
+	        for (var i = 0; i < hashes.length; i++) {
+	            hash = hashes[i].split('=');
+	            vars.push(hash[0]);
+	            vars[hash[0]] = hash[1];
+	        }
+	        return vars;
+	    }
+    </script>
+    
+    
+    <title>OpenLayers 3 example</title>
+  </head>
+  <body>
+    <div id="map2" class="map"></div>
+    <script type="text/javascript">
+	    var params = getUrlVars();
+	    lat2 = params['lat'];
+	    lon2 = params['lon'];
+	    zoom2 = 15;
+	    if((lat2=="" || lat2=="0") && (lon2=="" || lon2=="0")) {
+	      lat2 = "-32.5476626";
+	      lon2 = "-55.4411862";
+	      zoom2 = 16; 
+	    }
+      var coord2 = ol.proj.fromLonLat([parseFloat(lon2), parseFloat(lat2)]);
+      //Capa del mapa
+      var mapLayer = new ol.layer.Tile({
+        source: new ol.source.OSM()
+      });
+      //Capa del punto
+      var iconStyle = new ol.style.Style({
+        image: new ol.style.Icon(({
+          anchor: [0.5, 46],
+          anchorXUnits: 'fraction',
+          anchorYUnits: 'pixels',
+          opacity: 0.75,
+          src: '/sae/resources/images/info2.png'
+        }))
+      });
+      var iconFeature = new ol.Feature({
+        geometry: new ol.geom.Point(coord2),
+        name: 'X'
+      });      
+      iconFeature.setStyle(iconStyle);
+      var vectorSource = new ol.source.Vector({
+        features: [iconFeature]
+      });
+			var vectorLayer = new ol.layer.Vector({
+			  source: vectorSource
+			});
+			
+			//Dibujar el mapa con las dos layers
+      var map = new ol.Map({
+        target: 'map2',
+        layers: [mapLayer, vectorLayer],
+        view: new ol.View({ 
+          center: coord2,
+          zoom: 16
+        })
+      });
+    </script>
+  </body>
+</html>

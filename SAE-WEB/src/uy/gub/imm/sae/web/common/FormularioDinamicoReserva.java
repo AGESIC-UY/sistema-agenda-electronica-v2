@@ -359,39 +359,13 @@ public class FormularioDinamicoReserva {
 	/**
 	 * Un campo de tipo string consiste en un campo editable.
 	 */
-//	private UIComponent armarCampoString (DatoASolicitar dato) {
-//
-//		UIComponent campo = null;
-//
-//		if (soloLectura) {
-//			HtmlOutputText output = (HtmlOutputText) app.createComponent(HtmlOutputText.COMPONENT_TYPE);
-//			output.setValue(this.valores.get(dato.getNombre()));
-//			output.setStyleClass(STYLE_CLASS_CAMPO_LECTURA);
-//			campo = output;
-//		}
-//		else {
-//			HtmlInputText input = (HtmlInputText) app.createComponent(HtmlInputText.COMPONENT_TYPE);
-//			input.setMaxlength(dato.getLargo());
-//			input.setSize(dato.getLargo());
-//			input.setStyleClass(STYLE_CLASS_CAMPO);
-//
-//			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
-//			ValueExpression ve = armarExpresion(dato.getNombre(), String.class);
-//			input.setValueExpression("value", ve);
-//			
-//			campo = input;
-//		}
-//		
-//		return campo;
-//	}
-	
-	
 	private UIComponent armarCampoString (DatoASolicitar dato) {
 		
 		HtmlInputText input = (HtmlInputText) app.createComponent(HtmlInputText.COMPONENT_TYPE);
 		input.setMaxlength(dato.getLargo());
 		input.setSize(dato.getLargo());
 		input.setStyleClass(STYLE_CLASS_CAMPO);
+		input.setAutocomplete("off");
 		if (soloLectura) {
 			input.setValue(this.valores.get(dato.getNombre()));
 			input.setReadonly(true);
@@ -422,21 +396,18 @@ public class FormularioDinamicoReserva {
         }
       } catch (ParseException ex) {
         sFecha = (String)this.valores.get(dato.getNombre());
-      }                       
+      }
       input.setValue(sFecha);
       input.setStyleClass(STYLE_CLASS_CAMPO+" datepicker-dis");
       input.setReadonly(true);
 			input.setDisabled(true);
 			campo = input;
-		}
-		else {
-			
-			//glabandera cambio a primefaces
+		} else {
 			Calendar calendario = (Calendar) app.createComponent(Calendar.COMPONENT_TYPE);
+			calendario.setAutocomplete("off");
 			calendario.setStyleClass(STYLE_CLASS_CAMPO_SIN_ERROR);
 			calendario.setLocale(getLocale());
 			calendario.setLang(getLocale().getLanguage());
-			//calendario.setSize(dato.getLargo());
 			calendario.setNavigator(true);
 			calendario.setYearRange("1900:c+10");
 			
@@ -457,7 +428,6 @@ public class FormularioDinamicoReserva {
 	 * Un campo de tipo List consiste de una etiqueta y una lista de valores desplegable
 	 */
 	private UIComponent armarCampoList (DatoASolicitar dato) {
-
 		UIComponent campo = null;
 		
 		if (soloLectura) {
@@ -477,15 +447,11 @@ public class FormularioDinamicoReserva {
 			}
 			if (etiqueta != null) {
 				input.setValue(etiqueta);
-			}
-			else {
+			} else {
 				//Por precaución, aunque siempre debería poder obtener la etiqueta del valor.
 				input.setValue(this.valores.get(dato.getNombre()));
 			}
-
 			campo = input;
-
-		
 		}
 		else {
 			HtmlSelectOneMenu lista = (HtmlSelectOneMenu) app.createComponent(HtmlSelectOneMenu.COMPONENT_TYPE);

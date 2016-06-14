@@ -32,7 +32,6 @@ import net.sf.jasperreports.engine.JRField;
 
 public class JRDinamicBeanCollectionDataSource implements JRDataSource {
 
-   private static final String EXCEPCION_ROWS_NULL = "La lista de objetos pasada al constructor es nula.";
    private static final String EXCEPCION_MENSAJE_NO_HAY_FILA_SELECCIONADA = "No hay fila seleccionada, debe ejecutar next() antes de tratar de acceder a una fila";
    private static final String EXCEPCION_SE_ESPERABA_DATA_SOURCE = "Se esperaba un campo de tipo List<Object> para ser utilizada como DataSource en un subreporte";
 

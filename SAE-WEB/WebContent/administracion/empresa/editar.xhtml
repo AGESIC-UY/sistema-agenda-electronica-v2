@@ -43,7 +43,7 @@
 							<p:outputLabel value="#{sessionMBean.textos['codigo']}"
 								for="codigoOrganismo" styleClass="col-sm-1 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-1">
-								<p:inputText id="codigoOrganismo" maxlength="5"
+								<h:inputText id="codigoOrganismo" maxlength="5"
 									value="#{empresaMBean.empresaEditar.organismoCodigo}"
 									disabled="#{empresaMBean.empresaEditar.organismoId != null and empresaMBean.empresaEditar.organismoId != 0}"
 									styleClass="form-control" />
@@ -51,7 +51,7 @@
 							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
 								for="nombreOrganismo" styleClass="col-sm-1 control-label label" />
 							<p:outputPanel styleClass="col-sm-3">
-								<p:inputText id="nombreOrganismo"
+								<h:inputText id="nombreOrganismo"
 									value="#{empresaMBean.empresaEditar.organismoNombre}"
 									maxlength="100"
 									disabled="#{empresaMBean.empresaEditar.organismoId != null and empresaMBean.empresaEditar.organismoId != 0}"
@@ -89,7 +89,7 @@
 								for="codigoUnidadEjecutora"
 								styleClass="col-sm-1 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-1">
-								<p:inputText id="codigoUnidadEjecutora"
+								<h:inputText id="codigoUnidadEjecutora"
 									value="#{empresaMBean.empresaEditar.unidadEjecutoraCodigo}"
 									maxlength="5"
 									disabled="#{empresaMBean.empresaEditar.unidadEjecutoraId != null and empresaMBean.empresaEditar.unidadEjecutoraId != 0}"
@@ -99,7 +99,7 @@
 								for="nombreUnidadEjecutora"
 								styleClass="col-sm-1 control-label label" />
 							<p:outputPanel styleClass="col-sm-3">
-								<p:inputText id="nombreUnidadEjecutora"
+								<h:inputText id="nombreUnidadEjecutora"
 									value="#{empresaMBean.empresaEditar.unidadEjecutoraNombre}"
 									maxlength="100"
 									disabled="#{empresaMBean.empresaEditar.unidadEjecutoraId != null and empresaMBean.empresaEditar.unidadEjecutoraId != 0}"
@@ -124,7 +124,7 @@
 								for="nombreEmpresa"
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
-								<p:inputText id="nombreEmpresa"
+								<h:inputText id="nombreEmpresa"
 									value="#{empresaMBean.empresaEditar.nombre}" maxlength="100"
 									styleClass="form-control" />
 								<p:message for="nombreEmpresa"></p:message>
@@ -136,7 +136,7 @@
 								for="oidEmpresa"
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-8">
-								<p:inputText id="oidEmpresa"
+								<h:inputText id="oidEmpresa"
 									value="#{empresaMBean.empresaEditar.oid}" maxlength="25"
 									styleClass="form-control" />
 								<h:outputText styleClass="input-msg"
@@ -168,7 +168,7 @@
 								value="#{sessionMBean.textos['logo_texto_alternativo']}"
 								for="textoLogoEmpresa" styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
-								<p:inputText id="textoLogoEmpresa"
+								<h:inputText id="textoLogoEmpresa"
 									value="#{empresaMBean.empresaEditar.logoTexto}" maxlength="100"
 									styleClass="form-control" />
 									<p:message for="textoLogoEmpresa"></p:message>
@@ -220,9 +220,9 @@
 								for="datasourceEmpresa"
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-8">
-								<p:inputText id="datasourceEmpresa"
-									value="#{empresaMBean.empresaEditar.datasource}" maxlength="20"
-									styleClass="form-control" />
+								<h:inputText id="datasourceEmpresa"
+									value="#{empresaMBean.empresaEditar.datasource}" maxlength="20" 
+									styleClass="form-control" readonly="#{empresaMBean.empresaEditar.id != null}" />
                 <h:outputText styleClass="input-msg"
                   value="#{sessionMBean.textos['consulte_al_administrador_de_bases_de_datos']}" />
 								<p:message for="datasourceEmpresa"></p:message>
@@ -242,7 +242,7 @@
 								for="ccFinalidad"
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
-								<p:inputText id="ccFinalidad"
+								<h:inputText id="ccFinalidad"
 									value="#{empresaMBean.empresaEditar.ccFinalidad}"
 									maxlength="100" styleClass="form-control" />
 								<p:message for="ccFinalidad"></p:message>
@@ -254,7 +254,7 @@
 								for="ccResponsable"
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
-								<p:inputText id="ccResponsable"
+								<h:inputText id="ccResponsable"
 									value="#{empresaMBean.empresaEditar.ccResponsable}"
 									maxlength="100" styleClass="form-control" />
 								<p:message for="ccResponsable"></p:message>
@@ -266,7 +266,7 @@
 								for="ccDireccion"
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
-								<p:inputText id="ccDireccion"
+								<h:inputText id="ccDireccion"
 									value="#{empresaMBean.empresaEditar.ccDireccion}"
 									maxlength="100" styleClass="form-control" />
 								<p:message for="ccDireccion"></p:message>

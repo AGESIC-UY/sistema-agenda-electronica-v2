@@ -11,24 +11,17 @@
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<title>Sesión expirada</title>
 	<h:outputScript library="primefaces" name="jquery/jquery.js" />
-	<script src="/sae-admin/resources/js/jquery-ui.js"
-		type="text/javascript"></script>
-	<script src="/sae-admin/resources/js/funcionesJS.js"
-		type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/jquery-ui.js" type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/funcionesJS.js" type="text/javascript"></script>
 	<script src="/sae-admin/resources/js/bootstrap.min.js"></script>
-	<link href="/sae-admin/resources/css/bootstrap.min.css"
-		rel="stylesheet" />
-	<link href="/sae-admin/resources/css/formulario-tipo.css"
-		rel="stylesheet" />
+	<link href="/sae-admin/resources/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/formulario-tipo.css" rel="stylesheet" />
 	<link href="/sae-admin/resources/css/agenda.css" rel="stylesheet" />
 
-	<link
-		href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700'
-		rel='stylesheet' type='text/css' />
+	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700' rel='stylesheet' type='text/css' />
 </h:head>
 <h:body>
-	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar
-		al contenido</a>
+	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar al contenido</a>
 
 	<div class="cabezalLogin">
 		<div class="container">
@@ -44,14 +37,10 @@
 				<div class="col-sm-4 cabezalTramites">
 					<div class="logosSecundarios">
 						<ul class="listaHorizontal">
-							<li><a href="https://www.presidencia.gub.uy/"
-								title="Ir al sitio de Presidencia"> <img
-									src="/sae-admin/resources/images/logoPresidencia.png"
-									alt="Presidencia" /></a></li>
-							<li><a href="http://uruguaydigital.gub.uy/"
-								title="Ir al sitio de Uruguay Digital"> <img
-									src="/sae-admin/resources/images/logo-uruguayDigital.png"
-									alt="Uruguay Digital" /></a></li>
+							<li><a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia"> <img
+									src="/sae-admin/resources/images/logoPresidencia.png" alt="Presidencia" /></a></li>
+							<li><a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital"> <img
+									src="/sae-admin/resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" /></a></li>
 						</ul>
 					</div>
 				</div>
@@ -66,15 +55,12 @@
 					<span class="icn icn-warning-lg"></span>
 				</div>
 				<div class="dialog-data">
-					<span class="dialog-title"><h:outputText
-							value="#{sesionMBean.textos['la_sesion_ha_expirado']}" /></span>
+					<span class="dialog-title"><h:outputText value="#{sesionMBean.textos['la_sesion_ha_expirado']}" /></span>
 					<p>
-						<h:outputText
-							value="#{sesionMBean.textos['ha_pasado_demasiado_tiempo_desde_su_ultima_accion']}" />
+						<h:outputText value="#{sesionMBean.textos['ha_pasado_demasiado_tiempo_desde_su_ultima_accion']}" />
 					</p>
 					<p>
-						<h:outputText
-							value="#{sesionMBean.textos['debe_volver_al_sitio_desde_donde_accedio_para_volver_a_comenzar']}" />
+						<h:outputText value="#{sesionMBean.textos['debe_volver_al_sitio_desde_donde_accedio_para_volver_a_comenzar']}" />
 					</p>
 				</div>
 			</div>

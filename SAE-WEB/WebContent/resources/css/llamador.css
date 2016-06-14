@@ -62,13 +62,16 @@ body {
     text-transform: uppercase;
     color: #000;
     font-weight: normal;
-    padding: 0 0.5em;
+    padding: 0 0.5em 8px;
+}
+.ui-datatable table{
+	border-collapse: separate;
+	border-spacing: 0;
 }
 table{
 	background: #F4F7FA;
 	font-size: 3em;
 }
-
 table tr:nth-child(1n) {
 	background: #e7e7e7;
 }
@@ -114,7 +117,7 @@ table tbody{
 }
 table tr.ui-widget-content td{
 	padding: 0.3em 0.2em;
-	border: 8px solid #fff;
+	border: 4px solid #fff;
 	border-top: 0;
 	border-bottom: 0;
 	font-size: 1.9em;

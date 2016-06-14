@@ -2,6 +2,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.Stateless;
 import javax.jws.WebMethod;
@@ -14,6 +15,7 @@ import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;
 
 //import org.jboss.wsf.spi.annotation.WebContext;
+
 
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.AgrupacionDato;
@@ -50,7 +52,8 @@ public class RecursosWS implements IRecursosWS {
 	@WebMethod
 	public @WebResult(name = "Result") ArrayList<AgrupacionDato> consultarDefinicionDeCampos
 		(
-			@WebParam(name = "recurso") Recurso recurso
+			@WebParam(name = "recurso") Recurso recurso,
+			@WebParam(name = "timezone") TimeZone timezone
 		)
 			throws BusinessException {
 
@@ -62,7 +65,7 @@ public class RecursosWS implements IRecursosWS {
 			throw new BusinessException(e.getCodigoError(),e.getMessage(),e.getCause());
 		}
 
-		List<AgrupacionDato> lst = recursosEJB.consultarDefinicionDeCampos(recurso);
+		List<AgrupacionDato> lst = recursosEJB.consultarDefinicionDeCampos(recurso, timezone);
 		
 		if (lst instanceof ArrayList){
 			return (ArrayList<AgrupacionDato>)lst;

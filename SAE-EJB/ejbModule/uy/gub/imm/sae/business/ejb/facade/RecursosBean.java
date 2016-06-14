@@ -21,10 +21,13 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
@@ -252,7 +255,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		d1.setAgrupacionDato(agrupDato);
 		d1.setAnchoDespliegue(100);
 		d1.setEsClave(true);
-		d1.setEtiqueta("Tipo de Documento");
+		d1.setEtiqueta("Tipo de documento");
 		d1.setIncluirEnLlamador(true);
 		d1.setLargo(20);
 		d1.setLargoEnLlamador(20);
@@ -307,9 +310,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		d2.setColumna(1);
 		d2.setIncluirEnReporte(true);		
 		d2.setAgrupacionDato(agrupDato);
-		d2.setAnchoDespliegue(15);
+		d2.setAnchoDespliegue(120);
 		d2.setEsClave(true);
-		d2.setEtiqueta("Nro. Documento");
+		d2.setEtiqueta("Número de documento");
 		d2.setIncluirEnLlamador(true);
 		d2.setLargo(10);
 		d2.setLargoEnLlamador(10);
@@ -321,7 +324,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		//persisto dato a solicitar
 		agregarDatoASolicitar(r, agrupDato, d2);
 		
-		//agrego datos a solicitar Nro. documento
+		//agrego datos a solicitar Correo electrónico
 		DatoASolicitar d3 = new DatoASolicitar();
 		d3.setNombre("Mail");
 		d3.setRequerido(true);
@@ -330,11 +333,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		d3.setIncluirEnReporte(true);		
 		d3.setAgrupacionDato(agrupDato);
 		d3.setAnchoDespliegue(100);
-		d3.setEsClave(true);
-		d3.setEtiqueta("Mail");
+		d3.setEsClave(false);
+		d3.setEtiqueta("Correo electrónico");
 		d3.setIncluirEnLlamador(false);
 		d3.setLargo(100);
-		d3.setLargoEnLlamador(100);
+		d3.setLargoEnLlamador(150);
 		d3.setOrdenEnLlamador(3);
 		d3.setRecurso(r);
 		d3.setRequerido(true);
@@ -511,13 +514,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		}
 
 		//No pueden quedar disponibilidades vivas fuera del período fechaInicioDisp y fechaFinDisp.
-		//OJO, hay que ver bien que se quiere controlar aca!!!
-		if ( hayDispVivasPorFecha(r, r.getFechaInicioDisp(), r.getFechaFinDisp()) ){
+		if (hayDispVivasPorFecha(r.getId(), r.getFechaInicioDisp(), r.getFechaFinDisp()) ){
 			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_disponibilidades_fuera_del_periodo_especificado");
 		}
 		
 	    //No pueden quedar reservas vivas fuera del período fechaInicioDisp y fechaFinDisp.
-		if ( hayReservasVivasPorFecha(r,r.getFechaInicioDisp(),r.getFechaFinDisp()) ){
+		if ( hayReservasVivasPorFecha(r.getId(), r.getFechaInicioDisp(),r.getFechaFinDisp()) ){
 			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_reservas_vivas_fuera_del_periodo_especificado");
 		}
 		
@@ -1321,13 +1323,13 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		}
 	}
 
-	private Boolean hayReservasVivasPorFecha(Recurso r, Date desde, Date hasta) throws ApplicationException{
+	private Boolean hayReservasVivasPorFecha(Integer recursoId, Date desde, Date hasta) throws ApplicationException{
 		try {Long cant = (Long) entityManager
 					.createQuery("SELECT count(r) FROM Disponibilidad d JOIN d.reservas r " +
-							"WHERE d.recurso = :recurso " +
+							"WHERE d.recurso.id = :recursoId " +
 							"  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )" +
 							"  AND (r.estado = :reservado OR r.estado = :pendiente) " )
-					.setParameter("recurso", r)
+					.setParameter("recursoId", recursoId)
 					.setParameter("fecha_desde", desde,TemporalType.DATE)
 					.setParameter("fecha_hasta", hasta,TemporalType.DATE)
 					.setParameter("reservado", Estado.R)
@@ -1340,13 +1342,13 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 		}
 	}
 
-	private Boolean hayDispVivasPorFecha(Recurso r, Date desde, Date hasta) throws ApplicationException{
+	private Boolean hayDispVivasPorFecha(Integer recursoId, Date desde, Date hasta) throws ApplicationException{
 		try {Long cant = (Long) entityManager
 					.createQuery("SELECT count(d) FROM Disponibilidad d " +
-							"WHERE d.recurso = :recurso " +
+							"WHERE d.recurso.id = :recursoId " +
 							"  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )" +
 							"  AND d.fechaBaja IS NULL")
-					.setParameter("recurso", r)
+					.setParameter("recursoId", recursoId)
 					.setParameter("fecha_desde", desde)
 					.setParameter("fecha_hasta", hasta)
 					.getSingleResult();
@@ -1472,7 +1474,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 	 */
 	@SuppressWarnings("unchecked")
 	@RolesAllowed({"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR","RA_AE_ANONIMO", "RA_AE_FATENCION","RA_AE_FCALL_CENTER"})
-	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso) throws BusinessException {
+	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws BusinessException {
 		if (recurso == null) {
 			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
 		}
@@ -1500,7 +1502,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 			agrupacionDTO.setRecurso(recurso);
 			agrupacionesDTO.add(agrupacionDTO);
 			
-			List<DatoASolicitar> datosDTO = obtenerDatosASolicitar(agrupacion);
+			List<DatoASolicitar> datosDTO = obtenerDatosASolicitar(agrupacion, timezone);
 			agrupacionDTO.setDatosASolicitar(datosDTO);
 			
 		}
@@ -1582,7 +1584,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<DatoASolicitar> obtenerDatosASolicitar(AgrupacionDato agrupacion) throws BusinessException {
+	private List<DatoASolicitar> obtenerDatosASolicitar(AgrupacionDato agrupacion, TimeZone timezone) throws BusinessException {
 		
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
 		
@@ -1603,7 +1605,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 			datosDTO.add(datoASolicitarDTO);
 			
 			if (datoASolicitarDTO.getTipo() == Tipo.LIST) {
-				List<ValorPosible> valoresDTO = obtenerValoresPosibles(datoASolicitar);
+				List<ValorPosible> valoresDTO = obtenerValoresPosibles(datoASolicitar, timezone);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
 		}
@@ -1654,20 +1656,24 @@ public class RecursosBean implements RecursosLocal, RecursosRemote{
 
 	
 	@SuppressWarnings("unchecked")
-	private List<ValorPosible> obtenerValoresPosibles (DatoASolicitar dato) {
+	private List<ValorPosible> obtenerValoresPosibles (DatoASolicitar dato, TimeZone timezone) {
 		
 		List<ValorPosible> valoresDTO = new ArrayList<ValorPosible>(); 
+		
+		Calendar cal = new GregorianCalendar();
+		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
+		Date hoy = cal.getTime();
 		
 		//Obtengo los valores posibles vivos del dato
 		List<ValorPosible> valores = (List<ValorPosible>) entityManager
 									.createQuery(
 									"from ValorPosible valor " +
-									"where valor.dato = :d and " +
-									"      :ahora >= valor.fechaDesde and " +
-									"      (valor.fechaHasta is null or :ahora <= valor.fechaHasta) " +
+									"where valor.dato = :dato and " +
+									"      :hoy >= valor.fechaDesde and " +
+									"      (valor.fechaHasta is null or :hoy <= valor.fechaHasta) " +
 									"order by valor.orden ")
-									.setParameter("d", dato)
-									.setParameter("ahora", new Date(), TemporalType.TIMESTAMP)
+									.setParameter("dato", dato)
+									.setParameter("hoy", hoy, TemporalType.DATE)
 									.getResultList();
 		
 		for (ValorPosible valorPosible : valores) {

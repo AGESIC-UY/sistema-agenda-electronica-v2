@@ -11,7 +11,7 @@
 		<f:view beforePhase="#{recursoMBean.beforePhaseModificar}"
 			beforePhaseListener="#{recursoMBean.beforePhaseModificar}">
 
-			<p:dialog shadowOpacity="0.4" autosized="false"
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarDato" zindex="2000" modal="true">
 
 				<f:facet name="header">
@@ -221,22 +221,28 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['disponible_para_internet']}"
-								for="visibleInternet" styleClass="col-sm-3 control-label label" />
+							<h:outputText
+								value="#{sessionMBean.textos['recurso']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox id="visibleInternet"
 									value="#{recursoMBean.recursoSeleccionado.visibleInternet}" />
+								<p:outputLabel
+								value="#{sessionMBean.textos['disponible_para_internet']}"
+								for="visibleInternet" />
 							</p:outputPanel>
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}"
-								for="sabadoHabil" styleClass="col-sm-3 control-label label" />
+							<h:outputText
+								value="#{sessionMBean.textos['sabado']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox id="sabadoHabil"
 									value="#{recursoMBean.recursoSeleccionado.sabadoEsHabil}" />
+								<p:outputLabel
+								value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}"
+								for="sabadoHabil" />
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -367,22 +373,24 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_llamador']}"
-								for="mostrarLlamador" styleClass="col-sm-3 control-label label" />
+							<h:outputText
+								value="#{sessionMBean.textos['numero_de_la_reserva']}_algo"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox id="mostrarLlamador"
-									value="#{recursoMBean.recursoSeleccionado.mostrarNumeroEnLlamador}" />
-							</p:outputPanel>
-						</p:outputPanel>
-
-						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_ticket']}"
-								for="mostrarTicket" styleClass="col-sm-3 control-label label" />
-							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox id="mostrarTicket"
-									value="#{recursoMBean.recursoSeleccionado.mostrarNumeroEnTicket}" />
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="mostrarLlamador"
+										value="#{recursoMBean.recursoSeleccionado.mostrarNumeroEnLlamador}" />
+									<p:outputLabel
+									value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_llamador']}"
+									for="mostrarLlamador" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="mostrarTicket"
+										value="#{recursoMBean.recursoSeleccionado.mostrarNumeroEnTicket}" />
+									<p:outputLabel
+									value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_ticket']}"
+									for="mostrarTicket" />
+								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
 					</p:outputPanel>
@@ -425,7 +433,7 @@
 					<p:dataTable value="#{sessionMBean.datosDelRecurso}" var="row"
 						id="tablaDatos" rows="25" binding="#{recursoMBean.datosDataTable}"
 						paginator="true"
-						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 						caption="#{sessionMBean.textos['informacion_adicional_del_recurso']}"
 						emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 
@@ -531,7 +539,6 @@
 							</fieldset>
 						</p:outputPanel>
 					</p:outputPanel>
-
 
 					<p:outputPanel id="ap_agregarDato">
 						<p:outputPanel rendered="#{sessionMBean.mostrarAgregarDato}"

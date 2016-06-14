@@ -23,9 +23,11 @@ package uy.gub.imm.sae.web.mbean.administracion;
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -37,18 +39,25 @@ import javax.ejb.EJB;
 import javax.faces.application.FacesMessage;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.faces.event.ComponentSystemEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
+import org.jboss.security.SecurityContext;
+import org.jboss.security.SecurityContextAssociation;
+import org.jboss.security.SecurityContextFactory;
+import org.picketbox.commons.cipher.Base64;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
+import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
@@ -68,8 +77,6 @@ import uy.gub.imm.sae.web.common.SessionCleanerMBean;
 
 public class SessionMBean extends SessionCleanerMBean {
 
-	public static final String version = "1.8";
-	
 	public static final String MSG_ID = "pantalla";
 
 	private Usuario usuarioActual;
@@ -86,10 +93,17 @@ public class SessionMBean extends SessionCleanerMBean {
 	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
 	private UsuariosEmpresas usuariosEmpresasEJB;
 
+	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
+	private AgendarReservas agendarReservasEJB;
+	
+	
 	@PostConstruct
 	public void postConstruct() {
+		//Se cargan los textos antes que los datos del usuario porque hay cosas que dependen de esto
+		cargarTextos();
+		//Se cargan los datos del usuario
 		cargarDatosUsuario();
-		
+		//Se vuelven a cargar los textos despues de los datos del usuario para incluir los traducidos en el idioma actual
 		cargarTextos();
 	}
 	
@@ -118,11 +132,6 @@ public class SessionMBean extends SessionCleanerMBean {
 	// Booleana para saber si se despliega la tabla para agregar Dato del Recurso
 	private Boolean mostrarAgregarDato = false;
 
-	// Booleana para saber si se despliega la tabla de modificación de Agrupaciones
-	//private Boolean mostrarAgrupacion = false;
-	// Booleana para saber si se despliega la tabla para agregar Agrupaciones
-	//private Boolean mostrarAgregarAgrupacion = false;
-
 	// Booleana para saber si se utiliza llamador o no
 	private Boolean mostrarLlamador = true;
 
@@ -136,8 +145,7 @@ public class SessionMBean extends SessionCleanerMBean {
 	private Map<String, DatoASolicitar> datosASolicitar;
 
 	// Numero de puesto asignado al usuario en el momento de atender reservas
-	// con
-	// el modulo Llamador
+	// con el modulo Llamador
 	private Integer puesto = 0;
 
 	private String codigoSeguridadReserva;
@@ -191,10 +199,6 @@ public class SessionMBean extends SessionCleanerMBean {
 		return "HH:mm";
 	}
 	
-	public String getVersion() {
-		return version;
-	}
-
 	// *****************************************************************************************************
 	// ***************************Pasos para la reserva
 	// *****************************************************************************************************
@@ -348,7 +352,11 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	public void seleccionarAgenda(SelectEvent event) {
 		removeMBeansFromSession();
-		setAgendaMarcada(this.rowSelectAgenda);
+		if(this.rowSelectAgenda==null || this.rowSelectAgenda.getData().getId()==0) {
+			setAgendaMarcada(null);
+		}else {
+			setAgendaMarcada(this.rowSelectAgenda);
+		}
 		cargarRecursos();
 	}
 
@@ -364,7 +372,9 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	public void desseleccionarRecurso() {
 		removeMBeansFromSession();
-		if (this.rowSelectRecurso != null) {
+		if (this.rowSelectRecurso == null || this.rowSelectRecurso.getData().getId()==0) {
+			this.recursos.setSelectedRow(null);
+		}else {
 			this.recursos.setSelectedRow(rowSelectRecurso);
 		}
 		this.setRecursoSeleccionado(null);
@@ -374,6 +384,11 @@ public class SessionMBean extends SessionCleanerMBean {
 		List<Agenda> entidades;
 		try {
 			entidades = generalEJB.consultarAgendas();
+			Agenda ninguna = new Agenda();
+			ninguna.setId(0);
+			ninguna.setNombre(getTextos().get("ninguna"));
+			ninguna.setDescripcion(getTextos().get("ninguna"));
+			entidades.add(0, ninguna);
 			agendas = new RowList<Agenda>(entidades);
 			if (recursos != null) {
 				recursos.clear();
@@ -400,6 +415,32 @@ public class SessionMBean extends SessionCleanerMBean {
 				recursos.clear();
 			}
 		}
+	}
+	
+	/**
+	 * Este método es usado para la pantalla de selección de recurso.
+	 * Devuelve la lista de recursos de la agenda actual, a la cual añade un recurso adicional, con id=0 y nombre "ninguno"
+	 * para permitir "desseleccionar" el recurso seleccionado (usado para generar reportes independientes del recurso)	 * 
+	 * */
+	public RowList<Recurso> getRecursosSeleccion() {
+		
+		RowList<Recurso> ret = new RowList<Recurso>();
+		if(recursos==null || recursos.isEmpty()) {
+			cargarRecursos();
+		}
+		
+		if(recursos !=null) {
+			ret.addAll(recursos);
+		}
+
+		Recurso ninguno = new Recurso();
+		ninguno.setId(0);
+		ninguno.setNombre(getTextos().get("ninguno"));
+		ninguno.setDescripcion(getTextos().get("ninguno"));
+		ret.add(0, new Row<Recurso>(ninguno, ret));
+		
+		return ret;
+		
 	}
 
 	// Si hay recurso selecciondada, se cargan los datos del recurso asociados.
@@ -576,25 +617,92 @@ public class SessionMBean extends SessionCleanerMBean {
 		return null;
 	}
 
+	
 	public void cargarDatosUsuario() {
+		
 		try {
+			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			HttpSession session = request.getSession();
+			
+			//Esto es para prevenir el ataque de Session Fixation: cada vez que se pide recargar los datos del usuario se
+			//genera un id de sesión nuevo, y se copian todos los datos que estaban de la anterior
+			//1-Almacenar en un map temporal todas las propiedades de la sesión actual
+			Map<String, Object> map0 = new HashMap<String, Object>();
+			Enumeration<String> en = session.getAttributeNames();
+			while(en.hasMoreElements()) {
+				String attNombre = en.nextElement();
+				map0.put(attNombre, session.getAttribute(attNombre));
+			}
+			//2-Invalidar la sesión actual
+			session.invalidate();
+			//3-Crear una nueva sesión
+			session = request.getSession(true);
+			//4-Poner en la sesión nueva los datos de la sesión anterior
+			for(String nombre : map0.keySet()) {
+				session.setAttribute(nombre, map0.get(nombre));
+			}
+			
 			if (usuarioActual == null) {
 				// No esta definido el usuario actual, se carga ahora
+				//Si está en la sesión el atributo "codigocda" se utiliza como código de usuario el atributo "documentocda",
+				//sino se utiliza el atributo remoteUser; además, si viene de CDA hay que autenticarlo programáticamente (la
+				//contraseña usada es la encriptacion con RSA y la clave privada del certificado usado por la válvula, se debe
+				//verificar con la clave pública del mismo certificado)
+				//Nota: la válvula pone valores como los siguientes: codigocda=uy-ci-88888889, documentocda=88888889
+				Map<String, Object> sessionAttrs = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
+				if(sessionAttrs.containsKey("codigocda") && sessionAttrs.containsKey("documentocda") && 
+						sessionAttrs.containsKey("codigocda_encriptado") && sessionAttrs.containsKey("documentocda_encriptado")) {
+					
+					//Viene de la válvula de CDA
+					
+					String codigoCda = (String)sessionAttrs.get("documentocda");
+					byte[] codigoCdaEncriptado = (byte[])sessionAttrs.get("documentocda_encriptado");
+
+					loginUsername = codigoCda;
+					loginPassword = Base64.encodeBytes(codigoCdaEncriptado);
+					
+					try {
+		        if (request.getUserPrincipal() != null) {
+		        	request.logout();
+		        }
+		        
+						SecurityContext secContext = SecurityContextFactory.createSecurityContext("SDSAE");
+						SecurityContextAssociation.setSecurityContext(secContext);
+						request.login(loginUsername, loginPassword);
+						Principal principal = request.getUserPrincipal();
+						SecurityContextAssociation.setPrincipal(principal);
+					}catch(Exception ex) {
+						//No se pudo loguear al usuario
+						//Se crea un usuario artificial solo para poder ofrecer el link "logout" si es de CDA
+						usuarioActual = new Usuario();
+						usuarioActual.setCodigo(loginUsername);
+						usuarioActual.setNombre(loginUsername);
+						FacesContext ctx = FacesContext.getCurrentInstance();
+						ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+						return;
+					}
+					
+					//Quitar las propiedades que puso la válvula de CDA
+					session.removeAttribute("codigocda");
+					session.removeAttribute("documentocda");
+					session.removeAttribute("codigocda_encriptado");
+					session.removeAttribute("documentocda_encriptado");
+				}
+				
+				/* */
+				
 				String codigo = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
 				if (codigo != null) {
 					try {
 						usuarioActual = usuariosEmpresasEJB.obtenerUsuarioPorCodigo(codigo);
 						empresasUsuario = new ArrayList<SelectItem>();
 						if (usuarioActual != null) {
-							// Si es superadmin tiene acceso a todas las
-							// empresas, sino solo a
-							// las que tiene asociadas
+							// Si es superadmin tiene acceso a todas las empresas, sino solo a las que tiene asociadas
 							if (usuarioActual.isSuperadmin()) {
 								for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas()) {
 									empresasUsuario.add(new SelectItem(emp.getId(), emp.getNombre()));
 								}
 							} else {
-								
 								for (Empresa emp : usuariosEmpresasEJB.consultarEmpresasPorUsuario(usuarioActual)) {
 									empresasUsuario.add(new SelectItem(emp.getId(), emp.getNombre()));
 								}
@@ -642,15 +750,22 @@ public class SessionMBean extends SessionCleanerMBean {
 			ex.printStackTrace();
 		}
 	}
-
+	
 	public void cambioEmpresa(ValueChangeEvent event) {
+		try {
+			Integer empId = Integer.valueOf((String) event.getNewValue());
+			cambioEmpresa(empId);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
+	}
+
+	public void cambioEmpresa(Integer empId) {
 		empresaActual = null;
 		try {
 			// Seleccionar la nueva empresa
-			Integer empId = Integer.valueOf((String) event.getNewValue());
 			seleccionarEmpresa(empId);
-			//voy a buscar el logo de la empresa
-			//empresaActualLogo = new DefaultStreamedContent(new ByteArrayInputStream(usuariosEmpresasEJB.obtenerLogoEmpresaPorEmpresaId(empId)));
+			//Buscar el logo de la empresa
 			empresaActualLogoBytes = usuariosEmpresasEJB.obtenerLogoEmpresaPorEmpresaId(empId);
 			// Desmarcar la agenda y el recurso (pertenecen a otra empresa)
 			if (recursos != null) {
@@ -669,7 +784,7 @@ public class SessionMBean extends SessionCleanerMBean {
 			ex.printStackTrace();
 		}
 	}
-
+	
 	/**
 	 * Metodo que dado el id de una empresa busca la empresa correspondiente
 	 * entre las empresas del usuario actual
@@ -694,9 +809,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public String cerrarSesion() {
+		//Si la autenticación fue con la válvula de CDA se invoca al logout de CDA, sino se hace logout local
 		FacesContext fc = FacesContext.getCurrentInstance();
-		HttpServletRequest request = (HttpServletRequest) fc
-				.getExternalContext().getRequest();
+		HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
 		try {
 			request.logout();
 		} catch (ServletException e) {
@@ -706,6 +821,16 @@ public class SessionMBean extends SessionCleanerMBean {
 		return "inicio";
 	}
 
+	public String getTipoLogout() {
+		FacesContext fc = FacesContext.getCurrentInstance();
+		HttpSession session = (HttpSession) fc.getExternalContext().getSession(false);
+		if(session.getAttribute("CDAServiceProviderValve")!=null) {
+			return "CDA";
+		}else {
+			return "LOCAL";
+		}
+	}
+	
 	private String loginUsername;
 	private String loginPassword;
 
@@ -725,15 +850,18 @@ public class SessionMBean extends SessionCleanerMBean {
 	 */
 	public String iniciarSesion() {
 		FacesContext fc = FacesContext.getCurrentInstance();
-		HttpServletRequest request = (HttpServletRequest) fc
-				.getExternalContext().getRequest();
+		HttpServletRequest request = (HttpServletRequest) fc.getExternalContext().getRequest();
 
 		String username = request.getParameter("formLogin:username");
 		String password = request.getParameter("formLogin:password");
-
+		
+		if(username==null || username.isEmpty() || password==null || password.isEmpty()) {
+			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Debe ingresar su código de usuario  y contraseña"));
+			return null;
+		}
 		try {
+			
 			request.login(username, password);
-
 			this.loginUsername = username;
 			this.loginPassword = password;
 
@@ -741,15 +869,13 @@ public class SessionMBean extends SessionCleanerMBean {
 
 			return "inicio";
 		} catch (Exception ex) {
-			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR,
-					"Error", "Código de usuario o contraseña incorrectos"));
+			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Código de usuario o contraseña incorrectos"));
 			return null;
 		}
 
 	}
-
+	
 	public StreamedContent getEmpresaActualLogo() {
-		
 		// No se puede cachear porque un stream y la segunda vez que el cliente
 		// lo pide está cerrado y no es muestra la imagen
 		if (empresaActual != null && empresaActualLogoBytes != null) {
@@ -967,4 +1093,24 @@ public class SessionMBean extends SessionCleanerMBean {
 		this.empresaActualLogoBytes = empresaActualLogoBytes;
 	}
 	
+	public boolean getBackendConCda() {
+		Object backendConCda = FacesContext.getCurrentInstance().getExternalContext().getSessionMap().get("CDAServiceProviderValve");
+		if(backendConCda!=null && backendConCda.toString().equalsIgnoreCase("true")) {
+			return true;
+		}
+		return false;
+	}
+	
+	public void controlarAccesoRestringido(ComponentSystemEvent event) {
+    try {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+	    Principal principal = ctx.getExternalContext().getUserPrincipal();
+	    if(principal == null) {
+				ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+	    }
+    }catch(Exception ex) {
+    	//
+    }
+	}
+
 }
