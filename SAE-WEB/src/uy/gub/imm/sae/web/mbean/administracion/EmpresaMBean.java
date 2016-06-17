@@ -30,6 +30,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.commons.io.IOUtils;
@@ -155,7 +156,6 @@ public class EmpresaMBean extends BaseMBean {
 					addErrorMessage(sessionMBean.getTextos().get("el_codigo_de_la_unidad_ejecutora_es_obligatorio"), "form:codigoUnidadEjecutora");
 				}
 				
-				
 				if(empresa.getNombre()==null || empresa.getNombre().trim().isEmpty()) {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_empresa_es_obligatorio"), "form:nombreEmpresa");
@@ -234,6 +234,15 @@ public class EmpresaMBean extends BaseMBean {
 				}
 				//se carga los datos del usuario para que cargue la nueva empresa creada
 				sessionMBean.cargarEmpresasUsuario();
+				//si es la primer empresa y es nueva, loguear al usuario en esa empresa
+				//nota: habría que hacer lo mismo si es una edición, es la empresa actualmente seleccionada y cambió el datasource
+				if(nueva) {
+					List<SelectItem> emps = sessionMBean.getEmpresasUsuario();
+					if(emps!=null && emps.size()==1) {
+						SelectItem emp = emps.get(0);
+						sessionMBean.cambioEmpresa((Integer)emp.getValue());
+					}
+				}
 			} catch (UserException aEx) {
 				addErrorMessage(aEx, MSG_ID);
 			} catch (ApplicationException aEx) {
@@ -267,8 +276,7 @@ public class EmpresaMBean extends BaseMBean {
 			boolean seleccionEmpliminar = false;
 			try {
 				
-				if (empresaEliminar.getId()!=empresaActual.getId() && empresasEJB.empresaEsquemaValido(empresaEliminar.getId()))
-				{
+				if (empresaEliminar.getId()!=empresaActual.getId() && empresasEJB.empresaEsquemaValido(empresaEliminar.getId())) {
 					seleccionEmpliminar = true;
 					sessionMBean.seleccionarEmpresa(empresaEliminar.getId());
 				}
@@ -350,6 +358,12 @@ public class EmpresaMBean extends BaseMBean {
 		//Cargar los organismos
 		try {
 			List<Organismo> orgs = empresasEJB.obtenerOrganismos(true);
+			if(orgs == null) {
+				addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_actualizar_lista_de_organismos"));
+				orgs = empresasEJB.obtenerOrganismos(false);
+			}else {
+				addInfoMessage(sessionMBean.getTextos().get("lista_de_organismos_actualizada"));
+			}
 			empresaSessionMBean.setOrganismos(orgs);
 		} catch (ApplicationException e) {
 			empresaSessionMBean.setOrganismos(null);
@@ -367,6 +381,12 @@ public class EmpresaMBean extends BaseMBean {
 		//Cargar las unidades ejecutoras
 		try {
 			List<UnidadEjecutora> ues = empresasEJB.obtenerUnidadesEjecutoras(true);
+			if(ues == null) {
+				addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_actualizar_lista_de_unidades_ejecutoras"));
+				ues = empresasEJB.obtenerUnidadesEjecutoras(false);
+			}else {
+				addInfoMessage(sessionMBean.getTextos().get("lista_de_unidades_ejecutas_actualizada"));
+			}
 			empresaSessionMBean.setUnidadesEjecutoras(ues);
 		} catch (ApplicationException e) {
 			empresaSessionMBean.setUnidadesEjecutoras(null);

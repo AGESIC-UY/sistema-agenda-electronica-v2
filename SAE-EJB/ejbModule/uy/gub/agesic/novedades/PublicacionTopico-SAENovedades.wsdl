@@ -1,0 +1,40 @@
+<definitions name='PublicarNovedadService' 
+  targetNamespace='http://servicios.pge.red.uy/SAENovedades/publicacion' 
+  xmlns='http://schemas.xmlsoap.org/wsdl/' 
+  xmlns:soap='http://schemas.xmlsoap.org/wsdl/soap/' 
+  xmlns:tns='http://servicios.pge.red.uy/SAENovedades/publicacion' 
+  xmlns:xsd='http://www.w3.org/2001/XMLSchema' 
+  xmlns:fexp='http://novedades.sae.agesic.gub.uy/'>
+  <types>
+    <xsd:schema xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+      <xsd:import namespace="http://novedades.sae.agesic.gub.uy/" schemaLocation="SAENovedades.xsd"></xsd:import>
+    </xsd:schema>
+  </types>
+  <message name='NuevaNovedadService_nuevaNovedad'>
+    <part element="fexp:publicar" name='novedad'></part>
+  </message>
+  <message name='NuevaNovedadService_nuevaNovedadResponse'></message>
+  <portType name='NuevaNovedadService'>
+    <operation name='nuevaNovedad' parameterOrder='novedad'>
+      <input message='tns:NuevaNovedadService_nuevaNovedad'></input>
+      <output message='tns:NuevaNovedadService_nuevaNovedadResponse'></output>
+    </operation>
+  </portType>
+  <binding name='NuevaNovedadServiceBinding' type='tns:NuevaNovedadService'>
+    <soap:binding style='document' transport='http://schemas.xmlsoap.org/soap/http' />
+    <operation name='nuevaNovedad'>
+      <soap:operation soapAction='' />
+      <input>
+        <soap:body use='literal' />
+      </input>
+      <output>
+        <soap:body use='literal' />
+      </output>
+    </operation>
+  </binding>
+  <service name='NuevaNovedadService'>
+    <port binding='tns:NuevaNovedadServiceBinding' name='NuevaNovedadPort'>
+      <soap:address location='https://testservicios.pge.red.uy:6270/SAENovedades/publicacion' />
+    </port>
+  </service>
+</definitions>

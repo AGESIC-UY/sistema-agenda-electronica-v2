@@ -44,7 +44,9 @@ import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
 
+import uy.gub.agesic.novedades.Acciones;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
+import uy.gub.imm.sae.business.ejb.servicios.ServiciosNovedadesBean;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosTrazabilidadBean;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
@@ -74,6 +76,9 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	
 	@EJB
 	private ServiciosTrazabilidadBean trazaBean;
+	
+	@EJB
+	private ServiciosNovedadesBean novedadesBean;
 	
 	@Resource
 	private SessionContext ctx;
@@ -283,6 +288,10 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.ASISTENCIA);
 		}
+		
+		//Publicar la novedad
+		novedadesBean.publicarNovedad(empresa, reserva, Acciones.ASISTENCIA);
+		
 	}
 
 
@@ -310,6 +319,10 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.INASISTENCIA);
 		}
+		
+		//Publicar la novedad
+		novedadesBean.publicarNovedad(empresa, reserva, Acciones.INASISTENCIA);
+		
 	}
 
 }

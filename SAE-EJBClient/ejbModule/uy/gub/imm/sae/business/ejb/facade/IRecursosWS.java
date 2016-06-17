@@ -1,6 +1,7 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.ArrayList;
+import java.util.TimeZone;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -27,7 +28,8 @@ public interface IRecursosWS {
 	@WebMethod
 	public @WebResult(name = "consultarDefinicionDeCamposResult") ArrayList<AgrupacionDato> consultarDefinicionDeCampos
 		(
-				@WebParam(name = "recurso") Recurso recurso
+				@WebParam(name = "recurso") Recurso recurso,
+				@WebParam(name = "timezone") TimeZone timezone
 		)
 		throws 
 			BusinessException;

@@ -376,10 +376,12 @@ public class AgendaMBean extends BaseMBean {
 			Integer empresaId = sessionMBean.getEmpresaActual().getId();
 			List<Tramite> trams = empresasEJB.obtenerTramitesEmpresa(empresaId, actualizar);
 			setTramites(trams);
-		} catch (UserException uEx) {
-			addErrorMessage(uEx);
-			setTramites(null);
-		} catch (ApplicationException aEx) {
+			String msg = sessionMBean.getTextos().get("se_cargaron_n_tramites");
+			if(msg!=null) {
+				addInfoMessage(msg.replace("{cant}", ""+(trams==null?"0":""+trams.size())));
+			}
+		} catch (Exception uEx) {
+			addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_cargar_tramites"));
 			setTramites(null);
 		}
 	}

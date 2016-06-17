@@ -35,7 +35,7 @@
 							var="reserva" id="resultadoBusqueda"
 							rendered="#{not empty consReservaDatosSessionMBean.listaReservas}"
 							caption="Reservas" paginator="true" rows="10"
-							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
 							<p:column headerText="#{sessionMBean.textos['id']}">
 								<h:outputText value="#{reserva.id}"></h:outputText>
 							</p:column>

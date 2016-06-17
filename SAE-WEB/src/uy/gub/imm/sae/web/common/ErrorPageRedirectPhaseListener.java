@@ -20,16 +20,8 @@
 
 package uy.gub.imm.sae.web.common;
 
-import java.io.IOException;
-
-import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-
 
 public class ErrorPageRedirectPhaseListener implements javax.faces.event.PhaseListener {
 
@@ -43,7 +35,7 @@ public class ErrorPageRedirectPhaseListener implements javax.faces.event.PhaseLi
 
 	public void afterPhase(PhaseEvent event) {
 
-		event.getFacesContext().getApplication().getNavigationHandler().handleNavigation(event.getFacesContext(), null, ERROR_OUTCOME);
+		event.getFacesContext().getApplication().getNavigationHandler().handleNavigation(event.getFacesContext(), null, "/");
 		event.getFacesContext().responseComplete();
 	}
 

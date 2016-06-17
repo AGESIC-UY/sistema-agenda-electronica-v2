@@ -104,14 +104,15 @@
 				<li class="action-buttons-primary">
 					<ul>
 						<li><h:commandButton styleClass="btn-lg btn-primario"
-								value="#{sessionMBean.textos['confirmar_reserva']} &#12299;"
+								value="#{sessionMBean.textos['confirmar_reserva']} #{paso3AdminMBean.simboloSiguiente}"
 								action="#{paso3AdminMBean.confirmarReserva}" /></li>
 					</ul>
 				</li>
 				<li class="action-buttons-second">
 					<ul>
 						<li class="float-left">
-						  <h:commandButton styleClass="btn-lg btn-link" value="&#12298; #{sessionMBean.textos['dia_y_hora']}"
+						  <h:commandButton styleClass="btn-lg btn-link" 
+						    value="#{paso3AdminMBean.simboloAnterior} #{sessionMBean.textos['dia_y_hora']}"
 								action="pasoAnterior" />
 						</li>
 					</ul>

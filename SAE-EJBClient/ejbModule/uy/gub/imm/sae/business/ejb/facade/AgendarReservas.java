@@ -74,8 +74,8 @@ public interface AgendarReservas {
 	public Recurso consultarRecursoPorReservaId(Integer reservId) throws ApplicationException, BusinessException;
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException;
 	
-	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException;
-	
+	//public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException;
+	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException ;	
 	/**
 	 * Estos metodos son usados para enviar las comunicaciones cada vez que un usuario reserva o cancela una reservación.
 	 * Por el momento hay tres tipos de comunicaciones: por mail, por sms y por texto a voz.

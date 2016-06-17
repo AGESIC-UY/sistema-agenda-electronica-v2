@@ -33,9 +33,6 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 
-//import org.richfaces.component.UIDataTable;
-
-
 import org.primefaces.component.datatable.DataTable;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
@@ -50,21 +47,17 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
-import uy.gub.imm.sae.web.common.SessionCleaner;
 
 public class ConsultaReservaDatosMBean extends BaseMBean {
 	public static final String MSG_ID = "pantalla";
 
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
-//	@EJB(name="ejb/AgendarReservasBean")
 	private AgendarReservas agendarReservasEJB;
 
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/ConsultasBean!uy.gub.imm.sae.business.ejb.facade.ConsultasRemote")
-//	@EJB(name="ejb/ConsultasBean")
 	private Consultas consultaEJB;
 
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
-//	@EJB(name="ejb/RecursosBean")
 	private Recursos recursosEJB;
 
 	private SessionMBean sessionMBean;
@@ -301,8 +294,7 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 		this.campos = campos;
 		try {
 			List<AgrupacionDato> agrupaciones = recursosEJB
-					.consultarDefinicionDeCampos(sessionMBean
-							.getRecursoMarcado());
+					.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
 			FormularioDinReservaClient.armarFormularioLecturaDinamico(
 					sessionMBean.getRecursoMarcado(),
 					this.consReservaDatosSessionMBean.getReservaDatos(),

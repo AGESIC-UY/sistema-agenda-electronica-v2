@@ -12,6 +12,7 @@
 			beforePhaseListener="#{recursoMBean.beforePhaseCrear}">
 
 			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null}">
+			  <p:outputPanel id="panelForm">
 				<fieldset id="basic">
 					<legend>
 						<h:outputText value="#{sessionMBean.textos['datos_del_recurso']}" />
@@ -35,7 +36,7 @@
 									valueChangeListener="#{recursoMBean.cambioOficina}"
 									styleClass="form-control"
 									update="nombre descripcion direccion localidad departamento telefonos horarios">
-									<p:ajax update="@all" process="@this" />
+									<p:ajax update="form:panelForm" process="@this" />
 									<f:selectItems value="#{recursoMBean.oficinas}" />
 								</h:selectOneMenu>
 								<p:commandLink
@@ -101,7 +102,7 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel value="#{sessionMBean.textos['latitud']} "
+							<p:outputLabel value="#{sessionMBean.textos['latitud']}"
 								styleClass="col-sm-3 control-label label" for="latitud" />
 							<p:outputPanel styleClass="col-sm-9">
 								<h:inputText id="latitud"
@@ -201,24 +202,27 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['disponible_para_internet']}"
-								styleClass="col-sm-3 control-label label" for="visibliInternet" />
+							<h:outputText
+								value="#{sessionMBean.textos['recurso']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox id="visibliInternet"
 									value="#{recursoMBean.recursoNuevo.visibleInternet}" />
+								<p:outputLabel
+								value="#{sessionMBean.textos['disponible_para_internet']}" for="visibliInternet" />
 							</p:outputPanel>
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}"
-								styleClass="col-sm-3 control-label label"
-								for="ChecksabadoEsHabil" />
+							<h:outputText
+								value="#{sessionMBean.textos['sabado']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox
 									value="#{recursoMBean.recursoNuevo.sabadoEsHabil}"
 									id="ChecksabadoEsHabil" />
+								<p:outputLabel
+								value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}" for="ChecksabadoEsHabil" />
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -352,26 +356,26 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_llamador']}"
-								styleClass="col-sm-3 control-label label"
-								for="CheckNumeroEnLlamador" />
+							<h:outputText
+								value="#{sessionMBean.textos['numero_de_la_reserva']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox
-									value="#{recursoMBean.recursoNuevo.mostrarNumeroEnLlamador}"
-									id="CheckNumeroEnLlamador" />
-							</p:outputPanel>
-						</p:outputPanel>
-
-						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_ticket']}"
-								styleClass="col-sm-3 control-label label"
-								for="CheckNumeroEnTicket" />
-							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox
-									value="#{recursoMBean.recursoNuevo.mostrarNumeroEnTicket}"
-									id="CheckNumeroEnTicket" />
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoNuevo.mostrarNumeroEnLlamador}"
+										id="CheckNumeroEnLlamador" />
+									<p:outputLabel
+									value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_llamador']}"
+									for="CheckNumeroEnLlamador" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoNuevo.mostrarNumeroEnTicket}"
+										id="CheckNumeroEnTicket" />
+									<p:outputLabel
+									value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_ticket']}"
+									for="CheckNumeroEnTicket" />
+								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
 					</p:outputPanel>
@@ -383,12 +387,12 @@
 							<li><p:commandButton
 									value="#{sessionMBean.textos['guardar']}"
 									actionListener="#{recursoMBean.crear}"
-									styleClass="btn-lg btn-primario" update="form" /></li>
+									styleClass="btn-lg btn-primario" update="form:panelForm" /></li>
 						</ul>
 					</li>
 					<li class="action-buttons-second"></li>
 				</ul>
-
+      </p:outputPanel>
 			</h:form>
 		</f:view>
 	</ui:define>

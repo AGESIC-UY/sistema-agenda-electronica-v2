@@ -84,7 +84,7 @@
   <wsdl:binding name="lineaServiceSoapBinding" type="tns:LineaWS">
     <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
     <wsdl:operation name="persist">
-      <soap:operation soapAction="" style="document"/>
+      <soap:operation soapAction="http://ws.web.bruto.itramites.agesic.gub.uy/lineaService/persist" style="document"/>
       <wsdl:input name="persist">
         <soap:body use="literal"/>
       </wsdl:input>

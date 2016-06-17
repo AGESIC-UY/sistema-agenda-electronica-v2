@@ -139,7 +139,7 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 				
 				mensajeError = "RESERVA: ";
 				
-				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso);
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 				
 				Reserva rtmp = sessionMBean.getReservaConfirmada();
 

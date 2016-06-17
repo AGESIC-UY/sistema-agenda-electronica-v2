@@ -10,7 +10,7 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificar}"
 			beforePhaseListener="#{datoASolicitarMBean.beforePhaseModificar}">
-			<p:dialog moveable="true" shadowOpacity="0.4" autosized="false"
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarValor" zindex="2000" modal="true">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
@@ -146,9 +146,8 @@
 							</p:outputPanel>
 						</p:outputPanel>
 						
-						<p:outputPanel id="largoMax">
-							<p:outputPanel styleClass="form-group"
-							rendered="#{datoASolicitarMBean.visualizarLargoMax}">
+						<p:outputPanel id="largoMax" styleClass="form-group">
+							<p:outputPanel	rendered="#{datoASolicitarMBean.visualizarLargoMax}">
 								<p:outputLabel value="#{sessionMBean.textos['largo_maximo']}"
 									for="vLargoDS"
 									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
@@ -163,20 +162,19 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel value="#{sessionMBean.textos['clave']}"
-								for="clave" styleClass="col-sm-3 control-label label" />
+							<h:outputText value="#{sessionMBean.textos['dato_es']}"
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox id="clave"
-									value="#{datoASSessionMBean.datoSeleccionado.esClave}" />
-							</p:outputPanel>
-						</p:outputPanel>
-
-						<p:outputPanel styleClass="form-group">
-							<p:outputLabel value="#{sessionMBean.textos['requerido']}"
-								for="requerido" styleClass="col-sm-3 control-label label" />
-							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox id="requerido"
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="clave"
+										value="#{datoASSessionMBean.datoSeleccionado.esClave}" />
+									<p:outputLabel value="#{sessionMBean.textos['clave']}"	for="clave" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="requerido"
 									value="#{datoASSessionMBean.datoSeleccionado.requerido}" />
+									<p:outputLabel value="#{sessionMBean.textos['requerido']}" for="requerido" />
+								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -199,15 +197,18 @@
 					</legend>
 					<p:outputPanel styleClass="form-horizontal">
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
+							<h:outputText
 								value="#{sessionMBean.textos['incluir_en_el_reporte']}"
-								for="reporte" styleClass="col-sm-3 control-label label" />
+								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox id="reporte"
 									value="#{datoASSessionMBean.datoSeleccionado.incluirEnReporte}">
 									<p:ajax update="form:vAnchoDS"
 										listener="#{datoASolicitarMBean.limpiarAnchoDespliegueReporteSeleccionado}" />
 								</p:selectBooleanCheckbox>
+								<p:outputLabel
+								value="#{sessionMBean.textos['incluir']}"
+								for="reporte" />
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -268,7 +269,7 @@
 						<p:dataTable value="#{datoASSessionMBean.valoresDelDato}" var="row"
 							id="tablaValores" rows="25" rowKeyVar="rowIndex"
 							rowKeyConverter="conversor" paginator="true"
-							paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 							rowIndexVar="rowIndex"
 							caption="#{sessionMBean.textos['valores_posibles_para_el_dato']}"
 							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
@@ -383,10 +384,11 @@
 												styleClass="col-sm-3 control-label label formularioCampoRequerido"
 												for="fechaDesde" />
 											<p:outputPanel styleClass="col-sm-9">
-												<p:calendar id="fechaDesde"
-													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaDesde}"
-													pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
-													showWeeksBar="false" locale="es"></p:calendar>
+						                        <h:inputText value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaDesde}"
+						                          styleClass="datepicker" id="fechaDesde">
+						                          <f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+						                            timeZone="GMT" />
+						                        </h:inputText>
 												<p:message for="fechaDesde" errorClass="mensajeError"></p:message>
 											</p:outputPanel>
 										</p:outputPanel>
@@ -396,10 +398,11 @@
 												value="#{sessionMBean.textos['vigencia_hasta']}"
 												styleClass="col-sm-3 control-label label" for="fechaHasta" />
 											<p:outputPanel styleClass="col-sm-9">
-												<p:calendar id="fechaHasta"
-													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaHasta}"
-													pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
-													showWeeksBar="false" locale="es"></p:calendar>
+						                        <h:inputText value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaHasta}"
+						                          styleClass="datepicker" id="fechaHasta">
+						                          <f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+						                            timeZone="GMT" />
+						                        </h:inputText>
 												<p:message for="fechaHasta" errorClass="mensajeError"></p:message>
 											</p:outputPanel>
 										</p:outputPanel>
@@ -476,10 +479,11 @@
 												styleClass="col-sm-3 control-label label formularioCampoRequerido"
 												for="CfechaDesde" />
 											<p:outputPanel styleClass="col-sm-9">
-												<p:calendar id="CfechaDesde"
-													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaDesde}"
-													datePattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
-													showWeeksBar="false" locale="es"></p:calendar>
+                        <h:inputText value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaDesde}"
+                          styleClass="datepicker" id="CfechaDesde">
+                          <f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+                            timeZone="GMT" />
+                        </h:inputText>
 												<p:message for="CfechaDesde" errorClass="mensajeError"></p:message>
 											</p:outputPanel>
 										</p:outputPanel>
@@ -489,10 +493,11 @@
 												value="#{sessionMBean.textos['vigencia_hasta']}"
 												styleClass="col-sm-3 control-label label" for="CfechaHasta" />
 											<p:outputPanel styleClass="col-sm-9">
-												<p:calendar id="CfechaHasta"
-													value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaHasta}"
-													datePattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
-													showWeeksBar="false" locale="es"></p:calendar>
+				                <h:inputText value="#{datoASSessionMBean.valorDelDatoSeleccionado.fechaHasta}"
+				                  styleClass="datepicker" id="CfechaHasta">
+				                  <f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
+				                    timeZone="GMT" />
+				                </h:inputText>
 												<p:message for="CfechaHasta" errorClass="mensajeError"></p:message>
 											</p:outputPanel>
 										</p:outputPanel>

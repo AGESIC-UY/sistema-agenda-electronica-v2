@@ -13,7 +13,7 @@
 
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
-				<p:dialog shadowOpacity="0.4" autosized="false"
+				<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 					widgetVar="eliminarDato" zindex="2000" modal="true">
 					<f:facet name="header">
 						<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
@@ -23,7 +23,7 @@
 						<p:outputPanel styleClass="row panelBotonesPopUp">
 							<p:outputPanel styleClass="col-sm-6">
 								<p:commandButton id="btn_eliminar"
-									update="formDatosMod:tablaDatosSolicitarMod"
+									update="formDatosMod:panelDatosMod"
 									actionListener="#{datoASolicitarMBean.eliminarDato}"
 									value="#{sessionMBean.textos['eliminar']}" onclick="PF('eliminarDato').hide();"
 									styleClass="btn-primario btn-100 btn">
@@ -42,14 +42,14 @@
 					src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
 
 				<h:form id="formDatosMod">
+          <p:outputPanel id="panelDatosMod">
 					<p:outputPanel styleClass="botonesDerecha">
-						<ui:include
-							src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+						<ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
 					</p:outputPanel>
 
 					<p:dataTable value="#{datoASSessionMBean.datosASolicitar}"
 						var="row" id="tablaDatosSolicitarMod" rows="25" paginator="true"
-						paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 						rowIndexVar="rowIndex" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
 						>
 						
@@ -133,6 +133,7 @@
 							<p:tooltip for="eliminarLink" value="#{sessionMBean.textos['eliminar']}" />
 						</p:column>
 					</p:dataTable>
+					</p:outputPanel>
 				</h:form>
 			</p:outputPanel>
 		</f:view>
