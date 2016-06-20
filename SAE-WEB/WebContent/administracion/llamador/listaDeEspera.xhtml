@@ -16,10 +16,6 @@
 			<script type="text/javascript">
 
 		function decorarModal (modal) {
-
-			/*Por alguna razón el clientHeight no devuelve la altura de la ventana, devuelve la altura del contenido de la pagina html.
-              por lo tanto no me sirve para este propisito, por lo cual lo dejo fijo*/ 
-			//modal.style.height = document.body.clientHeight * 0.8 + "px";
 			modal.style.height = "300px";  
 			modal.style.width = document.body.clientWidth * 0.8 + "px";
 			modal.style.width = "800px";
@@ -34,16 +30,12 @@
           <button type="submit" class="ui-helper-hidden-accessible" value="dummy"/>
 				</h:form>
 
-
 				<h:form id="form1">
-
 					<p:outputPanel id="todo">
 						<div class="form-inline">
 							<div class="form-group">
-								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label"
-									for="puesto" />
-								<h:inputText size="3" maxlength="3" id="puesto"
-									value="#{sessionMBean.puesto}" styleClass="form-control" />
+								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label" for="puesto" />
+								<h:inputText size="3" maxlength="3" id="puesto" value="#{sessionMBean.puesto}" styleClass="form-control" />
 							</div>
 							<p:commandButton value="#{sessionMBean.textos['llamar_al_siguiente']}" 
 								actionListener="#{listaDeEsperaMBean.siguiente}"
@@ -111,10 +103,9 @@
 											icon="ui-icon-closethick">
 										</p:commandButton>
 										<p:commandButton value="#{sessionMBean.textos['asistio']}"
-											actionListener="#{listaDeEsperaMBean.asistio}"
-											update="form1:todo" styleClass="btn-lg btn-primario"
-											icon="ui-icon-check">
-										</p:commandButton>
+                      actionListener="#{listaDeEsperaMBean.asistio}"
+                      update="form1:todo" styleClass="btn-lg btn-primario"
+                      icon="ui-icon-check" />
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>

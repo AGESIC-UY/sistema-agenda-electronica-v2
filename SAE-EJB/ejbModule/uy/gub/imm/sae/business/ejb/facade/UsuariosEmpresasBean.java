@@ -858,5 +858,19 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		
 	}
 	
+	public boolean hayOtroSuperadmin(Integer usuarioId) throws ApplicationException {
+		try{
+			globalEntityManager.createQuery("SELECT u FROM Usuario u WHERE u.superadmin=true AND u.id<>:usuarioId")
+				.setParameter("usuarioId", usuarioId)
+				.setMaxResults(1)
+				.getSingleResult();
+			return true;
+		} catch(NoResultException nrEx) {
+			return false;
+		} catch(Exception ex) {
+			throw new ApplicationException(ex);
+		}
+	}
+	
 	
 }

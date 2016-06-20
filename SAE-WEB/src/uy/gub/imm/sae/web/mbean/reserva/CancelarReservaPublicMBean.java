@@ -82,7 +82,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 					empresaId = Integer.valueOf(sEmpresaId);
 					agendaId = Integer.valueOf(sAgendaId);
 					if (sReservaId != null) {
-						//Se especificó una reserva específica
+						//Se especificó una reserva por id
 						reservaId = Integer.valueOf(sReservaId);
 						recursoId = null;
 					}else {
@@ -122,7 +122,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				
 			}
 			
-			
 			//Poner en sesion los datos de la empresa  y la agenda para la válvula de CDA 
 			//(necesita estos datos para determinar si la agenda particular requiere o no CDA)
 			HttpSession httpSession = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
@@ -130,7 +129,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 			httpSession.setAttribute("a", agendaId.toString());
 			
 			String remoteUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-			
+
 			if (remoteUser == null || !remoteUser.startsWith("sae" + empresaId)) {
 				//No hay usuario o hay un usuario que no es de esta empresa (puede ser de CDA u otra empresa)
 				try {
@@ -144,11 +143,11 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 						//Hay usuario, dos alternativas: es de cda o es local de otra empresa
 						if(!remoteUser.startsWith("sae")) {
 							//Es un usuario de CDA
+							falsoUsuario = remoteUser;
 							sesionMBean.setUsuarioCda(remoteUser);
-							falsoUsuario = "sae"+remoteUser;
 						}else  {
-							//Ees un usuario de otra empresa
-							falsoUsuario = "sae" + empresaId;;
+							//Es un usuario de otra empresa
+							falsoUsuario = "sae" + empresaId;
 							sesionMBean.setUsuarioCda(null);
 						}
 						//Desloguear al usuario actual (inválido)
@@ -159,7 +158,10 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 						}
 					}
 					Random random = new Random();
-					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000))+ "/" + empresaId;
+					if(falsoUsuario.startsWith("cda")) {
+						falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+					}
+					falsoUsuario = falsoUsuario+ "/" + empresaId;
 					// Autenticarlo
 					String password = Utilidades.encriptarPassword(falsoUsuario);
 					request.login(falsoUsuario, password);
