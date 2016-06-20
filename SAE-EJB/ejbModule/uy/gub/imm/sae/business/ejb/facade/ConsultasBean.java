@@ -856,67 +856,58 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta) {
-		
-		String queryString = "select a from Atencion a where a.fechaCreacion >=:fD and a.fechaCreacion <=:fH";
+	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde, Date fechaHasta) {
+		String queryString = "select a from Atencion a where date_trunc('day',a.fechaCreacion) >=:fD "
+				+ "and date_trunc('day',a.fechaCreacion) <=:fH";
 		Query query = entityManager.createQuery(queryString);
-		query.setParameter("fD", fechaDesde);
-		query.setParameter("fH", fechaHasta);
+		query.setParameter("fD", fechaDesde, TemporalType.DATE);
+		query.setParameter("fH", fechaHasta, TemporalType.DATE);
 		List<Atencion> resultado = (List<Atencion>)query.getResultList();
 		return resultado;
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde,Date fechaHasta)
+	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta)
 	{
-		
 		String queryString = "select distinct a.funcionario, l.recurso.agenda.nombre, l.recurso.nombre, l.puesto, l.hora, a.fechaCreacion, a.asistio, l.reserva.id, l.reserva.fechaCreacion "
 							+ "from Atencion a join a.reserva.llamada l "
 							+ "where a.reserva = l.reserva and "
-							+ "l.fecha >=:fD and l.fecha <=:fH and "
-							+ "l.hora <= a.fechaCreacion";
+							+ "date_trunc('day',l.fecha) >=:fD and date_trunc('day',l.fecha) <=:fH "
+							+ "and l.hora <= a.fechaCreacion";
 		Query query = entityManager.createQuery(queryString);
-		query.setParameter("fD", fechaDesde);
-		query.setParameter("fH", fechaHasta);
+		query.setParameter("fD", fechaDesde, TemporalType.DATE);
+		query.setParameter("fH", fechaHasta, TemporalType.DATE);
 		List<Object[]> resultados = query.getResultList();
 		Iterator<Object[]> iterator = resultados.iterator();
 		List<AtencionLLamadaReporteDT> listAtencionLlamada = new ArrayList<AtencionLLamadaReporteDT>();
-		while (iterator.hasNext()) 
-		{
+		while (iterator.hasNext()) {
 			Object[] row = iterator.next();
 			Boolean asistio = (Boolean)row[6];
 			String resolucionAtencion = null;
-			if (asistio)
-			{
+			if (asistio) {
 				resolucionAtencion = "Asistió";
-			}else
-			{
+			}else {
 				resolucionAtencion = "No Asistió";
 			}
 			AtencionLLamadaReporteDT atencionLlamada = new AtencionLLamadaReporteDT((String)row[0],(String)row[1],(String)row[2],(Integer)row[3],(Date)row[4],(Date)row[5],resolucionAtencion,(Integer)row[7],(Date)row[8]);
 			listAtencionLlamada.add(atencionLlamada);
-			
 		}
-		
 		queryString = "select l.recurso.agenda.nombre, l.recurso.nombre, l.puesto, l.hora, l.reserva.id, l.reserva.fechaCreacion "
 				+ "from Llamada l "
-				+ "where l.fecha >=:fD and l.fecha <=:fH and l.reserva.id not IN (select a.reserva.id from Atencion a where a.fechaCreacion >=:fD and a.fechaCreacion <=:fH and l.hora <= a.fechaCreacion)";
+				+ "where date_trunc('day', l.fecha) >=:fD and date_trunc('day', l.fecha) <=:fH "
+				+ "and l.reserva.id not IN (select a.reserva.id from Atencion a where date_trunc('day', a.fechaCreacion) >=:fD and "
+				+ "date_trunc('day', a.fechaCreacion) <=:fH)";
 		query = entityManager.createQuery(queryString);
-		query.setParameter("fD", fechaDesde);
-		query.setParameter("fH", fechaHasta);
+		query.setParameter("fD", fechaDesde, TemporalType.DATE);
+		query.setParameter("fH", fechaHasta, TemporalType.DATE);
 		resultados = query.getResultList();
 		iterator = resultados.iterator();
-		while (iterator.hasNext()) 
-		{
+		while (iterator.hasNext()) {
 			Object[] row = iterator.next();
 			AtencionLLamadaReporteDT atencionLlamada = new AtencionLLamadaReporteDT(null,(String)row[0],(String)row[1],(Integer)row[2],(Date)row[3],null,null,(Integer)row[4],(Date)row[5]);
 			listAtencionLlamada.add(atencionLlamada);
-			
 		}
-		
-		
 		return listAtencionLlamada;
-		
 	}
 	
 }

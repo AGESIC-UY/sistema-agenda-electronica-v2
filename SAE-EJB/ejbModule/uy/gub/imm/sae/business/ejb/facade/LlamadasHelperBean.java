@@ -27,7 +27,6 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.LockModeType;
 import javax.persistence.PersistenceContext;
@@ -176,31 +175,6 @@ public class LlamadasHelperBean implements LlamadasHelperLocal {
 			}
 		}
 		
-/*		
-		//Obtengo los datos solicitados para la reserva que deben desplegarse en la pantalla llamadora
-		List<DatoReserva> datos = (List<DatoReserva>) em.createQuery(
-									"select dr " +
-									"from DatoReserva dr " +
-									"where dr.reserva = :reserva " +
-									"order by dr.datoASolicitar.ordenEnLlamador ")
-									.setParameter("reserva", reserva)
-									.getResultList();
-		
-		String etiqueta = "";
-		for (DatoReserva datoReserva : datos) {
-			if (datoReserva.getDatoASolicitar().getIncluirEnLlamador()) {
-				int largo = datoReserva.getDatoASolicitar().getLargoEnLlamador();
-				if (datoReserva.getValor().length() <= largo) {
-					etiqueta += datoReserva.getValor();
-					etiqueta += " ";
-				}
-				else {
-					etiqueta += datoReserva.getValor().substring(0,largo);
-					etiqueta += ". ";
-				}
-			}
-		}
-*/		
 		if (etiqueta.equals("")) {
 			ll.setEtiqueta("---");
 		}
@@ -208,7 +182,6 @@ public class LlamadasHelperBean implements LlamadasHelperLocal {
 			ll.setEtiqueta(etiqueta);
 		}
 		
-		logger.info("ETIQUETA:"+ll.getEtiqueta());
 		return ll;
 	}
 	

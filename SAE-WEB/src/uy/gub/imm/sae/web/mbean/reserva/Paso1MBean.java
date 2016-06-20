@@ -188,7 +188,8 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 						if(!remoteUser.startsWith("sae")) {
 							//Es un usuario de CDA
 							sesionMBean.setUsuarioCda(remoteUser);
-							falsoUsuario = "sae"+remoteUser;
+							//falsoUsuario = "sae"+remoteUser;
+							falsoUsuario = remoteUser;
 						}else  {
 							//Ees un usuario de otra empresa
 							falsoUsuario = "sae" + empresaId;;
@@ -202,7 +203,11 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 						}
 					}
 					Random random = new Random();
-					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000))+ "/" + empresaId;
+					//Si no es un usuario de CDA se añade un número randómico para evitar conflictos con otros usuarios
+					if(falsoUsuario.startsWith("cda")) {
+						falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+					}
+					falsoUsuario = falsoUsuario+ "/" + empresaId;
 					// Autenticarlo
 					String password = Utilidades.encriptarPassword(falsoUsuario);
 					request.login(falsoUsuario, password);
@@ -211,6 +216,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 					throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 				}
 			}
+			
 			//Cargar los textos dependientes del idioma
 			sesionMBean.cargarTextos();
 			//Restauar beans necesarios

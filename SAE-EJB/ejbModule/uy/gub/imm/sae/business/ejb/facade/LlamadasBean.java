@@ -250,8 +250,7 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 			
 			if (puestos.containsKey(llamada[5])) {
 				dto.setPuesto(null);
-			}
-			else {
+			} else {
 				dto.setPuesto((Integer)llamada[5]);
 				puestos.put((Integer)llamada[5], (Integer)llamada[5]);
 			}
@@ -281,17 +280,14 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 		atencion.setDuracion(1);
 		atencion.setFuncionario(ctx.getCallerPrincipal().getName());
 		em.persist(atencion);
-		
 		//Registrar la asistencia en el sistema de trazas del PEU
 		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
 		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), agenda.getTramiteCodigo(), reserva.getId());
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.ASISTENCIA);
 		}
-		
 		//Publicar la novedad
 		novedadesBean.publicarNovedad(empresa, reserva, Acciones.ASISTENCIA);
-		
 	}
 
 

@@ -7,6 +7,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -59,7 +60,9 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	
 	@PostConstruct
 	public void init() {
-		listaDeEsperaSessionMBean.setMostrarDatosSiguiente(false);
+		if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().containsKey("l")) {
+			listaDeEsperaSessionMBean.setMostrarDatosSiguiente(false);
+		}
 		boolean huboError = false;
 		if(sessionMBean.getAgendaMarcada()==null) {
 			huboError = true;
@@ -76,7 +79,6 @@ public class ListaDeEsperaMBean extends BaseMBean {
 			try {
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
 				listaDeEsperaSessionMBean.setAgrupaciones(agrupaciones);
-
 				if (listaDeEsperaSessionMBean.getHorarios() == null) {
 					try {
 						refrescarHorariosDeEspera(null);
@@ -87,8 +89,7 @@ public class ListaDeEsperaMBean extends BaseMBean {
 			} catch (BusinessException be) {
 				if (be.getCodigoError().equals("AE20084")) {
 					addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
-				}
-				else {
+				} else {
 					addErrorMessage(be, MSG_ID);
 				}
 			} catch (Exception e) {
@@ -181,20 +182,21 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	/**
 	 * Marca la reserva indicando que el el usuario estuvo presente en la cita
 	 */
-	public void asistio(ActionEvent event) {
+	//public void asistio(ActionEvent event) {
+	public void asistio() {
 		try {
 			Reserva reserva = listaDeEsperaSessionMBean.getSiguienteReserva();
 			llamadasEJB.marcarAsistencia(sessionMBean.getEmpresaActual(), sessionMBean.getRecursoMarcado(), reserva);
 			cierroDatosSiguiente();
 		} catch (Exception ex) {
 			addErrorMessage(ex, MSG_ID);
+			ex.printStackTrace();
 		}
 	}
-	
 	/**
 	 * Marca la reserva indicando que el el usuario estuvo ausente en la cita
 	 */
-	public void falto(ActionEvent event) {
+	public void falto() {
 		try {
 			Reserva reserva = listaDeEsperaSessionMBean.getSiguienteReserva();
 			llamadasEJB.marcarInasistencia(sessionMBean.getEmpresaActual(), sessionMBean.getRecursoMarcado(), reserva);
@@ -205,7 +207,6 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	}
 	
 	private void cierroDatosSiguiente() {
-		
 		refrescarHorariosDeEspera(null);
 		listaDeEsperaSessionMBean.setMostrarDatosSiguiente(false);
 	}
@@ -281,10 +282,17 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	
 	//Llama a la capa de negocio consumiendo la siguiente reserva en la lista de espera y la despliega al usuario.
 	public void siguiente(ActionEvent event) {
+		Integer iPuesto = null;
+		try {
+			iPuesto = Integer.valueOf(sessionMBean.getPuesto());
+		}catch(Exception ex) {
+			addErrorMessage(sessionMBean.getTextos().get("el_numero_de_puesto_no_es_valido"));
+			return;
+		}
 		if (sessionMBean.getRecursoMarcado() != null) {
 			Reserva siguienteReserva = null;
 			try {
-				siguienteReserva = llamadasEJB.siguienteEnEspera(sessionMBean.getRecursoMarcado(), sessionMBean.getPuesto());
+				siguienteReserva = llamadasEJB.siguienteEnEspera(sessionMBean.getRecursoMarcado(), iPuesto);
 				listaDeEsperaSessionMBean.setSiguienteReserva(siguienteReserva);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
@@ -309,13 +317,21 @@ public class ListaDeEsperaMBean extends BaseMBean {
 
 	//Llama a la capa de negocio re-consumiendo la reserva indicada y la despliega al usuario.
 	public void llamar(ActionEvent event) {
+		Integer iPuesto = null;
+		try {
+			iPuesto = Integer.valueOf(sessionMBean.getPuesto());
+		}catch(Exception ex) {
+			addErrorMessage(sessionMBean.getTextos().get("el_numero_de_puesto_no_es_valido"));
+			return;
+		}
+		
 		Reserva siguienteReserva = null;
 		try {
 			Espera espera = (Espera)getSubTablaListaDeEspera().getRowData();
 			if (espera != null) {
 				Reserva r = new Reserva();
 				r.setId(espera.getReserva().getId());
-				siguienteReserva = llamadasEJB.volverALlamar(sessionMBean.getRecursoMarcado(), sessionMBean.getPuesto(), r);
+				siguienteReserva = llamadasEJB.volverALlamar(sessionMBean.getRecursoMarcado(), iPuesto, r);
 				listaDeEsperaSessionMBean.setSiguienteReserva(siguienteReserva);
 			}
 		} catch (Exception e) {

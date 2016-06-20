@@ -74,4 +74,10 @@ public interface UsuariosEmpresas {
 	
 	public List<String> obtenerIdiomasSoportados();
 	
+	/**
+	 * Indica si existe otro usuario superadministrador diferente al indicado.
+	 * Esto es para ver si se permite quitar la marca de superadminstrador a un usuario (o por lo menos se muestra un mensaje de advertencia)
+	 * */
+	public boolean hayOtroSuperadmin(Integer usuarioId) throws ApplicationException;
+	
 }
