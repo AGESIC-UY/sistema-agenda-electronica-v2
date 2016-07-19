@@ -117,7 +117,7 @@
 					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}">
 					<p:menuitem value="#{sessionMBean.textos['lista_de_espera']}"
 						icon="ui-icon-clock"
-						url="/administracion/llamador/listaDeEspera.xhtml" />
+						url="/administracion/llamador/listaDeEspera.xhtml?l=1" />
 					<p:menuitem value="#{sessionMBean.textos['abrir_llamador']}"
 						icon="ui-icon-volume-on"
 						url="/administracion/llamador/configurarLlamador.xhtml" />

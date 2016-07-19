@@ -146,7 +146,7 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	// Numero de puesto asignado al usuario en el momento de atender reservas
 	// con el modulo Llamador
-	private Integer puesto = 0;
+	private String puesto = "";
 
 	private String codigoSeguridadReserva;
 	
@@ -548,11 +548,11 @@ public class SessionMBean extends SessionCleanerMBean {
 		this.datosASolicitar = datosASolicitar;
 	}
 
-	public Integer getPuesto() {
+	public String getPuesto() {
 		return puesto;
 	}
 
-	public void setPuesto(Integer puesto) {
+	public void setPuesto(String puesto) {
 		this.puesto = puesto;
 	}
 

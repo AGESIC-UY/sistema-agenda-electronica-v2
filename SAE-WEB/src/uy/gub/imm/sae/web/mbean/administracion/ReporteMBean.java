@@ -383,7 +383,7 @@ public class ReporteMBean extends BaseMBean {
 	}
 	
 	private List<AtencionReporteDT> obtenerDatosReporteAtencionPeriodo(Date fechaDesde, Date fechaHasta) {
-		List<Atencion> atenciones =consultaEJB.consultarTodasAtencionesPeriodo(fechaDesde,fechaHasta);
+		List<Atencion> atenciones = consultaEJB.consultarTodasAtencionesPeriodo(fechaDesde,fechaHasta);
 		Collections.sort(atenciones, new AtencionComparator());
 		String AgendaProcesada = "";
 		String FuncionarioProcesado = "";
@@ -482,19 +482,17 @@ public class ReporteMBean extends BaseMBean {
 									listAtencionLlamada.get(i).setNombEmpresa(emp.getNombre());
 									i++;
 								}
-								
 								listAtencionLLamadaReportDT.addAll(listAtencionLlamada);
-								
 							} catch (Exception e1) {
+								e1.printStackTrace();
 							}
 						}
-						
 					} catch (ApplicationException e1) {
+						e1.printStackTrace();
 					}finally {
 						sessionMBean.seleccionarEmpresa(empresaActual.getId());
 					}
-			}else
-			{
+			}else {
 				listAtencionLLamadaReportDT	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
 				Collections.sort(listAtencionLLamadaReportDT, new AtencionLlamadaReporteComparator());
 			}
@@ -502,36 +500,30 @@ public class ReporteMBean extends BaseMBean {
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
 			for (AtencionLLamadaReporteDT atencionLlamadaReporteDT : listAtencionLLamadaReportDT) {
 				List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
-				if(this.todasLasEmpresas)
-				{
+				if(this.todasLasEmpresas) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombEmpresa()));
 				}
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombAgenda()));
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombRecurso()));
+				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getReservaId()));
 				filaDatos.add(new TableCellValue(Utiles.date2string(atencionLlamadaReporteDT.getFechaHoraReserva(), Utiles.DIA)));
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getPuesto()));
-				if(atencionLlamadaReporteDT.getNombFuncionario()!=null)
-				{
+				if(atencionLlamadaReporteDT.getNombFuncionario()!=null) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombFuncionario()));
-				}else
-				{
+				}else {
 					filaDatos.add(new TableCellValue("---"));
 				}
-				if(atencionLlamadaReporteDT.getFechaHoraAtencion()!=null)
-				{
+				if(atencionLlamadaReporteDT.getFechaHoraAtencion()!=null) {
 					long tiempo = atencionLlamadaReporteDT.getFechaHoraAtencion().getTime() - atencionLlamadaReporteDT.getFechaHoraLlamada().getTime(); 
-					tiempo = tiempo/(1000 * 60);
+					tiempo = Math.abs(tiempo/(1000 * 60));
 					filaDatos.add(new TableCellValue(String.valueOf(tiempo)));
-				}else
-				{
+				}else {
 					filaDatos.add(new TableCellValue("---"));
 				}
 				
-				if(atencionLlamadaReporteDT.getAtencion()!= null)
-				{
+				if(atencionLlamadaReporteDT.getAtencion()!= null) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getAtencion()));
-				}else
-				{
+				}else {
 					filaDatos.add(new TableCellValue("No Marcado"));
 				}
 				
@@ -543,13 +535,11 @@ public class ReporteMBean extends BaseMBean {
 	          		   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
 	             };
 			StandardCSVFile fileCSV ;
-			if (this.todasLasEmpresas)
-			{
-				String[]  cabezales = {"Empresa","Tramite","Oficina","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+			if (this.todasLasEmpresas) {
+				String[]  cabezales = {"Empresa","Tramite","Oficina","Id Reserva","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
-			}else
-			{
-				String[]  cabezales = {"Tramite","Oficina","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+			}else {
+				String[]  cabezales = {"Tramite","Oficina","Id Reserva","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
 						

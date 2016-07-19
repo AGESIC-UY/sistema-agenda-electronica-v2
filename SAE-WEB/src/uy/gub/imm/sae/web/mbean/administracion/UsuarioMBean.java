@@ -351,8 +351,24 @@ public class UsuarioMBean extends BaseMBean {
 		}
 	}
 	
+	/**
+	 * Método invocado cuando se le pone o quita la marca de superadmin a un usuario.
+	 * Si determina que no hay otro superadmin entonces se muestra un mensaje de advertencia (pero igual se permite)
+	 */
 	public void cambioSuperadmin() {
-		if(getUsuarioEditar().getSuperadmin()!=null && getUsuarioEditar().getSuperadmin().booleanValue()) {
+		//Si deja de ser superadmin y es el último mostrar un mensaje de advertencia
+		Usuario usuario = getUsuarioEditar();
+		//Ver si hay al menos otro superadmin
+		try {
+			boolean hayOtroSuperadmin = usuariosEJB.hayOtroSuperadmin(usuario.getId());
+			if(!hayOtroSuperadmin) {
+				addAdvertenciaMessage(sessionMBean.getTextos().get("no_hay_otro_superadmin"), "form:superadministrador");
+			}
+		}catch(ApplicationException ex) {
+			addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_determinar_si_hay_otro_superadministrador"), "form:superadministrador");
+		}
+		//Si se pone la marca de superadmin se blanquean los roles específicos
+		if(usuario.getSuperadmin()!=null && usuario.getSuperadmin().booleanValue()) {
 			UsuarioEmpresaRoles uer = getUsuarioEmpresaRolesEditar();
 			uer.setAdministrador(false);
 			uer.setfAtencion(false);
