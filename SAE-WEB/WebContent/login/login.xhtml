@@ -11,15 +11,17 @@
 	<title><h:outputText value="#{sessionMBean.textos['ingreso_electronico']}" /></title>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
 	<h:outputScript library="primefaces" name="jquery/jquery.js" />
-	<script src="/sae/resources/js/jquery-ui.js" type="text/javascript"></script>
-	<script src="/sae/resources/js/funcionesJS.js" type="text/javascript"></script>
-	<script src="/sae/resources/js/bootstrap.min.js" type="text/javascript"></script>
-	<link href="/sae/resources/css/bootstrap.min.css" rel="stylesheet" />
-	<link href="/sae/resources/css/formulario-tipo.css" rel="stylesheet" />
-	<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
+	<script src="/sae-admin/resources/js/jquery-ui.js" type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/funcionesJS.js" type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/bootstrap.min.js" type="text/javascript"></script>
+	<link href="/sae-admin/resources/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/formulario-tipo.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/agenda.css" rel="stylesheet" />
 </h:head>
 <h:body>
-	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar al contenido</a>
+	<a class="sr-only sr-only-focusable saltar" href="#formLogin">
+   <h:outputText value="#{sessionMBean.textos['saltar_al_contenido']}" />
+  </a>
 	<div class="cabezalLogin">
 		<div class="container">
 			<div class="row">
@@ -54,6 +56,11 @@
 			</h1>
 			<p:messages id="messages" showDetail="true" showSummary="false" autoUpdate="true"
 					styleClass="msg errorGrande" errorTitle="#{sessionMBean.textos['mensajes_login_error']}" />
+					
+			<p:outputPanel styleClass="form-required">
+        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+      </p:outputPanel>
+					
 			<fieldset>
 				<legend>
 					<h:outputText value="#{sessionMBean.textos['ingreso_de_usuario']}" />
@@ -62,7 +69,7 @@
 				<div class="form-horizontal">
 					<div class="form-group">
 						<h:outputLabel value="#{sessionMBean.textos['codigo_de_usuario']}"
-							for="username" styleClass="col-sm-3 control-label label" />
+							for="username" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 						<div class="col-sm-9">
 							<h:inputText id="username" required="true" styleClass="form-control" />
 						</div>
@@ -70,7 +77,7 @@
 					<div class="form-group">
 						<h:outputLabel for="password"
 							value="#{sessionMBean.textos['contrasena']}"
-							styleClass="col-sm-3 control-label label" />
+							styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 						<div class="col-sm-9">
 							<p:password id="password" required="true"
 								styleClass="form-control" />

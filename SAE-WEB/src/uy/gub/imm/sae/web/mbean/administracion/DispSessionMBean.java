@@ -39,9 +39,7 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	
 	private DisponibilidadReserva dispSeleccionado;
 	private Boolean mostrarDisponibilidad = true;
-	private Boolean modificarTodos = false;
 	
-	//private List<Disponibilidad> disponibilidades;
 	private RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutina;
 	private RowList<DisponibilidadReserva> disponibilidadesDelDiaVespertina;
 	private RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutinaModif;
@@ -52,6 +50,8 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	private Date fechaHasta;
 	private Date fechaActual;
 	private Date fechaModifCupo;
+	private Boolean modificarTodos = false;
+	private Boolean[] diasAplicar = new Boolean[]{true,true,true,true,true,true}; //Lunes, martes, ..., sábado
 	
 	private int pagCupo;
 	//private int pagDisp;
@@ -222,6 +222,12 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 		this.disponibilidadesDelDiaVespertinaModif = disponibilidadesDelDiaVespertinaModif;
 	}
 
+	public Boolean[] getDiasAplicar() {
+		return diasAplicar;
+	}
+	public void setDiasAplicar(Boolean[] diasAplicar) {
+		this.diasAplicar = diasAplicar;
+	}
 
 }
 

@@ -83,7 +83,8 @@
 							<p:outputLabel for="diaSelect" value="día seleccionado" styleClass="hidden" />
 							<h:inputText value="#{paso2MBean.diaSeleccionadoStr}" id="diaSelect" styleClass="hidden" />
 							<p:outputLabel for="diaSelectFormat" value="día seleccionado" styleClass="hidden" />
-							<h:inputText value="#{paso2MBean.fechaFormatSelect}" id="diaSelectFormat" styleClass="diaSeleccionado" readonly="true" />
+							<h:inputText value="#{paso2MBean.fechaFormatSelect}" id="diaSelectFormat" styleClass="diaSeleccionado"
+							  readonly="true" onkeypress="return soloTabs(event);" />
 							<p:commandButton action="#{paso2MBean.seleccionarFecha}" value="enter" id="callBean" styleClass="hidden"
 								update="form:panelMatutina form:panelVespertina form:diaSelectFormat" />
 						</div>

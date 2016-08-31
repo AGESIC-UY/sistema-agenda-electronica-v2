@@ -23,12 +23,14 @@
 		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />
 
 		<ui:define name="descripcion">
-			<div id="form:j_idt30" aria-live="polite" class="ui-message ui-message-warn ui-widget ui-corner-all" style="margin: 20px 0 0;">
-				<span class="ui-message-warn-icon"></span>
-				<span class="ui-message-warn-detail">
-          <h:outputText styleClass="negrita" value="#{sessionMBean.textos['no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva']}" />
-        </span>
-			</div>
+      <f:view beforePhase="#{pasoAdminFinalMBean.beforePhase}" >
+				<div id="form:j_idt30" aria-live="polite" class="ui-message ui-message-warn ui-widget ui-corner-all" style="margin: 20px 0 0;">
+					<span class="ui-message-warn-icon"></span>
+					<span class="ui-message-warn-detail">
+	          <h:outputText styleClass="negrita" value="#{sessionMBean.textos['no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva']}" />
+	        </span>
+				</div>
+		  </f:view>
 		</ui:define>
 
 		<ui:define name="mensaje">

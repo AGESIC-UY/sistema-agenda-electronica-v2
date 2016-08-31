@@ -166,6 +166,21 @@ CREATE TABLE ae_textos (
 ALTER TABLE ae_textos OWNER TO sae;
 
 --
+-- Name: ae_tokens; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+--
+
+CREATE TABLE ae_tokens (
+    token character varying(25) NOT NULL,
+    empresa_id integer NOT NULL,
+    nombre character varying(100) NOT NULL,
+    email character varying(100) NOT NULL,
+    fecha timestamp without time zone NOT NULL
+);
+
+
+ALTER TABLE ae_tokens OWNER TO sae;
+
+--
 -- Name: ae_tramites; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
 --
 
@@ -195,7 +210,8 @@ CREATE TABLE ae_trazabilidad (
     id integer NOT NULL,
     es_cabezal boolean DEFAULT false NOT NULL,
     reserva_id integer,
-    empresa_id integer
+    empresa_id integer,
+    es_final boolean DEFAULT false
 );
 
 
@@ -297,51 +313,51 @@ ALTER TABLE s_ae_usuario OWNER TO sae;
 -- Data for Name: ae_configuracion; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', 'urn:tokensimple');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', 'AGESIC');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', 'SAENovedades');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', 'https://testservicios.pge.red.uy:6051/TrustServer/SecurityTokenServiceProtected');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', 'http://testservicios.pge.red.uy/SAENovedades/publicacion/nuevaNovedad');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', 'http://testservicios.pge.red.uy/SAENovedades/publicacion');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'TRUE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', 'urn:tokensimple');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_ALIAS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '***');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', 'https://testservicios.pge.red.uy:6051/TrustServer/SecurityTokenServiceProtected');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA', 'http://testservicios.pge.red.uy/agesic/LineaService/preprod');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_CABEZAL', 'http://ws.web.bruto.itramites.agesic.gub.uy/cabezalService/persist');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_LINEA', 'http://ws.web.bruto.itramites.agesic.gub.uy/lineaService/persist');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_CABEZAL', 'http://testservicios.pge.red.uy/agesic/cabezalService/preprod');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA', 'http://testservicios.pge.red.uy/agesic/LineaService/preprod');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', 'http://testservicios.pge.red.uy/SAENovedades/publicacion');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', 'http://testservicios.pge.red.uy/SAENovedades/publicacion/nuevaNovedad');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', 'AGESIC');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', 'SAENovedades');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'TRUE');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
+
 
 --
 -- Data for Name: ae_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
 
 
 --
@@ -353,19 +369,15 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA
 -- Data for Name: ae_oficinas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-INSERT INTO ae_oficinas (id, tramite_id, nombre, direccion, localidad, departamento, telefonos, horarios, comentarios) VALUES ('1000003-1855-0', '1000003-1855', 'Edificio Sede: 18 de Julio 360, piso PLANTA BAJA, sector Santiago de Chile, puerta 70.', 'Edificio Sede: 18 de Julio 360, piso PLANTA BAJA, sector Santiago de Chile, puerta 70.', '', 'Montevideo', '[598 2] 1950 1209', 'Lunes a Viernes de 10:15 a 15:30hs ', '');
-
 
 --
 -- Data for Name: ae_organismos; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
 
-
 --
 -- Data for Name: ae_rel_usuarios_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
 
 
 --
@@ -659,7 +671,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_esta_confirmada', 'La 
 INSERT INTO ae_textos (codigo, texto) VALUES ('si', 'Sí');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no', 'No');
 INSERT INTO ae_textos (codigo, texto) VALUES ('documento', 'Documento');
-INSERT INTO ae_textos (codigo, texto) VALUES ('numero_de_puesto', 'Puesto Nº');
 INSERT INTO ae_textos (codigo, texto) VALUES ('llamar_al_siguiente', 'Llamar al siguiente');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar', 'Mostrar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_hay_personas_en_espera', 'No hay personas en espera');
@@ -667,6 +678,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('volver_a_llamar', 'Volver a llama
 INSERT INTO ae_textos (codigo, texto) VALUES ('falto', 'Faltó');
 INSERT INTO ae_textos (codigo, texto) VALUES ('asistio', 'Asistió');
 INSERT INTO ae_textos (codigo, texto) VALUES ('tamano_de_la_pantalla', 'Tamaño de la pantalla');
+INSERT INTO ae_textos (codigo, texto) VALUES ('numero_de_puesto', 'Número de puesto');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_una_agenda_seleccionada', 'Debe haber una agenda seleccionada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('agrupacion_modificada', 'Agrupación modificada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_una_agrupacion_seleccionada', 'Debe haber una agrupación seleccionada');
@@ -760,7 +772,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('los_caracteres_escritos_no_son_co
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_completar_el_campo_campo', 'Debe completar el campo {campo}');
 INSERT INTO ae_textos (codigo, texto) VALUES ('imagen_de_seguridad', 'Imagen de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_del_usuario_es_obligatorio', 'El nombre del usuario es obligatorio');
-INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_del_usuario_es_obligatorio', 'El código del usuario es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_correo_electronico_del_usuario_es_obligatorio', 'El correo electrónico del usuario es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('ya_existe_una_agenda_con_el_nombre_especificado', 'Ya existe una agenda con el nombre especificado');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_descripcion_de_la_agenda_es_obligatoria', 'La descripción de la agenda es obligatoria');
@@ -968,7 +979,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('ha_ocurrido_un_error_no_soluciona
 INSERT INTO ae_textos (codigo, texto) VALUES ('cerrar', 'Cerrar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('seguimiento', 'Seguimiento del trámite');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_llamador', 'Visible en el llamador');
-INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_ticket', 'Visible en el ticket');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_numero_de_reserva_en_el_ticket', 'Mostrar serie y número');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_responder_la_pregunta_de_seguridad', 'Debe responder la pregunta de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('publicar_novedades', 'Publicar en PDI');
 INSERT INTO ae_textos (codigo, texto) VALUES ('novedades', 'Novedades');
@@ -994,6 +1005,65 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_actualizar_lista_de_or
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_actualizar_lista_de_unidades_ejecutoras', 'No se pudo actualizar la lista de unidades ejecutoras');
 INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_organismos_actualizada', 'La lista de organismos fue actualizada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_unidades_ejecutas_actualizada', 'La lista de unidades ejecutoras fue actualizada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_hay_otro_superadmin', 'No hay otro superadministrador');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_determinar_si_hay_otro_superadministrador', 'No se pudo determinar si hay otro superadministrador');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_numero_de_puesto_no_es_valido', 'El número de puesto no es válido');
+INSERT INTO ae_textos (codigo, texto) VALUES ('exportar', 'Exportar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('importar', 'Importar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('importar_recurso', 'Importar recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('archivo', 'Archivo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('subir_archivo', 'Subir archivo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_tamano_maximo_admitido_es_de_1mb', 'El archivo debe ser menor a 1 MB');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_el_archivo', 'No se pudo cargar el archivo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_realizar_la_exportacion', 'No se pudo realizar la exportación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recurso_importado_exitosamente', 'Recusro importado exitosamente');
+INSERT INTO ae_textos (codigo, texto) VALUES ('archivo_cargado', 'Archivo cargado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('gestionar_tokens', 'Gestionar tokens');
+INSERT INTO ae_textos (codigo, texto) VALUES ('token', 'Token');
+INSERT INTO ae_textos (codigo, texto) VALUES ('crear_token', 'Crear token');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_es_obligatorio', 'El nombre es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_correo_electronico_es_obligatorio', 'El correo electrónico es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('parametros_incorrectos', 'Parámetros incorrectos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_eliminar_el_token', '¿Esta seguro que desea eliminar el token?');
+INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_empresa', 'Modificar empresa');
+INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_usuario', 'Modificar usuario');
+INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_agenda', 'Modificar agenda');
+INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_recurso', 'Modificar recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('gestionar_agrupaciones', 'Gestionar agrupaciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('realizar_reserva', 'Realizar reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('seleccionar_agenda_recurso', 'Seleccionar agenda y recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('inicio', 'Inicio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_llamadas', 'Lista de llamadas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_por_id', 'Reserva por id');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_por_numero', 'Reserva por número');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_por_datos', 'Reserva por datos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mostrar_id_de_reserva_en_el_ticket', 'Mostrar identificador de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('id_de_la_reserva', 'Identificador de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_organismos', 'Recargar organismos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_unidades_ejecutoras', 'Recargar unidades ejecutoras');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_tramites', 'Recargar trámites');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_del_usuario_es_obligatorio', 'La cédula de identidad del usuario es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('los_campos_indicados_con_asterisco_son_obligatorios', 'Los campos indicados con * son obligatorios');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_cargar_un_archivo', 'Debe cargar un archivo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('archivo_no_cargado', 'Archivo no cargado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('puede_usar_las_siguientes_metavariables', 'Puede utilizar las siguientes metavariables');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda_o_tramite', 'Nombre de la agenda o trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_recurso_u_oficina', 'Nombre del recurso u oficina');
+INSERT INTO ae_textos (codigo, texto) VALUES ('direccion_fisica_donde_debe_concurrir', 'Dirección física donde debe concurrir el ciudadano');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_cuando_debe_concurrir', 'Fecha en la cual debe concurrir el ciudadano');
+INSERT INTO ae_textos (codigo, texto) VALUES ('hora_cuando_debe_concurrir', 'Hora en la cual debe concurrir el ciudadano');
+INSERT INTO ae_textos (codigo, texto) VALUES ('serie_asociada_al_recurso', 'Serie asociada al recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_cancelacion_de_la_reserva', 'Código de cancelación de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_trazabilidad_de_la_reserva', 'Código de trazabilidad de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('enlace_a_la_pagina_de_cancelacion', 'Enlace a la página directa de cancelación de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('identificador_de_la_reserva', 'Identificador de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('puede_ingresar_codigo_html', 'Puede ingresar código HTML');
+
+
+--
+-- Data for Name: ae_tokens; Type: TABLE DATA; Schema: global; Owner: sae
+--
+
 
 
 --
@@ -1134,6 +1204,14 @@ ALTER TABLE ONLY ae_rel_usuarios_roles
 
 ALTER TABLE ONLY ae_textos
     ADD CONSTRAINT ae_textos_pk PRIMARY KEY (codigo);
+
+
+--
+-- Name: ae_tokens_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+--
+
+ALTER TABLE ONLY ae_tokens
+    ADD CONSTRAINT ae_tokens_pkey PRIMARY KEY (token);
 
 
 --

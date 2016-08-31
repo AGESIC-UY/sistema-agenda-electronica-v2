@@ -492,7 +492,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @throws UserException
 	 * @throws ValidacionException 
 	 */
-	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre) 
+	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
 		throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
 		
 		if (reserva == null || reserva.getDatosReserva()==null) {
@@ -601,7 +601,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			//transaccionId = "2.16.858.0.0.2.3:ID_PROCESO_TEST_1:"+r.getId();
 			
 			//Registrar el cabezal en el sistema de trazabilidad del PEU
-			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, agenda.getTramiteCodigo(), transaccionPadreId, pasoPadre);
+			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, agenda.getTramiteCodigo(), 
+					inicioAsistido, transaccionPadreId, pasoPadre);
 			if(trazaGuid != null) {
 				reserva.setTrazabilidadGuid(trazaGuid);
 			}else {
@@ -1177,25 +1178,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		return textos;		
 	}
 	
-//	@SuppressWarnings("unchecked")
-//	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException {
-//		List<String> frasesCaptcha = new ArrayList<String>();
-//		try {
-//			List<FraseCaptcha> frases = (List<FraseCaptcha>) entityManager.
-//					createQuery("SELECT c from FraseCaptcha c WHERE c.idioma=:idioma")
-//					.setParameter("idioma", idioma).getResultList();
-//			if(frases != null) {
-//				for(FraseCaptcha frase : frases) {
-//					frasesCaptcha.add(frase.getFrase());
-//				}
-//			}
-//		}catch(Exception pEx) {
-//			//pEx.printStackTrace();
-//		}
-//		
-//		return frasesCaptcha;		
-//	}
-
 	@SuppressWarnings("unchecked")
 	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException {
 		Map<String, String> preguntasCaptcha = new HashMap<String, String>();
@@ -1212,6 +1194,10 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			//pEx.printStackTrace();
 		}
 		return preguntasCaptcha;		
+	}
+	
+	public void limpiarTrazas() {
+		trazaBean.finalizarTrazas();
 	}
 	
 }

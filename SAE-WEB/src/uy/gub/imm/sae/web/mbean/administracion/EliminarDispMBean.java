@@ -76,9 +76,8 @@ public class EliminarDispMBean extends BaseMBean {
 
 
 	public void beforePhase(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Eliminar disponibilidades por semana");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("eliminar_disponibilidades"));
 		}
 	}
 	

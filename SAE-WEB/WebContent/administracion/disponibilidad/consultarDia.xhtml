@@ -9,8 +9,7 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 
-		<f:view beforePhase="#{disponibilidadMBean.beforePhaseConsultarXdia}"
-			beforePhaseListener="#{disponibilidadMBean.beforePhaseConsultarXdia}">
+		<f:view beforePhase="#{disponibilidadMBean.beforePhaseConsultarXdia}" >
 
 			<h:form>
 				<h2>

@@ -115,7 +115,7 @@ public class ListaDeEsperaMBean extends BaseMBean {
 
 	public void beforePhaseListaDeEspera(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Lista de espera");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("lista_de_espera"));
 		}
 	}
 	

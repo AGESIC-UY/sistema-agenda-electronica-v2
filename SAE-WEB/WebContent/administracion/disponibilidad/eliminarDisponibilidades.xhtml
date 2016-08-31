@@ -7,8 +7,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{eliminarDispMBean.beforePhase}"
-			beforePhaseListener="#{eliminarDispMBean.beforePhase}">
+		<f:view beforePhase="#{eliminarDispMBean.beforePhase}" >
 
       <p:dialog closable="false" shadowOpacity="0.4" autosized="false"
         widgetVar="eliminarDisp" zindex="2000" modal="true">
@@ -36,13 +35,13 @@
         </h:form>
       </p:dialog>
 
-
-
-			<p:outputPanel
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 
 				<h:form id="form">
 				  <p:outputPanel id="panelForm">
+          <p:outputPanel styleClass="form-required">
+            <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+          </p:outputPanel>
 					<fieldset>
 						<legend><h:outputText value="#{sessionMBean.textos['seleccionar_semana']}" /></legend>
 						<p:outputPanel styleClass="form-horizontal">

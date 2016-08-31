@@ -127,13 +127,14 @@ public class LlamadorMBean extends BaseMBean {
 	/** Configura titulo pantalla de configuracion del llamador cuando se accede desde la administracion */
 	public void beforePhaseConfiguracionLlamador(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Configuración del Llamador");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("configuracion_del_llamador"));
 		}
 	}
 	
 	/** Valida parametros para armar el llamador generico */
 	public void beforePhaseListaDeLlamadas(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("lista_de_llamadas"));
 			try {
 				Map<String, String> parametros = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
 				if (parametros.get("agenda") != null && parametros.get("recursos") != null && parametros.get("tipoMonitor") != null) {					
@@ -157,8 +158,7 @@ public class LlamadorMBean extends BaseMBean {
 					
 					llamadorSessionMBean.setRecursos(recursos);
 					TipoMonitor tipoMonitor = TipoMonitor.fromPulgadas(Integer.valueOf(parametros.get("tipoMonitor")));
-					llamadorSessionMBean.setTipoMonitor((tipoMonitor != null ? tipoMonitor :  TipoMonitor.fromPulgadas(Integer.valueOf("22"))) 
-							);
+					llamadorSessionMBean.setTipoMonitor((tipoMonitor != null ? tipoMonitor :  TipoMonitor.fromPulgadas(Integer.valueOf("22"))));
 				}
 			}
 			catch (Exception e) {

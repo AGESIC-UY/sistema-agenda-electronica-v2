@@ -3,15 +3,20 @@
 	xmlns:ui="http://java.sun.com/jsf/facelets"
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
+	xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:pe="http://primefaces.org/ui/extensions"
+>
 
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{empresaMBean.beforePhaseCrear}"
-			beforePhaseListener="#{empresaMBean.beforePhaseCrear}">
-
+		<f:view beforePhase="#{empresaMBean.beforePhaseCrearModificar}" >
 			<h:form id="form">
+			
+	      <p:outputPanel styleClass="form-required">
+	        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+	      </p:outputPanel>
+			
 				<fieldset id="basic">
 					<legend>
 						<h:outputText
@@ -50,22 +55,14 @@
 							</p:outputPanel>
 							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
 								for="nombreOrganismo" styleClass="col-sm-1 control-label label" />
-							<p:outputPanel styleClass="col-sm-3">
-								<h:inputText id="nombreOrganismo"
-									value="#{empresaMBean.empresaEditar.organismoNombre}"
-									maxlength="100"
-									disabled="#{empresaMBean.empresaEditar.organismoId != null and empresaMBean.empresaEditar.organismoId != 0}"
-									styleClass="form-control" />
+							<p:outputPanel styleClass="col-sm-2">
+								<h:inputText id="nombreOrganismo" value="#{empresaMBean.empresaEditar.organismoNombre}" styleClass="form-control"
+									maxlength="100" disabled="#{empresaMBean.empresaEditar.organismoId != null and empresaMBean.empresaEditar.organismoId != 0}" />
 							</p:outputPanel>
-							<p:outputPanel styleClass="col-sm-1 no-padding">
-								<p:commandLink
-									actionListener="#{empresaMBean.recargarOrganismos}"
-									immediate="true"
-									update="organismo codigoOrganismo nombreOrganismo">
-									<h:outputText
-										value="#{sessionMBean.textos['recargar_listado']}" />
-									<h:outputText styleClass="ui-helper-hidden-accessible"
-										value="#{sessionMBean.textos['organismo']}" />
+							<p:outputPanel styleClass="col-sm-2 no-padding">
+								<p:commandLink actionListener="#{empresaMBean.recargarOrganismos}" immediate="true" update="organismo codigoOrganismo nombreOrganismo">
+									<h:outputText value="#{sessionMBean.textos['recargar_listado_de_organismos']}" />
+									<h:outputText styleClass="ui-helper-hidden-accessible" value="#{sessionMBean.textos['organismo']}" />
 								</p:commandLink>
 							</p:outputPanel>
 							<p:message for="codigoOrganismo" />
@@ -98,20 +95,20 @@
 							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
 								for="nombreUnidadEjecutora"
 								styleClass="col-sm-1 control-label label" />
-							<p:outputPanel styleClass="col-sm-3">
+							<p:outputPanel styleClass="col-sm-2">
 								<h:inputText id="nombreUnidadEjecutora"
 									value="#{empresaMBean.empresaEditar.unidadEjecutoraNombre}"
 									maxlength="100"
 									disabled="#{empresaMBean.empresaEditar.unidadEjecutoraId != null and empresaMBean.empresaEditar.unidadEjecutoraId != 0}"
 									styleClass="form-control" />
 							</p:outputPanel>
-							<p:outputPanel styleClass="col-sm-1 no-padding">
+							<p:outputPanel styleClass="col-sm-2 no-padding">
 								<p:commandLink
 									actionListener="#{empresaMBean.recargarUnidadesEjecutoras}"
 									immediate="true"
 									update="unidadEjecutora codigoUnidadEjecutora nombreUnidadEjecutora">
 									<h:outputText
-										value="#{sessionMBean.textos['recargar_listado']}" />
+										value="#{sessionMBean.textos['recargar_listado_de_unidades_ejecutoras']}" />
 									<h:outputText styleClass="ui-helper-hidden-accessible"
 										value="#{sessionMBean.textos['unidad_ejecutora']}" />
 								</p:commandLink>
@@ -284,11 +281,10 @@
 						<p:outputPanel styleClass="form-group">
 							<h:outputLabel
 								value="#{sessionMBean.textos['pie_de_pagina_publico']}"
-								for="piePublico_input" styleClass="col-sm-2 control-label label" />
+								for="piePublico" styleClass="col-sm-2 control-label label" />
 							<p:outputPanel styleClass="col-sm-10">
-								<p:editor maxlength="1000" id="piePublico"
-									value="#{empresaMBean.empresaEditar.piePublico}">
-								</p:editor>
+                <p:inputTextarea id="piePublico" rows="10" maxlength="1000" resizable="true" style="width:100%"
+                  value="#{empresaMBean.empresaEditar.piePublico}" />
 							</p:outputPanel>
 						</p:outputPanel>
 					</p:outputPanel>
@@ -315,5 +311,9 @@
 			</h:form>
 		</f:view>
 	</ui:define>
+	
 </ui:composition>
+
+
+
 </html>

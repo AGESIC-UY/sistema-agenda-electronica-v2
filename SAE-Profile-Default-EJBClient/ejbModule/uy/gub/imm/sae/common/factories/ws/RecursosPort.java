@@ -164,12 +164,6 @@ public class RecursosPort implements Recursos{
 		throw new UnsupportedOperationException();
 	}
 
-	@Override
-	public Boolean existeRecursoPorDescripcion(Recurso r)
-			throws ApplicationException {
-		throw new UnsupportedOperationException();
-	}
-	
 	public boolean existeDatoASolicPorNombre(String n, Integer idRecurso, Integer idDatoSolicitar) throws ApplicationException {
 		throw new UnsupportedOperationException();
 	}
@@ -179,4 +173,13 @@ public class RecursosPort implements Recursos{
 		throw new UnsupportedOperationException();
 	}
 
+	@Override
+	public byte[] exportarRecurso(Recurso r) throws UserException {
+		throw new UnsupportedOperationException();
+	}
+	
+	@Override
+	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException {
+		throw new UnsupportedOperationException();
+	}
 }

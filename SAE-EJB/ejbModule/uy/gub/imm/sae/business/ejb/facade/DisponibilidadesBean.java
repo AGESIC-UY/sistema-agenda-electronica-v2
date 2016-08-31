@@ -216,16 +216,16 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	 * Genera disponibilidades en una ventana de tiempo para un recurso. Toma como modelo 
 	 * las disponibilidades generadas para una fecha.
 	 * Controla: 
-	 * 1) Los días a generar se encuentren entre fechaInicioDisp y fechaFinDisp 
-	 *    del recurso.
+	 * 1) Los días a generar se encuentren entre fechaInicioDisp y fechaFinDisp del recurso.
 	 * 2) La cantidad de días a generar no puede superar cantDiasAGenerar del recurso.
 	 * 3) Solo se generen disponibilidades para días que se encuentren marcados
 	 *    como hábiles en sp_dias.
+	 * El parámetro dias debe ser un array de 6 lugares indicando para cada día si aplica o no (0=lunes,1=martes,2...,5=sábado)
 	 * @throws UserException 
 	 * @throws ApplicationException 
 	 */
 	@SuppressWarnings("unchecked")
-	public void generarDisponibilidades(Recurso r, Date fechaModelo, VentanaDeTiempo v) throws UserException, ApplicationException {
+	public void generarDisponibilidades(Recurso r, Date fechaModelo, VentanaDeTiempo v, Boolean[] dias) throws UserException, ApplicationException {
 
 		Recurso rManaged = entityManager.find(Recurso.class, r.getId());
 		if (rManaged == null) {
@@ -239,8 +239,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		v.setFechaInicial(Utiles.time2InicioDelDia(v.getFechaInicial()));
 		v.setFechaFinal(Utiles.time2FinDelDia(v.getFechaFinal()));
 
-		
-        //Se controla fecha inicial con fechaInicioDisp
+    //Se controla fecha inicial con fechaInicioDisp
 		if (v.getFechaInicial().compareTo(rManaged.getFechaInicioDisp()) < 0){
 			throw new UserException("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso");
 		}
@@ -270,7 +269,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 			throw new UserException("la_cantidad_de_dias_comprendidos_en_el_periodo_debe_ser_menor_que_la_cantidad_de_dias_a_generar_para");
 		}
 
-        //La fecha inicial debe ser menor o igual a la fecha final
+    //La fecha inicial debe ser menor o igual a la fecha final
 		if (v.getFechaInicial().compareTo(v.getFechaFinal()) > 0){
 			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
@@ -278,17 +277,16 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		//Se obtienen las disponibilidades generardas para la fecha a tomar como modelo.
 		List<Disponibilidad> disponibilidades =  entityManager
 		.createQuery(
-		"select d " +
-		"from  Disponibilidad d " +
-		"where d.recurso is not null and " +
-		"      d.recurso = :r and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha = :f " +
-		"order by d.horaInicio ")
+			"SELECT d " +
+			"FROM  Disponibilidad d " +
+			"WHERE d.recurso IS NOT NULL AND " +
+			"      d.recurso = :r AND " +
+			"      d.fechaBaja IS NULL AND " +
+			"      d.fecha = :f " +
+			"ORDER BY d.horaInicio ")
 		.setParameter("r", rManaged)
 		.setParameter("f", fechaModelo, TemporalType.DATE)
 		.getResultList();		
-		
 		
 		//Si la lista obtenida es vacía no se puede continuar
 		if (disponibilidades == null || disponibilidades.size() == 0){
@@ -301,7 +299,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		cal.setTime(v.getFechaInicial());
 		while (!cal.getTime().after(v.getFechaFinal())) {
 
-			if (esDiaHabil(cal.getTime(), r))	{
+			if (esDiaHabil(cal.getTime(), r) && considerarDia(cal, dias))	{
 				
 				//Se controla que no existan disponibilidades generadas para el día
 				List<Disponibilidad> dispCtrl =  entityManager.createQuery(
@@ -711,14 +709,12 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		"      d.recurso = :r and " +
 		"      d.fechaBaja is null and " +
 		"      d.fecha >= :fi and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-//    	"   and    d.horaInicio = :horaInicio " +
+  	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
 		"order by d.fecha asc, d.horaInicio ")
 		.setParameter("r", dispActual.getRecurso())
 		.setParameter("fi", dispActual.getFecha(), TemporalType.DATE)
 		.setParameter("hoy", ahora, TemporalType.DATE)
 		.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-//		.setParameter("horaInicio", dispActual.getHoraInicio(), TemporalType.TIME)
 		.getResultList();
 		Calendar hora = Calendar.getInstance();
 		hora.setTime(dispActual.getHoraInicio());
@@ -758,10 +754,11 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	}
 	
 	@SuppressWarnings("unchecked")
-	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor, int tipoOperacion) throws UserException, BusinessException  {
+	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor, int tipoOperacion, Boolean[] dias) throws UserException, BusinessException  {
 		
 		Disponibilidad dispActual = (Disponibilidad) entityManager.find(Disponibilidad.class, d.getId());
 
+		
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset((new Date()).getTime()));
 		Date ahora = cal.getTime();
@@ -785,14 +782,14 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 			throw new UserException("AE10084","El valor del cupo no puede ser nulo.");
 		}
 		
-		String query = "select d " +
-				"from  Disponibilidad d " +
-				"where d.recurso is not null and " +
-				"      d.recurso = :r and " +
-				"      d.fechaBaja is null and " +
-				"      d.fecha >= :fi and " +
-		    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-				"order by d.fecha asc, d.horaInicio ";
+		String query = "SELECT d " +
+			"FROM Disponibilidad d " +
+			"WHERE d.recurso IS NOT NULL AND " +
+			"      d.recurso = :r AND " +
+			"      d.fechaBaja IS NULL AND " +
+			"      d.fecha >= :fi AND " +
+    	"      (d.fecha <> :hoy OR d.horaInicio >= :ahora) " +
+			"ORDER BY d.fecha ASC, d.horaInicio ";
 
 		List<Disponibilidad> disponibilidades =  entityManager
 		.createQuery(query)
@@ -814,43 +811,49 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		while ( iDispon.hasNext()){
 			Disponibilidad disp = iDispon.next();
 			
-			Calendar horaPost = Calendar.getInstance();
-			horaPost.setTime(disp.getHoraInicio());
+			//Solo aplicar el cambio si es uno de los dias marcados
+			Calendar fecha = new GregorianCalendar();
+			fecha.setTime(disp.getFecha());
+			if(considerarDia(fecha, dias)) {
+				Calendar horaPost = Calendar.getInstance();
+				horaPost.setTime(disp.getHoraInicio());
 
-			String horaInicioP = Integer.toString(horaPost.get(Calendar.HOUR_OF_DAY));
-			String minutosInicioP = Integer.toString(horaPost.get(Calendar.MINUTE));
-			if (horaInicio.equals(horaInicioP) && minutosInicio.equals(minutosInicioP) ) {
-				int cupoDisp = disp.getCupo();
-				if (tipoOperacion == 1) {//Aumentar valor
-					disp.setCupo(cupoDisp+valor);
-				}else if (tipoOperacion == 2) {//Disminuir valor
-					cupoDisp = cupoDisp-valor;
-					if(cupoDisp<0) {
-						cupoDisp = 0;
-					}
-					int cantReservas = cantReservas(disp);
-					if (cantReservas > cupoDisp) {
-						disp.setCupo(cantReservas);
-						Calendar diaError = Calendar.getInstance();
-						diaError.setTime(disp.getHoraInicio());
-						//advertencia += diaError.get(Calendar.DAY_OF_MONTH) + " / "+(diaError.get(Calendar.MONTH)+1) + " / " +diaError.get(Calendar.YEAR)+" "+diaError.get(Calendar.HOUR_OF_DAY)+":"+diaError.get(Calendar.MINUTE)+", ";
-						diasHorasWarn.add(df.format(diaError.getTime()));
-					}else {
-						disp.setCupo(cupoDisp);
-					}
-				}else {//Valor Exacto
-					cupoDisp = valor;
-					int cantReservas = cantReservas(disp);
-					if (cantReservas > cupoDisp) {
-						disp.setCupo(cantReservas);
-						Calendar diaError = Calendar.getInstance();
-						diaError.setTime(disp.getHoraInicio());
-						diasHorasWarn.add(df.format(diaError.getTime()));
-					}else {
-						disp.setCupo(cupoDisp);
+				String horaInicioP = Integer.toString(horaPost.get(Calendar.HOUR_OF_DAY));
+				String minutosInicioP = Integer.toString(horaPost.get(Calendar.MINUTE));
+				if (horaInicio.equals(horaInicioP) && minutosInicio.equals(minutosInicioP) ) {
+					int cupoDisp = disp.getCupo();
+					if (tipoOperacion == 1) {//Aumentar valor
+						disp.setCupo(cupoDisp+valor);
+					}else if (tipoOperacion == 2) {//Disminuir valor
+						cupoDisp = cupoDisp-valor;
+						if(cupoDisp<0) {
+							cupoDisp = 0;
+						}
+						int cantReservas = cantReservas(disp);
+						if (cantReservas > cupoDisp) {
+							disp.setCupo(cantReservas);
+							Calendar diaError = Calendar.getInstance();
+							diaError.setTime(disp.getHoraInicio());
+							diasHorasWarn.add(df.format(diaError.getTime()));
+						}else {
+							disp.setCupo(cupoDisp);
+						}
+					}else {//Valor Exacto
+						cupoDisp = valor;
+						int cantReservas = cantReservas(disp);
+						if (cantReservas > cupoDisp) {
+							disp.setCupo(cantReservas);
+							Calendar diaError = Calendar.getInstance();
+							diaError.setTime(disp.getHoraInicio());
+							diasHorasWarn.add(df.format(diaError.getTime()));
+						}else {
+							disp.setCupo(cupoDisp);
+						}
 					}
 				}
 			}
+			
+			
 		}
 		return diasHorasWarn;
 	}
@@ -916,6 +919,29 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		return calendario.esDiaHabil(fecha, r);
 	}
 
+	private boolean considerarDia(Calendar cal, Boolean[] dias) {
+		if(cal==null || dias==null) {
+			return false;
+		}
+		int diaSemana = cal.get(Calendar.DAY_OF_WEEK);
+		switch(diaSemana) {
+			case Calendar.MONDAY:
+				return dias.length>0 && dias[0]!=null && dias[0];
+			case Calendar.TUESDAY:
+				return dias.length>1 && dias[1]!=null && dias[1];
+			case Calendar.WEDNESDAY:
+				return dias.length>2 && dias[2]!=null && dias[2];
+			case Calendar.THURSDAY:
+				return dias.length>3 && dias[3]!=null && dias[3];
+			case Calendar.FRIDAY:
+				return dias.length>4 && dias[4]!=null && dias[4];
+			case Calendar.SATURDAY:
+				return dias.length>5 && dias[5]!=null && dias[5];
+			default:
+				return false;
+		}
+	}
+	
 	@RolesAllowed({"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_FATENCION"})
 	public Date ultFechaGenerada(Recurso r) throws UserException,
 			BusinessException {

@@ -70,6 +70,7 @@ public interface Recursos {
 	//Métodos asociados a ServicioPorRecurso
 	List<ServicioPorRecurso> consultarServicioAutocompletar (Recurso r) throws BusinessException;
 	public Boolean existeRecursoPorNombre(Recurso r) throws ApplicationException;
-	public Boolean existeRecursoPorDescripcion(Recurso r) throws ApplicationException;
 		
+	public byte[] exportarRecurso(Recurso r) throws UserException;
+	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException;
 }

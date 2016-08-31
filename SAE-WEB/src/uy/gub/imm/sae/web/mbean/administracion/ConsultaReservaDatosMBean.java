@@ -235,18 +235,14 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 	 */
 	/** **************************************************************************** */
 	public void beforePhaseConsultarReservaDatos(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean
-					.setPantallaTitulo("Consultar reserva por Datos de Reserva");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_datos"));
 		}
 	}
 
 	public void beforePhaseDetalleReserva(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean
-					.setPantallaTitulo("Consultar reserva por Datos de Reserva");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("datos_de_la_reserva"));
 		}
 	}
 

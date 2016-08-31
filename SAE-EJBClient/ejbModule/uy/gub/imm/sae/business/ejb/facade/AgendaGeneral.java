@@ -33,7 +33,5 @@ public interface AgendaGeneral {
 	public List<Agenda> consultarAgendas() throws ApplicationException;
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException;
 	public List<Plantilla> consultarPlantillas(Recurso r) throws ApplicationException;
-	
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException;
-	
 }

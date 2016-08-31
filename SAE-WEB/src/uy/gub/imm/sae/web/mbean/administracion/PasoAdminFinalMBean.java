@@ -30,6 +30,7 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.component.UIComponent;
 import javax.faces.event.PhaseEvent;
+import javax.faces.event.PhaseId;
 
 import org.apache.log4j.Logger;
 
@@ -188,11 +189,8 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	 * @return retorna los valores de cada dato en un mapa cuya clave es el nombre del campo 
 	 */
 	private Map<String, Object> obtenerValores(Set<DatoReserva> datos) {
-		
 		Map<String, Object> valores = new HashMap<String, Object>();
-		
 		for (DatoReserva dato : datos) {
-			//TODO parsear el valor de string a object segun el tipo del DatoASolicitar
 			valores.put(dato.getDatoASolicitar().getNombre(), dato.getValor());
 		}
 		
@@ -201,6 +199,9 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	
 	public void beforePhase (PhaseEvent event) {
 		disableBrowserCache(event);
+		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));
+		}
 	}
 	
 	public Date getDiaSeleccionado() {

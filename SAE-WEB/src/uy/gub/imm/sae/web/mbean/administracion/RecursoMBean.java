@@ -20,6 +20,8 @@
 
 package uy.gub.imm.sae.web.mbean.administracion;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,13 +29,18 @@ import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
+import org.apache.commons.io.IOUtils;
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.event.FileUploadEvent;
+import org.primefaces.model.UploadedFile;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
@@ -76,6 +83,7 @@ public class RecursoMBean extends BaseMBean{
 	private Map<String, Oficina> mapOficinas = new HashMap<String, Oficina>();
 	private List<SelectItem> oficinas = new ArrayList<SelectItem>(0);
 
+	private UploadedFile archivo;
 	/**************************************************************************/
 	/*                           Getters y Setters                            */	
 	/**************************************************************************/	
@@ -99,7 +107,7 @@ public class RecursoMBean extends BaseMBean{
 	public void setRecursoNuevo(Recurso r){
 		recursoNuevo = r;
 	}
-
+	
 
 	//Recurso seleccionado para eliminacion/modificacion
 	public Recurso getRecursoSeleccionado() {
@@ -147,6 +155,16 @@ public class RecursoMBean extends BaseMBean{
 			
 		}
 		return datoDelRecursoNuevo;
+	}
+
+	
+	
+	public UploadedFile getArchivo() {
+		return archivo;
+	}
+
+	public void setArchivo(UploadedFile archivo) {
+		this.archivo = archivo;
 	}
 
 	@PostConstruct
@@ -306,24 +324,19 @@ public class RecursoMBean extends BaseMBean{
 		
 		try {
 			
-			if(r.getAgenda()==null)
-			{
+			if(r.getAgenda()==null) {
 				r.setAgenda(sessionMBean.getAgendaMarcada());
 			}
-			if(recursosEJB.existeRecursoPorNombre(r))
-			{
+			if(recursosEJB.existeRecursoPorNombre(r)) {
 				error = true;
 				addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_recurso_con_el_nombre_especificado"), FORM_ID+":nombre");
 			}
 		} catch (ApplicationException e1) {
-			// TODO Auto-generated catch block
 			addErrorMessage(e1, MSG_ID);
 		}
 		
 		if(!error) {
 			try {
-				
-				
 				recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), r);
 				sessionMBean.cargarRecursos();
 				sessionMBean.desmarcarRecurso();
@@ -664,6 +677,7 @@ public class RecursoMBean extends BaseMBean{
 			sessionMBean.getRecursoSeleccionado().setLongitud(recursoBase.getLongitud());
 			sessionMBean.getRecursoSeleccionado().setMostrarNumeroEnLlamador(recursoBase.getMostrarNumeroEnLlamador());
 			sessionMBean.getRecursoSeleccionado().setMostrarNumeroEnTicket(recursoBase.getMostrarNumeroEnTicket());
+			sessionMBean.getRecursoSeleccionado().setMostrarIdEnTicket(recursoBase.getMostrarIdEnTicket());
 			sessionMBean.getRecursoSeleccionado().setNombre(recursoBase.getNombre());
 			sessionMBean.getRecursoSeleccionado().setReservaMultiple(recursoBase.getReservaMultiple());
 			sessionMBean.getRecursoSeleccionado().setSabadoEsHabil(recursoBase.getSabadoEsHabil());
@@ -772,61 +786,28 @@ public class RecursoMBean extends BaseMBean{
 	
 	
 	public void beforePhaseCrear(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			//
-			if(sessionMBean.getAgendaMarcada()!=null)
-			{
-				sessionMBean.setPantallaTitulo("Crear recurso para trámite "+sessionMBean.getAgendaMarcada().getNombre());
-			}else
-			{
-				sessionMBean.setPantallaTitulo("Crear recurso");
-			}
-			
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_recurso"));
 		}
 	}
-	public void beforePhaseEliminar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Eliminar recurso");
-		}
-	}	
-	public void beforePhaseConsultar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar recurso");
-		}
-	}
+	
 	public void beforePhaseModificarConsultar(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			if(sessionMBean.getAgendaMarcada()!=null)
-			{
-				sessionMBean.setPantallaTitulo("Consultar recurso para trámite "+sessionMBean.getAgendaMarcada().getNombre());
-			}else
-			{
-				sessionMBean.setPantallaTitulo("Consultar recurso");
-			}
-			
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_recursos"));
 		}
 	}
 	
 	public void beforePhaseModificar(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			if(sessionMBean.getAgendaMarcada()!=null)
-			{
-				sessionMBean.setPantallaTitulo("Modificar recurso para trámite "+sessionMBean.getAgendaMarcada().getNombre());
-			}else
-			{
-				sessionMBean.setPantallaTitulo("Modificar recurso");
-			}
-			
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_recurso"));
 		}
 	}
 
-	
-	
+	public void beforePhaseImportar(PhaseEvent event) {
+		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("importar_recurso"));
+		}
+	}
 	
 	public void setOficinas(List<Oficina> ofs) {
 		mapOficinas = new HashMap<String, Oficina>();
@@ -883,5 +864,60 @@ public class RecursoMBean extends BaseMBean{
 		return null;
 	}
 
+	/**
+	 * Exporta la configuración del recurso a un archivo XML para poder importarla en otra agenda
+	 */
+	@SuppressWarnings("unchecked")
+  public void selecRecursoExportar() {
+    Recurso recurso = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
+		if (recurso != null) {
+			try {
+				byte[] bytes = recursosEJB.exportarRecurso(recurso);
+				
+				FacesContext fc = FacesContext.getCurrentInstance();
+		    ExternalContext ec = fc.getExternalContext();
+
+		    ec.responseReset(); // Some JSF component library or some Filter might have set some headers in the buffer beforehand. We want to get rid of them, else it may collide.
+		    ec.setResponseContentType("application/xml"); 
+		    ec.setResponseContentLength(bytes.length);
+		    ec.setResponseHeader("Content-Disposition", "attachment; filename=\"" + recurso.getNombre() + ".xml" + "\"");
+		    OutputStream output = ec.getResponseOutputStream();
+		    output.write(bytes);
+		    output.flush();
+		    output.close();
+		    fc.responseComplete();
+				
+			} catch (Exception e) {
+				e.printStackTrace();
+				addErrorMessage(e, MSG_ID);
+			}
+		}
+	}
+	
+	public void subirArchivo(FileUploadEvent event) {
+		archivo = event.getFile();
+		addInfoMessage(sessionMBean.getTextos().get("archivo_cargado"), MSG_ID);
+	}
+	
+	public void importar(){
+		
+		if(archivo==null || archivo.getSize()<1) {
+			addErrorMessage(sessionMBean.getTextos().get("debe_cargar_un_archivo"), "archivo_input");
+			return;
+		}
+		
+		try {
+			byte[] bytes = IOUtils.toByteArray(archivo.getInputstream());
+			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes);
+			if(recurso != null) {
+				sessionMBean.cargarRecursos();
+				addInfoMessage(sessionMBean.getTextos().get("recurso_importado_exitosamente"), MSG_ID);
+			}
+		} catch (IOException e) {
+			addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_cargar_el_archivo"), MSG_ID);
+		}catch (UserException aEx) {
+			addErrorMessage(aEx, MSG_ID);
+		}
+	}
 	
 }

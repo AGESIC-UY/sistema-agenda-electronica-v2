@@ -34,6 +34,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
@@ -50,6 +51,7 @@ import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ValorPosible;
+import uy.gub.imm.sae.entity.global.Token;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
@@ -58,6 +60,9 @@ import uy.gub.imm.sae.exception.UserException;
 @RolesAllowed({"RA_AE_FCALL_CENTER","RA_AE_PLANIFICADOR", "RA_AE_ADMINISTRADOR","RA_AE_ANONIMO","RA_AE_FATENCION"})
 public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 
+	@PersistenceContext(unitName = "AGENDA-GLOBAL")
+	private EntityManager globalEntityManager;
+	
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;
 	
@@ -910,4 +915,71 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		return listAtencionLlamada;
 	}
 	
+	/**
+	 * Esta función es utilizada por el servicio web REST para determinar las fechas de las reservas
+	 * que tiene una persona identificada por su tipo y número de documento en una agenda y recurso especial; la
+	 * empresa se determina en base al token, el cual debe estar registrado (el organismo que desee invocar el
+	 * servicio tendrá que solicitar un token para cada empresa)
+	 */
+	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc)
+			throws BusinessException{
+			
+			if(idAgenda==null && idRecurso==null) {
+				throw new BusinessException("Debe especificar el recurso o la agenda");
+			}
+		
+			//Determinar el esquema sobre el cual hay que hacer la consulta en base al token
+			try {
+				String query = "SELECT t FROM Token t WHERE t.token=:token";
+				Token oToken = (Token) globalEntityManager.createQuery(query).setParameter("token", token).getSingleResult();
+				String esquema = oToken.getEmpresa().getDatasource();
+				query = "SELECT dis.id, dis.fecha, dis.hora_inicio "
+						+ " FROM {esquema}.ae_reservas res "
+						+ " JOIN {esquema}.ae_datos_reserva dr1 ON dr1.aers_id=res.id "
+						+ " JOIN {esquema}.ae_datos_a_solicitar ds1 ON ds1.id=dr1.aeds_id "
+						+ " JOIN {esquema}.ae_datos_reserva dr2 ON dr2.aers_id=res.id "
+						+ " JOIN {esquema}.ae_datos_a_solicitar ds2 ON ds2.id=dr2.aeds_id "
+						+ " JOIN {esquema}.ae_reservas_disponibilidades rd ON rd.aers_id=res.id "
+						+ " JOIN {esquema}.ae_disponibilidades dis ON dis.id=rd.aedi_id ";
+				//Si se tiene el id del recurso se filtra por ese valor, sino por el id de agenda
+				if(idRecurso!=null) {
+					query = query + " WHERE dis.aere_id=:idRecurso ";
+				}else if(idAgenda!=null) {
+					query = query 
+						+ " JOIN {esquema}.ae_recursos rec ON rec.id=dis.aere_id "
+						+ " WHERE rec.aeag_id=:idAgenda ";
+				}
+				query = query
+						+ "   AND ds1.nombre='NroDocumento' "
+						+ "   AND dr1.valor=:numDoc "
+						+ "   AND ds2.nombre='TipoDocumento' "
+						+ "   AND dr2.valor=:tipoDoc "
+						+ "   AND dis.fecha>=:hoy "
+						+ " ORDER BY dis.fecha, dis.hora_inicio";
+				query = query.replace("{esquema}", esquema);
+				Query query1 = globalEntityManager.createNativeQuery(query);
+				if(idRecurso!=null) {
+					query1.setParameter("idRecurso", idRecurso);
+				}else if(idAgenda!=null) {
+					query1.setParameter("idAgenda", idAgenda);
+				}
+				query1.setParameter("numDoc", numDoc);
+				query1.setParameter("tipoDoc", tipoDoc);
+				query1.setParameter("hoy", new Date(), TemporalType.DATE);
+				@SuppressWarnings("unchecked")
+        List<Object[]> ress = query1.getResultList();
+				List<Date> resp = new ArrayList<Date>();
+				for(Object[] res : ress) {
+					Date fecha = (Date) res[2];
+					resp.add(fecha);
+				}
+				return resp;
+			}catch(NoResultException nrEx) {
+				throw new BusinessException("No se encontró el token especificado");		
+			}catch(NonUniqueResultException nurEx) {
+				throw new BusinessException("Se encontró más de un token");		
+			}
+			
+		}
+			
 }

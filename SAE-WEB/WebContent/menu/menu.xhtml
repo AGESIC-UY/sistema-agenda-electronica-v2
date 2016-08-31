@@ -33,7 +33,7 @@
 					<h:outputText value="#{sessionMBean.textos['menu']}" />
 				</h2>
 			</div>
-			<p:panelMenu id="menuLateral" aria-level="1">
+			<p:panelMenu id="menuLateral" aria-level="1" >
 				<p:submenu id="submenuEmpresas" label="#{sessionMBean.textos['empresas']}" aria-level="2"
 					rendered="#{sessionMBean.usuarioActual.superadmin}">
 					<p:menuitem value="#{sessionMBean.textos['crear_empresa']}"
@@ -49,6 +49,9 @@
 					<p:menuitem value="#{sessionMBean.textos['consultar_usuarios']}"
 						icon="ui-icon-search"
 						url="/administracion/usuario/consultar.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['gestionar_tokens']}"
+            icon="ui-icon-search"
+            url="/administracion/usuario/tokens.xhtml" />
 				</p:submenu>
 				<p:submenu id="submenuAgendas" label="#{sessionMBean.textos['agendas']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
@@ -67,12 +70,13 @@
 					<p:menuitem value="#{sessionMBean.textos['crear_recurso']}"
 						icon="ui-icon-plus" url="/administracion/recurso/crear.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['consultar_recursos']}"
-						icon="ui-icon-search"
-						url="/administracion/recurso/modificarConsultar.xhtml" />
+						icon="ui-icon-search" url="/administracion/recurso/modificarConsultar.xhtml" />
 					<p:menuitem
 						value="#{sessionMBean.textos['modificar_textos_de_recursos']}"
-						icon="ui-icon-pencil"
-						url="/administracion/recurso/modificarTextos.xhtml" />
+						icon="ui-icon-pencil" url="/administracion/recurso/modificarTextos.xhtml" />
+          <p:menuitem
+            value="#{sessionMBean.textos['importar_recurso']}"
+            icon="ui-icon-arrowthickstop-1-n" url="/administracion/recurso/importar.xhtml" />
 				</p:submenu>
 				<p:submenu id="submenuDatosASolicitar" label="#{sessionMBean.textos['datos_a_solicitar']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
@@ -124,11 +128,11 @@
 				</p:submenu>
 				<p:submenu id="submenuConsultas" label="#{sessionMBean.textos['consultas']}" aria-level="2"
 					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR')}">
-					<p:menuitem value="#{sessionMBean.textos['por_id.']}" icon="ui-icon-search"
+					<p:menuitem value="#{sessionMBean.textos['reserva_por_id']}" icon="ui-icon-search"
 						url="/administracion/consulta/consultarReservaId.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['por_numero']}" icon="ui-icon-search"
+					<p:menuitem value="#{sessionMBean.textos['reserva_por_numero']}" icon="ui-icon-search"
 						url="/administracion/consulta/consultarReservaNumero.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['por_datos']}" icon="ui-icon-search"
+					<p:menuitem value="#{sessionMBean.textos['reserva_por_datos']}" icon="ui-icon-search"
 						url="/administracion/consulta/consultarReservaDatos.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['reporte_reservas']}" icon="ui-icon-search"
 						url="/administracion/consulta/consultarReservaPeriodo.xhtml" />

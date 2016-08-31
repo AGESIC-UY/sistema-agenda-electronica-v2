@@ -217,14 +217,6 @@ public class ReservaMBean extends BaseMBean {
 	 * ***
 	 */
 
-	public void beforePhaseDetalleReserva(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean
-					.setPantallaTitulo("Consultar reserva por Datos de Reserva");
-		}
-	}
-
 	public UIComponent getFiltroConsulta() {
 		return filtroConsulta;
 	}
@@ -313,12 +305,12 @@ public class ReservaMBean extends BaseMBean {
 		this.reservaSessionMBean = reservaSessionMBean;
 	}
 
-	// setearlo en <f:view beforePhase de la pagina.
 	public void beforePhaseCancelar(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Cancelar reserva");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("cancelar_reserva"));
 		}
 	}
+	
 	public void selecReservaEliminar(ActionEvent e) {
 		int iSelectedPos = getReservasDataTable().getRowIndex();
 		Reserva r = reservaSessionMBean.getListaReservas().get(iSelectedPos);

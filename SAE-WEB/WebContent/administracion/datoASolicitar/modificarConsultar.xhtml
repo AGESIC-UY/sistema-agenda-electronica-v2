@@ -8,8 +8,7 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
-			beforePhase="#{datoASolicitarMBean.beforePhaseModificarConsultar}"
-			beforePhaseListener="#{datoASolicitarMBean.beforePhaseModificarConsultar}">
+			beforePhase="#{datoASolicitarMBean.beforePhaseModificarConsultar}" >
 
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
@@ -124,13 +123,11 @@
 								actionListener="#{datoASolicitarMBean.seleccionarDato(rowIndex)}"
 								action="modificar" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
 							</p:commandButton>
-							<p:tooltip for="modificarLink" value="#{sessionMBean.textos['modificar']}" />
 							<p:commandButton id="eliminarLink"
 								oncomplete="PF('eliminarDato').show();"
 								actionListener="#{datoASolicitarMBean.seleccionarDatoParaEliminar(rowIndex)}"
 								icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 							</p:commandButton>
-							<p:tooltip for="eliminarLink" value="#{sessionMBean.textos['eliminar']}" />
 						</p:column>
 					</p:dataTable>
 					</p:outputPanel>

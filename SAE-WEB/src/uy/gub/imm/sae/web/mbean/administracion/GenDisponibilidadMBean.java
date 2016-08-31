@@ -225,9 +225,8 @@ public class GenDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void beforePhaseGenerarDisponibilidades (PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Generar Disponibilidades para un Período");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("copiar_dia"));
 		}
 	}
 
@@ -237,7 +236,6 @@ public class GenDisponibilidadMBean extends BaseMBean {
 		
 		try {
 		
-			VentanaDeTiempo v = new VentanaDeTiempo();
 			Boolean huboError = false;
 			
 			if (genDispSessionMBean.getFechaModelo() == null ) {
@@ -268,6 +266,7 @@ public class GenDisponibilidadMBean extends BaseMBean {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), "formGenerarPatronDia:fechaHasta");
 				huboError = true;
 			}
+			
 			if(genDispSessionMBean.getFechaInicial()!=null && genDispSessionMBean.getFechaFinal()!=null){
 				if(genDispSessionMBean.getFechaInicial().compareTo(genDispSessionMBean.getFechaFinal()) > 0) {
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formGenerarPatronDia:fechaDesde", "formGenerarPatronDia:fechaHasta");
@@ -299,26 +298,22 @@ public class GenDisponibilidadMBean extends BaseMBean {
 			
 			if (!huboError) {
 				try{
-				v.setFechaInicial(Utiles.time2InicioDelDia(genDispSessionMBean.getFechaInicial()) );
-				v.setFechaFinal(Utiles.time2FinDelDia(genDispSessionMBean.getFechaFinal()));
-				disponibilidadesEJB.generarDisponibilidades(sessionMBean.getRecursoMarcado(),genDispSessionMBean.getFechaModelo(), v);
-				addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"));
-				}
-				catch (OptimisticLockException lockE){
+					VentanaDeTiempo ventana = new VentanaDeTiempo();
+					ventana.setFechaInicial(Utiles.time2InicioDelDia(genDispSessionMBean.getFechaInicial()) );
+					ventana.setFechaFinal(Utiles.time2FinDelDia(genDispSessionMBean.getFechaFinal()));
+					disponibilidadesEJB.generarDisponibilidades(sessionMBean.getRecursoMarcado(),genDispSessionMBean.getFechaModelo(), ventana, genDispSessionMBean.getDiasAplicar());
+					addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"));
+				} catch (OptimisticLockException lockE){
 					addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));
-				}
-				catch (PersistenceException persE){
+				} catch (PersistenceException persE){
 					addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));				
-				}
-				catch (EJBException eE){
+				} catch (EJBException eE){
 					if (eE.getCause() instanceof OptimisticLockException){
 						addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));			
-					}
-					else{
+					}else {
 						addErrorMessage(eE);
 					}
-				}
-				catch (Exception e) {
+				} catch (Exception e) {
 					addErrorMessage(e);
 				}
 			}

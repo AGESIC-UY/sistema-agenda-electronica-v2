@@ -7,8 +7,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{textoRecursoMBean.beforePhaseModifTexto}"
-			beforePhaseListener="#{textoRecursoMBean.beforePhaseModifTexto}">
+		<f:view beforePhase="#{textoRecursoMBean.beforePhaseModifTexto}" >
 
 			<h:form id="form"
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
@@ -27,7 +26,11 @@
 						</h:selectOneMenu>
 					</p:outputPanel>
 				</p:outputPanel>
-
+				
+        <p:outputPanel styleClass="form-required">
+          <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+        </p:outputPanel>
+				
 				<p:tabView
 					rendered="#{not empty textoRecursoMBean.idiomasSoportados}">
 
@@ -61,33 +64,6 @@
 						</p:outputPanel>
 					</p:tab>
 
-					<p:tab title="#{sessionMBean.textos['textos_del_llamador']}"
-						id="textoLlamador">
-
-						<p:outputPanel styleClass="form-horizontal">
-							<p:outputPanel styleClass="form-group">
-								<h:outputLabel
-									value="#{sessionMBean.textos['titulo_de_la_columna_de_datos']}:"
-									for="datos" styleClass="col-sm-3 control-label label" />
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="datos"
-										value="#{textoRecursoMBean.textoRec.tituloCiudadanoEnLlamador}"
-										maxlength="30" size="40" styleClass="form-control" />
-								</p:outputPanel>
-							</p:outputPanel>
-
-							<p:outputPanel styleClass="form-group">
-								<h:outputLabel
-									value="#{sessionMBean.textos['titulo_de_la_columna_del_puesto']}:"
-									for="puestos" styleClass="col-sm-3 control-label label" />
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="puestos"
-										value="#{textoRecursoMBean.textoRec.tituloPuestoEnLlamador}"
-										maxlength="30" size="40" styleClass="form-control" />
-								</p:outputPanel>
-							</p:outputPanel>
-						</p:outputPanel>
-					</p:tab>
 				</p:tabView>
 
 				<ul class="form-action-buttons">

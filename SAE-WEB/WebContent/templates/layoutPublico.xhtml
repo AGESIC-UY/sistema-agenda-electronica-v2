@@ -22,8 +22,10 @@
 		<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
 	</h:head>
 
-	<h:body onload="#{onload}" class="body">
-		<a class="sr-only sr-only-focusable saltar" href="#content">Saltar al contenido</a>
+	<h:body class="body">
+		<a class="sr-only sr-only-focusable saltar" href="#content">
+		  <h:outputText value="#{sesionMBean.textos['saltar_al_contenido']}" />
+		</a>
 
 		<input type="hidden" id="formatoFecha" value="#{sesionMBean.formatoFechaDatepicker}" />
 

@@ -282,39 +282,23 @@ public class AgendaMBean extends BaseMBean {
 	}
 
 	public void beforePhaseCrear(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Crear agenda");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_agenda"));
 		}
 	}
 
 	public void beforePhaseModificarConsultar(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar agenda");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_agendas"));
 		}
 	}
 	
 	public void beforePhaseModificar(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar agenda");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_agenda"));
 		}
 	}
 	
-	public void beforePhaseEliminar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Eliminar agenda");
-		}
-	}
-
-	public void beforePhaseConsultar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar agenda");
-		}
-	}
 	public Row<Agenda> getRowSelect() {
 		return rowSelect;
 	}

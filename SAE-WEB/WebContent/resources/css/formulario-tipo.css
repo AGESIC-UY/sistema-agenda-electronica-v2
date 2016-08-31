@@ -1015,6 +1015,9 @@ form .form-required {
 	text-align: right;
 	font-size: 0.9em;
 }
+form div.form-required + fieldset{
+	margin-top: 0;
+}
 .form-group-disabled label, .form-group-disabled .label {
 	color: #CCC;
 }

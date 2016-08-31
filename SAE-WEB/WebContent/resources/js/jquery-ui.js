@@ -5378,6 +5378,18 @@ $.extend(Datepicker.prototype, {
 		});
 	},
 
+	/****** spio */
+	myKeyPress: function(e){
+    var keynum;
+    if(window.event) { // IE                    
+      keynum = e.keyCode;
+    } else if(e.which){ // Netscape/Firefox/Opera                   
+      keynum = e.which;
+    }
+    alert(String.fromCharCode(keynum));
+  },
+	
+	
 	/* Generate the HTML for the current state of the date picker. */
 	_generateHTML: function(inst) {
 		var maxDraw, prevText, prev, nextText, next, currentText, gotoDate,
@@ -5430,14 +5442,14 @@ $.extend(Datepicker.prototype, {
 
 		prev = 
 			(this._canAdjustMonth(inst, -1, drawYear, drawMonth) ?
-				"<a id='mesAnt' href='#mesAnt' onclick='return false;' onkeypress='return false;' class='ui-datepicker-prev ui-corner-all' data-handler='prev' data-event='click' title='Mes anterior'>" +
+				"<a id='mesAnt' href='#mesAnt' onclick='return false;' return false;' class='ui-datepicker-prev ui-corner-all' data-handler='prev' data-event='click' title='Mes anterior'>" +
 					"<span class='ui-icon ui-icon-circle-triangle-" + ( isRTL ? "e" : "w") + "'>" + prevText + "</span>" +
 				"</a>" 
 			:
 				(hideIfNoPrevNext ? 
 						"" 
 				: 
-					"<a id='mesAnt' href='#mesAnt' onclick='return false;' onkeypress='return false;' class='ui-datepicker-prev ui-corner-all ui-state-disabled' title='Mes anterior'>" +
+					"<a id='mesAnt' href='#mesAnt' onclick='return false;' class='ui-datepicker-prev ui-corner-all ui-state-disabled' title='Mes anterior'>" +
 						"<span class='ui-icon ui-icon-circle-triangle-" + ( isRTL ? "e" : "w") + "'>" + prevText + "</span>" +
 					"</a>"
 				)
@@ -5448,10 +5460,16 @@ $.extend(Datepicker.prototype, {
 			this._daylightSavingAdjust(new Date(drawYear, drawMonth + stepMonths, 1)),
 			this._getFormatConfig(inst)));
 
-		next = (this._canAdjustMonth(inst, +1, drawYear, drawMonth) ?
-			"<a id='mesSig' href='#mesSig' onclick='return false;' onkeypress='return false;' class='ui-datepicker-next ui-corner-all' data-handler='next' data-event='click'" +
-			" title='Mes siguiente'><span class='ui-icon ui-icon-circle-triangle-" + ( isRTL ? "w" : "e") + "'>" + nextText + "</span></a>" :
-			(hideIfNoPrevNext ? "" : "<a id='mesSig' href='#mesSig' onclick='return false;' onkeypress='return false;' class='ui-datepicker-next ui-corner-all ui-state-disabled' title='Mes siguiente'><span class='ui-icon ui-icon-circle-triangle-" + ( isRTL ? "w" : "e") + "'>" + nextText + "</span></a>"));
+		next = 
+		  (this._canAdjustMonth(inst, +1, drawYear, drawMonth) ?
+		      "<a id='mesSig' href='#mesSig' onclick='return false;' class='ui-datepicker-next ui-corner-all' data-handler='next' data-event='click'" +
+		      " title='Mes siguiente'><span class='ui-icon ui-icon-circle-triangle-" + ( isRTL ? "w" : "e") + "'>" + nextText + "</span></a>" 
+			:
+			(hideIfNoPrevNext ? 
+			    "" 
+	    : 
+	      "<a id='mesSig' href='#mesSig' onclick='return false;' class='ui-datepicker-next ui-corner-all ui-state-disabled' " +
+	      "title='Mes siguiente'><span class='ui-icon ui-icon-circle-triangle-" + ( isRTL ? "w" : "e") + "'>" + nextText + "</span></a>"));
 
 		currentText = this._get(inst, "currentText");
 		gotoDate = (this._get(inst, "gotoCurrent") && inst.currentDay ? currentDate : today);

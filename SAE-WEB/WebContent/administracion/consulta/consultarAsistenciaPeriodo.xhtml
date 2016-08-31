@@ -9,10 +9,12 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
-			beforePhase="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}"
-			beforePhaseListener="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}">
+			beforePhase="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}" >
 			<p:outputPanel>
 				<h:form id="form">
+		      <p:outputPanel styleClass="form-required">
+		        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+		      </p:outputPanel>
 					<fieldset>
 						<legend>
 							<h:outputText

@@ -29,6 +29,7 @@ public class Trazabilidad implements Serializable {
 	private String datos;
 	private Boolean enviado;
 	private Boolean esCabezal;
+	private Boolean esFinal;
 
 	private Empresa empresa;
 	private Integer reservaId;
@@ -95,6 +96,13 @@ public class Trazabilidad implements Serializable {
 	}
 	public void setEsCabezal(Boolean esCabezal) {
 		this.esCabezal = esCabezal;
+	}
+	@Column(name="es_final")
+	public Boolean getEsFinal() {
+		return esFinal;
+	}
+	public void setEsFinal(Boolean esFinal) {
+		this.esFinal = esFinal;
 	}
 	@ManyToOne
 	@JoinColumn (name = "empresa_id")

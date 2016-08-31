@@ -16,6 +16,7 @@
     <class>uy.gub.imm.sae.entity.global.TextoGlobal</class>
     <class>uy.gub.imm.sae.entity.global.Trazabilidad</class>
     <class>uy.gub.imm.sae.entity.global.Novedad</class>
+    <class>uy.gub.imm.sae.entity.global.Token</class>
 		<properties>
 			<property name="hibernate.default_schema" value="global" />
 			<property name="hibernate.format_sql" value="false" />

@@ -6,7 +6,6 @@
 	xmlns:h="http://java.sun.com/jsf/html">
 
 <ui:composition template="/templates/layoutPublico.xhtml">
-	<ui:param name="onload" value="" />
 	<ui:param name="parametroBean" value="#{cancelarReservaPublicMBean}" />
 	<ui:define name="css">
 	</ui:define>
@@ -60,7 +59,9 @@
 		/>
 		
     <h:form id="formSinBusqueda" class="cancelarReserva" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='VALIDAR_DATOS'}">
-
+       <p:outputPanel styleClass="form-required">
+         <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+       </p:outputPanel>
        <h:panelGroup id="confirmacion1" styleClass="Texto" layout="block">
          <fieldset>
            <legend>
@@ -108,6 +109,9 @@
 		
 		<h:form id="formConBusqueda" class="cancelarReserva" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='BUSCAR_RESERVAS'}">
 
+      <p:outputPanel styleClass="form-required">
+        <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+      </p:outputPanel>
 			<p:outputPanel id="filtroBusqueda" >
 				<h:panelGroup id="camposFiltroCancelar" binding="#{cancelarReservaPublicMBean.filtroConsulta}" layout="block">
 				</h:panelGroup>
@@ -142,6 +146,9 @@
 		</h:form>
 		
     <h:form id="formConfirmarCancelacion" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='LISTAR_RESERVAS'}">
+      <p:outputPanel styleClass="form-required">
+        <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+      </p:outputPanel>
       <p:outputPanel>
         <p:outputPanel id="resultadosBusquedaCancelar">
           <p:dataGrid layout="grid" columns="1"
@@ -187,12 +194,9 @@
                     actionListener="#{cancelarReservaPublicMBean.selecReservaEliminar}"
                     styleClass="btn-lg btn-primario"
                     value="#{sesionMBean.textos['cancelar_reserva']}">
-                    <h:graphicImage
-                      value="#{saeProperties['ui.resource.base.url']}/recursos/images/delete2.gif"
-                      style="border:0" height="16" width="16" />
+                    <h:graphicImage value="#{saeProperties['ui.resource.base.url']}/recursos/images/delete2.gif"
+                      style="border:0" height="16" width="16" title="#{sesionMBean.textos['cancelar_reserva']}" />
                   </p:commandLink>
-                  <p:tooltip for="consultarLinkCancelar"
-                    value="#{sesionMBean.textos['cancelar_reserva']}" />
                 </div>
               </div>
             </div>
