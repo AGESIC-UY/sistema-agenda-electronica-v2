@@ -27,13 +27,13 @@
 									for="agenda" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText value="#{sessionMBean.agendaMarcada.nombre}"
-										id="agenda" readonly="true" styleClass="form-control" />
+										id="agenda" disabled="true" styleClass="form-control" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel id="pnlArchivo" styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['archivo']}"
-									for="archivo" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									for="archivo_input" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<p:fileUpload  mode="advanced" id="archivo"
 										fileUploadListener="#{recursoMBean.subirArchivo}" auto="true"

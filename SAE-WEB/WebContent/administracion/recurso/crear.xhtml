@@ -27,7 +27,7 @@
 								for="agenda" styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<h:inputText value="#{sessionMBean.agendaMarcada.nombre}"
-									id="agenda" readonly="true" styleClass="form-control" />
+									id="agenda" disabled="true" styleClass="form-control" />
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -44,7 +44,7 @@
 									<f:selectItems value="#{recursoMBean.oficinas}" />
 								</h:selectOneMenu>
 								<p:commandLink
-									value="#{sessionMBean.textos['recargar_listado']}"
+									value="#{sessionMBean.textos['recargar_listado_de_oficinas']}"
 									actionListener="#{recursoMBean.recargarOficinas}"
 									immediate="true" update="oficina" />
 							</p:outputPanel>

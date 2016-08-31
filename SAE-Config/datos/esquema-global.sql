@@ -1042,6 +1042,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('id_de_la_reserva', 'Identificador
 INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_organismos', 'Recargar organismos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_unidades_ejecutoras', 'Recargar unidades ejecutoras');
 INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_tramites', 'Recargar trámites');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recargar_listado_de_oficinas', 'Recargar oficinas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_del_usuario_es_obligatorio', 'La cédula de identidad del usuario es obligatoria');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_campos_indicados_con_asterisco_son_obligatorios', 'Los campos indicados con * son obligatorios');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_cargar_un_archivo', 'Debe cargar un archivo');

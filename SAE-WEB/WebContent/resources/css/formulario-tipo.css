@@ -1011,7 +1011,6 @@ span.required, .form-required span {
 	color: #3D6789;
 }
 form .form-required {
-	margin-bottom: -5px;
 	text-align: right;
 	font-size: 0.9em;
 }
