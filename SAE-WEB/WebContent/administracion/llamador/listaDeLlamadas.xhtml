@@ -9,6 +9,7 @@
 
 <h:head>
 	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<title><h:outputText value="#{sessionMBean.textos['nombre_aplicacion']} -- #{sessionMBean.pantallaTitulo}" /></title>
 	<h:outputStylesheet name="#{saeProperties['ui.style.organizacion.url']}" />
 	<h:outputStylesheet name="#{saeProperties['ui.style.organizacion.faces.url']}" />
 	<h:outputStylesheet name="#{sae:formatProperty('ui.style.sae.llamador.url', llamadorMBean.pulgadasMonitorArray)}" />
@@ -35,8 +36,7 @@
 					<tr>
 						<td><span id="varPuesto" class="bold"></span></td>
 						<td><span id="varDocumento"></span></td>
-						<td><span class="comentario">Nº </span><span id="varNumero"
-							class="bold"></span></td>
+						<td><span class="comentario">Nº </span><span id="varNumero" class="bold"></span></td>
 					</tr>
 				</TBODY>
 			</table>

@@ -36,7 +36,6 @@
 							<h:outputText value="Nombre"></h:outputText>
 						</f:facet>
 						<h:outputText value="#{row.validacion.nombre}"></h:outputText>
-						<p:tooltip value="#{row.validacion.descripcion}"></p:tooltip>
 					</p:column>
 
 					<p:column>
@@ -45,27 +44,17 @@
 						</f:facet>
 						<h:outputText value="#{row.ordenEjecucion}"></h:outputText>
 					</p:column>
-
 					<p:column>
 						<p:commandButton id="modificarLink" update="form:panelAsignacion"
 							actionListener="#{validacionAsignacionMBean.editar}"
-							icon="ui-icon-pencil">
-
+							icon="ui-icon-pencil" titile="#{sessionMBean.textos['modificar']}">
 						</p:commandButton>
-						<p:tooltip for="modificarLink"
-							value="#{sessionMBean.textos['modificar']}" />
-
 						<p:commandButton id="elimLink"
 							actionListener="#{validacionAsignacionMBean.eliminar}"
-							icon="ui-icon-trash">
+							icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>
-						<p:tooltip for="elimLink"
-							value="#{sessionMBean.textos['eliminar']}" />
 					</p:column>
-
 				</p:dataTable>
-
-
 				<p:spacer height="5px">
 				</p:spacer>
 
@@ -164,16 +153,8 @@
 												actionListener="#{validacionAsignacionMBean.eliminarValidacionPorDato}"
 												icon="ui-icon-trash"
 												title="#{sessionMBean.textos['eliminar']}">
-
-
 											</p:commandLink>
-											<p:tooltip for="elimLink"
-												value="#{sessionMBean.textos['eliminar']}" />
 										</p:column>
-
-
-
-
 									</p:dataTable>
 								</p:outputPanel>
 							</p:outputPanel>

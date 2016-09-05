@@ -71,8 +71,8 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 
 	public void beforePhase (PhaseEvent phaseEvent) {
 		disableBrowserCache(phaseEvent);
-		
 		if (phaseEvent.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));
 			sessionMBean.limpiarPaso2();
 		}
 	}

@@ -316,38 +316,21 @@ public class UsuarioMBean extends BaseMBean {
 	}
 
 	//setearlo en <f:view beforePhase de la pagina.
-	public void beforePhaseCrear(PhaseEvent event) {
-
+	public void beforePhaseCrearModificar(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar/Crear usuario");
-		}
-	}
-
-	public void beforePhaseModificarConsultar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar usuario");
-		}
-	}
-	
-	public void beforePhaseModificar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar usuario");
-		}
-	}
-	
-	public void beforePhaseEliminar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Eliminar usuario");
+			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			if(request.getParameter("n")!=null) {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_usuario"));
+			}else {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_usuario"));
+			}
 		}
 	}
 
 	public void beforePhaseConsultar(PhaseEvent event) {
 
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar usuarios");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_usuarios"));
 		}
 	}
 	

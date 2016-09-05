@@ -7,8 +7,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{textoAgendaMBean.beforePhaseModifTexto}"
-			beforePhaseListener="#{textoAgendaMBean.beforePhaseModifTexto}">
+		<f:view beforePhase="#{textoAgendaMBean.beforePhaseModifTexto}" >
 
 			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and not empty textoAgendaMBean.idiomasSoportados}">
 
@@ -32,7 +31,9 @@
 							value="#{sessionMBean.textos['establecer_como_idioma_por_defecto']}" />
 					</p:outputPanel>
 				</p:outputPanel>
-
+        <p:outputPanel styleClass="form-required" style="margin-bottom: 0px">
+          <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+        </p:outputPanel>
 				<p:tabView>
 
 					<p:tab title="#{sessionMBean.textos['etiquetas']}">
@@ -119,42 +120,30 @@
 							<p:outputPanel styleClass="col-sm-8">
 								<p:outputPanel styleClass="form-horizontal">
 									<p:outputPanel styleClass="form-group">
-										<h:outputLabel
-											value="#{sessionMBean.textos['texto_para_el_correo_de_confirmacion']}"
-											for="textocorreo_input" styleClass="col-sm-3 control-label label" />
+										<h:outputLabel value="#{sessionMBean.textos['texto_para_el_correo_de_confirmacion']}"
+											for="textocorreo" styleClass="control-label label col-sm-3" />
 										<p:outputPanel styleClass="col-sm-9">
-											<p:editor maxlength="1000" id="textocorreo"
-												value="#{textoAgendaMBean.textoAux.textoCorreoConf}">
-											</p:editor>
+										  <p:inputTextarea id="textocorreo" rows="10" maxlength="1000" style="width:100%" resizable="true"
+										    value="#{textoAgendaMBean.textoAux.textoCorreoConf}" />
+                      <h:outputText value="#{sessionMBean.textos['puede_ingresar_codigo_html']}" />
 										</p:outputPanel>
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
 							<p:outputPanel styleClass="col-sm-4">
-								<h:outputText
-									value="Puede utilizar las siguientes metavariables:" />
+								<h:outputText	value="#{sessionMBean.textos['puede_usar_las_siguientes_metavariables']}:" />
 								<ul class="tips pasoTexto">
-									<li><h:outputText
-											value="{{AGENDA}}: Nombre de la agenda o trámite." /></li>
-									<li><h:outputText
-											value="{{RECURSO}}: Nombre del recurso u oficina." /></li>
-									<li><h:outputText
-											value="{{DIRECCION}}: Dirección física donde debe concurrir el ciudadano." /></li>
-									<li><h:outputText
-											value="{{FECHA}}: Fecha en la cual debe concurrir el ciudadano." /></li>
-									<li><h:outputText
-											value="{{HORA}}: Hora en la cual debe concurrir el ciudadano." /></li>
-									<li><h:outputText
-											value="{{SERIE}}: Serie asociada al recurso." /></li>
-									<li><h:outputText value="{{NUMERO}}: Número de reserva." /></li>
-									<li><h:outputText
-											value="{{CODIGOSEGURIDAD}}: Código de seguridad de la reserva." /></li>
-									<li><h:outputText
-											value="{{CODIGOTRAZABILIDAD}}: Código de trazabilidad de la reserva." /></li>
-									<li><h:outputText
-											value="{{CANCELACION}}: Enlace (link) a la página directa de cancelación de la reserva." /></li>
-									<li><h:outputText
-											value="{{IDRESERVA}}: Identificador de la reserva" /></li>
+									<li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda_o_tramite']}" /></li>
+									<li><h:outputText	value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso_u_oficina']}" /></li>
+									<li><h:outputText value="{{DIRECCION}}: #{sessionMBean.textos['direccion_fisica_donde_debe_concurrir']}" /></li>
+									<li><h:outputText	value="{{FECHA}}: #{sessionMBean.textos['fecha_cuando_debe_concurrir']}" /></li>
+									<li><h:outputText	value="{{HORA}}: #{sessionMBean.textos['hora_cuando_debe_concurrir']}" /></li>
+									<li><h:outputText value="{{SERIE}}: #{sessionMBean.textos['serie_asociada_al_recurso']}" /></li>
+									<li><h:outputText value="{{NUMERO}}: #{sessionMBean.textos['numero_de_la_reserva']}" /></li>
+									<li><h:outputText	value="{{CODIGOSEGURIDAD}}: #{sessionMBean.textos['codigo_de_cancelacion_de_la_reserva']}" /></li>
+									<li><h:outputText	value="{{CODIGOTRAZABILIDAD}}: #{sessionMBean.textos['codigo_de_trazabilidad_de_la_reserva']}" /></li>
+									<li><h:outputText	value="{{CANCELACION}}: #{sessionMBean.textos['enlace_a_la_pagina_de_cancelacion']}" /></li>
+									<li><h:outputText	value="{{IDRESERVA}}: #{sessionMBean.textos['identificador_de_la_reserva']}" /></li>
 								</ul>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -165,35 +154,28 @@
 								<p:outputPanel styleClass="form-horizontal">
 									<p:outputPanel styleClass="form-group">
 										<h:outputLabel
-											value="#{sessionMBean.textos['texto_para_el_correo_de_cancelacion']}:"
-											for="textocorreocanc_input"
+											value="#{sessionMBean.textos['texto_para_el_correo_de_cancelacion']}" for="textocorreocanc"
 											styleClass="col-sm-3 control-label label" />
 										<p:outputPanel styleClass="col-sm-9">
-											<p:editor maxlength="1000" id="textocorreocanc"
-												value="#{textoAgendaMBean.textoAux.textoCorreoCanc}">
-											</p:editor>
+                      <p:inputTextarea id="textocorreocanc" rows="10" maxlength="1000" style="width:100%" resizable="true"
+                        value="#{textoAgendaMBean.textoAux.textoCorreoCanc}" />
+                      <h:outputText value="#{sessionMBean.textos['puede_ingresar_codigo_html']}" />
 										</p:outputPanel>
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
 							<p:outputPanel styleClass="col-sm-4">
-								<h:outputText
-									value="Puede utilizar las siguientes metavariables:" />
-								<ul class="tips pasoTexto">
-									<li><h:outputText
-											value="{{AGENDA}}: Nombre de la agenda o trámite." /></li>
-									<li><h:outputText
-											value="{{RECURSO}}: Nombre del recurso u oficina." /></li>
-									<li><h:outputText
-											value="{{DIRECCION}}: Dirección física donde debe concurrir el ciudadano." /></li>
-									<li><h:outputText
-											value="{{FECHA}}: Fecha en la cual debe concurrir el ciudadano." /></li>
-									<li><h:outputText
-											value="{{HORA}}: Hora en la cual debe concurrir el ciudadano." /></li>
-									<li><h:outputText
-											value="{{SERIE}}: Serie asociada al recurso." /></li>
-									<li><h:outputText value="{{NUMERO}}: Número de reserva." /></li>
-								</ul>
+                <h:outputText value="#{sessionMBean.textos['puede_usar_las_siguientes_metavariables']}:" />
+                <ul class="tips pasoTexto">
+                  <li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda_o_tramite']}" /></li>
+                  <li><h:outputText value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso_u_oficina']}" /></li>
+                  <li><h:outputText value="{{DIRECCION}}: #{sessionMBean.textos['direccion_fisica_donde_debe_concurrir']}" /></li>
+                  <li><h:outputText value="{{FECHA}}: #{sessionMBean.textos['fecha_cuando_debe_concurrir']}" /></li>
+                  <li><h:outputText value="{{HORA}}: #{sessionMBean.textos['hora_cuando_debe_concurrir']}" /></li>
+                  <li><h:outputText value="{{SERIE}}: #{sessionMBean.textos['serie_asociada_al_recurso']}" /></li>
+                  <li><h:outputText value="{{NUMERO}}: #{sessionMBean.textos['numero_de_la_reserva']}" /></li>
+                  <li><h:outputText value="{{IDRESERVA}}: #{sessionMBean.textos['identificador_de_la_reserva']}" /></li>
+                </ul>
 							</p:outputPanel>
 						</p:outputPanel>
 					</p:tab>

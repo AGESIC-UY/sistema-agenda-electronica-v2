@@ -10,8 +10,7 @@
 <ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{listaDeEsperaMBean.beforePhaseListaDeEspera}"
-			beforePhaseListener="#{listaDeEsperaMBean.beforePhaseListaDeEspera}">
+		<f:view beforePhase="#{listaDeEsperaMBean.beforePhaseListaDeEspera}" >
 
 			<script type="text/javascript">
 
@@ -34,7 +33,7 @@
 					<p:outputPanel id="todo">
 						<div class="form-inline">
 							<div class="form-group">
-								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label" for="puesto" />
+								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label formularioCampoRequerido" for="puesto" />
 								<h:inputText size="3" maxlength="3" id="puesto" value="#{sessionMBean.puesto}" styleClass="form-control" />
 							</div>
 							<p:commandButton value="#{sessionMBean.textos['llamar_al_siguiente']}" 

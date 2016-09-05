@@ -72,6 +72,7 @@ import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Oficina;
 import uy.gub.imm.sae.entity.global.Organismo;
+import uy.gub.imm.sae.entity.global.Token;
 import uy.gub.imm.sae.entity.global.Tramite;
 import uy.gub.imm.sae.entity.global.UnidadEjecutora;
 import uy.gub.imm.sae.entity.global.Usuario;
@@ -79,7 +80,6 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
-//@RolesAllowed("RA_AE_ADMINISTRADOR")
 public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmpresasRemote{
 
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
@@ -872,5 +872,52 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		}
 	}
 	
+	@SuppressWarnings("unchecked")
+  public List<Token> consultarTokensEmpresa(Integer empresaId) throws ApplicationException {
+		Query query = globalEntityManager.createQuery("SELECT t FROM Token t WHERE t.empresa.id=:empresaId ORDER BY t.nombre");
+		query.setParameter("empresaId", empresaId);
+		List<Token> tokens = (List<Token>)query.getResultList();
+		return tokens;
+	}
 	
+  public String crearToken(Integer empresaId, String nombre, String email) throws UserException {
+  	if(empresaId==null || nombre==null || email==null) {
+  		throw new UserException("parametros_incorrectos");
+  	}
+  	Empresa empresa = globalEntityManager.find(Empresa.class, empresaId);
+  	if(empresa==null) {
+  		throw new UserException("no_se_encuentra_la_empresa_especificada");
+  	}
+
+  	String sToken = null;
+  	String query = "SELECT t FROM Token t WHERE t.token=:token";
+  	while(sToken == null) {
+  		sToken = RandomStringUtils.randomAlphanumeric(25);
+  		//Verificar que no esté usado el token
+  		boolean ok = globalEntityManager.createQuery(query).setParameter("token", sToken).getResultList().isEmpty();
+  		if(!ok) {
+  			//Ya está en uso, se genera otro
+  			sToken = null;
+  		}
+  	}
+  	
+  	Token token = new Token();
+  	token.setEmail(email);
+  	token.setEmpresa(empresa);
+  	token.setFecha(new Date());
+  	token.setNombre(nombre);
+  	token.setToken(sToken);
+  	
+  	globalEntityManager.persist(token);
+  	
+		return sToken;
+	}
+	
+  public void eliminarToken(String sToken) {
+  	Token token = globalEntityManager.find(Token.class, sToken);
+  	if(token!=null) {
+  		globalEntityManager.remove(token);
+  	}
+  }
+  
 }

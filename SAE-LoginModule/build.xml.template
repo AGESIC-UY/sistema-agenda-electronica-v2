@@ -53,9 +53,15 @@
         <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.2.Final.jar"/>
         <pathelement location="${jboss.home}/modules/org/jboss/ejb3/main/jboss-ejb3-ext-api-2.0.0.jar"/>
     </path>
+    <path id="base.path">
+      <fileset dir="../SAE-Config/libs">
+        <include name="**/*.jar" />
+      </fileset>
+    </path>
     <path id="SAE-LoginModule.classpath">
-        <pathelement location="bin"/>
-        <path refid="JBoss 7.1 Runtime [JBoss 7.1 Runtime].libraryclasspath"/>
+      <pathelement location="bin"/>
+      <path refid="JBoss 7.1 Runtime [JBoss 7.1 Runtime].libraryclasspath"/>
+      <path refid="base.path"/>
     </path>
     <target name="init">
         <mkdir dir="bin"/>

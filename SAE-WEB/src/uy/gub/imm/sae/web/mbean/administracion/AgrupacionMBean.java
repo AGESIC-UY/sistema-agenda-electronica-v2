@@ -67,9 +67,8 @@ public class AgrupacionMBean extends BaseMBean {
 	}
 	
 	public void beforePhaseModificarAgrupaciones(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar agrupación de Dato a Solicitar");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("gestionar_agrupaciones"));
 		}
 	}
 
@@ -85,6 +84,7 @@ public class AgrupacionMBean extends BaseMBean {
 		}else{
 			datoASSessionMBean.setAgrupacionSeleccionada(null);
 		}
+		agrupacionDatoNuevo=null;
 	}
 
 	public void modificarAgrupacion(ActionEvent event) {
@@ -168,7 +168,6 @@ public class AgrupacionMBean extends BaseMBean {
 		}
 	}
 
-	//public void mostrarCrearAgrupacion(ActionEvent e) {
 	public void mostrarCrearAgrupacion() {
 		setAgrupacionDatoNuevo(new AgrupacionDato());
 		datoASSessionMBean.setAgrupacionSeleccionada(null);

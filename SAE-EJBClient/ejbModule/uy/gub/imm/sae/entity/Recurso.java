@@ -65,9 +65,10 @@ public class Recurso implements Serializable {
 	private Integer largoListaEspera;
 	private Integer version;
 	private Date fechaBaja;
-	private Boolean mostrarNumeroEnLlamador;
+	private Boolean mostrarNumeroEnLlamador = false;
 	private Boolean visibleInternet;
 	private Boolean mostrarNumeroEnTicket;
+	private Boolean mostrarIdEnTicket;
 	private Boolean usarLlamador;
 	private String serie;
 	private Boolean sabadoEsHabil;
@@ -142,6 +143,7 @@ public class Recurso implements Serializable {
 		fechaBaja = r.getFechaBaja();
 		mostrarNumeroEnLlamador = r.getMostrarNumeroEnLlamador();
 		mostrarNumeroEnTicket = r.getMostrarNumeroEnTicket();
+		mostrarIdEnTicket = r.getMostrarIdEnTicket();
 		usarLlamador = r.getUsarLlamador();
 		serie = r.getSerie();
 		visibleInternet = r.getVisibleInternet();
@@ -515,6 +517,15 @@ public class Recurso implements Serializable {
 
 	public void setTextosRecurso(Map<String, TextoRecurso> textosRecurso) {
 		this.textosRecurso = textosRecurso;
+	}
+
+	@Column (name = "mostrar_id_en_ticket", nullable = false)
+	public Boolean getMostrarIdEnTicket() {
+		return mostrarIdEnTicket;
+	}
+
+	public void setMostrarIdEnTicket(Boolean mostrarIdEnTicket) {
+		this.mostrarIdEnTicket = mostrarIdEnTicket;
 	}
 
 	

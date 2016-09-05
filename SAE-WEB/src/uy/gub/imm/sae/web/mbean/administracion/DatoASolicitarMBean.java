@@ -83,40 +83,20 @@ public class DatoASolicitarMBean extends BaseMBean {
 	}
 
 	public void beforePhaseCrear(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean
-					.setPantallaTitulo("Crear definición de Dato a Solicitar");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_dato"));
 		}
 	}
 
 	public void beforePhaseModificarConsultar(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar Datos a Solicitar");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_datos"));
 		}
 	}
 
 	public void beforePhaseModificar(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar Datos a Solicitar");
-		}
-	}
-
-	public void beforePhaseConsultar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean
-					.setPantallaTitulo("Consulta definición de Dato a Solicitar");
-		}
-	}
-
-	public void beforePhaseEliminar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean
-					.setPantallaTitulo("Eliminar definición de Dato a Solicitar");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_dato"));
 		}
 	}
 

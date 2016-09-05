@@ -10,39 +10,36 @@
 
 <body>
 	<ui:composition template="/administracion/reserva/Paso.template.xhtml">
-
 		<ui:param name="parametroBean" value="#{paso2AdminMBean}" />
 		<ui:param name="agenda_nombre" value="#{paso2AdminMBean.agendaNombre}" />
 		<ui:param name="bodyId" value="paso2" />
-
 		<ui:param name="paso_numero" value="2" />
-		<ui:param name="paso_texto"
-			value="#{sessionMBean.textos['seleccione_dia_y_hora']}" />
-
+		<ui:param name="paso_texto" value="#{sessionMBean.textos['seleccione_dia_y_hora']}" />
 		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-7" />
-		<ui:param name="clase_columna_der"
-			value="columnaDerecha col-sm-4 col-sm-offset-1" />
-
+		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4 col-sm-offset-1" />
 
 		<ui:define name="descripcion">
 
-			<ul class="tips pasoTexto">
-				<li><h:outputText value="#{sessionMBean.textos['dias_con_turnos_disponibles']}" /></li>
-				<li><h:outputText value="#{sessionMBean.textos['seleccione_el_dia']}" /></li>
-				<li><h:outputText value="#{sessionMBean.textos['debajo_del_calendario_horarios_disponibles']}" /></li>
-				<li><h:outputText value="#{sessionMBean.textos['seleccione_un_horario']}" /></li>
-			</ul>
+      <f:view beforePhase="#{paso2AdminMBean.beforePhase}" >
 
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false"
-					value="#{paso2AdminMBean.descripcion}"
-					rendered="#{paso2AdminMBean.descripcion != null}" />
-			</div>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false"
-					value="#{paso2AdminMBean.descripcionRecurso}"
-					rendered="#{paso2AdminMBean.descripcionRecurso != null}" />
-			</div>
+				<ul class="tips pasoTexto">
+					<li><h:outputText value="#{sessionMBean.textos['dias_con_turnos_disponibles']}" /></li>
+					<li><h:outputText value="#{sessionMBean.textos['seleccione_el_dia']}" /></li>
+					<li><h:outputText value="#{sessionMBean.textos['debajo_del_calendario_horarios_disponibles']}" /></li>
+					<li><h:outputText value="#{sessionMBean.textos['seleccione_un_horario']}" /></li>
+				</ul>
+	
+				<div class="descripcionAgenda">
+					<h:outputFormat escape="false"
+						value="#{paso2AdminMBean.descripcion}"
+						rendered="#{paso2AdminMBean.descripcion != null}" />
+				</div>
+				<div class="descripcionAgenda">
+					<h:outputFormat escape="false"
+						value="#{paso2AdminMBean.descripcionRecurso}"
+						rendered="#{paso2AdminMBean.descripcionRecurso != null}" />
+				</div>
+			</f:view>
 		</ui:define>
 
 		<ui:define name="mensaje">
@@ -71,7 +68,7 @@
 							id="diaSelect" styleClass="hidden" title="día seleccionado" />
 						<p:inputText value="#{paso2AdminMBean.fechaFormatSelect}"
 							id="diaSelectFormat" styleClass="diaSeleccionado"
-							title="día seleccionado" />
+							title="día seleccionado" readonly="true" onkeypress="return soloTabs(event);" />
 						<p:commandButton action="#{paso2AdminMBean.seleccionarFecha}"
 							value="enter" id="callBean" styleClass="hidden"
 							update="form:panelMatutina form:panelVespertina form:diaSelectFormat"></p:commandButton>

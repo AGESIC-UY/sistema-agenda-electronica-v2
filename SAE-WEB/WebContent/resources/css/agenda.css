@@ -106,10 +106,15 @@ input[type="radio"].form-control, input[type="checkbox"].form-control {
     margin-top: 6px;
     background-image: url(../images/ui-icons_000000_256x240.png);
 }
-.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus {
+.ui-state-hover, .ui-widget-content .ui-state-hover, .ui-widget-header .ui-state-hover, .ui-state-focus, .ui-widget-content .ui-state-focus, .ui-widget-header .ui-state-focus,
+.ui-menuitem-link:focus {
     background: #e2e9ef;
     font-weight: normal;
     box-shadow: none;
+}
+.ui-menuitem-link:focus,
+.btn-link:focus {
+    outline: thin dotted;
 }
 .ui-state-highlight, .ui-widget-content .ui-state-highlight, .ui-widget-header .ui-state-highlight {
     background: #607a92;

@@ -36,7 +36,7 @@ import uy.gub.imm.sae.exception.UserException;
 
 public interface Disponibilidades {
 	public void generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, Integer frecuencia, Integer cupo) throws UserException, ApplicationException;
-	public void generarDisponibilidades(Recurso r, Date f, VentanaDeTiempo periodo) throws UserException, ApplicationException;	
+	public void generarDisponibilidades(Recurso r, Date f, VentanaDeTiempo periodo, Boolean[] dias) throws UserException, ApplicationException;	
 	public void generarPatronSemana(Recurso r, VentanaDeTiempo semana, VentanaDeTiempo periodo) throws BusinessException, UserException, ApplicationException;	
 	public List<Disponibilidades> consultarDisponibilidadesSolapadas(Recurso r, Plantilla p, VentanaDeTiempo v);
 	public void generarDisponibilidaesAutomaticamente();
@@ -46,6 +46,6 @@ public interface Disponibilidades {
 	public void modificarCupoPeriodo(Disponibilidad d) throws UserException, BusinessException;
 	public Integer cantDisponibilidadesDia(Recurso r, Date f) throws UserException, BusinessException;
 	public Date ultFechaGenerada(Recurso r) throws UserException, BusinessException;
-	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor,int tipoOperacion) throws UserException, BusinessException ;
+	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor,int tipoOperacion, Boolean[] dias) throws UserException, BusinessException ;
 	public boolean esDiaHabil(Date fecha, Recurso r) throws ApplicationException;
 }

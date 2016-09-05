@@ -315,37 +315,20 @@ public class EmpresaMBean extends BaseMBean {
 		this.empresaSessionMBean = empresaSessionMBean;
 	}
 
-	//setearlo en <f:view beforePhase de la pagina.
-	public void beforePhaseCrear(PhaseEvent event) {
-
+	public void beforePhaseCrearModificar(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar/Crear empresa");
-		}
-	}
-
-	public void beforePhaseModificarConsultar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar empresa");
-		}
-	}
-	
-	public void beforePhaseModificar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar empresa");
-		}
-	}
-	
-	public void beforePhaseEliminar(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Eliminar empresa");
+			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+			if(request.getParameter("n")!=null) {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_empresa"));
+			}else {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_empresa"));
+			}
 		}
 	}
 
 	public void beforePhaseConsultar(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar empresas");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_empresas"));
 		}
 	}
 	

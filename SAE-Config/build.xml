@@ -11,7 +11,7 @@
 
 	<target name="clean" depends="init">
 		<path id="cleanlist">
-		<pathelement location="../SAE-EJBClient/build.xml"/>
+		  <pathelement location="../SAE-EJBClient/build.xml"/>
       <pathelement location="../SAE-EJB/build.xml"/>
       <pathelement location="../SAE-Profile-${build.profile}-EJBClient/build.xml"/>
       <pathelement location="../SAE-Profile-${build.profile}-EJB/build.xml"/>

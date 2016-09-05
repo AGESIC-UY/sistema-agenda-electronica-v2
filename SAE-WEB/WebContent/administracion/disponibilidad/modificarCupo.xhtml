@@ -8,8 +8,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{disponibilidadMBean.beforePhaseModifCupo}"
-			beforePhaseListener="#{disponibilidadMBean.beforePhaseModifCupo}">
+		<f:view beforePhase="#{disponibilidadMBean.beforePhaseModifCupo}" >
 
 			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="modificarCupos" zindex="2000" modal="true">
@@ -41,10 +40,12 @@
 
 			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
         <p:outputPanel id="panelForm">
+        <p:outputPanel styleClass="form-required">
+          <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+        </p:outputPanel>
 				<fieldset>
 					<legend>
-						<h:outputText
-							value="#{sessionMBean.textos['fecha_para_la_cual_modificar']}" />
+						<h:outputText value="#{sessionMBean.textos['fecha_para_la_cual_modificar']}" />
 					</legend>
 					<p:outputPanel styleClass="form-horizontal">
 						<p:outputPanel styleClass="form-group">
@@ -244,40 +245,52 @@
 									<p:outputPanel styleClass="col-sm-9">
 										<h:selectOneMenu id="oper" styleClass="form-control textoLargo"
 											value="#{disponibilidadMBean.tipoOperacion}">
-											<f:selectItem
-												itemLabel="#{sessionMBean.textos['aumentar_disponibilidades_en_la_cantidad_especificada']}"
-												itemValue="#{1}" />
-											<f:selectItem
-												itemLabel="#{sessionMBean.textos['disminuir_disponibilidades_en_la_cantidad_especificada']}"
-												itemValue="#{2}" />
-											<f:selectItem
-												itemLabel="#{sessionMBean.textos['establecer_disponibilidades_en_la_cantidad_especificada']}"
-												itemValue="#{3}" />
+											<f:selectItem itemLabel="#{sessionMBean.textos['aumentar_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{1}" />
+											<f:selectItem itemLabel="#{sessionMBean.textos['disminuir_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{2}" />
+											<f:selectItem itemLabel="#{sessionMBean.textos['establecer_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{3}" />
 										</h:selectOneMenu>
 										<p:message for="oper"></p:message>
 									</p:outputPanel>
 								</p:outputPanel>
 								<p:outputPanel styleClass="form-group">
-									<p:outputLabel
-										value="#{sessionMBean.textos['cantidad_de_cupos']}"
-										for="valor"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputLabel value="#{sessionMBean.textos['cantidad_de_cupos']}" for="valor" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="valor" value="#{disponibilidadMBean.valor}"
-											maxlength="5" styleClass="form-control textoCorto" />
+										<h:inputText id="valor" value="#{disponibilidadMBean.valor}" maxlength="5" styleClass="form-control textoCorto" />
 										<p:message for="valor" errorClass="mensajeError" />
 									</p:outputPanel>
 								</p:outputPanel>
-								<p:outputPanel styleClass="form-group">
-									<h:outputText
-										value="#{sessionMBean.textos['aplicar_a']}"
-										styleClass="col-sm-3 control-label label" />
+								<p:outputPanel id="aplicarTodos" styleClass="form-group">
+									<h:outputText value="#{sessionMBean.textos['aplicar_a']}" styleClass="col-sm-3 control-label label" />
 									<p:outputPanel styleClass="col-sm-9">
-										<p:selectBooleanCheckbox id="todosDios"
-											value="#{dispSessionMBean.modificarTodos}"/>
-										<p:outputLabel
-										value="#{sessionMBean.textos['aplicar_a_todos_los_dias']}"
-										for="todosDios" />
+										<p:selectBooleanCheckbox id="todosLosDias" value="#{dispSessionMBean.modificarTodos}"  >
+										  <p:ajax update="aplicarTodos" />
+										</p:selectBooleanCheckbox>
+										<p:outputLabel value="#{sessionMBean.textos['aplicar_a_todos_los_dias']}" for="todosLosDias" />
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+                    <p:selectBooleanCheckbox id="diaAplicarLu" value="#{dispSessionMBean.diasAplicar[0]}"  />
+                    <p:outputLabel value="Lunes" for="diaAplicarLu" />
+                  </p:outputPanel>
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+                    <p:selectBooleanCheckbox id="diaAplicarMa" value="#{dispSessionMBean.diasAplicar[1]}"  />
+                    <p:outputLabel value="Martes" for="diaAplicarMa" />
+                  </p:outputPanel>
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+                    <p:selectBooleanCheckbox id="diaAplicarMi" value="#{dispSessionMBean.diasAplicar[2]}"  />
+                    <p:outputLabel value="Miércoles" for="diaAplicarMi" />
+                  </p:outputPanel>
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+                    <p:selectBooleanCheckbox id="diaAplicarJu" value="#{dispSessionMBean.diasAplicar[3]}"  />
+                    <p:outputLabel value="Jueves" for="diaAplicarJu" />
+                  </p:outputPanel>
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+                    <p:selectBooleanCheckbox id="diaAplicarVi" value="#{dispSessionMBean.diasAplicar[4]}"  />
+                    <p:outputLabel value="Viernes" for="diaAplicarVi" />
+                  </p:outputPanel>
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos and sessionMBean.recursoMarcado.sabadoEsHabil}">
+                    <p:selectBooleanCheckbox id="diaAplicarSa" value="#{dispSessionMBean.diasAplicar[5]}" />
+                    <p:outputLabel value="Sábado" for="diaAplicarSa" />
+                  </p:outputPanel>
+										
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>

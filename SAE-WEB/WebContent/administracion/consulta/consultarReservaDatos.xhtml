@@ -9,18 +9,18 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
-			beforePhase="#{consultaReservaDatosMBean.beforePhaseConsultarReservaDatos}"
-			beforePhaseListener="#{consultaReservaDatosMBean.beforePhaseConsultarReservaDatos}">
+			beforePhase="#{consultaReservaDatosMBean.beforePhaseConsultarReservaDatos}" >
 
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="form" class="cancelarReserva">
-
+          <p:outputPanel styleClass="form-required">
+            <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+          </p:outputPanel>
 					<h:panelGroup id="camposFiltro"
 						binding="#{consultaReservaDatosMBean.filtroConsulta}"
 						layout="block">
 					</h:panelGroup>
-
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary"><p:commandButton
 								value="#{sessionMBean.textos['consultar']}"
@@ -61,11 +61,8 @@
 							<p:column headerText="#{sessionMBean.textos['accion']}">
 								<p:commandButton id="consultarButtom"
 									action="#{consultaReservaDatosMBean.verDetalleReserva}"
-									icon="ui-icon-search">
+									icon="ui-icon-search" title="#{sessionMBean.textos['ver_detalle']}">
 								</p:commandButton>
-
-								<p:tooltip for="consultarButtom"
-									value="#{sessionMBean.textos['ver_detalle']}" />
 							</p:column>
 
 						</p:dataTable>

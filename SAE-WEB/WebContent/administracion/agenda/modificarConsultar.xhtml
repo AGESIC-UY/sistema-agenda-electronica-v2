@@ -8,8 +8,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{agendaMBean.beforePhaseModificarConsultar}"
-			beforePhaseListener="#{agendaMBean.beforePhaseModificarConsultar}">
+		<f:view beforePhase="#{agendaMBean.beforePhaseModificarConsultar}" >
 
 			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarAgenda" zindex="2000" modal="true">
@@ -61,20 +60,16 @@
 							action="#{agendaMBean.modificar}" icon="ui-icon-pencil"
 							title="#{sessionMBean.textos['modificar']}">
 						</p:commandButton>
-						<p:tooltip value="#{sessionMBean.textos['modificar']}" for="modificarAgenda" />
 						<p:commandButton id="copiarAgeLink"
 							actionListener="#{agendaMBean.copiar}"
 							update="form:panelForm" icon="ui-icon-copy"
 							title="#{sessionMBean.textos['copiar']}">
 						</p:commandButton>
-						<p:tooltip value="#{sessionMBean.textos['copiar']}"
-							for="copiarAgeLink" />
 						<p:commandButton id="eliminarAgenda"
 							actionListener="#{agendaMBean.selecAgendaEliminar}"
 							oncomplete="PF('eliminarAgenda').show();" icon="ui-icon-trash"
 							title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>
-						<p:tooltip value="#{sessionMBean.textos['eliminar']}" for="eliminarAgenda" />
 					</p:column>
 				</p:dataTable>
 				</p:outputPanel>

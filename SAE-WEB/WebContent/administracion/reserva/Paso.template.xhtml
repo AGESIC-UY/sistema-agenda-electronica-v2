@@ -8,8 +8,7 @@
 <body>
 
 	<ui:composition template="/templates/layout.xhtml">
-		<ui:param name="nombre_pagina" value="Crear Reserva" />
-		<ui:param name="onload" value="" />
+		<ui:param name="nombre_pagina" value="#{sessionMBean.textos['realizar_reserva']}" />
 
 		<ui:define name="css">
 		</ui:define>
@@ -25,29 +24,23 @@
 				<h:panelGroup layout="block">
 					<h:form id="form">
 						<div>
-						
-				      <p:messages rendered="#{mensaje_error != null}"
-				        infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
-				        infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
-				        warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}"
-				        errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" />
-						
 							<h:panelGroup rendered="#{mensaje_error == null}" id="contenedorPaso" layout="block">
 
 								<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
 									<ul class="wizard-nav-tabs wizard-nav-tabs-3">
-										<li class="#{(paso_numero == 1) ? 'active' : ''}"><h:outputText
-												value="1" styleClass="wizard-step" /> <h:outputText
-												value="#{sessionMBean.textos['detalle_y_ubicacion']}"
-												styleClass="wizard-step-description" /></li>
-										<li class="#{(paso_numero == 2) ? 'active' : ''}"><h:outputText
-												value="2" styleClass="wizard-step" /> <h:outputText
-												value="#{sessionMBean.textos['dia_y_hora']}" styleClass="wizard-step-description" /></li>
-										<li class="#{(paso_numero == 3) ? 'active' : ''}"><h:outputText
-												value="3" styleClass="wizard-step" /> <h:outputText
-												value="#{sessionMBean.textos['datos_necesarios']}"
-												styleClass="wizard-step-description" /></li>
-									</ul>
+										<li class="#{(paso_numero == 1) ? 'active' : ''}">
+										  <h:outputText value="1" styleClass="wizard-step" /> 
+										  <h:outputText value="#{sessionMBean.textos['detalle_y_ubicacion']}" styleClass="wizard-step-description" />
+								    </li>
+										<li class="#{(paso_numero == 2) ? 'active' : ''}">
+										  <h:outputText value="2" styleClass="wizard-step" />
+											<h:outputText	value="#{sessionMBean.textos['dia_y_hora']}" styleClass="wizard-step-description" />
+										</li>
+										<li class="#{(paso_numero == 3) ? 'active' : ''}">
+										  <h:outputText value="3" styleClass="wizard-step" />
+										  <h:outputText	value="#{sessionMBean.textos['datos_necesarios']}" styleClass="wizard-step-description" />
+									  </li>
+								  </ul>
 								</h:panelGroup>
 
 								<ui:insert name="mensaje">

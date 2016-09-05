@@ -47,7 +47,7 @@ import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "1.1";
+	public static final String version = "1.2";
 
 	protected static final String FORM_ID = "form";
 	

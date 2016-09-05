@@ -21,7 +21,9 @@
 	<link href='https://fonts.googleapis.com/css?family=Open+Sans:400italic,700italic,400,300,700' rel='stylesheet' type='text/css' />
 </h:head>
 <h:body>
-	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar al contenido</a>
+	<a class="sr-only sr-only-focusable saltar" href="#formLogin">
+   <h:outputText value="#{sesionMBean.textos['saltar_al_contenido']}" />
+  </a>
 
 	<div class="cabezalLogin">
 		<div class="container">

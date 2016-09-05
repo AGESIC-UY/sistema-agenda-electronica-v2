@@ -9,13 +9,15 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
-			beforePhase="#{crearDisponibilidadMBean.beforePhaseCrearDisponibilidades}"
-			beforePhaseListener="#{crearDisponibilidadMBean.beforePhaseCrearDisponibilidades}">
+			beforePhase="#{crearDisponibilidadMBean.beforePhaseCrearDisponibilidades}" >
 
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="formCrearDisponibilidad">
           <p:outputPanel id="panelCrearDisponibilidad">
+		      <p:outputPanel styleClass="form-required">
+		        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+		      </p:outputPanel>
 					<fieldset>
 						<legend>
 							<h:outputText
@@ -24,7 +26,7 @@
 						<p:outputPanel id="fechaConsultar" styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha']}"
-									for="fecha" styleClass="col-sm-3 control-label label" />
+									for="fecha" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText id="fecha"
 										value="#{crearDispSessionMBean.fechaCrear}"

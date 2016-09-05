@@ -23,7 +23,7 @@ import org.jboss.security.auth.spi.AbstractServerLoginModule;
  * tanto en el login inicial (cuando no hay una empresa seleccioanda) como cuando el usuario logueado cambia de empresa.
  * 
  * El código de usuario debe estar compuesto por un nombre y el identificador de la empresa separados por una barra. 
- * Por ejemplo "usuario12345/3". Si no se incluye el identificador de la empresa, y el usuario no es superadminsitrador,
+ * Por ejemplo "usuario1/3". Si no se incluye el identificador de la empresa, y el usuario no es superadministrador,
  * no se cargará ningún rol. Si es superadministrador se cargan todos los roles incluso si no se especifica la empresa. 
  * Si no es superadministrador pero se especifica una empresa se cargan los roles del usuario en la empresa indicada. La 
  * contraseña debe corresponder con la que está almacenada en la base de datos (por ahora con Base64(MD5(x))).

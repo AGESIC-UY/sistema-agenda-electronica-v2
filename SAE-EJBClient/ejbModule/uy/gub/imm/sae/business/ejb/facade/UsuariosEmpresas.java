@@ -27,6 +27,7 @@ import uy.gub.imm.sae.business.dto.UsuarioEmpresaRoles;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Oficina;
 import uy.gub.imm.sae.entity.global.Organismo;
+import uy.gub.imm.sae.entity.global.Token;
 import uy.gub.imm.sae.entity.global.Tramite;
 import uy.gub.imm.sae.entity.global.UnidadEjecutora;
 import uy.gub.imm.sae.entity.global.Usuario;
@@ -79,5 +80,10 @@ public interface UsuariosEmpresas {
 	 * Esto es para ver si se permite quitar la marca de superadminstrador a un usuario (o por lo menos se muestra un mensaje de advertencia)
 	 * */
 	public boolean hayOtroSuperadmin(Integer usuarioId) throws ApplicationException;
+	
+	
+	public List<Token> consultarTokensEmpresa(Integer empresaId) throws ApplicationException;
+	public String crearToken(Integer empresaId, String nombre, String email) throws UserException;
+	public void eliminarToken(String sToken);
 	
 }

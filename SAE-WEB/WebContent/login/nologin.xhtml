@@ -19,7 +19,9 @@
 	<link href="/sae/resources/css/agenda.css" rel="stylesheet" />
 </h:head>
 <h:body>
-	<a class="sr-only sr-only-focusable saltar" href="#formLogin">Saltar al contenido</a>
+	<a class="sr-only sr-only-focusable saltar" href="#formLogin">
+   <h:outputText value="#{sessionMBean.textos['saltar_al_contenido']}" />
+  </a>
 	<div class="cabezalLogin">
 		<div class="container">
 			<div class="row">

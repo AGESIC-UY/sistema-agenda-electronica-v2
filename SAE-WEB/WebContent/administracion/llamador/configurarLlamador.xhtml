@@ -9,8 +9,7 @@
 <ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
-			beforePhase="#{llamadorMBean.beforePhaseConfiguracionLlamador}"
-			beforePhaseListener="#{llamadorMBean.beforePhaseConfiguracionLlamador}">
+			beforePhase="#{llamadorMBean.beforePhaseConfiguracionLlamador}">
 			<p:outputPanel rendered="#{sessionMBean.recursoMarcado != null}">
 
 				<h:form>

@@ -67,7 +67,8 @@ $(document).on('focus', '.datepicker',  function() {
 
 
 $(document).on('keydown', '.datepicker',    function() {
-    $.datepicker.customKeyPress(event);
+//Por alguna razón da error al invocar esta función, pero no es necesaria ya que solo se admite la tecla tab
+//    $.datepicker.customKeyPress(event);
 });
 
 $.extend($.datepicker, { // Extends datepicker with shortcuts.
@@ -129,5 +130,12 @@ $(function() {
   });
 
 $(document).on('keydown', '#datepickerinline',    function() {
-    $.datepicker.customKeyPress(event);
+// Por alguna razón da error al invocar esta función, pero no es necesaria ya que solo se admite la tecla tab
+//    $.datepicker.customKeyPress(event);
 });
+
+function soloTabs(e){
+  //9 es tab, 0 es otro caracter de control (Firefox y SeaMonkey devuelven 0)
+  var keynum = e.which;
+  return (keynum==0 || keynum==9);
+}

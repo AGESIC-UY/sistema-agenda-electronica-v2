@@ -194,79 +194,61 @@ public class ConsultaMBean extends SessionCleanerMBean {
 		this.idReserva = idReserva;
 	}
 
-
-
-
 	public Integer getDataScrollerPage() {
 		return dataScrollerPage;
 	}
-
-
-
 
 	public void setDataScrollerPage(Integer dataScrollerPage) {
 		this.dataScrollerPage = dataScrollerPage;
 	}
 
-
-
-
 	public ConsultaSessionMBean getConsultaSessionMBean() {
 		return consultaSessionMBean;
 	}
-
-
-
 
 	public void setConsultaSessionMBean(ConsultaSessionMBean consultaSessionMBean) {
 		this.consultaSessionMBean = consultaSessionMBean;
 	}
 
-	
-	
 	public void beforePhaseConsultarReservaId(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar reserva por Id.");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_id"));
 		}
 	}
 
 	public void beforePhaseConsultarReservaNumero(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar reserva por número");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_numero"));
 		}
 	}
 
 	public void beforePhaseConsultarReservaPeriodo(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar reserva por período");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_reservas"));
 		}
 	}
 
 	public void beforePhaseConsultarAsistenciaPeriodo(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar Asistencia por período");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_asistencias"));
 		}
 	}
 
 	public void beforePhaseConsultarTiempoAtencion(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar Tiempo de Atención");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("gestionar_tokens"));
 		}
 	}
 	
 	public void beforePhaseConsultarAtencionFuncionario(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar Atención Funcionarios");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_atencion_funcionario"));
 		}
 	}
 	
 	public void beforePhaseConsultarTiempoAtencionFuncionario(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar Tiempo de Atención Funcionarios");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_tiempo_atencion_funcionario"));
 		}
 	}
 	

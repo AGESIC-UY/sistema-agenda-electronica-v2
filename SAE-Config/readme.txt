@@ -3,12 +3,15 @@ COMPILACION
   Los archivos generados quedan en SAE-EAR/build/jar/
 
 Opción 1 - LINEA DE COMANDOS
+  Nota: requiere ant versión 1.9 o superior
 
   export JAVA_HOME=<ruta a directorio de instalación de jre7>
   export ANT_HOME=<ruta a directorio de instalación de ant>
   cd SAE-Config
   ant clean
   ant build
+  
+Nota: si al compilar se observa el error "/build.xml:51: srcdir "{...}/SAE-Config/ejbModule" does not exist!" seguramente se está utilizando una versión de ant anterior a 1.9.
 
 Opción 2 - DESDE ECLIPSE
 
@@ -39,12 +42,14 @@ PRIMEFACES
 Se tocaron los siguientes archivos de Primefaces:
   /org/primefaces/component/datatable/DataTable.java
   /org/primefaces/component/datatable/DataTableRenderer.java
+  /org/primefaces/component/menu/BaseMenuRenderer.java
+  /org/primefaces/component/messages/Messages.java
+  /org/primefaces/component/messages/MessagesRenderer.java
+  /org/primefaces/component/panelmenu/PanelMenuRenderer.java
   /org/primefaces/component/selectbooleancheckbox/SelectBooleanCheckboxRenderer.java
   /org/primefaces/component/selectonemenu/SelectOneMenuRenderer.java
   /org/primefaces/component/selectoneradio/SelectOneRadioRenderer.java
   /org/primefaces/component/tabview/TabViewRenderer.java
-  /org/primefaces/component/messages/Messages.java
-  /org/primefaces/component/messages/MessagesRenderer.java
 Cada vez que se modifica un archivo de Primefaces hay que compilarlo en un proyecto separado e incluirlo en el archivo primefaces-5.3-modificado.jar que está en /SAE-WEB/WebContent/WEB-INF/lib  
   
 Nota:

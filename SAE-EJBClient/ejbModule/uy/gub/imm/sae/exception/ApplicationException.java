@@ -26,8 +26,7 @@ public class ApplicationException extends BaseException {
 
 	private static final long serialVersionUID = -479168694942154987L;
 
-	public ApplicationException() 
-	{
+	public ApplicationException() {
 		super();
 	}
 	
