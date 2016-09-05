@@ -23,20 +23,20 @@
 		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
 
 		<ui:define name="descripcion">
-
-			<ul class="tips pasoTexto">
-				<li><h:outputText value="#{sessionMBean.textos['datos_marcados_obligatorios']}." /></li>
-			</ul>
-			
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcion}" 
-					rendered="#{paso3AdminMBean.descripcion != null}"/>
-			</div>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false"
-					value="#{paso3AdminMBean.descripcionRecurso}"
-					rendered="#{paso3AdminMBean.descripcionRecurso != null}" />
-			</div>
+      <f:view beforePhase="#{paso3AdminMBean.beforePhase}" >
+				<ul class="tips pasoTexto">
+					<li><h:outputText value="#{sessionMBean.textos['datos_marcados_obligatorios']}." /></li>
+				</ul>
+				<div class="descripcionAgenda">
+					<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcion}" 
+						rendered="#{paso3AdminMBean.descripcion != null}"/>
+				</div>
+				<div class="descripcionAgenda">
+					<h:outputFormat escape="false"
+						value="#{paso3AdminMBean.descripcionRecurso}"
+						rendered="#{paso3AdminMBean.descripcionRecurso != null}" />
+				</div>
+			</f:view>
 		</ui:define>
 
 		<ui:define name="mensaje">
@@ -63,6 +63,9 @@
 
 		<ui:define name="contenido">
 			<p:outputPanel>
+	      <p:outputPanel styleClass="form-required">
+	        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+	      </p:outputPanel>
 				<p:outputPanel id="formulario">
 					<h:panelGroup binding="#{paso3AdminMBean.campos}" layout="block"/>
 				</p:outputPanel>

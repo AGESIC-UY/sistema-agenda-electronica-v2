@@ -60,7 +60,7 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre) throws ApplicationException,
+	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException,
 			BusinessException, ValidacionException, AccesoMultipleException, UserException {
 		
 		try {
@@ -281,4 +281,7 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 	
+	public void limpiarTrazas() {
+		throw new UnsupportedOperationException();
+	}
 }

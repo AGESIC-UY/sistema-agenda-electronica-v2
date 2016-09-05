@@ -37,10 +37,9 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 	
 	public static final String MSG_ID = "pantalla";
 		
-//	@EJB( name="ejb/AgendaGeneralBean")
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
 	private AgendaGeneral generalEJB;
-//	@EJB( name="ejb/RecursosBean")
+
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
 
@@ -50,7 +49,6 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 	private DisponibilidadReserva dispSeleccionado;
 	private Boolean mostrarDisponibilidad = true;
 	
-	//private List<Disponibilidad> disponibilidades;
 	private RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutina;
 	private RowList<DisponibilidadReserva> disponibilidadesDelDiaVespertina;
 	private RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutinaModif;
@@ -60,18 +58,14 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 	private Date fechaDesde;
 	private Date fechaHasta;
 	private Date fechaActual;
-	//private Date fechaModifCupo;
 	
 	//Fecha para tomar como modelo para generar disponibilidades.
 	private Date fechaModelo;
 	private Date fechaInicial;
 	private Date fechaFinal;
+	private Boolean[] diasAplicar = new Boolean[]{true,true,true,true,true,true}; //Lunes, martes, ..., sábado
 
-	
-	
 	private int pagCupo;
-	//private int pagDisp;
-
 
 	public Date getFechaModelo() {
 		return fechaModelo;
@@ -80,7 +74,6 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 		this.fechaModelo = fechaModelo;
 	}
 
-	
 	public int getPagCupo() {
 		return pagCupo;
 	}
@@ -94,8 +87,6 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 		this.fechaActual = fechaActual;
 	}
 
-
-	
 	public CupoPorDia getCupoPorDiaSeleccionado() {
 		return cupoPorDiaSeleccionado;
 	}
@@ -124,22 +115,6 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 	public void setFechaHasta(Date fechaHasta) {
 		this.fechaHasta = fechaHasta;
 	}
-	/*
-	public int getPagDisp() {
-		return pagDisp;
-	}
-	public void setPagDisp(int pagDisp) {
-		this.pagDisp = pagDisp;
-	}
-
-	public List<Disponibilidad> getDisponibilidades() {
-		return disponibilidades;
-	}
-
-	public void setDisponibilidades(List<Disponibilidad> disponibilidades) {
-		this.disponibilidades = disponibilidades;
-	}
-	*/
 	
 	public RowList<DisponibilidadReserva> getDisponibilidadesDelDiaMatutina() {
 		return disponibilidadesDelDiaMatutina;
@@ -155,8 +130,6 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 			RowList<DisponibilidadReserva> disponibilidadesDelDiaVespertina) {
 		this.disponibilidadesDelDiaVespertina = disponibilidadesDelDiaVespertina;
 	}
-	
-	
 	
 	public DisponibilidadReserva getDispSeleccionado() {
 		return dispSeleccionado;
@@ -175,7 +148,6 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 		}
 		return this.mostrarDisponibilidad;
 	}
-
 
 	public void setMostrarDisponibilidad(Boolean mostrarDisponibilidad) {
 		this.mostrarDisponibilidad = mostrarDisponibilidad;
@@ -207,16 +179,13 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 	public void setFechaFinal(Date fechaFinal) {
 		this.fechaFinal = fechaFinal;
 	}
+	public Boolean[] getDiasAplicar() {
+		return diasAplicar;
+	}
+	public void setDiasAplicar(Boolean[] diasAplicar) {
+		this.diasAplicar = diasAplicar;
+	}
 	
-	/*
-	public Date getFechaModifCupo() {
-		return fechaModifCupo;
-	}
-	public void setFechaModifCupo(Date fechaModifCupo) {
-		this.fechaModifCupo = fechaModifCupo;
-	}
-	*/
-
 
 }
 

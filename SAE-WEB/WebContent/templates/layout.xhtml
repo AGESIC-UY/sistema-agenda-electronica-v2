@@ -4,12 +4,16 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
-	lang="#{sessionMBean.idiomaActual}">
-
+	lang="#{sessionMBean.idiomaActual}"
+	
+	>
 <h:head>
-	<title>
-	 <h:outputText value="#{sessionMBean.textos['nombre_aplicacion']}" /></title>
-	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+  <f:facet name="first">
+	  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	  <title>
+		  <h:outputText value="#{sessionMBean.textos['nombre_aplicacion']} -- #{sessionMBean.pantallaTitulo}" />
+	  </title>
+  </f:facet>
 	<h:outputScript library="primefaces" name="jquery/jquery.js" />
 	<script src="/sae-admin/resources/js/jquery-ui.js" type="text/javascript"></script>
 	<script src="/sae-admin/resources/js/funcionesJS.js" type="text/javascript"></script>
@@ -28,7 +32,7 @@
 <h:body styleClass="bodyAdmin" >
   <f:event type="preRenderView" listener="#{sessionMBean.controlarAccesoRestringido}"/>
 
-	<a class="sr-only sr-only-focusable saltar" href="#page-content-wrapper">
+	<a class="sr-only sr-only-focusable saltar" href="#destino_saltar_contenido">
 	 <h:outputText value="#{sessionMBean.textos['saltar_al_contenido']}" />
   </a>
 
@@ -144,7 +148,7 @@
 			</a>
 
 
-			<h1>
+			<h1 id="destino_saltar_contenido">
 				<h:outputText value="#{nombre_pagina}"></h:outputText>
 			</h1>
 			<p:messages id="pantalla" showDetail="false" autoUpdate="true"

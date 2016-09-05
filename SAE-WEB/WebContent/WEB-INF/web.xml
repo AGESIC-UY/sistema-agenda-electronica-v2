@@ -22,6 +22,9 @@
     <servlet-name>Faces Servlet</servlet-name>
     <url-pattern>*.xhtml</url-pattern>
   </servlet-mapping>
+  
+  
+  
   <welcome-file-list>
     <welcome-file>administracion/crear.xhtml</welcome-file>
   </welcome-file-list>

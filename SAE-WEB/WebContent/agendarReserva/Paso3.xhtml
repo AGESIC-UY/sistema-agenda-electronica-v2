@@ -57,6 +57,9 @@
 
 		<ui:define name="contenido">
 			<p:outputPanel rendered="#{!paso3MBean.errorInit}">
+        <p:outputPanel styleClass="form-required">
+          <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+        </p:outputPanel>
 				<p:outputPanel id="formulario">
 					<h:panelGroup binding="#{paso3MBean.campos}" layout="block" />
 				</p:outputPanel>

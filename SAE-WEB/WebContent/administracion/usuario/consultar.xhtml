@@ -8,8 +8,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{usuarioMBean.beforePhaseConsultar}"
-			beforePhaseListener="#{usuarioMBean.beforePhaseConsultar}">
+		<f:view beforePhase="#{usuarioMBean.beforePhaseConsultar}" >
 
 			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarUsuario" zindex="2000" modal="true">
@@ -65,19 +64,15 @@
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 						</f:facet>
-
 						<p:commandButton id="modificarUsuario"
 							action="#{usuarioMBean.modificar}" update="tablaUsuarios"
 							icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
 						</p:commandButton>
-						<p:tooltip value="#{sessionMBean.textos['modificar']}" for="modificarUsuario" />
-
 						<p:commandButton id="eliminarUsuario"
 							oncomplete="PF('eliminarUsuario').show();" icon="ui-icon-trash"
 							actionListener="#{usuarioMBean.selecUsuarioEliminar}"
 							title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>
-						<p:tooltip value="#{sessionMBean.textos['eliminar']}" for="eliminarUsuario" />
 					</p:column>
 				</p:dataTable>
 			</h:form>

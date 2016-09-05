@@ -8,8 +8,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificar}"
-			beforePhaseListener="#{datoASolicitarMBean.beforePhaseModificar}">
+		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificar}" >
 			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
 				widgetVar="eliminarValor" zindex="2000" modal="true">
 				<f:facet name="header">
@@ -38,15 +37,15 @@
 				</h:form>
 			</p:dialog>
 
-			<ui:include
-				src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
+			<ui:include src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
 
 			<h:form id="form">
 				<p:outputPanel styleClass="botonesDerecha">
-					<ui:include
-						src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+					<ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
 				</p:outputPanel>
-
+	      <p:outputPanel styleClass="form-required">
+	        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+	      </p:outputPanel>
 				<fieldset>
 					<legend>
 						<h:outputText value="#{sessionMBean.textos['datos_generales']}" />
@@ -318,16 +317,11 @@
 									update=":formModif2" icon="ui-icon-pencil"
 									title="#{sessionMBean.textos['modificar']}">
 								</p:commandButton>
-								<p:tooltip for="modificarValorLink"
-									value="#{sessionMBean.textos['modificar']}" />
-	
 								<p:commandButton id="eliminarValorLink"
 									oncomplete="PF('eliminarValor').show();"
 									actionListener="#{datoASolicitarValoresMBean.seleccionarValorParaEliminar(rowIndex)}"
 									icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 								</p:commandButton>
-								<p:tooltip for="eliminarValorLink"
-									value="#{sessionMBean.textos['eliminar']}" />
 							</p:column>
 						</p:dataTable>
 	

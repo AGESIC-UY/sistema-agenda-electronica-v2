@@ -342,23 +342,20 @@ public class DisponibilidadMBean extends BaseMBean {
 	}	
 	
 	public void beforePhaseConsultar (PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar disponibilidades");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_disponibilidades"));
 		}
 	}
 	
 	public void beforePhaseModifCupo (PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar Cupos de un día");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_cupos"));
 		}
 	}
 	
 	public void beforePhaseConsultarXdia (PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar disponibilidades por día");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("disponibilidades"));
 		}
 	}
 
@@ -465,7 +462,7 @@ public class DisponibilidadMBean extends BaseMBean {
 				
 				if (dispSessionMBean.getModificarTodos()) {
 					try {
-						List<String> advertencias = disponibilidadesEJB.modificarCupoPeriodoValorOperacion(disp, sessionMBean.getTimeZone(), valorCupo, this.tipoOperacion);
+						List<String> advertencias = disponibilidadesEJB.modificarCupoPeriodoValorOperacion(disp, sessionMBean.getTimeZone(), valorCupo, this.tipoOperacion, dispSessionMBean.getDiasAplicar());
 						for(String advertencia : advertencias) {
 							addAdvertenciaMessage(sessionMBean.getTextos().get("para_diahora_el_cupo_se_modifico_parcialmente_porque_hay_mas_reservas").replace("{diahora}",  advertencia), MSG_ID);
 						}
@@ -486,8 +483,6 @@ public class DisponibilidadMBean extends BaseMBean {
 				}
 			}
 		}
-		
-		
 		
 		VentanaDeTiempo v = new VentanaDeTiempo();
 		//Se setea hora 00:00:00

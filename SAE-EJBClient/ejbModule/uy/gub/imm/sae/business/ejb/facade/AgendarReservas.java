@@ -57,7 +57,7 @@ public interface AgendarReservas {
 	public Reserva marcarReserva(Disponibilidad d) throws BusinessException, UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;
 	public void validarDatosReserva(Empresa e, Reserva r) throws BusinessException, ValidacionException, ApplicationException;
-	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
+	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public Reserva consultarReservaPorNumero(Recurso r, Integer numero) throws BusinessException;
 	public List<Reserva> consultarReservaPorDatos(Recurso r, Map<DatoASolicitar, DatoReserva> datos);
@@ -74,7 +74,6 @@ public interface AgendarReservas {
 	public Recurso consultarRecursoPorReservaId(Integer reservId) throws ApplicationException, BusinessException;
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException;
 	
-	//public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException;
 	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException ;	
 	/**
 	 * Estos metodos son usados para enviar las comunicaciones cada vez que un usuario reserva o cancela una reservación.
@@ -93,5 +92,7 @@ public interface AgendarReservas {
 	 */
 	public void enviarComunicacionesConfirmacion(String urlBase, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException;
 	public void enviarComunicacionesCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException,UserException;
+	
+	public void limpiarTrazas();
 
 }

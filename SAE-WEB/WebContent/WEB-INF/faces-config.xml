@@ -576,6 +576,17 @@
 		</managed-property>
 	</managed-bean>
 
+  <managed-bean>
+    <managed-bean-name>tokensMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.TokensMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+
 	<navigation-rule>
 		<from-view-id>*</from-view-id>
 		<navigation-case>
@@ -683,6 +694,14 @@
       <redirect />
 		</navigation-case>
 	</navigation-rule>
+  <navigation-rule>
+    <from-view-id>/administracion/recurso/importar.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>modificar</from-outcome>
+      <to-view-id>/administracion/recurso/modificar.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
 
 	<navigation-rule>
 		<from-view-id>/administracion/recurso/consultarDatos.xhtml</from-view-id>

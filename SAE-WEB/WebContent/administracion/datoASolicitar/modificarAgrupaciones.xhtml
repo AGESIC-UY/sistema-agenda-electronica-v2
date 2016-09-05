@@ -9,8 +9,7 @@
   <ui:define name="cuerpo">
 
     <f:view
-      beforePhase="#{agrupacionMBean.beforePhaseModificarAgrupaciones}"
-      beforePhaseListener="#{agrupacionMBean.beforePhaseModificarAgrupaciones}">
+      beforePhase="#{agrupacionMBean.beforePhaseModificarAgrupaciones}" >
 
       <p:outputPanel
         rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
@@ -45,150 +44,153 @@
 
         <h:form id="formModificarAgrup">
           <p:outputPanel id="panelModificarAgrup">
-          <p:outputPanel styleClass="botonesDerecha">
-            <p:commandButton id="agregarAgrupLink" value="#{sessionMBean.textos['agregar_agrupacion']}"
-              styleClass="btn btn-secundario"
-              actionListener="#{agrupacionMBean.mostrarCrearAgrupacion}"
-              update="formModificarAgrup:panelModificarAgrup" />
-            <ui:include
-              src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+	          <p:outputPanel styleClass="botonesDerecha">
+	            <p:commandButton id="agregarAgrupLink" value="#{sessionMBean.textos['agregar_agrupacion']}"
+	              styleClass="btn btn-secundario"
+	              actionListener="#{agrupacionMBean.mostrarCrearAgrupacion}"
+	              update="formModificarAgrup:panelModificarAgrup" />
+	            <ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+	          </p:outputPanel>
+	
+	          <p:dataTable value="#{datoASSessionMBean.agrupaciones}" var="row"
+	            id="tablaAgrupacion" rows="25" rowIndexVar="rowIndex"
+	            paginator="true" caption="#{sessionMBean.textos['listado_de_agrupaciones']}"
+	            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+	            emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" >
+	            
+	            <p:column>
+	              <f:facet name="header">
+	                <h:outputText value="#{sessionMBean.textos['identificador']}"></h:outputText>
+	              </f:facet>
+	              <h:outputText value="#{row.id}"></h:outputText>
+	            </p:column>
+	            
+	            <p:column>
+	              <f:facet name="header">
+	                <h:outputText value="#{sessionMBean.textos['orden']}"></h:outputText>
+	              </f:facet>
+	              <h:outputText value="#{row.orden}"></h:outputText>
+	            </p:column>
+	
+	            <p:column>
+	              <f:facet name="header">
+	                <h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
+	              </f:facet>
+	              <h:outputText value="#{row.nombre}"></h:outputText>
+	            </p:column>
+	
+	            <p:column styleClass="alinCentro">
+	              <f:facet name="header">
+	                <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+	              </f:facet>
+	              <p:commandButton id="modificarAgrupLink"
+	                action="#{agrupacionMBean.seleccionarAgrupacion(rowIndex)}"
+	                update="formModificarAgrup:panelModificarAgrup" icon="ui-icon-pencil"
+	                title="#{sessionMBean.textos['modificar']}">
+	              </p:commandButton>
+	              <p:commandButton id="eliminarAgrupLink"
+	                oncomplete="PF('eliminarAgrupacion').show();"
+	                action="#{agrupacionMBean.seleccionarAgrupacionParaEliminar(rowIndex)}"
+	                icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+	              </p:commandButton>
+	            </p:column>
+	          </p:dataTable>
+	
+	          <p:outputPanel id="ap_modifAgrupacion">
+	            <p:outputPanel id="modifAgrupacion" rendered="#{agrupacionMBean.mostrarModificarAgrupacion}">
+					      <p:outputPanel styleClass="form-required">
+					        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+					      </p:outputPanel>
+	              <fieldset>
+	                <legend><h:outputText value="#{sessionMBean.textos['modificar_agrupacion']}" /></legend>
+	                <p:outputPanel styleClass="form-horizontal">
+	                  <p:outputPanel styleClass="form-group">
+	                    <h:outputLabel value="#{sessionMBean.textos['nombre']}"
+	                      styleClass="col-sm-3 control-label label formularioCampoRequerido" for="nombre" />
+	                    <p:outputPanel styleClass="col-sm-9">
+	                      <h:inputText id="nombre"
+	                        value="#{datoASSessionMBean.agrupacionSeleccionada.nombre}"
+	                        maxlength="50" styleClass="form-control" />
+	                      <p:message for="nombre" ajaxRendered="true"
+	                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+	
+	                  <p:outputPanel styleClass="form-group">
+	                    <h:outputLabel value="#{sessionMBean.textos['orden']}"
+	                      styleClass="col-sm-3 control-label label" for="VOrdAgrup" />
+	                    <p:outputPanel styleClass="col-sm-9">
+	                      <h:inputText id="VOrdAgrup"
+	                        value="#{datoASSessionMBean.agrupacionSeleccionada.orden}"
+	                        maxlength="5" styleClass="form-control textoCorto" />
+	                      <p:message for="VOrdAgrup" ajaxRendered="true"
+	                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+	
+	                  <p:outputPanel styleClass="form-group">
+	                    <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+	                      <p:commandButton value="#{sessionMBean.textos['cancelar']}" immediate="true"
+	                        actionListener="#{agrupacionMBean.cancelarModificarAgrupacion}"
+	                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-link" />
+	                      <p:commandButton value="#{sessionMBean.textos['guardar']}"
+	                        actionListener="#{agrupacionMBean.modificarAgrupacion}"
+	                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-secundario" />
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+	                </p:outputPanel>
+	              </fieldset>
+	            </p:outputPanel>
+	          </p:outputPanel>
+	
+	
+	          <p:outputPanel id="ap_agregarAgrupacion">
+	            <p:outputPanel id="agregarAgrupacion" rendered="#{agrupacionMBean.mostrarAgregarAgrupacion}">
+					      <p:outputPanel styleClass="form-required">
+					        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+					      </p:outputPanel>
+	              <fieldset>
+	                <legend><h:outputText value="#{sessionMBean.textos['crear_agrupacion']}" /></legend>
+	                <p:outputPanel styleClass="form-horizontal">
+	                  <p:outputPanel styleClass="form-group">
+	                    <h:outputLabel value="#{sessionMBean.textos['nombre']}"
+	                      styleClass="col-sm-3 control-label label formularioCampoRequerido" for="cNombre" />
+	                    <p:outputPanel styleClass="col-sm-9">
+	                      <h:inputText id="cNombre"
+	                        value="#{agrupacionMBean.agrupacionDatoNuevo.nombre}"
+	                        maxlength="50" styleClass="form-control" />
+	                      <p:message for="cNombre" ajaxRendered="true"
+	                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+	
+	                  <p:outputPanel styleClass="form-group">
+	                    <h:outputLabel value="#{sessionMBean.textos['orden']}"
+	                      styleClass="col-sm-3 control-label label" for="VOrdUpd" />
+	                    <p:outputPanel styleClass="col-sm-9">
+	                      <h:inputText id="VOrdUpd"
+	                        value="#{agrupacionMBean.agrupacionDatoNuevo.orden}"
+	                        maxlength="5" styleClass="form-control textoCorto" />
+	                      <p:message for="VOrdUpd" ajaxRendered="true"
+	                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+	
+	                  <p:outputPanel styleClass="form-group">
+	                    <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+	                      <p:commandButton value="#{sessionMBean.textos['cancelar']}" immediate="true"
+	                        actionListener="#{agrupacionMBean.cancelarCrearAgrupacion}"
+	                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-link" />
+	                      <p:commandButton value="#{sessionMBean.textos['guardar']}"
+	                        actionListener="#{agrupacionMBean.crearAgrupacion}"
+	                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-secundario" />
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+	                </p:outputPanel>
+	              </fieldset>
+	            </p:outputPanel>
+	          </p:outputPanel>
           </p:outputPanel>
-
-          <p:dataTable value="#{datoASSessionMBean.agrupaciones}" var="row"
-            id="tablaAgrupacion" rows="25" rowIndexVar="rowIndex"
-            paginator="true" caption="#{sessionMBean.textos['listado_de_agrupaciones']}"
-            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-            emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" >
-            
-            <p:column>
-              <f:facet name="header">
-                <h:outputText value="#{sessionMBean.textos['identificador']}"></h:outputText>
-              </f:facet>
-              <h:outputText value="#{row.id}"></h:outputText>
-            </p:column>
-            
-            <p:column>
-              <f:facet name="header">
-                <h:outputText value="#{sessionMBean.textos['orden']}"></h:outputText>
-              </f:facet>
-              <h:outputText value="#{row.orden}"></h:outputText>
-            </p:column>
-
-            <p:column>
-              <f:facet name="header">
-                <h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
-              </f:facet>
-              <h:outputText value="#{row.nombre}"></h:outputText>
-            </p:column>
-
-            <p:column styleClass="alinCentro">
-              <f:facet name="header">
-                <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
-              </f:facet>
-              <p:commandButton id="modificarAgrupLink"
-                action="#{agrupacionMBean.seleccionarAgrupacion(rowIndex)}"
-                update="formModificarAgrup:panelModificarAgrup" icon="ui-icon-pencil"
-                title="#{sessionMBean.textos['modificar']}">
-              </p:commandButton>
-              <p:tooltip for="modificarAgrupLink" value="#{sessionMBean.textos['modificar']}" />
-              <p:commandButton id="eliminarAgrupLink"
-                oncomplete="PF('eliminarAgrupacion').show();"
-                action="#{agrupacionMBean.seleccionarAgrupacionParaEliminar(rowIndex)}"
-                icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
-              </p:commandButton>
-              <p:tooltip for="eliminarAgrupLink" value="#{sessionMBean.textos['eliminar']}" />
-            </p:column>
-          </p:dataTable>
-
-          <p:outputPanel id="ap_modifAgrupacion">
-            <p:outputPanel id="modifAgrupacion" rendered="#{agrupacionMBean.mostrarModificarAgrupacion}">
-              <fieldset>
-                <legend><h:outputText value="#{sessionMBean.textos['modificar_agrupacion']}" /></legend>
-                <p:outputPanel styleClass="form-horizontal">
-                  <p:outputPanel styleClass="form-group">
-                    <h:outputLabel value="#{sessionMBean.textos['nombre']}"
-                      styleClass="col-sm-3 control-label label formularioCampoRequerido" for="nombre" />
-                    <p:outputPanel styleClass="col-sm-9">
-                      <h:inputText id="nombre"
-                        value="#{datoASSessionMBean.agrupacionSeleccionada.nombre}"
-                        maxlength="50" styleClass="form-control" />
-                      <p:message for="nombre" ajaxRendered="true"
-                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
-                    </p:outputPanel>
-                  </p:outputPanel>
-
-                  <p:outputPanel styleClass="form-group">
-                    <h:outputLabel value="#{sessionMBean.textos['orden']}"
-                      styleClass="col-sm-3 control-label label" for="VOrdAgrup" />
-                    <p:outputPanel styleClass="col-sm-9">
-                      <h:inputText id="VOrdAgrup"
-                        value="#{datoASSessionMBean.agrupacionSeleccionada.orden}"
-                        maxlength="5" styleClass="form-control textoCorto" />
-                      <p:message for="VOrdAgrup" ajaxRendered="true"
-                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
-                    </p:outputPanel>
-                  </p:outputPanel>
-
-                  <p:outputPanel styleClass="form-group">
-                    <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
-                      <p:commandButton value="#{sessionMBean.textos['guardar']}"
-                        actionListener="#{agrupacionMBean.modificarAgrupacion}"
-                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-secundario" />
-                      <p:commandButton value="#{sessionMBean.textos['cancelar']}" immediate="true"
-                        actionListener="#{agrupacionMBean.cancelarModificarAgrupacion}"
-                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-link" />
-                    </p:outputPanel>
-                  </p:outputPanel>
-                </p:outputPanel>
-              </fieldset>
-            </p:outputPanel>
-          </p:outputPanel>
-
-
-          <p:outputPanel id="ap_agregarAgrupacion">
-            <p:outputPanel id="agregarAgrupacion" rendered="#{agrupacionMBean.mostrarAgregarAgrupacion}">
-              <fieldset>
-                <legend><h:outputText value="#{sessionMBean.textos['crear_agrupacion']}" /></legend>
-                <p:outputPanel styleClass="form-horizontal">
-                  <p:outputPanel styleClass="form-group">
-                    <h:outputLabel value="#{sessionMBean.textos['nombre']}"
-                      styleClass="col-sm-3 control-label label formularioCampoRequerido" for="cNombre" />
-                    <p:outputPanel styleClass="col-sm-9">
-                      <h:inputText id="cNombre"
-                        value="#{agrupacionMBean.agrupacionDatoNuevo.nombre}"
-                        maxlength="50" styleClass="form-control" />
-                      <p:message for="cNombre" ajaxRendered="true"
-                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
-                    </p:outputPanel>
-                  </p:outputPanel>
-
-                  <p:outputPanel styleClass="form-group">
-                    <h:outputLabel value="#{sessionMBean.textos['orden']}"
-                      styleClass="col-sm-3 control-label label" for="VOrdUpd" />
-                    <p:outputPanel styleClass="col-sm-9">
-                      <h:inputText id="VOrdUpd"
-                        value="#{agrupacionMBean.agrupacionDatoNuevo.orden}"
-                        maxlength="5" styleClass="form-control textoCorto" />
-                      <p:message for="VOrdUpd" ajaxRendered="true"
-                        errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
-                    </p:outputPanel>
-                  </p:outputPanel>
-
-                  <p:outputPanel styleClass="form-group">
-                    <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
-                      <p:commandButton value="#{sessionMBean.textos['guardar']}"
-                        actionListener="#{agrupacionMBean.crearAgrupacion}"
-                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-secundario" />
-                      <p:commandButton value="#{sessionMBean.textos['cancelar']}" immediate="true"
-                        actionListener="#{agrupacionMBean.cancelarCrearAgrupacion}"
-                        update="formModificarAgrup:panelModificarAgrup" styleClass="btn btn-link" />
-                    </p:outputPanel>
-                  </p:outputPanel>
-                </p:outputPanel>
-              </fieldset>
-            </p:outputPanel>
-          </p:outputPanel>
-</p:outputPanel>
         </h:form>
       </p:outputPanel>
 

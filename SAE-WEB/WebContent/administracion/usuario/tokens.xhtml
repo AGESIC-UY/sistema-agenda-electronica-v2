@@ -1,0 +1,130 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+
+<ui:composition template="/templates/layout.xhtml">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{tokensMBean.beforePhaseGestionar}">
+
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
+				widgetVar="eliminarToken" zindex="2000" modal="true">
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+				</f:facet>
+				<h:form id="elimRec">
+					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_token']}" />
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btn_eliminar" update="form:tablaTokens"
+								actionListener="#{tokensMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarToken').hide();"
+								styleClass="btn-primario btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton onclick="PF('eliminarToken').hide();"
+								value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+
+			<h:form id="form">
+				<p:dataTable value="#{tokensMBean.tokensSeleccion}" var="row"
+					id="tablaTokens" rows="25" paginator="true"
+					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+					binding="#{tokensMBean.tokensDataTable}"
+					caption="#{sessionMBean.textos['listado_de_tokens']}"
+					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['token']}"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.data.token}"></h:outputText>
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.data.nombre}"></h:outputText>
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['correo_electronico']}"></h:outputText>
+						</f:facet>
+						<h:outputText value="#{row.data.email}"></h:outputText>
+					</p:column>
+
+					<p:column styleClass="alinCentro">
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+						</f:facet>
+
+						<p:commandButton id="eliminarToken"
+							oncomplete="PF('eliminarToken').show();" icon="ui-icon-trash"
+							actionListener="#{tokensMBean.selecTokenEliminar}"
+							title="#{sessionMBean.textos['eliminar']}">
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+				
+        <p:outputPanel>
+          <p:outputPanel bodyClass="formulario" id="crearToken">
+          
+			      <p:outputPanel styleClass="form-required">
+			        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+			      </p:outputPanel>
+          
+            <fieldset>
+	            <legend>
+	              <h:outputText value="#{sessionMBean.textos['crear_token']}" />
+	            </legend>
+              <p:outputPanel styleClass="form-horizontal">
+                <p:outputPanel styleClass="form-group">
+	                <p:outputLabel value="#{sessionMBean.textos['token']}" 
+	                  styleClass="col-sm-3 control-label label" for="tokenToken" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="tokenToken" value="#{tokensMBean.crearTokenToken}" styleClass="form-control" readonly="true" />
+                    <p:message for="tokenToken"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <p:outputLabel value="#{sessionMBean.textos['nombre']}" 
+                    styleClass="col-sm-3 control-label label formularioCampoRequerido" for="tokenNombre" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="tokenNombre" value="#{tokensMBean.crearTokenNombre}" maxlength="50" styleClass="form-control" />
+                    <p:message for="tokenNombre"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <p:outputLabel value="#{sessionMBean.textos['correo_electronico']}" 
+                    styleClass="col-sm-3 control-label label formularioCampoRequerido" for="tokenEmail" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="tokenEmail" value="#{tokensMBean.crearTokenEmail}" maxlength="150" styleClass="form-control" />
+                    <p:message for="tokenEmail"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+                    <p:commandButton value="#{sessionMBean.textos['cancelar']}"
+                      actionListener="#{tokensMBean.cancelarToken}" update="form" styleClass="btn btn-link" />
+                    <p:commandButton value="#{sessionMBean.textos['crear_token']}"
+                      actionListener="#{tokensMBean.crearToken}" update="form" styleClass="btn btn-secundario" />
+                  </p:outputPanel>
+                </p:outputPanel>
+              </p:outputPanel>
+            </fieldset>
+          </p:outputPanel>
+        </p:outputPanel>
+				
+			</h:form>
+
+		</f:view>
+	</ui:define>
+</ui:composition>
+</html>

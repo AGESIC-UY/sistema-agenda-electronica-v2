@@ -9,12 +9,14 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{consultaMBean.beforePhaseConsultarReservaId}"
-			beforePhaseListener="#{consultaMBean.beforePhaseConsultarReservaId}">
+		<f:view beforePhase="#{consultaMBean.beforePhaseConsultarReservaId}">
 
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="form">
+          <p:outputPanel styleClass="form-required">
+            <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+          </p:outputPanel>
 					<fieldset>
 						<legend>
 							<h:outputText

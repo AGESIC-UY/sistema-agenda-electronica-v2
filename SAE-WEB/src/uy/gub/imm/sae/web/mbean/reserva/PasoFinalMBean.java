@@ -263,8 +263,7 @@ public class PasoFinalMBean extends PasoMBean {
 			document.addKeywords("SAE,ticket,"+sesionMBean.getTextos().get("confirmacion")+","+sesionMBean.getTextos().get("reserva"));
 			document.addProducer();
 			document.addCreator("SAE");
-			document.addHeader("Producer", "SAE 1");
-			document.addHeader("Sofis", "SAE 2");
+			document.addHeader("Producer", "SAE");
 			
 			document.open();
 			
@@ -347,37 +346,33 @@ public class PasoFinalMBean extends PasoMBean {
 			posY = posY - 15;
 
 			//Serie
-			String serie = sesionMBean.getRecurso().getSerie();
-			if (serie != null && !serie.trim().isEmpty()) {
+			if (sesionMBean.getRecurso().getMostrarNumeroEnTicket()){
+				
+				String serieNumeroLabel = "";
+				String serieNumeroValue = "";
+				
+				String serie = sesionMBean.getRecurso().getSerie();
+				if (serie != null && !serie.trim().isEmpty()) {
+					serieNumeroLabel = sesionMBean.getTextos().get("serie") + "/";
+					serieNumeroValue = serie + "/";
+				}
+				serieNumeroLabel = serieNumeroLabel + sesionMBean.getTextos().get("numero");
+				serieNumeroValue = serieNumeroValue + sesionMBean.getReservaConfirmada().getNumero().toString();
+				
 				pdfContent.beginText();
 				pdfContent.setFontAndSize(helveticaBold, 12);
 				pdfContent.setTextMatrix(15, posY);
-				pdfContent.showText(sesionMBean.getTextos().get("serie")+":");
+				pdfContent.showText(serieNumeroLabel+":");
 				pdfContent.endText();
 
 				pdfContent.beginText();
 				pdfContent.setFontAndSize(helveticaBold, 12);
 				pdfContent.setTextMatrix(130, posY);
-				pdfContent.showText(serie);
+				pdfContent.showText(serieNumeroValue);
 				pdfContent.endText();
 				posY = posY - 15;
 			}
 			
-			if (sesionMBean.getRecurso().getMostrarNumeroEnTicket()){
-				pdfContent.beginText();
-				pdfContent.setFontAndSize(helveticaBold, 12);
-				pdfContent.setTextMatrix(15, posY);
-				pdfContent.showText(sesionMBean.getTextos().get("numero")+":");
-				pdfContent.endText();
-
-				pdfContent.beginText();
-				pdfContent.setFontAndSize(helveticaBold, 12);
-				pdfContent.setTextMatrix(130, posY);
-				pdfContent.showText(sesionMBean.getReservaConfirmada().getNumero().toString());
-				pdfContent.endText();
-				posY = posY - 15;
-			}
-
 			//Dibujo tercera línea
 			posY = posY + 10;
 			line.setLineColor(BaseColor.BLACK);
@@ -417,12 +412,22 @@ public class PasoFinalMBean extends PasoMBean {
 			posY = posY - 15;
 			
 			pdfContent.beginText();
-			pdfContent.setFontAndSize(helveticaOblique, 8);
+			pdfContent.setFontAndSize(helveticaOblique, 6);
 			pdfContent.setTextMatrix(20, posY);
 			Date ahora = new Date();
 			pdfContent.showText(sesionMBean.getTextos().get("reserva_realizada_el")+" "+sdfFecha.format(ahora)+ " " + sdfHora.format(ahora));
 			pdfContent.endText();
-			posY = posY - 15;
+			posY = posY - 10;
+			
+			if (sesionMBean.getRecurso().getMostrarIdEnTicket()!=null && sesionMBean.getRecurso().getMostrarIdEnTicket().booleanValue()){
+				pdfContent.beginText();
+				pdfContent.setFontAndSize(helveticaOblique, 6);
+				pdfContent.setTextMatrix(20, posY);
+				pdfContent.showText(sesionMBean.getTextos().get("id_de_la_reserva")+": "+sesionMBean.getReservaConfirmada().getId().toString());
+				pdfContent.endText();
+				posY = posY - 10;
+			}
+
 			
 			
 			if(imprimir) {

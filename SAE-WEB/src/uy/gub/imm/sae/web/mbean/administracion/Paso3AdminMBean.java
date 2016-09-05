@@ -102,6 +102,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 		disableBrowserCache(event);
 
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));
 			if (sessionMBean.getReserva() == null) {
 				// Se ha apretado el boton de back o algun acceso directo
 				FacesContext ctx = FacesContext.getCurrentInstance();
@@ -577,7 +578,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			while (!confirmada) {
 				try {
 					
-					Reserva rConfirmada = agendarReservasEJB.confirmarReserva(sessionMBean.getEmpresaActual(), reserva, null, null);
+					Reserva rConfirmada = agendarReservasEJB.confirmarReserva(sessionMBean.getEmpresaActual(), reserva, null, null, true);
 					reserva.setNumero(rConfirmada.getNumero());
 					reserva.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
 					reserva.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());

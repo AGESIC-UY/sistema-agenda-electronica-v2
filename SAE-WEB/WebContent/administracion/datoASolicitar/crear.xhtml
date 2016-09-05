@@ -8,8 +8,7 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseCrear}"
-			beforePhaseListener="#{datoASolicitarMBean.beforePhaseCrear}">
+		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseCrear}" >
 
 			<p:outputPanel
 				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
@@ -18,10 +17,12 @@
 
 				<h:form id="formCrear">
 					<p:outputPanel styleClass="botonesDerecha">
-						<ui:include
-							src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
+						<ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
 					</p:outputPanel>
 
+		      <p:outputPanel styleClass="form-required">
+		        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+		      </p:outputPanel>
 					<fieldset>
 						<legend>
 							<h:outputText value="#{sessionMBean.textos['datos_generales']}" />

@@ -17,7 +17,6 @@ public class Oficina implements Serializable {
 	
 	private String id;
 	private Tramite tramite;
-//	private String tramite_id;
 	private String nombre;
 	private String direccion;
 	private String localidad;

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jboss-web >  
   <security-domain >@SAE_SECURITY_DOMAIN@</security-domain>
+<!-- 
   <valve>
     <class-name>com.sofis.agesic.sae.cda.CDAServiceProviderValve</class-name>
     <module>cda</module>
@@ -30,7 +31,7 @@
     <param><param-name>sqlSchemaResolverQuery</param-name><param-value>select datasource from global.ae_empresas where id={e}</param-value></param>
     <param><param-name>sqlCDARequiredQuery</param-name><param-value>select con_cda from {esquema}.ae_agendas where id={a}</param-value></param>
   </valve>
-
+-->  
 <!--Descomentar esto solo si NO se utiliza un Apache delante del JBoss -->
 <!-- - ->  
   <valve>

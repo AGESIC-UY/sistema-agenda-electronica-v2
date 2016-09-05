@@ -55,7 +55,8 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 			@WebParam(name = "empresa") Empresa e,
 			@WebParam(name = "reserva") Reserva r,
 			@WebParam(name = "trazabilidadIdTransaccionPadre") String transaccionPadreId,
-			@WebParam(name = "trazabilidadPasoPadre") Long pasoPadre
+			@WebParam(name = "trazabilidadPasoPadre") Long pasoPadre,
+			@WebParam(name = "inicioAsistido") boolean inicioAsistido
 		) throws ApplicationException, BusinessException, AccesoMultipleException, 
 			ValidacionException, UserException, WarningValidacionException, ErrorValidacionException, WarningValidacionCommitException, 
 			ErrorValidacionCommitException, ValidacionClaveUnicaException, ValidacionPorCampoException{
@@ -68,7 +69,7 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 			throw new BusinessException(aEx.getCodigoError(),aEx.getMessage(),aEx.getCause());
 		}
 	
-		return agendarReservasSession.confirmarReserva(e, r, transaccionPadreId, pasoPadre);
+		return agendarReservasSession.confirmarReserva(e, r, transaccionPadreId, pasoPadre, inicioAsistido);
 	}
 
 	@WebMethod

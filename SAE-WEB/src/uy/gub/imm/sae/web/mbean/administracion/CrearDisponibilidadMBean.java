@@ -81,9 +81,8 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void beforePhaseCrearDisponibilidades (PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Generar Disponibilidades para un Día");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("generar_un_dia"));
 		}
 	}
 

@@ -382,6 +382,7 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 	public void beforePhase(PhaseEvent event) {
 		disableBrowserCache(event);
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));
 			sessionMBean.limpiarPaso3();
 		}
 	}

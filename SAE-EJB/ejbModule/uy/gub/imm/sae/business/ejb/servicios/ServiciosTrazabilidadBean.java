@@ -3,6 +3,7 @@ package uy.gub.imm.sae.business.ejb.servicios;
 import java.io.FileInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
+import java.math.BigInteger;
 import java.net.URL;
 import java.security.KeyStore;
 import java.security.SecureRandom;
@@ -24,6 +25,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Table;
+import javax.persistence.TemporalType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -79,13 +81,14 @@ public class ServiciosTrazabilidadBean {
 
 	/*
 	 * Por documentación del campo estado ver el documento Metadato_Trazas_Edicion_01_SinIntro.pdf
-	 * 	1=Inicio, 2=Ejecución, 3=Finalizado, 4=Cancelado
+	 * 	Estados: 1=Inicio, 2=En ejecución, 3=Finalizado, 4=Cancelado
 	 * */
 	public static enum Paso {
-		RESERVA(1L, 1, "Reserva"), 
-		ASISTENCIA(2L, 3, "Atención"), 
-		INASISTENCIA(3L, 3, "No asistencia"), 
-		CANCELACION(4L, 4, "Cancelación");
+		RESERVA(1L, 2, "Reserva"), 
+		ASISTENCIA(2L, 2, "Atención"), 
+		INASISTENCIA(3L, 2, "No asistencia"), 
+		CANCELACION(4L, 4, "Cancelación"),
+		FINALIZACION(5L, 3, "Finalización");
 
 		long lPaso;
 		int estado;
@@ -114,7 +117,7 @@ public class ServiciosTrazabilidadBean {
 		CABEZAL, LINEA
 	}
 
-	public String registrarCabezal(Empresa empresa, Reserva reserva, String transaccionId, String procesoId, 
+	public String registrarCabezal(Empresa empresa, Reserva reserva, String transaccionId, String procesoId, boolean inicioAsistido, 
 			String transaccionPadreId, Long pasoPadre) {
 
 
@@ -187,11 +190,14 @@ public class ServiciosTrazabilidadBean {
 			if(pasoPadre!=null) {
 				traza.setPasoPadre(pasoPadre);
 			}
-			//I. Friedmann:  El número corresponde a la cantidad de pasos que el proceso lleva en un flujo normal. 
-			//Entiendo que en un flujo normal en la agenda los pasos son 2, cuando la persona agenda y luego asiste.
-			traza.setCantidadPasosProceso(2L);
-			//I. Friedmann: En esta oportunidad debería mandar 0
-			traza.setInicioAsistidoProceso(0);
+			//Hay 3 pasos: 1=Reserva, 2=Atención (asiste o no), 3=Finalización (al final del día)
+			traza.setCantidadPasosProceso(3L);
+			//Si se hace desde la web pública es 0 en otro caso es 1
+			if(inicioAsistido) {
+				traza.setInicioAsistidoProceso(1);
+			}	else {
+				traza.setInicioAsistidoProceso(0);
+			}
 			//1=Web PC, 2=Web Móvil, 3=Presencial, 4=Redes de Cobranza, 5=PAC, 6=Telefónico, 7=Correo electrónico
 			//ToDo: si es una reserva pública, habría que ver si es 1 o 2; si es privada habría que ver si es 3, 5 o 6
 			//traza.setCanalDeInicio(1);
@@ -204,16 +210,16 @@ public class ServiciosTrazabilidadBean {
 
 			CabezalResponseDTO cabezalResp = cabezalPort.persist(traza);
 			if (cabezalResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.cabezal.EstadoRespuestaEnum.OK)) {
-				registrarTraza(empresa, reserva, transaccionId, cabezalToXml(traza), true, true);
+				registrarTraza(empresa, reserva.getId(), transaccionId, cabezalToXml(traza), true, false, true);
 				return cabezalResp.getGuid();
 			} else {
 				// No se pudo registrar la traza pero no se puede cancelar la reserva
 				logger.warn("No se pudo registrar el cabezal de la traza para la reserva " + transaccionId + ": " + cabezalResp.getMensaje());
-				registrarTraza(empresa, reserva, transaccionId, cabezalToXml(traza), true, false);
+				registrarTraza(empresa, reserva.getId(), transaccionId, cabezalToXml(traza), true, false, false);
 			}
 		} catch (Exception ex) {
 			logger.warn("No se pudo registrar el cabezal de la traza para la reserva " + transaccionId + ": " + ex.getMessage(), ex);
-			registrarTraza(empresa, reserva, transaccionId, cabezalToXml(traza), true, false);
+			registrarTraza(empresa, reserva.getId(), transaccionId, cabezalToXml(traza), true, false, false);
 		}
 		return null;
 	}
@@ -227,7 +233,7 @@ public class ServiciosTrazabilidadBean {
 	 * @param idOficina
 	 * @param paso
 	 */
-	public void registrarLinea(Empresa empresa, Reserva reserva, String transaccionId, String idOficina, Paso paso) {
+	public void registrarLinea(Empresa empresa, Reserva reserva, String transaccionId, String oficina, Paso paso) {
 		
 		boolean habilitado = false;
 		
@@ -249,6 +255,13 @@ public class ServiciosTrazabilidadBean {
 			return;
 		}
 
+		//Determinar el número de pasoProceso que le corresponde
+		String eql = "SELECT count(t.id) FROM Trazabilidad t WHERE t.transaccionId=:transaccionId AND t.esCabezal=FALSE";
+		Query query = globalEntityManager.createQuery(eql);
+		query.setParameter("transaccionId", transaccionId);
+		long pasoProceso = (Long) query.getSingleResult();
+		pasoProceso++; //Este pasoProceso es uno más que la cantidad de lineas de la transacción
+		
 		LineaDTO traza = null;
 		traza = new LineaDTO();
 		traza.setIdTransaccion(transaccionId);
@@ -259,7 +272,7 @@ public class ServiciosTrazabilidadBean {
 			version = 100;
 		}
 		traza.setEdicionModelo(version);
-		traza.setIdOficina(idOficina);
+		traza.setOficina(oficina);
 		try {
 			traza.setFechaHoraOrganismo(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
 		}catch(Exception ex) {
@@ -268,8 +281,10 @@ public class ServiciosTrazabilidadBean {
 		traza.setPaso(paso.getLPaso());
 		traza.setDescripcionDelPaso(paso.getAsunto());
 		traza.setEstadoProceso(paso.estado);
+		traza.setTipoRegistroTrazabilidad(3); //Comun
+		traza.setPasoDelProceso(pasoProceso);
 
-		registrarTraza(empresa, reserva, transaccionId, lineaToXml(traza), false, false);
+		registrarTraza(empresa, reserva.getId(), transaccionId, lineaToXml(traza), false, false, false);
 	}
 
 	private String cabezalToXml(CabezalDTO cabezal) {
@@ -309,7 +324,8 @@ public class ServiciosTrazabilidadBean {
 	}
 
 	@TransactionAttribute(TransactionAttributeType.REQUIRED)
-	private void registrarTraza(Empresa empresa, Reserva reserva, String transaccionId, String datos, boolean esCabezal, boolean enviado) {
+	public void registrarTraza(Empresa empresa, Integer reservaId, String transaccionId, String datos, 
+			boolean esCabezal, boolean esFinal, boolean enviado) {
 		if (datos == null) {
 			return;
 		}
@@ -322,7 +338,8 @@ public class ServiciosTrazabilidadBean {
 		traza.setTransaccionId(transaccionId);
 		traza.setEsCabezal(esCabezal);
 		traza.setEmpresa(empresa);
-		traza.setReservaId(reserva.getId());
+		traza.setReservaId(reservaId);
+		traza.setEsFinal(esFinal);
 		globalEntityManager.persist(traza);
 	}
 
@@ -604,5 +621,98 @@ public class ServiciosTrazabilidadBean {
 		}
 		return organismoOid+":"+tramiteId+":"+idInterno;
 	}
+
+	
+	
+	@SuppressWarnings("unchecked")
+	@Schedule(second = "0", minute = "0", hour = "1", persistent = false)
+	public void finalizarTrazas() {
+		//Template para la consulta de reservas vencidas con trazabilidad habilitada
+		String sql = "SELECT r.id, t.transaccion_id, s.nombre, count(*) AS lineas "
+				+ "FROM {empresa}.ae_disponibilidades d "
+				+ "JOIN {empresa}.ae_reservas_disponibilidades rd ON rd.aedi_id=d.id "
+				+ "JOIN {empresa}.ae_reservas r ON r.id=rd.aers_id "
+				+ "JOIN {empresa}.ae_recursos s ON s.id=d.aere_id "
+				+ "JOIN global.ae_trazabilidad t ON t.reserva_id=r.id AND t.empresa_id={empresaId} "
+				+ "WHERE d.fecha < :ahora "
+				+ "GROUP BY r.id, t.transaccion_id, s.nombre";
+		
+		//Armar y configurar el invocador del servicio web
+		LineaService lineaService = new LineaService(LineaService.class.getResource("LineaService.wsdl"));
+		LineaWS lineaPort = lineaService.getLineaWSPort();
+		String wsaToLinea = confBean.getString("WS_TRAZABILIDAD_WSATO_LINEA");
+		String wsaActionLinea = confBean.getString("WS_TRAZABILIDAD_WSAACTION_LINEA");
+		int timeout = 5000;
+		try {
+			timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
+		} catch (Exception nfEx) {
+			timeout = 5000;
+		}		
+		long version = 0;
+		try {
+			version = confBean.getLong("WS_TRAZABILIDAD_VERSION");
+		} catch (NumberFormatException nfEx) {
+			version = 100;
+		}
+		//Cargar todas las empresas
+		List<Empresa> empresas = globalEntityManager.createQuery("SELECT e FROM Empresa e WHERE e.fechaBaja IS NULL").getResultList();
+		//Para cada empresa determinar sus trazas vencidas y abiertas y tratar de cerrarlas
+		Integer reservaId=null;
+		String transaccionId=null;
+		String oficina=null;
+		BigInteger lineas=null;
+		for(Empresa empresa : empresas) {
+			try {
+				String sql1 = sql.replace("{empresa}", empresa.getDatasource()).replace("{empresaId}", empresa.getId().toString());
+				Query query = globalEntityManager.createNativeQuery(sql1);
+				query.setParameter("ahora", new Date(), TemporalType.DATE);
+				List<Object[]> aTrazas = (List<Object[]>) query.getResultList();
+				
+				for(Object[] aTraza : aTrazas) {
+					
+					try {
+						reservaId = (Integer) aTraza[0];
+						transaccionId = (String)aTraza[1];
+						oficina = (String)aTraza[2];
+						lineas = (BigInteger)aTraza[3];
+						
+						LineaDTO linea = null;
+						linea = new LineaDTO();
+						linea.setIdTransaccion(transaccionId);
+						linea.setEdicionModelo(version);
+						linea.setOficina(oficina);
+						try {
+							linea.setFechaHoraOrganismo(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
+						}catch(Exception ex) {
+							linea.setFechaHoraOrganismo(null);
+						}
+						linea.setPaso(Paso.FINALIZACION.getLPaso());
+						linea.setDescripcionDelPaso(Paso.FINALIZACION.getAsunto());
+						linea.setEstadoProceso(Paso.FINALIZACION.getEstado());
+						linea.setTipoRegistroTrazabilidad(3); //Comun
+						linea.setPasoDelProceso(lineas.longValue()+1);
+			
+						configurarSeguridad(lineaPort, wsaToLinea, wsaActionLinea, timeout);
+						ResponseDTO lineaResp = lineaPort.persist(linea);
+						
+						//Solo se registra la traza final si se pudo enviar correctamente, ya que en otro caso se requiere
+						//volvera generar una traza con la fecha del momento
+						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
+							registrarTraza(empresa, reservaId, transaccionId, lineaToXml(linea), false, true, true);
+							logger.debug("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") fue cerrada.");
+						}else {
+							logger.debug("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") no fue cerrada: "+lineaResp.getMensaje());
+						}
+					} catch (Exception ex) {
+						logger.error("No se pudo cerrar la traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
+						ex.printStackTrace();
+					}
+				}
+			}catch(Exception ex) {
+				logger.error("No se pudo cerrar las trazas de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
+			}
+		}
+	}
+	
 	
 }

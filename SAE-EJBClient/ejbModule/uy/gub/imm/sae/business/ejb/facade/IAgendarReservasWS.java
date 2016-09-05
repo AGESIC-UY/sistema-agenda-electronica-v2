@@ -38,7 +38,8 @@ public interface IAgendarReservasWS {
 			@WebParam(name = "empresa") Empresa e,
 			@WebParam(name = "reserva") Reserva r,
 			@WebParam(name = "trazabilidadIdTransaccionPadre") String transaccionPadreId,
-			@WebParam(name = "trazabilidadPasoPadre") Long pasoPadre
+			@WebParam(name = "trazabilidadPasoPadre") Long pasoPadre,
+			@WebParam(name = "inicioAsistido") boolean inicioAsistido
 		)
 		throws 
 			ApplicationException, BusinessException,

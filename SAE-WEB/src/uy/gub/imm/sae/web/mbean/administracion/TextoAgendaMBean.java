@@ -154,9 +154,8 @@ public class TextoAgendaMBean  extends BaseMBean{
 	}
 	
 	public void beforePhaseModifTexto(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Modificar Textos Agenda");
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_textos_de_agendas"));
 		}
 	}
 	

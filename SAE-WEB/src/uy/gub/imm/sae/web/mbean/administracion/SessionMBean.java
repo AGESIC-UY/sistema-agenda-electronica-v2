@@ -244,22 +244,14 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public void beforePhaseInicio(PhaseEvent event) {
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			setPantallaTitulo("Inicio");
-		}
-	}
-
-	public void beforePhaseConsultarDatosRecurso(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			setPantallaTitulo("Consultar Datos del Recurso");
+			setPantallaTitulo(getTextos().get("inicio"));
 		}
 	}
 
 	public void beforePhaseSeleccionAgendaRecurso(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			setPantallaTitulo("Selección de Agenda y Recurso");
+			setPantallaTitulo(getTextos().get("seleccionar_agenda_recurso"));
 		}
 	}
 
@@ -1111,6 +1103,14 @@ public class SessionMBean extends SessionCleanerMBean {
     }catch(Exception ex) {
     	//
     }
+	}
+	
+	
+
+	
+	
+	public void limpiarTrazas() {
+		agendarReservasEJB.limpiarTrazas();
 	}
 
 }
