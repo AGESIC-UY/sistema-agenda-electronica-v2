@@ -1,7 +1,38 @@
 Versión 1.1
--Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
--Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
--Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
--Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
--Se cambió la versión de OpenLayers para que funcione en IE 9.
--Se corrigieron problemas de visualización de los scrolls.
+*Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
+*Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
+*Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
+*Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
+*Se cambió la versión de OpenLayers para que funcione en IE 9.
+*Se corrigieron problemas de visualización de los scrolls.
+
+Versión 1.2
+* Se incorporó un servicio web REST que permite obtener información sobre las reservas.
+* Para lo anterior también se incorporó la posibilidad de asociar tokens a los usuarios para permitir identificarlos cuando invocan servicios web REST.
+* Se incorporó la posibilidad de realizar la autenticación contra un servidor LDAP.
+* Al modificar cupos, si se marca la casilla para aplicar el cambio a los días subsiguientes se permite especificar cuáles días de la semana serán modificados.
+* Se corrigieron detalles de accesibilidad y usabilidad reportados por UNIT:
+  - Se cambió la forma de seleccionar agendas y recursos; ahora se utilizan radiobuttons para marcar la opción seleccionada.
+  - Se añadió la posibilidad de navegar por el menú de páginas con el teclado.
+  - Se corrigió un problema que impedía navegar correctamente los calendarios usando el teclado.
+  - Se quitaron los editores HTML debido a que en Chrome capturan el foco y no permiten pasar al siguiente componente con el tabulador.
+  - Se cambió el comportamiento del link "Saltar al contenido" para que salte también el menú superior.
+  - Se cambiaron los títulos de las páginas para que sean más representativos.
+  - Se cambiaron los textos de los links "Recargar listado" por textos más explícitos.
+  - Se ajustaron algunos mensajes de error que eran muy vagos.
+  - Se añadió identificación de campo obligatorio a varios campos que no lo tenían.
+  - Se añadió tooltip HTML a todos los botones que solo tienen ícono (antes era por javascript) .
+  - Se homogeneizaron los botones "Cancelar" y "Guardar" entre las páginas para que estén todos del mismo lado.
+  - Se ajustaron estilos para resaltar la opción del menú seleccionada cuando se navega con teclado.
+  - Se cambiaron varios textos de las pantallas.
+* Se añadió la posibilidad de mostrar el identificador de la reserva en el ticket de confirmación
+* Se ajustaron parámetros en las invocaciones a los servicios de trazabilidad
+  - Se dejó de enviar el identificador de la oficina, que es interno de SAE, y en cambio se envía el nombre.
+  - Se comenzó a enviar el número de paso del proceso.
+  - Se dejó de marcar como finalizada las trazas correspondientes a las atenciones.
+* Se implementó un proceso periódico nocturno que registra una traza de finalización para todas las reservas del día anterior.
+* Se quitaron paquetes que estaban como dependencias y que no eran necesarios.
+
+Versión 1.3
+* Se corrigió el bug por el cual se perdían los atributos "u" (URL de retorno), "p" (parámetros), "t" (identificador de trazabilidad padre) y "i" (idioma) cuando se volvía al paso 1 luego de haber pasado al paso 2.
+* Se corrigió el problema por el cual no se podían registrar empresas cuyo OID tuviera más de 25 caracteres de largo.

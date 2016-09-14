@@ -263,6 +263,19 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 				if (recursoId != null) {
 					url = url + "&r=" + recursoId;
 				}
+				if(sIdioma != null) {
+					url = url + "&i=" + sIdioma;
+				}
+				if(sUrl != null) {
+					url = url + "&u=" + sUrl;
+				}
+				if(sParms != null) {
+					url = url + "&p=" + sParms;
+				}
+				if(sTraza != null) {
+					url = url + "&t=" + sTraza;
+				}
+
 				sesionMBean.setUrlPaso1Reserva(url);
 			}
 

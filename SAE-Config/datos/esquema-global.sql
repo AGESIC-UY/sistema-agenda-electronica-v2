@@ -71,7 +71,7 @@ CREATE TABLE ae_empresas (
     timezone character varying(25),
     formato_fecha character varying(25),
     formato_hora character varying(25),
-    oid character varying(25),
+    oid character varying(50),
     pie_publico text
 );
 
