@@ -379,18 +379,20 @@ public class PasoFinalMBean extends PasoMBean {
 			line.drawLine(pdfWriter.getDirectContent(), 10, 200,  posY);
 			posY = posY - 15;
 			
-			pdfContent.beginText();
-			pdfContent.setFontAndSize(helveticaBold, 10);
-			pdfContent.setTextMatrix(15, posY);
-			pdfContent.showText(sesionMBean.getTextos().get("codigo_de_trazabilidad")+":");
-			pdfContent.endText();
-
-			pdfContent.beginText();
-			pdfContent.setFontAndSize(helveticaBold, 12);
-			pdfContent.setTextMatrix(130, posY);
-			pdfContent.showText(sesionMBean.getReservaConfirmada().getTrazabilidadGuid());
-			pdfContent.endText();
-			posY = posY - 15;
+			if(sesionMBean.getAgenda().getConTrazabilidad()!=null && sesionMBean.getAgenda().getConTrazabilidad().booleanValue()) {
+  			pdfContent.beginText();
+  			pdfContent.setFontAndSize(helveticaBold, 10);
+  			pdfContent.setTextMatrix(15, posY);
+  			pdfContent.showText(sesionMBean.getTextos().get("codigo_de_trazabilidad")+":");
+  			pdfContent.endText();
+  
+  			pdfContent.beginText();
+  			pdfContent.setFontAndSize(helveticaBold, 12);
+  			pdfContent.setTextMatrix(130, posY);
+  			pdfContent.showText(sesionMBean.getReservaConfirmada().getTrazabilidadGuid());
+  			pdfContent.endText();
+  			posY = posY - 15;
+			}
 			
 			pdfContent.beginText();
 			pdfContent.setFontAndSize(helveticaBold, 10);
@@ -414,8 +416,12 @@ public class PasoFinalMBean extends PasoMBean {
 			pdfContent.beginText();
 			pdfContent.setFontAndSize(helveticaOblique, 6);
 			pdfContent.setTextMatrix(20, posY);
-			Date ahora = new Date();
-			pdfContent.showText(sesionMBean.getTextos().get("reserva_realizada_el")+" "+sdfFecha.format(ahora)+ " " + sdfHora.format(ahora));
+			
+			//Cambiar el timezone del formateador de hora para ajustar la fecha de hoy
+      SimpleDateFormat sdfFechaHora = new SimpleDateFormat (sesionMBean.getFormatoFecha() + " " + sesionMBean.getFormatoHora());
+      sdfFechaHora.setTimeZone(sesionMBean.getTimeZone());
+      pdfContent.showText(sesionMBean.getTextos().get("reserva_realizada_el")+" "+sdfFechaHora.format(new Date()));
+      
 			pdfContent.endText();
 			posY = posY - 10;
 			
@@ -428,8 +434,6 @@ public class PasoFinalMBean extends PasoMBean {
 				posY = posY - 10;
 			}
 
-			
-			
 			if(imprimir) {
 				pdfWriter.addJavaScript("this.print({bUI: true, bSilent: true, bShrinkToFit: true});",false); 
 				pdfWriter.addJavaScript("this.closeDoc(true);");   

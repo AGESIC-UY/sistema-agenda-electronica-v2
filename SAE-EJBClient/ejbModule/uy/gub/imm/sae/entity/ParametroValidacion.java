@@ -25,8 +25,6 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -37,8 +35,6 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import uy.gub.imm.sae.common.enumerados.Tipo;
-
 
 @Entity
 @Table (name = "ae_parametros_validacion")
@@ -48,8 +44,6 @@ public class ParametroValidacion implements Serializable{
 	
 	private Integer id;
 	private String nombre;
-	private Tipo tipo;	
-	private Integer largo;
 	private Date fechaBaja;
 	
 	private Validacion validacion;
@@ -61,8 +55,6 @@ public class ParametroValidacion implements Serializable{
 	public ParametroValidacion (ParametroValidacion p) {
 		id = p.getId();
 		nombre = p.getNombre();
-		tipo = p.getTipo();
-		largo = p.getLargo();
 		fechaBaja = p.getFechaBaja();
 	}
 	
@@ -82,23 +74,6 @@ public class ParametroValidacion implements Serializable{
 	}
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
-	}
-
-	@Column (nullable = false, length=30)
-	@Enumerated(EnumType.STRING)
-	public Tipo getTipo() {
-		return tipo;
-	}
-	public void setTipo(Tipo tipo) {
-		this.tipo = tipo;
-	}
-	
-	@Column (nullable = false)
-	public Integer getLargo() {
-		return largo;
-	}
-	public void setLargo(Integer largo) {
-		this.largo = largo;
 	}
 
 	@Column (name = "fecha_baja")

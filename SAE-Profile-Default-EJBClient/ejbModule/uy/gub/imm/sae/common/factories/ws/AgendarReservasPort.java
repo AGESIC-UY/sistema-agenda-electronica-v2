@@ -28,6 +28,7 @@ import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -40,8 +41,6 @@ import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 
 public class AgendarReservasPort implements AgendarReservas {
 	
@@ -83,10 +82,6 @@ public class AgendarReservasPort implements AgendarReservas {
 			throw new ValidacionClaveUnicaException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos());
 		} catch (ValidacionPorCampoException_Exception e) {
 			throw new ValidacionPorCampoException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos(),e.getFaultInfo().getMensajes());
-		} catch (WarningValidacionException_Exception e) {
-			throw new WarningValidacionException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos(),e.getFaultInfo().getMensajes());
-		} catch (WarningValidacionCommitException_Exception e) {
-			throw new WarningValidacionCommitException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos(),e.getFaultInfo().getMensajes());
 		}
 	}
 
@@ -284,4 +279,9 @@ public class AgendarReservasPort implements AgendarReservas {
 	public void limpiarTrazas() {
 		throw new UnsupportedOperationException();
 	}
+
+  @Override
+  public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
+    throw new UnsupportedOperationException();
+  }
 }

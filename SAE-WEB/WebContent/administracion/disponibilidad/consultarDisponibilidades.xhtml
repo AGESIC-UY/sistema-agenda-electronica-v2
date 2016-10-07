@@ -62,7 +62,8 @@
 					<p:outputPanel id="panelDisponibilidad">
 						<p:dataTable value="#{dispSessionMBean.cuposPorDia}" var="row"
 							binding="#{disponibilidadMBean.cuposDataTable}" id="tablaCupos"
-							rows="25" align="center"
+							align="center" rows="25" paginator="true"
+              paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
 							caption="#{sessionMBean.textos['disponibilidades_en_periodo_consultado']}"
 							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 							<p:column>

@@ -126,7 +126,7 @@ public class ServiciosNovedadesBean {
 		novedad.setOidOrganismo(empresa.getOid());
 		novedad.setNombreOrganismo(empresa.getNombre());
 
-		novedad.setCodigoAgenda(agenda.getTramiteCodigo());
+		novedad.setCodigoAgenda(reserva.getTramiteCodigo());
 		novedad.setNombreAgenda(agenda.getNombre());
 		
 		novedad.setCodigoRecurso(recurso.getOficinaId());

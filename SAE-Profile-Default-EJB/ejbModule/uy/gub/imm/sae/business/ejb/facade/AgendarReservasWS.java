@@ -39,9 +39,6 @@ import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
-
  
 @Stateless
 @WebService(serviceName = "AgendarReservasService",  targetNamespace = "http://montevideo.gub.uy/schema/sae/1.0/", portName = "AgendarReservasPort")
@@ -58,7 +55,7 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 			@WebParam(name = "trazabilidadPasoPadre") Long pasoPadre,
 			@WebParam(name = "inicioAsistido") boolean inicioAsistido
 		) throws ApplicationException, BusinessException, AccesoMultipleException, 
-			ValidacionException, UserException, WarningValidacionException, ErrorValidacionException, WarningValidacionCommitException, 
+			ValidacionException, UserException, ErrorValidacionException,  
 			ErrorValidacionCommitException, ValidacionClaveUnicaException, ValidacionPorCampoException{
 		
 		AgendarReservas agendarReservasSession = null;

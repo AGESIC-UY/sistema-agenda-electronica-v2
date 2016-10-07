@@ -26,12 +26,14 @@ import java.util.Map;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Plantilla;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.exception.ApplicationException;
 
 public interface AgendaGeneral {
 
 	public List<Agenda> consultarAgendas() throws ApplicationException;
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException;
+  public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException;
 	public List<Plantilla> consultarPlantillas(Recurso r) throws ApplicationException;
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException;
 }

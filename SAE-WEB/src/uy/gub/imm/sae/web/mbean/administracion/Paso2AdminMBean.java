@@ -252,9 +252,12 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 		
 		VentanaDeTiempo ventanaMesSeleccionado = new VentanaDeTiempo();
 		Calendar cal = Calendar.getInstance();
+		
 		cal.setTime(ventanaCalendario.getFechaInicial());
 		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
 		ventanaMesSeleccionado.setFechaInicial(Utiles.time2InicioDelDia(cal.getTime()));
+		
+    cal.setTime(ventanaCalendario.getFechaFinal());
 		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
 		ventanaMesSeleccionado.setFechaFinal(Utiles.time2FinDelDia(cal.getTime()));
 		sessionMBean.setVentanaMesSeleccionado(ventanaMesSeleccionado);

@@ -79,47 +79,35 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 	 */
 	public Validacion crearValidacion(Validacion v)throws UserException, BusinessException {
 
-		if (v.getNombre() == null || v.getNombre().equals("")) {
-			throw new UserException("-1", "El nombre es requerido");
+		if (v.getNombre() == null || v.getNombre().trim().isEmpty()) {
+			throw new UserException("el_nombre_de_la_validacion_es_obligatorio");
+		}else if (v.getNombre().length() > 50) {
+			throw new UserException("el_nombre_de_la_validacion_es_demasiado_largo");
 		}
-		if (v.getNombre().length() > 50) {
-			throw new UserException("-1", "El nombre es demasiado largo, máximo 50 caracteres.");
+    if (v.getDescripcion() == null || v.getDescripcion().trim().isEmpty()) {
+      throw new UserException("la_descripcion_de_la_validacion_es_obligatoria");
+    }else if (v.getDescripcion().length() > 100) {
+      throw new UserException("la_descripcion_de_la_alidacion_es_demasiado_larga");
+    }
+    if (v.getServicio() == null || v.getServicio().trim().isEmpty()) {
+			throw new UserException("el_servicio_de_la_validacion_es_obligatorio");
+		}else if (v.getServicio().length() > 250) {
+			throw new UserException("el_servicio_de_la_validacion_es_demasiado_largo");
 		}
-		
-		if (v.getServicio() == null || v.getServicio().equals("")) {
-			throw new UserException("-1", "Debe indicar el nombre del servicio que implementa la validación");
-		}
-		if (v.getServicio().length() > 250) {
-			throw new UserException("-1", "El servicio es demasiado largo, máximo 250 caracteres.");
-		}
-		
-		if (v.getHost() == null || v.getHost().equals("")) {
-			throw new UserException("-1", "Debe indicar el nombre del host donde se encuentra la validación");
-		}
-		if (v.getHost().length() > 100) {
-			throw new UserException("-1", "El host es demasiado largo, máximo 100 caracteres.");
-		}
-		
-		if (v.getDescripcion() == null || v.getDescripcion().equals("")) {
-			throw new UserException("-1", "Debe indicar la descripción del servicio");
-		}
-		if (v.getDescripcion().length() > 100) {
-			throw new UserException("-1", "La descripción es demasiado larga, máximo 100 caracteres.");
+		if (v.getHost() == null || v.getHost().trim().isEmpty()) {
+			throw new UserException("el_host_de_la_validacion_es_obligatorio");
+		}else if (v.getHost().length() > 100) {
+			throw new UserException("el_host_de_la_validacion_es_demasiado_largo");
 		}
 		
 		//Se controla que no exista otra validacion con el mismo nombre
 		if (existeValidacionPorNombre(v.getNombre()) ) {
-				throw new UserException("AE10031","Ya existe una validacion con ese nombre "+ v.getNombre());
-		}
-		//Se controla que la validacion no tenga fecha de baja
-		if (v.getFechaBaja() != null){
-			throw new BusinessException("AE10028","No se puede dar de alta una validacion con fecha de baja: "+ v.getNombre());			
+				throw new UserException("ya_existe_una_validacion_con_el_nombre_especificado");
 		}
 
 		Validacion vNueva = new Validacion(v);
 		em.persist(vNueva);
 		
-		logger.error("Cant parametros nuevos: "+v.getParametrosValidacion().size());
 		modificarParametrosValidacion(vNueva, v.getParametrosValidacion());
 		
 		vNueva.getParametrosValidacion().size(); //lazy
@@ -136,21 +124,16 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 	 */
 
 	public void eliminarValidacion(Validacion v) throws UserException, BusinessException {
-
 		Validacion validacion = (Validacion) em.find(Validacion.class, v.getId());
-		
 		if (validacion == null) {
-			throw new BusinessException("AE10029","No existe la validacion que se quiere eliminar: " + v.getId().toString());
+			throw new UserException("no_se_encuentra_la_validacion_especificada");
 		}
-		
 		//Se controla que no existan datos asociados vivos para la validacion.
 		 if  (hayDatosVivos(validacion)) {
-			throw new UserException("AE10030","La validación se encuentra asociada a algun recurso: " + v.getId().toString());
+			throw new UserException("la_validacion_se_encuentra_asociada_a_un_recurso");
 		}
-		
 		//Elimino todos los parametros
 		modificarParametrosValidacion(validacion, new ArrayList<ParametroValidacion>());
-
 		validacion.setFechaBaja(new Date());
 	}
 
@@ -168,56 +151,44 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 		Validacion validacionActual = (Validacion) em.find(Validacion.class, v.getId());
 		
 		if (validacionActual == null) {
-			throw new BusinessException ("AE10032","No existe la validacion que se quiere modificar: " + v.getId().toString());
+			throw new UserException ("no_se_encuentra_la_validacion_especificada");
 		}
 		
-		if (v.getNombre() == null || v.getNombre().equals("")) {
-			throw new UserException("-1", "El nombre es requerido");
-		}
-		if (v.getNombre().length() > 50) {
-			throw new UserException("-1", "El nombre es demasiado largo, máximo 50 caracteres.");
-		}
-		
-		if (v.getServicio() == null || v.getServicio().equals("")) {
-			throw new UserException("-1", "Debe indicar el nombre del servicio que implementa la validación");
-		}
-		if (v.getServicio().length() > 250) {
-			throw new UserException("-1", "El servicio es demasiado largo, máximo 250 caracteres.");
-		}
-		
-		if (v.getHost() == null || v.getHost().equals("")) {
-			throw new UserException("-1", "Debe indicar el nombre del host donde se encuentra la validación");
-		}
-		if (v.getHost().length() > 100) {
-			throw new UserException("-1", "El host es demasiado largo, máximo 100 caracteres.");
-		}
-		
-		if (v.getDescripcion() == null || v.getDescripcion().equals("")) {
-			throw new UserException("-1", "Debe indicar la descripción del servicio");
-		}
-		if (v.getDescripcion().length() > 100) {
-			throw new UserException("-1", "La descripción es demasiado larga, máximo 100 caracteres.");
-		}
+    if (v.getNombre() == null || v.getNombre().trim().isEmpty()) {
+      throw new UserException("el_nombre_de_la_validacion_es_obligatorio");
+    }else if (v.getNombre().length() > 50) {
+      throw new UserException("el_nombre_de_la_validacion_es_demasiado_largo");
+    }
+    if (v.getDescripcion() == null || v.getDescripcion().trim().isEmpty()) {
+      throw new UserException("la_descripcion_de_la_validacion_es_obligatoria");
+    }else if (v.getDescripcion().length() > 100) {
+      throw new UserException("la_descripcion_de_la_alidacion_es_demasiado_larga");
+    }
+    if (v.getServicio() == null || v.getServicio().trim().isEmpty()) {
+      throw new UserException("el_servicio_de_la_validacion_es_obligatorio");
+    }else if (v.getServicio().length() > 250) {
+      throw new UserException("el_servicio_de_la_validacion_es_demasiado_largo");
+    }
+    if (v.getHost() == null || v.getHost().trim().isEmpty()) {
+      throw new UserException("el_host_de_la_validacion_es_obligatorio");
+    }else if (v.getHost().length() > 100) {
+      throw new UserException("el_host_de_la_validacion_es_demasiado_largo");
+    }
 		
 		//Se controla que no exista otra validacion viva con el mismo nombre salvo la propia.
 		if (existeValidacionPorNombreSalvoEsta(v) ) {
-			throw new UserException("AE10031","Ya existe una validacion con el nombre: "+ v.getNombre());
-		}
-
-		//Se controla que la validacion no tenga fecha de baja
-		if (validacionActual.getFechaBaja() != null){
-			throw new BusinessException("AE10028","No se puede modificar una validacion con fecha de baja: "+ v.getNombre());			
+			throw new UserException("ya_existe_una_validacion_con_el_nombre_especificado");
 		}
 		
-    	validacionActual.setNombre(v.getNombre());
-    	validacionActual.setDescripcion(v.getDescripcion());
-    	validacionActual.setServicio(v.getServicio());
-    	validacionActual.setHost(v.getHost());
-        
-    	modificarParametrosValidacion(validacionActual, v.getParametrosValidacion());
-    	
-    	validacionActual.getParametrosValidacion().size(); //lazy
-    	return validacionActual;
+  	validacionActual.setNombre(v.getNombre());
+  	validacionActual.setDescripcion(v.getDescripcion());
+  	validacionActual.setServicio(v.getServicio());
+  	validacionActual.setHost(v.getHost());
+      
+  	modificarParametrosValidacion(validacionActual, v.getParametrosValidacion());
+  	
+  	validacionActual.getParametrosValidacion().size(); //lazy
+  	return validacionActual;
 	}
 
 	
@@ -251,14 +222,8 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 				ParametroValidacion pModificado = mapModificados.get(pActual.getId());
 				if (pModificado.getNombre() == null || pModificado.getNombre().equals("")) throw new UserException("-1","Falta indicar el nombre de un parámetro");
 				if (pModificado.getNombre().length() > 50) throw new UserException("-1","El nombre del parámetro es demasiado largo, máximo 50 caracteres.");
-				if (pModificado.getTipo()   == null) throw new UserException("-1","Falta indicar el tipo de un parámetro");
-				if (pModificado.getLargo()  == null) throw new UserException("-1","Falta indicar el largo de un parámetro");
-				
 				pActual.setNombre(pModificado.getNombre());
-				pActual.setTipo(pModificado.getTipo());
-				pActual.setLargo(pModificado.getLargo());
-			}
-			else {
+			} else {
 				//Eliminar el parámetro
 				pActual.setFechaBaja(ahora);
 			}
@@ -273,9 +238,6 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 				pNuevo.setValidacion(v);
 				if (pNuevo.getNombre() == null || pNuevo.getNombre().equals("")) throw new UserException("-1","Falta indicar el nombre de un parámetro");
 				if (pNuevo.getNombre().length() > 50) throw new UserException("-1","El nombre del parámetro es demasiado largo, máximo 50 caracteres.");
-				if (pNuevo.getTipo() == null) throw new UserException("-1","Falta indicar el tipo de un parámetro");
-				if (pNuevo.getLargo() == null) throw new UserException("-1","Falta indicar el largo de un parámetro");
-				
 				em.persist(pNuevo);
 			}
 		}
@@ -292,7 +254,7 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 				).setParameter("nombre", p.getNombre()).setParameter("validacion", p.getValidacion().getId().intValue()).getSingleResult();
 		
 		if (cant > 0) {
-			throw new UserException("-1", "No se puede modificar/eliminar un parámetro si está siendo utilizado en las validaciones de algún recurso");
+			throw new UserException("no_se_puede_modificar_los_parametros_si_estan_en_uso");
 		}
 	}
 	

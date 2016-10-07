@@ -25,7 +25,7 @@ package uy.gub.imm.sae.common.enumerados;
  *  C = Cancelar
  */
 public enum Evento {
-	R("Reservar"), C("Cancelar");
+	R("reservar"), C("cancelar");
 	
 	private final String descripcion;
 	

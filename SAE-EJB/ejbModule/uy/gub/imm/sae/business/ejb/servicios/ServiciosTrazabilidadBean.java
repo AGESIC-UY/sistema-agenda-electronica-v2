@@ -120,7 +120,6 @@ public class ServiciosTrazabilidadBean {
 	public String registrarCabezal(Empresa empresa, Reserva reserva, String transaccionId, String procesoId, boolean inicioAsistido, 
 			String transaccionPadreId, Long pasoPadre) {
 
-
 		boolean habilitado = false;
 		//Primero ver si la agenda soporta trazabilidad
 		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();

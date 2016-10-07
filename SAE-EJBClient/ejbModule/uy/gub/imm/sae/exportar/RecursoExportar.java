@@ -38,6 +38,7 @@ public class RecursoExportar {
 	private Boolean usarLlamador;
 	private String serie;
 	private Boolean sabadoEsHabil;
+  private Boolean domingoEsHabil;
 
 	// Datos obtenidos a partir de TramitesUy
 	private String oficinaId; // Esto es inventado, las oficinas no tienen id en
@@ -227,6 +228,14 @@ public class RecursoExportar {
 	public void setSabadoEsHabil(Boolean sabadoEsHabil) {
 		this.sabadoEsHabil = sabadoEsHabil;
 	}
+
+  public Boolean getDomingoEsHabil() {
+    return domingoEsHabil;
+  }
+
+  public void setDomingoEsHabil(Boolean domingoEsHabil) {
+    this.domingoEsHabil = domingoEsHabil;
+  }
 
 	public String getOficinaId() {
 		return oficinaId;

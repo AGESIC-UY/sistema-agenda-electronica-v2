@@ -136,6 +136,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (r.getSabadoEsHabil() == null) {
 			r.setSabadoEsHabil(false);
 		}
+    if (r.getDomingoEsHabil() == null) {
+      r.setDomingoEsHabil(false);
+    }
 		// Se setea hora en fecha de inicio disp. 00:00:00
 		r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
 		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
@@ -387,6 +390,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (r.getSabadoEsHabil() == null) {
 			r.setSabadoEsHabil(false);
 		}
+    if (r.getDomingoEsHabil() == null) {
+      r.setDomingoEsHabil(false);
+    }
 		// Se setea hora en fecha de inicio disp. 00:00:00
 		r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
 		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
@@ -717,6 +723,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		recursoActual.setMostrarNumeroEnTicket(r.getMostrarNumeroEnTicket());
 		recursoActual.setMostrarIdEnTicket(r.getMostrarIdEnTicket());
 		recursoActual.setSabadoEsHabil(r.getSabadoEsHabil());
+    recursoActual.setDomingoEsHabil(r.getDomingoEsHabil());
 
 		recursoActual.setLocalidad(r.getLocalidad());
 		recursoActual.setDepartamento(r.getDepartamento());
@@ -771,20 +778,19 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	@SuppressWarnings("unchecked")
 	public void eliminarRecurso(Recurso r) throws UserException,
 			ApplicationException {
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+	  
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	r.getId());
 
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
-		// Se controla que no existan reservas vivas para el recurso.
+		//Se controla que no existan reservas vivas para el recurso.
 		if (hayReservasVivas(recursoActual)) {
-			throw new UserException(
-					"no_se_puede_eliminar_el_recurso_porque_hay_reservas_vivas");
+			throw new UserException("no_se_puede_eliminar_el_recurso_porque_hay_reservas_vivas");
 		}
 
-		// Se eliminan disponibilidades.
+		//Se eliminan disponibilidades.
 		List<Disponibilidad> disponibilades = (List<Disponibilidad>) entityManager
 				.createQuery(
 						"SELECT d FROM Disponibilidad d "
@@ -795,33 +801,28 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 				.setParameter("recurso", recursoActual)
 				.setParameter("fecha", new Date())
 				.setParameter("hora", new Date()).getResultList();
-
 		for (Disponibilidad disponibilidad : disponibilades) {
 			disponibilidad.setFechaBaja(new Date());
 		}
-		// se eliminan agrupaciones de datos
+		
+		//Se eliminan agrupaciones de datos
 		List<AgrupacionDato> listaAgrupacion = (List<AgrupacionDato>) entityManager
-				.createQuery(
-						"SELECT ad FROM AgrupacionDato ad "
-								+ "WHERE ad.recurso = :recurso AND ad.fechaBaja is null")
+				.createQuery("SELECT ad FROM AgrupacionDato ad "
+					+ "WHERE ad.recurso = :recurso AND ad.fechaBaja is null")
 				.setParameter("recurso", recursoActual).getResultList();
-
 		for (AgrupacionDato agrupacionDato : listaAgrupacion) {
-			List<DatoASolicitar> lisrDatoAsolicitar = agrupacionDato
-					.getDatosASolicitar();
-
+			List<DatoASolicitar> lisrDatoAsolicitar = agrupacionDato.getDatosASolicitar();
 			for (DatoASolicitar datoASolicitar : lisrDatoAsolicitar) {
 				datoASolicitar.setFechaBaja(new Date());
 			}
 			agrupacionDato.setFechaBaja(new Date());
 		}
 
+		//Se eliminan las validaciones asociadas
 		List<ValidacionPorRecurso> listValidacionRecurso = (List<ValidacionPorRecurso>) entityManager
-				.createQuery(
-						"SELECT vxr FROM ValidacionPorRecurso vxr "
-								+ "WHERE vxr.recurso = :recurso AND vxr.fechaBaja is null")
+				.createQuery("SELECT vxr FROM ValidacionPorRecurso vxr "
+					+ "WHERE vxr.recurso = :recurso AND vxr.fechaBaja is null")
 				.setParameter("recurso", recursoActual).getResultList();
-
 		for (ValidacionPorRecurso validacionPorRecurso : listValidacionRecurso) {
 			validacionPorRecurso.setFechaBaja(new Date());
 		}
@@ -846,8 +847,6 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 */
 	public DatoDelRecurso agregarDatoDelRecurso(Recurso r, DatoDelRecurso d) throws UserException {
-		
-		System.out.println("[RecursosBean][agregarDatoDelRecurso] r="+r.getId());
 		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class, r.getId());
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
@@ -2215,11 +2214,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		r = entityManager.find(Recurso.class, r.getId());
 		if (r == null) {
-			throw new BusinessException("-1",
-					"No se encuentra el recurso indicado");
-		}
-		if (r.getFechaBaja() != null) {
-			throw new BusinessException("-1", "El recurso ha sido dado de baja");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		// 1- Creo un nuevo Recurso y copio los atributos de r.
@@ -2257,8 +2252,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		do {
 			contador++;
 			rCopia.setNombre("Copia " + contador + " de " + r.getNombre());
-			rCopia.setDescripcion("Copia " + contador + " de "
-					+ r.getDescripcion());
+			rCopia.setDescripcion("Copia " + contador + " de " + r.getDescripcion());
 		} while (existeRecursoPorNombre(rCopia));
 
 		entityManager.persist(rCopia);
@@ -2274,10 +2268,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 				trCopia.setIdioma(viejo.getIdioma());
 				trCopia.setTextoPaso2(viejo.getTextoPaso2());
 				trCopia.setTextoPaso3(viejo.getTextoPaso3());
-				trCopia.setTituloCiudadanoEnLlamador(viejo
-						.getTituloCiudadanoEnLlamador());
-				trCopia.setTituloPuestoEnLlamador(viejo
-						.getTituloPuestoEnLlamador());
+				trCopia.setTituloCiudadanoEnLlamador(viejo.getTituloCiudadanoEnLlamador());
+				trCopia.setTituloPuestoEnLlamador(viejo.getTituloPuestoEnLlamador());
 				trCopia.setTicketEtiquetaUno(viejo.getTicketEtiquetaUno());
 				trCopia.setTicketEtiquetaDos(viejo.getTicketEtiquetaDos());
 				trCopia.setValorEtiquetaUno(viejo.getValorEtiquetaUno());
@@ -2337,8 +2329,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 						// 5.2
 						for (ValorPosible vp : campo.getValoresPosibles()) {
-							if (vp.getFechaHasta() == null
-									|| vp.getFechaHasta().after(new Date())) {
+							if (vp.getFechaHasta() == null || vp.getFechaHasta().after(new Date())) {
 								ValorPosible vpCopia = new ValorPosible(vp);
 								vpCopia.setId(null);
 								vpCopia.setDato(campoCopia);
@@ -2347,15 +2338,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 						}
 
 						// 5.3
-						for (ValidacionPorDato vxd : campo
-								.getValidacionesPorDato()) {
+						for (ValidacionPorDato vxd : campo.getValidacionesPorDato()) {
 							if (vxd.getFechaDesasociacion() == null) {
 								ValidacionPorDato vxdCopia = new ValidacionPorDato();
-								vxdCopia.setNombreParametro(vxd
-										.getNombreParametro());
+								vxdCopia.setNombreParametro(vxd.getNombreParametro());
 								vxdCopia.setDatoASolicitar(campoCopia);
-								ValidacionPorRecurso vxrCopia = validacionesDelRecurso
-										.get(vxd.getValidacionPorRecurso());
+								ValidacionPorRecurso vxrCopia = validacionesDelRecurso.get(vxd.getValidacionPorRecurso());
 								vxdCopia.setValidacionPorRecurso(vxrCopia);
 								entityManager.persist(vxdCopia);
 							}

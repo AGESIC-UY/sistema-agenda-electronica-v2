@@ -35,6 +35,7 @@ import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Plantilla;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoTenant;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.TextoGlobal;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.login.SAEPrincipal;
@@ -83,8 +84,6 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 
 	/**
 	 * Retorna una lista de recursos vivos (fechaBaja == null)
-	 * Controla que el usuario tenga rol Administrador/Planificador sobre la agenda <b>a</b>
-	 * Roles permitidos: Administrador, Planificador
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException{
@@ -95,7 +94,6 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 											"AND r.fechaBaja IS NULL "+
 											"ORDER BY r.nombre")
 									.setParameter("a", a)
-									// TODO CONTROLAR ROLES
 									.getResultList();
 			return recurso;
 			} catch (Exception e){
@@ -103,6 +101,25 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 			}
 	}
 
+  /**
+   * Retorna la lista de tramites asociados a la agenda
+   */
+  @SuppressWarnings("unchecked")
+  public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
+    try{
+      List<TramiteAgenda> tramites = (List<TramiteAgenda>) entityManager
+                  .createQuery("SELECT t from TramiteAgenda t " +
+                      "WHERE t.agenda = :a " +
+                      "ORDER BY t.tramiteNombre")
+                  .setParameter("a", a)
+                  .getResultList();
+      return tramites;
+      } catch (Exception e){
+        throw new ApplicationException(e);
+      }
+  }
+	
+	
 	/**
 	 * Retorna una lista de plantillas vivas (fechaBaja == null)
 	 * ordenadas por orden de creacion

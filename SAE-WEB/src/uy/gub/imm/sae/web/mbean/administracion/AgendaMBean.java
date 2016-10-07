@@ -29,6 +29,7 @@ import java.util.concurrent.TimeUnit;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.component.UIInput;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -41,6 +42,7 @@ import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Agendas;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.entity.Agenda;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Tramite;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
@@ -82,9 +84,7 @@ public class AgendaMBean extends BaseMBean {
 		try {
 			List<Agenda> entidades = generalEJB.consultarAgendas();
 			agendasSeleccion = new RowList<Agenda>(entidades);
-			
 		} catch (Exception e) {
-			
 			addErrorMessage(e, MSG_ID);
 		}
 		return agendasSeleccion;
@@ -124,17 +124,35 @@ public class AgendaMBean extends BaseMBean {
 			addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agenda_es_obligatorio"), "form:nombreAgenda");
 			hayErrores = true;
 		}
-		if(agendaCrear.getDescripcion() == null || agendaCrear.getDescripcion().trim().equals("")){
-			addErrorMessage(sessionMBean.getTextos().get("la_descripcion_de_la_agenda_es_obligatoria"), "form:descripcionAgenda");
-			hayErrores = true;
-		}
-		if(agendaCrear.getTramiteCodigo() == null || agendaCrear.getTramiteCodigo().trim().isEmpty()){
-			addErrorMessage(sessionMBean.getTextos().get("el_codigo_del_tramite_es_obligatorio"), "form:codigoTramite");
-			hayErrores = true;
+    if(agendaSessionMBean.getIdiomasSeleccionados().isEmpty()){
+      addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_idioma"), "form:idiomasAgenda");
+      hayErrores = true;
+    }
+		if(agendaCrear.getTramites().isEmpty()) {
+		  addErrorMessage(sessionMBean.getTextos().get("debe_haber_al_menos_un_tramite"));
+		  hayErrores = true;
+		}else {
+		  int ind = 0;
+		  for(TramiteAgenda tramite : agendaCrear.getTramites()) {
+		    if(tramite.getTramiteCodigo() == null || tramite.getTramiteCodigo().trim().isEmpty()){
+	        addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
+          addErrorMessage("", "form:tramites:codigoTramite");
+		      hayErrores = true;
+		    }else if(tramite.getTramiteNombre() == null || tramite.getTramiteNombre().trim().isEmpty()){
+          addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
+          addErrorMessage("", "form:tramites:codigoTramite");
+          hayErrores = true;
+        }
+        ind++;
+		  }
 		}
 		if(hayErrores) {
 			return;
 		}
+		
+    if(agendaCrear.getDescripcion() == null){
+      agendaCrear.setDescripcion("");
+    }
 		
 		String sIdiomasSeleccionados = "";
 		if(agendaSessionMBean.getIdiomasSeleccionados() != null) {
@@ -146,14 +164,12 @@ public class AgendaMBean extends BaseMBean {
 			}
 		}
 		agendaCrear.setIdiomas(sIdiomasSeleccionados);
-		
+		//Guardar la agenda en la base de datos
 		try {
-			
 			if(agendasEJB.existeAgendaPorNombre(agendaCrear)) {
 				addErrorMessage(sessionMBean.getTextos().get("ya_existe_una_agenda_con_el_nombre_especificado"), "form:nombreAgenda");
 				return;
 			}
-			
 			agendasEJB.crearAgenda(agendaCrear);
 			sessionMBean.cargarAgendas();
 			agendasSeleccion = null;
@@ -168,7 +184,6 @@ public class AgendaMBean extends BaseMBean {
 	public void selecAgendaEliminar(ActionEvent e){
 		sessionMBean.setAgendaSeleccionada(((Row<Agenda>)agendasDataTable.getRowData()).getData());
 	}
-	
 	
 	public void eliminar(ActionEvent event) {
 		Agenda a = sessionMBean.getAgendaSeleccionada();
@@ -192,27 +207,36 @@ public class AgendaMBean extends BaseMBean {
 	}
 
 	@SuppressWarnings("unchecked")
-	public String modificar() { 
-		this.rowSelect = (Row<Agenda>)agendasDataTable.getRowData();
-		if (this.rowSelect != null){
-			Agenda agenda = rowSelect.getData();
-			
-			sessionMBean.setAgendaSeleccionada(agenda);
-			List<String> idiomasSeleccionados = new ArrayList<String>();
-			if(agenda.getIdiomas() != null) {
-				String[] idiomas = agenda.getIdiomas().split(",");
-				for(String idioma : idiomas) {
-					idiomasSeleccionados.add(idioma);
-				}
-			}
-			agendaSessionMBean.setIdiomasSeleccionados(idiomasSeleccionados);
-			return "modificar";
-		}
-		else {
-			sessionMBean.setAgendaSeleccionada(null);
-			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
-			return null;
-		}
+	public String modificar() {
+	  try {
+	  
+  		this.rowSelect = (Row<Agenda>)agendasDataTable.getRowData();
+  		if (this.rowSelect != null){
+  			Agenda agenda = rowSelect.getData();
+  			
+  			//Cargar los trámites de la agenda
+  			List<TramiteAgenda> tramites = generalEJB.consultarTramites(agenda);
+  			agenda.setTramites(tramites);
+  			//Cargar los idiomas seleccionados
+  			sessionMBean.setAgendaSeleccionada(agenda);
+  			List<String> idiomasSeleccionados = new ArrayList<String>();
+  			if(agenda.getIdiomas() != null) {
+  				String[] idiomas = agenda.getIdiomas().split(",");
+  				for(String idioma : idiomas) {
+  					idiomasSeleccionados.add(idioma);
+  				}
+  			}
+  			agendaSessionMBean.setIdiomasSeleccionados(idiomasSeleccionados);
+  			return "modificar";
+  		} else {
+  			sessionMBean.setAgendaSeleccionada(null);
+  			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+  			return null;
+  		}
+	  }catch(ApplicationException aEx) {
+      addErrorMessage(aEx.getMessage(), MSG_ID);
+      return null;
+	  }
 	}
 
 	
@@ -228,17 +252,38 @@ public class AgendaMBean extends BaseMBean {
 				addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agenda_es_obligatorio"), "form:nombreAgenda");
 				hayErrores = true;
 			}
-			if(agendaSeleccionada.getDescripcion() == null || agendaSeleccionada.getDescripcion().trim().isEmpty()){
-				addErrorMessage(sessionMBean.getTextos().get("la_descripcion_de_la_agenda_es_obligatoria"), "form:descripcionAgenda");
-				hayErrores = true;
-			}
-			if(agendaSeleccionada.getTramiteCodigo() == null || agendaSeleccionada.getTramiteCodigo().trim().isEmpty()){
-				addErrorMessage(sessionMBean.getTextos().get("el_codigo_del_tramite_es_obligatorio"), "form:codigoTramite");
-				hayErrores = true;
-			}
+	    if(agendaSessionMBean.getIdiomasSeleccionados().isEmpty()){
+	      addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_idioma"), "form:idiomasAgenda");
+	      hayErrores = true;
+	    }
+	    if(agendaSeleccionada.getTramites().isEmpty()) {
+	      addErrorMessage(sessionMBean.getTextos().get("debe_haber_al_menos_un_tramite"));
+	      hayErrores = true;
+	    }else {
+	      int ind = 0;
+	      for(TramiteAgenda tramite : agendaSeleccionada.getTramites()) {
+	        if(tramite.getTramiteCodigo() == null || tramite.getTramiteCodigo().trim().isEmpty()){
+	          addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
+            addErrorMessage("", "form:tramites:codigoTramite");
+	          hayErrores = true;
+	        }else if(tramite.getTramiteNombre() == null || tramite.getTramiteNombre().trim().isEmpty()){
+            addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
+            addErrorMessage("", "form:tramites:codigoTramite");
+	          hayErrores = true;
+	        }
+	        ind++;
+	      }
+	    }
+			
+			
 			if(hayErrores) {
 				return null;
 			}
+
+      if(agendaSeleccionada.getDescripcion() == null){
+        agendaSeleccionada.setDescripcion("");
+      }
+			
 			
 			String sIdiomasSeleccionados = "";
 			if(agendaSessionMBean.getIdiomasSeleccionados() != null) {
@@ -351,7 +396,22 @@ public class AgendaMBean extends BaseMBean {
 	}
 	
 	private void recargarTramites(boolean actualizar) {
-		//Cargar los tramites
+	  /*	  
+	  //Para desarrollo si no funciona el servicio web de tramites
+    List<Tramite> ts = new ArrayList();
+    for(int i=1;i<10;i++) {
+      Tramite t = new Tramite();
+      t.setEmpresaId(sessionMBean.getEmpresaActual().getId());
+      t.setId(""+sessionMBean.getEmpresaActual().getId()+"-"+i);
+      t.setNombre("Trámite "+i);
+      ts.add(t);
+    }
+    setTramites(ts);
+    if(true) {
+      return;
+    }
+	  */
+	  
 		try {
 			if(sessionMBean.getEmpresaActual() == null) {
 				setTramites(null);
@@ -364,62 +424,16 @@ public class AgendaMBean extends BaseMBean {
 			if(msg!=null) {
 				addInfoMessage(msg.replace("{cant}", ""+(trams==null?"0":""+trams.size())));
 			}
-		} catch (Exception uEx) {
+		} catch (UserException ex) {
+      addErrorMessage(ex);
+      ex.printStackTrace();
+      setTramites(null);
+    }	catch (Exception ex) {
 			addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_cargar_tramites"));
+			ex.printStackTrace();
 			setTramites(null);
 		}
 	}
-	
-	public void cambioTramite(ValueChangeEvent event) {
-		limpiarMensajesError();
-		String tramId = (String) event.getNewValue();
-		if(tramId == null || !mapTramites.containsKey(tramId)) {
-			this.agendaNueva.setTramiteId(null);
-			this.agendaNueva.setTramiteCodigo("");
-			this.agendaNueva.setNombre("");
-			this.agendaNueva.setDescripcion("");
-		}else {
-			Tramite tramite = mapTramites.get(tramId);
-			this.agendaNueva.setTramiteId(tramId);
-			this.agendaNueva.setNombre(tramite.getNombre());
-			this.agendaNueva.setDescripcion(tramite.getQuees());
-			String[] partes = tramId.split("-");
-			if(partes.length>1) {
-				this.agendaNueva.setTramiteCodigo(partes[1]);
-			}
-		}
-	}
-	
-	public void cambioTramiteMod(ValueChangeEvent event) {
-		limpiarMensajesError();
-		String tramId = (String) event.getNewValue();
-		if(tramId!=null && mapTramites.containsKey(tramId)) {
-			String[] partes = tramId.split("-");
-			if(partes.length>1) {
-				this.getAgendaSeleccionada().setTramiteCodigo(partes[1]);
-			}
-		}
-	}
-	
-/*
-	public void actualizarTramiteAgenda(String tramId) {
-		if(tramId == null || !mapTramites.containsKey(tramId)) {
-			this.agendaNueva.setTramiteId(null);
-			this.agendaNueva.setTramiteCodigo("");
-			this.agendaNueva.setNombre("");
-			this.agendaNueva.setDescripcion("");
-		}else {
-			Tramite tramite = mapTramites.get(tramId);
-			this.agendaNueva.setTramiteId(tramId);
-			this.agendaNueva.setNombre(tramite.getNombre());
-			this.agendaNueva.setDescripcion(tramite.getQuees());
-			String[] partes = tramId.split("-");
-			if(partes.length>1) {
-				this.agendaNueva.setTramiteCodigo(partes[1]);
-			}
-		}
-	}
-*/	
 
 	public List<SelectItem> getTimezones() {
 		String[] ids = TimeZone.getAvailableIDs();
@@ -464,4 +478,51 @@ public class AgendaMBean extends BaseMBean {
 	public void setIdiomasSeleccionados(List<String> idiomasSeleccionados) {
 		agendaSessionMBean.setIdiomasSeleccionados(idiomasSeleccionados);
 	}
+	
+	
+	public void agregarTramite() {
+	  TramiteAgenda tramite = new TramiteAgenda();
+	  tramite.setAgenda(this.agendaNueva);
+	  this.agendaNueva.getTramites().add(tramite);
+	}
+	
+  public void cambioTramite(ValueChangeEvent event) {
+    limpiarMensajesError();
+    UIInput input = (UIInput) event.getComponent();
+    TramiteAgenda tramiteAgenda = (TramiteAgenda) input.getAttributes().get("tramiteAgenda");
+    String tramId = (String) event.getNewValue();
+    if(tramId == null || !mapTramites.containsKey(tramId)) {
+      tramiteAgenda.setTramiteId(null);
+      tramiteAgenda.setTramiteCodigo("");
+      tramiteAgenda.setTramiteNombre("");
+    }else {
+      Tramite tramite = mapTramites.get(tramId);
+      tramiteAgenda.setTramiteId(tramId);
+      tramiteAgenda.setTramiteNombre(tramite.getNombre());
+      String[] partes = tramId.split("-");
+      if(partes.length>1) {
+        tramiteAgenda.setTramiteCodigo(partes[1]);
+      }
+    }
+  }
+
+  public void quitarTramite(Integer ordinal) {
+    TramiteAgenda ta = this.agendaNueva.getTramites().remove(ordinal.intValue());
+    ta.setAgenda(null);
+  }
+  
+  
+  
+  
+  public void agregarTramiteMod() {
+    TramiteAgenda tramite = new TramiteAgenda();
+    tramite.setAgenda(this.agendaNueva);
+    this.getAgendaSeleccionada().getTramites().add(tramite);
+  }
+  
+  public void quitarTramiteMod(Integer ordinal) {
+    TramiteAgenda ta = this.getAgendaSeleccionada().getTramites().remove(ordinal.intValue());
+    ta.setAgenda(null);
+  }
+  
 }

@@ -19,6 +19,9 @@
       <pathelement location="../SAE-Componentes/build.xml"/>
       <pathelement location="../SAE-WEB/build.xml"/>
       <pathelement location="../SAE-EAR/build.xml"/>
+      <pathelement location="../SAE-Acciones-EJBClient/build.xml"/>
+      <pathelement location="../SAE-Autocompletados-EJBClient/build.xml"/>
+      <pathelement location="../SAE-Validaciones-EJBClient/build.xml"/>
 		</path>
 		<subant target="clean" buildpathref="cleanlist" failonerror="true" inheritall="true"/>
 	</target>
@@ -34,6 +37,8 @@
 			<pathelement location="../SAE-Profile-${build.profile}-WEB/build.xml"/>
 			<pathelement location="../SAE-Componentes/build.xml"/>
 		 	<pathelement location="../SAE-WEB/build.xml"/>
+      <pathelement location="../SAE-Acciones-EJBClient/build.xml"/>
+      <pathelement location="../SAE-Validaciones-EJBClient/build.xml"/>
 			<pathelement location="../SAE-EAR/build.xml"/>
 		</path>
 

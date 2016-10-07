@@ -396,49 +396,6 @@
 	</managed-bean>
 
 	<managed-bean>
-		<managed-bean-name>validacionAsignacionSessionMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionAsignacionSessionMBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
-
-	<managed-bean>
-		<managed-bean-name>validacionMantenimientoSessionMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionMantenimientoSessionMBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
-	</managed-bean>
-
-	<managed-bean>
-		<managed-bean-name>validacionAsignacionMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionAsignacionMBean</managed-bean-class>
-		<managed-bean-scope>request</managed-bean-scope>
-		<managed-property>
-			<property-name>sessionMBean</property-name>
-			<property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
-			<value>#{sessionMBean}</value>
-		</managed-property>
-		<managed-property>
-			<property-name>validacionAsignacionSessionMBean</property-name>
-			<property-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionAsignacionSessionMBean</property-class>
-			<value>#{validacionAsignacionSessionMBean}</value>
-		</managed-property>
-	</managed-bean>
-	<managed-bean>
-		<managed-bean-name>validacionMantenimientoMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionMantenimientoMBean</managed-bean-class>
-		<managed-bean-scope>request</managed-bean-scope>
-		<managed-property>
-			<property-name>sessionMBean</property-name>
-			<property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
-			<value>#{sessionMBean}</value>
-		</managed-property>
-		<managed-property>
-			<property-name>validacionMantenimientoSessionMBean</property-name>
-			<property-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionMantenimientoSessionMBean</property-class>
-			<value>#{validacionMantenimientoSessionMBean}</value>
-		</managed-property>
-	</managed-bean>
-
-	<managed-bean>
 		<managed-bean-name>listaDeEsperaMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ListaDeEsperaMBean</managed-bean-class>
 		<managed-bean-scope>view</managed-bean-scope>
@@ -586,6 +543,50 @@
       <value>#{sessionMBean}</value>
     </managed-property>
   </managed-bean>
+
+
+  <managed-bean>
+    <managed-bean-name>accionMantenimientoMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.AccionMantenimientoMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>accionAsignacionMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.AccionAsignacionMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>validacionAsignacionMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionAsignacionMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>validacionMantenimientoMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ValidacionMantenimientoMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+
 
 	<navigation-rule>
 		<from-view-id>*</from-view-id>
@@ -957,6 +958,10 @@
   <converter>
     <converter-id>integerConverter</converter-id>
     <converter-class>uy.gub.imm.sae.web.common.IntegerConverter</converter-class>
+  </converter>
+  <converter>
+    <converter-id>eventoConverter</converter-id>
+    <converter-class>uy.gub.imm.sae.web.common.EventoConverter</converter-class>
   </converter>
 
 </faces-config>

@@ -66,12 +66,13 @@
 					<div>
 						<h:outputText value="#{pasoFinalMBean.recursoDescripcion}" />
 					</div>
-					<div class="seguridad">
-						<h:outputText value="#{sesionMBean.textos['codigo_de_trazabilidad']}:" />
-						<h:outputText
-							value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}"
-							styleClass="negrita" />
-					</div>
+					<p:outputPanel rendered="#{sesionMBean.agenda.conTrazabilidad}">
+						<div class="seguridad">
+							<h:outputText value="#{sesionMBean.textos['codigo_de_trazabilidad']}:" />
+							<h:outputText
+								value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}" styleClass="negrita" />
+						</div>
+					</p:outputPanel>
 	        <div class="seguridad">
 	          <h:outputText value="#{sesionMBean.textos['codigo_de_seguridad']}:" />
 	          <h:outputText
@@ -83,7 +84,7 @@
 		</ui:define>
 
 		<ui:define name="contenido">
-      <p:outputPanel rendered="#{!pasoFinalMBean.errorInit}">
+      <p:outputPanel rendered="#{!pasoFinalMBean.errorInit and not empty pasoFinalMBean.descripcion}">
 				<div class="infoAdicional box-grey">
 					<h:outputFormat escape="false" value="#{pasoFinalMBean.descripcion}" />
 				</div>

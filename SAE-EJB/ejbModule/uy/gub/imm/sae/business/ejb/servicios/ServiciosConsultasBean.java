@@ -101,6 +101,8 @@ public class ServiciosConsultasBean implements ServiciosConsultasLocal, Servicio
 			auxiliar.setEstado(reserva.getEstadoDescripcion());
 			auxiliar.setFecha(reserva.getDisponibilidades().get(0).getFecha());
 			auxiliar.setHoraInicio(reserva.getDisponibilidades().get(0).getHoraInicio());
+	    auxiliar.setTramiteCodigo(reserva.getTramiteCodigo());
+	    auxiliar.setTramiteNombre(reserva.getTramiteNombre());
 			resultado.add(auxiliar);
 		}
 		return resultado;

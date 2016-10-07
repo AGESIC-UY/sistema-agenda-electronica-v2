@@ -7,12 +7,6 @@
 	<property name="java.src" value="ejbModule" />
 	<property name="SAE-EAR.lib" value="../SAE-EAR/EarContent/lib" />
 
-
-	
-	
-	
-	
-	
 	<tstamp>
 		<format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
 	</tstamp>
@@ -58,4 +52,14 @@
         </copy>
 	</target>
 
+  <target name="build" depends="compile,clean">
+    <jar destfile="build/jar/sae-validaciones-ejbclient.jar" 
+       filesetmanifest="merge" manifest="build/MANIFEST.MF" duplicate="fail">
+      <metainf dir="build/classes/META-INF" />
+      <fileset dir="build/classes">
+        <exclude name="META-INF/**"/>
+      </fileset>
+    </jar>
+  </target>
+	
 </project>

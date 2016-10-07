@@ -937,6 +937,8 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 				return dias.length>4 && dias[4]!=null && dias[4];
 			case Calendar.SATURDAY:
 				return dias.length>5 && dias[5]!=null && dias[5];
+      case Calendar.SUNDAY:
+        return dias.length>6 && dias[6]!=null && dias[6];
 			default:
 				return false;
 		}

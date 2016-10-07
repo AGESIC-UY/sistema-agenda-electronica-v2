@@ -36,3 +36,29 @@ Versión 1.2
 Versión 1.3
 * Se corrigió el bug por el cual se perdían los atributos "u" (URL de retorno), "p" (parámetros), "t" (identificador de trazabilidad padre) y "i" (idioma) cuando se volvía al paso 1 luego de haber pasado al paso 2.
 * Se corrigió el problema por el cual no se podían registrar empresas cuyo OID tuviera más de 25 caracteres de largo.
+
+Versión 1.4
+* Se corrigió el bug por el cual no se mostraban las disponibilidades de los meses posteriores al actual.
+* Se corrigió el problema por el cual la fecha que se muestra en el ticket estaba siempre en GMT0.
+* Se cambió la forma de determinar el primer día disponible para reservar de forma de saltear los días no hábiles.
+* Se quitó la obligatoriedad del campo descripción para las agendas.
+* Se quitó la carga automática del campo descripción cuando se elige un trámite en la creación de una agenda.
+* Se corrigió el problema por el cual solo se mostraban hasta 25 días en la consulta de disponibilidades.
+* Se agregó la exigencia de seleccionar al menos un idioma para las agendas.
+* Se corrigió un problema por el cual los valores por defecto pasados por parámetro a la reserva podían quedar cortados si incluyen más de un punto.
+* Se corrigió un problema por el cual no se enviaba el proceso padre al sistema de trazabilidad si no el cliente no informaba también el paso padre.
+* Se incorporó la posibilidad de crear disponibilidades para los domingos (igual que para los sábados)
+* Se corrigieron y cambiaron algunos textos.
+* Se ocultó el dato sobre el código de trazabilidad para las agendas que no están integradas con el Sistema de Trazabilidad.
+* Se incorporó la posibilidad de asociar múltiples trámites a las agendas:
+  - Al crear la agenda se puede asociar a múltiples trámites
+  - Al realizar una reserva se debe seleccionar el trámite que se desea realizar (si hay más de uno)
+  - Al invocar al Sistema de Trazabilidad se informa el trámite seleccionado durante la reserva
+  - Al invocar al Sistema de Novedades se informa el trámite seleccionado durante la reserva
+  - Al consultar reservas y realizar reportes se obtiene información sobre el trámite realizado
+* Se reincorporó la posibilidad de definir acciones de usuario para ser ejecutadas al confirmar o cancelar reservas
+  - Se permite utilizar la acción AccionNotificarBean
+  - Se permite incorporar acciones propias mediante la implementación de una interfaz en un proyecto JavaEE
+* Se reincorporó la posibilidad de definir validaciones de usuario para ser ejecutadas al confirmar o cancelar reservas
+  - Se permite utilizar las validaciones ValidacionMailBean y ValidadorDatosPersonaBean
+  - Se permite incorporar validaciones propias mediante la implementación de una interfaz en un proyecto JavaEE

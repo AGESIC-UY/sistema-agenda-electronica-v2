@@ -38,12 +38,6 @@ public class ValidacionClaveUnicaException extends ValidacionException {
 	 */
 	public ValidacionClaveUnicaException(String codigoError, List<String> nombreCampos) {
 		super(codigoError, nombreCampos, null);
-		
-		if (nombreCampos == null ||
-			nombreCampos.size() == 0 
-		) {
-			throw new RuntimeException("No se ha indicado la lista de campos que fallan la validación");
-		}
 	}
 
 }

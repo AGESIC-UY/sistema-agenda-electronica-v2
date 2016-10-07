@@ -476,24 +476,20 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		if(actualizar) {
 			try {
 				URL urlWsdl = WsTramite.class.getResource("WsTramite.wsdl");
-				
 				String wsUser = confBean.getString("WS_TRAMITE_USER");
 				String wsPass = confBean.getString("WS_TRAMITE_PASS");
-
+				
 				//Consultar el servicio web
 				WsTramite wsTramite = new WsTramite(urlWsdl);
 				WsTramiteSoap port = wsTramite.getWsTramiteSoap();
-				
 	      List<Handler> customHandlerChain = new ArrayList<Handler>();
 	      customHandlerChain.add(new SoapHandler());
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-				
 	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
 	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
-	      
 				String organismos = port.obtenerOrganismos(wsUser, wsPass);
-				
+
 				//Parsear el string para obtener los organismos
 				InputSource is = new InputSource();
 				is.setCharacterStream(new StringReader(organismos));
@@ -508,7 +504,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			  	if(erroresIter.hasNext()) {
 			  		return null;
 			  	}
-			  }			  
+			  }
 			  
 			  //Se pudo invocar el servicio y parsear el resultado
 				//Vaciar la tabla de organismos
@@ -528,7 +524,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			  }
 			}	catch (Exception ex) {
 				ex.printStackTrace();
-				//throw new ApplicationException("no_se_pudo_consultar_el_servicio_web", ex);
 			}
 		}
 		//Devolver la lista de organismos
@@ -692,7 +687,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				
 			}	catch (Exception ex) {
 				ex.printStackTrace();
-				//throw new ApplicationException("no_se_pudo_consultar_el_servicio_web", ex);
 			}
 		}
 		//Devolver la lista de tramites

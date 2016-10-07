@@ -35,6 +35,7 @@ import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
+import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -53,9 +54,11 @@ import uy.gub.imm.sae.entity.ServicioAutocompletarPorDato;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoRecurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
 import uy.gub.imm.sae.exception.AutocompletarException;
+import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAutocompletarException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
@@ -63,8 +66,6 @@ import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 /**
@@ -95,7 +96,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	private Map<String, Object> datosReservaMBean;
 	private FormularioDinamicoReserva formularioDin;
 
-	private String textoCaptcha;
+  private Map<String, TramiteAgenda> tramitesAgenda;
+  private List<SelectItem> tramites;
+  private String tramiteCodigo;
 	private String aceptaCondiciones;
 
 	public void beforePhase(PhaseEvent event) {
@@ -114,11 +117,37 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	@PostConstruct
 	public void init() {
 
-		if (sessionMBean.getAgenda() == null
-				|| sessionMBean.getRecurso() == null) {
+		if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null) {
 			redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
 			return;
 		}
+		
+    try {
+      this.tramiteCodigo = null;
+      tramitesAgenda = new HashMap<String, TramiteAgenda>();
+      tramites = new ArrayList<SelectItem>();
+      
+      Reserva reserva = sessionMBean.getReserva();
+      Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
+      List<TramiteAgenda> tramites0 = agendarReservasEJB.consultarTramites(agenda);
+
+      if(tramites0.size()==1) {
+        TramiteAgenda tramite = tramites0.get(0);
+        tramiteCodigo = tramite.getTramiteCodigo();
+        tramitesAgenda.put(tramiteCodigo, tramite);
+      }else {
+        tramites.add(new SelectItem("", "Sin especificar"));
+        for(TramiteAgenda tramite : tramites0) {
+          tramitesAgenda.put(tramite.getTramiteCodigo(), tramite);
+          tramites.add(new SelectItem(tramite.getTramiteCodigo(), tramite.getTramiteNombre()));
+        }
+      }
+    }catch(Exception ex) {
+      ex.printStackTrace();
+      redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+      return;
+    }
+		
 	}
 
 	public SessionMBean getSessionMBean() {
@@ -232,122 +261,61 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 						for (ParametrosAutocompletar param : parametros) {
 							if (ModoAutocompletado.SALIDA.equals(param.getModo())) {
 								for (ServicioAutocompletarPorDato sDato : lstDatos) {
-									if (sDato.getNombreParametro().equals(
-											param.getNombre())) {
-
+									if (sDato.getNombreParametro().equals(param.getNombre())) {
 										if (ultimo == null) {
-
 											ultimo = sDato.getDatoASolicitar();
-
 										} else {
-
-											if (sDato.getDatoASolicitar()
-													.getAgrupacionDato()
-													.getOrden().intValue() > ultimo
-													.getAgrupacionDato()
-													.getOrden().intValue()) {
-
-												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar
-														.get(ultimo.getId());
+											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo
+													.getAgrupacionDato().getOrden().intValue()) {
+												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
 												if (auxServiciosRecurso.size() > 1) {
-													auxServiciosRecurso
-															.remove(sRec
-																	.getId());
+													auxServiciosRecurso.remove(sRec.getId());
 												} else {
-													serviciosAutocompletar
-															.remove(ultimo
-																	.getId());
+													serviciosAutocompletar.remove(ultimo.getId());
 												}
-												ultimo = sDato
-														.getDatoASolicitar();
-
-											} else if (sDato
-													.getDatoASolicitar()
-													.getAgrupacionDato()
-													.getOrden().intValue() == ultimo
-													.getAgrupacionDato()
-													.getOrden().intValue()) {
-												if (sDato.getDatoASolicitar()
-														.getFila().intValue() > ultimo
-														.getFila().intValue()) {
-
-													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar
-															.get(ultimo.getId());
-													if (auxServiciosRecurso
-															.size() > 1) {
-														auxServiciosRecurso
-																.remove(sRec
-																		.getId());
+												ultimo = sDato.getDatoASolicitar();
+											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == 
+											    ultimo.getAgrupacionDato().getOrden().intValue()) {
+												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
+													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
+													if (auxServiciosRecurso.size() > 1) {
+														auxServiciosRecurso.remove(sRec.getId());
 													} else {
-														serviciosAutocompletar
-																.remove(ultimo
-																		.getId());
+														serviciosAutocompletar.remove(ultimo.getId());
 													}
-													ultimo = sDato
-															.getDatoASolicitar();
-
-												} else if (sDato
-														.getDatoASolicitar()
-														.getFila().intValue() == ultimo
-														.getFila().intValue()) {
-													if (sDato
-															.getDatoASolicitar()
-															.getColumna()
-															.intValue() > ultimo
-															.getColumna()
-															.intValue()) {
-
-														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar
-																.get(ultimo
-																		.getId());
-														if (auxServiciosRecurso
-																.size() > 1) {
-															auxServiciosRecurso
-																	.remove(sRec
-																			.getId());
+													ultimo = sDato.getDatoASolicitar();
+												} else if (sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
+													if (sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
+														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
+														if (auxServiciosRecurso.size() > 1) {
+															auxServiciosRecurso.remove(sRec.getId());
 														} else {
-															serviciosAutocompletar
-																	.remove(ultimo
-																			.getId());
+															serviciosAutocompletar.remove(ultimo.getId());
 														}
-														ultimo = sDato
-																.getDatoASolicitar();
-
+														ultimo = sDato.getDatoASolicitar();
 													}
 												}
 											}
 										}
-
-										if (serviciosAutocompletar
-												.containsKey(ultimo.getId())) {
-											serviciosAutocompletar.get(
-													ultimo.getId()).put(
-													sRec.getId(), sRec);
+										if (serviciosAutocompletar.containsKey(ultimo.getId())) {
+											serviciosAutocompletar.get(ultimo.getId()).put(sRec.getId(), sRec);
 										} else {
 											HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = new HashMap<Integer, ServicioPorRecurso>();
-											auxServiciosRecurso.put(
-													sRec.getId(), sRec);
-											serviciosAutocompletar.put(
-													ultimo.getId(),
-													auxServiciosRecurso);
+											auxServiciosRecurso.put(sRec.getId(), sRec);
+											serviciosAutocompletar.put(ultimo.getId(), auxServiciosRecurso);
 										}
-
 									}
 								}
 							}
 						}
 					}
-					formularioDin.armarFormulario(agrupaciones,
-							serviciosAutocompletar);
-
+					formularioDin.armarFormulario(agrupaciones, serviciosAutocompletar);
 				}
-				UIComponent formulario = formularioDin
-						.getComponenteFormulario();
+				UIComponent formulario = formularioDin.getComponenteFormulario();
 				campos.getChildren().add(formulario);
 			}
 		} catch (Exception e) {
 			addErrorMessage(e, FORMULARIO_ID);
-
 		}
 	}
 
@@ -375,129 +343,61 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 
 					HashMap<Integer, HashMap<Integer, ServicioPorRecurso>> serviciosAutocompletar = new HashMap<Integer, HashMap<Integer, ServicioPorRecurso>>();
 
-					List<ServicioPorRecurso> lstServiciosPorRecurso = recursosEJB
-							.consultarServicioAutocompletar(recurso);
+					List<ServicioPorRecurso> lstServiciosPorRecurso = recursosEJB.consultarServicioAutocompletar(recurso);
 
 					for (ServicioPorRecurso sRec : lstServiciosPorRecurso) {
-						List<ServicioAutocompletarPorDato> lstDatos = sRec
-								.getAutocompletadosPorDato();
-						List<ParametrosAutocompletar> parametros = sRec
-								.getAutocompletado()
-								.getParametrosAutocompletados();
+						List<ServicioAutocompletarPorDato> lstDatos = sRec.getAutocompletadosPorDato();
+						List<ParametrosAutocompletar> parametros = sRec.getAutocompletado().getParametrosAutocompletados();
 
 						DatoASolicitar ultimo = null;
 						for (ParametrosAutocompletar param : parametros) {
-							if (ModoAutocompletado.SALIDA.equals(param
-									.getModo())) {
+							if (ModoAutocompletado.SALIDA.equals(param.getModo())) {
 								for (ServicioAutocompletarPorDato sDato : lstDatos) {
-									if (sDato.getNombreParametro().equals(
-											param.getNombre())) {
-
+									if (sDato.getNombreParametro().equals(param.getNombre())) {
 										if (ultimo == null) {
-
-											ultimo = sDato
-													.getDatoASolicitar();
-
+											ultimo = sDato.getDatoASolicitar();
 										} else {
-
-											if (sDato.getDatoASolicitar()
-													.getAgrupacionDato()
-													.getOrden().intValue() > ultimo
-													.getAgrupacionDato()
-													.getOrden().intValue()) {
-
-												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar
-														.get(ultimo.getId());
-												if (auxServiciosRecurso
-														.size() > 1) {
-													auxServiciosRecurso
-															.remove(sRec
-																	.getId());
+											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > 
+											  ultimo.getAgrupacionDato().getOrden().intValue()) {
+												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
+												if (auxServiciosRecurso.size() > 1) {
+													auxServiciosRecurso.remove(sRec.getId());
 												} else {
-													serviciosAutocompletar
-															.remove(ultimo
-																	.getId());
+													serviciosAutocompletar.remove(ultimo.getId());
 												}
-												ultimo = sDato
-														.getDatoASolicitar();
-
-											} else if (sDato
-													.getDatoASolicitar()
-													.getAgrupacionDato()
-													.getOrden().intValue() == ultimo
-													.getAgrupacionDato()
-													.getOrden().intValue()) {
-												if (sDato
-														.getDatoASolicitar()
-														.getFila()
-														.intValue() > ultimo
-														.getFila()
-														.intValue()) {
-
-													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar
-															.get(ultimo
-																	.getId());
-													if (auxServiciosRecurso
-															.size() > 1) {
-														auxServiciosRecurso
-																.remove(sRec
-																		.getId());
+												ultimo = sDato.getDatoASolicitar();
+											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == 
+											    ultimo.getAgrupacionDato().getOrden().intValue()) {
+												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
+													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = 
+													    serviciosAutocompletar.get(ultimo.getId());
+													if (auxServiciosRecurso.size() > 1) {
+														auxServiciosRecurso.remove(sRec.getId());
 													} else {
-														serviciosAutocompletar
-																.remove(ultimo
-																		.getId());
+														serviciosAutocompletar.remove(ultimo.getId());
 													}
-													ultimo = sDato
-															.getDatoASolicitar();
-
-												} else if (sDato
-														.getDatoASolicitar()
-														.getFila()
-														.intValue() == ultimo
-														.getFila()
-														.intValue()) {
-													if (sDato
-															.getDatoASolicitar()
-															.getColumna()
-															.intValue() > ultimo
-															.getColumna()
-															.intValue()) {
-
-														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar
-																.get(ultimo
-																		.getId());
-														if (auxServiciosRecurso
-																.size() > 1) {
-															auxServiciosRecurso
-																	.remove(sRec
-																			.getId());
+													ultimo = sDato.getDatoASolicitar();
+												} else if (sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
+													if (sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
+														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = 
+														    serviciosAutocompletar.get(ultimo.getId());
+														if (auxServiciosRecurso.size() > 1) {
+															auxServiciosRecurso.remove(sRec.getId());
 														} else {
-															serviciosAutocompletar
-																	.remove(ultimo
-																			.getId());
+															serviciosAutocompletar.remove(ultimo.getId());
 														}
-														ultimo = sDato
-																.getDatoASolicitar();
-
+														ultimo = sDato.getDatoASolicitar();
 													}
 												}
 											}
 										}
-
-										if (serviciosAutocompletar
-												.containsKey(ultimo.getId())) {
-											serviciosAutocompletar.get(
-													ultimo.getId()).put(
-													sRec.getId(), sRec);
+										if (serviciosAutocompletar.containsKey(ultimo.getId())) {
+											serviciosAutocompletar.get(ultimo.getId()).put(sRec.getId(), sRec);
 										} else {
 											HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = new HashMap<Integer, ServicioPorRecurso>();
-											auxServiciosRecurso.put(
-													sRec.getId(), sRec);
-											serviciosAutocompletar.put(
-													ultimo.getId(),
-													auxServiciosRecurso);
+											auxServiciosRecurso.put(sRec.getId(), sRec);
+											serviciosAutocompletar.put(ultimo.getId(), auxServiciosRecurso);
 										}
-
 									}
 								}
 							}
@@ -521,20 +421,17 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 		this.datosReservaMBean = datosReservaMBean;
 	}
 
-	public String getTextoCaptcha() {
-		return textoCaptcha;
-	}
-
-	public void setTextoCaptcha(String textoCaptcha) {
-		this.textoCaptcha = textoCaptcha;
-	}
-
 	public String confirmarReserva() {
 		limpiarMensajesError();
 		
 		try {
 
 			boolean hayError = false;
+			
+      if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
+        hayError = true;
+        addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_el_tramite"), FORM_ID+":tramite");
+      }
 			
 			HtmlPanelGroup clausulaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:clausula");
 			String clausulaStyleClass = clausulaGroup.getStyleClass();
@@ -573,6 +470,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			if(hayError) {
 				return null;
 			}
+			
+      reserva.setTramiteCodigo(this.tramiteCodigo);
+      reserva.setTramiteNombre(tramitesAgenda.get(this.tramiteCodigo).getTramiteNombre());
 			
 			boolean confirmada = false;
 			while (!confirmada) {
@@ -633,20 +533,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			
 			return null;
-		} catch (WarningValidacionException e) {
-			List<String> idComponentesError = new ArrayList<String>();
-			for(int i = 0; i < e.getCantCampos(); i++) {
-				idComponentesError.add(e.getNombreCampo(i));
-			}
-			String mensaje = e.getMensaje(0);
-			for(int i = 1; i < e.getCantMensajes(); i++) {
-				mensaje += "  |  "+e.getMensaje(i);
-			}
-			addInfoMessage(mensaje);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
-			
-			return null;				
-		}	catch (ErrorValidacionCommitException e) { 
+		} catch (ErrorValidacionCommitException e) { 
 			//Algun grupo de campos no es valido según alguna validacion
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -659,19 +546,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			addErrorMessage(mensaje);
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		}	catch (WarningValidacionCommitException e) {
-			List<String> idComponentesError = new ArrayList<String>();
-			for(int i = 0; i < e.getCantCampos(); i++) {
-				idComponentesError.add(e.getNombreCampo(i));
-			}
-			String mensaje = e.getMensaje(0);
-			for(int i = 1; i < e.getCantMensajes(); i++) {
-				mensaje += "  |  "+e.getMensaje(i);
-			}
-			addInfoMessage(mensaje);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
-			return null;				
-		} catch (ValidacionClaveUnicaException vcuEx) {
+		}	catch (ValidacionClaveUnicaException vcuEx) {
 			addErrorMessage(vcuEx);
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < vcuEx.getCantCampos(); i++) {
@@ -691,7 +566,12 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch(Exception ex) {
+		} catch(BusinessException bEx) {
+      //Seguramente esto fue lanzado por una Accion
+      addErrorMessage(bEx.getMessage());
+      bEx.printStackTrace();
+      return null;
+    } catch(Exception ex) {
 			addErrorMessage(sessionMBean.getTextos().get("sistema_en_mantenimiento"));
 			ex.printStackTrace();
 			return null;
@@ -811,4 +691,17 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	public void setAceptaCondiciones(String aceptaCondiciones) {
 		this.aceptaCondiciones = aceptaCondiciones;
 	}
+	
+  public String getTramiteCodigo() {
+    return tramiteCodigo;
+  }
+
+  public void setTramiteCodigo(String tramiteCodigo) {
+    this.tramiteCodigo = tramiteCodigo;
+  }
+
+  public List<SelectItem> getTramites() {
+    return tramites;
+  }
+	
 }

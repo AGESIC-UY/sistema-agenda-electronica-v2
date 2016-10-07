@@ -33,7 +33,9 @@ public class SimpleCalendario implements Calendario {
 		cal.setTime(dia);
 		int diaSemana = cal.get(Calendar.DAY_OF_WEEK);
 		
-		return ((diaSemana!=Calendar.SATURDAY || r.getSabadoEsHabil()) && diaSemana!=Calendar.SUNDAY); 
+		return ((diaSemana!=Calendar.SATURDAY && diaSemana!=Calendar.SUNDAY) || 
+		    (diaSemana==Calendar.SATURDAY && r.getSabadoEsHabil()) ||
+		    (diaSemana==Calendar.SUNDAY && r.getDomingoEsHabil())); 
 	}
 	
 }

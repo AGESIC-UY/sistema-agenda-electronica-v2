@@ -36,6 +36,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
+import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
@@ -53,19 +54,18 @@ import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoRecurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.AutocompletarException;
+import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAutocompletarException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
-import uy.gub.imm.sae.exception.WarningAutocompletarException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 /**
@@ -92,8 +92,12 @@ public class Paso3MBean extends PasoMBean {
 	private UIComponent camposError;
 	private Map<String, Object> datosReservaMBean;
 	private FormularioDinamicoReserva formularioDin;
-	
+
+	private Map<String, TramiteAgenda> tramitesAgenda;
+	private List<SelectItem> tramites;
+	private String tramiteCodigo;
 	private String aceptaCondiciones;
+	
 
 	private boolean errorInit;
 	
@@ -114,6 +118,32 @@ public class Paso3MBean extends PasoMBean {
 		} catch (ApplicationException ex) {
 			addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 			errorInit = true;
+		}
+		
+		try {
+      this.tramiteCodigo = null;
+      tramitesAgenda = new HashMap<String, TramiteAgenda>();
+      tramites = new ArrayList<SelectItem>();
+      
+  		Reserva reserva = sesionMBean.getReserva();
+  		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
+  		List<TramiteAgenda> tramites0 = agendarReservasEJB.consultarTramites(agenda);
+
+      if(tramites0.size()==1) {
+        TramiteAgenda tramite = tramites0.get(0);
+        tramiteCodigo=tramite.getTramiteCodigo();
+        tramitesAgenda.put(tramiteCodigo, tramite);
+      }else {
+        tramites.add(new SelectItem("", "Sin especificar"));
+    		for(TramiteAgenda tramite : tramites0) {
+    		  tramitesAgenda.put(tramite.getTramiteCodigo(), tramite);
+    		  tramites.add(new SelectItem(tramite.getTramiteCodigo(), tramite.getTramiteNombre()));
+    		}
+      }
+		}catch(Exception ex) {
+		  ex.printStackTrace();
+      addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+      errorInit = true;
 		}
 	}
 	
@@ -216,15 +246,12 @@ public class Paso3MBean extends PasoMBean {
 				if (formularioDin == null) {
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sesionMBean.getTimeZone());
 					sesionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					
 					String valoresCampos = sesionMBean.getParmsDatosCiudadano();
 					if(valoresCampos!=null) {
 						cargarCamposPorDefecto(valoresCampos, agrupaciones);
 					}
-					
 					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
 							FormularioDinamicoReserva.TipoFormulario.EDICION, sesionMBean.getFormatoFecha());
-					
 					formularioDin.armarFormulario(agrupaciones, null);
 				}
 				UIComponent formulario = formularioDin.getComponenteFormulario();
@@ -279,6 +306,11 @@ public class Paso3MBean extends PasoMBean {
 
 			boolean hayError = false;
 			
+			if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
+        hayError = true;
+        addErrorMessage(sesionMBean.getTextos().get("debe_seleccionar_el_tramite"), FORM_ID, FORM_ID+":tramite");
+			}
+			
 			HtmlPanelGroup clausulaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:clausula");
 			String clausulaStyleClass = clausulaGroup.getStyleClass();
 			if (this.aceptaCondiciones==null || !this.aceptaCondiciones.equals("SI")) {
@@ -332,6 +364,7 @@ public class Paso3MBean extends PasoMBean {
 			}
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
 			Reserva reserva = sesionMBean.getReserva();
+			
 			reserva.setDatosReserva(datos);
 			
 			agendarReservasEJB.validarDatosReserva(sesionMBean.getEmpresaActual(), reserva);
@@ -339,13 +372,16 @@ public class Paso3MBean extends PasoMBean {
 			if(hayError) {
 				return null;
 			}
+
+      reserva.setTramiteCodigo(this.tramiteCodigo);
+      reserva.setTramiteNombre(tramitesAgenda.get(this.tramiteCodigo).getTramiteNombre());
 			
 			String transaccionPadreId = null;
 			Long pasoPadre = null;
 			if(sesionMBean.getCodigoTrazabilidadPadre()!=null) {
 				String transaccionPadre[] = sesionMBean.getCodigoTrazabilidadPadre().split("-");
+        transaccionPadreId = transaccionPadre[0];
 				if(transaccionPadre.length==2) {
-					transaccionPadreId = transaccionPadre[0];
 					try {
 						pasoPadre = Long.valueOf(transaccionPadre[1]);
 					}catch(Exception ex) {
@@ -412,21 +448,7 @@ public class Paso3MBean extends PasoMBean {
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			
 			return null;
-		} catch (WarningValidacionException e) {
-			//Algun grupo de campos tiene algun valor que amerita una atencion.
-			List<String> idComponentesError = new ArrayList<String>();
-			for(int i = 0; i < e.getCantCampos(); i++) {
-				idComponentesError.add(e.getNombreCampo(i));
-			}
-			String mensaje = e.getMensaje(0);
-			for(int i = 1; i < e.getCantMensajes(); i++) {
-				mensaje += "  |  "+e.getMensaje(i);
-			}
-			addInfoMessage(mensaje);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
-			
-			return null;				
-		}	catch (ErrorValidacionCommitException e) { 
+		} catch (ErrorValidacionCommitException e) { 
 			//Algun grupo de campos no es valido según alguna validacion
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -439,20 +461,7 @@ public class Paso3MBean extends PasoMBean {
 			addErrorMessage(mensaje);
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		}	catch (WarningValidacionCommitException e) {
-			//Algun grupo de campos tiene algun valor que amerita una atencion.
-			List<String> idComponentesError = new ArrayList<String>();
-			for(int i = 0; i < e.getCantCampos(); i++) {
-				idComponentesError.add(e.getNombreCampo(i));
-			}
-			String mensaje = e.getMensaje(0);
-			for(int i = 1; i < e.getCantMensajes(); i++) {
-				mensaje += "  |  "+e.getMensaje(i);
-			}
-			addInfoMessage(mensaje);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
-			return null;				
-		} catch (ValidacionClaveUnicaException vcuEx) {
+		}	catch (ValidacionClaveUnicaException vcuEx) {
 			//Guardo el estado de la confirmacion con warnings
 			addErrorMessage(vcuEx);
 			List<String> idComponentesError = new ArrayList<String>();
@@ -461,8 +470,7 @@ public class Paso3MBean extends PasoMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		}
-		catch (ValidacionException e) {
+		} catch (ValidacionException e) {
 			//Faltan campos requeridos
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -473,11 +481,16 @@ public class Paso3MBean extends PasoMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch(Exception ex) {
-			addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
-			ex.printStackTrace();
+		} catch(BusinessException bEx) {
+		  //Seguramente esto fue lanzado por una Accion
+			addErrorMessage(bEx.getMessage());
+			bEx.printStackTrace();
 			return null;
-		}
+		} catch(Exception ex) {
+      addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
+      ex.printStackTrace();
+      return null;
+    }
 		//Blanqueo el formulario de datos de la reserva
 		datosReservaMBean.clear();
 		
@@ -545,20 +558,6 @@ public class Paso3MBean extends PasoMBean {
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			
 			return null;
-		} catch (WarningAutocompletarException e) {
-			
-			List<String> idComponentesError = new ArrayList<String>();
-			for(int i = 0; i < e.getCantCampos(); i++) {
-				idComponentesError.add(e.getNombreCampo(i));
-			}
-			String mensaje = e.getMensaje(0);
-			for(int i = 1; i < e.getCantMensajes(); i++) {
-				mensaje += "  |  "+e.getMensaje(i);
-			}
-			addInfoMessage(mensaje, FORMULARIO_ID);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
-			
-			return null;
 		} catch (AutocompletarException e) {
 			//Faltan campos requeridos
 			addErrorMessage(e.getMessage(), FORMULARIO_ID);
@@ -590,7 +589,7 @@ public class Paso3MBean extends PasoMBean {
 	{
 		String parametros[] = valoresCampos.split("\\;");
 		for (String parm : parametros) {
-			String agrupCampoValor[] = parm.split("\\.");
+			String agrupCampoValor[] = parm.split("\\.", 3);
 			boolean largoCorrecto = false;
 		
 			if (agrupCampoValor.length > 3 && agrupCampoValor[2].contains("@")) {
@@ -698,6 +697,18 @@ public class Paso3MBean extends PasoMBean {
 	public boolean isErrorInit() {
 		return errorInit;
 	}
+
+  public String getTramiteCodigo() {
+    return tramiteCodigo;
+  }
+
+  public void setTramiteCodigo(String tramiteCodigo) {
+    this.tramiteCodigo = tramiteCodigo;
+  }
+
+  public List<SelectItem> getTramites() {
+    return tramites;
+  }
 	
 
 }

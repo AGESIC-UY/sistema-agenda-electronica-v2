@@ -42,12 +42,14 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
+import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Oficina;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
@@ -65,6 +67,9 @@ public class RecursoMBean extends BaseMBean{
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
 	private UsuariosEmpresas empresasEJB;
+	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  private AgendaGeneral generalEJB;
 	
 	private SessionMBean sessionMBean;
 	private Recurso recursoNuevo;
@@ -178,14 +183,8 @@ public class RecursoMBean extends BaseMBean{
 		}
 		
 		try {
-			//Cargar la lista de oficinas para el tramite asociado a la agenda
-			if(agenda != null && agenda.getTramiteId() != null) {
-				List<Oficina> oficinas = empresasEJB.obtenerOficinasTramite(agenda.getTramiteId(), false);
-				setOficinas(oficinas);
-			}else {
-				setOficinas(null);
-			}
-			
+		  List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, false);
+		  setOficinas(oficinas);
 		}catch(ApplicationException aEx) {
 			addErrorMessage(aEx.getMessage());
 			aEx.printStackTrace();
@@ -681,6 +680,7 @@ public class RecursoMBean extends BaseMBean{
 			sessionMBean.getRecursoSeleccionado().setNombre(recursoBase.getNombre());
 			sessionMBean.getRecursoSeleccionado().setReservaMultiple(recursoBase.getReservaMultiple());
 			sessionMBean.getRecursoSeleccionado().setSabadoEsHabil(recursoBase.getSabadoEsHabil());
+      sessionMBean.getRecursoSeleccionado().setDomingoEsHabil(recursoBase.getDomingoEsHabil());
 			sessionMBean.getRecursoSeleccionado().setSerie(recursoBase.getSerie());
 			sessionMBean.getRecursoSeleccionado().setTelefonos(recursoBase.getTelefonos());
 			sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(recursoBase.getVentanaCuposMinimos());
@@ -849,9 +849,9 @@ public class RecursoMBean extends BaseMBean{
 		try {
 			//Cargar la lista de oficinas para el tramite asociado a la agenda
 			Agenda agenda = sessionMBean.getAgendaMarcada();
-			String tramiteId = agenda.getTramiteId();
-			List<Oficina> oficinas = empresasEJB.obtenerOficinasTramite(tramiteId, true);
-			setOficinas(oficinas);
+			
+      List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, true);
+      setOficinas(oficinas);
 			
 			String msg = sessionMBean.getTextos().get("se_cargaron_n_oficinas");
 			if(msg!=null) {
@@ -918,6 +918,15 @@ public class RecursoMBean extends BaseMBean{
 		}catch (UserException aEx) {
 			addErrorMessage(aEx, MSG_ID);
 		}
+	}
+	
+	private List<Oficina> cargarOficinasTramitesAgenda(Agenda agenda, boolean actualizar) throws ApplicationException {
+    List<Oficina> oficinas = new ArrayList<Oficina>();
+    List<TramiteAgenda> tramites = generalEJB.consultarTramites(agenda);
+    for(TramiteAgenda tramite : tramites) {
+      oficinas.addAll(empresasEJB.obtenerOficinasTramite(tramite.getTramiteId(), actualizar));
+    }
+    return oficinas;
 	}
 	
 }

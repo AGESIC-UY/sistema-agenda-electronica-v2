@@ -88,6 +88,29 @@
 									value="#{sessionMBean.textos['datos_de_la_reserva']}" />
 							</legend>
 							<p:outputPanel styleClass="form-horizontal">
+								
+	              <p:outputPanel styleClass="form-group">
+	                <h:outputLabel value="#{sessionMBean.textos['identificador_de_la_reserva']}"
+	                  styleClass="col-sm-3 control-label label" for="resNum" />
+	                <p:outputPanel styleClass="col-sm-9">
+	                  <h:inputText id="resId"
+	                    value="#{consultaMBean.reservaConsultada.id}"
+	                    styleClass="form-control textoCorto" readonly="true"
+	                    disabled="true" />
+	                </p:outputPanel>
+	              </p:outputPanel>
+	              
+	              <p:outputPanel styleClass="form-group">
+	                <h:outputLabel value="#{sessionMBean.textos['tramite']}"
+	                  styleClass="col-sm-3 control-label label" for="resNum" />
+	                <p:outputPanel styleClass="col-sm-9">
+	                  <h:inputText id="resTramite"
+	                    value="#{consultaMBean.reservaConsultada.tramiteCodigo} - #{consultaMBean.reservaConsultada.tramiteNombre}"
+	                    styleClass="form-control" readonly="true"
+	                    disabled="true" />
+	                </p:outputPanel>
+	              </p:outputPanel>
+								
 								<p:outputPanel styleClass="form-group">
 									<h:outputLabel value="#{sessionMBean.textos['fecha']}"
 										styleClass="col-sm-3 control-label label" for="dispFecha" />

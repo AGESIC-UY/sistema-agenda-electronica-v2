@@ -1201,6 +1201,9 @@ input[type="text"].diaSeleccionado{
 	}
 }
 
+dt {
+	font-weight: 100;
+}
 
 /*
 Esto es para solucionar el problema que hace que el botón para subir archivos solo funcione cuando se hace
@@ -1208,4 +1211,7 @@ clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
 */
 .ui-fileupload-buttonbar .ui-fileupload-choose input {
     transform: scale(3, 1);
+}
+.ui-datalist-content {
+	border:none;
 }

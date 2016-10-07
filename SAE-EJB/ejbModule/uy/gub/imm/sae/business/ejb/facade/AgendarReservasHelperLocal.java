@@ -41,8 +41,6 @@ import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 
 @Local
 public interface AgendarReservasHelperLocal {
@@ -58,8 +56,8 @@ public interface AgendarReservasHelperLocal {
 	public boolean chequeoCupoNegativo (Disponibilidad d);
 	public List<DatoASolicitar> obtenerDatosASolicitar(Recurso r);
 	public List<ValidacionPorRecurso> obtenerValidacionesPorRecurso(Recurso r);
-	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException, ValidacionException;
-	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, ReservaDTO reservaDTO) throws ApplicationException, BusinessException, ErrorValidacionException, WarningValidacionException, ErrorValidacionCommitException, WarningValidacionCommitException;
+	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws ValidacionException;
+	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, ReservaDTO reservaDTO) throws ApplicationException, BusinessException, ErrorValidacionException, ErrorValidacionCommitException;
 	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Reserva reserva, List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException;
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, ErrorAutocompletarException, WarningAutocompletarException;
 }

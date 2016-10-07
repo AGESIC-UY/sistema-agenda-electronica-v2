@@ -69,8 +69,11 @@ public class Reserva implements Serializable {
 	private String ucrea;
 	private String ucancela;
 	
-	private String codigoSeguridad;
-	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU 
+	private String codigoSeguridad; //Código utilizado para la cencelación
+	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
+	
+	private String tramiteCodigo;
+	private String tramiteNombre;
 
 	private List<Disponibilidad> disponibilidades;
 	private Set<DatoReserva> datosReserva;
@@ -283,7 +286,7 @@ public class Reserva implements Serializable {
 	public void setCodigoSeguridad(String codigoSeguridad) {
 		this.codigoSeguridad = codigoSeguridad;
 	}
-		
+
 	@Transient
 	public String getNumeroDocumento() {
 		String documento = "";
@@ -296,7 +299,25 @@ public class Reserva implements Serializable {
 		return documento;
 	}
 
-	@Transient
+  @Column(name="tramite_codigo")
+	public String getTramiteCodigo() {
+    return tramiteCodigo;
+  }
+
+  public void setTramiteCodigo(String tramiteCodigo) {
+    this.tramiteCodigo = tramiteCodigo;
+  }
+
+  @Column(name="tramite_nombre")
+  public String getTramiteNombre() {
+    return tramiteNombre;
+  }
+
+  public void setTramiteNombre(String tramiteNombre) {
+    this.tramiteNombre = tramiteNombre;
+  }
+
+  @Transient
 	public String getTipoDocumento() {
 		String tipoDocumento = "";
 		for(DatoReserva dato : getDatosReserva()) {
@@ -317,4 +338,6 @@ public class Reserva implements Serializable {
 	public void setTrazabilidadGuid(String trazabilidadGuid) {
 		this.trazabilidadGuid = trazabilidadGuid;
 	}
+	
+	
 }

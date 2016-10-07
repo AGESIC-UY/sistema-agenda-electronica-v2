@@ -54,7 +54,7 @@ public interface AgendarReservasWS {
     public Reserva confirmarReserva(
         @WebParam(name = "reserva", targetNamespace = "")
         Reserva reserva)
-        throws AccesoMultipleException_Exception, ApplicationException_Exception, BusinessException_Exception, ErrorValidacionCommitException_Exception, ErrorValidacionException_Exception, UserException_Exception, ValidacionClaveUnicaException_Exception, ValidacionException_Exception, ValidacionPorCampoException_Exception, WarningValidacionCommitException_Exception, WarningValidacionException_Exception
+        throws AccesoMultipleException_Exception, ApplicationException_Exception, BusinessException_Exception, ErrorValidacionCommitException_Exception, ErrorValidacionException_Exception, UserException_Exception, ValidacionClaveUnicaException_Exception, ValidacionException_Exception, ValidacionPorCampoException_Exception
     ;
 
 //    /**

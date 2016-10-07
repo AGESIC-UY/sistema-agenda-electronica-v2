@@ -241,7 +241,7 @@ public class Paso2MBean extends PasoMBean {
 
 		VentanaDeTiempo ventanaCalendario;
 		ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
-
+		
 		sesionMBean.setVentanaCalendario(ventanaCalendario);
 
 		VentanaDeTiempo ventanaMesSeleccionado = new VentanaDeTiempo();
@@ -249,18 +249,19 @@ public class Paso2MBean extends PasoMBean {
 		cal.setTime(ventanaCalendario.getFechaInicial());
 		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
 		ventanaMesSeleccionado.setFechaInicial(Utiles.time2InicioDelDia(cal.getTime()));
+		
+    cal.setTime(ventanaCalendario.getFechaFinal());
 		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
 		ventanaMesSeleccionado.setFechaFinal(Utiles.time2FinDelDia(cal.getTime()));
 		sesionMBean.setVentanaMesSeleccionado(ventanaMesSeleccionado);
-
+		
 		cargarCuposADesplegar(recurso, ventanaMesSeleccionado);
 
 		sesionMBean.setCurrentDate(ventanaCalendario.getFechaInicial());
 		sesionMBean.setDiaSeleccionado(null);
 	}
 
-	private void cargarCuposADesplegar(Recurso r,
-			VentanaDeTiempo ventanaMesSeleccionado) {
+	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado) {
 
 		List<Integer> listaCupos = null;
 		try {
