@@ -20,15 +20,16 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
-
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -116,115 +117,44 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
     try {
       Calendario calendario = CalendarioFactory.getCalendario();
       for(int i=0; i<recurso.getDiasInicioVentanaIntranet().intValue(); ) {
-        cal.add(Calendar.DAY_OF_MONTH, 1);
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
           i++;
         }
+        cal.add(Calendar.DAY_OF_MONTH, 1);
       }
     }catch(Exception ex) {
       cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasInicioVentanaIntranet());
     }
 		
+    //Fecha inicial
 		Date fechaInicial = cal.getTime();
 		ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		if (ventana.getFechaInicial().before(fechaInicial)) {
 			ventana.setFechaInicial(fechaInicial);
 		}
-
-		//FECHA FINAL
-		ventana.setFechaFinal(recurso.getDiasVentanaIntranet()-1);
-		if (recurso.getFechaFinDisp() != null && recurso.getFechaFinDisp().before(ventana.getFechaFinal())) {
-			ventana.setFechaFinal(recurso.getFechaFinDisp());
-		}
+		
+    //Calcular la fecha final: fecha inicial + getDiasVentanaInternet (tener en cuenta los días no hábiles)
+    try {
+      Calendario calendario = CalendarioFactory.getCalendario();
+      for(int i=0; i<recurso.getDiasVentanaIntranet().intValue()-1; ) {
+        if(calendario.esDiaHabil(cal.getTime(), recurso)) {
+          i++;
+        }
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+      }
+    }catch(Exception ex) {
+      cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasVentanaIntranet());
+    }
+    Date fechaFinal = cal.getTime();
+    ventana.setFechaFinal(fechaFinal);
+    if (recurso.getFechaFinDisp() != null && recurso.getFechaFinDisp().before(ventana.getFechaFinal())) {
+      ventana.setFechaFinal(recurso.getFechaFinDisp());
+    }
 
 		return ventana;
 	}
 	
 
-	/**
-	 * Obtiene una ventana mas chica ajustada a las disponibilidades que realmente estan disponibles
-	 * (o sea que hay cupos). Si no hay cupos retorna null.
-	 */
-	@SuppressWarnings("unchecked")
-	public VentanaDeTiempo obtenerVentanaCalendarioAjustadaIntranet(Recurso recurso, VentanaDeTiempo ventana) {
-
-		VentanaDeTiempo ventanaAjustada = new VentanaDeTiempo();
-		
-		Date ahora = new Date();
-		
-		//Calculo la fecha de inicio
-		Date min = (Date) entityManager.createQuery(
-		"select min(d.fecha) " +
-		"from Disponibilidad d " +
-		"where  d.recurso = :rec and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha >= :fi and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora)" 
-		)
-		.setParameter("rec", recurso)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-		.setParameter("hoy", ahora, TemporalType.DATE)
-		.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-		.getSingleResult();
-		
-		if (min != null ) {
-	    //Calcular la fecha inicial: hoy + diasInicioVentanaIntranet (tener en cuenta los días no hábiles)
-			Date hoy = Utiles.time2InicioDelDia(new Date());
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(hoy);
-	    try {
-	      Calendario calendario = CalendarioFactory.getCalendario();
-	      for(int i=0; i<recurso.getDiasInicioVentanaIntranet().intValue(); ) {
-          cal.add(Calendar.DAY_OF_MONTH, 1);
-	        if(calendario.esDiaHabil(cal.getTime(), recurso)) {
-	          i++;
-	        }
-	      }
-	    }catch(Exception ex) {
-	      cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasInicioVentanaIntranet());
-	    }
-			
-			Date fechaInicial = cal.getTime();
-			
-			ventanaAjustada.setFechaInicial(min);
-			if (ventanaAjustada.getFechaInicial().before(fechaInicial)) {
-				ventanaAjustada.setFechaInicial(fechaInicial);
-			}
-			
-			//FECHA FINAL
-			List<Date> lstMax = (List<Date>) entityManager.createQuery(
-			"select distinct(d.fecha) " +
-			"from Disponibilidad d " +
-			"where  d.recurso = :rec and " +
-			"      d.fechaBaja is null and " +
-			"      d.fecha >= :fi and " +
-	    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-	    	"order by d.fecha" 
-			)
-			.setParameter("rec", recurso)
-			.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-			.setParameter("hoy", ahora, TemporalType.DATE)
-			.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-			.setMaxResults(recurso.getDiasVentanaIntranet())
-			.getResultList();
-			
-			Date max = lstMax.get(lstMax.size() - 1);
-			
-			ventanaAjustada.setFechaFinal(max);
-			if (recurso.getFechaFinDisp() != null && recurso.getFechaFinDisp().before(ventanaAjustada.getFechaFinal())) {
-				ventanaAjustada.setFechaFinal(recurso.getFechaFinDisp());
-			}
-
-		}
-		else {
-			//No hay disponibilidades, por lo tanto anulo la ventana
-			ventanaAjustada.setFechaInicial(ventana.getFechaInicial());
-			ventanaAjustada.setFechaFinal(-1);
-		}		
-
-		return ventanaAjustada;
-	}
-	
 	/**
 	 * Obtiene la ventana del calendario estatica, es decir sin verificar 
 	 * los cupos que realmente existen en la ventana.
@@ -243,206 +173,39 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		try {
       Calendario calendario = CalendarioFactory.getCalendario();
       for(int i=0; i<recurso.getDiasInicioVentanaInternet().intValue(); ) {
-        cal.add(Calendar.DAY_OF_MONTH, 1);
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
           i++;
         }
+        cal.add(Calendar.DAY_OF_MONTH, 1);
       }
 		}catch(Exception ex) {
 		  cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasInicioVentanaInternet());
 		}
-    
+
+		//Fecha inicial
 		Date fechaInicial = cal.getTime();
-		
 		ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		if (ventana.getFechaInicial().before(fechaInicial)) {
 			ventana.setFechaInicial(fechaInicial);
 		}
 
-		//FECHA FINAL
-		ventana.setFechaFinal(recurso.getDiasVentanaInternet()-1);
+    //Calcular la fecha final: fecha inicial + getDiasVentanaInternet (tener en cuenta los días no hábiles)
+    try {
+      Calendario calendario = CalendarioFactory.getCalendario();
+      for(int i=0; i<recurso.getDiasVentanaInternet().intValue()-1; ) {
+        if(calendario.esDiaHabil(cal.getTime(), recurso)) {
+          i++;
+        }
+        cal.add(Calendar.DAY_OF_MONTH, 1);
+      }
+    }catch(Exception ex) {
+      cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasVentanaInternet());
+    }
+    Date fechaFinal = cal.getTime();
+    ventana.setFechaFinal(fechaFinal);
 		if (recurso.getFechaFinDisp() != null && recurso.getFechaFinDisp().before(ventana.getFechaFinal())) {
 			ventana.setFechaFinal(recurso.getFechaFinDisp());
 		}
-
-		return ventana;
-	}
-	
-
-	/**
-	 * Obtiene una ventana mas chica ajustada a las disponibilidades que realmente estan disponibles
-	 * (o sea que hay cupos). Si no hay cupos retorna null.
-	 */
-	@SuppressWarnings("unchecked")
-	public VentanaDeTiempo obtenerVentanaCalendarioAjustadaInternet(Recurso recurso, VentanaDeTiempo ventana) {
-		VentanaDeTiempo ventanaAjustada = new VentanaDeTiempo();
-		Date ahora = new Date();
-		
-		//Calculo la fecha de inicio
-		Date min = (Date) entityManager.createQuery(
-		"select min(d.fecha) " +
-		"from Disponibilidad d " +
-		"where  d.recurso = :rec and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha >= :fi and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora)" 
-		)
-		.setParameter("rec", recurso)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-		.setParameter("hoy", ahora, TemporalType.DATE)
-		.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-		.getSingleResult();
-		
-		if (min != null ) {
-	    //Calcular la fecha inicial: hoy + diasInicioVentanaInterneet (tener en cuenta los días no hábiles)
-			Date hoy = Utiles.time2InicioDelDia(new Date());
-			Calendar cal = Calendar.getInstance();
-			cal.setTime(hoy);
-	    try {
-	      Calendario calendario = CalendarioFactory.getCalendario();
-	      for(int i=0; i<recurso.getDiasInicioVentanaInternet().intValue(); ) {
-          cal.add(Calendar.DAY_OF_MONTH, 1);
-	        if(calendario.esDiaHabil(cal.getTime(), recurso)) {
-	          i++;
-	        }
-	      }
-	    }catch(Exception ex) {
-	      cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasInicioVentanaInternet());
-	    }
-			
-			Date fechaInicial = cal.getTime();
-			ventanaAjustada.setFechaInicial(min);
-			if (ventanaAjustada.getFechaInicial().before(fechaInicial)) {
-				ventanaAjustada.setFechaInicial(fechaInicial);
-			}
-			
-			//FECHA FINAL
-			List<Date> lstMax = (List<Date>) entityManager.createQuery(
-			"select distinct(d.fecha) " +
-			"from Disponibilidad d " +
-			"where  d.recurso = :rec and " +
-			"      d.fechaBaja is null and " +
-			"      d.fecha >= :fi and " +
-	    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-	    	"order by d.fecha" 
-			)
-			.setParameter("rec", recurso)
-			.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-			.setParameter("hoy", ahora, TemporalType.DATE)
-			.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-			.setMaxResults(recurso.getDiasVentanaInternet())
-			.getResultList();
-			
-			Date max = lstMax.get(lstMax.size() - 1);
-			
-			ventanaAjustada.setFechaFinal(max);
-			if (recurso.getFechaFinDisp() != null && recurso.getFechaFinDisp().before(ventanaAjustada.getFechaFinal())) {
-				ventanaAjustada.setFechaFinal(recurso.getFechaFinDisp());
-			}
-		}	else {
-			//No hay disponibilidades, por lo tanto anulo la ventana
-			ventanaAjustada.setFechaInicial(ventana.getFechaInicial());
-			ventanaAjustada.setFechaFinal(-1);
-		}		
-
-		return ventanaAjustada;
-	}
-	
-	/**
-	 * Obtiene una ventana posiblemente mas grande que cumpla con la cantidad de cupos minimos indicada en el recurso.
-	 * Esto solo sera posible si efectivamente existe disponibilidad suficiente hacia el futuro.
-	 */
-	@SuppressWarnings("unchecked")
-	public VentanaDeTiempo obtenerVentanaCalendarioExtendida(Recurso r, VentanaDeTiempo ventana) {
-		
-	  
-		//TODO Falta implementar
-		//Se calcula la cantidad de cupos que hay en la ventana
-	
-		Date ahora = new Date();
-		
-		//Se obtiene lista de Cupos
-		List<Object[]> listaCupos = (List<Object[]>) entityManager.createQuery(
-		"select d.fecha, sum(d.cupo) " +
-		"from  Disponibilidad d  " +
-		"where d.recurso = :rec and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha >= :fi and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-		"group by d.fecha " +
-		"order by d.fecha asc "
-		)
-		.setParameter("rec", r)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-		.setParameter("hoy", ahora, TemporalType.DATE)
-		.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-		.getResultList();
-		
-
-		//Se obtiene lista de Reservas
-		List<Object[]> listaReservas = (List<Object[]>) entityManager.createQuery(
-		"select d.fecha, count(r) " +
-		"from  Disponibilidad d join d.reservas r " +
-		"where d.recurso = :rec and " +
-		"      d.fechaBaja is null and " +
-		"      d.fecha >= :fi and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) and " +
-		"      r.estado <> :cancelado " +
-		"group by d.fecha " +
-		"order by d.fecha asc "
-		)
-		.setParameter("rec", r)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-		.setParameter("hoy", ahora, TemporalType.DATE)
-		.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-		.setParameter("cancelado", Estado.C)
-		.getResultList();
-
-		//Si la cantidad de cupos es menor que ventanaCuposMinimos del recurso,
-		//se aumenta la cantidad de dias hasta llegar a ese valor (mientras no se llegue a fechaFinDisp
-		// y sigan existiendo disponibilidades).
-
-		Date fechaHasta = null;
-		Long cuposDisp = new Long(0);
-		Date fechaIterCupo = null;
-		Date fechaIterReserva = null;
-		
-		Iterator<Object[]> iCupos = listaCupos.iterator();
-		Iterator<Object[]> iReservas = listaReservas.iterator();
-		
-		Object[] reserva = null;
-		
-		if(iReservas.hasNext()){
-			reserva = iReservas.next();
-			fechaIterReserva = (Date)reserva[0];
-		}
-		
-		while ( cuposDisp < r.getVentanaCuposMinimos() && iCupos.hasNext()){
-			//Se controla si existen Disponibilidades
-			
-			Object[] cupo= iCupos.next();
-			fechaIterCupo = (Date)cupo[0];
-			
-			if(fechaIterReserva!=null && fechaIterCupo.equals(fechaIterReserva)){
-				cuposDisp = cuposDisp + (Long)cupo[1] - (Long)reserva[1];
-
-				if(iReservas.hasNext()){
-					reserva = iReservas.next();
-					fechaIterReserva = (Date)reserva[0];
-				} else {
-					fechaIterReserva = null;
-				}
-			} else {
-				cuposDisp = cuposDisp + (Long)cupo[1];
-			}
-			fechaHasta = fechaIterCupo;
-			
-		}
-	
-		if ((fechaHasta != null) && ventana.getFechaFinal().before(fechaHasta)){
-			ventana.setFechaFinal(fechaHasta);
-		}
-		
 		return ventana;
 	}
 	
@@ -452,12 +215,14 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * del inicio de disponibilidad indicado en el recurso, no se devuelve cupos.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo v) {
+	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo v, TimeZone timezone) {
 		
 		//La clono pues la voy a modificar.
 		v = new VentanaDeTiempo(v);
 		
-		Date ahora = new Date();
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, timezone.getOffset((new Date()).getTime()));
+    Date ahora = cal.getTime();
 
 		//Elimino el PASADO
 		if (v.getFechaInicial().before(ahora)) {
@@ -494,12 +259,15 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * del inicio de disponibilidad indicado en el recurso, no se devuelve cupos.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo v) {
+	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo v, TimeZone timezone) {
 		
 		//La clono pues la voy a modificar.
 		v = new VentanaDeTiempo(v);
 		
-		Date ahora = new Date();
+    //Date ahora = new Date();
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, timezone.getOffset((new Date()).getTime()));
+    Date ahora = cal.getTime();
 
 		//Elimino el PASADO
 		if (v.getFechaInicial().before(ahora)) {

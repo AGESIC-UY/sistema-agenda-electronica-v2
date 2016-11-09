@@ -312,13 +312,13 @@
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 								</f:facet>
-								<p:commandButton id="modificarValorLink" ajaxSingle="true"
+								<p:commandButton id="modificarValorLink" ajaxSingle="true" styleClass="ui-button-icon-only"
 									actionListener="#{datoASolicitarValoresMBean.seleccionarValor(rowIndex)}"
-									update=":formModif2" icon="ui-icon-pencil"
+									update=":formModif2" icon="ui-icon-pencil" value="#{sessionMBean.textos['modificar']}"
 									title="#{sessionMBean.textos['modificar']}">
 								</p:commandButton>
-								<p:commandButton id="eliminarValorLink"
-									oncomplete="PF('eliminarValor').show();"
+								<p:commandButton id="eliminarValorLink" styleClass="ui-button-icon-only"
+									oncomplete="PF('eliminarValor').show();" value="#{sessionMBean.textos['eliminar']}"
 									actionListener="#{datoASolicitarValoresMBean.seleccionarValorParaEliminar(rowIndex)}"
 									icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 								</p:commandButton>

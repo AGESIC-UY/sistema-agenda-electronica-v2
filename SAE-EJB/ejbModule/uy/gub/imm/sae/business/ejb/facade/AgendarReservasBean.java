@@ -391,28 +391,26 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @throws BusinessException 
 	 * @throws UserException 
 	 */
-	public Reserva marcarReserva(Disponibilidad d) throws BusinessException, UserException {
+	public Reserva marcarReserva(Disponibilidad disponibilidad) throws BusinessException, UserException {
 		
-		if (d == null) {
-			throw new BusinessException("-1", "Parametro nulo");
+		if (disponibilidad == null) {
+			throw new UserException("debe_especificar_la_disponibilidad");
 		}
-		
-		d = entityManager.find(Disponibilidad.class, d.getId());
-		if (d == null) {
-			throw new BusinessException("-1", "No se encuentra la disponibilidad indicada");
+		disponibilidad = entityManager.find(Disponibilidad.class, disponibilidad.getId());
+		if (disponibilidad == null) {
+			throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
 		}		
 		
 		//Se crea la reserva en una transaccion independiente
-		Reserva reserva = helper.crearReservaPendiente(d);
-		
+		Reserva reserva = helper.crearReservaPendiente(disponibilidad);
 		//Chequeo que el cupo real no de negativo
 		//Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
 		//De lo contrario la reserva se ha marcado con exito
-		if (helper.chequeoCupoNegativo(d)) {
+		if (helper.chequeoCupoNegativo(disponibilidad)) {
 			reserva = entityManager.find(Reserva.class, reserva.getId());
 			entityManager.remove(reserva);
 			entityManager.flush();
-			throw new UserCommitException("AE10069");
+			throw new UserCommitException("el_horario_acaba_de_quedar_sin_cupos");
 		}
 		return reserva;
 	}
@@ -526,9 +524,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
 		throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
 		
-    System.out.println("AgendarReservasBean.confirmarReserva -- transaccionPadreId="+transaccionPadreId);
-    System.out.println("AgendarReservasBean.confirmarReserva -- pasoPadre="+pasoPadre);
-	  
 		if (reserva == null || reserva.getDatosReserva()==null) {
       throw new BusinessException("debe_especificar_la_reserva");
 		}
@@ -778,31 +773,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (r == null) {
 			throw new BusinessException("-1", "No se encuentra el recurso indicado");
 		}
-	//	chequearPermiso(r.getAgenda());	
 
-		//Ajusto el tamaño segun la cantidad de cupos minimos y la cantidad de cupos existentes.
-		//Dentro de la ventana obtenida busco la primer y ultima disponibilidad para achicar aun mas la ventana.
-		//Luego la agrando hasta cumplir con el cupo minimo.
-
-		VentanaDeTiempo ventanaResultado;
-		
-		//1- Tamaño estetico: Es una ventana futura o comienza hoy.
+		//1- Tamaño estatico: Es una ventana futura o comienza hoy.
 		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaIntranet(r);
 		
-		//2- Obtengo una ventana mas chica ajustada segun los cupos que realmente estan disponibles, posiblemente vacia.
-		VentanaDeTiempo ventanaAjustada = helper.obtenerVentanaCalendarioAjustadaIntranet(r, ventanaEstatica);
-			
-		//Si ventanCuposMinimos = 0, la ventana no se corre.
-		if (r.getVentanaCuposMinimos() > 0){ 
-			//3- Agrando la ventana hasta cumplir con los cupos minimos si es que existe disponibilidad suficiente.
-			VentanaDeTiempo ventanaExtendida = helper.obtenerVentanaCalendarioExtendida(r, ventanaAjustada);
-			ventanaResultado = ventanaExtendida;
-		}
-		else {
-			ventanaResultado = ventanaAjustada;
-		}
-
-		return ventanaResultado;
+		return ventanaEstatica;
 	}
 
 	/**
@@ -836,30 +811,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (r == null) {
 			throw new BusinessException("-1", "No se encuentra el recurso indicado");
 		}
-	//	chequearPermiso(r.getAgenda());	
 
-		//Ajusto el tamaño segun la cantidad de cupos minimos y la cantidad de cupos existentes.
-		//Dentro de la ventana obtenida busco la primer y ultima disponibilidad para achicar aun mas la ventana.
-		//Luego la agrando hasta cumplir con el cupo minimo.
-
-		VentanaDeTiempo ventanaResultado;
-		
-		//1- Tamaño estetico: Es una ventana futura o comienza hoy.
+		//1- Tamaño estatico: Es una ventana futura o comienza hoy.
 		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaInternet(r);
 		
-		//2- Obtengo una ventana mas chica ajustada segun los cupos que realmente estan disponibles, posiblemente vacia.
-		VentanaDeTiempo ventanaAjustada = helper.obtenerVentanaCalendarioAjustadaInternet(r, ventanaEstatica);
-			
-		//Si ventanCuposMinimos = 0, la ventana no se corre.
-		if (r.getVentanaCuposMinimos() > 0){ 
-			//3- Agrando la ventana hasta cumplir con los cupos minimos si es que existe disponibilidad suficiente.
-			VentanaDeTiempo ventanaExtendida = helper.obtenerVentanaCalendarioExtendida(r, ventanaAjustada);
-			ventanaResultado = ventanaExtendida;
-		} else {
-			ventanaResultado = ventanaAjustada;
-		}
-
-		return ventanaResultado;
+		return ventanaEstatica;
 	}
 
 	/**
@@ -877,22 +833,22 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @return 
 	 */
 	@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_FCALL_CENTER", "RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_ANONIMO"})
-	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v) throws BusinessException {
+	public List<Integer> obtenerCuposPorDia(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws BusinessException {
 		
-		if (r == null || v == null) {
+		if (recurso == null || ventana == null) {
 			throw new BusinessException("-1", "Parametro nulo");
 		}
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null) {
+		recurso = entityManager.find(Recurso.class, recurso.getId());
+		if (recurso == null) {
 			throw new BusinessException("-1", "No se encuentra el recurso indicado");
 		}
 		
 		//Obtengo la suma de cupos asignados por dia
-		List<Object[]> cuposAsignados  = helper.obtenerCuposAsignados(r,v);
+		List<Object[]> cuposAsignados  = helper.obtenerCuposAsignados(recurso, ventana, timezone);
 		//Obtengo la suma de cupos consumidos (reservas) por dia
-		List<Object[]> cuposConsumidos = helper.obtenerCuposConsumidos(r,v);
+		List<Object[]> cuposConsumidos = helper.obtenerCuposConsumidos(recurso,ventana, timezone);
 		//Armo la lista de resultados, indicando los cupos para todos los dias solicitados en la ventana
-		List<Integer> cuposXdia = helper.obtenerCuposXDia(v, cuposAsignados, cuposConsumidos);
+		List<Integer> cuposXdia = helper.obtenerCuposXDia(ventana, cuposAsignados, cuposConsumidos);
 
 		return cuposXdia;
 	}

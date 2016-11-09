@@ -216,6 +216,9 @@ public class Paso2MBean extends PasoMBean {
 				for (Disponibilidad d : lista) {
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(d.getHoraInicio());
+					if(d.getCupo()<0) {
+					  d.setCupo(0);
+					}
 
 					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
 						// Matutino
@@ -239,8 +242,7 @@ public class Paso2MBean extends PasoMBean {
 
 		Recurso recurso = sesionMBean.getRecurso();
 
-		VentanaDeTiempo ventanaCalendario;
-		ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
+		VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
 		
 		sesionMBean.setVentanaCalendario(ventanaCalendario);
 
@@ -261,25 +263,25 @@ public class Paso2MBean extends PasoMBean {
 		sesionMBean.setDiaSeleccionado(null);
 	}
 
-	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado) {
+	private void cargarCuposADesplegar(Recurso recurso, VentanaDeTiempo ventana) {
 
 		List<Integer> listaCupos = null;
 		try {
-			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado);
+			listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventana, sesionMBean.getTimeZone());
 			// Se carga la fecha inicial
 			Calendar cont = Calendar.getInstance();
 			cont.setTime(Utiles.time2InicioDelDia(sesionMBean.getVentanaMesSeleccionado().getFechaInicial()));
 
 			Integer i = 0;
 
-			Date inicio_disp = sesionMBean.getVentanaCalendario().getFechaInicial();
-			Date fin_disp = sesionMBean.getVentanaCalendario().getFechaFinal();
+			Date inicioDisp = sesionMBean.getVentanaCalendario().getFechaInicial();
+			Date finDisp = sesionMBean.getVentanaCalendario().getFechaFinal();
 
 			jsonArrayFchDisp = new JSONArray();
 			// Recorro la ventana dia a dia y voy generando la lista completa de
 			// cupos x dia con -1, 0, >0 según corresponda.
 			while (!cont.getTime().after(sesionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
-				if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
+				if (cont.getTime().before(inicioDisp) || cont.getTime().after(finDisp)) {
 					listaCupos.set(i, -1);
 				} else {
 					if (listaCupos.get(i) > 0) {
@@ -367,8 +369,9 @@ public class Paso2MBean extends PasoMBean {
 			try {
 				marcarReserva(row.getData());
 				return "siguientePaso";
-			} catch (Exception e) {
-				addErrorMessage(e);
+			} catch (Exception ex) {
+			  addErrorMessage(ex);
+			  configurarDisponibilidadesDelDia();
 				return null;
 			}
 		} else {

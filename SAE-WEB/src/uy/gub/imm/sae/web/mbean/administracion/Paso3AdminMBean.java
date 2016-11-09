@@ -461,6 +461,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 					datos.add(dato);
 				}
 			}
+			
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
 			Reserva reserva = sessionMBean.getReserva();
 			reserva.setDatosReserva(datos);

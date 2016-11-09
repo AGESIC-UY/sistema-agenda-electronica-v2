@@ -133,6 +133,8 @@ public class AgendaMBean extends BaseMBean {
 		  hayErrores = true;
 		}else {
 		  int ind = 0;
+		  List<String> tramitesUsados = new ArrayList<String>(agendaCrear.getTramites().size());
+		  boolean hayTramitesRepetidos = false;
 		  for(TramiteAgenda tramite : agendaCrear.getTramites()) {
 		    if(tramite.getTramiteCodigo() == null || tramite.getTramiteCodigo().trim().isEmpty()){
 	        addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
@@ -142,8 +144,20 @@ public class AgendaMBean extends BaseMBean {
           addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
           addErrorMessage("", "form:tramites:codigoTramite");
           hayErrores = true;
+        }else {
+          String claveTramite = "["+tramite.getTramiteCodigo().trim()+"]["+tramite.getTramiteNombre().trim()+"]";
+          claveTramite = claveTramite.toLowerCase();
+          if(tramitesUsados.contains(claveTramite)) {
+            hayTramitesRepetidos = true;
+          }else {
+            tramitesUsados.add(claveTramite);
+          }
         }
         ind++;
+		  }
+		  if(hayTramitesRepetidos) {
+	      addErrorMessage(sessionMBean.getTextos().get("hay_tramites_repetidos"));
+	      hayErrores = true;
 		  }
 		}
 		if(hayErrores) {
@@ -261,6 +275,8 @@ public class AgendaMBean extends BaseMBean {
 	      hayErrores = true;
 	    }else {
 	      int ind = 0;
+	      List<String> tramitesUsados = new ArrayList<String>(agendaSeleccionada.getTramites().size());
+	      boolean hayTramitesRepetidos = false;
 	      for(TramiteAgenda tramite : agendaSeleccionada.getTramites()) {
 	        if(tramite.getTramiteCodigo() == null || tramite.getTramiteCodigo().trim().isEmpty()){
 	          addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
@@ -270,11 +286,22 @@ public class AgendaMBean extends BaseMBean {
             addErrorMessage(sessionMBean.getTextos().get("el_codigo_y_el_nombre_del_tramite_son_obligatorios"), "form:tramites:"+ind+":codigoTramite");
             addErrorMessage("", "form:tramites:codigoTramite");
 	          hayErrores = true;
+	        }else {
+	          String claveTramite = "["+tramite.getTramiteCodigo().trim()+"]["+tramite.getTramiteNombre().trim()+"]";
+	          claveTramite = claveTramite.toLowerCase();
+	          if(tramitesUsados.contains(claveTramite)) {
+	            hayTramitesRepetidos = true;
+	          }else {
+	            tramitesUsados.add(claveTramite);
+	          }
 	        }
 	        ind++;
 	      }
+	      if(hayTramitesRepetidos) {
+	        addErrorMessage(sessionMBean.getTextos().get("hay_tramites_repetidos"));
+	        hayErrores = true;
+	      }
 	    }
-			
 			
 			if(hayErrores) {
 				return null;
@@ -457,6 +484,7 @@ public class AgendaMBean extends BaseMBean {
 			try {
 				agendasEJB.copiarAgenda(a);
 				sessionMBean.cargarAgendas();
+        addInfoMessage(sessionMBean.getTextos().get("agenda_copiada"), MSG_ID);
 			} catch (BusinessException e) {
 				addErrorMessage(e, MSG_ID);
 			} catch (ApplicationException e) {

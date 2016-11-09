@@ -209,7 +209,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 		do{
 			contador++;
 			aCopia.setNombre("Copia "+contador+" de "+a.getNombre());
-			aCopia.setDescripcion("Copia "+contador+" de "+a.getDescripcion());
+			aCopia.setDescripcion(a.getDescripcion());
 		}while(existeAgendaPorNombre(aCopia));
 		
 		aCopia.setTextosAgenda(new HashMap<String, TextoAgenda>());
@@ -217,6 +217,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
   		for(String idioma : a.getTextosAgenda().keySet()) {
 	  		TextoAgenda viejo = a.getTextosAgenda().get(idioma);
 	  		TextoAgenda nuevo = new TextoAgenda();
+	  		nuevo.setIdioma(idioma);
 	  		nuevo.setTextoPaso1(viejo.getTextoPaso1());
 	  		nuevo.setTextoPaso2(viejo.getTextoPaso2());
 	  		nuevo.setTextoPaso3(viejo.getTextoPaso3());
@@ -224,6 +225,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	  		nuevo.setTextoTicketConf(viejo.getTextoTicketConf());
 	  		nuevo.setTextoCorreoConf(viejo.getTextoCorreoConf());
 	  		nuevo.setTextoCorreoCanc(viejo.getTextoCorreoCanc());
+	  		nuevo.setAgenda(aCopia);
 	  		aCopia.getTextosAgenda().put(idioma, nuevo);
   		}
   	}
@@ -425,23 +427,6 @@ private void copiarRecursoParaAgenda(Agenda acopia, Recurso r, String nombre, St
 		}
 	}
 
-	private Boolean existeAgendaPorDescripcion(Agenda a) throws ApplicationException{
-		try{
-		Long cant = (Long) entityManager
-								.createQuery("SELECT count(a) from Agenda a " +
-										"WHERE upper(a.descripcion) = upper(:descripcion) " +
-										"and (a.id <> :id or :id is null) " +
-										"AND a.fechaBaja IS NULL")
-								.setParameter("descripcion", a.getDescripcion())
-								.setParameter("id", a.getId())
-								.getSingleResult();
-		
-		return (cant > 0);
-		} catch (Exception e){
-			throw new ApplicationException(e);
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	public List<Agenda> consultarAgendas() throws ApplicationException {
 

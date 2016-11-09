@@ -213,7 +213,6 @@ public class EmpresaMBean extends BaseMBean {
 				//Verificar que no existe otra empresa con el mismo nombre
 				if(nueva) {
 					try {
-						
 						Empresa empresa0 = empresasEJB.obtenerEmpresaPorNombre(empresa.getNombre());
 						if(empresa0 != null) {
 							addErrorMessage(sessionMBean.getTextos().get("ya_existe_una_empresa_con_el_nombre_especificado"), "nombreEmpresa");
@@ -243,10 +242,8 @@ public class EmpresaMBean extends BaseMBean {
 						sessionMBean.cambioEmpresa((Integer)emp.getValue());
 					}
 				}
-			} catch (UserException aEx) {
-				addErrorMessage(aEx, MSG_ID);
-			} catch (ApplicationException aEx) {
-				addErrorMessage(aEx, MSG_ID);
+			} catch(Exception ex) {
+        addErrorMessage(ex, MSG_ID);
 			}
 		}
 		return null;

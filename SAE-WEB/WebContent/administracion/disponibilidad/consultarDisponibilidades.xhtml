@@ -89,9 +89,9 @@
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 								</f:facet>
-								<p:commandButton id="consultarLink"
+								<p:commandButton id="consultarLink" value="#{sessionMBean.textos['ver_detalles']}"
 									action="#{disponibilidadMBean.configurarDisponibilidadesDelDia}"
-									icon="ui-icon-search"
+									icon="ui-icon-search" styleClass="ui-button-icon-only"
 									title="#{sessionMBean.textos['ver_detalles']}">
 								</p:commandButton>
 							</p:column>

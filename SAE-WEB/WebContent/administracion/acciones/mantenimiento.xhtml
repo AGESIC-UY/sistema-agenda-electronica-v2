@@ -69,14 +69,14 @@
 							<f:facet name="header">
 								<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 							</f:facet>
-							<p:commandButton id="modificarAccion"
+							<p:commandButton id="modificarAccion" value="#{sessionMBean.textos['modificar']}"
 								actionListener="#{accionMantenimientoMBean.editarAccion}"
-								icon="ui-icon-pencil" update="form:panelAcciones"
+								icon="ui-icon-pencil" update="form:panelAcciones" styleClass="ui-button-icon-only"
 								title="#{sessionMBean.textos['modificar']}">
 							</p:commandButton>
-							<p:commandButton id="eliminarAccion"
+							<p:commandButton id="eliminarAccion" value="#{sessionMBean.textos['eliminar']}"
 								actionListener="#{accionMantenimientoMBean.selecAccionEliminar}" update="form:panelAcciones"
-								oncomplete="PF('eliminarAccion').show();" icon="ui-icon-trash"
+								oncomplete="PF('eliminarAccion').show();" icon="ui-icon-trash" styleClass="ui-button-icon-only"
 								title="#{sessionMBean.textos['eliminar']}">
 							</p:commandButton>
 						</p:column>
@@ -167,10 +167,10 @@
 										<f:facet name="header">
 											<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 										</f:facet>
-										<p:commandButton id="eliminarParametro"
+										<p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
 											action="#{accionMantenimientoMBean.eliminarParametro(num)}"
 											icon="ui-icon-trash" update="form:panelAcciones"
-											title="#{sessionMBean.textos['eliminar']}">
+											title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
 										</p:commandButton>
 									</p:column>
 								</p:dataTable>

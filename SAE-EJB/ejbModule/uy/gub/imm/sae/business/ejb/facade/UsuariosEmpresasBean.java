@@ -249,7 +249,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			throw new UserException("no_se_puede_guardar_la_empresa_porque_no_existe_el_esquema");
 		}
 
-		
 		if(empresa.getId() == null) {
 			globalEntityManager.persist(empresa);
 			globalEntityManager.flush();

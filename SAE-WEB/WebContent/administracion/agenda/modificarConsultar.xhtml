@@ -56,19 +56,19 @@
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 						</f:facet>
-						<p:commandButton id="modificarAgenda"
+						<p:commandButton id="modificarAgenda" value="#{sessionMBean.textos['modificar']}"
 							action="#{agendaMBean.modificar}" icon="ui-icon-pencil"
-							title="#{sessionMBean.textos['modificar']}">
+							title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
-						<p:commandButton id="copiarAgeLink"
+						<p:commandButton id="copiarAgeLink" value="#{sessionMBean.textos['copiar']}"
 							actionListener="#{agendaMBean.copiar}"
 							update="form:panelForm" icon="ui-icon-copy"
-							title="#{sessionMBean.textos['copiar']}">
+							title="#{sessionMBean.textos['copiar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
-						<p:commandButton id="eliminarAgenda"
+						<p:commandButton id="eliminarAgenda" value="#{sessionMBean.textos['eliminar']}"
 							actionListener="#{agendaMBean.selecAgendaEliminar}"
 							oncomplete="PF('eliminarAgenda').show();" icon="ui-icon-trash"
-							title="#{sessionMBean.textos['eliminar']}">
+							title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
 					</p:column>
 				</p:dataTable>

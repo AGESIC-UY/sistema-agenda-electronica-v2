@@ -304,7 +304,7 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado){
 		List<Integer> listaCupos=null;
 		try {
-			listaCupos= agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado);
+			listaCupos= agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado, sessionMBean.getTimeZone());
 			//Se carga la fecha inicial 
 			Calendar cont = Calendar.getInstance();
 			cont.setTime(Utiles.time2InicioDelDia(sessionMBean.getVentanaMesSeleccionado().getFechaInicial()));
@@ -332,25 +332,18 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 				Recurso recurso = sessionMBean.getRecurso();
 				try {
 					VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
-					VentanaDeTiempo ventanaMesSeleccionado = new VentanaDeTiempo();
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(ventanaCalendario.getFechaInicial());
-					cal.set(Calendar.DAY_OF_MONTH,cal.getActualMinimum(Calendar.DAY_OF_MONTH));
-					ventanaMesSeleccionado.setFechaInicial(Utiles.time2InicioDelDia(cal.getTime()));
-					cal.set(Calendar.DAY_OF_MONTH,cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-					ventanaMesSeleccionado.setFechaFinal(Utiles.time2FinDelDia(cal.getTime()));
 					
-					List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso,ventanaMesSeleccionado);
+					List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventanaCalendario, sessionMBean.getTimeZone());
 					// Se carga la fecha inicial
 					Calendar cont = Calendar.getInstance();
-					cont.setTime(Utiles.time2InicioDelDia(ventanaMesSeleccionado.getFechaInicial()));
+          cont.setTime(Utiles.time2InicioDelDia(ventanaCalendario.getFechaInicial()));
 
 					Integer i = 0;
 
 					Date inicio_disp = ventanaCalendario.getFechaInicial();
 					Date fin_disp = ventanaCalendario.getFechaFinal();
 					boolean tieneDiponibilidad = false; 
-					while (!cont.getTime().after(ventanaMesSeleccionado.getFechaFinal()) && tieneDiponibilidad == false) {
+          while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && tieneDiponibilidad == false) {
 						if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
 							listaCupos.set(i, -1);
 						} else {

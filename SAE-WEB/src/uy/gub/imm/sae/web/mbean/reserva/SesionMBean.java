@@ -228,16 +228,13 @@ public class SesionMBean	extends BaseMBean {
 	}
 
 	public void setDiaSeleccionado(Date diaSeleccionado) {
-
-		
 		if (diaSeleccionado == null) {
 			this.diaSeleccionado = null;
 			this.disponibilidadesDelDiaMatutina = null;
 			this.disponibilidadesDelDiaVespertina = null;
 			this.disponibilidad = null;
-		}
-		else {
-			if (this.diaSeleccionado == null || !diaSeleccionado.equals(this.diaSeleccionado)) {
+		} else {
+			if(this.diaSeleccionado == null || !diaSeleccionado.equals(this.diaSeleccionado)) {
 				this.diaSeleccionado = diaSeleccionado;
 				this.disponibilidadesDelDiaMatutina = null;
 				this.disponibilidadesDelDiaVespertina = null;

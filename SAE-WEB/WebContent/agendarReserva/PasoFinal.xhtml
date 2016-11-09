@@ -68,9 +68,8 @@
 					</div>
 					<p:outputPanel rendered="#{sesionMBean.agenda.conTrazabilidad}">
 						<div class="seguridad">
-							<h:outputText value="#{sesionMBean.textos['codigo_de_trazabilidad']}:" />
-							<h:outputText
-								value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}" styleClass="negrita" />
+							<h:outputText value="#{sesionMBean.textos['codigo_de_trazabilidad']}: " />
+							<h:outputText value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}" styleClass="negrita" />
 						</div>
 					</p:outputPanel>
 	        <div class="seguridad">

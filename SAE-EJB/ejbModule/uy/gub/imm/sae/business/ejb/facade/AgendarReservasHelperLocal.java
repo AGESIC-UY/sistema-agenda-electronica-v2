@@ -22,6 +22,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.ejb.Local;
 
@@ -45,12 +46,9 @@ import uy.gub.imm.sae.exception.WarningAutocompletarException;
 @Local
 public interface AgendarReservasHelperLocal {
 	public VentanaDeTiempo obtenerVentanaCalendarioEstaticaIntranet (Recurso recurso);
-	public VentanaDeTiempo obtenerVentanaCalendarioAjustadaIntranet(Recurso r, VentanaDeTiempo ventana);
 	public VentanaDeTiempo obtenerVentanaCalendarioEstaticaInternet (Recurso recurso);
-	public VentanaDeTiempo obtenerVentanaCalendarioAjustadaInternet(Recurso r, VentanaDeTiempo ventana);
-	public VentanaDeTiempo obtenerVentanaCalendarioExtendida(Recurso r, VentanaDeTiempo ventana);
-	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo ventana);
-	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana);
+	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
+	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
 	public List<Integer> obtenerCuposXDia(VentanaDeTiempo ventana, List<Object[]> cuposAsignados, List<Object[]> cuposConsumidos);
 	public Reserva crearReservaPendiente(Disponibilidad d);
 	public boolean chequeoCupoNegativo (Disponibilidad d);

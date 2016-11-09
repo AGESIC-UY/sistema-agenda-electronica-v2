@@ -341,14 +341,16 @@ public class UsuarioMBean extends BaseMBean {
 	public void cambioSuperadmin() {
 		//Si deja de ser superadmin y es el último mostrar un mensaje de advertencia
 		Usuario usuario = getUsuarioEditar();
-		//Ver si hay al menos otro superadmin
-		try {
-			boolean hayOtroSuperadmin = usuariosEJB.hayOtroSuperadmin(usuario.getId());
-			if(!hayOtroSuperadmin) {
-				addAdvertenciaMessage(sessionMBean.getTextos().get("no_hay_otro_superadmin"), "form:superadministrador");
-			}
-		}catch(ApplicationException ex) {
-			addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_determinar_si_hay_otro_superadministrador"), "form:superadministrador");
+		if(usuario.getSuperadmin()!=null && !usuario.getSuperadmin().booleanValue()) {
+  		//Ver si hay al menos otro superadmin
+  		try {
+  			boolean hayOtroSuperadmin = usuariosEJB.hayOtroSuperadmin(usuario.getId());
+  			if(!hayOtroSuperadmin) {
+  				addAdvertenciaMessage(sessionMBean.getTextos().get("no_hay_otro_superadmin"), "form:superadministrador");
+  			}
+  		}catch(ApplicationException ex) {
+  			addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_determinar_si_hay_otro_superadministrador"), "form:superadministrador");
+  		}
 		}
 		//Si se pone la marca de superadmin se blanquean los roles específicos
 		if(usuario.getSuperadmin()!=null && usuario.getSuperadmin().booleanValue()) {

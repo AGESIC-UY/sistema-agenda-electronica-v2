@@ -66,15 +66,16 @@
               <f:facet name="header">
                 <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
               </f:facet>
-              <p:commandButton id="modificarValidacion"
+              <p:commandButton id="modificarValidacion" value="#{sessionMBean.textos['modificar']}"
                 actionListener="#{validacionAsignacionMBean.editarValidacion}"
                 icon="ui-icon-pencil" update="form:panelAsociaciones"
-                title="#{sessionMBean.textos['modificar']}">
+                title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
               </p:commandButton>
-              <p:commandButton id="eliminarValidacion"
-                actionListener="#{validacionAsignacionMBean.selecValidacionEliminar}" update="form:panelAsociaciones"
+              <p:commandButton id="eliminarValidacion" value="#{sessionMBean.textos['eliminar']}"
+                actionListener="#{validacionAsignacionMBean.selecValidacionEliminar}" 
+                update="form:panelAsociaciones"
                 oncomplete="PF('eliminarValidacion').show();" icon="ui-icon-trash"
-                title="#{sessionMBean.textos['eliminar']}">
+                title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
               </p:commandButton>
             </p:column>
           </p:dataTable>
@@ -144,10 +145,10 @@
                     <f:facet name="header">
                       <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
                     </f:facet>
-                    <p:commandButton id="eliminarParametro"
+                    <p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
                       action="#{validacionAsignacionMBean.eliminarValidacionPorDato(num)}"
                       icon="ui-icon-trash" update="form:panelAsociaciones"
-                      title="#{sessionMBean.textos['eliminar']}">
+                      title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
                     </p:commandButton>
                   </p:column>
                 </p:dataTable>

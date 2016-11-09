@@ -219,27 +219,35 @@ input[type="text"].texto100, input[type="tel"].texto100, select.texto100, textar
 	margin-bottom: 0;
 }
 .form-group .ui-chkbox{
-	margin-top: 6px;
-    margin-bottom: 4px;
-    vertical-align: middle;
+vertical-align: middle;
 }
+.ui-selectoneradio .ui-helper-hidden-accessible, .ui-chkbox .ui-helper-hidden-accessible, .ui-radiobutton .ui-helper-hidden-accessible{
+	position: relative;
+	overflow: visible;
+	height: auto;
+	width: auto;
+	margin: 0;
+}
+.ui-radiobutton-box, .ui-chkbox .ui-chkbox-box {
+  display: none;
+} 
 .form-group input[type="radio"], .form-group input[type="checkbox"]{
 	margin-top: 8px;
-    margin-bottom: 11px;
+  margin-bottom: 11px;
 }
 .form-group .ui-message.ui-widget{
-    padding: 6px 0px;
-    margin: 0;
-    background-color: transparent;
-    clear: both;
+  padding: 6px 0px;
+  margin: 0;
+  background-color: transparent;
+  clear: both;
 }
 .form-group-con-error{
 	padding: 10px 40px 10px 15px;
-    background-color: #ffeded;
-    border: 1px solid #e3c4c4;
-    background-image: url(../images/icn-circle-error.png);
-    background-position: right center;
-    background-repeat: no-repeat;
+  background-color: #ffeded;
+  border: 1px solid #e3c4c4;
+  background-image: url(../images/icn-circle-error.png);
+  background-position: right center;
+  background-repeat: no-repeat;
 }
 .form-group .ui-message.ui-widget .ui-message-error-icon{
 	display: none;
@@ -249,12 +257,12 @@ input[type="text"].texto100, input[type="tel"].texto100, select.texto100, textar
 .form-group textarea, 
 .form-group .ui-inputfield, 
 .form-group .form-control{
-    display: inline-block;
-    vertical-align: middle;
+  display: inline-block;
+  vertical-align: middle;
 }
 .form-group .btn, .form-group .btn-lg{
-    margin-bottom: 0;
-    vertical-align: initial;
+  margin-bottom: 0;
+  vertical-align: initial;
 }
 .form-group input + .btn, .form-group .form-control + .btn{
     margin-left: 10px;
@@ -1211,6 +1219,7 @@ clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
 */
 .ui-fileupload-buttonbar .ui-fileupload-choose input {
     transform: scale(3, 1);
+    width: 100%; 
 }
 .ui-datalist-content {
 	border:none;

@@ -70,15 +70,15 @@
               <f:facet name="header">
                 <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
               </f:facet>
-              <p:commandButton id="modificarAccion"
+              <p:commandButton id="modificarAccion" value="#{sessionMBean.textos['modificar']}"
                 actionListener="#{accionAsignacionMBean.editarAccion}"
                 icon="ui-icon-pencil" update="form:panelAsociaciones"
-                title="#{sessionMBean.textos['modificar']}">
+                title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
               </p:commandButton>
-              <p:commandButton id="eliminarAccion"
+              <p:commandButton id="eliminarAccion" value="#{sessionMBean.textos['eliminar']}"
                 actionListener="#{accionAsignacionMBean.selecAccionEliminar}" update="form:panelAsociaciones"
                 oncomplete="PF('eliminarAccion').show();" icon="ui-icon-trash"
-                title="#{sessionMBean.textos['eliminar']}">
+                title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
               </p:commandButton>
             </p:column>
           </p:dataTable>
@@ -163,11 +163,11 @@
                   <p:column styleClass="alinCentro">
                     <f:facet name="header">
                       <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
-                    </f:facet>
-                    <p:commandButton id="eliminarParametro"
+                    </f:facet> 
+                    <p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
                       action="#{accionAsignacionMBean.eliminarAccionPorDato(num)}"
                       icon="ui-icon-trash" update="form:panelAsociaciones"
-                      title="#{sessionMBean.textos['eliminar']}">
+                      title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
                     </p:commandButton>
                   </p:column>
                 </p:dataTable>

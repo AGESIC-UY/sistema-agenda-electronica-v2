@@ -54,7 +54,7 @@ public interface AgendarReservas {
 	public Boolean agendaActiva(Agenda a);
 	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) throws BusinessException;
 	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws BusinessException;
-	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v) throws BusinessException;
+	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException;
 	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException;
 	public Reserva marcarReserva(Disponibilidad d) throws BusinessException, UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;

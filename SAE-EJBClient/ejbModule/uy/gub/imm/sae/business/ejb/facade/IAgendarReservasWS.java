@@ -3,6 +3,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -22,7 +23,6 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
-import uy.gub.imm.sae.exception.UserCommitException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
@@ -82,13 +82,14 @@ public interface IAgendarReservasWS {
 			@WebParam(name = "disponibilidad") Disponibilidad d
 		) 
 		throws 
-			BusinessException, UserException, UserCommitException;
+			BusinessException, UserException;
 
 	@WebMethod
 	public @WebResult(name = "obtenerCuposPorDiaResult")  ArrayList<Integer> obtenerCuposPorDia
 		(
 			@WebParam(name = "recurso") Recurso r, 
-			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v
+			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v,
+      @WebParam(name = "timezone") TimeZone t
 		)
 		throws 
 			BusinessException;

@@ -3,6 +3,7 @@ package uy.gub.imm.sae.common.factories.ws.client.agendar;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -161,7 +162,7 @@ public interface AgendarReservasWS {
     public Reserva marcarReservaDisponible(
         @WebParam(name = "disponibilidad", targetNamespace = "")
         Disponibilidad disponibilidad)
-        throws BusinessException_Exception, UserCommitException_Exception, UserException_Exception
+        throws BusinessException_Exception, UserException_Exception
     ;
 
     /**
@@ -180,8 +181,11 @@ public interface AgendarReservasWS {
         @WebParam(name = "recurso", targetNamespace = "")
         Recurso recurso,
         @WebParam(name = "ventanaDeTiempo", targetNamespace = "")
-        VentanaDeTiempo ventanaDeTiempo)
-        throws BusinessException_Exception
+        VentanaDeTiempo ventanaDeTiempo,
+        @WebParam(name = "timezone", targetNamespace = "")
+        TimeZone timezone
+      )
+      throws BusinessException_Exception
     ;
 
     /**

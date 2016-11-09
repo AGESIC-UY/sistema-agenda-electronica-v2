@@ -76,13 +76,14 @@
               <f:facet name="header">
                 <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
               </f:facet>
-              <p:commandButton id="modificarValidacion"
+              <p:commandButton id="modificarValidacion" value="#{sessionMBean.textos['modificar']}"
                 actionListener="#{validacionMantenimientoMBean.editarValidacion}"
-                icon="ui-icon-pencil" update="form:panelValidacion"
+                icon="ui-icon-pencil" update="form:panelValidacion" styleClass="ui-button-icon-only"
                 title="#{sessionMBean.textos['modificar']}">
               </p:commandButton>
-              <p:commandButton id="eliminarValidacion"
-                actionListener="#{validacionMantenimientoMBean.selecValidacionEliminar}" update="form:panelValidacion"
+              <p:commandButton id="eliminarValidacion" value="#{sessionMBean.textos['eliminar']}"
+                actionListener="#{validacionMantenimientoMBean.selecValidacionEliminar}" 
+                update="form:panelValidacion" styleClass="ui-button-icon-only"
                 oncomplete="PF('eliminarValidacion').show();" icon="ui-icon-trash"
                 title="#{sessionMBean.textos['eliminar']}">
               </p:commandButton>
@@ -174,10 +175,10 @@
                     <f:facet name="header">
                       <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
                     </f:facet>
-                    <p:commandButton id="eliminarParametro"
+                    <p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
                       action="#{validacionMantenimientoMBean.eliminarParametro(num)}"
                       icon="ui-icon-trash" update="form:panelValidacion"
-                      title="#{sessionMBean.textos['eliminar']}">
+                      title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
                     </p:commandButton>
                   </p:column>
                 </p:dataTable>

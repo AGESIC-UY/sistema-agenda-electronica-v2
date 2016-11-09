@@ -25,7 +25,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Table;
-import javax.persistence.TemporalType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -627,13 +626,20 @@ public class ServiciosTrazabilidadBean {
 	@Schedule(second = "0", minute = "0", hour = "1", persistent = false)
 	public void finalizarTrazas() {
 		//Template para la consulta de reservas vencidas con trazabilidad habilitada
+	  //Se buscan todas las reservas correspondientes a disponibilidades anteriores al día de hoy
+	  //que tengan alguna traza registrada y no tengan una traza marcada como final
 		String sql = "SELECT r.id, t.transaccion_id, s.nombre, count(*) AS lineas "
 				+ "FROM {empresa}.ae_disponibilidades d "
 				+ "JOIN {empresa}.ae_reservas_disponibilidades rd ON rd.aedi_id=d.id "
 				+ "JOIN {empresa}.ae_reservas r ON r.id=rd.aers_id "
 				+ "JOIN {empresa}.ae_recursos s ON s.id=d.aere_id "
 				+ "JOIN global.ae_trazabilidad t ON t.reserva_id=r.id AND t.empresa_id={empresaId} "
-				+ "WHERE d.fecha < :ahora "
+				+ "WHERE NOT EXISTS( "
+				+ "  SELECT 1 FROM global.ae_trazabilidad t1 "
+				+ "  WHERE t1.empresa_id=t.empresa_id "
+				+ " AND t1.reserva_id=t.reserva_id "
+				+ " AND t1.es_final=true) "
+				+ "AND d.fecha < :ahora "
 				+ "GROUP BY r.id, t.transaccion_id, s.nombre";
 		
 		//Armar y configurar el invocador del servicio web
@@ -646,7 +652,7 @@ public class ServiciosTrazabilidadBean {
 			timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
 		} catch (Exception nfEx) {
 			timeout = 5000;
-		}		
+		}
 		long version = 0;
 		try {
 			version = confBean.getLong("WS_TRAZABILIDAD_VERSION");
@@ -663,9 +669,14 @@ public class ServiciosTrazabilidadBean {
 		for(Empresa empresa : empresas) {
 			try {
 				String sql1 = sql.replace("{empresa}", empresa.getDatasource()).replace("{empresaId}", empresa.getId().toString());
+				
+				logger.debug("Consulta para determinar las trazas a cerrar en la empresa ["+empresa.getNombre()+"]: "+sql1);
+				
 				Query query = globalEntityManager.createNativeQuery(sql1);
-				query.setParameter("ahora", new Date(), TemporalType.DATE);
+				//query.setParameter("ahora", new Date(), TemporalType.DATE);
 				List<Object[]> aTrazas = (List<Object[]>) query.getResultList();
+
+        logger.debug("Se encontraron "+aTrazas.size()+" trazas.");
 				
 				for(Object[] aTraza : aTrazas) {
 					
@@ -691,16 +702,17 @@ public class ServiciosTrazabilidadBean {
 						linea.setTipoRegistroTrazabilidad(3); //Comun
 						linea.setPasoDelProceso(lineas.longValue()+1);
 			
-						configurarSeguridad(lineaPort, wsaToLinea, wsaActionLinea, timeout);
-						ResponseDTO lineaResp = lineaPort.persist(linea);
+            configurarSeguridad(lineaPort, wsaToLinea, wsaActionLinea, timeout);
+            ResponseDTO lineaResp = lineaPort.persist(linea);
+						lineaResp.setEstado(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK);
 						
 						//Solo se registra la traza final si se pudo enviar correctamente, ya que en otro caso se requiere
-						//volvera generar una traza con la fecha del momento
+						//volver a generar una traza con la fecha del momento
 						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
 							registrarTraza(empresa, reservaId, transaccionId, lineaToXml(linea), false, true, true);
-							logger.debug("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") fue cerrada.");
+							logger.info("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") fue cerrada.");
 						}else {
-							logger.debug("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") no fue cerrada: "+lineaResp.getMensaje());
+							logger.warn("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") no fue cerrada: "+lineaResp.getMensaje());
 						}
 					} catch (Exception ex) {
 						logger.error("No se pudo cerrar la traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
