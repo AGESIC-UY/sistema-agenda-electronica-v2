@@ -137,10 +137,11 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	 * 1) Que no exista una disponibilidad viva para la misma fecha y la misma hora.
 	 * 2) Solo se generen disponibilidades para días que se encuentren marcados
 	 *    como hábiles en sp_dias.
+	 * @return true si hubo conflicto en alguna hora, false en otro caso
 	 * @throws UserException 
 	 * @throws ApplicationException 
 	 */
-	public void generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, 
+	public List<Date> generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, 
 			Integer frecuencia, Integer cupo) throws UserException, ApplicationException {
 		
 		Recurso rManaged = entityManager.find(Recurso.class, r.getId());
@@ -200,15 +201,21 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		
 		calHoraFin.setTime(horaDesde);
 		
+		List<Date> horasConflicto = new ArrayList<Date>();
+		
 		while (calHoraInicio.getTime().before(horaHasta)) {
 			calHoraFin.add(Calendar.MINUTE, frecuencia);
 			if (!existeDisponibilidadEnHoraInicio(rManaged, calHoraInicio.getTime())){
 				//Se crea la disponibilidad 
 				generarNuevaDisponibilidad(rManaged, fecha, calHoraInicio.getTime(),calHoraFin.getTime(), cupo);
+			}else {
+			  horasConflicto.add(calHoraInicio.getTime());
 			}
 			//Se actualiza horaInicio
 			calHoraInicio.add(Calendar.MINUTE, frecuencia);
 		}
+		
+		return horasConflicto;
 	}
 	
 

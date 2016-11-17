@@ -542,7 +542,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   		Date fecha = reservaNueva.getDisponibilidades().get(0).getFecha();
   		
   		// consulto las reservas por dato de reserva (solo para los campos clave)
-  		listaReserva = consultaEJB.consultarReservaDatosHora(datoReservaLista, recurso, fecha);
+  		listaReserva = consultaEJB.consultarReservaDatosFecha(datoReservaLista, recurso, fecha, reservaNueva.getTramiteCodigo());
   		
   	}
 		return listaReserva;

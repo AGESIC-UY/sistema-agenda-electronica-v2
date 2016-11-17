@@ -63,7 +63,7 @@ Versión 1.4 (2016-10-06)
   - Se permite utilizar las validaciones ValidacionMailBean y ValidadorDatosPersonaBean
   - Se permite incorporar validaciones propias mediante la implementación de una interfaz en un proyecto JavaEE
 
-Versión 1.5
+Versión 1.4.p1 (2016-11-17)
 * Se corrigieron y cambiaron algunos textos.
 * Se corrigió un bug por el cual se calculaban mal los días con disponibilidades luego de que se eliminaban disponibilidades de una semana.
 * Se corrigió un problema con los timezones al momento de desplegar las horas para el día de hoy.
@@ -79,3 +79,6 @@ Versión 1.5
 * Se añadió la posibilidad de utilizar TLS en el envío de mail (aunque esto se documenta como una configuración opcional).
 * Se corrigió un bug por el cual no se podía seleccionar un timezone cuyo nombre sea mayor a 25 caracteres, tanto para empresas como para agendas.
 * Se corrigió un bug que hacía que las trazas nunca se cerraran y se continuaran enviando todos los días las respectivas trazas de cierre.
+* Se añadió la posibilidad de realizar más de una reserva para el mismo día con los mismos valores en todos los campos clave si se seleccionan diferentes trámites.
+* Se cambiaron los mensajes relativos a los errores de fechas (vigencia y disponibilidad) al crear y modificar recursos.
+

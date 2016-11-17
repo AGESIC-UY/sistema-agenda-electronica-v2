@@ -131,9 +131,16 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		return reserva;
 	}
 	
-	
+	/**
+	 * Busca las reservas confirmadas existentes que tengan los mismos valores en todos los datos claves
+	 * y que correspondan al trámite indicado 
+	 * @param datos
+	 * @param recurso
+	 * @param fecha
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservaDatosHora(List<DatoReserva> datos , Recurso recurso, Date fecha){
+	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos , Recurso recurso, Date fecha, String codigoTramite){
 		List<Reserva> resultados = new ArrayList<Reserva>();
 		
 		String selectStr =	" SELECT distinct(reserva) " ;
@@ -141,7 +148,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 						   					"	JOIN reserva.disponibilidades disp " +
 					   						" JOIN reserva.datosReserva datoReserva " +
 				   							"	JOIN datoReserva.datoASolicitar datoSolicitar	" ;
-		String whereStr = 	" WHERE disp.recurso = :recurso " +
+		String whereStr = 	" WHERE reserva.tramiteCodigo = :tramiteCodigo" +
+		                    "   AND disp.recurso = :recurso " +
 						  					" 	AND disp.fechaBaja is null " + 
 					  						"   AND disp.fecha = :fecha " +
 				  							"   AND reserva.estado NOT IN ('U','C') ";
@@ -149,11 +157,9 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			boolean hayCamposClaveNulos = false;
 			if (! datos.isEmpty()) {
 				whereStr = whereStr + "    and (" ;
-			
 				boolean primerRegistro = true;
 				int i = 0;
 				for (DatoReserva datoR : datos){
-					
 					if (datoR != null){
 						if (primerRegistro){
 							whereStr = whereStr + 
@@ -179,9 +185,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			
 			try {
 				resultados = (List<Reserva>)entityManager.createQuery(consulta)
-									.setParameter("recurso", recurso)
-									.setParameter("fecha", fecha, TemporalType.DATE)
-									.getResultList();
+          .setParameter("tramiteCodigo", codigoTramite)
+  				.setParameter("recurso", recurso)
+  				.setParameter("fecha", fecha, TemporalType.DATE)
+  				.getResultList();
 				
 				/* 12/03/2010 - Corrige que al traer reservas con la misma clave que se ingreso, 
 				 * se filtren las que tengan algun dato clave mas ingresado (por ejemplo cuando 
