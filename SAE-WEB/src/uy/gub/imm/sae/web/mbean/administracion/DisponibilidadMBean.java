@@ -116,18 +116,16 @@ public class DisponibilidadMBean extends BaseMBean {
 			v.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaDesde()));
 			if (dispSessionMBean.getFechaHasta()== null) {
 				try {
-				dispSessionMBean.setFechaHasta(disponibilidadesEJB.ultFechaGenerada(sessionMBean.getRecursoMarcado()));
-				}
-				catch (Exception ex){
+				  dispSessionMBean.setFechaHasta(disponibilidadesEJB.ultFechaGenerada(sessionMBean.getRecursoMarcado()));
+				}	catch (Exception ex){
 					addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_obtener_la_ultima_fecha_generada"), MSG_ID);
 				}
 			}
 			if (dispSessionMBean.getFechaHasta() != null){
-			v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaHasta()));
-			dispSessionMBean.setCuposPorDia(obtenerCupos(v));
+  			v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaHasta()));
+  			dispSessionMBean.setCuposPorDia(obtenerCupos(v));
 			}
-		}
-		else{
+		} else{
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
 		}
 	}
@@ -151,9 +149,7 @@ public class DisponibilidadMBean extends BaseMBean {
 		RowList<CupoPorDia> cuposAux = null;
 		try{
 			if (sessionMBean.getRecursoMarcado() != null){
-				if (v.getFechaInicial() != null && v.getFechaFinal() != null &&
-						v.getFechaInicial().compareTo(v.getFechaFinal()) <= 0 ) {
-
+				if (v.getFechaInicial() != null && v.getFechaFinal() != null && v.getFechaInicial().compareTo(v.getFechaFinal()) <= 0 ) {
 					List<Integer> cupos = agendarReservasEJB.obtenerCuposPorDia(sessionMBean.getRecursoMarcado(), v, sessionMBean.getTimeZone());
 					Calendar fecha = Calendar.getInstance();
 					fecha.setTime(v.getFechaInicial());
@@ -161,7 +157,7 @@ public class DisponibilidadMBean extends BaseMBean {
 					fechaFin.setTime(v.getFechaFinal());
 					Integer i = 0;
 					Integer cuposDia = 0;
-					List<CupoPorDia> lista_cupos = new ArrayList<CupoPorDia>();
+					List<CupoPorDia> listaCupos = new ArrayList<CupoPorDia>();
 					while ( !fecha.after( fechaFin ) ){
 						cuposDia = disponibilidadesEJB.cantDisponibilidadesDia(sessionMBean.getRecursoMarcado(), fecha.getTime());
 						if (cupos.get(i) != -1 || cuposDia > 0){
@@ -169,20 +165,16 @@ public class DisponibilidadMBean extends BaseMBean {
 							cupoPorDia.setDia(fecha.getTime());
 							if (cupos.get(i) == -1) {
 								cupoPorDia.setCupoDisponible(0);
+							} else {
+							  cupoPorDia.setCupoDisponible(cupos.get(i));
 							}
-							else {
-							cupoPorDia.setCupoDisponible(cupos.get(i));
-							}
-							lista_cupos.add(cupoPorDia);
+							listaCupos.add(cupoPorDia);
 						}
 						i++;
 						fecha.add(Calendar.DAY_OF_MONTH, 1);
 					}
-
-					cuposAux= new RowList<CupoPorDia>(lista_cupos);
-				
-				}
-				else{
+					cuposAux= new RowList<CupoPorDia>(listaCupos);
+				} else{
 					if(v.getFechaInicial() == null) {
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"));
 					}
@@ -193,11 +185,9 @@ public class DisponibilidadMBean extends BaseMBean {
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"));
 					}
 				}
-			}
-			else{
+			} else{
 				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"));
 			}
-				
 		}catch (Exception ex) {
 				addErrorMessage(ex, MSG_ID);
 		}

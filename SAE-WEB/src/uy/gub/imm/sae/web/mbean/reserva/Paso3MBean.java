@@ -129,17 +129,38 @@ public class Paso3MBean extends PasoMBean {
   		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
   		List<TramiteAgenda> tramites0 = agendarReservasEJB.consultarTramites(agenda);
 
-      if(tramites0.size()==1) {
-        TramiteAgenda tramite = tramites0.get(0);
-        tramiteCodigo=tramite.getTramiteCodigo();
-        tramitesAgenda.put(tramiteCodigo, tramite);
-      }else {
-        tramites.add(new SelectItem("", "Sin especificar"));
-    		for(TramiteAgenda tramite : tramites0) {
-    		  tramitesAgenda.put(tramite.getTramiteCodigo(), tramite);
-    		  tramites.add(new SelectItem(tramite.getTramiteCodigo(), tramite.getTramiteNombre()));
-    		}
-      }
+  		//Si se especificó el trámite a realizar en la URL (parámetro "q") no se permite al ciudadano 
+  		//seleccionar el trámite (si el trámite especificado no corresponde a un trámite asociado a la
+  		//agenda se ignora el parámetro).
+  		//Si no se especificó el trámite en la URL pero la agenda está asociada a un único trámite se
+  		//selecciona auntomáticamente el único trámite y tampoco se permite modificar la selección
+  		String codigoTramite = sesionMBean.getCodigoTramite();
+  		if(codigoTramite != null) {
+  		  //Buscar el trámite correspondiente al código
+  		  for(TramiteAgenda tramite : tramites0) {
+  		    if(codigoTramite.equals(tramite.getTramiteCodigo())) {
+            tramiteCodigo = tramite.getTramiteCodigo();
+            tramitesAgenda.put(tramiteCodigo, tramite);
+            break;
+  		    }
+  		  }
+  		}
+  		//Si no se identifico un trámite continuar con el procedimiento usual
+  		if(tramiteCodigo == null) {
+        if(tramites0.size()==1) {
+          //Hay un solo trámite asociado a la agenda, se selecciona solo ese
+          TramiteAgenda tramite = tramites0.get(0);
+          tramiteCodigo = tramite.getTramiteCodigo();
+          tramitesAgenda.put(tramiteCodigo, tramite);
+        }else {
+          //El ciudadano debe seleccionar el trámite
+          tramites.add(new SelectItem("", "Sin especificar"));
+      		for(TramiteAgenda tramite : tramites0) {
+      		  tramitesAgenda.put(tramite.getTramiteCodigo(), tramite);
+      		  tramites.add(new SelectItem(tramite.getTramiteCodigo(), tramite.getTramiteNombre()));
+      		}
+        }
+  		}
 		}catch(Exception ex) {
 		  ex.printStackTrace();
       addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));

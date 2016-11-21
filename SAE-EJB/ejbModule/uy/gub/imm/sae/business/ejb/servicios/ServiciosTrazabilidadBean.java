@@ -59,7 +59,7 @@ import uy.gub.agesic.itramites.bruto.web.ws.linea.ResponseDTO;
 import uy.gub.agesic.jbossws.SAMLHandler;
 import uy.gub.agesic.jbossws.WSAddressingHandler;
 import uy.gub.agesic.sts.client.PGEClient;
-import uy.gub.imm.sae.business.ejb.facade.ConfiguracionBean;
+import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ws.SoapHandler;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Reserva;
@@ -73,8 +73,8 @@ public class ServiciosTrazabilidadBean {
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 
-	@EJB
-	private ConfiguracionBean confBean;
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
+	private Configuracion confBean;
 	
 	private static Logger logger = Logger.getLogger(ServiciosTrazabilidadBean.class);
 

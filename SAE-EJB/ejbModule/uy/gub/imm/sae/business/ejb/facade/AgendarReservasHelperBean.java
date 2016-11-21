@@ -216,7 +216,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo v, TimeZone timezone) {
-		
 		//La clono pues la voy a modificar.
 		v = new VentanaDeTiempo(v);
 		
@@ -285,7 +284,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 			"where d.recurso = :rec and " +
 			"      d.fechaBaja is null and " +
 			"      d.fecha between :fi and :ff and " +
-	    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) and " +
+    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) and " +
 			"      (reserva is null or reserva.estado <> :cancelado) " +
 			"group by d.fecha " +
 			"order by d.fecha asc ")
@@ -311,6 +310,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		
 		Calendar cont = Calendar.getInstance();
 		cont.setTime(Utiles.time2InicioDelDia(v.getFechaInicial()));
+		
 		Object[] cupoAsignado  = null;
 		Object[] cupoConsumido = null;
 		if (iterCuposAsignados.hasNext()) {
@@ -333,8 +333,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 					cantidadDeCupos = ((Long)cupoAsignado[1]).intValue();
 					if (iterCuposAsignados.hasNext()) {
 						cupoAsignado = iterCuposAsignados.next();
-					}
-					else {
+					} else {
 						cupoAsignado = null;
 					}
 					
@@ -345,14 +344,13 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 							cantidadDeCupos -= ((Long)cupoConsumido[1]).intValue();
 							
 							if (cantidadDeCupos < -1) {
-								//Solo se da en el caso de que mas de uno hallan querido reservar a la vez cuando quedaba solo un cupo
+								//Solo se da en el caso de que mas de uno hayan querido reservar a la vez cuando quedaba solo un cupo
 								cantidadDeCupos = -1;
 							}
 							
 							if (iterCuposConsumidos.hasNext()) {
 								cupoConsumido = iterCuposConsumidos.next();
-							}
-							else {
+							} else {
 								cupoConsumido = null;
 							}
 						}

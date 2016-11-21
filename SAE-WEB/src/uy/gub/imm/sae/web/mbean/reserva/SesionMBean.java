@@ -19,10 +19,14 @@ package uy.gub.imm.sae.web.mbean.reserva;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.io.ByteArrayInputStream;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -30,6 +34,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
+import javax.ejb.EJB;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
@@ -38,6 +43,7 @@ import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.Agenda;
@@ -83,12 +89,38 @@ public class SesionMBean	extends BaseMBean {
 	private String urlTramite;
 	private String parmsDatosCiudadano;
 	private String codigoTrazabilidadPadre;
+	private String codigoTramite;
 	
 	private String paso3Captcha;
 
 	private Empresa empresaActual;
 
 	private String idiomaActual = Locale.getDefault().getLanguage();
+	
+	private boolean mostrarFechaActual = false;
+	
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionRemote")
+  private Configuracion configuracionEJB;
+	
+  @PostConstruct
+  public void init() {
+
+    try {
+      agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
+      //Cargar los textos dependientes del idioma
+      cargarTextos();
+      //Cargar las propiedades de configuracion
+      Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
+      if(bMostrarFechaActual!=null) {
+        mostrarFechaActual = bMostrarFechaActual.booleanValue();
+      }
+    } catch (ApplicationException e) {
+      logger.error("NO SE PUDO OBTENER EJB AgendarReservas");
+      logger.error(e);
+      redirect(ERROR_PAGE_OUTCOME);     
+    }
+  } 
+  
 	
 	public TimeZone getTimeZone() {
 		//Primero se devuelve la de la Agenda, si tiene
@@ -135,6 +167,17 @@ public class SesionMBean	extends BaseMBean {
 		return formatoJava.replace("yyyy", "yy").replace("MM", "mm");
 	}
 	
+  public boolean isMostrarFechaActual() {
+    return this.mostrarFechaActual;
+  }
+  
+  public String getFechaActual() {
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, getTimeZone().getOffset((new Date()).getTime()));
+    DateFormat df = new SimpleDateFormat(getFormatoFecha()+" "+getFormatoHora());
+    return df.format(cal.getTime());
+  }
+  
 	
 	//**************************************************************************************************************************************************************
 	//***************************************** CDA *****************************************************************************************************
@@ -164,19 +207,6 @@ public class SesionMBean	extends BaseMBean {
 	private String codigoSeguridadReserva;
 	private boolean renderedVolverBotom;
 	private boolean SeHizoSeleccion;
-	
-	@PostConstruct
-	public void init() {
-
-		try {
-			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
-			cargarTextos();
-		} catch (ApplicationException e) {
-			logger.error("NO SE PUDO OBTENER EJB AgendarReservas");
-			logger.error(e);
-			redirect(ERROR_PAGE_OUTCOME);			
-		}
-	}	
 	
 	public void seleccionarAgenda(Integer agendaId) throws BusinessException, RolException, ApplicationException {
 		limpiarSesion();
@@ -581,6 +611,15 @@ public class SesionMBean	extends BaseMBean {
 		this.codigoTrazabilidadPadre = codigoTrazabilidadPadre;
 	}
 
+	
+  public String getCodigoTramite() {
+    return codigoTramite;
+  }
+
+  public void setCodigoTramite(String codigoTramite) {
+    this.codigoTramite = codigoTramite;
+  }
+	
 	public String getPaso3Captcha() {
 		return paso3Captcha;
 	}

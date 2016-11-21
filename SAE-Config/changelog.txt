@@ -82,3 +82,6 @@ Versión 1.4.p1 (2016-11-17)
 * Se añadió la posibilidad de realizar más de una reserva para el mismo día con los mismos valores en todos los campos clave si se seleccionan diferentes trámites.
 * Se cambiaron los mensajes relativos a los errores de fechas (vigencia y disponibilidad) al crear y modificar recursos.
 
+Versión 1.5 (2016-11-21)
+* Se añadió el parámetro "q" a la URL de la reserva pública para permitir especificar el trámite a realizar.
+* Se añadió el despliegue opcional de la fecha actual (según la agenda seleccionada) en la parte superior de ambas interfaces.

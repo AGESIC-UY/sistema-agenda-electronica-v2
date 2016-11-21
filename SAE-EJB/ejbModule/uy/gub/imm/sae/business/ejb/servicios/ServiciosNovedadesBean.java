@@ -56,7 +56,7 @@ import uy.gub.agesic.novedades.ObjectFactory;
 import uy.gub.agesic.novedades.Publicar;
 import uy.gub.agesic.novedades.PublishSubscribeHeadersHandler;
 import uy.gub.agesic.sts.client.PGEClient;
-import uy.gub.imm.sae.business.ejb.facade.ConfiguracionBean;
+import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ws.SoapHandler;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Disponibilidad;
@@ -71,8 +71,8 @@ public class ServiciosNovedadesBean {
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 
-	@EJB
-	private ConfiguracionBean confBean;
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
+	private Configuracion confBean;
 	
 	private static Logger logger = Logger.getLogger(ServiciosNovedadesBean.class);
 

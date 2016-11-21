@@ -117,6 +117,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			String sUrl = request.getParameter("u"); //URL de retorno al confirmar (URL encoded)
 			String sParms = request.getParameter("p"); //Parámetros para autocompletar: <idagrupacion>.<iddato>.<valor>;)
 			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
+			String sTramite = request.getParameter("q"); //Código de trámite
 			
 			if(sParms!=null) {
 				sesionMBean.setParmsDatosCiudadano(sParms);
@@ -133,6 +134,11 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			}else {
 				sesionMBean.setCodigoTrazabilidadPadre(null);
 			}
+      if(sTramite!=null) {
+        sesionMBean.setCodigoTramite(sTramite);
+      }else {
+        sesionMBean.setCodigoTramite(null);
+      }
 			
 			if(sIdioma!=null) {
 				sesionMBean.setIdiomaActual(sIdioma);
@@ -271,6 +277,9 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 				if(sTraza != null) {
 					url = url + "&t=" + sTraza;
 				}
+        if(sTramite != null) {
+          url = url + "&q=" + sTramite;
+        }
 
 				sesionMBean.setUrlPaso1Reserva(url);
 			}
