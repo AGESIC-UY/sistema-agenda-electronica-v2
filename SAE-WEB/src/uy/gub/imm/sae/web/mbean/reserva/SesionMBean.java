@@ -44,6 +44,7 @@ import org.primefaces.model.StreamedContent;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Configuracion;
+import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.Agenda;
@@ -536,15 +537,14 @@ public class SesionMBean	extends BaseMBean {
 		this.idiomaActual = idiomaActual;
 	}
 
-	private Map<String, String> textos = new HashMap<String, String>();
-//	private List<String> frasesCaptcha = new ArrayList<String>();
+	private Map<String, String> textos = new SofisHashMap();
 	private Map<String, String> preguntasCaptcha = new HashMap<String, String>();
 
 	public void cargarTextos() {
 		try {
 			textos = agendarReservasEJB.consultarTextos(idiomaActual);
 		} catch (ApplicationException e) {
-			textos = new HashMap<String, String>();
+			textos = new SofisHashMap();
 			e.printStackTrace();
 		}
 		try {

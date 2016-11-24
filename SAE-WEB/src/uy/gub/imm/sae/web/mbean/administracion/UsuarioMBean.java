@@ -341,7 +341,7 @@ public class UsuarioMBean extends BaseMBean {
 	public void cambioSuperadmin() {
 		//Si deja de ser superadmin y es el último mostrar un mensaje de advertencia
 		Usuario usuario = getUsuarioEditar();
-		if(usuario.getSuperadmin()!=null && !usuario.getSuperadmin().booleanValue()) {
+		if(usuario.getId()!=null && usuario.getSuperadmin()!=null && !usuario.getSuperadmin().booleanValue()) {
   		//Ver si hay al menos otro superadmin
   		try {
   			boolean hayOtroSuperadmin = usuariosEJB.hayOtroSuperadmin(usuario.getId());

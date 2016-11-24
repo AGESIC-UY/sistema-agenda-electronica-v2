@@ -208,9 +208,7 @@ public class RecursoMBean extends BaseMBean{
 		if(getRecursoNuevo().getDescripcion() == null || getRecursoNuevo().getDescripcion().equals("")){
 			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
-			
 		}
-		
 		Recurso r = getRecursoNuevo();
 		r.setVentanaCuposMinimos(0);
 		//Fechas de vigencia
@@ -228,7 +226,7 @@ public class RecursoMBean extends BaseMBean{
 		}
 		if(r.getFechaInicio() != null && r.getFechaFin() != null && r.getFechaInicio().compareTo(r.getFechaFin()) > 0) {
 			error = true;
-			addErrorMessage("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia", FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
 		}
     //Fechas de disponibilidad
 		if(r.getFechaInicioDisp() == null) {
@@ -256,8 +254,6 @@ public class RecursoMBean extends BaseMBean{
 			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
 		}
-		
-		
 		if (r.getDiasInicioVentanaIntranet() == null){
 			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasVIntranet");

@@ -211,7 +211,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 			aCopia.setNombre("Copia "+contador+" de "+a.getNombre());
 			aCopia.setDescripcion(a.getDescripcion());
 		}while(existeAgendaPorNombre(aCopia));
-		
+		//Textos
 		aCopia.setTextosAgenda(new HashMap<String, TextoAgenda>());
   	if(a.getTextosAgenda() != null) {
   		for(String idioma : a.getTextosAgenda().keySet()) {
@@ -229,15 +229,27 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	  		aCopia.getTextosAgenda().put(idioma, nuevo);
   		}
   	}
-		
+  	//Persistir la copia
 		entityManager.persist(aCopia);
+		//Recursos
 		List<Recurso> recursos = a.getRecursos();
 		for (Recurso r : recursos) {
-			if(r.getFechaBaja() == null)
-			{
+			if(r.getFechaBaja() == null) {
 				copiarRecursoParaAgenda(aCopia,r, r.getNombre(), r.getDescripcion());
 			}
 		}
+    //Tramites
+    if(a.getTramites() != null) {
+      for(TramiteAgenda ta : a.getTramites()) {
+        TramiteAgenda taNuevo = new TramiteAgenda();
+        taNuevo.setAgenda(aCopia);
+        taNuevo.setTramiteCodigo(ta.getTramiteCodigo());
+        taNuevo.setTramiteId(ta.getTramiteId());
+        taNuevo.setTramiteNombre(ta.getTramiteNombre());
+        entityManager.persist(taNuevo);
+      }
+    }
+		
 	}
 	
 private void copiarRecursoParaAgenda(Agenda acopia, Recurso r, String nombre, String descripcion) throws BusinessException, ApplicationException, UserException {

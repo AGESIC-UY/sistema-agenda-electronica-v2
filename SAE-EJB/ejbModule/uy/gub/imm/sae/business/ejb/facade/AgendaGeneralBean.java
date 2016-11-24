@@ -20,7 +20,6 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +30,7 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Plantilla;
 import uy.gub.imm.sae.entity.Recurso;
@@ -145,7 +145,7 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 	
 	@SuppressWarnings("unchecked")
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException {
-		Map<String, String> textos = new HashMap<String, String>();
+    Map<String, String> textos = new SofisHashMap();
 		try{
 			//Primero se cargan los textos globales
 			List<TextoGlobal> tGlobales = (List<TextoGlobal>) globalEntityManager.createQuery("SELECT t from TextoGlobal t ").getResultList();

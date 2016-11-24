@@ -226,17 +226,12 @@ public class ServiciosNovedadesBean {
 				timeout = 5000;
 			}
 
-			try {
-				configurarSeguridad(novedadPort, wsaToNovedad, wsaActionNovedad, timeout);
-			}catch(Exception ex) {
-				throw new RuntimeException("No se pudo configurar la seguridad para invocar los servicios web de Publicación de Novedades: "+ex.getMessage(), ex);
-			}
-			
 			for (Novedad novedad0 : novedades) {
 				Publicar novedad = xmlToNovedad(novedad0.getDatos());
 				novedad0.setFechaUltIntento(new Date());
 				novedad0.setIntentos(novedad0.getIntentos() + 1);
 				try {
+	        configurarSeguridad(novedadPort, wsaToNovedad, wsaActionNovedad, timeout);
 					novedadPort.nuevaNovedad(novedad);;
 					novedad0.setEnviado(true);
 				} catch (Exception ex) {

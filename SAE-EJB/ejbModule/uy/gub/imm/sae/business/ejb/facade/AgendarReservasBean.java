@@ -53,6 +53,7 @@ import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosNovedadesBean;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosTrazabilidadBean;
 import uy.gub.imm.sae.business.utilidades.MailUtiles;
+import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Evento;
@@ -1108,7 +1109,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 
 	@SuppressWarnings("unchecked")
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException {
-		Map<String, String> textos = new HashMap<String, String>();
+	  Map<String, String> textos = new SofisHashMap();
 		try{
 			//Primero se cargan los textos globales
 			List<TextoGlobal> tGlobales = (List<TextoGlobal>) globalEntityManager.createQuery("SELECT t from TextoGlobal t ").getResultList();

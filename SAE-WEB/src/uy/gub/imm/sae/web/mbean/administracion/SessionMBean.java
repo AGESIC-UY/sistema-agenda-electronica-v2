@@ -65,6 +65,7 @@ import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
+import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoASolicitar;
@@ -1052,13 +1053,13 @@ public class SessionMBean extends SessionCleanerMBean {
 	// PARA LOS TEXTOS FIJOS
 	//*******************************************************************
 	
-	private Map<String, String> textos = new HashMap<String, String>();
+	private Map<String, String> textos = new SofisHashMap();
 
 	public void cargarTextos() {
 		try {
 			textos = generalEJB.consultarTextos(idiomaActual);
 		} catch (ApplicationException e) {
-			textos = new HashMap<String, String>();
+			textos = new SofisHashMap();
 			e.printStackTrace();
 		}
 	}
