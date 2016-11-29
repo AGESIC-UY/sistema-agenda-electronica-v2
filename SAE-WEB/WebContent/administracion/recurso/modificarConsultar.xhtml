@@ -103,22 +103,22 @@
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 						</f:facet>
-						<p:commandButton id="modificarRecLink"
+						<p:commandButton id="modificarRecLink" value="#{sessionMBean.textos['modificar']}"
 							action="#{recursoMBean.modificar}" icon="ui-icon-pencil"
-							title="#{sessionMBean.textos['modificar']}">
+							title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
-						<p:commandButton id="copiarRecLink"
+						<p:commandButton id="copiarRecLink" value="#{sessionMBean.textos['copiar']}"
 							actionListener="#{recursoMBean.copiar}"
 							update="formRecModCon:tablaRecursos" icon="ui-icon-copy"
-							title="#{sessionMBean.textos['copiar']}">
+							title="#{sessionMBean.textos['copiar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
-						<p:commandButton id="elimRecLink"
-							oncomplete="PF('eliminarRecurso').show();"
+						<p:commandButton id="elimRecLink" value="#{sessionMBean.textos['eliminar']}"
+							oncomplete="PF('eliminarRecurso').show();" styleClass="ui-button-icon-only"
 							actionListener="#{recursoMBean.selecRecursoEliminar}"
 							icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>
-            <p:commandButton id="expRecLink"
-              actionListener="#{recursoMBean.selecRecursoExportar}"
+            <p:commandButton id="expRecLink" value="#{sessionMBean.textos['exportar']}"
+              actionListener="#{recursoMBean.selecRecursoExportar}" styleClass="ui-button-icon-only"
               icon="ui-icon-arrowthickstop-1-s" title="#{sessionMBean.textos['exportar']}" ajax="false">
             </p:commandButton>
 					</p:column>

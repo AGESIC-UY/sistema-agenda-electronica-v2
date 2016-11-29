@@ -85,8 +85,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 	
-	@EJB
-	private ConfiguracionBean confBean;
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
+	private Configuracion confBean;
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendasBean!uy.gub.imm.sae.business.ejb.facade.AgendasLocal")
 	private Agendas agendasEJB;
@@ -249,7 +249,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			throw new UserException("no_se_puede_guardar_la_empresa_porque_no_existe_el_esquema");
 		}
 
-		
 		if(empresa.getId() == null) {
 			globalEntityManager.persist(empresa);
 			globalEntityManager.flush();
@@ -476,24 +475,20 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		if(actualizar) {
 			try {
 				URL urlWsdl = WsTramite.class.getResource("WsTramite.wsdl");
-				
 				String wsUser = confBean.getString("WS_TRAMITE_USER");
 				String wsPass = confBean.getString("WS_TRAMITE_PASS");
-
+				
 				//Consultar el servicio web
 				WsTramite wsTramite = new WsTramite(urlWsdl);
 				WsTramiteSoap port = wsTramite.getWsTramiteSoap();
-				
 	      List<Handler> customHandlerChain = new ArrayList<Handler>();
 	      customHandlerChain.add(new SoapHandler());
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-				
 	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
 	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
-	      
 				String organismos = port.obtenerOrganismos(wsUser, wsPass);
-				
+
 				//Parsear el string para obtener los organismos
 				InputSource is = new InputSource();
 				is.setCharacterStream(new StringReader(organismos));
@@ -508,7 +503,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			  	if(erroresIter.hasNext()) {
 			  		return null;
 			  	}
-			  }			  
+			  }
 			  
 			  //Se pudo invocar el servicio y parsear el resultado
 				//Vaciar la tabla de organismos
@@ -528,7 +523,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			  }
 			}	catch (Exception ex) {
 				ex.printStackTrace();
-				//throw new ApplicationException("no_se_pudo_consultar_el_servicio_web", ex);
 			}
 		}
 		//Devolver la lista de organismos
@@ -692,7 +686,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				
 			}	catch (Exception ex) {
 				ex.printStackTrace();
-				//throw new ApplicationException("no_se_pudo_consultar_el_servicio_web", ex);
 			}
 		}
 		//Devolver la lista de tramites

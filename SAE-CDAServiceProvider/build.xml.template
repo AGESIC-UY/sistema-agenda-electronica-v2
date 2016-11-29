@@ -1,86 +1,93 @@
 <?xml version="1.0" encoding="UTF-8"?>
-  <project basedir="." default="build" name="SAE-CDAServiceProvider">
-    <property environment="env"/>
-    <property name="debuglevel" value="source,lines,vars"/>
-    <property name="target" value="1.7"/>
-    <property name="source" value="1.7"/>
-    <property name="jboss.home" value=""/>
-    <path id="JBoss 7.1 Runtime [JBoss 7.1 Runtime].libraryclasspath">
-        <pathelement location="${jboss.home}/modules/javax/activation/api/main/activation-1.1.1.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/annotation/api/main/jboss-annotations-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/ejb/api/main/jboss-ejb-api_3.1_spec-1.0.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/el/api/main/jboss-el-api_2.2_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/enterprise/api/main/cdi-api-1.0-SP4.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/enterprise/deploy/api/main/jboss-jad-api_1.2_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/faces/api/main/jboss-jsf-api_2.1_spec-2.0.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/inject/api/main/javax.inject-1.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/interceptor/api/main/jboss-interceptors-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/jms/api/main/jboss-jms-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/jws/api/main/jsr181-api-1.0-MR1.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/mail/api/main/mail-1.4.4.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/management/j2ee/api/main/jboss-j2eemgmt-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/persistence/api/main/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/resource/api/main/jboss-connector-api_1.6_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/rmi/api/main/jboss-rmi-api_1.0_spec-1.0.4.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/security/auth/message/api/main/jboss-jaspi-api_1.0_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/security/jacc/api/main/jboss-jacc-api_1.4_spec-1.0.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/servlet/api/main/jboss-servlet-api_3.0_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/servlet/jsp/api/main/jboss-jsp-api_2.2_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/servlet/jstl/api/main/jboss-jstl-api_1.2_spec-1.0.2.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/transaction/api/main/jboss-transaction-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/validation/api/main/validation-api-1.0.0.GA.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/ws/rs/api/main/jboss-jaxrs-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/wsdl4j/api/main/wsdl4j-1.6.2.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/xml/bind/api/main/jboss-jaxb-api_2.2_spec-1.0.3.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/xml/registry/api/main/jboss-jaxr-api_1.0_spec-1.0.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/xml/rpc/api/main/jboss-jaxrpc-api_1.1_spec-1.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/xml/soap/api/main/jboss-saaj-api_1.3_spec-1.0.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/javax/xml/ws/api/main/jboss-jaxws-api_2.2_spec-2.0.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/hibernate/validator/main/hibernate-validator-4.2.0.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/picketbox/main/picketbox-infinispan-4.0.7.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/picketbox/main/picketbox-commons-1.0.0.final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/picketbox/main/picketbox-4.0.7.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/as/controller-client/main/jboss-as-controller-client-7.1.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/dmr/main/jboss-dmr-1.1.1.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/logging/main/jboss-logging-3.1.0.GA.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxb-provider/main/resteasy-jaxb-provider-2.3.2.Final-jandex.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxb-provider/main/resteasy-jaxb-provider-2.3.2.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-2.3.2.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/async-http-servlet-3.0-2.3.2.Final-jandex.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-2.3.2.Final-jandex.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/async-http-servlet-3.0-2.3.2.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.2.Final-jandex.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.2.Final.jar"/>
-        <pathelement location="${jboss.home}/modules/org/jboss/ejb3/main/jboss-ejb3-ext-api-2.0.0.jar"/>
-    </path>
-    <path id="SAE-CDAServiceProvider.classpath">
-        <pathelement location="bin"/>
-        <pathelement location="libs/unboundid-ldapsdk-3.0.0.jar"/>
-        <path refid="JBoss 7.1 Runtime [JBoss 7.1 Runtime].libraryclasspath"/>
-        <pathelement location="libs/opensaml-2.4.1.jar"/>
-        <pathelement location="libs/joda-time-1.6.2.jar"/>
-        <pathelement location="libs/xmltooling-1.3.1.jar"/>
-        <pathelement location="libs/catalina-6.0.16.jar"/>
-    </path>
-    <target name="init">
-        <mkdir dir="bin"/>
-        <copy includeemptydirs="false" todir="bin">
-            <fileset dir="src">
-                <exclude name="**/*.java"/>
-            </fileset>
-        </copy>
-    </target>
-    <target name="clean">
-      <delete dir="dist"/>
-      <delete dir="bin"/>
-    </target>
-	<target depends="init" name="build">
-    	<echo message="${ant.project.name}: ${ant.file}"/>
-        <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
-        	<src path="src"/>
-            <classpath refid="SAE-CDAServiceProvider.classpath"/>
-        </javac>
-	  <jar destfile="dist/CDAServiceProvider.jar" basedir="bin" includes="**">
-	    </jar>
-    </target>
+<project basedir="." default="build" name="SAE-CDAServiceProvider">
+  <property environment="env" />
+  <property name="debuglevel" value="source,lines,vars" />
+  <property name="target" value="1.7" />
+  <property name="source" value="1.7" />
+  <property name="jboss.home" value="" />
+  <path id="JBoss 7.1 Runtime [JBoss 7.1 Runtime].libraryclasspath">
+    <pathelement location="${jboss.home}/modules/javax/activation/api/main/activation-1.1.1.jar" />
+    <pathelement location="${jboss.home}/modules/javax/annotation/api/main/jboss-annotations-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/ejb/api/main/jboss-ejb-api_3.1_spec-1.0.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/el/api/main/jboss-el-api_2.2_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/enterprise/api/main/cdi-api-1.0-SP4.jar" />
+    <pathelement location="${jboss.home}/modules/javax/enterprise/deploy/api/main/jboss-jad-api_1.2_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/faces/api/main/jboss-jsf-api_2.1_spec-2.0.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/inject/api/main/javax.inject-1.jar" />
+    <pathelement location="${jboss.home}/modules/javax/interceptor/api/main/jboss-interceptors-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/jms/api/main/jboss-jms-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/jws/api/main/jsr181-api-1.0-MR1.jar" />
+    <pathelement location="${jboss.home}/modules/javax/mail/api/main/mail-1.4.4.jar" />
+    <pathelement location="${jboss.home}/modules/javax/management/j2ee/api/main/jboss-j2eemgmt-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/persistence/api/main/hibernate-jpa-2.0-api-1.0.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/resource/api/main/jboss-connector-api_1.6_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/rmi/api/main/jboss-rmi-api_1.0_spec-1.0.4.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/security/auth/message/api/main/jboss-jaspi-api_1.0_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/security/jacc/api/main/jboss-jacc-api_1.4_spec-1.0.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/servlet/api/main/jboss-servlet-api_3.0_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/servlet/jsp/api/main/jboss-jsp-api_2.2_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/servlet/jstl/api/main/jboss-jstl-api_1.2_spec-1.0.2.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/transaction/api/main/jboss-transaction-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/validation/api/main/validation-api-1.0.0.GA.jar" />
+    <pathelement location="${jboss.home}/modules/javax/ws/rs/api/main/jboss-jaxrs-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/wsdl4j/api/main/wsdl4j-1.6.2.jar" />
+    <pathelement location="${jboss.home}/modules/javax/xml/bind/api/main/jboss-jaxb-api_2.2_spec-1.0.3.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/xml/registry/api/main/jboss-jaxr-api_1.0_spec-1.0.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/xml/rpc/api/main/jboss-jaxrpc-api_1.1_spec-1.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/xml/soap/api/main/jboss-saaj-api_1.3_spec-1.0.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/javax/xml/ws/api/main/jboss-jaxws-api_2.2_spec-2.0.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/hibernate/validator/main/hibernate-validator-4.2.0.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/picketbox/main/picketbox-infinispan-4.0.7.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/picketbox/main/picketbox-commons-1.0.0.final.jar" />
+    <pathelement location="${jboss.home}/modules/org/picketbox/main/picketbox-4.0.7.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/as/controller-client/main/jboss-as-controller-client-7.1.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/dmr/main/jboss-dmr-1.1.1.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/logging/main/jboss-logging-3.1.0.GA.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxb-provider/main/resteasy-jaxb-provider-2.3.2.Final-jandex.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxb-provider/main/resteasy-jaxb-provider-2.3.2.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-2.3.2.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/async-http-servlet-3.0-2.3.2.Final-jandex.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/resteasy-jaxrs-2.3.2.Final-jandex.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-jaxrs/main/async-http-servlet-3.0-2.3.2.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.2.Final-jandex.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/resteasy/resteasy-multipart-provider/main/resteasy-multipart-provider-2.3.2.Final.jar" />
+    <pathelement location="${jboss.home}/modules/org/jboss/ejb3/main/jboss-ejb3-ext-api-2.0.0.jar" />
+  </path>
+  <path id="SAE-CDAServiceProvider.classpath">
+    <pathelement location="bin" />
+    <pathelement location="libs/unboundid-ldapsdk-3.0.0.jar" />
+    <path refid="JBoss 7.1 Runtime [JBoss 7.1 Runtime].libraryclasspath" />
+    <pathelement location="libs/opensaml-2.4.1.jar" />
+    <pathelement location="libs/joda-time-1.6.2.jar" />
+    <pathelement location="libs/xmltooling-1.3.1.jar" />
+    <pathelement location="libs/catalina-6.0.16.jar" />
+  </path>
+  <target name="init">
+    <mkdir dir="bin" />
+    <copy includeemptydirs="false" todir="bin">
+      <fileset dir="src">
+        <exclude name="**/*.java" />
+      </fileset>
+    </copy>
+  </target>
+  <target name="clean">
+    <delete dir="dist" />
+    <delete dir="bin" />
+  </target>
+  <target name="create_manifest">
+    <manifest file="dist/MANIFEST.MF">
+      <attribute name="Version" value="2.2" />
+      <attribute name="Company" value="Sofis" />
+      <attribute name="Project" value="CDAServiceProvider" />
+    </manifest>
+  </target> 
+  <target depends="init,create_manifest" name="build">
+    <echo message="${ant.project.name}: ${ant.file}" />
+    <javac debug="true" debuglevel="${debuglevel}" destdir="bin" includeantruntime="false" source="${source}" target="${target}">
+      <src path="src" />
+      <classpath refid="SAE-CDAServiceProvider.classpath" />
+    </javac>
+    <jar destfile="dist/CDAServiceProvider.jar" basedir="bin" includes="**" manifest="dist/MANIFEST.MF">
+    </jar>
+  </target>
 </project>

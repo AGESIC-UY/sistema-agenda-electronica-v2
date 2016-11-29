@@ -22,7 +22,10 @@ package uy.gub.imm.sae.exception;
 
 import javax.ejb.ApplicationException;
 
-//!!!!!!!!OJO: ESTA EXCEPCION COMMITEA!!!!!!!!!
+/**
+ * Ver: uy.gub.imm.sae.exception.UserException
+ *
+ */
 @ApplicationException(rollback=false)
 public class UserCommitException extends UserException {
 

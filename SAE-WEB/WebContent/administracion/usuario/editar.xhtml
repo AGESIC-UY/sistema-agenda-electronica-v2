@@ -71,8 +71,7 @@
 								<p:selectBooleanCheckbox id="superadministrador"
 									value="#{usuarioMBean.usuarioEditar.superadmin}"
 									disabled="#{not sessionMBean.usuarioActual.superadmin}">
-									<p:ajax update="selRolesEmp"
-										listener="#{usuarioMBean.cambioSuperadmin}" />
+									<p:ajax update="selRolesEmp" listener="#{usuarioMBean.cambioSuperadmin}" />
 								</p:selectBooleanCheckbox>
 								<p:outputLabel
 									value="#{sessionMBean.textos['superadministrador']}"

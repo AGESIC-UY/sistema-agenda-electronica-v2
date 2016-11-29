@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -59,16 +60,17 @@ public class Agenda implements Serializable {
 	
 	private List<Recurso> recursos;
 	
-	private String tramiteId;
-	private String tramiteCodigo;
-	
 	private String timezone;
 	private String idiomas;
 	
   private Map<String, TextoAgenda> textosAgenda;
 	
+  private List<TramiteAgenda> tramites;
+  
+  
 	public Agenda () {
 		recursos = new ArrayList<Recurso>();
+    tramites = new ArrayList<TramiteAgenda>();
 	}
 	
 	/**
@@ -83,6 +85,7 @@ public class Agenda implements Serializable {
 		
 		textosAgenda = new HashMap<String, TextoAgenda>();
 		recursos = new ArrayList<Recurso>();
+		tramites = new ArrayList<TramiteAgenda>();
 	}
 
 	@Id
@@ -121,6 +124,15 @@ public class Agenda implements Serializable {
 		this.recursos = recursos;
 	}
 	
+  @XmlTransient
+  @OneToMany (mappedBy = "agenda")
+  public List<TramiteAgenda> getTramites() {
+    return tramites;
+  }
+  public void setTramites(List<TramiteAgenda> tramites) {
+    this.tramites = tramites;
+  }
+  
 	@Column (nullable = false, length=1000)
 	public String getDescripcion() {
 		return descripcion;
@@ -128,15 +140,6 @@ public class Agenda implements Serializable {
 
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
-	}
-
-	@Column(name="tramite_id")
-	public String getTramiteId() {
-		return tramiteId;
-	}
-
-	public void setTramiteId(String tramiteId) {
-		this.tramiteId = tramiteId;
 	}
 
 	public String getTimezone() {
@@ -154,7 +157,7 @@ public class Agenda implements Serializable {
 		this.idiomas = idiomas;
 	}
 
-	@OneToMany(mappedBy="agenda", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="agenda", fetch=FetchType.EAGER, cascade=CascadeType.ALL)
   @MapKey(name="idioma")
 	public Map<String, TextoAgenda> getTextosAgenda() {
 		return textosAgenda;
@@ -171,15 +174,6 @@ public class Agenda implements Serializable {
 
 	public void setConCda(Boolean conCda) {
 		this.conCda = conCda;
-	}
-
-	@Column(name="tramite_codigo")
-	public String getTramiteCodigo() {
-		return tramiteCodigo;
-	}
-
-	public void setTramiteCodigo(String tramiteCodigo) {
-		this.tramiteCodigo = tramiteCodigo;
 	}
 
 	@Column(name="publicar_novedades")

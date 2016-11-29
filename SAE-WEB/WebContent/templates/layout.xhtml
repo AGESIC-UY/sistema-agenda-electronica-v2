@@ -92,12 +92,13 @@
 								<ul>
 									<li>
 										<div class="form-inline">
+										  <p:outputPanel styleClass="form-group" rendered="#{sessionMBean.mostrarFechaActual}">
+										    <h:outputText value="#{sessionMBean.fechaActual}" />
+									    </p:outputPanel>
 											<div class="form-group">
 												<h:outputLabel for="idioma" value="#{sessionMBean.textos['idioma']}" class="label" />
-												<h:selectOneMenu id="idioma"
-													value="#{sessionMBean.idiomaActual}"
-													valueChangeListener="#{sessionMBean.cambioIdiomaActual}"
-													styleClass="form-control">
+												<h:selectOneMenu id="idioma" value="#{sessionMBean.idiomaActual}"
+													valueChangeListener="#{sessionMBean.cambioIdiomaActual}" styleClass="form-control">
 													<p:ajax update="@all" process="@this" />
 													<f:selectItems value="#{sessionMBean.idiomasSoportados}" />
 												</h:selectOneMenu>
@@ -151,7 +152,7 @@
 			<h1 id="destino_saltar_contenido">
 				<h:outputText value="#{nombre_pagina}"></h:outputText>
 			</h1>
-			<p:messages id="pantalla" showDetail="false" autoUpdate="true"
+			<p:messages id="pantalla" showDetail="false" autoUpdate="true" 
 				infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
 				infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
 				warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}"

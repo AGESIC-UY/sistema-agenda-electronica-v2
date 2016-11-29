@@ -29,7 +29,7 @@ import uy.gub.imm.sae.entity.global.Configuracion;
 
 @Stateless
 @RolesAllowed("RA_AE_ANONIMO")
-public class ConfiguracionBean  {
+public class ConfiguracionBean implements ConfiguracionLocal, ConfiguracionRemote {
 
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;

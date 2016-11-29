@@ -24,10 +24,14 @@ import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.Principal;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -58,8 +62,10 @@ import org.primefaces.model.StreamedContent;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
+import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoASolicitar;
@@ -83,6 +89,8 @@ public class SessionMBean extends SessionCleanerMBean {
 	private Empresa empresaActual;
 	private List<SelectItem> empresasUsuario;
 	private byte[] empresaActualLogoBytes;
+	
+	private boolean mostrarFechaActual = false;
 
 	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
 	private AgendaGeneral generalEJB;
@@ -96,6 +104,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
 	private AgendarReservas agendarReservasEJB;
 	
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionRemote")
+  private Configuracion configuracionEJB;
+	
 	
 	@PostConstruct
 	public void postConstruct() {
@@ -105,6 +116,11 @@ public class SessionMBean extends SessionCleanerMBean {
 		cargarDatosUsuario();
 		//Se vuelven a cargar los textos despues de los datos del usuario para incluir los traducidos en el idioma actual
 		cargarTextos();
+		//Cargar las propiedades de configuracion
+		Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
+		if(bMostrarFechaActual!=null) {
+		  mostrarFechaActual = bMostrarFechaActual.booleanValue();
+		}
 	}
 	
 	private String idiomaActual = Locale.getDefault().getLanguage();
@@ -198,6 +214,18 @@ public class SessionMBean extends SessionCleanerMBean {
 		}
 		return "HH:mm";
 	}
+	
+	public boolean isMostrarFechaActual() {
+	  return this.mostrarFechaActual;
+	}
+	
+  public String getFechaActual() {
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, getTimeZone().getOffset((new Date()).getTime()));
+    DateFormat df = new SimpleDateFormat(getFormatoFecha()+" "+getFormatoHora());
+    return df.format(cal.getTime());
+  }
+	
 	
 	// *****************************************************************************************************
 	// ***************************Pasos para la reserva
@@ -1025,13 +1053,13 @@ public class SessionMBean extends SessionCleanerMBean {
 	// PARA LOS TEXTOS FIJOS
 	//*******************************************************************
 	
-	private Map<String, String> textos = new HashMap<String, String>();
+	private Map<String, String> textos = new SofisHashMap();
 
 	public void cargarTextos() {
 		try {
 			textos = generalEJB.consultarTextos(idiomaActual);
 		} catch (ApplicationException e) {
-			textos = new HashMap<String, String>();
+			textos = new SofisHashMap();
 			e.printStackTrace();
 		}
 	}

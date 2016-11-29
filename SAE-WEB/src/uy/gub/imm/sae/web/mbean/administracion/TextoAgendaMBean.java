@@ -34,9 +34,11 @@ import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
+import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Agendas;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.TextoAgenda;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.SelectItemComparator;
 
@@ -48,6 +50,9 @@ public class TextoAgendaMBean  extends BaseMBean{
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendasBean!uy.gub.imm.sae.business.ejb.facade.AgendasRemote")
 	private Agendas agendasEJB;
 
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  private AgendaGeneral generalEJB;
+	
 	public SessionMBean sessionMBean;
 	public TextoAgenda textoAux = new TextoAgenda();
 	
@@ -133,6 +138,9 @@ public class TextoAgendaMBean  extends BaseMBean{
  						}
  					}
  				}
+ 				
+ 				List<TramiteAgenda> tramites = generalEJB.consultarTramites(agenda);
+ 				agenda.setTramites(tramites);
  				
 				agendasEJB.modificarAgenda(agenda);
 				addInfoMessage(sessionMBean.getTextos().get("agenda_modificada"), MSG_ID); 

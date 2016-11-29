@@ -8,330 +8,205 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view beforePhase="#{validacionMantenimientoMBean.beforePhase}"
-			beforePhaseListener="#{validacionMantenimientoMBean.beforePhase}">
+		<f:view beforePhase="#{validacionMantenimientoMBean.beforePhase}">
 
-			<h:form id="form">
-				<p:outputPanel styleClass="botonesDerecha">
-					<p:commandButton id="agregarValidacion" value="Crear Validación"
-						styleClass="btn btn-secundario"
-						actionListener="#{validacionMantenimientoMBean.crear}"
-						update="form" />
-				</p:outputPanel>
+      <p:dialog closable="false" shadowOpacity="0.4" autosized="false"
+        widgetVar="eliminarValidacion" zindex="2000" modal="true">
+        <f:facet name="header">
+          <h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+        </f:facet>
+        <h:form id="elimRec">
+          <h:outputText
+            value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_validacion']}" />
+          <p:outputPanel styleClass="row panelBotonesPopUp">
+            <p:outputPanel styleClass="col-sm-6">
+              <p:commandButton id="btn_eliminar" update="form:panelForm"
+                actionListener="#{validacionMantenimientoMBean.eliminarValidacion}"
+                value="#{sessionMBean.textos['eliminar']}"
+                onclick="PF('eliminarValidacion').hide();"
+                styleClass="btn-primario btn-100 btn">
+              </p:commandButton>
+            </p:outputPanel>
+            <p:outputPanel styleClass="col-sm-6">
+              <p:commandButton onclick="PF('eliminarValidacion').hide();"
+                value="#{sessionMBean.textos['cancelar']}"
+                styleClass="btn-link btn-100 btn">
+              </p:commandButton>
+            </p:outputPanel>
+          </p:outputPanel>
+        </h:form>
+      </p:dialog>
 
+      <h:form id="form" rendered="#{sessionMBean.empresaActual != null}">
+        <p:outputPanel id="panelForm">
 
-				<p:dataTable value="#{validacionMantenimientoMBean.validaciones}"
-					var="row"
-					binding="#{validacionMantenimientoMBean.validacionesTable}"
-					id="tablaValidaciones" rows="5" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+          <p:outputPanel styleClass="botonesDerecha">
+            <p:commandButton id="agregarValidacion"
+              value="#{sessionMBean.textos['agregar_validacion']}"
+              styleClass="btn btn-secundario"
+              actionListener="#{validacionMantenimientoMBean.crearValidacion}"
+              update="form:panelValidacion" />
+          </p:outputPanel>
 
-					<f:facet name="header">
-						<h:outputText value="Validaciones" />
-					</f:facet>
-
-					<p:column>
-						<f:facet name="header">
-							<h:outputText value="Nombre"></h:outputText>
-						</f:facet>
-						<h:outputText value="#{row.nombre}"></h:outputText>
-						<p:tooltip value="#{row.descripcion}"></p:tooltip>
-					</p:column>
-
-					<p:column>
-						<f:facet name="header">
-							<h:outputText value="Servicio"></h:outputText>
-						</f:facet>
-						<h:outputText value="#{row.servicio}"></h:outputText>
-					</p:column>
-
-					<p:column>
-						<f:facet name="header">
-							<h:outputText value="Host"></h:outputText>
-						</f:facet>
-						<h:outputText value="#{row.host}"></h:outputText>
-					</p:column>
-
-					<p:column>
-						<p:commandButton id="modificarLink" update="form:panelValidacion"
-							actionListener="#{validacionMantenimientoMBean.editar}"
-							icon="ui-icon-pencil">
-
-							<p:tooltip value="Editar la validacion" />
-						</p:commandButton>
-
-
-
-						<p:commandButton id="elimLink"
-							update="tablaValidaciones, panelValidacion"
-							actionListener="#{validacionMantenimientoMBean.eliminarValidacion}"
-							icon="ui-icon-trash">
-
-						</p:commandButton>
-						<p:tooltip for="elimLink"
-							value="#{sessionMBean.textos['eliminar']}" />
-					</p:column>
-
-
-				</p:dataTable>
-
-				<p:spacer height="5px"></p:spacer>
-
-				<p:outputPanel id="panelValidacion"
-					rendered="#{validacionMantenimientoSessionMBean.modoEdicion || validacionMantenimientoSessionMBean.modoCreacion}">
-					<fieldset>
-						<legend>
-							<h:outputText value="Creando validación"
-								rendered="#{validacionMantenimientoSessionMBean.modoCreacion}" />
-							<h:outputText value="Editando validación"
-								rendered="#{validacionMantenimientoSessionMBean.modoEdicion}" />
-						</legend>
-
-						<p:outputPanel styleClass="form-horizontal">
-
-							<p:outputPanel styleClass="form-group">
-								<h:outputLabel value="Nombre:"
-									styleClass="col-sm-3 control-label label" for="nombre" />
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText
-										value="#{validacionMantenimientoSessionMBean.validacion.nombre}"
-										size="75" id="nombre" />
-								</p:outputPanel>
-							</p:outputPanel>
-
-							<p:outputPanel styleClass="form-group">
-								<h:outputLabel value="Descripción:"
-									styleClass="col-sm-3 control-label label" for="descripcion" />
-
-
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputTextarea
-										value="#{validacionMantenimientoSessionMBean.validacion.descripcion}"
-										cols="71" rows="5" id="descripcion" />
-								</p:outputPanel>
-							</p:outputPanel>
-
-							<p:outputPanel styleClass="form-group">
-								<h:outputLabel value="Servicio:"
-									styleClass="col-sm-3 control-label label" for="servicio" />
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.servicio}"
-									size="75" id="servicio" />
-								</p:outputPanel>
-							</p:outputPanel>
-							
-							<p:outputPanel styleClass="form-group">
-								<h:outputText value="Host:" />
-								<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.host}"
-									size="75" />
-								<h:outputLabel value="Host:" 
-									styleClass="col-sm-3 control-label label" for="host" />
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.host}"
-									size="75" id="host" />
-								</p:outputPanel>
-							</p:outputPanel>
-							
-							<p:outputPanel styleClass="form-group">
-								<h:outputText value="Parámetros:" />
-								<h:outputLabel value="Parámetros:"
-									styleClass="col-sm-3 control-label label" for="parametro" />
-								<p:dataTable
-									value="#{validacionMantenimientoSessionMBean.validacion.parametrosValidacion}"
-									var="row" columns="4"
-									binding="#{validacionMantenimientoMBean.parametrosTable}"
-									id="tablaParametros" rows="4" width="404px">
-
-									<p:column style="text-align:left;" width="234px">
-										<f:facet name="header">
-											<h:outputText value="Nombre"></h:outputText>
-										</f:facet>
-										<p:inplaceInput value="#{row.nombre}" inputWidth="150px"></p:inplaceInput>
-									</p:column>
-
-									<p:column style="text-align:left;" width="120px">
-										<f:facet name="header">
-											<h:outputText value="Tipo"></h:outputText>
-										</f:facet>
-
-										<h:selectOneMenu value="#{row.tipo}" style="width: 90px">
-											<f:selectItems
-												value="#{validacionMantenimientoMBean.tiposDeDato}" />
-										</h:selectOneMenu>
-									</p:column>
-
-									<p:column style="text-align:left;" width="30px">
-										<f:facet name="header">
-											<h:outputText value="Largo"></h:outputText>
-										</f:facet>
-										<p:inplaceInput value="#{row.largo}" inputWidth="30px">
-										</p:inplaceInput>
-									</p:column>
-
-									<p:column style="text-align:center;" width="20px">
-										<p:commandLink reRender="tablaParametros"
-											actionListener="#{validacionMantenimientoMBean.eliminarParametro}">
-											<h:graphicImage
-												value="#{saeProperties['ui.resource.base.url']}/recursos/images/delete2.gif"
-												style="border:0" height="16" width="16" />
-											<p:tooltip value="Elimina el parámetro" />
-										</p:commandLink>
-									</p:column>
-
-									<f:facet name="footer">
-										<h:panelGroup>
-											<p:commandLink reRender="tablaParametros"
-												actionListener="#{validacionMantenimientoMBean.crearParametro}">
-												<h:graphicImage
-													value="#{saeProperties['ui.resource.base.url']}/recursos/images/create_doc.gif"
-													style="border:0" height="16" width="16" />
-												<p:tooltip value="Agrega un nuevo parámetro" />
-											</p:commandLink>
-										</h:panelGroup>
-									</f:facet>
-								</p:dataTable>
-								
-								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.servicio}"
-									size="75" id="servicio" />
-								</p:outputPanel>
-							</p:outputPanel>
-
-						</p:outputPanel>
-
-					</fieldset>
-				</p:outputPanel>
-				<h:panelGrid columns="1">
-
-
-
-
-					<p:spacer height="5px"></p:spacer>
-
-					<h:panelGroup id="panelValidacion">
-						<p:panel
-							rendered="#{validacionMantenimientoSessionMBean.modoEdicion || validacionMantenimientoSessionMBean.modoCreacion}">
+					<p:dataTable value="#{validacionMantenimientoMBean.validacionesSeleccion}"
+						var="row" id="tablaValidaciones" rows="25" paginator="true"
+						binding="#{validacionMantenimientoMBean.validacionesDataTable}"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						caption="#{sessionMBean.textos['listado_de_validaciones']}"
+            emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+						<p:column>
 							<f:facet name="header">
-								<h:panelGroup>
-									<h:outputText value="Creando validación"
-										rendered="#{validacionMantenimientoSessionMBean.modoCreacion}" />
-									<h:outputText value="Editando validación"
-										rendered="#{validacionMantenimientoSessionMBean.modoEdicion}" />
-								</h:panelGroup>
+								<h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
 							</f:facet>
+							<h:outputText value="#{row.data.nombre}"></h:outputText>
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['servicio']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.data.servicio}"></h:outputText>
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['host']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.data.host}"></h:outputText>
+						</p:column>
+            <p:column styleClass="alinCentro">
+              <f:facet name="header">
+                <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+              </f:facet>
+              <p:commandButton id="modificarValidacion" value="#{sessionMBean.textos['modificar']}"
+                actionListener="#{validacionMantenimientoMBean.editarValidacion}"
+                icon="ui-icon-pencil" update="form:panelValidacion" styleClass="ui-button-icon-only"
+                title="#{sessionMBean.textos['modificar']}">
+              </p:commandButton>
+              <p:commandButton id="eliminarValidacion" value="#{sessionMBean.textos['eliminar']}"
+                actionListener="#{validacionMantenimientoMBean.selecValidacionEliminar}" 
+                update="form:panelValidacion" styleClass="ui-button-icon-only"
+                oncomplete="PF('eliminarValidacion').show();" icon="ui-icon-trash"
+                title="#{sessionMBean.textos['eliminar']}">
+              </p:commandButton>
+            </p:column>
+					</p:dataTable>
+				</p:outputPanel>
 
-							<h:panelGrid columns="2" columnClasses="derecha, izquierda">
+				<p:outputPanel id="panelValidacion">
+          <p:outputPanel rendered="#{validacionMantenimientoMBean.validacion != null}">
+  
+            <p:outputPanel styleClass="form-required">
+              <h:outputText
+                value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+            </p:outputPanel>
+            <fieldset id="basic">
+              <legend>
+                <h:outputText
+                  value="#{sessionMBean.textos['datos_de_la_validacion']}" />
+              </legend>
+              <p:outputPanel styleClass="form-horizontal">
+                <p:outputPanel styleClass="form-group">
+                  <h:outputLabel value="#{sessionMBean.textos['nombre']}"
+                    for="nombreValidacion"
+                    styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="nombreValidacion"
+                      value="#{validacionMantenimientoMBean.validacion.nombre}"
+                      maxlength="50" styleClass="form-control" />
+                    <p:message for="nombreValidacion"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <h:outputLabel value="#{sessionMBean.textos['descripcion']}"
+                    for="descripcionValidacion"
+                    styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="descripcionValidacion"
+                      value="#{validacionMantenimientoMBean.validacion.descripcion}"
+                      maxlength="100" styleClass="form-control" />
+                    <p:message for="descripcionValidacion"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <h:outputLabel value="#{sessionMBean.textos['servicio']}"
+                    for="servicioValidacion"
+                    styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="servicioValidacion"
+                      value="#{validacionMantenimientoMBean.validacion.servicio}"
+                      maxlength="250" styleClass="form-control" />
+                    <p:message for="servicioValidacion"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <h:outputLabel value="#{sessionMBean.textos['host']}"
+                    for="hostValidacion"
+                    styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="hostValidacion"
+                      value="#{validacionMantenimientoMBean.validacion.host}"
+                      maxlength="100" styleClass="form-control" />
+                    <p:message for="hostValidacion"></p:message>
+                  </p:outputPanel>
+                </p:outputPanel>
+  
+                <p:outputPanel styleClass="botonesDerecha">
+                  <p:commandButton id="agregarParametro"
+                    value="#{sessionMBean.textos['agregar_parametro']}"
+                    styleClass="btn btn-secundario"
+                    actionListener="#{validacionMantenimientoMBean.crearParametro}"
+                    update="form:parametrosValidacion" >
+                  </p:commandButton>
+                </p:outputPanel>
+  
+                <p:dataTable
+                  value="#{validacionMantenimientoMBean.validacion.parametrosValidacion}"
+                  var="row" id="parametrosValidacion" rowIndexVar="num" 
+                  caption="#{sessionMBean.textos['parametros']}"
+                  emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+                  <p:column headerText="#{sessionMBean.textos['nombre']}">
+                    <p:outputPanel styleClass="form-group">
+                      <p:outputPanel styleClass="col-sm-12">
+                        <h:inputText id="parametroNombre" value="#{row.nombre}" maxlength="50" title="#{sessionMBean.textos['nombre']}"></h:inputText>
+                        <p:message for="parametroNombre"></p:message>
+                      </p:outputPanel>
+                    </p:outputPanel>
+                  </p:column>
+                  <p:column styleClass="alinCentro">
+                    <f:facet name="header">
+                      <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+                    </f:facet>
+                    <p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
+                      action="#{validacionMantenimientoMBean.eliminarParametro(num)}"
+                      icon="ui-icon-trash" update="form:panelValidacion"
+                      title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
+                    </p:commandButton>
+                  </p:column>
+                </p:dataTable>
+              </p:outputPanel>
+            </fieldset>
+  
+            <ul class="form-action-buttons">
+              <li class="action-buttons-primary">
+                <ul>
+                  <li><p:commandButton
+                      value="#{sessionMBean.textos['guardar']}"
+                      actionListener="#{validacionMantenimientoMBean.guardarValidacion}"
+                      styleClass="btn-lg btn-primario" update="form:panelForm form:panelValidacion" /></li>
+                </ul>
+              </li>
+              <li class="action-buttons-second">
+                <ul>
+                  <li class="float-left">
+                    <p:commandButton
+                      value="#{sessionMBean.textos['cancelar']}"
+                      actionListener="#{validacionMantenimientoMBean.cancelarValidacion}"
+                      styleClass="btn-lg btn-link" update="form:panelForm form:panelValidacion" /></li>
+                </ul>
+              </li>
+            </ul>
 
-								<h:outputText value="Nombre:" />
-								<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.nombre}"
-									size="75" />
-								<h:outputText value="Descripción:" />
-								<h:inputTextarea
-									value="#{validacionMantenimientoSessionMBean.validacion.descripcion}"
-									cols="71" rows="5">
-								</h:inputTextarea>
-								<h:outputText value="Servicio:" />
-								<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.servicio}"
-									size="75" />
-								<h:outputText value="Host:" />
-								<h:inputText
-									value="#{validacionMantenimientoSessionMBean.validacion.host}"
-									size="75" />
-
-								<h:outputText value="Parámetros:" />
-
-								<p:dataTable
-									value="#{validacionMantenimientoSessionMBean.validacion.parametrosValidacion}"
-									var="row" columns="4"
-									binding="#{validacionMantenimientoMBean.parametrosTable}"
-									id="tablaParametros" rows="4" width="404px">
-
-									<p:column style="text-align:left;" width="234px">
-										<f:facet name="header">
-											<h:outputText value="Nombre"></h:outputText>
-										</f:facet>
-										<p:inplaceInput value="#{row.nombre}" inputWidth="150px"></p:inplaceInput>
-									</p:column>
-
-									<p:column style="text-align:left;" width="120px">
-										<f:facet name="header">
-											<h:outputText value="Tipo"></h:outputText>
-										</f:facet>
-
-										<h:selectOneMenu value="#{row.tipo}" style="width: 90px">
-											<f:selectItems
-												value="#{validacionMantenimientoMBean.tiposDeDato}" />
-										</h:selectOneMenu>
-									</p:column>
-
-									<p:column style="text-align:left;" width="30px">
-										<f:facet name="header">
-											<h:outputText value="Largo"></h:outputText>
-										</f:facet>
-										<p:inplaceInput value="#{row.largo}" inputWidth="30px">
-										</p:inplaceInput>
-									</p:column>
-
-									<p:column style="text-align:center;" width="20px">
-										<p:commandLink reRender="tablaParametros"
-											actionListener="#{validacionMantenimientoMBean.eliminarParametro}">
-											<h:graphicImage
-												value="#{saeProperties['ui.resource.base.url']}/recursos/images/delete2.gif"
-												style="border:0" height="16" width="16" />
-											<p:tooltip value="Elimina el parámetro" />
-										</p:commandLink>
-									</p:column>
-
-									<f:facet name="footer">
-										<h:panelGroup>
-											<p:commandLink reRender="tablaParametros"
-												actionListener="#{validacionMantenimientoMBean.crearParametro}">
-												<h:graphicImage
-													value="#{saeProperties['ui.resource.base.url']}/recursos/images/create_doc.gif"
-													style="border:0" height="16" width="16" />
-												<p:tooltip value="Agrega un nuevo parámetro" />
-											</p:commandLink>
-										</h:panelGroup>
-									</f:facet>
-								</p:dataTable>
-
-								<p:spacer>
-								</p:spacer>
-
-								<h:panelGroup>
-									<p:commandButton value="Guardar"
-										actionListener="#{validacionMantenimientoMBean.guardarEdicion}"
-										reRender="tablaValidaciones, panelValidacion"
-										rendered="#{validacionMantenimientoSessionMBean.modoEdicion}">
-									</p:commandButton>
-									<p:commandButton value="Cancelar"
-										actionListener="#{validacionMantenimientoMBean.cancelarEdicion}"
-										immediate="true" reRender="tablaValidaciones, panelValidacion"
-										rendered="#{validacionMantenimientoSessionMBean.modoEdicion}">
-									</p:commandButton>
-
-									<p:commandButton value="Guardar"
-										actionListener="#{validacionMantenimientoMBean.guardarCreacion}"
-										reRender="pantalla,tablaValidaciones"
-										rendered="#{validacionMantenimientoSessionMBean.modoCreacion}">
-									</p:commandButton>
-									<p:commandButton value="Cancelar"
-										actionListener="#{validacionMantenimientoMBean.cancelarCreacion}"
-										immediate="true" reRender="pantalla"
-										rendered="#{validacionMantenimientoSessionMBean.modoCreacion}">
-									</p:commandButton>
-								</h:panelGroup>
-							</h:panelGrid>
-
-						</p:panel>
-					</h:panelGroup>
-				</h:panelGrid>
+          </p:outputPanel>
+        </p:outputPanel>
 			</h:form>
 		</f:view>
 	</ui:define>

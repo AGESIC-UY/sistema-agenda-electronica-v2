@@ -117,6 +117,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			String sUrl = request.getParameter("u"); //URL de retorno al confirmar (URL encoded)
 			String sParms = request.getParameter("p"); //Parámetros para autocompletar: <idagrupacion>.<iddato>.<valor>;)
 			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
+			String sTramite = request.getParameter("q"); //Código de trámite
 			
 			if(sParms!=null) {
 				sesionMBean.setParmsDatosCiudadano(sParms);
@@ -133,6 +134,11 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			}else {
 				sesionMBean.setCodigoTrazabilidadPadre(null);
 			}
+      if(sTramite!=null) {
+        sesionMBean.setCodigoTramite(sTramite);
+      }else {
+        sesionMBean.setCodigoTramite(null);
+      }
 			
 			if(sIdioma!=null) {
 				sesionMBean.setIdiomaActual(sIdioma);
@@ -245,18 +251,14 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			String paginaDeRetorno = request.getParameter("pagina_retorno");
 			boolean soloCuerpo = Boolean.parseBoolean(request.getParameter("solo_cuerpo"));
 			if (empresaId != null && agendaId != null) {
-				// Se esta indicando a que agenda se desea acceder
-				if (sesionMBean.getAgenda() == null || !sesionMBean.getAgenda().getId().equals(agendaId)) {
-					// Y es distinta de la actualmente seleccionada
-					try {
-						sesionMBean.seleccionarAgenda(agendaId);
-						sesionMBean.setPaginaDeRetorno(paginaDeRetorno);
-						sesionMBean.setSoloCuerpo(soloCuerpo);
-					} catch (Exception  ae) {
-						addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-						errorInit = true;
-						return;
-					}
+				try {
+					sesionMBean.seleccionarAgenda(agendaId);
+					sesionMBean.setPaginaDeRetorno(paginaDeRetorno);
+					sesionMBean.setSoloCuerpo(soloCuerpo);
+				} catch (Exception  ae) {
+					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+					errorInit = true;
+					return;
 				}
 
 				String url = "/agendarReserva/Paso1.xhtml?e=" + empresaId + "&a=" + agendaId;
@@ -275,6 +277,9 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 				if(sTraza != null) {
 					url = url + "&t=" + sTraza;
 				}
+        if(sTramite != null) {
+          url = url + "&q=" + sTramite;
+        }
 
 				sesionMBean.setUrlPaso1Reserva(url);
 			}
@@ -562,7 +567,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 
 		List<Integer> listaCupos = null;
 		try {
-			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado);
+			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado, sesionMBean.getTimeZone());
 			// Se carga la fecha inicial
 			Calendar cont = Calendar.getInstance();
 			cont.setTime(Utiles.time2InicioDelDia(sesionMBean.getVentanaMesSeleccionado().getFechaInicial()));
@@ -600,48 +605,36 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			Recurso recurso = sesionMBean.getRecurso();
 			try {
 				VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
-				VentanaDeTiempo ventanaMesSeleccionado = new VentanaDeTiempo();
-				Calendar cal = Calendar.getInstance();
-				cal.setTime(ventanaCalendario.getFechaInicial());
-				cal.set(Calendar.DAY_OF_MONTH,cal.getActualMinimum(Calendar.DAY_OF_MONTH));
-				ventanaMesSeleccionado.setFechaInicial(Utiles.time2InicioDelDia(cal.getTime()));
-				cal.set(Calendar.DAY_OF_MONTH,cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-				ventanaMesSeleccionado.setFechaFinal(Utiles.time2FinDelDia(cal.getTime()));
 				
-				List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso,ventanaMesSeleccionado);
+        List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventanaCalendario, sesionMBean.getTimeZone());
 				// Se carga la fecha inicial
 				Calendar cont = Calendar.getInstance();
-				cont.setTime(Utiles.time2InicioDelDia(ventanaMesSeleccionado.getFechaInicial()));
+        cont.setTime(Utiles.time2InicioDelDia(ventanaCalendario.getFechaInicial()));
 
 				Integer i = 0;
 
 				Date inicio_disp = ventanaCalendario.getFechaInicial();
 				Date fin_disp = ventanaCalendario.getFechaFinal();
 				boolean tieneDiponibilidad = false; 
-				while (!cont.getTime().after(ventanaMesSeleccionado.getFechaFinal()) && tieneDiponibilidad == false) {
-					if (cont.getTime().before(inicio_disp)
-							|| cont.getTime().after(fin_disp)) {
+				
+        while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && tieneDiponibilidad == false) {
+					if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
 						listaCupos.set(i, -1);
 					} else {
 						if (listaCupos.get(i) > 0) {
-							
 							tieneDiponibilidad = true;
 						}
-
 					}
 					cont.add(Calendar.DAY_OF_MONTH, 1);
 					i++;
 				}
-				if(tieneDiponibilidad)
-				{
+				if(tieneDiponibilidad) {
 					return "siguientePaso";
-				}else
-				{
+				}else {
 					addErrorMessage(sesionMBean.getTextos().get("sin_disponibilidades"));
 					mostrarMapa(recurso);
 					return null;
 				}
-				
 			} catch (Exception ex) {
 				addErrorMessage(sesionMBean.getTextos().get("sin_disponibilidades"));
 				ex.printStackTrace();

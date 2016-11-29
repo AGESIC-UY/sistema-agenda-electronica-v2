@@ -14,13 +14,10 @@ import uy.gub.imm.sae.common.factories.ws.client.agendar.ApplicationException_Ex
 import uy.gub.imm.sae.common.factories.ws.client.agendar.BusinessException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.agendar.ErrorValidacionCommitException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.agendar.ErrorValidacionException_Exception;
-import uy.gub.imm.sae.common.factories.ws.client.agendar.UserCommitException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.agendar.UserException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.agendar.ValidacionClaveUnicaException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.agendar.ValidacionException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.agendar.ValidacionPorCampoException_Exception;
-import uy.gub.imm.sae.common.factories.ws.client.agendar.WarningValidacionCommitException_Exception;
-import uy.gub.imm.sae.common.factories.ws.client.agendar.WarningValidacionException_Exception;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
@@ -28,6 +25,7 @@ import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -35,13 +33,10 @@ import uy.gub.imm.sae.exception.AutocompletarException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
-import uy.gub.imm.sae.exception.UserCommitException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 
 public class AgendarReservasPort implements AgendarReservas {
 	
@@ -83,10 +78,6 @@ public class AgendarReservasPort implements AgendarReservas {
 			throw new ValidacionClaveUnicaException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos());
 		} catch (ValidacionPorCampoException_Exception e) {
 			throw new ValidacionPorCampoException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos(),e.getFaultInfo().getMensajes());
-		} catch (WarningValidacionException_Exception e) {
-			throw new WarningValidacionException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos(),e.getFaultInfo().getMensajes());
-		} catch (WarningValidacionCommitException_Exception e) {
-			throw new WarningValidacionCommitException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getNombresCampos(),e.getFaultInfo().getMensajes());
 		}
 	}
 
@@ -176,9 +167,7 @@ public class AgendarReservasPort implements AgendarReservas {
 			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
 		} catch (UserException_Exception e) {
 			throw new UserException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
-		} catch (UserCommitException_Exception e) {
-			throw new UserCommitException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
-		}
+		} 
 		
 	}
 
@@ -186,11 +175,11 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v)
+	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone t)
 			throws BusinessException {
 
 		try {
-			return this.reservas.obtenerCuposPorDia(r, v);
+			return this.reservas.obtenerCuposPorDia(r, v, t);
 		} catch (BusinessException_Exception e) {
 			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
 		}
@@ -284,4 +273,9 @@ public class AgendarReservasPort implements AgendarReservas {
 	public void limpiarTrazas() {
 		throw new UnsupportedOperationException();
 	}
+
+  @Override
+  public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
+    throw new UnsupportedOperationException();
+  }
 }

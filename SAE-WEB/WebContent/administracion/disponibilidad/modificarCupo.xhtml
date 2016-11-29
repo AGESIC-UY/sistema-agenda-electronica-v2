@@ -290,6 +290,10 @@
                     <p:selectBooleanCheckbox id="diaAplicarSa" value="#{dispSessionMBean.diasAplicar[5]}" />
                     <p:outputLabel value="Sábado" for="diaAplicarSa" />
                   </p:outputPanel>
+                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos and sessionMBean.recursoMarcado.domingoEsHabil}">
+                    <p:selectBooleanCheckbox id="diaAplicarDo" value="#{dispSessionMBean.diasAplicar[6]}" />
+                    <p:outputLabel value="Domingo" for="diaAplicarDo" />
+                  </p:outputPanel>
 										
 									</p:outputPanel>
 								</p:outputPanel>

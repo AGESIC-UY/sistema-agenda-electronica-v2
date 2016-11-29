@@ -56,7 +56,7 @@ import uy.gub.agesic.novedades.ObjectFactory;
 import uy.gub.agesic.novedades.Publicar;
 import uy.gub.agesic.novedades.PublishSubscribeHeadersHandler;
 import uy.gub.agesic.sts.client.PGEClient;
-import uy.gub.imm.sae.business.ejb.facade.ConfiguracionBean;
+import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ws.SoapHandler;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Disponibilidad;
@@ -71,8 +71,8 @@ public class ServiciosNovedadesBean {
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 
-	@EJB
-	private ConfiguracionBean confBean;
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
+	private Configuracion confBean;
 	
 	private static Logger logger = Logger.getLogger(ServiciosNovedadesBean.class);
 
@@ -126,7 +126,7 @@ public class ServiciosNovedadesBean {
 		novedad.setOidOrganismo(empresa.getOid());
 		novedad.setNombreOrganismo(empresa.getNombre());
 
-		novedad.setCodigoAgenda(agenda.getTramiteCodigo());
+		novedad.setCodigoAgenda(reserva.getTramiteCodigo());
 		novedad.setNombreAgenda(agenda.getNombre());
 		
 		novedad.setCodigoRecurso(recurso.getOficinaId());
@@ -226,17 +226,12 @@ public class ServiciosNovedadesBean {
 				timeout = 5000;
 			}
 
-			try {
-				configurarSeguridad(novedadPort, wsaToNovedad, wsaActionNovedad, timeout);
-			}catch(Exception ex) {
-				throw new RuntimeException("No se pudo configurar la seguridad para invocar los servicios web de Publicación de Novedades: "+ex.getMessage(), ex);
-			}
-			
 			for (Novedad novedad0 : novedades) {
 				Publicar novedad = xmlToNovedad(novedad0.getDatos());
 				novedad0.setFechaUltIntento(new Date());
 				novedad0.setIntentos(novedad0.getIntentos() + 1);
 				try {
+	        configurarSeguridad(novedadPort, wsaToNovedad, wsaActionNovedad, timeout);
 					novedadPort.nuevaNovedad(novedad);;
 					novedad0.setEnviado(true);
 				} catch (Exception ex) {

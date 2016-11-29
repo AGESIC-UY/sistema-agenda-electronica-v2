@@ -42,12 +42,14 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
+import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Oficina;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
@@ -65,6 +67,9 @@ public class RecursoMBean extends BaseMBean{
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
 	private UsuariosEmpresas empresasEJB;
+	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  private AgendaGeneral generalEJB;
 	
 	private SessionMBean sessionMBean;
 	private Recurso recursoNuevo;
@@ -178,14 +183,8 @@ public class RecursoMBean extends BaseMBean{
 		}
 		
 		try {
-			//Cargar la lista de oficinas para el tramite asociado a la agenda
-			if(agenda != null && agenda.getTramiteId() != null) {
-				List<Oficina> oficinas = empresasEJB.obtenerOficinasTramite(agenda.getTramiteId(), false);
-				setOficinas(oficinas);
-			}else {
-				setOficinas(null);
-			}
-			
+		  List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, false);
+		  setOficinas(oficinas);
 		}catch(ApplicationException aEx) {
 			addErrorMessage(aEx.getMessage());
 			aEx.printStackTrace();
@@ -209,56 +208,52 @@ public class RecursoMBean extends BaseMBean{
 		if(getRecursoNuevo().getDescripcion() == null || getRecursoNuevo().getDescripcion().equals("")){
 			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
-			
 		}
-		
 		Recurso r = getRecursoNuevo();
 		r.setVentanaCuposMinimos(0);
+		//Fechas de vigencia
 		if (r.getFechaInicio() == null){
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), FORM_ID+":fechaInicio");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
 		}else {
 			r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
 		}
 		if(r.getFechaFin() == null) {
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), FORM_ID+":fechaFin");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_obligatoria"), FORM_ID+":fechaFin");
 		} else {
 			r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
 		}
-		
 		if(r.getFechaInicio() != null && r.getFechaFin() != null && r.getFechaInicio().compareTo(r.getFechaFin()) > 0) {
 			error = true;
-			addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
 		}
+    //Fechas de disponibilidad
 		if(r.getFechaInicioDisp() == null) {
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), FORM_ID+":fechaIniDispon");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaIniDispon");
 		}else {
 			r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
 		}
-		//Si la fecha de Fin de disponibilidad no es nula, se setea la hora al final del Día.
 		if (r.getFechaFinDisp() == null){
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), FORM_ID+":fechaFinDispon");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaFinDispon");
 		} else {
 			r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));	
 		}
 		if (r.getFechaInicioDisp() != null && r.getFechaFinDisp() != null && r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0){
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaIniDispon");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaIniDispon");
 		}
-		
+		//Relaciones entre fechas de vigencia y disponibilidad
 		if (r.getFechaInicioDisp() != null && r.getFechaInicio()!= null && r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), FORM_ID+":fechaInicio",FORM_ID+":fechaIniDispon");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaInicio",FORM_ID+":fechaIniDispon");
 		}
 		if (r.getFechaFinDisp() != null && r.getFechaFin()!= null && r.getFechaFinDisp().compareTo(r.getFechaFin()) > 0) {
 			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
 		}
-		
-		
 		if (r.getDiasInicioVentanaIntranet() == null){
 			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasVIntranet");
@@ -443,48 +438,50 @@ public class RecursoMBean extends BaseMBean{
  					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
  				}
+
+        //Fechas de vigencia
  				if (r.getFechaInicio() == null){
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), FORM_ID+":fechaInicio");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
  				}else {
  					r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
  				}
  				if(r.getFechaFin()==null) {
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), FORM_ID+":fechaFin");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_obligatoria"), FORM_ID+":fechaFin");
  				} else {
  					r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
  				}
  				if(r.getFechaInicio() != null && r.getFechaFin() != null && r.getFechaInicio().compareTo(r.getFechaFin()) > 0 ) {
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
  				}
+ 				//Fechas de disponibilidad
  				if(r.getFechaInicioDisp() == null) {
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), FORM_ID+":fechaInicioDispon");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaInicioDispon");
  				}else {
  					r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
  				}
  				if(r.getFechaFinDisp() == null) {
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), FORM_ID+":fechaFinDispon");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaFinDispon");
  				}else {
  					r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));	
  				}
  				if(r.getFechaInicioDisp()!=null && r.getFechaFinDisp() != null && r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0 ){
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaInicioDispon");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaInicioDispon");
  				}
- 				
+ 				//Relaciones entre fechas de vigencia y disponibilidad
  				if (r.getFechaInicioDisp() != null && r.getFechaInicio()!= null && r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), FORM_ID+":fechaInicio",FORM_ID+":fechaIniDispon");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaInicio",FORM_ID+":fechaInicioDispon");
  				}
  				if (r.getFechaFinDisp() != null && r.getFechaFin()!= null && r.getFechaFinDisp().compareTo(r.getFechaFin()) > 0) {
  					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
+ 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
  				}
- 				
  				
  				if (r.getDiasInicioVentanaIntranet() == null){
  					error = true;
@@ -681,6 +678,7 @@ public class RecursoMBean extends BaseMBean{
 			sessionMBean.getRecursoSeleccionado().setNombre(recursoBase.getNombre());
 			sessionMBean.getRecursoSeleccionado().setReservaMultiple(recursoBase.getReservaMultiple());
 			sessionMBean.getRecursoSeleccionado().setSabadoEsHabil(recursoBase.getSabadoEsHabil());
+      sessionMBean.getRecursoSeleccionado().setDomingoEsHabil(recursoBase.getDomingoEsHabil());
 			sessionMBean.getRecursoSeleccionado().setSerie(recursoBase.getSerie());
 			sessionMBean.getRecursoSeleccionado().setTelefonos(recursoBase.getTelefonos());
 			sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(recursoBase.getVentanaCuposMinimos());
@@ -849,9 +847,9 @@ public class RecursoMBean extends BaseMBean{
 		try {
 			//Cargar la lista de oficinas para el tramite asociado a la agenda
 			Agenda agenda = sessionMBean.getAgendaMarcada();
-			String tramiteId = agenda.getTramiteId();
-			List<Oficina> oficinas = empresasEJB.obtenerOficinasTramite(tramiteId, true);
-			setOficinas(oficinas);
+			
+      List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, true);
+      setOficinas(oficinas);
 			
 			String msg = sessionMBean.getTextos().get("se_cargaron_n_oficinas");
 			if(msg!=null) {
@@ -918,6 +916,15 @@ public class RecursoMBean extends BaseMBean{
 		}catch (UserException aEx) {
 			addErrorMessage(aEx, MSG_ID);
 		}
+	}
+	
+	private List<Oficina> cargarOficinasTramitesAgenda(Agenda agenda, boolean actualizar) throws ApplicationException {
+    List<Oficina> oficinas = new ArrayList<Oficina>();
+    List<TramiteAgenda> tramites = generalEJB.consultarTramites(agenda);
+    for(TramiteAgenda tramite : tramites) {
+      oficinas.addAll(empresasEJB.obtenerOficinasTramite(tramite.getTramiteId(), actualizar));
+    }
+    return oficinas;
 	}
 	
 }

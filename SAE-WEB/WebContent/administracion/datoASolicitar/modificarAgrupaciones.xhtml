@@ -83,13 +83,13 @@
 	              <f:facet name="header">
 	                <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 	              </f:facet>
-	              <p:commandButton id="modificarAgrupLink"
+	              <p:commandButton id="modificarAgrupLink" value="#{sessionMBean.textos['modificar']}"
 	                action="#{agrupacionMBean.seleccionarAgrupacion(rowIndex)}"
 	                update="formModificarAgrup:panelModificarAgrup" icon="ui-icon-pencil"
-	                title="#{sessionMBean.textos['modificar']}">
-	              </p:commandButton>
-	              <p:commandButton id="eliminarAgrupLink"
-	                oncomplete="PF('eliminarAgrupacion').show();"
+	                title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
+	              </p:commandButton> 
+	              <p:commandButton id="eliminarAgrupLink" value="#{sessionMBean.textos['eliminar']}"
+	                oncomplete="PF('eliminarAgrupacion').show();" styleClass="ui-button-icon-only"
 	                action="#{agrupacionMBean.seleccionarAgrupacionParaEliminar(rowIndex)}"
 	                icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 	              </p:commandButton>

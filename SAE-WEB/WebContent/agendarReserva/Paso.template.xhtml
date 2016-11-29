@@ -36,15 +36,15 @@
 		<ui:define name="cuerpo">
 			<h:form id="form">
 				<div class="idioma">
-					<h:panelGroup rendered="#{not empty sesionMBean.idiomasSoportados}"
-						layout="block">
+					<h:panelGroup rendered="#{not empty sesionMBean.idiomasSoportados}" layout="block">
 						<div class="form-inline">
+              <p:outputPanel styleClass="form-group" rendered="#{sesionMBean.mostrarFechaActual}">
+                <h:outputText value="#{sesionMBean.fechaActual}" />
+              </p:outputPanel>
 							<div class="form-group">
-								<h:outputLabel for="idioma"
-									value="#{sesionMBean.textos['idioma']}" class="label" />
+								<h:outputLabel for="idioma" value="#{sesionMBean.textos['idioma']}" class="label" />
 								<h:selectOneMenu id="idioma" value="#{sesionMBean.idiomaActual}"
-									valueChangeListener="#{sesionMBean.cambioIdiomaActual}"
-									styleClass="form-control">
+									valueChangeListener="#{sesionMBean.cambioIdiomaActual}" styleClass="form-control">
 									<p:ajax update="@all" process="@this" />
 									<f:selectItems value="#{sesionMBean.idiomasSoportados}" />
 								</h:selectOneMenu>

@@ -22,6 +22,18 @@ package uy.gub.imm.sae.exception;
 
 import javax.ejb.ApplicationException;
 
+/**
+ * Esta es la excepción que se debería enviar a la presentación para que
+ * muestre mensajes de error en pantalla. El código de error debería ser
+ * la clave correspondiente en la tabla ae_textos.
+ * 
+ * Notar que esta excepción hace rollback. Si se desea aplicar los cambios
+ * en la base de datos y aún así lanzar la excepción se debe utilizar
+ * UserCommitException, que extiende esta excepción pero con la
+ * anotación rollback en false.
+ * 
+ */
+
 @ApplicationException(rollback=true)
 public class UserException extends BaseException {
 

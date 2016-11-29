@@ -389,7 +389,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 						sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
 		if (reservas.isEmpty()) {
 			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
-			addErrorMessage(sesionMBean.getTextos().get("no_se_encontraron_reservas"));
+			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
 		} else {
 			this.sesionMBean.setListaReservas(reservas);
 			mostrar = "LISTAR_RESERVAS";

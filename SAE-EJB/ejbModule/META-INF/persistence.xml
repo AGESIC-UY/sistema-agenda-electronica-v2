@@ -67,6 +67,7 @@
     <class>uy.gub.imm.sae.entity.TextoTenant</class>
     <class>uy.gub.imm.sae.entity.FraseCaptcha</class>
     <class>uy.gub.imm.sae.entity.PreguntaCaptcha</class>
+    <class>uy.gub.imm.sae.entity.TramiteAgenda</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
       <property name="hibernate.show_sql" value="false" />

@@ -20,7 +20,6 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,10 +30,12 @@ import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
+import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Plantilla;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoTenant;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.TextoGlobal;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.login.SAEPrincipal;
@@ -83,8 +84,6 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 
 	/**
 	 * Retorna una lista de recursos vivos (fechaBaja == null)
-	 * Controla que el usuario tenga rol Administrador/Planificador sobre la agenda <b>a</b>
-	 * Roles permitidos: Administrador, Planificador
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException{
@@ -95,7 +94,6 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 											"AND r.fechaBaja IS NULL "+
 											"ORDER BY r.nombre")
 									.setParameter("a", a)
-									// TODO CONTROLAR ROLES
 									.getResultList();
 			return recurso;
 			} catch (Exception e){
@@ -103,6 +101,25 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 			}
 	}
 
+  /**
+   * Retorna la lista de tramites asociados a la agenda
+   */
+  @SuppressWarnings("unchecked")
+  public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
+    try{
+      List<TramiteAgenda> tramites = (List<TramiteAgenda>) entityManager
+                  .createQuery("SELECT t from TramiteAgenda t " +
+                      "WHERE t.agenda = :a " +
+                      "ORDER BY t.tramiteNombre")
+                  .setParameter("a", a)
+                  .getResultList();
+      return tramites;
+      } catch (Exception e){
+        throw new ApplicationException(e);
+      }
+  }
+	
+	
 	/**
 	 * Retorna una lista de plantillas vivas (fechaBaja == null)
 	 * ordenadas por orden de creacion
@@ -128,7 +145,7 @@ public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemot
 	
 	@SuppressWarnings("unchecked")
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException {
-		Map<String, String> textos = new HashMap<String, String>();
+    Map<String, String> textos = new SofisHashMap();
 		try{
 			//Primero se cargan los textos globales
 			List<TextoGlobal> tGlobales = (List<TextoGlobal>) globalEntityManager.createQuery("SELECT t from TextoGlobal t ").getResultList();

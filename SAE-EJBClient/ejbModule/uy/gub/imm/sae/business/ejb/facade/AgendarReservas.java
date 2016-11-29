@@ -34,6 +34,7 @@ import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -47,12 +48,13 @@ public interface AgendarReservas {
 	public Agenda consultarAgendaPorId(Integer id) throws ApplicationException, BusinessException;
 	public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException;
 	public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException;
+	public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException;
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException;
 	
 	public Boolean agendaActiva(Agenda a);
 	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) throws BusinessException;
 	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws BusinessException;
-	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v) throws BusinessException;
+	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException;
 	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException;
 	public Reserva marcarReserva(Disponibilidad d) throws BusinessException, UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;

@@ -63,7 +63,7 @@ public class GenDispSessionMBean extends SessionCleanerMBean implements Removabl
 	private Date fechaModelo;
 	private Date fechaInicial;
 	private Date fechaFinal;
-	private Boolean[] diasAplicar = new Boolean[]{true,true,true,true,true,true}; //Lunes, martes, ..., sábado
+	private Boolean[] diasAplicar = new Boolean[]{true,true,true,true,true,true,true}; //Lunes, martes, ..., domingo
 
 	private int pagCupo;
 

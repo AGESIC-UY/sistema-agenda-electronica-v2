@@ -22,7 +22,6 @@ package uy.gub.imm.sae.common;
 
 
 import java.io.Serializable;
-import java.util.Calendar;
 import java.util.Date;
 
 public class VentanaDeTiempo implements Serializable {
@@ -33,16 +32,15 @@ public class VentanaDeTiempo implements Serializable {
 	private Date fechaFinal;
 	
 	public VentanaDeTiempo() {
-		
 		fechaInicial = null;
 		fechaFinal = null;
-
 	}
 	
 	public VentanaDeTiempo( VentanaDeTiempo v) {
 		fechaInicial = v.getFechaInicial();
 		fechaFinal = v.getFechaFinal();
 	}
+	
 	public Date getFechaInicial() {
 		return fechaInicial;
 	}
@@ -59,18 +57,6 @@ public class VentanaDeTiempo implements Serializable {
 		this.fechaFinal = fechaFinal;
 	}
 
-	/**
-	 * Setea la fecha final al valor resultado de sumar cantidadDias a la fecha inicial
-	 * Fecha inicial debe estar seteada
-	 * @param cantidadDias
-	 */
-	public void setFechaFinal(Integer cantidadDias) {
-		
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(fechaInicial);
-		cal.add(Calendar.DAY_OF_MONTH, cantidadDias);
-		fechaFinal = cal.getTime();
-	}
 
 }
 

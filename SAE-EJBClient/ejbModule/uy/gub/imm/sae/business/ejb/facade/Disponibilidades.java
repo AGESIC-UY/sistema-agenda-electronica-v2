@@ -35,7 +35,7 @@ import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
 
 public interface Disponibilidades {
-	public void generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, Integer frecuencia, Integer cupo) throws UserException, ApplicationException;
+	public List<Date> generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, Integer frecuencia, Integer cupo) throws UserException, ApplicationException;
 	public void generarDisponibilidades(Recurso r, Date f, VentanaDeTiempo periodo, Boolean[] dias) throws UserException, ApplicationException;	
 	public void generarPatronSemana(Recurso r, VentanaDeTiempo semana, VentanaDeTiempo periodo) throws BusinessException, UserException, ApplicationException;	
 	public List<Disponibilidades> consultarDisponibilidadesSolapadas(Recurso r, Plantilla p, VentanaDeTiempo v);

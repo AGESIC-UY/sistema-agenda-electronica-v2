@@ -73,7 +73,8 @@
         </copy>
     </target>
     <target name="clean">
-        <delete dir="bin"/>
+      <delete dir="bin"/>
+      <delete dir="jar"/>
     </target>
     <target depends="init" name="build">
         <echo message="${ant.project.name}: ${ant.file}"/>

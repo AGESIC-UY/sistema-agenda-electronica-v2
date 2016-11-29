@@ -43,7 +43,9 @@ public class ReservaDTO implements Serializable{
 		private String ucancela;
 		private Boolean asistio;	
 		private String numeroDocumento;	
-
+		private String tramiteCodigo;
+		private String tramiteNombre;
+		
 		public ReservaDTO() {
 			datos = new HashMap<String, Object>();
 		}
@@ -119,5 +121,18 @@ public class ReservaDTO implements Serializable{
 		public void setNumeroDocumento(String numeroDocumento) {
 			this.numeroDocumento = numeroDocumento;
 		}
+    public String getTramiteCodigo() {
+      return tramiteCodigo;
+    }
+    public void setTramiteCodigo(String tramiteCodigo) {
+      this.tramiteCodigo = tramiteCodigo;
+    }
+    public String getTramiteNombre() {
+      return tramiteNombre;
+    }
+    public void setTramiteNombre(String tramiteNombre) {
+      this.tramiteNombre = tramiteNombre;
+    }
+		
 		
 }

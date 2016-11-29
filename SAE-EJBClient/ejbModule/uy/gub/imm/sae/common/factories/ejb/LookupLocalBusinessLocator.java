@@ -71,4 +71,5 @@ public class LookupLocalBusinessLocator implements BusinessLocator {
 		return lookup(Consultas.class, SAEProfile.getInstance().getProperties().getProperty(SAEProfile.EJB_CONSULTAS_JNDI_KEY));
 	}
 
+
 }
