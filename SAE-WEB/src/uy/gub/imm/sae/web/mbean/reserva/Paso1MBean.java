@@ -119,6 +119,16 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
 			String sTramite = request.getParameter("q"); //Código de trámite
 			
+			logger.debug("Parámetros GET: ");
+      logger.debug("              : e=["+request.getParameter("e")+"]");
+      logger.debug("              : a=["+request.getParameter("a")+"]");
+      logger.debug("              : r=["+request.getParameter("r")+"]");
+      logger.debug("              : i=["+request.getParameter("i")+"]");
+      logger.debug("              : u=["+request.getParameter("u")+"]");
+      logger.debug("              : p=["+request.getParameter("p")+"]");
+      logger.debug("              : t=["+request.getParameter("t")+"]");
+      logger.debug("              : q=["+request.getParameter("q")+"]");
+			
 			if(sParms!=null) {
 				sesionMBean.setParmsDatosCiudadano(sParms);
 			}else {

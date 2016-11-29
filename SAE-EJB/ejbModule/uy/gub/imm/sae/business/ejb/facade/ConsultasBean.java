@@ -52,7 +52,6 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Token;
-import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
@@ -66,47 +65,36 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;
 	
-	public Reserva consultarReservaId(Integer idReserva, Integer idRecurso) throws ApplicationException, BusinessException {
-		
-		Reserva reserva = null;
-		
-		if (idReserva == null)
-			throw new BusinessException("-1", "El Nro. de la reserva no puede ser nulo.");
-		
-		try {
-		
-			 reserva = entityManager.find(Reserva.class, idReserva);
-			 if (reserva != null) {
-				 reserva.getDisponibilidades().size();
-				 reserva.getDatosReserva().size();
-			 }
-		
-		}catch (Exception e) {
-			throw new ApplicationException(e);
+	public Reserva consultarReservaId(Integer idReserva, Integer idRecurso) throws UserException {
+		if (idReserva == null) {
+			throw new UserException("debe_especificar_la_reserva");
 		}
-		if (reserva != null) {
-			if (reserva.getDisponibilidades().iterator().next().getRecurso().getId().intValue() != idRecurso){
-				throw new BusinessException("-1","La reserva no corresponde al recurso.");
-			}
-		}
-		return reserva;
+	  //Cargar la reserva
+	  Reserva reserva = entityManager.find(Reserva.class, idReserva);
+    if (reserva != null) {
+      //Verificar que la reserva corresponda al recurso indicado
+      if(!reserva.getDisponibilidades().get(0).getRecurso().getId().equals(idRecurso)) {
+        throw new UserException("la_reserva_no_corresponde_al_recurso_seleccionado");
+      }
+      //Forzar la carga de datos lazy
+      reserva.getDisponibilidades().size();
+      reserva.getDatosReserva().size();
+    }
+    return reserva;
 	}
-
 	
 	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws BusinessException, UserException {
-		
 		Reserva reserva = null;
-		
 		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null || r.getFechaBaja() != null)
+		if (r == null || r.getFechaBaja() != null) {
 			throw new BusinessException("no_se_encuentra_el_recurso_especificado");
-
-		if (fechaHoraInicio == null)
+		}
+		if (fechaHoraInicio == null) {
 			throw new BusinessException("el_dia_y_la_hora_son_obligatorios");
-
-		if (numero == null)
+		}
+		if (numero == null) {
 			throw new BusinessException("el_numero_es_obligatorio");
-		
+		}
 		try {
 		reserva = (Reserva) entityManager.createQuery(
 				 "select res " +

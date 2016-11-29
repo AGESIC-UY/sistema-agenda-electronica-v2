@@ -107,15 +107,13 @@
 									</li>
 									<li><h:outputText
 											value="#{sessionMBean.textos['empresa']}: #{sessionMBean.empresaActual.nombre}" /></li>
-									<li><h:outputText
-											value="#{sessionMBean.textos['agenda']}:" /> <a
-										href="/sae-admin/administracion/seleccionAgendaRecurso.xhtml">
-											<h:outputText
-												value="#{sessionMBean.textos['seleccionar']}..."
-												rendered="#{sessionMBean.agendaMarcada == null}" /> <h:outputText
-												value="#{sessionMBean.agendaMarcada.nombre}"
-												rendered="#{sessionMBean.agendaMarcada != null}" />
-									</a></li>
+									<li>
+									  <h:outputText value="#{sessionMBean.textos['agenda']}:" /> 
+									  <a	href="/sae-admin/administracion/seleccionAgendaRecurso.xhtml">
+										  <h:outputText value="#{sessionMBean.textos['seleccionar']}..." rendered="#{sessionMBean.agendaMarcada == null}" /> 
+											<h:outputText value="#{sessionMBean.agendaMarcada.nombre}" rendered="#{sessionMBean.agendaMarcada != null}" />
+									  </a>
+									</li>
 									<li><h:outputText
 											value="#{sessionMBean.textos['recurso']}:" /> <a
 										href="/sae-admin/administracion/seleccionAgendaRecurso.xhtml">

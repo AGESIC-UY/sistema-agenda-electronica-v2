@@ -305,8 +305,6 @@ public class Paso2MBean extends PasoMBean {
 		Date date = null;
 		try {
 			date = format.parse(this.diaSeleccionadoStr);
-			
-			
 			//Verificar que la fecha esté en el rango permitido (que no la modifiquen en el medio)
 			Date inicio_disp = sesionMBean.getVentanaCalendario().getFechaInicial();
 			Date fin_disp = sesionMBean.getVentanaCalendario().getFechaFinal();

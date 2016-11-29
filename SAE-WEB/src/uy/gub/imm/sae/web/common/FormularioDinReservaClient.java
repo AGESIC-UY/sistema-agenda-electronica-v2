@@ -54,7 +54,6 @@ public class FormularioDinReservaClient {
 	
 	public static void armarFormularioEdicionDinamico(Recurso recurso, UIComponent filtroConsulta, List<AgrupacionDato> agrupaciones, String formatoFecha)
 			throws Exception {
-	
 		// El chequeo de recurso != null es en caso de un acceso directo a la
 		// pagina, es solo para que no salte la excepcion en el log, pues de todas formas sera
 		// redirigido a una pagina de error.
@@ -66,39 +65,26 @@ public class FormularioDinReservaClient {
 		}
 	}
 
-			private static Map<String, Object> obtenerValores(Set<DatoReserva> datos) {
-				
-				Map<String, Object> valores = new HashMap<String, Object>();
-				
-				for (DatoReserva dato : datos) {
-					//TODO parsear el valor de string a object segun el tipo del DatoASolicitar
-					valores.put(dato.getDatoASolicitar().getNombre(), dato.getValor());
-				}
-				
-				return valores;
-			 }
+	private static Map<String, Object> obtenerValores(Set<DatoReserva> datos) {
+		Map<String, Object> valores = new HashMap<String, Object>();
+		for (DatoReserva dato : datos) {
+			valores.put(dato.getDatoASolicitar().getNombre(), dato.getValor());
+		}
+		return valores;
+	 }
 
-			public static List<DatoReserva> obtenerDatosReserva(Map<String, Object> origen, Map<String, DatoASolicitar> datosASolicitar) {
-
-				List<DatoReserva> datos = new ArrayList<DatoReserva>();
-
-				for (String nombre : origen.keySet()) {
-					Object valor = origen.get(nombre);
-
-					if (valor != null && !valor.toString().equals("") && !valor.toString().equals("NoSeleccion")) {
-						DatoReserva dato = new DatoReserva();
-						dato.setDatoASolicitar(datosASolicitar.get(nombre));
-						// TODO DatoReserva implemetar correctamente el parser de object
-						// a string para cada tipo.
-						dato.setValor(valor.toString());
-						datos.add(dato);
-					}
-				}
-				return datos;
+	public static List<DatoReserva> obtenerDatosReserva(Map<String, Object> origen, Map<String, DatoASolicitar> datosASolicitar) {
+		List<DatoReserva> datos = new ArrayList<DatoReserva>();
+		for (String nombre : origen.keySet()) {
+			Object valor = origen.get(nombre);
+			if (valor != null && !valor.toString().equals("") && !valor.toString().equals("NoSeleccion")) {
+				DatoReserva dato = new DatoReserva();
+				dato.setDatoASolicitar(datosASolicitar.get(nombre));
+				dato.setValor(valor.toString());
+				datos.add(dato);
 			}
+		}
+		return datos;
+	}
 
-
-
-	
-	
 }

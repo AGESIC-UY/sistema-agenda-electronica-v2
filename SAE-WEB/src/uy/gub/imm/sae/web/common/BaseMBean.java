@@ -29,25 +29,21 @@ import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.servlet.http.HttpServletResponse;
 
-import org.apache.log4j.Logger;
 import org.primefaces.component.outputpanel.OutputPanel;
 
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoRecurso;
-import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.mbean.administracion.SessionMBean;
 import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "1.5";
+	public static final String version = "2.0";
 
 	protected static final String FORM_ID = "form";
 	
@@ -66,20 +62,22 @@ public abstract class BaseMBean {
 	 */
 	static protected String ERROR_PAGE_OUTCOME = "error";
 	
-	private Logger logger = Logger.getLogger(this.getClass());
-	
-	private static InitialContext ctx;
-	
 	public String getVersion() {
 		return version;
 	}
 
+	/**
+	 * Desmarca los campos marcados con error (fondo rojo)
+	 */
 	protected void limpiarMensajesError() {
 		for(UIComponent comp : FacesContext.getCurrentInstance().getViewRoot().getChildren()) {
 			limpiarMensajeError(comp);
 		}
 	}
 	
+  /**
+   * Desmarca los campos marcados con error (fondo rojo)
+   */
 	private void limpiarMensajeError(UIComponent comp) {
 		if(comp instanceof OutputPanel) {
 			OutputPanel panel = (OutputPanel)comp;
@@ -92,28 +90,49 @@ public abstract class BaseMBean {
 				panel.setStyleClass(panel.getStyleClass().replace(FormularioDinamicoReserva.STYLE_CLASS_DATO_CON_ERROR, ""));;
 			}
 		}
-		
 		if(comp.getChildCount()>0) {
 			for(UIComponent comp1 : comp.getChildren()) {
 				limpiarMensajeError(comp1);
 			}
 		}
 	}
-	
+
+	/**
+	 * Añade un mensaje de error sin especificar un componente en pantalla
+	 */
 	protected void addErrorMessage (Exception ex) {
 		addErrorMessage(ex, FORM_ID);
 	}
 
+  /**
+   * Añade un mensaje de error sin especificar un componente en pantalla
+   */
 	protected void addErrorMessage (String mensaje) {
 		addErrorMessage(new UserException(mensaje, mensaje), FORM_ID);
 	}
 
+  /**
+   * Añade un mensaje de error asociados a todos los componentes en pantalla indicados
+   */
 	protected void addErrorMessage (String mensaje, String... idsComponentes) {
 		for(String idComponente : idsComponentes) {
 			addErrorMessage(new UserException(mensaje, mensaje), idComponente);
 		}
 	}
 
+  /**
+   * Añade un mensaje de error asociado al componente en pantalla indicado
+   * Para que funcione correctamente, el componente debe estar dentro de un <p:outputPanel> que a su vez
+   * esté dentro de otro <p:outputPanel> con styleClass="form-group"; además, dentro del primer outputPanel
+   * debería haber un componente <p:message>. También funciona con <h:panelGroup>.
+   * <p:outputPanel styleClass="form-group">
+   *   <p:outputLabel value="Etiqueta" for="idComponente" />
+   *   <p:outputPanel>
+   *     <p:inputText id="idComponente" value="..." />
+   *     <p:message for="idComponente" />
+   *   </p:outputPanel>
+   * </p:outputPanel>
+   */
 	protected void addErrorMessage (Exception e, String idComponente) {
 		FacesMessage m;
 		if (e instanceof UserException) {
@@ -124,10 +143,6 @@ public abstract class BaseMBean {
 			e.printStackTrace(System.err);
 		}
 		FacesContext.getCurrentInstance().addMessage(idComponente, m);
-		
-		//ToDo: solo para debug, imprimir el arbol de componentes
-    //SofisJSFUtils.printComponentTree(FacesContext.getCurrentInstance().getViewRoot());
-    
 		//Ver si se puede poner la clase al contenedor (el parent inmediato o el siguiente debe ser un outputPanel
 		//o panelGroup con la clase form-group
 		try {
@@ -149,15 +164,11 @@ public abstract class BaseMBean {
 					}
 				}
 			}
-			
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
-
-		
 	}
 
-	
 	private void addErrorSytleClassToFormGroup(OutputPanel panel) {
 		String styleClass = panel.getStyleClass();
 		if(!styleClass.contains(FormularioDinamicoReserva.STYLE_CLASS_DATO_CON_ERROR)) {
@@ -192,34 +203,17 @@ public abstract class BaseMBean {
 		FacesContext.getCurrentInstance().addMessage(idComponente, m);
 	}
 	
-	protected static InitialContext getContext() throws ApplicationException {
-
-	    //Patron singleton, inicialización lazy
-	    if (ctx == null) {
-	        try {
-	            ctx = new InitialContext();
-	        } catch (NamingException e) {
-	            throw new ApplicationException("No se pudo obtener el contexto inicial", e);
-	        }
-	    }
-	    return ctx;
-	}
-	
 	/**
 	 * Redirecciona a la pagina asociada al respectivo outcome
 	 * segun lo configurado en las reglas de navegacion del faces-config
 	 * */
 	protected void redirect(String from_outcome) {
-
 		FacesContext fc = FacesContext.getCurrentInstance();
 		if (! fc.getResponseComplete()) {
-			//ServletContext servletCtx = (ServletContext) fc.getExternalContext().getContext();
-			//fc.getExternalContext().redirect(servletCtx.getContextPath() + from_outcome);
 			fc.getApplication().getNavigationHandler().handleNavigation(fc, null, from_outcome);
 			fc.responseComplete();
 		}
 	}
-	
 	
 	/**
 	 * Deshabilta el cache del navegador para la pagina que se esta respondiendo.
@@ -237,15 +231,13 @@ public abstract class BaseMBean {
 		}
 	}
 
-	protected Logger getLogger() {
-		return logger;
-	}
-	
-	
+	/**
+	 * Devuelve el texto correspondiente a la clave indicada en el idioma actualmente seleccionado.
+	 * @param clave
+	 * @return
+	 */
 	private String getTexto(String clave) {
-		
 		FacesContext context = FacesContext.getCurrentInstance();
-		
 		Map<String, String> textos = null;
 		try {
 			SessionMBean sessionMBean = context.getApplication().evaluateExpressionGet(context, "#{sessionMBean}", SessionMBean.class);
@@ -261,13 +253,10 @@ public abstract class BaseMBean {
 				textos = null;
 			}
 		}
-		
 		if(textos == null || !textos.containsKey(clave)) {
 			return clave;
 		}
 		return textos.get(clave);
-		
-			
 	}
 	
 	protected TextoAgenda getTextoAgenda(Agenda agenda, String idioma) {

@@ -21,6 +21,7 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.entity.Agenda;
@@ -28,6 +29,7 @@ import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -58,7 +60,6 @@ public interface Recursos {
 	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r) throws ApplicationException;
 	public Boolean mostrarDatosASolicitarEnLlamador(Recurso r) throws BusinessException;
 	public boolean existeDatoASolicPorNombre(String n, Integer idRecurso, Integer idDatoSolicitar) throws ApplicationException;
-	
 	//Métodos asociados a ValorPosible
 	public ValorPosible agregarValorPosible(DatoASolicitar d, ValorPosible v) throws UserException, ApplicationException;
 	public void modificarValorPosible(ValorPosible v) throws UserException, ApplicationException;
@@ -66,11 +67,21 @@ public interface Recursos {
 	public List<ValorPosible> consultarValoresPosibles(DatoASolicitar d) throws ApplicationException;
 	public boolean existeValorPosiblePeriodo(ValorPosible v) throws ApplicationException;
 	public void copiarRecurso(Recurso r) throws BusinessException, ApplicationException, UserException;
-	
 	//Métodos asociados a ServicioPorRecurso
 	List<ServicioPorRecurso> consultarServicioAutocompletar (Recurso r) throws BusinessException;
 	public Boolean existeRecursoPorNombre(Recurso r) throws ApplicationException;
-		
+	//Métodos de exportación e importación
 	public byte[] exportarRecurso(Recurso r) throws UserException;
 	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException;
+
+
+  /**
+   * Almacena en la base de datos los roles por recurso asociados al usuario.
+   * @param usuarioId Identificador del usuario
+   * @param roles Mapa contenido como clave los id de los recursos y como valor la lista de roles asociados al usuario en el recurso
+   */
+  public List<RolesUsuarioRecurso> asociarRolesUsuarioRecurso(Integer usuarioId, Map<Integer, String[]> roles);
+  public List<RolesUsuarioRecurso> getRolesUsuarioRecurso(Integer usuarioId);
+  public RolesUsuarioRecurso getRolesUsuarioRecurso(Integer usuarioId, Integer recursoId);
+
 }

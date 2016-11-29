@@ -85,6 +85,9 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 	
+  @PersistenceContext(unitName = "SAE-EJB")
+  private EntityManager entityManager;
+	
   @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
 	private Configuracion confBean;
 	
@@ -358,6 +361,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			return;
 		}
 		if (usuario.getEmpresas().contains(emp)){
+      //Eliminar los roles globales
 			String schema = (String) globalEntityManager.getEntityManagerFactory().getProperties().get("hibernate.default_schema");
 			if(schema == null) {
 				schema = "public";
@@ -367,6 +371,11 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			query.setParameter(1, usuario.getId());
 			query.setParameter(2, emp.getId());
 			query.executeUpdate();
+			//Eliminar los roles por recurso
+	    query = entityManager.createQuery("DELETE FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId");
+	    query = query.setParameter("usuarioId", usuario.getId());
+	    query.executeUpdate();
+			//Desasociar el usuario de la empresa
 			usuario.getEmpresas().remove(emp);
 		}else{
 			return;

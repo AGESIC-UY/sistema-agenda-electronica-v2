@@ -21,7 +21,11 @@
 package uy.gub.imm.sae.web.mbean.administracion;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,12 +36,19 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
+import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
 import org.primefaces.component.datatable.DataTable;
 
 import uy.gub.imm.sae.business.dto.UsuarioEmpresaRoles;
+import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
+import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
+import uy.gub.imm.sae.common.RolesXRecurso;
+import uy.gub.imm.sae.entity.Agenda;
+import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Usuario;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -52,6 +63,12 @@ public class UsuarioMBean extends BaseMBean {
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
 	private UsuariosEmpresas usuariosEJB;
 	
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  private AgendaGeneral generalEJB;
+	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
+  private Recursos recursosEJB;
+  
 	private SessionMBean sessionMBean;
 	private UsuarioSessionMBean usuarioSessionMBean;
 	private RowList<Usuario> usuariosSeleccion;
@@ -64,6 +81,7 @@ public class UsuarioMBean extends BaseMBean {
 		if(request.getParameter("n")!=null) {
 			setUsuarioEditar(new Usuario());
 		}
+    cargarRecursosYRoles();
 	}
 	
 	public SessionMBean getSessionMBean() {
@@ -101,6 +119,7 @@ public class UsuarioMBean extends BaseMBean {
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
+		
 	}
 	
 	public UsuarioEmpresaRoles getUsuarioEmpresaRolesEditar() {
@@ -167,32 +186,7 @@ public class UsuarioMBean extends BaseMBean {
 					  hayErrores = true;
 					}
 				}
-				
 				UsuarioEmpresaRoles ueRoles = getUsuarioEmpresaRolesEditar();
-				
-				//Se vuelve a permitir tener más de un rol a cada usuario
-//				if(ueRoles.getRoles().size()>1) {
-//					for(String ueRol : ueRoles.getRoles()) {
-//						String campo = null;
-//						if("RA_AE_ADMINISTRADOR".equals(ueRol)) {
-//							campo = "form:administrador";
-//						}else if("RA_AE_PLANIFICADOR".equals(ueRol)) {
-//							campo = "form:planificador";
-//						}else if("RA_AE_FCALL_CENTER".equals(ueRol)) {
-//							campo = "form:callCenter";
-//						}else if("RA_AE_FATENCION".equals(ueRol)) {
-//							campo = "form:atencion";
-//						}else if("RA_AE_LLAMADOR".equals(ueRol)) {
-//							campo = "form:llamador";
-//						}
-//						if(campo != null) {
-//							addErrorMessage(sessionMBean.getTextos().get("solo_se_puede_asignar_un_rol"), campo);
-//						}
-//					}
-//				  hayErrores = true;
-//				}
-				
-				
 				if(hayErrores) {
 					return null;
 				}
@@ -211,9 +205,11 @@ public class UsuarioMBean extends BaseMBean {
 				}
 				//Guardar el usuario
 				usuario = usuariosEJB.guardarUsuario(usuario);
-				//Guardar los roles
+				//Guardar los roles por empresa
 				ueRoles.setIdUsuario(usuario.getId()); //Solo es necesario si es un usuario nuevo
 				usuariosEJB.guardarRolesUsuarioEmpresa(ueRoles);
+				//Guardar los roles por recurso
+				recursosEJB.asociarRolesUsuarioRecurso(usuario.getId(), rolesRecurso);
 				//Generar y enviar contraseña
 				if(usuario.getPassword() == null || usuario.getPassword().trim().isEmpty()) {
 					//Si hay CDA no se envia el password
@@ -256,6 +252,11 @@ public class UsuarioMBean extends BaseMBean {
 		usuarioSessionMBean.setUsuarioEliminar(usuarioEliminar);
 	}
 	
+	/**
+	 * Este método no elimina realmente al usuario de la base de datos sino que solo lo desasocia de la empresa.
+	 * Lo que sí elimina de la base de datos es la relación con los permisos por recurso.
+	 * @return
+	 */
 	public String eliminar() {
 		Usuario usuarioEliminar = usuarioSessionMBean.getUsuarioEliminar(); 
 		if (usuarioEliminar != null){
@@ -363,4 +364,87 @@ public class UsuarioMBean extends BaseMBean {
 		}
 	}
 	
+// =============================================================================
+  private List<Recurso> listaRecursos;
+  private List<SelectItem> listaRolesRecurso;
+  private Map<Integer, String[]> rolesRecurso;
+  
+  private void cargarRecursosYRoles() {
+    try {
+      listaRecursos = new ArrayList<Recurso>();
+      rolesRecurso = new HashMap<Integer, String[]>();
+      
+      List<Agenda> agendas = generalEJB.consultarAgendas();
+      if(agendas != null) {
+        for(Agenda agenda : agendas) {
+          List<Recurso> recursosAgenda = generalEJB.consultarRecursos(agenda);
+          if(recursosAgenda != null) {
+            for(Recurso recursoAgenda : recursosAgenda) {
+              listaRecursos.add(recursoAgenda);
+              rolesRecurso.put(recursoAgenda.getId(), new String[0]);
+            }
+          }
+        }
+      }
+      Collections.sort(listaRecursos, new Comparator<Recurso>() {
+
+        @Override
+        public int compare(Recurso o1, Recurso o2) {
+          String nombre1 = o1.getAgenda().getNombre();
+          String nombre2 = o2.getAgenda().getNombre();
+          int compAgendas = nombre1.compareTo(nombre2);
+          if(compAgendas != 0) {
+            return compAgendas;
+          }
+          nombre1 = o1.getNombre();
+          nombre2 = o2.getNombre();
+          return nombre1.compareTo(nombre2);
+        }
+        
+      });
+      
+      listaRolesRecurso = new ArrayList<SelectItem>();
+      for(RolesXRecurso rol : RolesXRecurso.values()) {
+        listaRolesRecurso.add(new SelectItem(rol, sessionMBean.getTextos().get(rol.getClave())));
+      }
+      
+      Usuario usuario = getUsuarioEditar();
+      if(usuario.getId()!=null) {
+        List<RolesUsuarioRecurso> rolesRecursoUsuario = recursosEJB.getRolesUsuarioRecurso(usuario.getId());
+        for(RolesUsuarioRecurso rolRecursoUsuario : rolesRecursoUsuario) {
+          Integer recursoId = rolRecursoUsuario.getId().getRecursoId();
+          if(rolesRecurso.containsKey(recursoId)) {
+            String[] roles;
+            if(rolRecursoUsuario.getRoles()==null) {
+              roles = null;
+            }else {
+              roles = rolRecursoUsuario.getRoles().split(",");
+              for(int i=0; i<roles.length; i++) {
+                roles[i] = roles[i].trim();
+              }
+            }
+            rolesRecurso.put(recursoId, roles);
+          }
+        }
+      }
+    } catch (ApplicationException e) {
+      e.printStackTrace();
+    }
+  }
+
+  public List<Recurso> getListaRecursos() {
+    return listaRecursos;
+  }
+
+  public List<SelectItem> getListaRolesRecurso() {
+    return listaRolesRecurso;
+  }
+
+  public Map<Integer, String[]> getRolesRecurso() {
+    return rolesRecurso;
+  }
+  
+  
+	
 }
+

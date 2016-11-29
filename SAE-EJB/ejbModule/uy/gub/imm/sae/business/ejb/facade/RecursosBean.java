@@ -23,6 +23,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -34,6 +35,7 @@ import java.util.TimeZone;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
@@ -50,6 +52,8 @@ import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecursoId;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
 import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
@@ -65,8 +69,7 @@ import uy.gub.imm.sae.exportar.RecursoExportar;
 import uy.gub.imm.sae.exportar.ValorPosibleExport;
 
 @Stateless
-@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO",
-		"RA_AE_LLAMADOR" })
+@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_LLAMADOR" })
 public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	@PersistenceContext(unitName = "SAE-EJB")
@@ -926,8 +929,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * permitidos: Administrador, Planificador
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
 	public List<DatoDelRecurso> consultarDatosDelRecurso(Recurso r)
 			throws ApplicationException, BusinessException {
 
@@ -1900,8 +1902,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
 	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso,
 			TimeZone timezone) throws BusinessException {
 		if (recurso == null) {
@@ -1952,8 +1953,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
 	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso)
 			throws BusinessException {
 		if (recurso == null) {
@@ -1991,8 +1991,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		return agrupacionesDTO;
 	}
 
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION" })
 	public Boolean mostrarDatosASolicitarEnLlamador(Recurso recurso)
 			throws BusinessException {
 
@@ -2149,8 +2148,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
 	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r)
 			throws ApplicationException {
 
@@ -2380,8 +2378,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
 	public List<ServicioPorRecurso> consultarServicioAutocompletar(Recurso r)
 			throws BusinessException {
 
@@ -2487,5 +2484,52 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("no_se_pudo_realizar_la_importacion");
 		}
 	}
+	
+	public List<RolesUsuarioRecurso> asociarRolesUsuarioRecurso(Integer usuarioId, Map<Integer, String[]> rolesRecurso) {
+	  
+	  //Borrar las asociaciones actuales
+	  Query query = entityManager.createQuery("DELETE FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId");
+	  query = query.setParameter("usuarioId", usuarioId);
+	  query.executeUpdate();
+	  //Crear las nuevas asociaciones
+	  List<RolesUsuarioRecurso> ret = new ArrayList<RolesUsuarioRecurso>();
+	  for(Integer recursoId : rolesRecurso.keySet()) {
+	    String[] roles = rolesRecurso.get(recursoId);
+	    if(roles!=null && roles.length>0) {
+	      String sRoles = Arrays.toString(roles).replace("[", "").replace("]", "");
+        RolesUsuarioRecursoId rurId = new RolesUsuarioRecursoId();
+        rurId.setRecursoId(recursoId);
+        rurId.setUsuarioId(usuarioId);
+	      RolesUsuarioRecurso rur = new RolesUsuarioRecurso();
+	      rur.setId(rurId);
+	      rur.setRoles(sRoles);
+	      entityManager.persist(rur);
+	      ret.add(rur);
+	    }
+	  }
+	  return ret;
+	}
+	
+	public List<RolesUsuarioRecurso> getRolesUsuarioRecurso(Integer usuarioId) {
+    try {
+      Query query = entityManager.createQuery("SELECT r FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId");
+      query = query.setParameter("usuarioId", usuarioId);
+      @SuppressWarnings("unchecked")
+      List<RolesUsuarioRecurso> ret = query.getResultList();
+  	  return ret;
+    }catch(NoResultException nrEx) {
+      return new ArrayList<RolesUsuarioRecurso>();
+    }
+	}
+
+  public RolesUsuarioRecurso getRolesUsuarioRecurso(Integer usuarioId, Integer recursoId) {
+    try {
+      Query query = entityManager.createQuery("SELECT r FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId AND r.id.recursoId=:recursoId");
+      RolesUsuarioRecurso ret = (RolesUsuarioRecurso) query.setParameter("usuarioId", usuarioId).setParameter("recursoId", recursoId).getSingleResult();
+      return ret;
+    }catch(Exception ex) {
+      return null;
+    }
+  }
 
 }

@@ -338,8 +338,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 						agrupaciones, sesionMBean.getFormatoFecha());
 			}
 
-		} catch (BusinessException be) {
-			addErrorMessage(be);
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}

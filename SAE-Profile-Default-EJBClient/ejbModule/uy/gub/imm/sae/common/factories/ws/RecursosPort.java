@@ -1,6 +1,7 @@
 package uy.gub.imm.sae.common.factories.ws;
 
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
@@ -12,6 +13,7 @@ import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -182,4 +184,19 @@ public class RecursosPort implements Recursos{
 	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException {
 		throw new UnsupportedOperationException();
 	}
+
+  @Override
+  public List<RolesUsuarioRecurso> asociarRolesUsuarioRecurso(Integer usuarioId, Map<Integer, String[]> roles) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public List<RolesUsuarioRecurso> getRolesUsuarioRecurso(Integer usuarioId) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public RolesUsuarioRecurso getRolesUsuarioRecurso(Integer usuarioId, Integer recursoId) {
+    throw new UnsupportedOperationException();
+  }
 }

@@ -71,7 +71,7 @@
 								<p:selectBooleanCheckbox id="superadministrador"
 									value="#{usuarioMBean.usuarioEditar.superadmin}"
 									disabled="#{not sessionMBean.usuarioActual.superadmin}">
-									<p:ajax update="selRolesEmp" listener="#{usuarioMBean.cambioSuperadmin}" />
+									<p:ajax update="selRolesEmp selRolesRecurso" listener="#{usuarioMBean.cambioSuperadmin}" />
 								</p:selectBooleanCheckbox>
 								<p:outputLabel
 									value="#{sessionMBean.textos['superadministrador']}"
@@ -94,8 +94,7 @@
 				</fieldset>
 				<fieldset>
 					<legend>
-						<h:outputText
-							value="#{sessionMBean.textos['roles_del_usuario_en_la_empresa']} #{sessionMBean.empresaActual.nombre}" />
+						<h:outputText value="#{sessionMBean.textos['roles_del_usuario_en_la_empresa']} #{sessionMBean.empresaActual.nombre}" />
 					</legend>
 					<p:outputPanel id="selRolesEmp" styleClass="form-horizontal">
 						<p:outputPanel styleClass="form-group">
@@ -147,6 +146,23 @@
 						</p:outputPanel>
 					</p:outputPanel>
 				</fieldset>
+        <fieldset>
+          <legend>
+            <h:outputText value="#{sessionMBean.textos['roles_del_usuario_por_recurso']}" />
+          </legend>
+          <p:outputPanel id="selRolesRecurso" styleClass="form-horizontal">
+            <p:dataGrid var="rec" value="#{usuarioMBean.listaRecursos}" columns="2" layout="grid" styleClass="grid-roles-recurso">             
+              <p:outputPanel styleClass="form-group" >
+                <h:outputText value="#{rec.agenda.nombre} / #{rec.nombre}" styleClass="col-sm-7 control-label label" />
+                <p:outputPanel styleClass="col-sm-5">
+                  <p:selectManyCheckbox id="recursoRol" value="#{usuarioMBean.rolesRecurso[rec.id]}" layout="responsive" columns="1" disabled="#{usuarioMBean.usuarioEditar.superadmin}">
+                    <f:selectItems value="#{usuarioMBean.listaRolesRecurso}" var="rol" itemLabel="#{rol.getLabel()}" itemValue="#{rol.getValue()}" />
+                  </p:selectManyCheckbox>
+                </p:outputPanel>
+              </p:outputPanel>
+            </p:dataGrid>
+          </p:outputPanel>
+        </fieldset>
 
 				<ul class="form-action-buttons">
 					<li class="action-buttons-primary">

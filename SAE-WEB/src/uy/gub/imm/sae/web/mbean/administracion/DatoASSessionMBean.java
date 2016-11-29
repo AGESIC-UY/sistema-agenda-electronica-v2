@@ -68,8 +68,6 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 
 	private Integer agrupacionDatoId = null;
 	
-	
-//	@EJB(name="ejb/RecursosBean")
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
 	

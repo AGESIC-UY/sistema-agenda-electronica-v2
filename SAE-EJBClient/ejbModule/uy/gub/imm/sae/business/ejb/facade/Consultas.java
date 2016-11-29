@@ -32,14 +32,13 @@ import uy.gub.imm.sae.entity.Atencion;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 public interface Consultas {
 
 	
-	public Reserva consultarReservaId(Integer id, Integer recId) throws ApplicationException, BusinessException;
+	public Reserva consultarReservaId(Integer id, Integer recId) throws UserException;
 	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws BusinessException, UserException;
 
 	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, Estado estado) throws BusinessException;

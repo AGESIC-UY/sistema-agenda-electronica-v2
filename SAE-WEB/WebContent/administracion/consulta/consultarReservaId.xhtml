@@ -33,11 +33,9 @@
 						</p:outputPanel>
 					</fieldset>
 					<ul class="form-action-buttons">
-						<li class="action-buttons-primary"><p:commandButton
-								value="#{sessionMBean.textos['consultar']}"
-								actionListener="#{consultaMBean.buscarReservaId}"
-								update="@form"
-								styleClass="btn-lg btn-primario" /></li>
+						<li class="action-buttons-primary">
+						  <p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{consultaMBean.buscarReservaId}" update="@form" styleClass="btn-lg btn-primario" />
+						</li>
 					</ul>
 
 					<p:outputPanel id="resultadosBusqueda">

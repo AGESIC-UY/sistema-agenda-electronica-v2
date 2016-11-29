@@ -51,7 +51,7 @@ public interface UsuariosEmpresas {
 
 	public List<String> obtenerRolesUsuarioEmpresa(Integer usuarioId, Integer empresaId) throws ApplicationException;
 	public void guardarRolesUsuarioEmpresa(UsuarioEmpresaRoles roles) throws ApplicationException;
-
+	
 	/**
 	 * Devuelve la lista de organismos. Si el parámetro actualizar es false devuelve lo que tiene en la
 	 * base de datos, si es true vacía la base de datos, consulta al servicio web, almacena los resultados

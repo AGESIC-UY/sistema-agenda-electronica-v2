@@ -65,6 +65,7 @@ import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
+import uy.gub.imm.sae.common.RolesXRecurso;
 import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
@@ -73,6 +74,7 @@ import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Usuario;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -1134,11 +1136,55 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 	
 	
-
-	
-	
 	public void limpiarTrazas() {
 		agendarReservasEJB.limpiarTrazas();
 	}
 
+  public boolean tieneRol(String rol) {
+    return tieneRoles(new String[]{rol});
+  }
+  
+  public boolean tieneRoles(String[] roles) {
+    if(usuarioActual == null) {
+      return false;
+    }
+    if(usuarioActual.isSuperadmin() != null && usuarioActual.isSuperadmin().booleanValue()) {
+      return true;
+    }
+    List<String> rolesRecurso = null;
+    Recurso recurso = this.getRecursoMarcado();
+    for(String rol : roles) {
+      try {
+        //Verificar si es un rol por recurso
+        RolesXRecurso.valueOf(rol);
+        //El rol es uno de los del enumerado, hay que verificar si el usuario tiene el rol en el recurso actual
+        if(recurso != null) {
+          //Si aún no se cargaron los roles del usuario en el recurso se cargan ahora
+          if(rolesRecurso == null) {
+            RolesUsuarioRecurso rolesRecursoUsuario = recursosEJB.getRolesUsuarioRecurso(usuarioActual.getId(), recurso.getId());
+            if(rolesRecursoUsuario != null && rolesRecursoUsuario.getRoles() != null) {
+              String[] aRoles = rolesRecursoUsuario.getRoles().split(",");
+              rolesRecurso = new ArrayList<String>();
+              for(int i=0; i<aRoles.length; i++) {
+                rolesRecurso.add(aRoles[i].trim());
+              }
+            }
+          }
+          if(rolesRecurso != null) {
+            if(rolesRecurso.contains(rol)) {
+              return true;
+            }
+          }
+        }
+      }catch(IllegalArgumentException iaEx) {
+        //El rol indicado no es uno de los del enumerado, hay que ver si el usuario tiene el rol a nivel de JAAS
+        if(FacesContext.getCurrentInstance().getExternalContext().isUserInRole(rol)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+	
+	
 }

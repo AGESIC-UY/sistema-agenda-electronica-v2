@@ -28,6 +28,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -42,6 +43,7 @@ import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.CupoPorDia;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
+
 import org.primefaces.component.datatable.DataTable;
 
 
@@ -239,8 +241,6 @@ public class DisponibilidadMBean extends BaseMBean {
 
 		CupoPorDia c = ((Row<CupoPorDia>) this.getCuposDataTable().getRowData()).getData();
 		if (c != null) {
-	        //La siguiente línea no está desplegando el recurso
-			//sessionMBean.setCupoPorDiaSeleccionado(c);
 			dispSessionMBean.setFechaActual(c.getDia());
 			//Se configura para que se despliegue en la primer página.
 			
@@ -332,18 +332,36 @@ public class DisponibilidadMBean extends BaseMBean {
 	}	
 	
 	public void beforePhaseConsultar (PhaseEvent event) {
+	  //Verificar que el usuario tiene permisos para acceder a esta página
+	  if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+	  }
+	  //Establecer el título de la pantalla
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_disponibilidades"));
 		}
 	}
 	
 	public void beforePhaseModifCupo (PhaseEvent event) {
+    //Verificar que el usuario tiene permisos para acceder a esta página
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    //Establecer el título de la pantalla
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_cupos"));
 		}
 	}
 	
 	public void beforePhaseConsultarXdia (PhaseEvent event) {
+    //Verificar que el usuario tiene permisos para acceder a esta página
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    //Establecer el título de la pantalla
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("disponibilidades"));
 		}

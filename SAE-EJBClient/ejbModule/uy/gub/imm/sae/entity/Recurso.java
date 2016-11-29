@@ -540,5 +540,4 @@ public class Recurso implements Serializable {
 		this.mostrarIdEnTicket = mostrarIdEnTicket;
 	}
 
-	
 }

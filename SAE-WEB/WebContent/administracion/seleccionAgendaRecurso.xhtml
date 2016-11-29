@@ -56,9 +56,8 @@
 								<h:outputText value="Recursos"></h:outputText>
 							</f:facet>
 
-							<p:ajax event="rowSelectRadio"
-								listener="#{sessionMBean.desseleccionarRecurso}"
-								update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:tablaRecursos" />
+							<p:ajax event="rowSelectRadio" listener="#{sessionMBean.desseleccionarRecurso}"
+								update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:tablaRecursos :formMenu:menuLateral" />
 
               <p:column selectionMode="single"  id="colSelRecurso">
                 <p:outputLabel value="#{row.data.nombre}" for="colSelRecurso" styleClass="ui-helper-hidden-accessible" />

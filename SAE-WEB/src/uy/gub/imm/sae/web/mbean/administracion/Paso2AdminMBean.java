@@ -77,23 +77,12 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 	
 	@PostConstruct
 	public void init() {
-
 		try {
 			if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null) {
 				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
 				return;
 			}
-
-			// Previene una recarga de la pagina o si el usuario oprime la tecla
-			// Back del navegador.
-			// para minimizar la cantidad de reservas pendientes.
-
 			if (sessionMBean.getReserva() != null) {
-				getLogger().info(
-						"Desmarco Reserva:" + sessionMBean.getReserva().getId()
-								+ " " + sessionMBean.getReserva().getEstado()
-								+ " "
-								+ sessionMBean.getReserva().getFechaCreacion());
 				agendarReservasEJB.desmarcarReserva(sessionMBean.getReserva());
 				sessionMBean.setReserva(null);
 			}
