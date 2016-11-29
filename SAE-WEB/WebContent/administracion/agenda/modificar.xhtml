@@ -29,36 +29,6 @@
 									</p:outputPanel>
 								</p:outputPanel>
 		
-		            <p:outputPanel styleClass="form-group">
-		              <h:outputLabel value="#{sessionMBean.textos['tramite']}"
-		                for="tramite" styleClass="col-sm-3 control-label label" />
-		              <p:outputPanel styleClass="col-sm-5">
-		                <h:selectOneMenu id="tramite"
-		                  value="#{agendaMBean.agendaSeleccionada.tramiteId}"
-		                  valueChangeListener="#{agendaMBean.cambioTramiteMod}"
-		                  styleClass="form-control textoLargo"
-		                  update="tramite nombreAgenda descripcionAgenda">
-		                  <p:ajax update="form:panelForm" process="@this" />
-		                  <f:selectItems value="#{agendaMBean.tramites}" />
-		                </h:selectOneMenu>
-		                <p:message for="codigoTramite" />
-		              </p:outputPanel>
-		              <p:outputLabel value="#{sessionMBean.textos['codigo']}"
-		                for="codigoTramite" styleClass="col-sm-1 control-label label formularioCampoRequerido" />
-		              <p:outputPanel styleClass="col-sm-1">
-			              <h:inputText id="codigoTramite" maxlength="5"
-			                value="#{agendaMBean.agendaSeleccionada.tramiteCodigo}"
-			                disabled="#{agendaMBean.agendaSeleccionada.tramiteId != null and agendaMBean.agendaSeleccionada.tramiteId != '0'}"
-			                styleClass="form-control" />
-		              </p:outputPanel>
-		              <p:outputPanel styleClass="col-sm-2">
-		                <p:commandLink
-		                  value="#{sessionMBean.textos['recargar_listado_de_tramites']}"
-		                  actionListener="#{agendaMBean.recargarTramites}"
-		                  immediate="true" update="tramite" />
-		              </p:outputPanel>
-		            </p:outputPanel>
-		
 								<p:outputPanel styleClass="form-group">
 									<h:outputLabel value="#{sessionMBean.textos['nombre']}"
 										for="nombreAgenda"
@@ -74,7 +44,7 @@
 								<p:outputPanel styleClass="form-group">
 									<h:outputLabel value="#{sessionMBean.textos['descripcion']}"
 										for="descripcionAgenda"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+										styleClass="col-sm-3 control-label label" />
 									<p:outputPanel styleClass="col-sm-9">
 										<p:inputTextarea id="descripcionAgenda"
 											value="#{agendaMBean.agendaSeleccionada.descripcion}"
@@ -132,15 +102,88 @@
 										value="#{sessionMBean.textos['idiomas_soportados']}"
 										styleClass="col-sm-3 control-label label" />
 									<p:outputPanel styleClass="col-sm-9">
-										<p:selectManyCheckbox id="grid2"
+										<p:selectManyCheckbox id="idiomasAgenda"
 											value="#{agendaMBean.idiomasSeleccionados}" layout="responsive"
 											columns="4">
 											<f:selectItems value="#{agendaMBean.idiomasDisponibles}" />
 										</p:selectManyCheckbox>
+                    <p:message for="idiomasAgenda" />
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
-						</fieldset>
+							
+	            <fieldset>
+	              <legend>
+	                <h:outputText value="#{sessionMBean.textos['tramites_asociados']}" />
+	              </legend>
+		            <p:outputPanel styleClass="col-sm-12 form-required">
+		              <p:commandLink
+		                value="#{sessionMBean.textos['recargar_listado_de_tramites']}"
+		                actionListener="#{agendaMBean.recargarTramites}"
+		                immediate="true" update="tramites" />
+		            </p:outputPanel>
+		            <p:dataList id="tramites" rowIndexVar="num" type="definition"
+		              value="#{agendaMBean.agendaSeleccionada.tramites}" var="tramite"
+		              emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+		              >
+		              <p:outputPanel id="pnlTramite">
+		                <fieldset>
+		                  <legend>
+		                    <h:outputText styleClass="subtitulo" value="#{sessionMBean.textos['tramite']} #{num + 1}" />
+		                   </legend>
+		                  <p:outputPanel styleClass="form-group">
+		                    <h:outputLabel value="#{sessionMBean.textos['tramite']}"
+		                      for="tramite" styleClass="col-sm-2 control-label label" />
+		                    <p:outputPanel styleClass="col-sm-10">
+		                      <h:selectOneMenu id="tramite" value="#{tramite.tramiteId}"
+		                        valueChangeListener="#{agendaMBean.cambioTramite}"
+		                        styleClass="form-control textoLargo" update="pnlTramite">
+		                        <f:attribute name="tramiteAgenda" value="#{tramite}" />
+		                        <p:ajax update="pnlTramite" process="@this" />
+		                        <f:selectItems value="#{agendaMBean.tramites}" />
+		                      </h:selectOneMenu>
+		                    </p:outputPanel>
+		                  </p:outputPanel>
+		                  <p:outputPanel styleClass="form-group">
+		                    <p:outputLabel value="#{sessionMBean.textos['codigo']}"
+		                      for="codigoTramite"
+		                      styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+		                    <p:outputPanel styleClass="col-sm-2">
+		                      <h:inputText id="codigoTramite" maxlength="5"
+		                        value="#{tramite.tramiteCodigo}"
+		                        disabled="#{tramite.tramiteId != null and tramite.tramiteId != '0'}"
+		                        styleClass="form-control" />
+		                    </p:outputPanel>
+		                    <p:outputLabel value="#{sessionMBean.textos['nombre']}"
+		                      for="nombreTramite"
+		                      styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+		                    <p:outputPanel styleClass="col-sm-6">
+		                      <h:inputText id="nombreTramite" maxlength="100"
+		                        value="#{tramite.tramiteNombre}"
+		                        disabled="#{tramite.tramiteId != null and tramite.tramiteId != '0'}"
+		                        styleClass="form-control" />
+		                    </p:outputPanel>
+	                      <p:outputPanel styleClass="col-sm-10 col-sm-offset-2">
+	                        <p:message for="codigoTramite"></p:message>
+	                      </p:outputPanel>
+		                  </p:outputPanel>
+		                  <p:outputPanel styleClass="form-group">
+		                    <p:outputPanel styleClass="col-sm-12 form-required">
+		                      <p:commandLink
+		                        value="#{sessionMBean.textos['quitar_tramite']}"
+		                        actionListener="#{agendaMBean.quitarTramiteMod(num)}"
+		                        update="tramites" />
+		                    </p:outputPanel>
+		                  </p:outputPanel>
+		                </fieldset>
+		              </p:outputPanel>
+		            </p:dataList>
+		            <p:outputPanel styleClass="col-sm-2">
+		              <p:commandLink value="#{sessionMBean.textos['agregar_tramite']}"
+		                actionListener="#{agendaMBean.agregarTramiteMod}" update="tramites" />
+		            </p:outputPanel>
+	            </fieldset>
+  					</fieldset>
 						<ul class="form-action-buttons">
 							<li class="action-buttons-primary">
 								<ul>

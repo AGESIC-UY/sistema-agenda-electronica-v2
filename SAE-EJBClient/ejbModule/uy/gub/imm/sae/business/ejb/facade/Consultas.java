@@ -47,7 +47,7 @@ public interface Consultas {
 	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, TimeZone timezone) throws BusinessException;
 	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, TimeZone timezone) throws BusinessException;
 	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso);
-	public List<Reserva> consultarReservaDatosHora(List<DatoReserva> datos ,Recurso recurso,Date fecha);	
+	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos, Recurso recurso, Date fecha, String codigoTramite);	
 	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo) throws BusinessException;
 	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos ,Recurso recurso,String codigoSeguridadReserva, TimeZone timezone);
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);

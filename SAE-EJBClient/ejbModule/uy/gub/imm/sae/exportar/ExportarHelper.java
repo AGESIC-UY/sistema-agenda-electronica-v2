@@ -38,6 +38,7 @@ public class ExportarHelper {
 		re.setUsarLlamador(r.getUsarLlamador());
 		re.setSerie(r.getSerie());
 		re.setSabadoEsHabil(r.getSabadoEsHabil());
+    re.setDomingoEsHabil(r.getDomingoEsHabil());
 		re.setOficinaId(r.getOficinaId());
 		re.setDireccion(r.getDireccion());
 		re.setLocalidad(r.getLocalidad());
@@ -160,6 +161,7 @@ public class ExportarHelper {
 		r.setUsarLlamador(re.getUsarLlamador());
 		r.setSerie(re.getSerie());
 		r.setSabadoEsHabil(re.getSabadoEsHabil());
+    r.setDomingoEsHabil(re.getDomingoEsHabil());
 		r.setOficinaId(re.getOficinaId());
 		r.setDireccion(re.getDireccion());
 		r.setLocalidad(re.getLocalidad());

@@ -64,14 +64,14 @@
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 						</f:facet>
-						<p:commandButton id="modificarUsuario"
-							action="#{usuarioMBean.modificar}" update="tablaUsuarios"
+						<p:commandButton id="modificarUsuario" value="#{sessionMBean.textos['modificar']}"
+							action="#{usuarioMBean.modificar}" update="tablaUsuarios" styleClass="ui-button-icon-only"
 							icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
 						</p:commandButton>
-						<p:commandButton id="eliminarUsuario"
+						<p:commandButton id="eliminarUsuario" value="#{sessionMBean.textos['eliminar']}"
 							oncomplete="PF('eliminarUsuario').show();" icon="ui-icon-trash"
 							actionListener="#{usuarioMBean.selecUsuarioEliminar}"
-							title="#{sessionMBean.textos['eliminar']}">
+							title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
 					</p:column>
 				</p:dataTable>

@@ -51,7 +51,6 @@ import uy.gub.imm.sae.business.ejb.servicios.ServiciosTrazabilidadBean;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
-import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Atencion;
 import uy.gub.imm.sae.entity.Llamada;
 import uy.gub.imm.sae.entity.Recurso;
@@ -72,8 +71,6 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	@EJB
 	private ConsultasLocal consultas;
 	
-	static Logger logger = Logger.getLogger(LlamadasBean.class);
-	
 	@EJB
 	private ServiciosTrazabilidadBean trazaBean;
 	
@@ -83,6 +80,8 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	@Resource
 	private SessionContext ctx;
 	
+  static Logger logger = Logger.getLogger(LlamadasBean.class);
+  
 	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, TimeZone timezone) throws BusinessException {
 
 		VentanaDeTiempo hoy = new VentanaDeTiempo();
@@ -281,8 +280,7 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 		atencion.setFuncionario(ctx.getCallerPrincipal().getName());
 		em.persist(atencion);
 		//Registrar la asistencia en el sistema de trazas del PEU
-		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), agenda.getTramiteCodigo(), reserva.getId());
+		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.ASISTENCIA);
 		}
@@ -310,8 +308,7 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 		em.persist(atencion);
 		
 		//Registrar la asistencia en el sistema de trazas del PEU
-		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), agenda.getTramiteCodigo(), reserva.getId());
+		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.INASISTENCIA);
 		}

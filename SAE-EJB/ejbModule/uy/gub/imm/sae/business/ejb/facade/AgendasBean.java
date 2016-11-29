@@ -39,6 +39,7 @@ import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoRecurso;
+import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
@@ -55,6 +56,10 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
+	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  private AgendaGeneral generalEJB;
+	
 	/**
 	 * Crea la agenda <b>a</b> en el sistema.
 	 * Controla la unicidad del nombre de la agenda entre todas las agendas vivas (fechaBaja == null).
@@ -69,7 +74,13 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 		if (existeAgendaPorNombre(a) ) {
 				throw new UserException("ya_existe_una_agenda_con_el_nombre_especificado");
 		}
+		//Persistir la agenda
 		entityManager.persist(a);
+		//Persistir los trámites de la agenda
+		for(TramiteAgenda ta : a.getTramites()) {
+		  ta.setAgenda(a);
+		  entityManager.persist(ta);
+		}
 
 		return a;
 	}
@@ -109,8 +120,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 
 	/**
 	 * Se realiza la modificacion de la agenda <b>a</b>.
-	 * Controla la unicidad del nombre de la agenda entre todas las agendas vivas (fechaBaja == null).
-	 * Roles permitidos: Administrador
 	 * @throws UserException 
 	 * @throws ApplicationException 
 	 */
@@ -124,25 +133,10 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 			throw new UserException("ya_existe_una_agenda_con_el_nombre_especificado");
 		}
 		
-		if (agendaActual.getFechaBaja()!= null) {
-			throw new UserException("AE10070","La agenda esta dada de baja no se puede modificar");
-		}
-		
-		//Se controla que la descripción no sea nula
-		if (a.getDescripcion() == null || a.getDescripcion().equals("")){
-			throw new UserException("AE10001","No se puede dar de alta una agenda sin descripción");			
-		}
-		//Se controla que no exista otra agenda con la misma descripción
-		if (existeAgendaPorDescripcion(a) ) {
-				throw new UserException("AE10006","Ya existe una agenda con esa descripcion: "+ a.getDescripcion());
-		}
-
   	agendaActual.setNombre(a.getNombre());
   	agendaActual.setDescripcion(a.getDescripcion());
   	agendaActual.setTimezone(a.getTimezone());
   	agendaActual.setIdiomas(a.getIdiomas());
-  	agendaActual.setTramiteId(a.getTramiteId());
-  	agendaActual.setTramiteCodigo(a.getTramiteCodigo());
   	agendaActual.setConCda(a.getConCda());
   	agendaActual.setConTrazabilidad(a.getConTrazabilidad());
   	agendaActual.setPublicarNovedades(a.getPublicarNovedades());
@@ -170,8 +164,30 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
   		}
   	}
   	
-  	entityManager.merge(agendaActual);
-  	
+  	//Eliminar los trámites que fueron quitados
+  	for(TramiteAgenda tramite : agendaActual.getTramites()) {
+  	  if(!a.getTramites().contains(tramite)) {
+  	    entityManager.remove(tramite);
+  	  }
+  	}
+  	//Actualizar los trámites que se mantienen y guardar los nuevos
+  	agendaActual.getTramites().clear();
+    for(TramiteAgenda tramite : a.getTramites()) {
+      if(tramite.getId()==null) {
+        tramite.setAgenda(agendaActual);
+        entityManager.persist(tramite);
+      }else {
+        TramiteAgenda tramite1 = entityManager.find(TramiteAgenda.class, tramite.getId());
+        tramite1.setAgenda(agendaActual);
+        tramite1.setTramiteCodigo(tramite.getTramiteCodigo());
+        tramite1.setTramiteId(tramite.getTramiteId());
+        tramite1.setTramiteNombre(tramite.getTramiteNombre());
+        tramite = entityManager.merge(tramite1);
+      }
+      agendaActual.getTramites().add(tramite);
+    }
+  	//Actualizar la agenda
+    entityManager.merge(agendaActual);
 	}
 	
 	public void copiarAgenda(Agenda a) throws BusinessException, ApplicationException, UserException
@@ -185,8 +201,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 		aCopia.setId(null);
 		aCopia.setIdiomas(a.getIdiomas());
 		aCopia.setTimezone(a.getTimezone());
-		aCopia.setTramiteId(a.getTramiteId());
-		aCopia.setTramiteCodigo(a.getTramiteCodigo());
 		aCopia.setConCda(a.getConCda());
 		aCopia.setConTrazabilidad(a.getConTrazabilidad());
 		aCopia.setPublicarNovedades(a.getPublicarNovedades());
@@ -195,14 +209,15 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 		do{
 			contador++;
 			aCopia.setNombre("Copia "+contador+" de "+a.getNombre());
-			aCopia.setDescripcion("Copia "+contador+" de "+a.getDescripcion());
+			aCopia.setDescripcion(a.getDescripcion());
 		}while(existeAgendaPorNombre(aCopia));
-		
+		//Textos
 		aCopia.setTextosAgenda(new HashMap<String, TextoAgenda>());
   	if(a.getTextosAgenda() != null) {
   		for(String idioma : a.getTextosAgenda().keySet()) {
 	  		TextoAgenda viejo = a.getTextosAgenda().get(idioma);
 	  		TextoAgenda nuevo = new TextoAgenda();
+	  		nuevo.setIdioma(idioma);
 	  		nuevo.setTextoPaso1(viejo.getTextoPaso1());
 	  		nuevo.setTextoPaso2(viejo.getTextoPaso2());
 	  		nuevo.setTextoPaso3(viejo.getTextoPaso3());
@@ -210,18 +225,31 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	  		nuevo.setTextoTicketConf(viejo.getTextoTicketConf());
 	  		nuevo.setTextoCorreoConf(viejo.getTextoCorreoConf());
 	  		nuevo.setTextoCorreoCanc(viejo.getTextoCorreoCanc());
+	  		nuevo.setAgenda(aCopia);
 	  		aCopia.getTextosAgenda().put(idioma, nuevo);
   		}
   	}
-		
+  	//Persistir la copia
 		entityManager.persist(aCopia);
+		//Recursos
 		List<Recurso> recursos = a.getRecursos();
 		for (Recurso r : recursos) {
-			if(r.getFechaBaja() == null)
-			{
+			if(r.getFechaBaja() == null) {
 				copiarRecursoParaAgenda(aCopia,r, r.getNombre(), r.getDescripcion());
 			}
 		}
+    //Tramites
+    if(a.getTramites() != null) {
+      for(TramiteAgenda ta : a.getTramites()) {
+        TramiteAgenda taNuevo = new TramiteAgenda();
+        taNuevo.setAgenda(aCopia);
+        taNuevo.setTramiteCodigo(ta.getTramiteCodigo());
+        taNuevo.setTramiteId(ta.getTramiteId());
+        taNuevo.setTramiteNombre(ta.getTramiteNombre());
+        entityManager.persist(taNuevo);
+      }
+    }
+		
 	}
 	
 private void copiarRecursoParaAgenda(Agenda acopia, Recurso r, String nombre, String descripcion) throws BusinessException, ApplicationException, UserException {
@@ -411,23 +439,6 @@ private void copiarRecursoParaAgenda(Agenda acopia, Recurso r, String nombre, St
 		}
 	}
 
-	private Boolean existeAgendaPorDescripcion(Agenda a) throws ApplicationException{
-		try{
-		Long cant = (Long) entityManager
-								.createQuery("SELECT count(a) from Agenda a " +
-										"WHERE upper(a.descripcion) = upper(:descripcion) " +
-										"and (a.id <> :id or :id is null) " +
-										"AND a.fechaBaja IS NULL")
-								.setParameter("descripcion", a.getDescripcion())
-								.setParameter("id", a.getId())
-								.getSingleResult();
-		
-		return (cant > 0);
-		} catch (Exception e){
-			throw new ApplicationException(e);
-		}
-	}
-	
 	@SuppressWarnings("unchecked")
 	public List<Agenda> consultarAgendas() throws ApplicationException {
 

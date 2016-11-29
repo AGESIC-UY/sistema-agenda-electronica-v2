@@ -63,12 +63,12 @@
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 						</f:facet>
-						<p:commandButton id="modificarEmpresa"
-							action="#{empresaMBean.modificar}" update="tablaEmpresas"
+						<p:commandButton id="modificarEmpresa" value="#{sessionMBean.textos['modificar']}" 
+							action="#{empresaMBean.modificar}" update="tablaEmpresas" styleClass="ui-button-icon-only"
 							icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}" >
 						</p:commandButton>
-						<p:commandButton id="eliminarEmpresa"
-							oncomplete="PF('eliminarEmpresa').show();"
+						<p:commandButton id="eliminarEmpresa" value="#{sessionMBean.textos['eliminar']}"
+							oncomplete="PF('eliminarEmpresa').show();" styleClass="ui-button-icon-only"
 							actionListener="#{empresaMBean.selecEmpresaEliminar}"
 							icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>

@@ -24,7 +24,8 @@ import uy.gub.imm.sae.common.enumerados.Evento;
 @Entity
 @Table (name = "ae_acciones_por_recurso")
 public class AccionPorRecurso implements Serializable{
-	private Integer id;
+	private static final long serialVersionUID = 1L;
+  private Integer id;
 	private Integer ordenEjecucion;
 	private Date fechaBaja;
 

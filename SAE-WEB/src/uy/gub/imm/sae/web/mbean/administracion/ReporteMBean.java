@@ -370,14 +370,18 @@ public class ReporteMBean extends BaseMBean {
 			};
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
-				String[]  cabezales = {"Empresa","Tramite","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
+				String[]  cabezales = {"Empresa","Agenda","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}else {
-				String[]  cabezales = {"Tramite","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
+				String[]  cabezales = {"Agenda","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
 						
-			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, sessionMBean.getTextos().get("reporte_tiempo_atencion_funcionario"));
+      String nombre = sessionMBean.getTextos().get("reporte_atencion_funcionario");
+      nombre = nombre.replace(" ", "_");
+			
+			
+			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
       printer.print(); 
 		}
 	}
@@ -506,6 +510,7 @@ public class ReporteMBean extends BaseMBean {
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombAgenda()));
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombRecurso()));
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getReservaId()));
+        filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getTramiteNombre()));
 				filaDatos.add(new TableCellValue(Utiles.date2string(atencionLlamadaReporteDT.getFechaHoraReserva(), Utiles.DIA)));
 				filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getPuesto()));
 				if(atencionLlamadaReporteDT.getNombFuncionario()!=null) {
@@ -536,14 +541,18 @@ public class ReporteMBean extends BaseMBean {
 	             };
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
-				String[]  cabezales = {"Empresa","Tramite","Oficina","Id Reserva","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+				String[]  cabezales = {"Empresa","Tramite","Oficina","Id Reserva","Trámite","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}else {
-				String[]  cabezales = {"Tramite","Oficina","Id Reserva","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+				String[]  cabezales = {"Tramite","Oficina","Id Reserva","Trámite","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
+			
+      String nombre = sessionMBean.getTextos().get("reporte_tiempo_atencion_funcionario");
+      nombre = nombre.replace(" ", "_");
+			
 						
-			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, "ReporteTiempoAtencion");
+			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
 			printer.print(); 
 			
 		}
@@ -631,13 +640,14 @@ public class ReporteMBean extends BaseMBean {
 				}
 			}
 		}
-		String[] aux = new String[cabezales.length+2];
+		String[] aux = new String[cabezales.length+3];
 		int i=0;
 		for (i=0;i<cabezales.length; i++){
 			aux[i]=cabezales[i];
 		}
 		aux[i]= sessionMBean.getTextos().get("numero_de_puesto");
 		aux[i+1]= sessionMBean.getTextos().get("asistio");
+    aux[i+2]= sessionMBean.getTextos().get("tramite");
 		cabezales = aux;
 		return cabezales;
 	}
@@ -697,6 +707,9 @@ public class ReporteMBean extends BaseMBean {
 			}else {
 				filaDatos.add(new TableCellValue(reserva.getAsistio().booleanValue()?sessionMBean.getTextos().get("si"):sessionMBean.getTextos().get("no")));
 			}
+			
+      filaDatos.add(new TableCellValue(reserva.getTramiteNombre()));
+			
 			resultado.add(filaDatos);
 		}
 		

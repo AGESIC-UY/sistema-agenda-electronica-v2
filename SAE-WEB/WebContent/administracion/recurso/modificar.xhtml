@@ -250,6 +250,19 @@
 							</p:outputPanel>
 						</p:outputPanel>
 
+            <p:outputPanel styleClass="form-group">
+              <h:outputText
+                value="#{sessionMBean.textos['domingo']}"
+                styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <p:selectBooleanCheckbox id="domingoHabil"
+                  value="#{recursoMBean.recursoSeleccionado.domingoEsHabil}" />
+                <p:outputLabel
+                value="#{sessionMBean.textos['considerar_el_domingo_como_dia_habil']}"
+                for="domingoHabil" />
+              </p:outputPanel>
+            </p:outputPanel>
+
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel
 								value="#{sessionMBean.textos['cantidad_de_dias_a_generar']}"

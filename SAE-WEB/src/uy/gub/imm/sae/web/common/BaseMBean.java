@@ -47,7 +47,7 @@ import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "1.2";
+	public static final String version = "1.5";
 
 	protected static final String FORM_ID = "form";
 	
@@ -125,7 +125,9 @@ public abstract class BaseMBean {
 		}
 		FacesContext.getCurrentInstance().addMessage(idComponente, m);
 		
-		
+		//ToDo: solo para debug, imprimir el arbol de componentes
+    //SofisJSFUtils.printComponentTree(FacesContext.getCurrentInstance().getViewRoot());
+    
 		//Ver si se puede poner la clase al contenedor (el parent inmediato o el siguiente debe ser un outputPanel
 		//o panelGroup con la clase form-group
 		try {
@@ -155,6 +157,7 @@ public abstract class BaseMBean {
 		
 	}
 
+	
 	private void addErrorSytleClassToFormGroup(OutputPanel panel) {
 		String styleClass = panel.getStyleClass();
 		if(!styleClass.contains(FormularioDinamicoReserva.STYLE_CLASS_DATO_CON_ERROR)) {

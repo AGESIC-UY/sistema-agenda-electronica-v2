@@ -205,18 +205,18 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 		if (sessionMBean.getDiaSeleccionado() != null) {
 			
 			VentanaDeTiempo ventana = new VentanaDeTiempo();
-			ventana.setFechaInicial(Utiles.time2InicioDelDia(sessionMBean
-					.getDiaSeleccionado()));
-			ventana.setFechaFinal(Utiles.time2FinDelDia(sessionMBean
-					.getDiaSeleccionado()));
+			ventana.setFechaInicial(Utiles.time2InicioDelDia(sessionMBean.getDiaSeleccionado()));
+			ventana.setFechaFinal(Utiles.time2FinDelDia(sessionMBean.getDiaSeleccionado()));
 			
 			try {
-				List<Disponibilidad> lista = agendarReservasEJB
-						.obtenerDisponibilidades(sessionMBean.getRecurso(), ventana, sessionMBean.getTimeZone());
+				List<Disponibilidad> lista = agendarReservasEJB.obtenerDisponibilidades(sessionMBean.getRecurso(), ventana, sessionMBean.getTimeZone());
 				
 				for (Disponibilidad d : lista) {
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(d.getHoraInicio());
+          if(d.getCupo()<0) {
+            d.setCupo(0);
+          }
 
 					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
 						// Matutino
@@ -232,12 +232,8 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 			}
 		}
 		
-		sessionMBean
-				.setDisponibilidadesDelDiaMatutina(new RowList<Disponibilidad>(
-						dispMatutinas));
-		sessionMBean
-				.setDisponibilidadesDelDiaVespertina(new RowList<Disponibilidad>(
-						dispVespertinas));
+		sessionMBean.setDisponibilidadesDelDiaMatutina(new RowList<Disponibilidad>(dispMatutinas));
+		sessionMBean.setDisponibilidadesDelDiaVespertina(new RowList<Disponibilidad>(dispVespertinas));
 	}
 
 	
@@ -252,9 +248,12 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 		
 		VentanaDeTiempo ventanaMesSeleccionado = new VentanaDeTiempo();
 		Calendar cal = Calendar.getInstance();
+		
 		cal.setTime(ventanaCalendario.getFechaInicial());
 		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
 		ventanaMesSeleccionado.setFechaInicial(Utiles.time2InicioDelDia(cal.getTime()));
+		
+    cal.setTime(ventanaCalendario.getFechaFinal());
 		cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
 		ventanaMesSeleccionado.setFechaFinal(Utiles.time2FinDelDia(cal.getTime()));
 		sessionMBean.setVentanaMesSeleccionado(ventanaMesSeleccionado);
@@ -265,39 +264,32 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 		sessionMBean.setDiaSeleccionado(null);
 	}
 	
-	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado) {
+	private void cargarCuposADesplegar(Recurso recurso, VentanaDeTiempo ventana) {
 
 		List<Integer> listaCupos = null;
 		try {
-			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r,ventanaMesSeleccionado);
+			listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventana, sessionMBean.getTimeZone());
 			// Se carga la fecha inicial
 			Calendar cont = Calendar.getInstance();
 			cont.setTime(Utiles.time2InicioDelDia(sessionMBean.getVentanaMesSeleccionado().getFechaInicial()));
 
 			Integer i = 0;
 
-			Date inicio_disp = sessionMBean.getVentanaCalendario().getFechaInicial();
-			Date fin_disp = sessionMBean.getVentanaCalendario().getFechaFinal();
+			Date inicioDisp = sessionMBean.getVentanaCalendario().getFechaInicial();
+			Date finDisp = sessionMBean.getVentanaCalendario().getFechaFinal();
 
 			jsonArrayFchDisp = new JSONArray();
 			// Recorro la ventana dia a dia y voy generando la lista completa de
 			// cupos x dia con -1, 0, >0 según corresponda.
 			while (!cont.getTime().after(
 					sessionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
-				if (cont.getTime().before(inicio_disp)
-						|| cont.getTime().after(fin_disp)) {
+				if (cont.getTime().before(inicioDisp) || cont.getTime().after(finDisp)) {
 					listaCupos.set(i, -1);
-				} else {
+				}else {
 					if (listaCupos.get(i) > 0) {
-						String dateStr = String.valueOf(cont
-								.get(Calendar.DAY_OF_MONTH))
-								+ "/"
-								+ String.valueOf(cont.get(Calendar.MONTH) + 1)
-								+ "/" + String.valueOf(cont.get(Calendar.YEAR));
+						String dateStr = String.valueOf(cont.get(Calendar.DAY_OF_MONTH)) + "/" + String.valueOf(cont.get(Calendar.MONTH) + 1) + "/" + String.valueOf(cont.get(Calendar.YEAR));
 						jsonArrayFchDisp.put(dateStr);
-						
 					}
-
 				}
 				cont.add(Calendar.DAY_OF_MONTH, 1);
 				i++;
@@ -369,8 +361,9 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 			try {
 				marcarReserva(row.getData());
 				return "siguientePaso";
-			} catch (Exception e) {
-				addErrorMessage(e);
+			} catch (Exception ex) {
+        addErrorMessage(ex);
+        configurarDisponibilidadesDelDia();
 				return null;
 			}
 		} else {

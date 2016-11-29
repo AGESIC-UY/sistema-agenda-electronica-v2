@@ -150,7 +150,7 @@ public class GenDisponibilidadMBean extends BaseMBean {
 			if (sessionMBean.getRecursoMarcado() != null){
 				if (v.getFechaInicial() != null && v.getFechaFinal() != null &&
 						v.getFechaInicial().compareTo(v.getFechaFinal()) <= 0 ) {
-					List<Integer> cupos = agendarReservasEJB.obtenerCuposPorDia(sessionMBean.getRecursoMarcado(), v);
+					List<Integer> cupos = agendarReservasEJB.obtenerCuposPorDia(sessionMBean.getRecursoMarcado(), v, sessionMBean.getTimeZone());
 					Calendar fecha = Calendar.getInstance();
 					fecha.setTime(v.getFechaInicial());
 					Calendar fechaFin = Calendar.getInstance();

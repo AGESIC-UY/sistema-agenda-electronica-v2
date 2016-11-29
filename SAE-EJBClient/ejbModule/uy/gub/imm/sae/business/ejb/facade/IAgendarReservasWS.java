@@ -3,6 +3,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.TimeZone;
 
 import javax.jws.WebMethod;
 import javax.jws.WebParam;
@@ -22,12 +23,9 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
-import uy.gub.imm.sae.exception.UserCommitException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 
 @WebService
 public interface IAgendarReservasWS {
@@ -42,11 +40,8 @@ public interface IAgendarReservasWS {
 			@WebParam(name = "inicioAsistido") boolean inicioAsistido
 		)
 		throws 
-			ApplicationException, BusinessException,
-			AccesoMultipleException, ValidacionException, UserException,
-			WarningValidacionException, ErrorValidacionException,
-			WarningValidacionCommitException, ErrorValidacionCommitException,
-			ValidacionClaveUnicaException;
+			ApplicationException, BusinessException, AccesoMultipleException, ValidacionException, UserException,
+			ErrorValidacionException,	ErrorValidacionCommitException,	ValidacionClaveUnicaException;
 
 	@WebMethod
 	public @WebResult(name = "consultarAgendaPorIdResult") Agenda consultarAgendaPorId
@@ -87,13 +82,14 @@ public interface IAgendarReservasWS {
 			@WebParam(name = "disponibilidad") Disponibilidad d
 		) 
 		throws 
-			BusinessException, UserException, UserCommitException;
+			BusinessException, UserException;
 
 	@WebMethod
 	public @WebResult(name = "obtenerCuposPorDiaResult")  ArrayList<Integer> obtenerCuposPorDia
 		(
 			@WebParam(name = "recurso") Recurso r, 
-			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v
+			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v,
+      @WebParam(name = "timezone") TimeZone t
 		)
 		throws 
 			BusinessException;

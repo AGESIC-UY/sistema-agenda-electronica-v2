@@ -2,12 +2,16 @@
 -- PostgreSQL database dump
 --
 
+-- Dumped from database version 9.5.4
+-- Dumped by pg_dump version 9.5.4
+
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SET check_function_bodies = false;
 SET client_min_messages = warning;
+SET row_security = off;
 
 --
 -- Name: global; Type: SCHEMA; Schema: -; Owner: sae
@@ -25,7 +29,7 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: ae_captchas; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_captchas; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_captchas (
@@ -37,7 +41,7 @@ CREATE TABLE ae_captchas (
 ALTER TABLE ae_captchas OWNER TO sae;
 
 --
--- Name: ae_configuracion; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_configuracion; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_configuracion (
@@ -49,7 +53,7 @@ CREATE TABLE ae_configuracion (
 ALTER TABLE ae_configuracion OWNER TO sae;
 
 --
--- Name: ae_empresas; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_empresas; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_empresas (
@@ -71,7 +75,7 @@ CREATE TABLE ae_empresas (
     timezone character varying(25),
     formato_fecha character varying(25),
     formato_hora character varying(25),
-    oid character varying(25),
+    oid character varying(50),
     pie_publico text
 );
 
@@ -79,7 +83,7 @@ CREATE TABLE ae_empresas (
 ALTER TABLE ae_empresas OWNER TO sae;
 
 --
--- Name: ae_novedades; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_novedades; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_novedades (
@@ -97,7 +101,7 @@ CREATE TABLE ae_novedades (
 ALTER TABLE ae_novedades OWNER TO sae;
 
 --
--- Name: ae_oficinas; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_oficinas; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_oficinas (
@@ -116,7 +120,7 @@ CREATE TABLE ae_oficinas (
 ALTER TABLE ae_oficinas OWNER TO sae;
 
 --
--- Name: ae_organismos; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_organismos; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_organismos (
@@ -129,7 +133,7 @@ CREATE TABLE ae_organismos (
 ALTER TABLE ae_organismos OWNER TO sae;
 
 --
--- Name: ae_rel_usuarios_empresas; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_rel_usuarios_empresas; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_rel_usuarios_empresas (
@@ -141,7 +145,7 @@ CREATE TABLE ae_rel_usuarios_empresas (
 ALTER TABLE ae_rel_usuarios_empresas OWNER TO sae;
 
 --
--- Name: ae_rel_usuarios_roles; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_rel_usuarios_roles; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_rel_usuarios_roles (
@@ -154,7 +158,7 @@ CREATE TABLE ae_rel_usuarios_roles (
 ALTER TABLE ae_rel_usuarios_roles OWNER TO sae;
 
 --
--- Name: ae_textos; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_textos; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_textos (
@@ -166,7 +170,7 @@ CREATE TABLE ae_textos (
 ALTER TABLE ae_textos OWNER TO sae;
 
 --
--- Name: ae_tokens; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_tokens; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_tokens (
@@ -181,7 +185,7 @@ CREATE TABLE ae_tokens (
 ALTER TABLE ae_tokens OWNER TO sae;
 
 --
--- Name: ae_tramites; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_tramites; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_tramites (
@@ -197,7 +201,7 @@ CREATE TABLE ae_tramites (
 ALTER TABLE ae_tramites OWNER TO sae;
 
 --
--- Name: ae_trazabilidad; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_trazabilidad; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_trazabilidad (
@@ -218,7 +222,7 @@ CREATE TABLE ae_trazabilidad (
 ALTER TABLE ae_trazabilidad OWNER TO sae;
 
 --
--- Name: ae_unidadesejecutoras; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_unidadesejecutoras; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_unidadesejecutoras (
@@ -231,7 +235,7 @@ CREATE TABLE ae_unidadesejecutoras (
 ALTER TABLE ae_unidadesejecutoras OWNER TO sae;
 
 --
--- Name: ae_usuarios; Type: TABLE; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_usuarios; Type: TABLE; Schema: global; Owner: sae
 --
 
 CREATE TABLE ae_usuarios (
@@ -349,20 +353,23 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', 'A
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', 'SAENovedades');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'TRUE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
 
 
 --
 -- Data for Name: ae_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
+INSERT INTO ae_empresas (id, nombre, datasource, fecha_baja, org_id, org_codigo, org_nombre, unej_id, unej_codigo, unej_nombre, logo, cc_finalidad, cc_responsable, cc_direccion, logo_texto, timezone, formato_fecha, formato_hora, oid, pie_publico) VALUES (2, 'Empresa 1', 'empresa1', NULL, 28, '152', 'Intendencia de Montevideo', 13, '16', 'Intendencia de Montevideo', NULL, 'No configurado', 'No configurado', 'No configurado', 'Noconfigurado', 'America/Montevideo', 'dd/MM/yyyy', 'HH:mm', '2.16.858.0.0.3.10', '');
+
 
 --
 -- Data for Name: ae_novedades; Type: TABLE DATA; Schema: global; Owner: sae
 --
+
 
 
 --
@@ -375,9 +382,11 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '
 --
 
 
+
 --
 -- Data for Name: ae_rel_usuarios_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
+
 
 
 --
@@ -470,7 +479,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('fecha', 'Fecha');
 INSERT INTO ae_textos (codigo, texto) VALUES ('hora', 'Hora');
 INSERT INTO ae_textos (codigo, texto) VALUES ('serie', 'Serie');
 INSERT INTO ae_textos (codigo, texto) VALUES ('numero', 'Número');
-INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_realizada_el', 'Reserva realizada el día');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_seleccionar_un_horario', 'Debe seleccionar un día y una hora');
 INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_el_texto_que_aparece_en_la_imagen', 'Ingrese el texto que aparece en la imagen');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_el_texto_que_aparece_en_la_imagen', 'Debe ingresar el texto que aparece en la imagen');
@@ -563,7 +571,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('copiar_dia', 'Copiar día');
 INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_cupos', 'Modificar cupos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('eliminar_disponibilidades', 'Eliminar disponibilidades');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reservas', 'Reservas');
-INSERT INTO ae_textos (codigo, texto) VALUES ('reservar', 'Reservar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('considerar_el_sabado_como_dia_habil', 'Considerar como día hábil');
 INSERT INTO ae_textos (codigo, texto) VALUES ('lista_de_espera', 'Lista de espera');
 INSERT INTO ae_textos (codigo, texto) VALUES ('abrir_llamador', 'Abrir llamador');
@@ -830,6 +837,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('ya_existe_una_reserva_para_el_dia
 INSERT INTO ae_textos (codigo, texto) VALUES ('hay_campos_obligatorios_sin_completar', 'Hay campos obligatorios sin completar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_campo_campo_debe_contener_solo_digitos', 'El campo {campo} debe contener solo dígitos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_consultar_el_servicio_web', 'No se pudo consultar el servicio web');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ha_pasado_demasiado_tiempo_desde_su_ultima_accion', 'Ha pasado demasiado tiempo desde su última acción');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_enviar_el_correo_porque_el_usuario_no_tiene_direccion_de_correo_electronico', 'No se puede enviar el correo porque el usuario no tiene dirección de correo electrónico');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva', 'No se pudo enviar el correo electrónico de confirmación; tome nota de los datos de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_trazabilidad', 'Código de trazabilidad');
@@ -911,7 +919,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('solicitar_otra_frase', 'Solicitar
 INSERT INTO ae_textos (codigo, texto) VALUES ('consulte_al_administrador_de_bases_de_datos', 'Consulte al administrador de bases de datos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_existe_el_origen_de_datos', 'No existe el origen de datos');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_sesion_ha_expirado', 'La sesión ha expirado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ha_pasado_demasiado_tiempo_desde_su_ultima_accion', 'Ha pasado demasiado tiempo desde su última acción');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_volver_al_sitio_desde_donde_accedio_para_volver_a_comenzar', 'Debe volver al sitio desde el cual accedió para volver a comenzar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_de_la_unidad_ejecutora_es_obligatorio', 'El código de la unidad ejecutora es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('solo_si_no_tiene_datos_asociados', 'Solo si no tiene datos asociados');
@@ -1059,6 +1066,86 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_trazabilidad_de_la_rese
 INSERT INTO ae_textos (codigo, texto) VALUES ('enlace_a_la_pagina_de_cancelacion', 'Enlace a la página directa de cancelación de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('identificador_de_la_reserva', 'Identificador de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('puede_ingresar_codigo_html', 'Puede ingresar código HTML');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_realizada_el', 'Reserva realizada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('considerar_el_domingo_como_dia_habil', 'Considerar como día hábil');
+INSERT INTO ae_textos (codigo, texto) VALUES ('domingo', 'Domingo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_tramite', 'Agregar trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('quitar_tramite', 'Quitar trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_al_menos_un_tramite', 'Debe asociar al menos un trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_del_tramite_es_obligatorio', 'El nombre del trámite es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('tramites_asociados', 'Trámites asociados');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_seleccionar_el_tramite', 'Debe seleccionar el trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda', 'Nombre de la agenda');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_recurso', 'Nombre del recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_tramite', 'Nombre del trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mantenimiento_de_acciones', 'Mantenimiento de acciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('listado_de_acciones', 'Listado de acciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('servicio', 'Servicio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('host', 'Host');
+INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_eliminar_la_accion', '¿Está seguro que desea eliminar la acción?');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_accion', 'Agregar acción');
+INSERT INTO ae_textos (codigo, texto) VALUES ('parametros', 'Parámetros');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_parametro', 'Agregar parámetro');
+INSERT INTO ae_textos (codigo, texto) VALUES ('definir', 'Definir');
+INSERT INTO ae_textos (codigo, texto) VALUES ('asociar', 'Asociar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('accion_creada', 'Acción creada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('accion_modificada', 'Acción modificada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('accion_eliminada', 'Acción eliminada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_de_la_accion_es_obligatorio', 'El nombre de la acción es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_servicio_de_la_accion_es_obligatorio', 'El servicio de la acción es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_host_de_la_accion_es_obligatorio', 'El host de la acción es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_del_parametro_es_obligatorio', 'El nombre del parámetro es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_largo_del_parametro_es_obligatorio', 'El largo del parámetro es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('asociar_acciones_a_recurso', 'Asociar acciones al recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_la_accion', 'Datos de la acción');
+INSERT INTO ae_textos (codigo, texto) VALUES ('orden_de_ejecucion', 'Orden de ejecución');
+INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_la_asignacion', 'Datos de la asignación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('evento', 'Evento');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dato_a_solicitar', 'Dato a solicitar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_asociacion', 'Agregar asociacion');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_accion_es_obligatoria', 'La acción es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_orden_de_ejecucion_es_obligatorio', 'El orden de ejecución es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_orden_de_ejecucion_debe_ser_mayor_a_cero', 'El orden de ejecución debe ser mayor a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('parametro', 'Parámetro');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_parametro_es_obligatorio', 'El parámetro es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_dato_a_solicitar_es_obligatorio', 'El dato a solicitar es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validaciones', 'Validaciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mantenimiento_de_validaciones', 'Mantenimiento de validaciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_validacion', 'Agregar validación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('listado_de_validaciones', 'Listado de validaciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_eliminar_la_validacion', '¿Está seguro que desea eliminar la validación?');
+INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_la_validacion', 'Datos de la validación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validacion_creada', 'Validación creada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validacion_modificada', 'Validación modificada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validacion_eliminada', 'Validación eliminada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_de_la_validacion_es_obligatorio', 'El nombre de la validación es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_servicio_de_la_validacion_es_obligatorio', 'El servicio de la validación es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_host_de_la_validacion_es_obligatorio', 'El host de la validación es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('asociar_validaciones_a_recurso', 'Asociar acciones al recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_validacion_es_obligatoria', 'La validación es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validacion', 'Validación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_descripcion_de_la_accion_es_obligatoria', 'La descripción de la acción es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_de_la_accion_es_demasiado_largo', 'El nombre es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_descripcion_de_la_accion_es_demasiado_larga', 'La descripción es demasiado larga');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_servicio_de_la_accion_es_demasiado_largo', 'El servicio es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_host_de_la_accion_es_demasiado_largo', 'El host es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_del_parametro_es_demasiado_largo', 'El nombre del parámetro es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_accion_se_encuentra_asociada_a_un_recurso', 'La acción se encuentra asociada a un recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_modificar_los_parametros_si_estan_en_uso', 'No se puede modificar los parámetros si están en uso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_descripcion_de_la_validacion_es_obligatoria', 'La descripción de la validación es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ya_existe_una_accion_con_el_nombre_especificado', 'Ya existe una acción con el nombre especificado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_accion_especificada', 'No se encuentra la acción especificada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_de_la_validacion_es_demasiado_largo', 'El nombre es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_servicio_de_la_validacion_es_demasiado_largo', 'El servicio es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_descripcion_de_la_alidacion_es_demasiado_larga', 'La descripción es demasiado larga');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_host_de_la_validacion_es_demasiado_largo', 'El host es demasiado largo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ya_existe_una_validacion_con_el_nombre_especificado', 'Ya existe una validación con el nombre especificado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_validacion_especificada', 'No se encuentra la validación especificada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_validacion_se_encuentra_asociada_a_un_recurso', 'La acción se encuentra asociada a un recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reservar', 'Reservar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('tipo', 'Tipo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_y_el_nombre_del_tramite_son_obligatorios', 'El código y el nombre del trámite son obligatorios');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_seleccionar_al_menos_un_idioma', 'Debe seleccionar al menos un idioma');
 
 
 --
@@ -1120,7 +1207,7 @@ SELECT pg_catalog.setval('s_ae_usuario', 1, true);
 
 
 --
--- Name: ae_captchas_pk; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_captchas_pk; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_captchas
@@ -1128,7 +1215,7 @@ ALTER TABLE ONLY ae_captchas
 
 
 --
--- Name: ae_configuracion_pk; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_configuracion_pk; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_configuracion
@@ -1136,7 +1223,7 @@ ALTER TABLE ONLY ae_configuracion
 
 
 --
--- Name: ae_empresas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_empresas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_empresas
@@ -1144,7 +1231,7 @@ ALTER TABLE ONLY ae_empresas
 
 
 --
--- Name: ae_novedades_pk; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_novedades_pk; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_novedades
@@ -1152,7 +1239,7 @@ ALTER TABLE ONLY ae_novedades
 
 
 --
--- Name: ae_oficinas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_oficinas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_oficinas
@@ -1160,7 +1247,7 @@ ALTER TABLE ONLY ae_oficinas
 
 
 --
--- Name: ae_oficinas_un1; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_oficinas_un1; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_oficinas
@@ -1168,7 +1255,7 @@ ALTER TABLE ONLY ae_oficinas
 
 
 --
--- Name: ae_organismos_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_organismos_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_organismos
@@ -1176,7 +1263,7 @@ ALTER TABLE ONLY ae_organismos
 
 
 --
--- Name: ae_organismos_un1; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_organismos_un1; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_organismos
@@ -1184,7 +1271,7 @@ ALTER TABLE ONLY ae_organismos
 
 
 --
--- Name: ae_rel_usuarios_empresas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_rel_usuarios_empresas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_rel_usuarios_empresas
@@ -1192,7 +1279,7 @@ ALTER TABLE ONLY ae_rel_usuarios_empresas
 
 
 --
--- Name: ae_rel_usuarios_roles_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_rel_usuarios_roles_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_rel_usuarios_roles
@@ -1200,7 +1287,7 @@ ALTER TABLE ONLY ae_rel_usuarios_roles
 
 
 --
--- Name: ae_textos_pk; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_textos_pk; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_textos
@@ -1208,7 +1295,7 @@ ALTER TABLE ONLY ae_textos
 
 
 --
--- Name: ae_tokens_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_tokens_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_tokens
@@ -1216,7 +1303,7 @@ ALTER TABLE ONLY ae_tokens
 
 
 --
--- Name: ae_tramites_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_tramites_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_tramites
@@ -1224,7 +1311,7 @@ ALTER TABLE ONLY ae_tramites
 
 
 --
--- Name: ae_trazabilidad_pk; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_trazabilidad_pk; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_trazabilidad
@@ -1232,7 +1319,7 @@ ALTER TABLE ONLY ae_trazabilidad
 
 
 --
--- Name: ae_unidadesejecutoras_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_unidadesejecutoras_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_unidadesejecutoras
@@ -1240,7 +1327,7 @@ ALTER TABLE ONLY ae_unidadesejecutoras
 
 
 --
--- Name: ae_unidadesejecutoras_un1; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_unidadesejecutoras_un1; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_unidadesejecutoras
@@ -1248,7 +1335,7 @@ ALTER TABLE ONLY ae_unidadesejecutoras
 
 
 --
--- Name: ae_usuarios_pkey; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_usuarios_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_usuarios
@@ -1256,7 +1343,7 @@ ALTER TABLE ONLY ae_usuarios
 
 
 --
--- Name: ae_usuarios_un1; Type: CONSTRAINT; Schema: global; Owner: sae; Tablespace: 
+-- Name: ae_usuarios_un1; Type: CONSTRAINT; Schema: global; Owner: sae
 --
 
 ALTER TABLE ONLY ae_usuarios

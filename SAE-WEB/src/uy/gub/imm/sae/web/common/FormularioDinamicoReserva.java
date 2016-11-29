@@ -169,27 +169,28 @@ public class FormularioDinamicoReserva {
 	public static void desmarcarCampos(List<String> idComponentes, UIComponent formulario) {
 		for (String id : idComponentes) {
 			UIComponent comp = formulario.findComponent(id);
-			if (comp instanceof HtmlInputText) {
-				HtmlInputText input = (HtmlInputText) comp;
-				input.setStyleClass("");
-			}
-			if (comp instanceof HtmlSelectOneMenu) {
-				HtmlSelectOneMenu input = (HtmlSelectOneMenu) comp;
-				input.setStyleClass("");
-			}
-			
-			//Intentar marcar tambien al contenedor
-			comp =  comp.getParent();
 			if(comp != null) {
-				comp = comp.getParent();
-			}
-			if(comp instanceof HtmlPanelGroup) {
-				HtmlPanelGroup panel = (HtmlPanelGroup)comp;
-				String styleClass = panel.getStyleClass();
-				if(styleClass != null) {
-					styleClass = styleClass.replace(STYLE_CLASS_DATO_CON_ERROR, "");
-					panel.setStyleClass(styleClass);
-				}
+	      if (comp instanceof HtmlInputText) {
+	        HtmlInputText input = (HtmlInputText) comp;
+	        input.setStyleClass("");
+	      }
+	      if (comp instanceof HtmlSelectOneMenu) {
+	        HtmlSelectOneMenu input = (HtmlSelectOneMenu) comp;
+	        input.setStyleClass("");
+	      }
+  			//Intentar marcar tambien al contenedor
+  			comp =  comp.getParent();
+  			if(comp != null) {
+  				comp = comp.getParent();
+  			}
+  			if(comp instanceof HtmlPanelGroup) {
+  				HtmlPanelGroup panel = (HtmlPanelGroup)comp;
+  				String styleClass = panel.getStyleClass();
+  				if(styleClass != null) {
+  					styleClass = styleClass.replace(STYLE_CLASS_DATO_CON_ERROR, "");
+  					panel.setStyleClass(styleClass);
+  				}
+  			}
 			}
 			
 		}

@@ -133,7 +133,7 @@
 								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-8">
 								<h:inputText id="oidEmpresa"
-									value="#{empresaMBean.empresaEditar.oid}" maxlength="25"
+									value="#{empresaMBean.empresaEditar.oid}" maxlength="50"
 									styleClass="form-control" />
 								<h:outputText styleClass="input-msg"
 									value="#{sessionMBean.textos['empresa_oid_ayuda']}" />
@@ -235,11 +235,9 @@
 					<p:outputPanel styleClass="form-horizontal">
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['finalidad']}"
-								for="ccFinalidad"
-								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+								for="ccFinalidad" styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
-								<h:inputText id="ccFinalidad"
-									value="#{empresaMBean.empresaEditar.ccFinalidad}"
+								<h:inputText id="ccFinalidad" value="#{empresaMBean.empresaEditar.ccFinalidad}"
 									maxlength="100" styleClass="form-control" />
 								<p:message for="ccFinalidad"></p:message>
 							</p:outputPanel>
@@ -247,8 +245,7 @@
 
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['responsable']}"
-								for="ccResponsable"
-								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+								for="ccResponsable" styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
 								<h:inputText id="ccResponsable"
 									value="#{empresaMBean.empresaEditar.ccResponsable}"
@@ -259,8 +256,7 @@
 
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['direccion']}"
-								for="ccDireccion"
-								styleClass="col-sm-2 control-label label formularioCampoRequerido" />
+								for="ccDireccion" styleClass="col-sm-2 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-10">
 								<h:inputText id="ccDireccion"
 									value="#{empresaMBean.empresaEditar.ccDireccion}"

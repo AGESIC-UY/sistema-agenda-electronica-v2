@@ -182,7 +182,7 @@ public class CDAServiceProviderValve extends ValveBase {
 
 		try {
 			logger.info("==============================================");
-			logger.info("=====  SOFIS-SERVICE-PROVIDER-VALVE v.2.1  ===");
+			logger.info("=====  SOFIS-SERVICE-PROVIDER-VALVE v.2.2  ===");
 			logger.info("==============================================");
 
 			DefaultBootstrap.bootstrap();
@@ -920,6 +920,7 @@ public class CDAServiceProviderValve extends ValveBase {
 			assertion.getAttributeStatements();
 			boolean certificado = false;
 			boolean presencial = false;
+			String uid = "";
 			for (AttributeStatement attSt : assertion.getAttributeStatements()) {
 				for (Attribute att : attSt.getAttributes()) {
 					if ("Certificado".equalsIgnoreCase(att.getName())) {
@@ -936,12 +937,16 @@ public class CDAServiceProviderValve extends ValveBase {
 							presencial = true;
 						}
 					}
+          if ("Uid".equalsIgnoreCase(att.getName())) {
+            XSString attVal = (XSString) att.getAttributeValues().get(0);
+            uid = attVal.getValue();
+          }
 				}
 			}
 			if (!certificado && !presencial) {
-				throw new CDAServiceProviderException("La cuenta del usuario en CDA no está autenticada, no se acepta");
+				//throw new CDAServiceProviderException("La cuenta del usuario en CDA no está autenticada, no se acepta");
+	      logger.fine("[" + httpRequest.getContextPath()+"/"+httpRequest.getServletPath() + "] La cuenta del usuario ["+uid+"] en CDA no está autenticada.");
 			} 
-			
 			
 			// Verificar el status
 			Status status = samlResponse.getStatus();
@@ -999,10 +1004,8 @@ public class CDAServiceProviderValve extends ValveBase {
 
 			if (subject == null || subject.getNameID() == null || subject.getNameID().getValue() == null) {
 				throw new CDAServiceProviderException(
-				    "El mensaje enviado por el Proveedor de Identidades no contiene informaciÃ³n sobre el usuario autenticado");
+				    "El mensaje enviado por el Proveedor de Identidades no contiene información sobre el usuario autenticado");
 			}
-
-			// String userName = subject.getNameID().getValue();
 
 			String userId = null;
 			String firstName = null;
@@ -1043,14 +1046,10 @@ public class CDAServiceProviderValve extends ValveBase {
 				userName = userName + "(" + userId + ")";
 			}
 			userName = userName.trim();
-
 			if (userName.isEmpty()) {
-				subject.getNameID().getValue();
 				userName = applyTransformations(userName, programData);
 			}
 
-			//userName = "[CDA]"+subject.getNameID().getValue() + "/" + userName;
-			
 			List<String> sessionIndexes = new ArrayList<String>();
 			if (assertion.getAuthnStatements() != null && !assertion.getAuthnStatements().isEmpty()) {
 				AuthnStatement authStatement = assertion.getAuthnStatements().get(0);
@@ -1081,8 +1080,7 @@ public class CDAServiceProviderValve extends ValveBase {
 
 			httpRequest.getSession().removeAttribute(REQUEST_DATA_CACHE);
 
-			// Devolver la URL original que habia pedido el usuario para
-			// redirigirlo
+			//Devolver la URL original que habia pedido el usuario para redirigirlo
 			return requestData.getOriginalUrl();
 		} catch (CDAServiceProviderException sspEx) {
 			throw sspEx;

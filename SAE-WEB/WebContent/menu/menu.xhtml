@@ -90,6 +90,24 @@
 						icon="ui-icon-search"
 						url="/administracion/datoASolicitar/modificarConsultar.xhtml" />
 				</p:submenu>
+        <p:submenu id="submenuValidaciones" label="#{sessionMBean.textos['validaciones']}" aria-level="2"
+          rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+          <p:menuitem value="#{sessionMBean.textos['definir']}"
+            icon="ui-icon-pencil"
+            url="/administracion/validaciones/mantenimiento.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['asociar']}"
+            icon="ui-icon-pencil"
+            url="/administracion/validaciones/asociacion.xhtml" />
+        </p:submenu>
+        <p:submenu id="submenuAcciones" label="#{sessionMBean.textos['acciones']}" aria-level="2"
+          rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+          <p:menuitem value="#{sessionMBean.textos['definir']}"
+            icon="ui-icon-pencil"
+            url="/administracion/acciones/mantenimiento.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['asociar']}"
+            icon="ui-icon-pencil"
+            url="/administracion/acciones/asociacion.xhtml" />
+        </p:submenu>
 				<p:submenu id="submenuDisponibilidades" label="#{sessionMBean.textos['disponibilidades']}" aria-level="2"
 					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_PLANIFICADOR')}">
 					<p:menuitem
@@ -121,10 +139,12 @@
 					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}">
 					<p:menuitem value="#{sessionMBean.textos['lista_de_espera']}"
 						icon="ui-icon-clock"
-						url="/administracion/llamador/listaDeEspera.xhtml?l=1" />
+						url="/administracion/llamador/listaDeEspera.xhtml?l=1"
+						rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}" />
 					<p:menuitem value="#{sessionMBean.textos['abrir_llamador']}"
 						icon="ui-icon-volume-on"
-						url="/administracion/llamador/configurarLlamador.xhtml" />
+						url="/administracion/llamador/configurarLlamador.xhtml"
+						rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR')}" />
 				</p:submenu>
 				<p:submenu id="submenuConsultas" label="#{sessionMBean.textos['consultas']}" aria-level="2"
 					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR')}">

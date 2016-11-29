@@ -1,7 +1,93 @@
-Versión 1.1
--Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
--Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
--Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
--Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
--Se cambió la versión de OpenLayers para que funcione en IE 9.
--Se corrigieron problemas de visualización de los scrolls.
+Versión 1.1 (2016-05-24)
+*Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
+*Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
+*Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
+*Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
+*Se cambió la versión de OpenLayers para que funcione en IE 9.
+*Se corrigieron problemas de visualización de los scrolls.
+
+Versión 1.2 (2016-08-31)
+* Se incorporó un servicio web REST que permite obtener información sobre las reservas.
+* Para lo anterior también se incorporó la posibilidad de asociar tokens a los usuarios para permitir identificarlos cuando invocan servicios web REST.
+* Se incorporó la posibilidad de realizar la autenticación contra un servidor LDAP.
+* Al modificar cupos, si se marca la casilla para aplicar el cambio a los días subsiguientes se permite especificar cuáles días de la semana serán modificados.
+* Se corrigieron detalles de accesibilidad y usabilidad reportados por UNIT:
+  - Se cambió la forma de seleccionar agendas y recursos; ahora se utilizan radiobuttons para marcar la opción seleccionada.
+  - Se añadió la posibilidad de navegar por el menú de páginas con el teclado.
+  - Se corrigió un problema que impedía navegar correctamente los calendarios usando el teclado.
+  - Se quitaron los editores HTML debido a que en Chrome capturan el foco y no permiten pasar al siguiente componente con el tabulador.
+  - Se cambió el comportamiento del link "Saltar al contenido" para que salte también el menú superior.
+  - Se cambiaron los títulos de las páginas para que sean más representativos.
+  - Se cambiaron los textos de los links "Recargar listado" por textos más explícitos.
+  - Se ajustaron algunos mensajes de error que eran muy vagos.
+  - Se añadió identificación de campo obligatorio a varios campos que no lo tenían.
+  - Se añadió tooltip HTML a todos los botones que solo tienen ícono (antes era por javascript) .
+  - Se homogeneizaron los botones "Cancelar" y "Guardar" entre las páginas para que estén todos del mismo lado.
+  - Se ajustaron estilos para resaltar la opción del menú seleccionada cuando se navega con teclado.
+  - Se cambiaron varios textos de las pantallas.
+* Se añadió la posibilidad de mostrar el identificador de la reserva en el ticket de confirmación
+* Se ajustaron parámetros en las invocaciones a los servicios de trazabilidad
+  - Se dejó de enviar el identificador de la oficina, que es interno de SAE, y en cambio se envía el nombre.
+  - Se comenzó a enviar el número de paso del proceso.
+  - Se dejó de marcar como finalizada las trazas correspondientes a las atenciones.
+* Se implementó un proceso periódico nocturno que registra una traza de finalización para todas las reservas del día anterior.
+* Se quitaron paquetes que estaban como dependencias y que no eran necesarios.
+
+Versión 1.3 (2016-09-09)
+* Se corrigió el bug por el cual se perdían los atributos "u" (URL de retorno), "p" (parámetros), "t" (identificador de trazabilidad padre) y "i" (idioma) cuando se volvía al paso 1 luego de haber pasado al paso 2.
+* Se corrigió el problema por el cual no se podían registrar empresas cuyo OID tuviera más de 25 caracteres de largo.
+
+Versión 1.4 (2016-10-06)
+* Se corrigió el bug por el cual no se mostraban las disponibilidades de los meses posteriores al actual.
+* Se corrigió el problema por el cual la fecha que se muestra en el ticket estaba siempre en GMT0.
+* Se cambió la forma de determinar el primer día disponible para reservar de forma de saltear los días no hábiles.
+* Se quitó la obligatoriedad del campo descripción para las agendas.
+* Se quitó la carga automática del campo descripción cuando se elige un trámite en la creación de una agenda.
+* Se corrigió el problema por el cual solo se mostraban hasta 25 días en la consulta de disponibilidades.
+* Se agregó la exigencia de seleccionar al menos un idioma para las agendas.
+* Se corrigió un problema por el cual los valores por defecto pasados por parámetro a la reserva podían quedar cortados si incluyen más de un punto.
+* Se corrigió un problema por el cual no se enviaba el proceso padre al sistema de trazabilidad si no el cliente no informaba también el paso padre.
+* Se incorporó la posibilidad de crear disponibilidades para los domingos (igual que para los sábados)
+* Se corrigieron y cambiaron algunos textos.
+* Se ocultó el dato sobre el código de trazabilidad para las agendas que no están integradas con el Sistema de Trazabilidad.
+* Se incorporó la posibilidad de asociar múltiples trámites a las agendas:
+  - Al crear la agenda se puede asociar a múltiples trámites
+  - Al realizar una reserva se debe seleccionar el trámite que se desea realizar (si hay más de uno)
+  - Al invocar al Sistema de Trazabilidad se informa el trámite seleccionado durante la reserva
+  - Al invocar al Sistema de Novedades se informa el trámite seleccionado durante la reserva
+  - Al consultar reservas y realizar reportes se obtiene información sobre el trámite realizado
+* Se reincorporó la posibilidad de definir acciones de usuario para ser ejecutadas al confirmar o cancelar reservas
+  - Se permite utilizar la acción AccionNotificarBean
+  - Se permite incorporar acciones propias mediante la implementación de una interfaz en un proyecto JavaEE
+* Se reincorporó la posibilidad de definir validaciones de usuario para ser ejecutadas al confirmar o cancelar reservas
+  - Se permite utilizar las validaciones ValidacionMailBean y ValidadorDatosPersonaBean
+  - Se permite incorporar validaciones propias mediante la implementación de una interfaz en un proyecto JavaEE
+
+Versión 1.4.p1 (2016-11-17)
+* Se corrigieron y cambiaron algunos textos.
+* Se corrigió un bug por el cual se calculaban mal los días con disponibilidades luego de que se eliminaban disponibilidades de una semana.
+* Se corrigió un problema con los timezones al momento de desplegar las horas para el día de hoy.
+* Se cambió la válvula de CDA para permitir la autenticación de usuarios cuya cuenta no haya sido validado ni por certificado ni presencial.
+* Se incluye la versión de la aplicación en el archivo MANIFEST.MF de la válvula de CDA.
+* Se corrigió un defecto por el cual en Internet Explorer 9 el botón para subir un archivo solo funciona si se hace clic en la mitad del mismo.
+* Se añadió un mensaje de aviso de ejecución correcta al copiar una agenda.
+* Se cambiaron los checkboxes y radiobuttons para que funcionen correctamente cuando se hace clic sobre la etiqueta.
+* Se añadió texto oculto descriptivo para cada uno de los botones que solo tienen íconos (para ser usado por los lectores de pantalla).
+* Se corrigió un problema que impedía copiar una agenda si ésta tenía algún texto personalizado asociado.
+* Se corrigó el problema por el cual no se mostraba un mensaje de error apropiado cuando dos usuarios diferentes seleccionaban el mismo último cupo en un horario.
+* Se quitó el caché de la definición de las agendas en la reserva pública para evitar que los usuarios vean definiciones antiguas si acceden dos veces a una agenda y en el medio ésta fue modificada.
+* Se añadió la posibilidad de utilizar TLS en el envío de mail (aunque esto se documenta como una configuración opcional).
+* Se corrigió un bug por el cual no se podía seleccionar un timezone cuyo nombre sea mayor a 25 caracteres, tanto para empresas como para agendas.
+* Se corrigió un bug que hacía que las trazas nunca se cerraran y se continuaran enviando todos los días las respectivas trazas de cierre.
+* Se añadió la posibilidad de realizar más de una reserva para el mismo día con los mismos valores en todos los campos clave si se seleccionan diferentes trámites.
+* Se cambiaron los mensajes relativos a los errores de fechas (vigencia y disponibilidad) al crear y modificar recursos.
+
+Versión 1.5 (2016-11-21)
+* Se añadió el parámetro "q" a la URL de la reserva pública para permitir especificar el trámite a realizar.
+* Se añadió el despliegue opcional de la fecha actual (según la agenda seleccionada) en la parte superior de ambas interfaces.
+
+Versión 2.0
+* Se corrige un bug por el cual los envíos fallidos al Sistema de Notificaciones se reintentaban indefinidamente.
+* Se modificó la lógica de despliegue de textos para que en caso de no encontrar una etiqueta en la tabla ae_textos principal en lugar de dar un error se muestra la propia etiqueta como texto.
+* Se corrigió un error por el cual se mostraba la adevertencia "No hay otro administrador" cuando se creaba un usuario nuevo y se marcaba y desmarcaba la casilla "superadministrador".
+* Se corrigió un error por el cual al clonar una agenda no se copiaban los trámites asociados.

@@ -65,10 +65,10 @@
 							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 						</f:facet>
 
-						<p:commandButton id="eliminarToken"
+						<p:commandButton id="eliminarToken" value="#{sessionMBean.textos['eliminar']}"
 							oncomplete="PF('eliminarToken').show();" icon="ui-icon-trash"
 							actionListener="#{tokensMBean.selecTokenEliminar}"
-							title="#{sessionMBean.textos['eliminar']}">
+							title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
 					</p:column>
 				</p:dataTable>

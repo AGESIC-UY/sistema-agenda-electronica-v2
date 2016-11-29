@@ -66,6 +66,27 @@
 	      <p:outputPanel styleClass="form-required">
 	        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
 	      </p:outputPanel>
+	      
+        <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3AdminMBean.tramites}">
+          <fieldset>
+            <legend>
+              <h:outputText value="#{sessionMBean.textos['tramite']}" />
+            </legend>
+            <p:outputPanel styleClass="form-group">
+              <h:outputLabel value="#{sessionMBean.textos['tramite']}"
+                for="tramite" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:selectOneMenu id="tramite" value="#{paso3AdminMBean.tramiteCodigo}"
+                  styleClass="form-control">
+                  <f:selectItems value="#{paso3AdminMBean.tramites}" />
+                </h:selectOneMenu>
+                <h:message for="tramite" styleClass="mensajeError" />
+              </p:outputPanel>
+            </p:outputPanel>
+          </fieldset>
+        </p:outputPanel>
+	      
+	      
 				<p:outputPanel id="formulario">
 					<h:panelGroup binding="#{paso3AdminMBean.campos}" layout="block"/>
 				</p:outputPanel>

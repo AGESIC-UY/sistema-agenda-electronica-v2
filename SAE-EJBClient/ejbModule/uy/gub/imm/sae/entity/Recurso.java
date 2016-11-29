@@ -72,6 +72,7 @@ public class Recurso implements Serializable {
 	private Boolean usarLlamador;
 	private String serie;
 	private Boolean sabadoEsHabil;
+  private Boolean domingoEsHabil;
 	
 	//Datos obtenidos a partir de TramitesUy
 	private String oficinaId; //Esto es inventado, las oficinas no tienen id en TramitesUy
@@ -112,6 +113,7 @@ public class Recurso implements Serializable {
 		fechaInicio = new Date();
 		usarLlamador = true;
 		sabadoEsHabil = false;
+		domingoEsHabil = false;
 	}
 	
 	/**
@@ -148,6 +150,7 @@ public class Recurso implements Serializable {
 		serie = r.getSerie();
 		visibleInternet = r.getVisibleInternet();
 		sabadoEsHabil = r.getSabadoEsHabil();
+		domingoEsHabil = r.getDomingoEsHabil();
 		
 		agenda = new Agenda(r.getAgenda());
 		
@@ -342,13 +345,22 @@ public class Recurso implements Serializable {
 		this.visibleInternet = visibleInternet;
 	}
 	
-	@Column (name = "SABADO_ES_HABIL", nullable = false)
+	@Column (name = "sabado_es_habil", nullable = false)
 	public Boolean getSabadoEsHabil() {
 		return sabadoEsHabil;
 	}
 	public void setSabadoEsHabil(Boolean sabadoEsHabil) {
 		this.sabadoEsHabil = sabadoEsHabil;
 	}
+	
+  @Column (name = "domingo_es_habil", nullable = false)
+  public Boolean getDomingoEsHabil() {
+    return domingoEsHabil;
+  }
+  public void setDomingoEsHabil(Boolean domingoEsHabil) {
+    this.domingoEsHabil = domingoEsHabil;
+  }
+	
 	@XmlTransient
 	@ManyToOne (optional = false)
 	@JoinColumn (name = "aeag_id", nullable = false)

@@ -22,6 +22,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.ejb.Local;
 
@@ -41,25 +42,20 @@ import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
-import uy.gub.imm.sae.exception.WarningValidacionCommitException;
-import uy.gub.imm.sae.exception.WarningValidacionException;
 
 @Local
 public interface AgendarReservasHelperLocal {
 	public VentanaDeTiempo obtenerVentanaCalendarioEstaticaIntranet (Recurso recurso);
-	public VentanaDeTiempo obtenerVentanaCalendarioAjustadaIntranet(Recurso r, VentanaDeTiempo ventana);
 	public VentanaDeTiempo obtenerVentanaCalendarioEstaticaInternet (Recurso recurso);
-	public VentanaDeTiempo obtenerVentanaCalendarioAjustadaInternet(Recurso r, VentanaDeTiempo ventana);
-	public VentanaDeTiempo obtenerVentanaCalendarioExtendida(Recurso r, VentanaDeTiempo ventana);
-	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo ventana);
-	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana);
+	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
+	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
 	public List<Integer> obtenerCuposXDia(VentanaDeTiempo ventana, List<Object[]> cuposAsignados, List<Object[]> cuposConsumidos);
 	public Reserva crearReservaPendiente(Disponibilidad d);
 	public boolean chequeoCupoNegativo (Disponibilidad d);
 	public List<DatoASolicitar> obtenerDatosASolicitar(Recurso r);
 	public List<ValidacionPorRecurso> obtenerValidacionesPorRecurso(Recurso r);
-	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException, ValidacionException;
-	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, ReservaDTO reservaDTO) throws ApplicationException, BusinessException, ErrorValidacionException, WarningValidacionException, ErrorValidacionCommitException, WarningValidacionCommitException;
+	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws ValidacionException;
+	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, ReservaDTO reservaDTO) throws ApplicationException, BusinessException, ErrorValidacionException, ErrorValidacionCommitException;
 	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Reserva reserva, List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException;
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, ErrorAutocompletarException, WarningAutocompletarException;
 }

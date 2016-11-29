@@ -119,12 +119,13 @@
 							<f:facet name="header">
 								<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 							</f:facet>
-							<p:commandButton id="modificarLink" reRender="pantalla"
+							<p:commandButton id="modificarLink" reRender="pantalla" 
+							  value="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only"
 								actionListener="#{datoASolicitarMBean.seleccionarDato(rowIndex)}"
 								action="modificar" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
 							</p:commandButton>
-							<p:commandButton id="eliminarLink"
-								oncomplete="PF('eliminarDato').show();"
+							<p:commandButton id="eliminarLink" value="#{sessionMBean.textos['eliminar']}"
+								oncomplete="PF('eliminarDato').show();" styleClass="ui-button-icon-only"
 								actionListener="#{datoASolicitarMBean.seleccionarDatoParaEliminar(rowIndex)}"
 								icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 							</p:commandButton>

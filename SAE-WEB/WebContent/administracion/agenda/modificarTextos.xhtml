@@ -133,8 +133,9 @@
 							<p:outputPanel styleClass="col-sm-4">
 								<h:outputText	value="#{sessionMBean.textos['puede_usar_las_siguientes_metavariables']}:" />
 								<ul class="tips pasoTexto">
-									<li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda_o_tramite']}" /></li>
-									<li><h:outputText	value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso_u_oficina']}" /></li>
+									<li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda']}" /></li>
+									<li><h:outputText	value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso']}" /></li>
+                  <li><h:outputText value="{{TRAMITE}}: #{sessionMBean.textos['nombre_del_tramite']}" /></li>
 									<li><h:outputText value="{{DIRECCION}}: #{sessionMBean.textos['direccion_fisica_donde_debe_concurrir']}" /></li>
 									<li><h:outputText	value="{{FECHA}}: #{sessionMBean.textos['fecha_cuando_debe_concurrir']}" /></li>
 									<li><h:outputText	value="{{HORA}}: #{sessionMBean.textos['hora_cuando_debe_concurrir']}" /></li>
@@ -167,8 +168,9 @@
 							<p:outputPanel styleClass="col-sm-4">
                 <h:outputText value="#{sessionMBean.textos['puede_usar_las_siguientes_metavariables']}:" />
                 <ul class="tips pasoTexto">
-                  <li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda_o_tramite']}" /></li>
-                  <li><h:outputText value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso_u_oficina']}" /></li>
+                  <li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda']}" /></li>
+                  <li><h:outputText value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso']}" /></li>
+                  <li><h:outputText value="{{TRAMITE}}: #{sessionMBean.textos['nombre_del_tramite']}" /></li>
                   <li><h:outputText value="{{DIRECCION}}: #{sessionMBean.textos['direccion_fisica_donde_debe_concurrir']}" /></li>
                   <li><h:outputText value="{{FECHA}}: #{sessionMBean.textos['fecha_cuando_debe_concurrir']}" /></li>
                   <li><h:outputText value="{{HORA}}: #{sessionMBean.textos['hora_cuando_debe_concurrir']}" /></li>

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <jboss-web >  
   <security-domain >@SAE_SECURITY_DOMAIN@</security-domain>
+<!-- Válvula para la integración con CDA (Control De Acceso) -->
 <!-- 
   <valve>
     <class-name>com.sofis.agesic.sae.cda.CDAServiceProviderValve</class-name>

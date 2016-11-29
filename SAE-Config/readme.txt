@@ -52,8 +52,9 @@ Se tocaron los siguientes archivos de Primefaces:
   /org/primefaces/component/tabview/TabViewRenderer.java
 Cada vez que se modifica un archivo de Primefaces hay que compilarlo en un proyecto separado e incluirlo en el archivo primefaces-5.3-modificado.jar que está en /SAE-WEB/WebContent/WEB-INF/lib  
   
-Nota:
-para crear las clases de los servicios web, hay que utilizar directamente el comando wsimport de Java 7:
+SERVICIOS WEB  
+  
+Para crear las clases de los servicios web, hay que utilizar directamente el comando wsimport de Java 7:
 /usr/lib/jvm/jdk1.7.0_60/bin/wsimport -s . http://localhost:8080/SAE-StubsServiciosWebAgesic/wsTramite?wsdl
 Luego, hay que modificar el archivo Persist.java para cambiar la parte que dice 
   @XmlType(name = "persist" 
@@ -64,6 +65,7 @@ y el archivo PersistResponse.java para cambiar la parte que
 por 
   @XmlType(name = "persistResponse1"
 Esto es para evitar el problema "Two classes have the same XML type name"
+
 En el caso de Trazabilidad, también hay que añadir la anotación @XmlRootElement a las clases CabezalDTO y LineaDTO
 Esto es para poder generar el XML en el caso de que haya que almacenarlo para volver a intentar más tarde
 

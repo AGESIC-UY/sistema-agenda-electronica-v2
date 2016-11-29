@@ -131,9 +131,16 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		return reserva;
 	}
 	
-	
+	/**
+	 * Busca las reservas confirmadas existentes que tengan los mismos valores en todos los datos claves
+	 * y que correspondan al trámite indicado 
+	 * @param datos
+	 * @param recurso
+	 * @param fecha
+	 * @return
+	 */
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservaDatosHora(List<DatoReserva> datos , Recurso recurso, Date fecha){
+	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos , Recurso recurso, Date fecha, String codigoTramite){
 		List<Reserva> resultados = new ArrayList<Reserva>();
 		
 		String selectStr =	" SELECT distinct(reserva) " ;
@@ -141,7 +148,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 						   					"	JOIN reserva.disponibilidades disp " +
 					   						" JOIN reserva.datosReserva datoReserva " +
 				   							"	JOIN datoReserva.datoASolicitar datoSolicitar	" ;
-		String whereStr = 	" WHERE disp.recurso = :recurso " +
+		String whereStr = 	" WHERE reserva.tramiteCodigo = :tramiteCodigo" +
+		                    "   AND disp.recurso = :recurso " +
 						  					" 	AND disp.fechaBaja is null " + 
 					  						"   AND disp.fecha = :fecha " +
 				  							"   AND reserva.estado NOT IN ('U','C') ";
@@ -149,11 +157,9 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			boolean hayCamposClaveNulos = false;
 			if (! datos.isEmpty()) {
 				whereStr = whereStr + "    and (" ;
-			
 				boolean primerRegistro = true;
 				int i = 0;
 				for (DatoReserva datoR : datos){
-					
 					if (datoR != null){
 						if (primerRegistro){
 							whereStr = whereStr + 
@@ -179,9 +185,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			
 			try {
 				resultados = (List<Reserva>)entityManager.createQuery(consulta)
-									.setParameter("recurso", recurso)
-									.setParameter("fecha", fecha, TemporalType.DATE)
-									.getResultList();
+          .setParameter("tramiteCodigo", codigoTramite)
+  				.setParameter("recurso", recurso)
+  				.setParameter("fecha", fecha, TemporalType.DATE)
+  				.getResultList();
 				
 				/* 12/03/2010 - Corrige que al traer reservas con la misma clave que se ingreso, 
 				 * se filtren las que tengan algun dato clave mas ingresado (por ejemplo cuando 
@@ -589,7 +596,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			where += "and ( " + whereDispIds + " ) ";
 		}
 		String queryString = 
-			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, a.asistio " +
+			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, " +
+			"dr.valor, ll.puesto, a.asistio, r.tramiteCodigo, r.tramiteNombre " +
 			"from   Reserva r " +
 			"       join r.disponibilidades d " +
 			"       left join r.datosReserva dr " +
@@ -638,6 +646,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Object  valorDatoReserva = (Object) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
 			Boolean asistio          = (Boolean)rowReserva[11];
+
+      String  tramiteCodigo    = (String) rowReserva[12];
+      String  tramiteNombre    = (String) rowReserva[13];
+			
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
 				idReservaActual = reservaId;
 				if (reservaDTO != null) {
@@ -652,6 +664,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 				reservaDTO.setHoraInicio(dispHoraInicio);
 				reservaDTO.setPuestoLlamada(puesto);
 				reservaDTO.setAsistio(asistio);
+		    reservaDTO.setTramiteCodigo(tramiteCodigo);
+		    reservaDTO.setTramiteNombre(tramiteNombre);
 			}
 			if (nombreDatoReserva != null) {
 				if (tipoDatoReserva == Tipo.LIST) {
@@ -747,7 +761,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		//Esta consulta no funciona con reserva multiples.
 		//Asumo que no existen reservas multiples
 		String queryString = 
-			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, at.asistio " +
+			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, " + 
+			"dr.valor, ll.puesto, at.asistio, r.tramiteCodigo, r.tramiteNombre " +
 			"from   Reserva r " +
 			"       join r.disponibilidades d " +
 			"       left join r.datosReserva dr " +
@@ -797,6 +812,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Object  valorDatoReserva = (Object) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
 			Boolean asistio          = (Boolean)rowReserva[11];
+      String  tramiteCodigo    = (String) rowReserva[12];
+      String  tramiteNombre    = (String) rowReserva[13];
 
 
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
@@ -811,7 +828,6 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 				}
 				
 				reservaDTO = new ReservaDTO();
-				
 				reservaDTO.setId(reservaId);
 				reservaDTO.setNumero(reservaNumero);
 				reservaDTO.setEstado(reservaEstado);
@@ -823,6 +839,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 				if (asistio != null){
 					reservaDTO.setAsistio(asistio);
 				}
+		    reservaDTO.setTramiteCodigo(tramiteCodigo);
+		    reservaDTO.setTramiteNombre(tramiteNombre);
 			}
 			//El else indica que estoy iterando sobre los datos de la reserva
 			
@@ -874,11 +892,13 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	@SuppressWarnings("unchecked")
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta)
 	{
-		String queryString = "select distinct a.funcionario, l.recurso.agenda.nombre, l.recurso.nombre, l.puesto, l.hora, a.fechaCreacion, a.asistio, l.reserva.id, l.reserva.fechaCreacion "
-							+ "from Atencion a join a.reserva.llamada l "
-							+ "where a.reserva = l.reserva and "
-							+ "date_trunc('day',l.fecha) >=:fD and date_trunc('day',l.fecha) <=:fH "
-							+ "and l.hora <= a.fechaCreacion";
+		String queryString = "select distinct a.funcionario, l.recurso.agenda.nombre, l.recurso.nombre, "
+		    + "l.puesto, l.hora, a.fechaCreacion, a.asistio, l.reserva.id, l.reserva.fechaCreacion, "
+		    + "l.reserva.tramiteCodigo, l.reserva.tramiteNombre "
+				+ "from Atencion a join a.reserva.llamada l "
+				+ "where a.reserva = l.reserva and "
+				+ "date_trunc('day',l.fecha) >=:fD and date_trunc('day',l.fecha) <=:fH "
+				+ "and l.hora <= a.fechaCreacion";
 		Query query = entityManager.createQuery(queryString);
 		query.setParameter("fD", fechaDesde, TemporalType.DATE);
 		query.setParameter("fH", fechaHasta, TemporalType.DATE);
@@ -894,10 +914,13 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			}else {
 				resolucionAtencion = "No Asistió";
 			}
-			AtencionLLamadaReporteDT atencionLlamada = new AtencionLLamadaReporteDT((String)row[0],(String)row[1],(String)row[2],(Integer)row[3],(Date)row[4],(Date)row[5],resolucionAtencion,(Integer)row[7],(Date)row[8]);
+			AtencionLLamadaReporteDT atencionLlamada = new AtencionLLamadaReporteDT((String)row[0], (String)row[1],
+			    (String)row[2], (Integer)row[3], (Date)row[4], (Date)row[5], resolucionAtencion, (Integer)row[7],
+			    (Date)row[8], (String)row[9], (String)row[10]);
 			listAtencionLlamada.add(atencionLlamada);
 		}
-		queryString = "select l.recurso.agenda.nombre, l.recurso.nombre, l.puesto, l.hora, l.reserva.id, l.reserva.fechaCreacion "
+		queryString = "select l.recurso.agenda.nombre, l.recurso.nombre, l.puesto, l.hora, l.reserva.id, "
+		    + "l.reserva.fechaCreacion, l.reserva.tramiteCodigo, l.reserva.tramiteNombre "
 				+ "from Llamada l "
 				+ "where date_trunc('day', l.fecha) >=:fD and date_trunc('day', l.fecha) <=:fH "
 				+ "and l.reserva.id not IN (select a.reserva.id from Atencion a where date_trunc('day', a.fechaCreacion) >=:fD and "
@@ -909,7 +932,9 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		iterator = resultados.iterator();
 		while (iterator.hasNext()) {
 			Object[] row = iterator.next();
-			AtencionLLamadaReporteDT atencionLlamada = new AtencionLLamadaReporteDT(null,(String)row[0],(String)row[1],(Integer)row[2],(Date)row[3],null,null,(Integer)row[4],(Date)row[5]);
+			AtencionLLamadaReporteDT atencionLlamada = new AtencionLLamadaReporteDT(null, (String)row[0],
+			    (String)row[1], (Integer)row[2], (Date)row[3], null, null, (Integer)row[4], (Date)row[5],
+			    (String)row[6], (String)row[7]);
 			listAtencionLlamada.add(atencionLlamada);
 		}
 		return listAtencionLlamada;
