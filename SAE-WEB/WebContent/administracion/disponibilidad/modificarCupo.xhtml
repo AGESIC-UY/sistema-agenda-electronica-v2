@@ -260,7 +260,7 @@
 									</p:outputPanel>
 								</p:outputPanel>
 								<p:outputPanel id="aplicarTodos" styleClass="form-group">
-									<h:outputText value="#{sessionMBean.textos['aplicar_a']}" styleClass="col-sm-3 control-label label" />
+									<h:outputText value="#{sessionMBean.textos['dias_a_aplicar']}" styleClass="col-sm-3 control-label label" />
 									<p:outputPanel styleClass="col-sm-9">
 										<p:selectBooleanCheckbox id="todosLosDias" value="#{dispSessionMBean.modificarTodos}"  >
 										  <p:ajax update="aplicarTodos" />
@@ -268,31 +268,31 @@
 										<p:outputLabel value="#{sessionMBean.textos['aplicar_a_todos_los_dias']}" for="todosLosDias" />
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
                     <p:selectBooleanCheckbox id="diaAplicarLu" value="#{dispSessionMBean.diasAplicar[0]}"  />
-                    <p:outputLabel value="Lunes" for="diaAplicarLu" />
+                    <p:outputLabel value="#{sessionMBean.textos['lunes']}" for="diaAplicarLu" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
                     <p:selectBooleanCheckbox id="diaAplicarMa" value="#{dispSessionMBean.diasAplicar[1]}"  />
-                    <p:outputLabel value="Martes" for="diaAplicarMa" />
+                    <p:outputLabel value="#{sessionMBean.textos['martes']}" for="diaAplicarMa" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
                     <p:selectBooleanCheckbox id="diaAplicarMi" value="#{dispSessionMBean.diasAplicar[2]}"  />
-                    <p:outputLabel value="Miércoles" for="diaAplicarMi" />
+                    <p:outputLabel value="#{sessionMBean.textos['miercoles']}" for="diaAplicarMi" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
                     <p:selectBooleanCheckbox id="diaAplicarJu" value="#{dispSessionMBean.diasAplicar[3]}"  />
-                    <p:outputLabel value="Jueves" for="diaAplicarJu" />
+                    <p:outputLabel value="#{sessionMBean.textos['jueves']}" for="diaAplicarJu" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
                     <p:selectBooleanCheckbox id="diaAplicarVi" value="#{dispSessionMBean.diasAplicar[4]}"  />
-                    <p:outputLabel value="Viernes" for="diaAplicarVi" />
+                    <p:outputLabel value="#{sessionMBean.textos['viernes']}" for="diaAplicarVi" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos and sessionMBean.recursoMarcado.sabadoEsHabil}">
                     <p:selectBooleanCheckbox id="diaAplicarSa" value="#{dispSessionMBean.diasAplicar[5]}" />
-                    <p:outputLabel value="Sábado" for="diaAplicarSa" />
+                    <p:outputLabel value="#{sessionMBean.textos['sabado']}" for="diaAplicarSa" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{dispSessionMBean.modificarTodos and sessionMBean.recursoMarcado.domingoEsHabil}">
                     <p:selectBooleanCheckbox id="diaAplicarDo" value="#{dispSessionMBean.diasAplicar[6]}" />
-                    <p:outputLabel value="Domingo" for="diaAplicarDo" />
+                    <p:outputLabel value="#{sessionMBean.textos['domingo']}" for="diaAplicarDo" />
                   </p:outputPanel>
 										
 									</p:outputPanel>

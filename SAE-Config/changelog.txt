@@ -91,4 +91,7 @@ Versión 2.0
 * Se modificó la lógica de despliegue de textos para que en caso de no encontrar una etiqueta en la tabla ae_textos principal en lugar de dar un error se muestra la propia etiqueta como texto.
 * Se corrigió un error por el cual se mostraba la adevertencia "No hay otro administrador" cuando se creaba un usuario nuevo y se marcaba y desmarcaba la casilla "superadministrador".
 * Se corrigió un error por el cual al clonar una agenda no se copiaban los trámites asociados.
-* Se añadió la posibilidad se asociar algunos roles a los usuarios en recursos individuales. Los roles admitidos son "planificador" y "emisor de reportes"
+* Se separaron las consultas de reservas de los reportes.
+* Se añadió la posibilidad se asociar algunos roles a los usuarios en recursos individuales. Los roles admitidos son "planificador" y "emisor de reportes".
+* Se modificaron los roles necesarios para permitir realizar consultas de reservas y generar reportes.
+* Se corrigieron errores en los controles de datos de recursos y los mensajes desplegados al crearlos y modificarlos.

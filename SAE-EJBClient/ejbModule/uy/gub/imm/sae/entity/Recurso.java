@@ -99,6 +99,17 @@ public class Recurso implements Serializable {
 
   private Map<String, TextoRecurso> textosRecurso;
 	
+  //Datos de atención presencial
+  private Boolean presencialAdmite;
+  private Integer presencialCupos;
+  private Boolean presencialLunes;
+  private Boolean presencialMartes;
+  private Boolean presencialMiercoles;
+  private Boolean presencialJueves;
+  private Boolean presencialViernes;
+  private Boolean presencialSabado;
+  private Boolean presencialDomingo;
+  
 	
 	public Recurso () {
 		visibleInternet = false;
@@ -114,6 +125,16 @@ public class Recurso implements Serializable {
 		usarLlamador = true;
 		sabadoEsHabil = false;
 		domingoEsHabil = false;
+
+		presencialAdmite = false;
+		presencialCupos = 0;
+		presencialLunes = false;
+		presencialMartes = false;
+		presencialMiercoles = false;
+		presencialJueves = false;
+		presencialViernes = false;
+		presencialSabado = false;
+    presencialDomingo = false;
 	}
 	
 	/**
@@ -164,6 +185,17 @@ public class Recurso implements Serializable {
 		
 		this.latitud = r.latitud;
 		this.longitud = r.longitud;
+	
+
+    this.presencialAdmite = r.presencialAdmite;
+    this.presencialCupos = r.presencialCupos;
+    this.presencialLunes = r.presencialLunes;
+    this.presencialMartes = r.presencialMartes;
+    this.presencialMiercoles = r.presencialMiercoles;
+    this.presencialJueves = r.presencialJueves;
+    this.presencialViernes = r.presencialViernes;
+    this.presencialSabado = r.presencialSabado;
+    this.presencialDomingo = r.presencialDomingo;
 		
 	}
 
@@ -539,5 +571,86 @@ public class Recurso implements Serializable {
 	public void setMostrarIdEnTicket(Boolean mostrarIdEnTicket) {
 		this.mostrarIdEnTicket = mostrarIdEnTicket;
 	}
+
+  @Column (name = "presencial_admite", nullable = false)
+  public Boolean getPresencialAdmite() {
+    return presencialAdmite;
+  }
+
+  public void setPresencialAdmite(Boolean presencialAdmite) {
+    this.presencialAdmite = presencialAdmite;
+  }
+
+  @Column (name = "presencial_cupos", nullable = false)
+  public Integer getPresencialCupos() {
+    return presencialCupos;
+  }
+
+  public void setPresencialCupos(Integer presencialCupos) {
+    this.presencialCupos = presencialCupos;
+  }
+
+  @Column (name = "presencial_lunes", nullable = false)
+  public Boolean getPresencialLunes() {
+    return presencialLunes;
+  }
+
+  public void setPresencialLunes(Boolean presencialLunes) {
+    this.presencialLunes = presencialLunes;
+  }
+
+  @Column (name = "presencial_martes", nullable = false)
+  public Boolean getPresencialMartes() {
+    return presencialMartes;
+  }
+
+  public void setPresencialMartes(Boolean presencialMartes) {
+    this.presencialMartes = presencialMartes;
+  }
+
+  @Column (name = "presencial_miercoles", nullable = false)
+  public Boolean getPresencialMiercoles() {
+    return presencialMiercoles;
+  }
+
+  public void setPresencialMiercoles(Boolean presencialMiercoles) {
+    this.presencialMiercoles = presencialMiercoles;
+  }
+
+  @Column (name = "presencial_jueves", nullable = false)
+  public Boolean getPresencialJueves() {
+    return presencialJueves;
+  }
+
+  public void setPresencialJueves(Boolean presencialJueves) {
+    this.presencialJueves = presencialJueves;
+  }
+
+  @Column (name = "presencial_viernes", nullable = false)
+  public Boolean getPresencialViernes() {
+    return presencialViernes;
+  }
+
+  public void setPresencialViernes(Boolean presencialViernes) {
+    this.presencialViernes = presencialViernes;
+  }
+
+  @Column (name = "presencial_sabado", nullable = false)
+  public Boolean getPresencialSabado() {
+    return presencialSabado;
+  }
+
+  public void setPresencialSabado(Boolean presencialSabado) {
+    this.presencialSabado = presencialSabado;
+  }
+
+  @Column (name = "presencial_domingo", nullable = false)
+  public Boolean getPresencialDomingo() {
+    return presencialDomingo;
+  }
+
+  public void setPresencialDomingo(Boolean presencialDomingo) {
+    this.presencialDomingo = presencialDomingo;
+  }
 
 }

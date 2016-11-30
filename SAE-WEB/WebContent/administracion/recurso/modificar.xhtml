@@ -225,9 +225,7 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<h:outputText
-								value="#{sessionMBean.textos['recurso']}"
-								styleClass="col-sm-3 control-label label" />
+							<h:outputText value="#{sessionMBean.textos['recurso']}" styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:selectBooleanCheckbox id="visibleInternet"
 									value="#{recursoMBean.recursoSeleccionado.visibleInternet}" />
@@ -238,42 +236,30 @@
 						</p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<h:outputText
-								value="#{sessionMBean.textos['sabado']}"
-								styleClass="col-sm-3 control-label label" />
+							<h:outputText value="#{sessionMBean.textos['sabado']}" styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox id="sabadoHabil"
-									value="#{recursoMBean.recursoSeleccionado.sabadoEsHabil}" />
-								<p:outputLabel
-								value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}"
-								for="sabadoHabil" />
+								<p:selectBooleanCheckbox id="sabadoHabil" value="#{recursoMBean.recursoSeleccionado.sabadoEsHabil}" >
+                  <p:ajax update="configuracionAtencionPresencial" />
+                </p:selectBooleanCheckbox>
+								<p:outputLabel value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}" for="sabadoHabil" />
 							</p:outputPanel>
 						</p:outputPanel>
 
             <p:outputPanel styleClass="form-group">
-              <h:outputText
-                value="#{sessionMBean.textos['domingo']}"
-                styleClass="col-sm-3 control-label label" />
+              <h:outputText value="#{sessionMBean.textos['domingo']}" styleClass="col-sm-3 control-label label" />
               <p:outputPanel styleClass="col-sm-9">
-                <p:selectBooleanCheckbox id="domingoHabil"
-                  value="#{recursoMBean.recursoSeleccionado.domingoEsHabil}" />
-                <p:outputLabel
-                value="#{sessionMBean.textos['considerar_el_domingo_como_dia_habil']}"
-                for="domingoHabil" />
+                <p:selectBooleanCheckbox id="domingoHabil" value="#{recursoMBean.recursoSeleccionado.domingoEsHabil}" >
+                  <p:ajax update="configuracionAtencionPresencial" />
+                </p:selectBooleanCheckbox>
+                <p:outputLabel value="#{sessionMBean.textos['considerar_el_domingo_como_dia_habil']}" for="domingoHabil" />
               </p:outputPanel>
             </p:outputPanel>
 
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['cantidad_de_dias_a_generar']}"
-								for="vDiasGen"
-								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputLabel value="#{sessionMBean.textos['cantidad_de_dias_a_generar']}"	for="vDiasGen" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="vDiasGen"
-									value="#{recursoMBean.recursoSeleccionado.cantDiasAGenerar}"
-									maxlength="5" styleClass="form-control textoCorto" />
-								<p:message for="vDiasGen" errorClass="mensajeError"
-									infoClass="mensajeInfo" />
+								<h:inputText id="vDiasGen" value="#{recursoMBean.recursoSeleccionado.cantDiasAGenerar}"	maxlength="5" styleClass="form-control textoCorto" />
+								<p:message for="vDiasGen" errorClass="mensajeError"	infoClass="mensajeInfo" />
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -411,25 +397,86 @@
 					</p:outputPanel>
 				</fieldset>
 
+        <fieldset>
+          <legend>
+            <h:outputText value="#{sessionMBean.textos['configuracion_de_atencion_presencial']}" />
+          </legend>
+          <p:outputPanel styleClass="form-horizontal" id="configuracionAtencionPresencial">
+          
+            <p:outputPanel styleClass="form-group">
+              <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox value="#{recursoMBean.recursoSeleccionado.presencialAdmite}" id="admitePresencial" >
+                    <p:ajax update="configuracionAtencionPresencial" />
+                  </p:selectBooleanCheckbox>
+                  <p:outputLabel value="#{sessionMBean.textos['admite_atencion_presencial']}" for="admitePresencial" />
+                </p:outputPanel>
+              </p:outputPanel>
+            </p:outputPanel>
+          
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['cupos_por_dia']}" styleClass="col-sm-3 control-label label" for="idSerie" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="cuposPresencial" value="#{recursoMBean.recursoSeleccionado.presencialCupos}" maxlength="3" 
+                  styleClass="form-control textoCorto" converter="integerConverter" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}"  />
+                <p:message for="cuposPresencial"></p:message>
+              </p:outputPanel>
+            </p:outputPanel>
+            
+            <p:outputPanel styleClass="form-group">
+              <h:outputText value="#{sessionMBean.textos['dias_a_aplicar']}" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox id="diaAplicarLu" value="#{recursoMBean.recursoSeleccionado.presencialLunes}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}"/>
+                  <p:outputLabel value="#{sessionMBean.textos['lunes']}" for="diaAplicarLu" />
+                </p:outputPanel>
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox id="diaAplicarMa" value="#{recursoMBean.recursoSeleccionado.presencialMartes}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+                  <p:outputLabel value="#{sessionMBean.textos['martes']}" for="diaAplicarMa" />
+                </p:outputPanel>
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox id="diaAplicarMi" value="#{recursoMBean.recursoSeleccionado.presencialMiercoles}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+                  <p:outputLabel value="#{sessionMBean.textos['miercoles']}" for="diaAplicarMi" />
+                </p:outputPanel>
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox id="diaAplicarJu" value="#{recursoMBean.recursoSeleccionado.presencialJueves}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+                  <p:outputLabel value="#{sessionMBean.textos['jueves']}" for="diaAplicarJu" />
+                </p:outputPanel>
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox id="diaAplicarVi" value="#{recursoMBean.recursoSeleccionado.presencialViernes}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+                  <p:outputLabel value="#{sessionMBean.textos['viernes']}" for="diaAplicarVi" />
+                </p:outputPanel>
+                <p:outputPanel rendered="#{recursoMBean.recursoSeleccionado.sabadoEsHabil}">
+                  <p:selectBooleanCheckbox id="diaAplicarSa" value="#{recursoMBean.recursoSeleccionado.presencialSabado}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+                  <p:outputLabel value="#{sessionMBean.textos['sabado']}" for="diaAplicarSa" />
+                </p:outputPanel>
+                <p:outputPanel rendered="#{recursoMBean.recursoSeleccionado.domingoEsHabil}">
+                  <p:selectBooleanCheckbox id="diaAplicarDo" value="#{recursoMBean.recursoSeleccionado.presencialDomingo}" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+                  <p:outputLabel value="#{sessionMBean.textos['domingo']}" for="diaAplicarDo" />
+                </p:outputPanel>
+              </p:outputPanel>
+            </p:outputPanel>
+            
+          </p:outputPanel>
+        </fieldset>
+
 				<ul class="form-action-buttons">
 					<li class="action-buttons-primary">
 						<ul>
-							<li><p:commandButton
-									value="#{sessionMBean.textos['guardar']}"
-									action="#{recursoMBean.guardar}"
-									styleClass="btn-lg btn-primario" update="form" /></li>
+							<li>
+							  <p:commandButton value="#{sessionMBean.textos['guardar']}" action="#{recursoMBean.guardar}" styleClass="btn-lg btn-primario" update="form" />
+						  </li>
 						</ul>
 					</li>
 					<li class="action-buttons-second">
 						<ul>
-							<li class="float-left"><p:commandButton
-									value="#{sessionMBean.textos['cancelar']}"
-									action="#{recursoMBean.cancelarRecurso}"
-									styleClass="btn-lg btn-link" update="form" /></li>
+							<li class="float-left">
+							  <p:commandButton value="#{sessionMBean.textos['cancelar']}" action="#{recursoMBean.cancelarRecurso}"	styleClass="btn-lg btn-link" update="form" />
+						  </li>
 						</ul>
 					</li>
 				</ul>
-
 			</h:form>
 
 			<h:form id="form2">
@@ -550,8 +597,7 @@
 					</p:outputPanel>
 
 					<p:outputPanel id="ap_agregarDato">
-						<p:outputPanel rendered="#{sessionMBean.mostrarAgregarDato}"
-							id="agregarDato">
+						<p:outputPanel rendered="#{sessionMBean.mostrarAgregarDato}" id="agregarDato">
 							<fieldset>
 								<legend>
 									<h:outputText value="#{sessionMBean.textos['agregar_dato']}" />

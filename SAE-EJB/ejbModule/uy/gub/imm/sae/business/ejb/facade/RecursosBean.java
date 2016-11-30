@@ -166,8 +166,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
 		if (r.getDiasInicioVentanaIntranet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaIntranet > 0
 		if (r.getDiasVentanaIntranet() == null) {
@@ -184,8 +183,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
 		if (r.getDiasInicioVentanaInternet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaInternet > 0
 		if (r.getDiasVentanaInternet() == null) {
@@ -346,12 +344,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	}
 
-	public Recurso crearRecursoImportado(Agenda a, Recurso r) throws UserException,
+	public Recurso crearRecursoImportado(Agenda agenda, Recurso recurso) throws UserException,
 			ApplicationException, BusinessException {
-		if (a == null) {
+		if (agenda == null) {
 			throw new UserException("debe_haber_una_agenda_seleccionada");
 		}
-		Agenda aManejada = (Agenda) entityManager.find(Agenda.class, a.getId());
+		Agenda aManejada = (Agenda) entityManager.find(Agenda.class, agenda.getId());
 		if (aManejada == null) {
 			throw new UserException("no_se_encuentra_la_agenda_especificada");
 		}
@@ -359,138 +357,115 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (aManejada.getFechaBaja() != null) {
 			throw new UserException("la_agenda_especificada_no_es_valida");
 		}
-		a = aManejada;
-		aManejada = null; // De aquí en mas utilizo "a".
-		r.setAgenda(a);
+		agenda = aManejada;
+		aManejada = null;
+		recurso.setAgenda(agenda);
 
 		// Controla la unicidad del nombre del recurso entre todos los recursos
 		// vivos (fechaBaja == null)
 		// para la misma agenda.
-		if (existeRecursoPorNombre(r)) {
-			throw new UserException(
-					"ya_existe_un_recurso_con_el_nombre_especificado");
+		if (existeRecursoPorNombre(recurso)) {
+			throw new UserException("ya_existe_un_recurso_con_el_nombre_especificado");
 		}
 		// fechaInicio <> NULL
-		if (r.getFechaInicio() == null) {
+		if (recurso.getFechaInicio() == null) {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
 		// Se setea hora en fecha de inicio 00:00:00
-		r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
+		recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
 		// Si la fecha de Fin no es nula, se setea la hora al final del Día.
-		if (r.getFechaFin() != null) {
-			r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
+		if (recurso.getFechaFin() != null) {
+		  recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
 		}
 		// fechaInicio <= fechaFin o fechaFin == NULL
-		if ((r.getFechaFin() != null)
-				&& (r.getFechaInicio().compareTo(r.getFechaFin()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if ((recurso.getFechaFin() != null) && (recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0)) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		// fechaInicioDisp <> NULL
-		if (r.getFechaInicioDisp() == null) {
+		if (recurso.getFechaInicioDisp() == null) {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
-		if (r.getSabadoEsHabil() == null) {
-			r.setSabadoEsHabil(false);
+		if (recurso.getSabadoEsHabil() == null) {
+		  recurso.setSabadoEsHabil(false);
 		}
-    if (r.getDomingoEsHabil() == null) {
-      r.setDomingoEsHabil(false);
+    if (recurso.getDomingoEsHabil() == null) {
+      recurso.setDomingoEsHabil(false);
     }
 		// Se setea hora en fecha de inicio disp. 00:00:00
-		r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
+    recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
 		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
 		// final del Día.
-		if (r.getFechaFinDisp() != null) {
-			r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));
+		if (recurso.getFechaFinDisp() != null) {
+		  recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));
 		}
 		// fechaInicioDisp <= fechaFinDisp o fechaFinDisp == NULL
-		if ((r.getFechaFinDisp() != null)
-				&& (r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if ((recurso.getFechaFinDisp() != null)	&& (recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0)) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		// fechaInicio <= fechaInicioDisp
-		if (r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
-			throw new UserException(
-					"la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso");
+		if (recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
+			throw new UserException("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso");
 		}
 		// diasInicioVentanaIntranet >= 0
-		if (r.getDiasInicioVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasInicioVentanaIntranet() == null) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasInicioVentanaIntranet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasInicioVentanaIntranet() < 0) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaIntranet > 0
-		if (r.getDiasVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasVentanaIntranet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasVentanaIntranet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasVentanaIntranet() <= 0) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 		// diasInicioVentanaInternet >= 0
-		if (r.getDiasInicioVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasInicioVentanaInternet() == null) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasInicioVentanaInternet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasInicioVentanaInternet() < 0) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaInternet > 0
-		if (r.getDiasVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_es_obligatorio");
+		if (recurso.getDiasVentanaInternet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_es_obligatorio");
 		}
-		if (r.getDiasVentanaInternet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasVentanaInternet() <= 0) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
 		}
 		// ventanaCuposMinimos >= 0
-		if (r.getVentanaCuposMinimos() == null) {
-			throw new UserException(
-					"la_cantidad_de_cupos_minimos_es_obligatoria");
+		if (recurso.getVentanaCuposMinimos() == null) {
+			throw new UserException("la_cantidad_de_cupos_minimos_es_obligatoria");
 		}
-		if (r.getVentanaCuposMinimos() < 0) {
-			throw new UserException(
-					"la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
+		if (recurso.getVentanaCuposMinimos() < 0) {
+			throw new UserException("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
 		}
 		// cantDiasAGenerar > 0
-		if (r.getCantDiasAGenerar() == null) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_es_obligatoria");
+		if (recurso.getCantDiasAGenerar() == null) {
+			throw new UserException("la_cantidad_de_dias_a_generar_es_obligatoria");
 		}
-		if (r.getCantDiasAGenerar() <= 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
+		if (recurso.getCantDiasAGenerar() <= 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
 		}
 		// cantDiasAGenerar >= diasInicioVentanaIntranet + diasVentanaIntranet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
 		}
 		// cantDiasAGenerar >= diasInicioVentanaInternet + diasVentanaInternet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
 		}
 		// largoListaEspera > 0
-		if ((r.getLargoListaEspera() != null) && (r.getLargoListaEspera() <= 0)) {
-			throw new UserException(
-					"el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
+		if ((recurso.getLargoListaEspera() != null) && (recurso.getLargoListaEspera() <= 0)) {
+			throw new UserException("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
 		}
 		// se controla que el campo "usaLlamador" no sea null
-		if (r.getUsarLlamador() == null) {
-			r.setUsarLlamador(true);
+		if (recurso.getUsarLlamador() == null) {
+		  recurso.setUsarLlamador(true);
 		}
-		entityManager.persist(r);
-		return r;
+		entityManager.persist(recurso);
+		return recurso;
 	}
 
 	/**
@@ -517,31 +492,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	public void modificarRecurso(Recurso r) throws UserException,
 			BusinessException, ApplicationException {
 
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	r.getId());
 
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
-		}
-
-		// No se puede modificar un recurso con fecha de baja
-		if (recursoActual.getFechaBaja() != null) {
-			throw new BusinessException("AE10024",
-					"No se puede modificar un recurso con fecha de baja");
 		}
 
 		// Controla la unicidad del nombre del recurso entre todos los recursos
 		// vivos (fechaBaja == null)
 		// para la misma agenda.
 		if (existeRecursoPorNombre(r)) {
-			throw new UserException(
-					"ya_existe_un_recurso_con_el_nombre_especificado");
-		}
-
-		// Se controla que el recurso no tenga fecha de baja
-		if (r.getFechaBaja() != null) {
-			throw new BusinessException("AE10023",
-					"No se puede modificar la fecha de baja" + r.getNombre());
+			throw new UserException("ya_existe_un_recurso_con_el_nombre_especificado");
 		}
 
 		// fechaInicio <> NULL
@@ -563,8 +524,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("la_fecha_de_fin_es_obligatoria");
 		}
 		if (r.getFechaInicio().compareTo(r.getFechaFin()) > 0) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 
 		// fechaInicioDisp <> NULL
@@ -574,8 +534,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		// Se setea hora en fecha de inicio disp. 00:00:00
 		r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
-		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
-		// final del Día.
+		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al final del Día.
 		if (r.getFechaFinDisp() != null) {
 			r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));
 		}
@@ -585,123 +544,95 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("la_fecha_de_fin_es_obligatoria");
 		}
 		if (r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 
 		// fechaInicio <= fechaInicioDisp
 		if (r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
-			throw new UserException(
-					"la_fecha_de_inicio_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_inicio");
+			throw new UserException("la_fecha_de_inicio_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 
 		// diasInicioVentanaIntranet >= 0
 		if (r.getDiasInicioVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
 		if (r.getDiasInicioVentanaIntranet() < 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 
 		// diasVentanaIntranet > 0
 		if (r.getDiasVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_es_obligatorio");
+			throw new UserException("los_dias_de_la_ventana_de_intranet_es_obligatorio");
 		}
 		if (r.getDiasVentanaIntranet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 
 		// diasInicioVentanaInternet >= 0
 		if (r.getDiasInicioVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_es_obligatorio");
+			throw new UserException("los_dias_de_la_ventana_de_internet_es_obligatorio");
 		}
 		if (r.getDiasInicioVentanaInternet() < 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
 		}
 
 		// diasVentanaInternet > 0
 		if (r.getDiasVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_es_obligatorio");
+			throw new UserException("los_dias_de_la_ventana_de_internet_es_obligatorio");
 		}
 		if (r.getDiasVentanaInternet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 
 		// ventanaCuposMinimos >= 0
 		if ((r.getVentanaCuposMinimos() == null)
 				|| (r.getVentanaCuposMinimos() < 0)) {
-			throw new UserException(
-					"la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
+			throw new UserException("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
 		}
 
 		// cantDiasAGenerar > 0
 		if ((r.getCantDiasAGenerar() == null) || (r.getCantDiasAGenerar() <= 0)) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
 		}
 
 		// cantDiasAGenerar >= diasInicioVentanaIntranet + diasVentanaIntranet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
+		if (r.getCantDiasAGenerar().compareTo(r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
 		}
 
 		// cantDiasAGenerar >= diasInicioVentanaInternet + diasVentanaInternet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
+		if (r.getCantDiasAGenerar().compareTo(r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
 		}
 
 		// largoListaEspera > 0
 		if ((r.getLargoListaEspera() != null) && (r.getLargoListaEspera() <= 0)) {
-			throw new UserException(
-					"el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
+			throw new UserException("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
 		}
 
-		// Si reservaMultiple = True => se podrá cambiar su valor a
-		// reservaMultiple = FALSE
-		// solo si no existe reserva viva con más de una disponibilidad para ese
-		// recurso.
-		if ((recursoActual.getReservaMultiple() != r.getReservaMultiple())
-				&& (r.getReservaMultiple() == false)) {
-			// no existe reserva viva con más de una disponibilidad para ese
-			// recurso.
+		// Si reservaMultiple = True => se podrá cambiar su valor a reservaMultiple = FALSE
+		// solo si no existe reserva viva con más de una disponibilidad para ese recurso.
+		if ((recursoActual.getReservaMultiple() != r.getReservaMultiple())	&& (r.getReservaMultiple() == false)) {
+			// no existe reserva viva con más de una disponibilidad para ese recurso.
 			if (existeReservaVivaMultiple(r)) {
-				throw new UserException("AE10025",
-						"No se puede desactivar reservaMultiple si existen reservas multiples vivas");
+				throw new UserException("AE10025",	"No se puede desactivar reservaMultiple si existen reservas multiples vivas");
 			}
 		}
 
 		// No pueden quedar disponibilidades vivas fuera del período
 		// fechaInicioDisp y fechaFinDisp.
-		if (hayDispVivasPorFecha(r.getId(), r.getFechaInicioDisp(),
-				r.getFechaFinDisp())) {
-			throw new UserException(
-					"no_se_puede_modificar_las_fechas_porque_quedarian_disponibilidades_fuera_del_periodo_especificado");
+		if (hayDispVivasPorFecha(r.getId(), r.getFechaInicioDisp(),	r.getFechaFinDisp())) {
+			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_disponibilidades_fuera_del_periodo_especificado");
 		}
 
-		// No pueden quedar reservas vivas fuera del período fechaInicioDisp y
-		// fechaFinDisp.
-		if (hayReservasVivasPorFecha(r.getId(), r.getFechaInicioDisp(),
-				r.getFechaFinDisp())) {
-			throw new UserException(
-					"no_se_puede_modificar_las_fechas_porque_quedarian_reservas_vivas_fuera_del_periodo_especificado");
+		// No pueden quedar reservas vivas fuera del período fechaInicioDisp y fechaFinDisp.
+		if (hayReservasVivasPorFecha(r.getId(), r.getFechaInicioDisp(),	r.getFechaFinDisp())) {
+			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_reservas_vivas_fuera_del_periodo_especificado");
 		}
 
 		// Se controla que la serie no tenga largo mayor a 3
 		if ((r.getSerie() != null) && (r.getSerie().length() > 3)) {
-			throw new UserException("AE10028",
-					"El largo del campo serie no puede ser mayor a 3");
+			throw new UserException("AE10028", "El largo del campo serie no puede ser mayor a 3");
 		}
 
 		recursoActual.setNombre(r.getNombre());
@@ -710,11 +641,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		recursoActual.setFechaFin(r.getFechaFin());
 		recursoActual.setFechaInicioDisp(r.getFechaInicioDisp());
 		recursoActual.setFechaFinDisp(r.getFechaFinDisp());
-		recursoActual.setDiasInicioVentanaIntranet(r
-				.getDiasInicioVentanaIntranet());
+		recursoActual.setDiasInicioVentanaIntranet(r.getDiasInicioVentanaIntranet());
 		recursoActual.setDiasVentanaIntranet(r.getDiasVentanaIntranet());
-		recursoActual.setDiasInicioVentanaInternet(r
-				.getDiasInicioVentanaInternet());
+		recursoActual.setDiasInicioVentanaInternet(r.getDiasInicioVentanaInternet());
 		recursoActual.setDiasVentanaInternet(r.getDiasVentanaInternet());
 		recursoActual.setVentanaCuposMinimos(r.getVentanaCuposMinimos());
 		recursoActual.setCantDiasAGenerar(r.getCantDiasAGenerar());
@@ -735,7 +664,16 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		recursoActual.setHorarios(r.getHorarios());
 		recursoActual.setLatitud(r.getLatitud());
 		recursoActual.setLongitud(r.getLongitud());
-
+		
+		recursoActual.setPresencialAdmite(r.getPresencialAdmite());
+    recursoActual.setPresencialCupos(r.getPresencialCupos());
+    recursoActual.setPresencialLunes(r.getPresencialLunes());
+    recursoActual.setPresencialMartes(r.getPresencialMartes());
+    recursoActual.setPresencialMiercoles(r.getPresencialMiercoles());
+    recursoActual.setPresencialJueves(r.getPresencialJueves());
+    recursoActual.setPresencialViernes(r.getPresencialViernes());
+    recursoActual.setPresencialSabado(r.getPresencialSabado());
+		
 		for (TextoRecurso viejo : recursoActual.getTextosRecurso().values()) {
 			entityManager.remove(viejo);
 		}
@@ -749,10 +687,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 				nuevo.setIdioma(viejo.getIdioma());
 				nuevo.setTextoPaso2(viejo.getTextoPaso2());
 				nuevo.setTextoPaso3(viejo.getTextoPaso3());
-				nuevo.setTituloCiudadanoEnLlamador(viejo
-						.getTituloCiudadanoEnLlamador());
-				nuevo.setTituloPuestoEnLlamador(viejo
-						.getTituloPuestoEnLlamador());
+				nuevo.setTituloCiudadanoEnLlamador(viejo.getTituloCiudadanoEnLlamador());
+				nuevo.setTituloPuestoEnLlamador(viejo.getTituloPuestoEnLlamador());
 				nuevo.setTicketEtiquetaUno(viejo.getTicketEtiquetaUno());
 				nuevo.setTicketEtiquetaDos(viejo.getTicketEtiquetaDos());
 				nuevo.setValorEtiquetaUno(viejo.getValorEtiquetaUno());
