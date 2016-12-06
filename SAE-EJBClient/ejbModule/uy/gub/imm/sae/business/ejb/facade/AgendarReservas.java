@@ -21,15 +21,12 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
-import uy.gub.imm.sae.entity.DatoASolicitar;
-import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
@@ -52,23 +49,19 @@ public interface AgendarReservas {
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException;
 	
 	public Boolean agendaActiva(Agenda a);
-	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) throws BusinessException;
-	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws BusinessException;
-	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException;
-	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException;
+	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) throws UserException;
+	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws UserException;
+	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
+	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
 	public Reserva marcarReserva(Disponibilidad d) throws BusinessException, UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;
 	public void validarDatosReserva(Empresa e, Reserva r) throws BusinessException, ValidacionException, ApplicationException;
 	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public Reserva consultarReservaPorNumero(Recurso r, Integer numero) throws BusinessException;
-	public List<Reserva> consultarReservaPorDatos(Recurso r, Map<DatoASolicitar, DatoReserva> datos);
-	public Reserva consultarReservaPorDatosClave(Recurso r, Map<DatoASolicitar, DatoReserva> datos) throws ApplicationException;
 	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws BusinessException, ApplicationException;
 	
-	public Reserva marcarReserva(List<Disponibilidad> disps);
 	public List<Reserva> consultarReservasEnPeriodo(Recurso r, VentanaDeTiempo v);
-	public void reagendarReservas(List<Reserva> reservas, Date fechaHora);
 	
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, AutocompletarException, UserException;
 	
@@ -97,4 +90,6 @@ public interface AgendarReservas {
 	
 	public void limpiarTrazas();
 
+	public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
+	
 }

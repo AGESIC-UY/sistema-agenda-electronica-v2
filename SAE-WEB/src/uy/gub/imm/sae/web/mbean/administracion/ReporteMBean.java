@@ -188,7 +188,7 @@ public class ReporteMBean extends BaseMBean {
 							}
 						}
 					}
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estadoReservaSeleccionado);
+					List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estadoReservaSeleccionado, false);
 					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
 					contenido.addAll(contenido1);
 					

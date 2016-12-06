@@ -30,7 +30,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -52,11 +51,9 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Token;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
-@RolesAllowed({"RA_AE_FCALL_CENTER","RA_AE_PLANIFICADOR", "RA_AE_ADMINISTRADOR","RA_AE_ANONIMO","RA_AE_FATENCION"})
 public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
@@ -65,6 +62,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;
 	
+	/**
+	 * Obtiene una reserva por su identificador.
+	 * No toma en cuenta si la reserva corresponde o no a una disponibilidad presencial.
+	 */
 	public Reserva consultarReservaId(Integer idReserva, Integer idRecurso) throws UserException {
 		if (idReserva == null) {
 			throw new UserException("debe_especificar_la_reserva");
@@ -83,45 +84,47 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
     return reserva;
 	}
 	
-	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws BusinessException, UserException {
-		Reserva reserva = null;
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null || r.getFechaBaja() != null) {
-			throw new BusinessException("no_se_encuentra_el_recurso_especificado");
+  /**
+   * Obtiene una reserva por la combinación de fecha/hora/número.
+   * No toma en cuenta a las reservas que corresponden a disponibilidades presenciales.
+   */
+	public Reserva consultarReservaPorNumero(Recurso recurso, Date fechaHoraInicio, Integer numero) throws UserException {
+		recurso = entityManager.find(Recurso.class, recurso.getId());
+		if (recurso == null || recurso.getFechaBaja() != null) {
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 		if (fechaHoraInicio == null) {
-			throw new BusinessException("el_dia_y_la_hora_son_obligatorios");
+			throw new UserException("el_dia_y_la_hora_son_obligatorios");
 		}
 		if (numero == null) {
-			throw new BusinessException("el_numero_es_obligatorio");
+			throw new UserException("el_numero_es_obligatorio");
 		}
 		try {
-		reserva = (Reserva) entityManager.createQuery(
-				 "select res " +
-				 "from  Reserva res join res.disponibilidades d " +
-				 "where d.recurso = :recurso and " +
-				 "      d.fecha = :fecha and" +
-				 "      d.horaInicio = :horaInicio and " +
-				 "      res.numero = :numero ")
-				 .setParameter("recurso", r)
-				 .setParameter("fecha", fechaHoraInicio, TemporalType.DATE)
-				 .setParameter("horaInicio", fechaHoraInicio, TemporalType.TIMESTAMP)
-				 .setParameter("numero", numero)
-				 .getSingleResult();
-		} 
-		catch ( NoResultException e) { 
+		  Reserva reserva = (Reserva) entityManager.createQuery(
+				 "SELECT res " +
+				 "FROM Reserva res " +
+				 "JOIN res.disponibilidades d " +
+				 "WHERE d.recurso = :recurso " +
+         "  AND d.presencial = false " +
+				 "  AND d.fecha = :fecha " +
+				 "  AND d.horaInicio = :horaInicio " +
+				 "  AND res.numero = :numero")
+			 .setParameter("recurso", recurso)
+			 .setParameter("fecha", fechaHoraInicio, TemporalType.DATE)
+			 .setParameter("horaInicio", fechaHoraInicio, TemporalType.TIMESTAMP)
+			 .setParameter("numero", numero)
+			 .getSingleResult();
+	    reserva.getDisponibilidades().size();
+	    reserva.getDatosReserva().size();
+	    return reserva;
+		} catch ( NoResultException e) { 
 			throw new UserException("no_se_encuentra_la_reserva_especificada");
 		}
-
-		reserva.getDisponibilidades().size();
-		reserva.getDatosReserva().size();
-
-		return reserva;
 	}
 	
 	/**
-	 * Busca las reservas confirmadas existentes que tengan los mismos valores en todos los datos claves
-	 * y que correspondan al trámite indicado 
+	 * Busca las reservas confirmadas existentes que tengan los mismos valores en todos los datos claves y que correspondan al trámite indicado.
+	 * No considera reservas que corresponden a disponibilidades presenciales. 
 	 * @param datos
 	 * @param recurso
 	 * @param fecha
@@ -129,81 +132,72 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos , Recurso recurso, Date fecha, String codigoTramite){
-		List<Reserva> resultados = new ArrayList<Reserva>();
-		
-		String selectStr =	" SELECT distinct(reserva) " ;
+		String selectStr =	" SELECT DISTINCT(reserva) " ;
 		String fromStr =   	" FROM Reserva reserva " +
 						   					"	JOIN reserva.disponibilidades disp " +
 					   						" JOIN reserva.datosReserva datoReserva " +
 				   							"	JOIN datoReserva.datoASolicitar datoSolicitar	" ;
 		String whereStr = 	" WHERE reserva.tramiteCodigo = :tramiteCodigo" +
 		                    "   AND disp.recurso = :recurso " +
-						  					" 	AND disp.fechaBaja is null " + 
+                        "   AND disp.presencial = false " + 
+						  					" 	AND disp.fechaBaja IS NULL " + 
 					  						"   AND disp.fecha = :fecha " +
 				  							"   AND reserva.estado NOT IN ('U','C') ";
-					  							
-			boolean hayCamposClaveNulos = false;
-			if (! datos.isEmpty()) {
-				whereStr = whereStr + "    and (" ;
-				boolean primerRegistro = true;
-				int i = 0;
-				for (DatoReserva datoR : datos){
-					if (datoR != null){
-						if (primerRegistro){
-							whereStr = whereStr + 
-							" 	   (upper(datoReserva.valor) = '" + datoR.getValor().toUpperCase() + "' and " +
-							" 	   datoSolicitar.id = " + datoR.getDatoASolicitar().getId() + ") ";
-							primerRegistro = false;
-						} else {
-							String joinFromAux =  " join  reserva.datosReserva datoReserva" + i +
-												  " join datoReserva" + i + ".datoASolicitar datoSolicitar" + i;
-							fromStr = fromStr + joinFromAux;
-							whereStr = whereStr + " AND " +
-								" 	 ( upper(datoReserva" + i + ".valor) = '" + datoR.getValor().toUpperCase() + "' and " +
-								" 	   datoSolicitar" + i + ".id = " + datoR.getDatoASolicitar().getId() + ") ";
-						}
+		boolean hayCamposClaveNulos = false;
+		if (! datos.isEmpty()) {
+			whereStr = whereStr + "    AND (" ;
+			boolean primerRegistro = true;
+			int i = 0;
+			for (DatoReserva datoR : datos){
+				if (datoR != null){
+					if (primerRegistro){
+						whereStr = whereStr + 
+						" (UPPER(datoReserva.valor) = '" + datoR.getValor().toUpperCase() 
+						  + "' AND datoSolicitar.id = " + datoR.getDatoASolicitar().getId() + ") ";
+						primerRegistro = false;
 					} else {
-						hayCamposClaveNulos = true;
+						String joinFromAux = " JOIN reserva.datosReserva datoReserva" + i 
+						    +" JOIN datoReserva" + i + ".datoASolicitar datoSolicitar" + i;
+						fromStr = fromStr + joinFromAux;
+						whereStr = whereStr + " AND (UPPER(datoReserva" + i + ".valor) = '" 
+						    + datoR.getValor().toUpperCase() + "' AND datoSolicitar" + i 
+						    + ".id = " + datoR.getDatoASolicitar().getId() + ") ";
 					}
-					i++;
+				} else {
+					hayCamposClaveNulos = true;
 				}
-				whereStr = whereStr + ")" ;
+				i++;
 			}
-			String consulta = selectStr + fromStr + whereStr  + " ORDER BY reserva.id ";
-			
-			try {
-				resultados = (List<Reserva>)entityManager.createQuery(consulta)
-          .setParameter("tramiteCodigo", codigoTramite)
-  				.setParameter("recurso", recurso)
-  				.setParameter("fecha", fecha, TemporalType.DATE)
-  				.getResultList();
-				
-				/* 12/03/2010 - Corrige que al traer reservas con la misma clave que se ingreso, 
-				 * se filtren las que tengan algun dato clave mas ingresado (por ejemplo cuando 
-				 * un gestor reservo para otras personas y luego reserva para si mismo, 
-				 * sin ingresar los datos clave opcional) 
-				 */
-				if(hayCamposClaveNulos) {
-					resultados = filtrarReservasConMasDatos(resultados, datos);
-				}
-			} catch (Exception e){ 
-				
-			}
-			// 	recorro las reservas para obtener las listas disponibilidades y datos reservas 
-			for (Reserva r : resultados){
-				r.getDisponibilidades().size();
-				r.getDatosReserva().size();
-			}
-		return resultados;
+			whereStr = whereStr + ")" ;
+		}
+		String consulta = selectStr + fromStr + whereStr  + " ORDER BY reserva.id ";
+		List<Reserva> reservas = (List<Reserva>)entityManager.createQuery(consulta)
+      .setParameter("tramiteCodigo", codigoTramite)
+			.setParameter("recurso", recurso)
+			.setParameter("fecha", fecha, TemporalType.DATE)
+			.getResultList();
+		
+		/* 12/03/2010 - Corrige que al traer reservas con la misma clave que se ingreso, 
+		 * se filtren las que tengan algun dato clave mas ingresado (por ejemplo cuando 
+		 * un gestor reservo para otras personas y luego reserva para si mismo, 
+		 * sin ingresar los datos clave opcional) 
+		 */
+		if(hayCamposClaveNulos) {
+		  reservas = filtrarReservasConMasDatos(reservas, datos);
+		}
+		//Forzar la carga de datos lazy 
+		for (Reserva r : reservas){
+			r.getDisponibilidades().size();
+			r.getDatosReserva().size();
+		}
+		return reservas;
 	}
 	
 	private List<Reserva> filtrarReservasConMasDatos(List<Reserva> reservasIni, List<DatoReserva> datosIngresadosClave){
 		List<Reserva> reservasResult = new ArrayList<Reserva>();
-		
 		boolean hayAlgunoQueNoEsta = false;
 		for (Iterator<Reserva> iterator1 = reservasIni.iterator(); iterator1.hasNext();) {
 			Reserva reserva = iterator1.next();
-			
 			hayAlgunoQueNoEsta = false;
 			for (Iterator<DatoReserva> iterator = reserva.getDatosReserva().iterator(); iterator.hasNext() && !hayAlgunoQueNoEsta;) {
 				DatoReserva datoI = iterator.next();
@@ -211,175 +205,154 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 					hayAlgunoQueNoEsta = true;
 				}
 			}
-			
 			if(!hayAlgunoQueNoEsta){
 				reservasResult.add(reserva);
 			}
 		}
-		
 		return reservasResult;
 	}
 
 	private boolean existeDatoReservaEnDatosIngresados(List<DatoReserva> datosIngresadosClave, DatoASolicitar datoSolicReservaFiltrar){
-	
 		boolean esta = false; 
-		
 		for (Iterator<DatoReserva> iterator = datosIngresadosClave.iterator(); iterator.hasNext() && !esta;) {
 			DatoReserva datoClave = iterator.next();
 			if(datoClave!=null && datoClave.getDatoASolicitar().getId().equals(datoSolicReservaFiltrar.getId())){
 				esta = true;
 			}			
 		}
-		
 		return esta;
 	}
 	
-
+  /**
+   * Busca las reservas confirmadas existentes que tengan los mismos valores en todos los datos claves y que correspondan al trámite indicado.
+   * No considera reservas que corresponden a disponibilidades presenciales. 
+   * @param datos
+   * @param recurso
+   * @param fecha
+   * @return
+   */
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso){
-		List<Reserva> resultados = new ArrayList<Reserva>();
-		
+	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos, Recurso recurso){
+		List<Reserva> reservas = new ArrayList<Reserva>();
 		if (! datos.isEmpty()){
-
-			String selectStr = " SELECT distinct(reserva) " ;
-			String fromStr =   " FROM Reserva reserva " +
-							   "	   join  reserva.disponibilidades disp " +
-		  				       "       join  reserva.datosReserva datoReserva " +
-		  				       "	   join datoReserva.datoASolicitar datoSolicitar	" ;
-	
+			String selectStr = " SELECT DISTINCT(reserva) " ;
+			String fromStr = " FROM Reserva reserva " +
+							         "	JOIN reserva.disponibilidades disp " +
+		  				         "  JOIN reserva.datosReserva datoReserva " +
+		  				         "  JOIN datoReserva.datoASolicitar datoSolicitar	" ;
 			String whereStr = " WHERE disp.recurso = :recurso " +
-						  "		  and reserva.estado <> 'P' " ;
-		 
+                        "   AND disp.presencial = false " +
+		  				          "   AND reserva.estado <> 'P' " ;
 			boolean primerRegistro = true;
 			int i = 0;
 			for (DatoReserva datoR : datos){
 				if((datoR.getValor() != null) && (!datoR.getValor().equalsIgnoreCase("NoSeleccion"))){
 					if ((primerRegistro)){
-						whereStr = whereStr + 
-						" 	   and ((upper(datoReserva.valor) = '" + datoR.getValor().toUpperCase() + "' and " +
-						" 	   datoSolicitar.id = " + datoR.getDatoASolicitar().getId() + ") ";
+						whereStr = whereStr + " AND ((upper(datoReserva.valor) = '" 
+						    + datoR.getValor().toUpperCase() + "' AND datoSolicitar.id = " 
+						    + datoR.getDatoASolicitar().getId() + ") ";
 						primerRegistro = false;
 					} else {
-				
-						String joinFromAux =  " join  reserva.datosReserva datoReserva" + i +
-											  " join datoReserva" + i + ".datoASolicitar datoSolicitar" + i;
-						fromStr = fromStr + joinFromAux;
-				
-						whereStr = whereStr + " AND " +
-							" 	 ( upper(datoReserva" + i + ".valor) = '" + datoR.getValor().toUpperCase() + "' and " +
-							" 	   datoSolicitar" + i + ".id = " + datoR.getDatoASolicitar().getId() + ") ";
-				
+						fromStr = fromStr + " JOIN reserva.datosReserva datoReserva" + i 
+						                  + " JOIN datoReserva" + i + ".datoASolicitar datoSolicitar" + i;
+						whereStr = whereStr + " AND (UPPER(datoReserva" + i + ".valor) = '" 
+						                    + datoR.getValor().toUpperCase() + "' AND datoSolicitar" + i 
+						                    + ".id = " + datoR.getDatoASolicitar().getId() + ") ";
 					}
 				}
 				i++;
 			}
-
-			String consulta = selectStr + fromStr + whereStr ;
-	
-			// Agrego el ORDER BY parentesis final de la consulta
-			consulta = consulta + ") ORDER BY reserva.fechaCreacion DESC ";
-	
-			try {
-				resultados = (List<Reserva>)entityManager.createQuery(consulta)
-									.setParameter("recurso", recurso)
-									.getResultList();
-			} catch (Exception e){}
-	
-			// 	recorro las reservas para obtener las listas disponibilidades y datos reservas 
-			for (Reserva r : resultados){
-				r.getDisponibilidades().size();
-				r.getDatosReserva().size();
+			String consulta = selectStr + fromStr + whereStr  + ") ORDER BY reserva.fechaCreacion DESC ";
+			
+			System.out.println("ConsultasBean.consultarReservaDatos -- consulta="+consulta);
+			
+			reservas = (List<Reserva>)entityManager.createQuery(consulta)
+				.setParameter("recurso", recurso)
+				.getResultList();
+			//Forzar la carga de datos lazy
+			for (Reserva reserva : reservas){
+			  reserva.getDisponibilidades().size();
+			  reserva.getDatosReserva().size();
 			}
 		}
-		return resultados;
+		return reservas;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva,
-			TimeZone timezone){
-		List<Reserva> resultados = new ArrayList<Reserva>();
-		
-		String selectStr = " SELECT distinct(reserva) " ;
-		String fromStr =   " FROM Reserva reserva " +
-						   "	   join  reserva.disponibilidades disp " +
-	  				       "       join  reserva.datosReserva datoReserva " +
-	  				       "	   join datoReserva.datoASolicitar datoSolicitar	" ;
-	
+	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva, TimeZone timezone){
+		String selectStr = "SELECT DISTINCT(reserva) " ;
+		String fromStr = " FROM Reserva reserva " +
+						         " JOIN reserva.disponibilidades disp " +
+	  				         " JOIN reserva.datosReserva datoReserva " +
+	  				         " JOIN datoReserva.datoASolicitar datoSolicitar	" ;
 		String whereStr = " WHERE disp.recurso = :recurso " +
-					  "		  and reserva.estado = 'R' " +
-					  "		  and reserva.codigoSeguridad = :codigoSeguridad " +
-					  "		  and disp.horaInicio >= :fecha " ;
-	 
+		                  "  AND disp.presencial = false " +
+					            "  AND reserva.estado = 'R' " +
+					            "  AND reserva.codigoSeguridad = :codigoSeguridad " +
+					            "  AND disp.horaInicio >= :fecha " ;
 		boolean primerRegistro = true;
 		int i = 0;
 		for (DatoReserva datoR : datos){
 			if((datoR.getValor() != null) && (!datoR.getValor().equalsIgnoreCase("NoSeleccion"))){
 				if ((primerRegistro)){
 					whereStr = whereStr + 
-					" 	   and ((upper(datoReserva.valor) = '" + datoR.getValor().toUpperCase() + "' and " +
-					" 	   datoSolicitar.id = " + datoR.getDatoASolicitar().getId() + ") ";
+					" AND ((upper(datoReserva.valor) = '" + datoR.getValor().toUpperCase() + "'" +
+					" AND datoSolicitar.id = " + datoR.getDatoASolicitar().getId() + ") ";
 					primerRegistro = false;
 				} else {
-				
-					String joinFromAux =  " join  reserva.datosReserva datoReserva" + i +
-										  " join datoReserva" + i + ".datoASolicitar datoSolicitar" + i;
+					String joinFromAux =  " JOIN reserva.datosReserva datoReserva" + i +
+										            " JOIN datoReserva" + i + ".datoASolicitar datoSolicitar" + i;
 					fromStr = fromStr + joinFromAux;
-				
-					whereStr = whereStr + " AND " +
-						" 	 ( upper(datoReserva" + i + ".valor) = '" + datoR.getValor().toUpperCase() + "' and " +
-						" 	   datoSolicitar" + i + ".id = " + datoR.getDatoASolicitar().getId() + ") ";
-				
+					whereStr = whereStr + " AND (UPPER(datoReserva" + i + ".valor) = '" + datoR.getValor().toUpperCase() + "'" +
+						" AND datoSolicitar" + i + ".id = " + datoR.getDatoASolicitar().getId() + ") ";
 				}
 			}
 			i++;
 		}
-
 		String consulta = selectStr + fromStr + whereStr ;
-	
-		Calendar cal = new GregorianCalendar();
+    consulta = consulta + ") ORDER BY reserva.fechaCreacion DESC ";
+
+    Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTime().getTime()));
-		
-		// Agrego el ORDER BY parentesis final de la consulta
-		consulta = consulta + ") ORDER BY reserva.fechaCreacion DESC ";
-		try {
-			resultados = (List<Reserva>)entityManager.createQuery(consulta)
-								.setParameter("recurso", recurso)
-								.setParameter("codigoSeguridad", codigoSeguridadReserva)
-								.setParameter("fecha", cal.getTime(), TemporalType.TIMESTAMP)
-								.getResultList();
-		} catch (Exception ex){
-			ex.printStackTrace();
+		List<Reserva> reservas = (List<Reserva>)entityManager.createQuery(consulta)
+							.setParameter("recurso", recurso)
+							.setParameter("codigoSeguridad", codigoSeguridadReserva)
+							.setParameter("fecha", cal.getTime(), TemporalType.TIMESTAMP)
+							.getResultList();
+		//Forzar la carga de datos lazy
+		for (Reserva reserva : reservas){
+		  reserva.getDisponibilidades().size();
+		  reserva.getDatosReserva().size();
 		}
-		// 	recorro las reservas para obtener las listas disponibilidades y datos reservas 
-		for (Reserva r : resultados){
-			r.getDisponibilidades().size();
-			r.getDatosReserva().size();
-		}
-		return resultados;
+		return reservas;
 	}
 	
-	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, Estado estado) throws BusinessException {
+	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, Estado estado, boolean atencionPresencial) throws UserException {
 		List<Estado> estados = new ArrayList<Estado>();
 		estados.add(estado);
-		return consultarReservasPorPeriodoEstado(recurso, periodo, estados);
+		return consultarReservasPorPeriodoEstado(recurso, periodo, estados, atencionPresencial);
 	}
 
-	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados) throws BusinessException {
-		if (recurso == null || periodo == null || estados == null || estados.size() == 0 || estados.get(0) == null) {
-			throw new BusinessException("-1", "Parametro nulo");
+	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo ventana, List<Estado> estados, boolean atencionPresencial) throws UserException {
+		if (recurso == null) {
+			throw new UserException("debe_especificar_el_recurso");
 		}
-		if (periodo.getFechaInicial() == null || periodo.getFechaFinal() == null) {
-			throw new BusinessException("-1", "El periodo debe tener inicio y fin");
+    if (ventana == null) {
+      throw new UserException("debe_especificar_la_ventana");
+    }
+		if (ventana.getFechaInicial() == null || ventana.getFechaFinal() == null) {
+			throw new UserException("la_ventana_especificada_no_es_valida");
 		}
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}		
-		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, new ArrayList<Integer>());
-		
+		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, ventana, estados, new ArrayList<Integer>(), atencionPresencial);
 	}
 
-	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, TimeZone timezone) throws BusinessException {
+	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, boolean atencionPresencial, TimeZone timezone) throws UserException {
+	  
+	  System.out.println("ConsultasBean.consultarReservasEnEspera -- 1");
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 		Date hoy = cal.getTime();
@@ -388,11 +361,13 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		periodo.setFechaFinal(Utiles.time2FinDelDia(hoy));
 		List<Estado> estados = new ArrayList<Estado>();
 		estados.add(Estado.R);
-		List<Integer> disponibilidadesIds = consultarDisponibilidadesReservadasYUtilizadas(recurso, periodo);
-		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, disponibilidadesIds);
+    System.out.println("ConsultasBean.consultarReservasEnEspera -- 2");
+		List<Integer> disponibilidadesIds = consultarDisponibilidadesReservadasYUtilizadas(recurso, periodo, atencionPresencial);
+    System.out.println("ConsultasBean.consultarReservasEnEspera -- 3 - disponibilidadesIds: "+disponibilidadesIds);
+		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, disponibilidadesIds, atencionPresencial);
 	}
 
-	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, TimeZone timezone) throws BusinessException {
+	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, boolean atencionPresencial, TimeZone timezone) throws UserException {
 		
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
@@ -405,163 +380,113 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		estados.add(Estado.R);
 		estados.add(Estado.U);
 
-		List<Integer> disponibilidadesIds = consultarDisponibilidadesReservadasYUtilizadas(recurso, periodo);
+		List<Integer> disponibilidadesIds = consultarDisponibilidadesReservadasYUtilizadas(recurso, periodo, atencionPresencial);
 		
-		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, disponibilidadesIds);
+		return consultarReservasPorPeriodoEstadosDisponibilidades(recurso, periodo, estados, disponibilidadesIds, atencionPresencial);
 	}
 
 	
 	@SuppressWarnings("unchecked")	
-	private List<Integer> consultarDisponibilidadesReservadasYUtilizadas(Recurso recurso, VentanaDeTiempo periodo) throws BusinessException {
-
-
+	private List<Integer> consultarDisponibilidadesReservadasYUtilizadas(Recurso recurso, VentanaDeTiempo periodo, boolean atencionPresencial) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-		
-		
-		//Busco las primeras 2 disponibilidades con reservas en estado R
 		Query queryR = entityManager.createQuery(
-				"select distinct d.id, d.fecha, d.horaInicio " +
-				"from   Reserva r " +
-				"       join r.disponibilidades d " +
-				"where   " +
-				"       d.recurso.id = :recurso and " +
-				"       d.fecha between :fi and :ff  and " +
-				"       r.estado = :estado " +
-				"order by d.fecha, d.horaInicio " 
-		);
-
+				"SELECT distinct d.id, d.fecha, d.horaInicio " +
+				"FROM Reserva r " +
+				"JOIN r.disponibilidades d " +
+				"WHERE d.recurso.id = :recurso " +
+				(atencionPresencial?"  AND d.presencial = true ":"  AND d.presencial = false ") +
+				"  AND d.fecha BETWEEN :fi AND :ff " +
+				"  AND r.estado = :estado " +
+				"ORDER BY d.fecha, d.horaInicio");
 		queryR.setParameter("recurso", recurso.getId());
 		queryR.setParameter("estado", Estado.R);
 		queryR.setParameter("fi", periodo.getFechaInicial(), TemporalType.DATE);
 		queryR.setParameter("ff", periodo.getFechaFinal(), TemporalType.DATE);
-		
 		if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera() > 0){
 			queryR.setMaxResults(recurso.getLargoListaEspera());
 		}
-		
 		List<Object[]> dispsR = queryR.getResultList();
-
 		List<Object[]> dispsU = null;
-		
-		if (dispsR.size()>0) {
-			//Si hay disponibilidades en estado R, busco las 2 inmediatamente anteriores en estado U
-			
+		if (!dispsR.isEmpty()) {
 			Query queryU = entityManager.createQuery(
-				"select distinct d.id, d.fecha, d.horaInicio " +
-				"from   Reserva r " +
-				"       join r.disponibilidades d " +
-				"where   " +
-				"       d.recurso.id = :recurso and " +
-				"       d.fecha between :fi and :ff  and " +
-				"       r.estado = :estado and " +
-				"		d.horaInicio < :hora " +
-				"order by d.fecha desc, d.horaInicio desc " 
+				"SELECT DISTINCT d.id, d.fecha, d.horaInicio " +
+				"FROM Reserva r " +
+				"JOIN r.disponibilidades d " +
+				"WHERE d.recurso.id = :recurso " +
+        (atencionPresencial?"  AND d.presencial = true ":"  AND d.presencial = false ") +
+				"  AND d.fecha BETWEEN :fi AND :ff " +
+				"  AND r.estado = :estado " +
+				"	 AND d.horaInicio < :hora " +
+				"ORDER BY d.fecha DESC, d.horaInicio DESC " 
 			);
-
 			queryU.setParameter("recurso", recurso.getId());
 			queryU.setParameter("estado", Estado.U);
 			queryU.setParameter("fi", periodo.getFechaInicial(), TemporalType.DATE);
 			queryU.setParameter("ff", periodo.getFechaFinal(), TemporalType.DATE);
 			queryU.setParameter("hora", (Date)dispsR.get(0)[2], TemporalType.TIMESTAMP);
-						
-			if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera() > 0){
+			if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera().intValue() > 0){
 				queryU.setMaxResults(recurso.getLargoListaEspera());
 			}
-			
 			dispsU = queryU.getResultList();
-			
-		}
-		else {
-			//Busco las 2 ultimas en estado U
+		}	else {
 			Query queryU = entityManager.createQuery(
-					"select distinct d.id, d.fecha, d.horaInicio " +
-					"from   Reserva r " +
-					"       join r.disponibilidades d " +
-					"where   " +
-					"       d.recurso.id = :recurso and " +
-					"       d.fecha between :fi and :ff  and " +
-					"       r.estado = :estado " +
-					"order by d.fecha desc, d.horaInicio desc " 
-				);
-
-				queryU.setParameter("recurso", recurso.getId());
-				queryU.setParameter("estado", Estado.U);
-				queryU.setParameter("fi", periodo.getFechaInicial(), TemporalType.DATE);
-				queryU.setParameter("ff", periodo.getFechaFinal(), TemporalType.DATE);
-							
-				if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera() > 0){
-					queryU.setMaxResults(recurso.getLargoListaEspera());
-				}
-				
-				dispsU = queryU.getResultList();
+					"SELECT distinct d.id, d.fecha, d.horaInicio " +
+					"FROM Reserva r " +
+					"JOIN r.disponibilidades d " +
+					"WHERE d.recurso.id = :recurso " +
+	        (atencionPresencial?"  AND d.presencial = true ":"  AND d.presencial = false ") +
+					"  AND d.fecha BETWEEN :fi AND :ff " +
+					"  AND r.estado = :estado " +
+					"ORDER BY d.fecha DESC, d.horaInicio DESC ");
+			queryU.setParameter("recurso", recurso.getId());
+			queryU.setParameter("estado", Estado.U);
+			queryU.setParameter("fi", periodo.getFechaInicial(), TemporalType.DATE);
+			queryU.setParameter("ff", periodo.getFechaFinal(), TemporalType.DATE);
+			if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera().intValue() > 0){
+				queryU.setMaxResults(recurso.getLargoListaEspera());
+			}
+			dispsU = queryU.getResultList();
 		}
-		
-		
 		List<Integer> dispIds = new ArrayList<Integer>();
-		
-//		if (dispsU != null) {
-//			
-//			if (dispsU.size() == 2) {
-//				dispIds.add((Integer)dispsU.get(1)[0]);
-//			}
-//			
-//			if (dispsU.size() >= 1 && (dispsR == null || dispsR.size() == 0 || !dispsR.get(0)[0].equals(dispsU.get(0)[0])) ) {
-//				dispIds.add((Integer)dispsU.get(0)[0]);
-//			}
-//		}
-//		
-//		if (dispsR != null) {
-//
-//			if (dispsR.size() >= 1) {
-//				dispIds.add((Integer)dispsR.get(0)[0]);
-//			}
-//			
-//			if (dispsR.size() == 2) {
-//				dispIds.add((Integer)dispsR.get(1)[0]);
-//			}
-//			
-//		}
-		
 		if (dispsU != null) {
-			
 			for (int i= dispsU.size() - 1; i > 0; i--){
 				dispIds.add((Integer)dispsU.get(i)[0]);
 			}
-			
 			if (dispsU.size() >= 1 && (dispsR == null || dispsR.size() == 0 || !dispsR.get(0)[0].equals(dispsU.get(0)[0])) ) {
 				dispIds.add((Integer)dispsU.get(0)[0]);
 			}
 		}
-		
 		if (dispsR != null) {
-			
 			for (int i= dispsR.size() - 1; i >= 0; i--){
 				dispIds.add((Integer)dispsR.get(i)[0]);
 			}
 		}
-		
 		return dispIds;
 	}
 	
-	
-	
 	@SuppressWarnings("unchecked")	
-	private List<ReservaDTO> consultarReservasPorPeriodoEstadosDisponibilidades(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados, List<Integer> disponibilidadesIds ) throws BusinessException {
+	private List<ReservaDTO> consultarReservasPorPeriodoEstadosDisponibilidades(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados, List<Integer> disponibilidadesIds, boolean atencionPresencial) throws UserException {
+	  
+	  System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 1");
+	  
 		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
-		}		
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
+		}
+		
+		System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 2");
+		
 		Map<Integer, Map<String,String>> valoresPosiblesPorEtiqueta = armoMapaCampoValorEtiqueta(recurso);
 		int i;
 		String whereEstados = null;
 		for (i=1; i <= estados.size(); i++) {
 			if (whereEstados != null) {
-				whereEstados += " or ";
+				whereEstados += " OR ";
 			} else {
 				whereEstados = "";
 			}
@@ -570,7 +495,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		String whereDispIds = null;
 		for (i=1; i <= disponibilidadesIds.size(); i++) {
 			if (whereDispIds != null) {
-				whereDispIds += " or ";
+				whereDispIds += " OR ";
 			} else {
 				whereDispIds = "";
 			}
@@ -578,43 +503,49 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		}
 		String where = "";
 		if (whereEstados != null) {
-			where += "and ( " + whereEstados + " ) ";
+			where += "AND ( " + whereEstados + " ) ";
 		}
 		if (whereDispIds != null) {
-			where += "and ( " + whereDispIds + " ) ";
+			where += "AND ( " + whereDispIds + " ) ";
+		}
+		if(atencionPresencial) {
+      where += "AND d.presencial = true ";
+		}else {
+      where += "AND d.presencial = false ";
 		}
 		String queryString = 
-			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, " +
-			"dr.valor, ll.puesto, a.asistio, r.tramiteCodigo, r.tramiteNombre " +
-			"from   Reserva r " +
-			"       join r.disponibilidades d " +
-			"       left join r.datosReserva dr " +
-			"		    left join dr.datoASolicitar das " +
-			"       left join r.llamada ll " +
-			"       left join r.atenciones a "+
-			"where   " +
-			"       d.recurso.id = :recurso and " +
-			"       d.fecha between :fi and :ff " +
-					where +
-			"order by d.fecha, d.horaInicio, r.numero "; 
-
+			"SELECT r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, a.asistio, r.tramiteCodigo, r.tramiteNombre " +
+			"FROM Reserva r " +
+			"JOIN r.disponibilidades d " +
+			"LEFT JOIN r.datosReserva dr " +
+			"LEFT JOIN dr.datoASolicitar das " +
+			"LEFT JOIN r.llamada ll " +
+			"LEFT JOIN r.atenciones a "+
+			"WHERE d.recurso.id = :recurso " +
+			"  AND d.fecha BETWEEN :fi AND :ff " +
+			where +
+			"ORDER BY d.fecha, d.horaInicio, r.numero "; 
+		
+		System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 3 queryString: "+queryString);
+		System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 3 fi: "+periodo.getFechaInicial());
+    System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 3 ff: "+periodo.getFechaFinal());
+    System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 3 estados: "+estados);
+    System.out.println("ConsultasBean.consultarReservasPorPeriodoEstadosDisponibilidades -- 3 disponibilidadesIds: "+disponibilidadesIds);
+		
 		Query query = entityManager.createQuery(queryString);
 		query.setParameter("recurso", recurso.getId());
 		query.setParameter("fi", periodo.getFechaInicial(), TemporalType.DATE);
 		query.setParameter("ff", periodo.getFechaFinal(), TemporalType.DATE);
-
 		i = 1;
 		for (Estado estado : estados) {
 			query.setParameter("estado"+i, estado);
 			i++;
 		}
-
 		i = 1;
 		for (Integer dispId : disponibilidadesIds) {
 			query.setParameter("dispId"+i, dispId);
 			i++;
 		}
-
 		List<Object[]> resultados = query.getResultList();
 		List<ReservaDTO> reservas = new ArrayList<ReservaDTO>();
 		Integer idReservaActual = null;
@@ -625,7 +556,6 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Integer reservaId        = (Integer)rowReserva[0];
 			Integer reservaNumero    = (Integer)rowReserva[1];
 			String  reservaEstado    = ((Estado) rowReserva[2]).toString();
-			//Integer dispId           = (Integer)rowReserva[3];
 			Date    dispFecha        = (Date) rowReserva[4];
 			Date    dispHoraInicio   = (Date) rowReserva[5];
 			Integer datoASolicitarId = (Integer) rowReserva[6];
@@ -634,14 +564,11 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Object  valorDatoReserva = (Object) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
 			Boolean asistio          = (Boolean)rowReserva[11];
-
       String  tramiteCodigo    = (String) rowReserva[12];
       String  tramiteNombre    = (String) rowReserva[13];
-			
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
 				idReservaActual = reservaId;
 				if (reservaDTO != null) {
-					//Cambio de reserva, guardo la actual como resultado
 					reservas.add(reservaDTO);
 				}
 				reservaDTO = new ReservaDTO();
@@ -668,12 +595,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			}
 		}
 		if (reservaDTO != null) {
-			//Al salir del loop, siempre me queda la ultima reserva para agregar al resultado
 			reservas.add(reservaDTO);
 		}
 		return reservas;
 	}
-	
 	
 	private Map<Integer, Map<String,String>> armoMapaCampoValorEtiqueta(Recurso recurso) {
 		
@@ -693,75 +618,66 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	}
 	
 	
-	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo) throws BusinessException {
-		
-	
-		if (recurso == null || periodo == null) {
-			throw new BusinessException("-1", "Parametro nulo");
+	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo ventana) throws UserException {
+		if(recurso == null) {
+			throw new UserException("debe_especificar_el_recurso");
 		}
-		if (periodo.getFechaInicial() == null || periodo.getFechaFinal() == null) {
-			throw new BusinessException("-1", "El periodo debe tener inicio y fin");
+    if(ventana == null) {
+      throw new UserException("debe_especificar_la_ventana");
+    }
+		if (ventana.getFechaInicial() == null || ventana.getFechaFinal() == null) {
+			throw new UserException("la_ventana_especificada_no_es_valida");
 		}
-		
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}		
-		
-		return consultarReservasUsadasPorPeriodoDisponibilidades(recurso, periodo, new ArrayList<Integer>());
-		
+		return consultarReservasUsadasPorPeriodoDisponibilidades(recurso, ventana, new ArrayList<Integer>());
 	}
 
 	@SuppressWarnings("unchecked")	
-	private List<ReservaDTO> consultarReservasUsadasPorPeriodoDisponibilidades(Recurso recurso, VentanaDeTiempo periodo, List<Integer> disponibilidadesIds ) throws BusinessException {
-
+	private List<ReservaDTO> consultarReservasUsadasPorPeriodoDisponibilidades(Recurso recurso, VentanaDeTiempo periodo, List<Integer> disponibilidadesIds ) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("-1", "Parametro nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-		
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
-		}		
-		
-
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
+		}
 		Map<Integer, Map<String,String>> valoresPosiblesPorEtiqueta = armoMapaCampoValorEtiqueta(recurso);
-		
 		int i;
 		String whereDispIds = null;
 		for (i=1; i <= disponibilidadesIds.size(); i++) {
 			if (whereDispIds != null) {
-				whereDispIds += " or ";
+				whereDispIds += " OR ";
 			}
 			else {
 				whereDispIds = "";
 			}
-			
 			whereDispIds += "d.id = :dispId" + i;
 		}
 		String where = "";
-		where += "and ( r.estado = 'U' ) ";
+		where += "AND ( r.estado = 'U' ) ";
 		if (whereDispIds != null) {
-			where += "and ( " + whereDispIds + " ) ";
+			where += "AND ( " + whereDispIds + " ) ";
 		}
 		
 
 		//Esta consulta no funciona con reserva multiples.
 		//Asumo que no existen reservas multiples
 		String queryString = 
-			"select r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, " + 
-			"dr.valor, ll.puesto, at.asistio, r.tramiteCodigo, r.tramiteNombre " +
-			"from   Reserva r " +
-			"       join r.disponibilidades d " +
-			"       left join r.datosReserva dr " +
-			"		left join dr.datoASolicitar das " +
-			"       left join r.llamada ll " +
-			"       left join r.atenciones at "+
-			"where   " +
-			"       d.recurso.id = :recurso and " +
-			"       d.fecha between :fi and :ff " +
-					where +
-			"order by d.fecha, d.horaInicio, r.numero "; 
+			"SELECT r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, at.asistio, r.tramiteCodigo, r.tramiteNombre " +
+			"FROM Reserva r " +
+			"JOIN r.disponibilidades d " +
+			"LEFT JOIN r.datosReserva dr " +
+			"LEFT JOIN dr.datoASolicitar das " +
+			"LEFT JOIN r.llamada ll " +
+			"LEFT JOIN r.atenciones at "+
+			"WHERE d.recurso.id = :recurso " +
+      "  AND d.presencial = false " +
+			"  AND d.fecha BETWEEN :fi AND :ff " +
+			where +
+			"ORDER BY d.fecha, d.horaInicio, r.numero"; 
 
 		Query query = entityManager.createQuery(queryString);
 		query.setParameter("recurso", recurso.getId());
@@ -774,24 +690,16 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			i++;
 		}
 
-		
-		
 		List<Object[]> resultados = query.getResultList();
-		
 		List<ReservaDTO> reservas = new ArrayList<ReservaDTO>();
-
 		Integer idReservaActual = null;
 		ReservaDTO reservaDTO = null;
-		
 		Iterator<Object[]> iterator = resultados.iterator();
 		while (iterator.hasNext()) {
-
 			Object[] rowReserva = iterator.next();
-		
 			Integer reservaId        = (Integer)rowReserva[0];
 			Integer reservaNumero    = (Integer)rowReserva[1];
 			String  reservaEstado    = ((Estado) rowReserva[2]).toString();
-//			Integer dispId           = (Integer)rowReserva[3];
 			Date    dispFecha        = (Date) rowReserva[4];
 			Date    dispHoraInicio   = (Date) rowReserva[5];
 			Integer datoASolicitarId = (Integer) rowReserva[6];
@@ -802,19 +710,11 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Boolean asistio          = (Boolean)rowReserva[11];
       String  tramiteCodigo    = (String) rowReserva[12];
       String  tramiteNombre    = (String) rowReserva[13];
-
-
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
-				//recien arranco o cambio de reserva: 
-				
 				idReservaActual = reservaId;
-				
 				if (reservaDTO != null) {
-					//Cambio de reserva, guardo la actual como resultado
-
 					reservas.add(reservaDTO);
 				}
-				
 				reservaDTO = new ReservaDTO();
 				reservaDTO.setId(reservaId);
 				reservaDTO.setNumero(reservaNumero);
@@ -830,37 +730,21 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		    reservaDTO.setTramiteCodigo(tramiteCodigo);
 		    reservaDTO.setTramiteNombre(tramiteNombre);
 			}
-			//El else indica que estoy iterando sobre los datos de la reserva
-			
 			if (nombreDatoReserva != null) {
-				
-				
 				if (tipoDatoReserva == Tipo.LIST) {
-					//Lista de valores: etiqueta del valor
 					String valor = valoresPosiblesPorEtiqueta.get(datoASolicitarId).get(valorDatoReserva);
 					reservaDTO.getDatos().put(nombreDatoReserva, valor);			
-				}
-				else {
-					//Tipo simple: valor
+				}else {
 					reservaDTO.getDatos().put(nombreDatoReserva, valorDatoReserva);			
 				}
-				
 				if("NroDocumento".equals(nombreDatoReserva) && nombreDatoReserva!=null) {
 					reservaDTO.setNumeroDocumento(valorDatoReserva.toString());
 				}
-				
 			}
-
-
 		}
-
 		if (reservaDTO != null) {
-			//Al salir del loop, siempre me queda la ultima reserva para agregar al resultado
-
 			reservas.add(reservaDTO);
 		}
-		
-		
 		return reservas;
 	}
 
@@ -932,13 +816,13 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	 * Esta función es utilizada por el servicio web REST para determinar las fechas de las reservas
 	 * que tiene una persona identificada por su tipo y número de documento en una agenda y recurso especial; la
 	 * empresa se determina en base al token, el cual debe estar registrado (el organismo que desee invocar el
-	 * servicio tendrá que solicitar un token para cada empresa)
+	 * servicio tendrá que solicitar un token para cada empresa).
+	 * No considera las reservas correspondientes a disponibilidades presenciales.
 	 */
-	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc)
-			throws BusinessException{
+	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException{
 			
 			if(idAgenda==null && idRecurso==null) {
-				throw new BusinessException("Debe especificar el recurso o la agenda");
+				throw new UserException("debe_especificar_la_agenda_o_el_recurso");
 			}
 		
 			//Determinar el esquema sobre el cual hay que hacer la consulta en base al token
@@ -963,6 +847,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 						+ " WHERE rec.aeag_id=:idAgenda ";
 				}
 				query = query
+            + "   AND dis.presencial = false' "
 						+ "   AND ds1.nombre='NroDocumento' "
 						+ "   AND dr1.valor=:numDoc "
 						+ "   AND ds2.nombre='TipoDocumento' "
@@ -988,9 +873,9 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 				}
 				return resp;
 			}catch(NoResultException nrEx) {
-				throw new BusinessException("No se encontró el token especificado");		
+				throw new UserException("no_se_encuentra_el_token_especificado");		
 			}catch(NonUniqueResultException nurEx) {
-				throw new BusinessException("Se encontró más de un token");		
+				throw new UserException("no_se_encuentra_el_token_especificado");		
 			}
 			
 		}

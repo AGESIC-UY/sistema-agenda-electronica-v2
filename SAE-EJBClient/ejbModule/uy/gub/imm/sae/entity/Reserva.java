@@ -58,6 +58,7 @@ public class Reserva implements Serializable {
 	private static final long serialVersionUID = 3500715468120358550L;
 
 	private Integer id;
+	private String serie;
 	private Integer numero;
 	private Estado estado;
 	private String observaciones;
@@ -72,10 +73,10 @@ public class Reserva implements Serializable {
 	private String codigoSeguridad; //Código utilizado para la cencelación
 	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
 	
-	private String tramiteCodigo;
-	private String tramiteNombre;
+	private String tramiteCodigo; //Código del trámite en TrámitesUy
+	private String tramiteNombre; //Nombre del trámite en TrámitesUy
 
-	private List<Disponibilidad> disponibilidades;
+	private List<Disponibilidad> disponibilidades; //Es una lista pero solo debería haber una
 	private Set<DatoReserva> datosReserva;
 	private List<Atencion> atenciones;
 	
@@ -87,22 +88,6 @@ public class Reserva implements Serializable {
 		datosReserva = new HashSet<DatoReserva>();
 	}
 	
-	public Reserva (Integer id, Integer numero, Estado estado, String obs, Date creacion, Disponibilidad d, DatoReserva dr) {
-	
-		this.id = id;
-		this.numero = numero;
-		this.estado = estado;
-		this.observaciones = obs;
-		this.fechaCreacion = creacion;
-		this.fechaActualizacion = creacion;
-		
-		this.disponibilidades = new ArrayList<Disponibilidad>();
-		this.disponibilidades.add(d);
-		this.datosReserva = new HashSet<DatoReserva>();
-		this.datosReserva.add(dr);
-	}
-
-
 	@Id
 	@GeneratedValue (strategy = GenerationType.SEQUENCE, generator="seq_reserva")
 	@SequenceGenerator (name ="seq_reserva", initialValue = 1, sequenceName = "s_ae_reserva",allocationSize=1)
@@ -146,8 +131,7 @@ public class Reserva implements Serializable {
 		this.datosReserva = datosReserva;
 	}
 	
-	// Se agrega la lista de atencion para poder hacer el reporte
-	// de vino - No vino
+	// Se agrega la lista de atencion para poder hacer el reporte de vino - No vino
 	@XmlTransient
 	@OneToMany (mappedBy="reserva")
 	public List <Atencion> getAtenciones(){
@@ -209,28 +193,6 @@ public class Reserva implements Serializable {
 		this.version = version;
 	}
 
-	@Transient
-	public String getEstadoDescripcion(){
-		
-		return getEstadoDescripcion(estado);
-		
-	}
-	
-	public void setEstadoDescripcion(String estado){
-		
-	}
-	
-	@Transient
-	public String getEstadoDescripcion(Estado e){
-		
-		String resultado = "";
-		
-		if (e != null){
-			resultado = e.getDescripcion();
-		}        
-		return resultado;
-	}
-
 	@Override
 	public String toString() {
 		String strDisp = "disponibilidades=";
@@ -238,14 +200,11 @@ public class Reserva implements Serializable {
 			Disponibilidad disp = iterator.next();
 			strDisp+= disp.toString()+",";			
 		}
-		
 		String strDatos = "datos=";
-		
 		for (Iterator<DatoReserva> iterator = datosReserva.iterator(); iterator.hasNext();) {
 			DatoReserva dato = iterator.next();
 			strDatos+=dato.toString()+",";
 		}
-		
 		return "Reserva [id="+ id + "," + strDisp + "," + strDatos +"]";
 	}
 
@@ -287,18 +246,6 @@ public class Reserva implements Serializable {
 		this.codigoSeguridad = codigoSeguridad;
 	}
 
-	@Transient
-	public String getNumeroDocumento() {
-		String documento = "";
-		for(DatoReserva dato : getDatosReserva()) {
-			DatoASolicitar datoSol = dato.getDatoASolicitar();
-			if("NroDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-				documento = dato.getValor();
-			}
-		}
-		return documento;
-	}
-
   @Column(name="tramite_codigo")
 	public String getTramiteCodigo() {
     return tramiteCodigo;
@@ -317,18 +264,13 @@ public class Reserva implements Serializable {
     this.tramiteNombre = tramiteNombre;
   }
 
-  @Transient
-	public String getTipoDocumento() {
-		String tipoDocumento = "";
-		for(DatoReserva dato : getDatosReserva()) {
-			DatoASolicitar datoSol = dato.getDatoASolicitar();
-			if("TipoDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-				tipoDocumento = dato.getValor();
-			}
-		}
-		
-		return tipoDocumento;
-	}
+  public String getSerie() {
+    return serie;
+  }
+
+  public void setSerie(String serie) {
+    this.serie = serie;
+  }
 
 	@Column(name="trazabilidad_guid")
 	public String getTrazabilidadGuid() {
@@ -339,5 +281,42 @@ public class Reserva implements Serializable {
 		this.trazabilidadGuid = trazabilidadGuid;
 	}
 	
-	
+  @Transient
+  public String getEstadoDescripcion(){
+    return getEstadoDescripcion(estado);
+  }
+  
+  @Transient
+  public String getEstadoDescripcion(Estado estado){
+    return (estado != null ? estado.getDescripcion() : "");
+  }
+
+  @Transient
+  public String getTipoDocumento() {
+    String tipoDocumento = "";
+    for(DatoReserva dato : getDatosReserva()) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if("TipoDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        tipoDocumento = dato.getValor();
+      }
+    }
+    return tipoDocumento;
+  }
+
+  @Transient
+  public String getNumeroDocumento() {
+    String documento = "";
+    for(DatoReserva dato : getDatosReserva()) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if("NroDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        documento = dato.getValor();
+      }
+    }
+    return documento;
+  }
+
+  @Transient
+	public Boolean getPresencial() {
+	  return(disponibilidades.isEmpty()? null : disponibilidades.get(0).getPresencial());
+	}
 }

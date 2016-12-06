@@ -112,10 +112,10 @@ public class DisponibilidadMBean extends BaseMBean {
 	}
 
 	public void obtenerCuposCons(ActionEvent e){
-		VentanaDeTiempo v = new VentanaDeTiempo();
+		VentanaDeTiempo ventana = new VentanaDeTiempo();
 		if (dispSessionMBean.getFechaDesde() != null) {
 			//Se setea hora 00:00:00
-			v.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaDesde()));
+			ventana.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaDesde()));
 			if (dispSessionMBean.getFechaHasta()== null) {
 				try {
 				  dispSessionMBean.setFechaHasta(disponibilidadesEJB.ultFechaGenerada(sessionMBean.getRecursoMarcado()));
@@ -124,8 +124,8 @@ public class DisponibilidadMBean extends BaseMBean {
 				}
 			}
 			if (dispSessionMBean.getFechaHasta() != null){
-  			v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaHasta()));
-  			dispSessionMBean.setCuposPorDia(obtenerCupos(v));
+  			ventana.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaHasta()));
+  			dispSessionMBean.setCuposPorDia(obtenerCupos(ventana));
 			}
 		} else{
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
@@ -141,28 +141,29 @@ public class DisponibilidadMBean extends BaseMBean {
 			dispSessionMBean.setDisponibilidadesDelDiaMatutinaModif(null);
 			dispSessionMBean.setDisponibilidadesDelDiaVespertinaModif(null) ;
 			configurarDisponibilidadesDelDiaModif();
-		}
-		else{
+		} else{
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "form:fecha");
 		}
 	}
 	
-	public RowList<CupoPorDia> obtenerCupos(VentanaDeTiempo v){
+	private RowList<CupoPorDia> obtenerCupos(VentanaDeTiempo ventana){
 		RowList<CupoPorDia> cuposAux = null;
 		try{
 			if (sessionMBean.getRecursoMarcado() != null){
-				if (v.getFechaInicial() != null && v.getFechaFinal() != null && v.getFechaInicial().compareTo(v.getFechaFinal()) <= 0 ) {
-					List<Integer> cupos = agendarReservasEJB.obtenerCuposPorDia(sessionMBean.getRecursoMarcado(), v, sessionMBean.getTimeZone());
+				if (ventana.getFechaInicial() != null && ventana.getFechaFinal() != null && ventana.getFechaInicial().compareTo(ventana.getFechaFinal()) <= 0 ) {
+				  //Obtener los cupos para el período indicado por la ventana
+					List<Integer> cupos = agendarReservasEJB.obtenerCuposPorDia(sessionMBean.getRecursoMarcado(), ventana, sessionMBean.getTimeZone());
 					Calendar fecha = Calendar.getInstance();
-					fecha.setTime(v.getFechaInicial());
+					fecha.setTime(ventana.getFechaInicial());
 					Calendar fechaFin = Calendar.getInstance();
-					fechaFin.setTime(v.getFechaFinal());
-					Integer i = 0;
-					Integer cuposDia = 0;
+					fechaFin.setTime(ventana.getFechaFinal());
+					int i = 0;
 					List<CupoPorDia> listaCupos = new ArrayList<CupoPorDia>();
+					//Iterar por cada día y determinar cuántos cupos tiene
+					//Si para un día hay disponibilidades pero no hay cupos significa que ya pasó la hora de la última disponibilidad (pero igual hay que mostrar el día)
 					while ( !fecha.after( fechaFin ) ){
-						cuposDia = disponibilidadesEJB.cantDisponibilidadesDia(sessionMBean.getRecursoMarcado(), fecha.getTime());
-						if (cupos.get(i) != -1 || cuposDia > 0){
+					  boolean hayDisponFecha = disponibilidadesEJB.hayDisponibilidadesFecha(sessionMBean.getRecursoMarcado(), fecha.getTime());
+						if (cupos.get(i) != -1 || hayDisponFecha){
 							CupoPorDia cupoPorDia = new CupoPorDia();
 							cupoPorDia.setDia(fecha.getTime());
 							if (cupos.get(i) == -1) {
@@ -177,13 +178,13 @@ public class DisponibilidadMBean extends BaseMBean {
 					}
 					cuposAux= new RowList<CupoPorDia>(listaCupos);
 				} else{
-					if(v.getFechaInicial() == null) {
+					if(ventana.getFechaInicial() == null) {
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"));
 					}
-					if(v.getFechaFinal() == null) {
+					if(ventana.getFechaFinal() == null) {
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"));
 					}
-					if (v.getFechaInicial() != null && v.getFechaFinal() != null && v.getFechaInicial().compareTo(v.getFechaFinal()) > 0){
+					if (ventana.getFechaInicial() != null && ventana.getFechaFinal() != null && ventana.getFechaInicial().compareTo(ventana.getFechaFinal()) > 0){
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"));
 					}
 				}
@@ -239,45 +240,37 @@ public class DisponibilidadMBean extends BaseMBean {
 		List<DisponibilidadReserva> dispMatutinas   = new ArrayList<DisponibilidadReserva>();
 		List<DisponibilidadReserva> dispVespertinas = new ArrayList<DisponibilidadReserva>();
 
-		CupoPorDia c = ((Row<CupoPorDia>) this.getCuposDataTable().getRowData()).getData();
-		if (c != null) {
-			dispSessionMBean.setFechaActual(c.getDia());
-			//Se configura para que se despliegue en la primer página.
-			
+		//Determinar la fecha seleccionada
+		CupoPorDia cupoPorDia = ((Row<CupoPorDia>) this.getCuposDataTable().getRowData()).getData();
+		if (cupoPorDia != null) {
+		  //Armar la ventana de tiempo con solo un día
+			dispSessionMBean.setFechaActual(cupoPorDia.getDia());
 			VentanaDeTiempo ventana = new VentanaDeTiempo();
 			ventana.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaActual()));
 			ventana.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaActual()));
-			
 			try {
+			  //Determinar las disponibilidades para la ventana (día actual)
 				List<DisponibilidadReserva> lista = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventana);
-				
 				for (DisponibilidadReserva d : lista) {
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(d.getHoraInicio());
-					
 					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
-						//Matutino
 						dispMatutinas.add(d);
-					}
-					else {
-						//Vespertino
+					} else {
 						dispVespertinas.add(d);
 					}
 				}
-				
-				
+		    dispSessionMBean.setDisponibilidadesDelDiaMatutina(new RowList<DisponibilidadReserva>(dispMatutinas));
+		    dispSessionMBean.setDisponibilidadesDelDiaVespertina(new RowList<DisponibilidadReserva>(dispVespertinas));
+		    return "consultarPorDia";
 			} catch (Exception e) { 
 				addErrorMessage(e);
 				return null;
 			}
-		}	
-		else {
+		}	else {
 			return null;
 		}
 
-		dispSessionMBean.setDisponibilidadesDelDiaMatutina(new RowList<DisponibilidadReserva>(dispMatutinas));
-		dispSessionMBean.setDisponibilidadesDelDiaVespertina(new RowList<DisponibilidadReserva>(dispVespertinas));
-		return "consultarPorDia";
 	}
 
 	public void configurarDisponibilidadesDelDiaModif() {
@@ -394,19 +387,15 @@ public class DisponibilidadMBean extends BaseMBean {
 	}
 
 	public void cancelarModifDisp(ActionEvent event) {
-
-		//Esto es el código del actionListener obtenerCuposModif
 		VentanaDeTiempo v = new VentanaDeTiempo();
 		if (dispSessionMBean.getFechaModifCupo() != null ) {
-			//Se setea hora 00:00:00
 			v.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaModifCupo()) );
 			v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaModifCupo()));
 			dispSessionMBean.setDisponibilidadesDelDiaMatutina(null);
 			dispSessionMBean.setDisponibilidadesDelDiaVespertina(null) ;
 			obtenerCupos(v);
 			configurarDisponibilidadesDelDiaModif();
-		}
-		else{
+		} else{
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), MSG_ID);
 		}
 		this.selectAllMatutino = false;
@@ -454,14 +443,17 @@ public class DisponibilidadMBean extends BaseMBean {
 		for (Row<DisponibilidadReserva> row : listDispReserva) {
 			if(row.getData().isSeleccionado()) {
 				int cupo = row.getData().getCupo();
-				if(this.tipoOperacion==1) {//Aumentar valor
+				if(this.tipoOperacion==1) {
+				  //Aumentar valor
 					cupo = cupo+valorCupo;
-				}else if(this.tipoOperacion==2) {//Disminuir valor
+				}else if(this.tipoOperacion==2) {
+				  //Disminuir valor
 					cupo = cupo-valorCupo;
 					if(cupo<0) {
 						cupo = 0;
 					}
-				}else {//Valor Exacto
+				}else {
+				  //Establecer valor
 					cupo = valorCupo;
 				}
 				Disponibilidad disp = new Disponibilidad();

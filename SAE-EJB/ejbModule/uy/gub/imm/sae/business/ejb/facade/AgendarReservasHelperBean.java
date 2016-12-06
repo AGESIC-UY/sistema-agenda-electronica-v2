@@ -44,8 +44,10 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TemporalType;
 
-import uy.gub.imm.sae.business.common.factories.CalendarioFactory;
+import org.apache.log4j.Logger;
+
 import uy.gub.imm.sae.business.dto.ReservaDTO;
+import uy.gub.imm.sae.business.utilidades.SimpleCalendario;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
@@ -98,6 +100,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	@EJB
 	private ConsultasLocal consultaEJB;
 	
+  static Logger logger = Logger.getLogger(AgendarReservasHelperBean.class);
 	
 	/**
 	 * Obtiene la ventana del calendario estatica, es decir sin verificar 
@@ -110,12 +113,13 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		VentanaDeTiempo ventana = new VentanaDeTiempo();
 
+    Calendario calendario = new SimpleCalendario(null);
+		
 		//Calcular la fecha inicial: hoy + diasInicioVentanaIntranet (tener en cuenta los días no hábiles)
 		Date hoy = Utiles.time2InicioDelDia(new Date());
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(hoy);
     try {
-      Calendario calendario = CalendarioFactory.getCalendario();
       for(int i=0; i<recurso.getDiasInicioVentanaIntranet().intValue(); ) {
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
           i++;
@@ -135,7 +139,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		
     //Calcular la fecha final: fecha inicial + getDiasVentanaInternet (tener en cuenta los días no hábiles)
     try {
-      Calendario calendario = CalendarioFactory.getCalendario();
       for(int i=0; i<recurso.getDiasVentanaIntranet().intValue()-1; ) {
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
           i++;
@@ -166,12 +169,14 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		
 		VentanaDeTiempo ventana = new VentanaDeTiempo();
 
+    Calendario calendario = new SimpleCalendario(null);
+		
 		//Calcular la fecha inicial: hoy + diasInicioVentanaInternet (tener en cuenta los días no hábiles)
 		Date hoy = Utiles.time2InicioDelDia(new Date());
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(hoy);
+		
 		try {
-      Calendario calendario = CalendarioFactory.getCalendario();
       for(int i=0; i<recurso.getDiasInicioVentanaInternet().intValue(); ) {
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
           i++;
@@ -191,7 +196,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 
     //Calcular la fecha final: fecha inicial + getDiasVentanaInternet (tener en cuenta los días no hábiles)
     try {
-      Calendario calendario = CalendarioFactory.getCalendario();
       for(int i=0; i<recurso.getDiasVentanaInternet().intValue()-1; ) {
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
           i++;
@@ -215,39 +219,37 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * del inicio de disponibilidad indicado en el recurso, no se devuelve cupos.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo v, TimeZone timezone) {
+	public List<Object[]> obtenerCuposAsignados(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) {
 		//La clono pues la voy a modificar.
-		v = new VentanaDeTiempo(v);
-		
+		ventana = new VentanaDeTiempo(ventana);
     Calendar cal = new GregorianCalendar();
     cal.add(Calendar.MILLISECOND, timezone.getOffset((new Date()).getTime()));
     Date ahora = cal.getTime();
-
-		//Elimino el PASADO
-		if (v.getFechaInicial().before(ahora)) {
-			v.setFechaInicial(ahora);
+		//Elimino el pasado
+		if (ventana.getFechaInicial().before(ahora)) {
+			ventana.setFechaInicial(ahora);
 		}
-		if (v.getFechaInicial().before(r.getFechaInicioDisp())) {
-			v.setFechaInicial(r.getFechaInicioDisp());
+		if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
+			ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		}
-		
 		//Cupos asignados por dia.
-		List<Object[]> cuposAsignados = entityManager.createQuery(
-			"select d.fecha, sum(d.cupo) " + 
-			"from  Disponibilidad d " +
-			"where d.recurso = :rec and " +
-			"      d.fechaBaja is null and " +
-			"      d.fecha between :fi and :ff and " +
-	    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) " +
-			"group by d.fecha " +
-			"order by d.fecha asc ")
-			.setParameter("rec", r)
-			.setParameter("fi", v.getFechaInicial(), TemporalType.DATE)
-			.setParameter("ff", v.getFechaFinal(), TemporalType.DATE)
+		//NO se debe considerar las disponibilidades presenciales
+		String eql = "SELECT d.fecha, SUM(d.cupo) " + 
+	      "FROM Disponibilidad d " +
+	      "WHERE d.recurso = :rec " +
+        "  AND d.presencial = false " +
+	      "  AND d.fechaBaja is null " +
+	      "  AND d.fecha BETWEEN :fi AND :ff " +
+	      "  AND (d.fecha <> :hoy OR d.horaInicio >= :ahora) " +
+	      "GROUP BY d.fecha " +
+	      "ORDER BY d.fecha asc ";
+		List<Object[]> cuposAsignados = entityManager.createQuery(eql)
+			.setParameter("rec", recurso)
+			.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
+			.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
 			.setParameter("hoy", ahora, TemporalType.DATE)
 			.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
 			.getResultList();
-		
 		return cuposAsignados;
 	}
 
@@ -258,44 +260,41 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * del inicio de disponibilidad indicado en el recurso, no se devuelve cupos.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo v, TimeZone timezone) {
-		
+	public List<Object[]> obtenerCuposConsumidos(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) {
 		//La clono pues la voy a modificar.
-		v = new VentanaDeTiempo(v);
-		
+		ventana = new VentanaDeTiempo(ventana);
     //Date ahora = new Date();
     Calendar cal = new GregorianCalendar();
     cal.add(Calendar.MILLISECOND, timezone.getOffset((new Date()).getTime()));
     Date ahora = cal.getTime();
-
 		//Elimino el PASADO
-		if (v.getFechaInicial().before(ahora)) {
-			v.setFechaInicial(ahora);
+		if (ventana.getFechaInicial().before(ahora)) {
+			ventana.setFechaInicial(ahora);
 		}
-		if (v.getFechaInicial().before(r.getFechaInicioDisp())) {
-			v.setFechaInicial(r.getFechaInicioDisp());
+		if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
+			ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		}
-		
 		//Cupos consumidos, es decir, cantidad de reservas por dia no canceladas.
+		//No se debe considerar las disponibilidades presenciales
 		List<Object[]> cuposConsumidos = entityManager.createQuery(
-			"select d.fecha, count(reserva) " + 
-			"from  Disponibilidad d " +
-			"      left join d.reservas reserva " +
-			"where d.recurso = :rec and " +
-			"      d.fechaBaja is null and " +
-			"      d.fecha between :fi and :ff and " +
-    	"      (d.fecha <> :hoy or d.horaInicio >= :ahora) and " +
-			"      (reserva is null or reserva.estado <> :cancelado) " +
-			"group by d.fecha " +
-			"order by d.fecha asc ")
-			.setParameter("rec", r)
-			.setParameter("fi", v.getFechaInicial(), TemporalType.DATE)
-			.setParameter("ff", v.getFechaFinal(), TemporalType.DATE)
+			"SELECT d.fecha, COUNT(reserva) " + 
+			"FROM Disponibilidad d " +
+			"LEFT JOIN d.reservas reserva " +
+			"WHERE d.recurso = :rec " +
+      "  AND d.presencial = false " +
+			"  AND d.fechaBaja is null " +
+			"  AND d.fecha BETWEEN :fi AND :ff " +
+    	"  AND (d.fecha <> :hoy OR d.horaInicio >= :ahora) " +
+			"  AND (reserva is null OR reserva.estado <> :cancelado) " +
+			"GROUP BY d.fecha " +
+			"ORDER BY d.fecha asc ")
+			.setParameter("rec", recurso)
+			.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
+			.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
 			.setParameter("hoy", ahora, TemporalType.DATE)
 			.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
 			.setParameter("cancelado", Estado.C)
 			.getResultList();
-
 		return cuposConsumidos;
 	}
 	
@@ -336,18 +335,15 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 					} else {
 						cupoAsignado = null;
 					}
-					
 					if (cupoConsumido != null) {
 						Date fechaDelCupoC = (Date)cupoConsumido[0];
 						if (fechaDelCupoC.equals(cont.getTime())) {
 							//Nunca deberia ser mas grande que un Entero.	
 							cantidadDeCupos -= ((Long)cupoConsumido[1]).intValue();
-							
 							if (cantidadDeCupos < -1) {
 								//Solo se da en el caso de que mas de uno hayan querido reservar a la vez cuando quedaba solo un cupo
 								cantidadDeCupos = -1;
 							}
-							
 							if (iterCuposConsumidos.hasNext()) {
 								cupoConsumido = iterCuposConsumidos.next();
 							} else {
@@ -357,11 +353,9 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 					}
 				}
 			}
-			
 			cuposXdia.add(cantidadDeCupos);
 			cont.add(Calendar.DAY_OF_MONTH, 1);
 		}
-
 		return cuposXdia;
 	}
 	
@@ -575,20 +569,17 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 						DatoASolicitar campo = validacionPorDato.getDatoASolicitar();
 						DatoReserva dato = valores.get(campo.getNombre());
 						if (dato != null) {
-							//TODO parsear el valor de String al tipo que corresponda: Stirng, Integer, Date
 							if (campo.getTipo() == Tipo.NUMBER){
 								parametros.put(nombreParametro, Integer.valueOf(dato.getValor()));
-							}
-							else if (campo.getTipo() == Tipo.BOOLEAN) {
+							}	else if (campo.getTipo() == Tipo.BOOLEAN) {
 								parametros.put(nombreParametro, Boolean.valueOf(dato.getValor()));
-							}
-							else {
+							}	else {
 								parametros.put(nombreParametro, dato.getValor());
 							}
 						} else {
 							//parametros.put(nombreParametro, null);
 							//Este codigo esta en las acciones, pero aca no puedo ponerlo mientras tenga mas adelante
-							//el quequeo isEmpty para no llamar a una validacion si todos los campos de la misma son opcionales
+							//el chequeo isEmpty para no llamar a una validacion si todos los campos de la misma son opcionales
 							//y estan en null. No se hay que analizarlo mas.
 						}
 						nombreCampos.add(campo.getNombre());
@@ -675,6 +666,14 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		recursoDTO.setDiasVentanaIntranet(recurso.getDiasVentanaIntranet());
 		recursoDTO.setDiasInicioVentanaInternet(recurso.getDiasInicioVentanaInternet());
 		recursoDTO.setDiasVentanaInternet(recurso.getDiasVentanaInternet());
+		recursoDTO.setPresencialAdmite(recurso.getPresencialAdmite());
+		recursoDTO.setPresencialCupos(recurso.getPresencialCupos());
+		recursoDTO.setPresencialLunes(recurso.getPresencialLunes());
+		recursoDTO.setPresencialMartes(recurso.getPresencialMartes());
+		recursoDTO.setPresencialMiercoles(recurso.getPresencialMiercoles());
+		recursoDTO.setPresencialJueves(recurso.getPresencialJueves());
+		recursoDTO.setPresencialViernes(recurso.getPresencialViernes());
+		recursoDTO.setPresencialSabado(recurso.getPresencialSabado());
 		
 		return recursoDTO;
 	}

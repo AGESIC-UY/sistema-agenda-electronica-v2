@@ -29,6 +29,7 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
 import uy.gub.imm.sae.web.common.reporte.Columna;
@@ -57,7 +58,14 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	
 	private List<SelectItem> itemsEstado;
 	
+	private Boolean atencionPresencial;
 	
+  public void beforePhaseListaDeEspera(PhaseEvent event) {
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("lista_de_espera"));
+    }
+  }
+  
 	@PostConstruct
 	public void init() {
 		if(FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap().containsKey("l")) {
@@ -75,13 +83,16 @@ public class ListaDeEsperaMBean extends BaseMBean {
 		if(huboError) {
 			return;
 		}
+		
+		atencionPresencial = false;
+		
 		if (listaDeEsperaSessionMBean.getAgrupaciones() == null && sessionMBean.getRecursoMarcado() != null) {
 			try {
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
 				listaDeEsperaSessionMBean.setAgrupaciones(agrupaciones);
 				if (listaDeEsperaSessionMBean.getHorarios() == null) {
 					try {
-						refrescarHorariosDeEspera(null);
+						refrescarHorariosDeEspera(null, atencionPresencial);
 					} catch (Exception e) {
 						addErrorMessage(e, MSG_ID);
 					}
@@ -113,13 +124,15 @@ public class ListaDeEsperaMBean extends BaseMBean {
 		this.sessionMBean = sessionMBean;
 	}
 
-	public void beforePhaseListaDeEspera(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("lista_de_espera"));
-		}
-	}
-	
-	public List<Columna> getDefinicionColumnas() {
+	public Boolean getAtencionPresencial() {
+    return atencionPresencial;
+  }
+
+  public void setAtencionPresencial(Boolean atencionPresencial) {
+    this.atencionPresencial = atencionPresencial;
+  }
+
+  public List<Columna> getDefinicionColumnas() {
 		if (definicionColumnas == null) {
 			definicionColumnas = new ArrayList<Columna>();
 			if (sessionMBean.getRecursoMarcado() != null) {
@@ -176,7 +189,7 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	@SuppressWarnings("unchecked")
 	public void cambiaSeleccionEstados(ValueChangeEvent event) {
 		List<Estado> estados = (List<Estado>) event.getNewValue();
-		refrescarHorariosDeEspera(estados);
+		refrescarHorariosDeEspera(estados, atencionPresencial);
 	}
 
 	/**
@@ -207,12 +220,17 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	}
 	
 	private void cierroDatosSiguiente() {
-		refrescarHorariosDeEspera(null);
+		refrescarHorariosDeEspera(null, atencionPresencial);
 		listaDeEsperaSessionMBean.setMostrarDatosSiguiente(false);
 	}
 
-	private void refrescarHorariosDeEspera(List<Estado> estados) {
+	private void refrescarHorariosDeEspera(List<Estado> estados, boolean atencionPresencial) {
+	  
+	  System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 1");
+	  
 		listaDeEsperaSessionMBean.setHorarios(new ArrayList<Horario>());
+
+    System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 2");
 		
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
 		if (sessionMBean.getRecursoMarcado() != null) {
@@ -220,15 +238,18 @@ public class ListaDeEsperaMBean extends BaseMBean {
 				if (getListaDeEsperaSessionMBean().getEstadosSeleccionado() == null) {
 					getListaDeEsperaSessionMBean().setEstadosSeleccionado(new ArrayList<Estado>());
 					getListaDeEsperaSessionMBean().getEstadosSeleccionado().add(Estado.R);
-					
 				}
 			
 				if(estados == null) {
 					estados = getListaDeEsperaSessionMBean().getEstadosSeleccionado();
 				}
 			
-				List<ReservaDTO> reservas = llamadasEJB.obtenerReservasEnEspera(recursoMarcado, estados, sessionMBean.getTimeZone());
-			
+		    System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 3");
+				
+				List<ReservaDTO> reservas = llamadasEJB.obtenerReservasEnEspera(recursoMarcado, estados, atencionPresencial, sessionMBean.getTimeZone());
+
+        System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 4 - reservas: "+reservas);
+				
 				Horario horario = null;
 				
 				//Recorro las reservas agrupándolas por horario
@@ -243,10 +264,8 @@ public class ListaDeEsperaMBean extends BaseMBean {
 						horario.getListaEspera().add(crearEspera(reserva));
 						
 						listaDeEsperaSessionMBean.getHorarios().add(horario);
-					}
-					else {
+					} else {
 						horario.getListaEspera().add(crearEspera(reserva));
-						
 					}
 				}
 			
@@ -254,12 +273,11 @@ public class ListaDeEsperaMBean extends BaseMBean {
 				if (getListaDeEsperaSessionMBean().getEstadosSeleccionado().size() == 1 &&
 					getListaDeEsperaSessionMBean().getEstadosSeleccionado().get(0).equals(Estado.R)) {
 					getListaDeEsperaSessionMBean().setRefrescarListaDeEspera(true);
-				}
-				else {
+				} else {
 					getListaDeEsperaSessionMBean().setRefrescarListaDeEspera(false);
 				}
-			} catch (BusinessException e) {
-				addErrorMessage(e, MSG_ID);
+			} catch (UserException uEx) {
+				addErrorMessage(uEx, MSG_ID);
 			}
 		}
 	}
@@ -429,6 +447,11 @@ public class ListaDeEsperaMBean extends BaseMBean {
 		public void setDatos(List<String> datos) {
 			this.datos = datos;
 		}
+	}
+	
+	public void cambioAtencionPresencial() {
+	  System.out.println("ListaDeEsperaMBean.cambioAtencionPresencial -- Cambio el indicador de atención presencial, ahora es: "+atencionPresencial);
+	  refrescarHorariosDeEspera(null, atencionPresencial);
 	}
 	
 }

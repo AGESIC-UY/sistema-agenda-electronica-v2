@@ -44,8 +44,6 @@ import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.ApplicationException;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
 
@@ -83,17 +81,12 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 		if (sessionMBean.getAgendaMarcada() == null || sessionMBean.getRecursoMarcado() == null) {
 			return;
 		}
-		try {
-			List<DatoASolicitar> listaDatoSolicitar = recursosEJB.consultarDatosSolicitar(sessionMBean.getRecursoMarcado());
-			Map<String, DatoASolicitar> datoSolicMap = new HashMap<String, DatoASolicitar>();
-			for (DatoASolicitar dato : listaDatoSolicitar) {
-				datoSolicMap.put(dato.getNombre(), dato);
-			}
-			setDatosASolicitar(datoSolicMap);
-		}catch (ApplicationException e) {
-			addErrorMessage(e.getMessage());
-			return;
+		List<DatoASolicitar> listaDatoSolicitar = recursosEJB.consultarDatosSolicitar(sessionMBean.getRecursoMarcado());
+		Map<String, DatoASolicitar> datoSolicMap = new HashMap<String, DatoASolicitar>();
+		for (DatoASolicitar dato : listaDatoSolicitar) {
+			datoSolicMap.put(dato.getNombre(), dato);
 		}
+		setDatosASolicitar(datoSolicMap);
 	}
 
   public void beforePhaseConsultarReservaDatos(PhaseEvent event) {
@@ -120,6 +113,11 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 		return "volver";
 	}
 	
+	/**
+	 * Busca reservas para el recurso actual que coincidan con los datos ingresados por el usuario.
+	 * No considera reservas que corresponden a disponibilidades presenciales.
+	 * @param e
+	 */
 	public void buscarReservaDatos(ActionEvent e) {
 		boolean huboError = false;
 		if(sessionMBean.getAgendaMarcada() == null && !huboError) {
@@ -160,8 +158,6 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 			try {
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefCamposTodos(this.sessionMBean.getRecursoMarcado());
 				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sessionMBean.getRecursoMarcado(), filtroConsulta, agrupaciones,sessionMBean.getFormatoFecha());
-			} catch (BusinessException be) {
-				addErrorMessage(be, MSG_ID);
 			} catch (Exception e) {
 				addErrorMessage(e);
 			}
@@ -193,8 +189,6 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 		try {
 			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
 			FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), this.consReservaDatosSessionMBean.getReservaDatos(), this.campos, agrupaciones,sessionMBean.getFormatoFecha());
-		} catch (BusinessException be) {
-			addErrorMessage(be, MSG_ID);
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}

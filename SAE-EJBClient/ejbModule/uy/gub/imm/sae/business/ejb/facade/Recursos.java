@@ -52,12 +52,12 @@ public interface Recursos {
 	public void eliminarAgrupacionDato(AgrupacionDato a, boolean controlarDatos) throws UserException, ApplicationException;
 	public List<AgrupacionDato> consultarAgrupacionesDatos(Recurso r) throws ApplicationException;
 	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws BusinessException;
-	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso) throws BusinessException;
+	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso) throws UserException;
 	//Métodos asociados a DatoASolicitar
 	public DatoASolicitar agregarDatoASolicitar(Recurso r,AgrupacionDato a, DatoASolicitar d) throws UserException, ApplicationException, BusinessException;
 	public void modificarDatoASolicitar(DatoASolicitar d) throws UserException, ApplicationException;
 	public void eliminarDatoASolicitar(DatoASolicitar d) throws UserException;
-	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r) throws ApplicationException;
+	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r);
 	public Boolean mostrarDatosASolicitarEnLlamador(Recurso r) throws BusinessException;
 	public boolean existeDatoASolicPorNombre(String n, Integer idRecurso, Integer idDatoSolicitar) throws ApplicationException;
 	//Métodos asociados a ValorPosible
@@ -71,8 +71,8 @@ public interface Recursos {
 	List<ServicioPorRecurso> consultarServicioAutocompletar (Recurso r) throws BusinessException;
 	public Boolean existeRecursoPorNombre(Recurso r) throws ApplicationException;
 	//Métodos de exportación e importación
-	public byte[] exportarRecurso(Recurso r) throws UserException;
-	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException;
+	public byte[] exportarRecurso(Recurso r, String versionSAE) throws UserException;
+	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE) throws UserException;
 
 
   /**

@@ -19,8 +19,7 @@
           </p:outputPanel>
 					<fieldset>
 						<legend>
-							<h:outputText
-								value="#{sessionMBean.textos['numero_de_la_reserva']}" />
+							<h:outputText value="#{sessionMBean.textos['numero_de_la_reserva']}" />
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
@@ -38,7 +37,9 @@
 						</li>
 					</ul>
 
-					<p:outputPanel id="resultadosBusqueda">
+					<p:outputPanel id="resultadosBusqueda" rendered="#{consultaMBean.reservaConsultada != null}">
+					
+					 <!-- Campos básicos del recurso -->
 						<fieldset>
 							<legend>
 								<h:outputText
@@ -46,108 +47,87 @@
 							</legend>
 							<p:outputPanel styleClass="form-horizontal">
 								
-								
                 <p:outputPanel styleClass="form-group">
-                  <h:outputLabel value="#{sessionMBean.textos['identificador_de_la_reserva']}"
-                    styleClass="col-sm-3 control-label label" for="resNum" />
+                  <h:outputLabel value="#{sessionMBean.textos['identificador_de_la_reserva']}" styleClass="col-sm-3 control-label label" for="resId" />
                   <p:outputPanel styleClass="col-sm-9">
-                    <h:inputText id="resId"
-                      value="#{consultaMBean.consultaSessionMBean.reserva.id}"
-                      styleClass="form-control textoCorto" readonly="true"
-                      disabled="true" />
+                    <h:inputText id="resId" value="#{consultaMBean.reservaConsultada.id}" styleClass="form-control textoCorto" readonly="true" disabled="true" />
                   </p:outputPanel>
                 </p:outputPanel>
 								
                 <p:outputPanel styleClass="form-group">
-                  <h:outputLabel value="#{sessionMBean.textos['tramite']}"
-                    styleClass="col-sm-3 control-label label" for="resNum" />
+                  <h:outputLabel value="#{sessionMBean.textos['tramite']}" styleClass="col-sm-3 control-label label" for="resTramite" />
                   <p:outputPanel styleClass="col-sm-9">
-                    <h:inputText id="resTramite"
-                      value="#{consultaMBean.consultaSessionMBean.reserva.tramiteCodigo} - #{consultaMBean.consultaSessionMBean.reserva.tramiteNombre}"
-                      styleClass="form-control" readonly="true"
-                      disabled="true" />
+                    <h:inputText id="resTramite" styleClass="form-control" readonly="true" disabled="true"
+                      value="#{consultaMBean.reservaConsultada.tramiteCodigo} - #{consultaMBean.reservaConsultada.tramiteNombre}" />
                   </p:outputPanel>
                 </p:outputPanel>
 
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['fecha']}"
-										styleClass="col-sm-3 control-label label" for="dispFecha" />
+									<h:outputLabel value="#{sessionMBean.textos['fecha']}" styleClass="col-sm-3 control-label label" for="dispFecha" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="dispFecha"
-											styleClass="form-control datepicker-dis" readonly="true"
-											disabled="true"
-											value="#{consultaMBean.consultaSessionMBean.disponibilidad.fecha}">
-											<f:convertDateTime type="date"
-												pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
-												locale="es" />
+										<h:inputText id="dispFecha" styleClass="form-control datepicker-dis" readonly="true" disabled="true" value="#{consultaMBean.reservaConsultada.disponibilidades[0].fecha}">
+											<f:convertDateTime type="date" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" locale="es" />
 										</h:inputText>
 									</p:outputPanel>
 								</p:outputPanel>
 
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['hora']}"
-										styleClass="col-sm-3 control-label label" for="dispHoraInicio" />
+									<h:outputLabel value="#{sessionMBean.textos['hora']}" styleClass="col-sm-3 control-label label" for="dispHoraInicio" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText styleClass="form-control textoCorto"
-											readonly="true" disabled="true" id="dispHoraInicio"
-											value="#{consultaMBean.consultaSessionMBean.disponibilidad.horaInicio}">
-											<f:convertDateTime type="time"
-												pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+										<h:inputText styleClass="form-control textoCorto" readonly="true" disabled="true" id="dispHoraInicio" value="#{consultaMBean.reservaConsultada.disponibilidades[0].horaInicio}">
+											<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 										</h:inputText>
 									</p:outputPanel>
 								</p:outputPanel>
 
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['numero']}"
-										styleClass="col-sm-3 control-label label" for="resNum" />
+									<h:outputLabel value="#{sessionMBean.textos['serie']}" styleClass="col-sm-3 control-label label" for="resSerie" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="resNum"
-											value="#{consultaMBean.consultaSessionMBean.reserva.numero}"
-											styleClass="form-control textoCorto" readonly="true"
-											disabled="true" />
+										<h:inputText id="resSerie" value="#{consultaMBean.reservaConsultada.serie}" styleClass="form-control textoCorto" readonly="true" disabled="true" />
+									</p:outputPanel>
+								</p:outputPanel>
+
+                <p:outputPanel styleClass="form-group">
+                  <h:outputLabel value="#{sessionMBean.textos['numero']}" styleClass="col-sm-3 control-label label" for="resNum" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="resNum" value="#{consultaMBean.reservaConsultada.numero}" styleClass="form-control textoCorto" readonly="true" disabled="true" />
+                  </p:outputPanel>
+                </p:outputPanel>
+
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['estado']}" styleClass="col-sm-3 control-label label" for="resEstadoDes" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText styleClass="form-control" id="resEstadoDes" value="#{consultaMBean.reservaConsultada.estadoDescripcion}" readonly="true" disabled="true" />
 									</p:outputPanel>
 								</p:outputPanel>
 
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['estado']}"
-										styleClass="col-sm-3 control-label label" for="resEstadoDes" />
+									<h:outputLabel value="#{sessionMBean.textos['observaciones']}" styleClass="col-sm-3 control-label label" for="resObs" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText styleClass="form-control" id="resEstadoDes"
-											value="#{consultaMBean.consultaSessionMBean.reserva.estadoDescripcion}"
-											readonly="true" disabled="true" />
+										<h:inputText id="resObs" value="#{consultaMBean.reservaConsultada.observaciones}" styleClass="form-control" readonly="true" disabled="true" />
 									</p:outputPanel>
 								</p:outputPanel>
 
-								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['observaciones']}"
-										styleClass="col-sm-3 control-label label" for="resObs" />
-									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="resObs"
-											value="#{consultaMBean.consultaSessionMBean.reserva.observaciones}"
-											styleClass="form-control" readonly="true" disabled="true" />
-									</p:outputPanel>
-								</p:outputPanel>
+                <p:outputPanel styleClass="form-group">
+                  <h:outputLabel value="#{sessionMBean.textos['atencion_presencial']}" styleClass="col-sm-3 control-label label" for="resPresencial" />
+                  <p:outputPanel styleClass="col-sm-9">
+                    <h:inputText id="resPresencial" value="#{consultaMBean.reservaConsultada.presencial}" styleClass="form-control" readonly="true" disabled="true" converter="booleanConverter" />
+                  </p:outputPanel>
+                </p:outputPanel>
 
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel
-										value="#{sessionMBean.textos['fecha_de_creacion']}"
-										styleClass="col-sm-3 control-label label"
-										for="resFechaCreacion" />
+									<h:outputLabel value="#{sessionMBean.textos['fecha_de_creacion']}" styleClass="col-sm-3 control-label label" for="resFechaCreacion" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText styleClass="form-control datepicker-dis"
-											readonly="true" disabled="true" id="resFechaCreacion"
-											value="#{consultaMBean.consultaSessionMBean.reserva.fechaCreacion}">
-											<f:convertDateTime type="date"
-												pattern="#{sessionMBean.formatoFecha}" timeZone="GMT"
-												locale="es" />
+										<h:inputText styleClass="form-control datepicker-dis" readonly="true" disabled="true" id="resFechaCreacion" value="#{consultaMBean.reservaConsultada.fechaCreacion}">
+											<f:convertDateTime type="date" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" locale="es" />
 										</h:inputText>
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
 						</fieldset>
-						<h:panelGroup id="camposDin" binding="#{consultaMBean.campos}"
-							layout="block">
-						</h:panelGroup>
+						
+						<!-- Campos propios del recurso -->
+						<h:panelGroup id="camposDin" binding="#{consultaMBean.campos}" layout="block" />
 
 					</p:outputPanel>
 				</h:form>

@@ -415,6 +415,7 @@ public class Paso3MBean extends PasoMBean {
 			while (!confirmada) {
 				try {
 					Reserva rConfirmada = agendarReservasEJB.confirmarReserva(sesionMBean.getEmpresaActual(), reserva, transaccionPadreId, pasoPadre, false);
+					reserva.setSerie(rConfirmada.getSerie());
 					reserva.setNumero(rConfirmada.getNumero());
 					reserva.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
 					reserva.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());

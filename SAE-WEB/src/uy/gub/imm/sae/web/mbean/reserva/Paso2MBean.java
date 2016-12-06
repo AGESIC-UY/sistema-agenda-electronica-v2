@@ -203,32 +203,24 @@ public class Paso2MBean extends PasoMBean {
 	private void configurarDisponibilidadesDelDia() {
 		List<Disponibilidad> dispMatutinas = new ArrayList<Disponibilidad>();
 		List<Disponibilidad> dispVespertinas = new ArrayList<Disponibilidad>();
-
 		if (sesionMBean.getDiaSeleccionado() != null) {
-
 			VentanaDeTiempo ventana = new VentanaDeTiempo();
 			ventana.setFechaInicial(Utiles.time2InicioDelDia(sesionMBean.getDiaSeleccionado()));
 			ventana.setFechaFinal(Utiles.time2FinDelDia(sesionMBean.getDiaSeleccionado()));
-
 			try {
 				List<Disponibilidad> lista = agendarReservasEJB.obtenerDisponibilidades(sesionMBean.getRecurso(),	ventana, sesionMBean.getTimeZone());
-
 				for (Disponibilidad d : lista) {
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(d.getHoraInicio());
 					if(d.getCupo()<0) {
 					  d.setCupo(0);
 					}
-
 					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
-						// Matutino
 						dispMatutinas.add(d);
 					} else {
-						// Vespertino
 						dispVespertinas.add(d);
 					}
 				}
-
 			} catch (Exception e) {
 				addErrorMessage(e);
 			}
@@ -238,7 +230,7 @@ public class Paso2MBean extends PasoMBean {
 		sesionMBean.setDisponibilidadesDelDiaVespertina(new RowList<Disponibilidad>(dispVespertinas));
 	}
 
-	private void configurarCalendario() throws RolException, BusinessException {
+	private void configurarCalendario() throws RolException, UserException {
 
 		Recurso recurso = sesionMBean.getRecurso();
 

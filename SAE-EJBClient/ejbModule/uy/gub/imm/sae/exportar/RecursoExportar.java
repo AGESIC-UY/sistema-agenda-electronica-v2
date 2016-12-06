@@ -16,6 +16,8 @@ import javax.xml.bind.annotation.XmlElement;
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RecursoExportar {
 
+  private String versionSAE;
+  
 	private String nombre;
 	private String descripcion;
 	private Date fechaInicio;
@@ -41,8 +43,7 @@ public class RecursoExportar {
   private Boolean domingoEsHabil;
 
 	// Datos obtenidos a partir de TramitesUy
-	private String oficinaId; // Esto es inventado, las oficinas no tienen id en
-								// TramitesUy
+	private String oficinaId; // Esto es inventado, las oficinas no tienen id en TramitesUy
 	private String direccion;
 	private String localidad;
 	private String departamento;
@@ -51,6 +52,16 @@ public class RecursoExportar {
 
 	private BigDecimal latitud;
 	private BigDecimal longitud;
+	
+  private Boolean presencialAdmite;
+  private Integer presencialCupos;
+  private Boolean presencialLunes;
+  private Boolean presencialMartes;
+  private Boolean presencialMiercoles;
+  private Boolean presencialJueves;
+  private Boolean presencialViernes;
+  private Boolean presencialSabado;
+  private Boolean presencialDomingo;
 
 	@XmlElement(name = "agrupaciones")
 	private List<AgrupacionDatoExport> agrupaciones = new ArrayList<AgrupacionDatoExport>();
@@ -324,5 +335,85 @@ public class RecursoExportar {
 	public void setMostrarIdEnTicket(Boolean mostrarIdEnTicket) {
 		this.mostrarIdEnTicket = mostrarIdEnTicket;
 	}
+
+  public Boolean getPresencialAdmite() {
+    return presencialAdmite;
+  }
+
+  public void setPresencialAdmite(Boolean presencialAdmite) {
+    this.presencialAdmite = presencialAdmite;
+  }
+
+  public Integer getPresencialCupos() {
+    return presencialCupos;
+  }
+
+  public void setPresencialCupos(Integer presencialCupos) {
+    this.presencialCupos = presencialCupos;
+  }
+
+  public Boolean getPresencialLunes() {
+    return presencialLunes;
+  }
+
+  public void setPresencialLunes(Boolean presencialLunes) {
+    this.presencialLunes = presencialLunes;
+  }
+
+  public Boolean getPresencialMartes() {
+    return presencialMartes;
+  }
+
+  public void setPresencialMartes(Boolean presencialMartes) {
+    this.presencialMartes = presencialMartes;
+  }
+
+  public Boolean getPresencialMiercoles() {
+    return presencialMiercoles;
+  }
+
+  public void setPresencialMiercoles(Boolean presencialMiercoles) {
+    this.presencialMiercoles = presencialMiercoles;
+  }
+
+  public Boolean getPresencialJueves() {
+    return presencialJueves;
+  }
+
+  public void setPresencialJueves(Boolean presencialJueves) {
+    this.presencialJueves = presencialJueves;
+  }
+
+  public Boolean getPresencialViernes() {
+    return presencialViernes;
+  }
+
+  public void setPresencialViernes(Boolean presencialViernes) {
+    this.presencialViernes = presencialViernes;
+  }
+
+  public Boolean getPresencialSabado() {
+    return presencialSabado;
+  }
+
+  public void setPresencialSabado(Boolean presencialSabado) {
+    this.presencialSabado = presencialSabado;
+  }
+
+  public Boolean getPresencialDomingo() {
+    return presencialDomingo;
+  }
+
+  public void setPresencialDomingo(Boolean presencialDomingo) {
+    this.presencialDomingo = presencialDomingo;
+  }
+
+  public String getVersionSAE() {
+    return versionSAE;
+  }
+
+  public void setVersionSAE(String versionSAE) {
+    this.versionSAE = versionSAE;
+  }
 
 }

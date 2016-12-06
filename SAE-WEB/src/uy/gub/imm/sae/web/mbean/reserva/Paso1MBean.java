@@ -98,7 +98,6 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 
 	public void beforePhase(PhaseEvent phaseEvent) {
 		disableBrowserCache(phaseEvent);
-
 		if (phaseEvent.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sesionMBean.limpiarPaso2();
 		}
@@ -616,7 +615,12 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			try {
 				VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
 				
+				logger.debug("Ventanda calendario: "+ventanaCalendario.getFechaInicial()+" a "+ventanaCalendario.getFechaFinal());
+				
         List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventanaCalendario, sesionMBean.getTimeZone());
+        
+        logger.debug("Lista de cupos: "+listaCupos);
+        
 				// Se carga la fecha inicial
 				Calendar cont = Calendar.getInstance();
         cont.setTime(Utiles.time2InicioDelDia(ventanaCalendario.getFechaInicial()));

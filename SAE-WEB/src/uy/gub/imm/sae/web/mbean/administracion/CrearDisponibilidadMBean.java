@@ -93,12 +93,14 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 		}
 	}
 
-	
+  /**
+   * Este método es invocado desde la interfaz web para crear disponibilidades para un día seleccionado
+   * @param event
+   */
 	public void crearDisponibilidades(ActionEvent event){
 		limpiarMensajesError();
 		
 		boolean huboError = false;
-		
 		try{
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
@@ -119,11 +121,11 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 				}
 			}
 			
+
 			Date fecha = crearDispSessionMBean.getFechaCrear();
 			if(fecha==null) {
 				fecha = new Date();
 			}
-			
 			Calendar c0 = new GregorianCalendar();
 			c0.setTime(fecha); //Debe estar en GMT0
 			
@@ -222,10 +224,9 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 
 	private void cargarListaHoras(){
 		horas =  new ArrayList<SelectItem>();
-	    Integer h = 0;
-	    String labelH;
-	    
-	    while (h < 24){
+    Integer h = 0;
+    String labelH;
+    while (h < 24){
 			SelectItem s = new SelectItem();
 			s.setValue(h);
 			labelH = Integer.toString(h);
@@ -239,12 +240,10 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 
 	private void cargarListaMinutos(){
-
 		minutos =  new ArrayList<SelectItem>();
-	    Integer h = 0;
-	    String labelH;
-	    
-	    while (h < 60){
+    Integer h = 0;
+    String labelH;
+    while (h < 60){
 			SelectItem s = new SelectItem();
 			s.setValue(h);
 			labelH = Integer.toString(h);
@@ -274,9 +273,7 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void consultarDisponibilidadesDelDia(ActionEvent event) {
-		
 		limpiarMensajesError();
-		
 		try {
 			boolean huboError = false;
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
@@ -297,9 +294,8 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 					}
 				}
 			}
-			
 			if(!huboError){
-				this.configurarDisponibilidadesDelDia();
+				configurarDisponibilidadesDelDia();
 			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
@@ -307,42 +303,28 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 	
 	
-	public void configurarDisponibilidadesDelDia() {
-
+	private void configurarDisponibilidadesDelDia() {
 		List<DisponibilidadReserva> dispMatutinas   = new ArrayList<DisponibilidadReserva>();
 		List<DisponibilidadReserva> dispVespertinas = new ArrayList<DisponibilidadReserva>();
-
+		//Armar la ventana con solo el día seleccionado
 		VentanaDeTiempo ventana = new VentanaDeTiempo();
-		
-	ventana.setFechaInicial(Utiles.time2InicioDelDia(crearDispSessionMBean.getFechaCrear()));
-	ventana.setFechaFinal(Utiles.time2FinDelDia(crearDispSessionMBean.getFechaCrear()));
-			
+  	ventana.setFechaInicial(Utiles.time2InicioDelDia(crearDispSessionMBean.getFechaCrear()));
+  	ventana.setFechaFinal(Utiles.time2FinDelDia(crearDispSessionMBean.getFechaCrear()));
 		try {
+		  //Obtener las disponibilidades para el día seleccionado
 			List<DisponibilidadReserva> lista = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventana);
-				
 			for (DisponibilidadReserva d : lista) {
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(d.getHoraInicio());
-					//cal.setTimeZone(sessionMBean.getTimeZone());
-					
-					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
-						//Matutino
-						dispMatutinas.add(d);
-					}
-					else {
-						//Vespertino
-						dispVespertinas.add(d);
-					}
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(d.getHoraInicio());
+				if (cal.get(Calendar.AM_PM) == Calendar.AM) {
+					dispMatutinas.add(d);
+				}	else {
+					dispVespertinas.add(d);
+				}
 			}
-				
-				
 		} catch (Exception ex) {
-			
-			ex.printStackTrace();
-			
 			addErrorMessage(ex);
 		}
-
 		crearDispSessionMBean.setDisponibilidadesDelDiaMatutina(new RowList<DisponibilidadReserva>(dispMatutinas));
 		crearDispSessionMBean.setDisponibilidadesDelDiaVespertina(new RowList<DisponibilidadReserva>(dispVespertinas));
 	}
@@ -350,17 +332,14 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	public String getMensajePeriodoDisponibilidad() {
 		if(sessionMBean.getRecursoMarcado() != null) {
 			DateFormat df = new SimpleDateFormat(sessionMBean.getFormatoFecha());
-			if (sessionMBean.getRecursoMarcado().getFechaFinDisp()!=null)
-			{
+			if (sessionMBean.getRecursoMarcado().getFechaFinDisp()!=null) {
 				return sessionMBean.getTextos().get("la_fecha_debe_estar_comprendida_en_el_periodo_fdesde_a_fhasta")
-						.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()))
-						.replace("{fhasta}", df.format(sessionMBean.getRecursoMarcado().getFechaFinDisp()));
-			}else
-			{
+  				.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()))
+  				.replace("{fhasta}", df.format(sessionMBean.getRecursoMarcado().getFechaFinDisp()));
+			}else {
 				return sessionMBean.getTextos().get("la_fecha_debe_ser_posterior_a_la_fecha_fdesde")
-						.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()));
+					.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()));
 			}
-			
 		}
 		return "";
 	}

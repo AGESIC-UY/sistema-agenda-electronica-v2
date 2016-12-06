@@ -22,7 +22,6 @@ package uy.gub.imm.sae.entity;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -38,7 +37,6 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -61,12 +59,13 @@ public class Disponibilidad implements Serializable {
 	private Plantilla plantilla;
 	private List<Reserva> reservas;
 	
+	private Boolean presencial;
 	
 	public Disponibilidad () {
 		numerador = 0;
+		presencial = false;
 		reservas = new ArrayList<Reserva>();
 	}
-	
 	
 	@Id
 	@GeneratedValue (strategy = GenerationType.SEQUENCE, generator = "seq_disponibilidad")
@@ -130,23 +129,16 @@ public class Disponibilidad implements Serializable {
 		this.version = version;
 	}
 
-	@Transient
-	public Integer getDuracionEnMinutos() {
-		Calendar cali = Calendar.getInstance();
-		cali.setTime(horaInicio);
-		Calendar calf = Calendar.getInstance();
-		calf.setTime(horaFin);
-		
-		calf.add(Calendar.MINUTE, -cali.get(Calendar.MINUTE));
-		calf.add(Calendar.HOUR_OF_DAY, -cali.get(Calendar.HOUR_OF_DAY));
-		
-		Integer h = calf.get(Calendar.HOUR_OF_DAY);
-		Integer m = calf.get(Calendar.MINUTE);
-		
-		return h*60 + m;
-	}
+  @Column(name="presencial", nullable=false)
+	public Boolean getPresencial() {
+    return presencial;
+  }
 
-	@Column (name = "fecha_baja")
+  public void setPresencial(Boolean presencial) {
+    this.presencial = presencial;
+  }
+
+  @Column (name = "fecha_baja")
 	@Temporal(TemporalType.TIMESTAMP)
 	public Date getFechaBaja() {
 		return fechaBaja;
@@ -167,7 +159,6 @@ public class Disponibilidad implements Serializable {
 	
 	@XmlTransient
 	@ManyToMany (mappedBy = "disponibilidades")
-	//@ManyToMany 
 	public List<Reserva> getReservas() {
 		return reservas;
 	}
@@ -190,4 +181,5 @@ public class Disponibilidad implements Serializable {
 		return "Disponibilidad [id="+id+",fecha=" + fecha + ",horaIni=" + horaInicio +"]";
 	}
 
+	
 }

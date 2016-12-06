@@ -226,7 +226,7 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 	}
 
 	
-	private void configurarCalendario() throws RolException, BusinessException {
+	private void configurarCalendario() throws RolException, UserException {
 
 		Recurso recurso = sessionMBean.getRecurso();
 

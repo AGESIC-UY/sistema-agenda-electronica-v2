@@ -20,6 +20,8 @@ package uy.gub.imm.sae.web.mbean.administracion;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.io.ByteArrayOutputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -36,24 +38,33 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.model.SelectItem;
-import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
 
+import com.itextpdf.text.BaseColor;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.Image;
+import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.pdf.BaseFont;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.text.pdf.draw.LineSeparator;
+
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Disponibilidades;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.common.enumerados.ModoAutocompletado;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
+import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.ParametrosAutocompletar;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioAutocompletarPorDato;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
-import uy.gub.imm.sae.entity.TextoAgenda;
-import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
@@ -66,6 +77,7 @@ import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 /**
@@ -77,9 +89,11 @@ import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
  *
  */
 
-public class Paso3AdminMBean extends PasoAdminMBean {
+public class AtencionPresencialMBean extends BaseMBean {
 
-	static Logger logger = Logger.getLogger(Paso3AdminMBean.class);
+  public static final String MSG_ID = "pantalla";
+  
+	static Logger logger = Logger.getLogger(AtencionPresencialMBean.class);
 	public static final String FORMULARIO_ID = "datosReserva";
 	public static final String DATOS_RESERVA_MBEAN = "datosReservaMBean";
 
@@ -89,6 +103,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
 
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/DisponibilidadesBean!uy.gub.imm.sae.business.ejb.facade.DisponibilidadesRemote")
+  private Disponibilidades disponibilidadesEJB;
+	
 	private SessionMBean sessionMBean;
 
 	private UIComponent campos;
@@ -100,37 +117,68 @@ public class Paso3AdminMBean extends PasoAdminMBean {
   private List<SelectItem> tramites;
   private String tramiteCodigo;
 	private String aceptaCondiciones;
+	
+	private Reserva reserva;
+	private Reserva reservaConfirmada;
 
 	public void beforePhase(PhaseEvent event) {
+	  
 		disableBrowserCache(event);
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));
-			if (sessionMBean.getReserva() == null) {
-				// Se ha apretado el boton de back o algun acceso directo
-				FacesContext ctx = FacesContext.getCurrentInstance();
-				ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "pasoAnterior");
-			}
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("atencion_presencial"));
 		}
 	}
 
 	@PostConstruct
 	public void init() {
 
-		if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null) {
-			redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
-			return;
-		}
-		
+    Agenda agenda = sessionMBean.getAgendaMarcada();
+    Recurso recurso = sessionMBean.getRecursoMarcado();
+    
+    boolean hayError = false;
+    
+    //Verificar si hay una agenda y un recurso seleccionados
+    if(agenda == null) {
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+      hayError = true;
+    }
+    if(recurso == null) {
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+      hayError = true;
+    }
+    
+    if(hayError) {
+      return;
+    }
+    
+    //Determinar si el recurso admite atención presencial
+    if(recurso.getPresencialAdmite()==null || !recurso.getPresencialAdmite().booleanValue()) {
+      addErrorMessage(sessionMBean.getTextos().get("el_recurso_no_admite_atencion_presencial"), MSG_ID);
+      return;
+    }
+    //Determinar si quedan cupos disponibles para hoy
+    Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sessionMBean.getTimeZone());
+    if(disponibilidad == null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_recurso_no_admite_atencion_presencial"), MSG_ID);
+      return;
+    }
+    
+    if(disponibilidad.getCupo().intValue() <= disponibilidad.getNumerador().intValue()) {
+      addErrorMessage(sessionMBean.getTextos().get("no_hay_cupos_disponibles_para_hoy"), MSG_ID);
+      return;
+    }
+    
+    //Cargar en sesión la agenda y el recurso
+    sessionMBean.setAgenda(agenda);
+    sessionMBean.setRecurso(recurso);
+    
+    //Cargar los tramites de la agenda
     try {
       this.tramiteCodigo = null;
       tramitesAgenda = new HashMap<String, TramiteAgenda>();
       tramites = new ArrayList<SelectItem>();
       
-      Reserva reserva = sessionMBean.getReserva();
-      Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
       List<TramiteAgenda> tramites0 = agendarReservasEJB.consultarTramites(agenda);
-
       if(tramites0.size()==1) {
         TramiteAgenda tramite = tramites0.get(0);
         tramiteCodigo = tramite.getTramiteCodigo();
@@ -144,78 +192,32 @@ public class Paso3AdminMBean extends PasoAdminMBean {
       }
     }catch(Exception ex) {
       ex.printStackTrace();
-      redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
-      return;
+      addErrorMessage(ex.getMessage());
     }
-		
 	}
 
+	public Reserva getReservaConfirmada() {
+    return reservaConfirmada;
+  }
+
+  public boolean getRecursoPermitirAtencionPresencial() {
+    Recurso recurso = sessionMBean.getRecursoMarcado();
+    if(recurso==null || recurso.getPresencialAdmite()==null || !recurso.getPresencialAdmite().booleanValue()) {
+      return false;
+    }
+    Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sessionMBean.getTimeZone());
+    if(disponibilidad == null || disponibilidad.getCupo().intValue() <= disponibilidad.getNumerador().intValue()) {
+      return false;
+    }
+    return true;
+	}
+	
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
 
 	public void setSessionMBean(SessionMBean sessionMBean) {
 		this.sessionMBean = sessionMBean;
-	}
-
-	public String getAgendaNombre() {
-		if (sessionMBean.getAgenda() != null) {
-			return sessionMBean.getAgenda().getNombre();
-		} else {
-			return null;
-		}
-	}
-
-	public String getRecursoDescripcion() {
-		Recurso recurso = sessionMBean.getRecurso();
-		if (recurso != null) {
-			String descripcion = recurso.getNombre();
-			if(descripcion != null && !descripcion.equals(recurso.getDireccion())) {
-				descripcion = descripcion + " - " + recurso.getDireccion();
-			}
-			return  descripcion;
-		} else {
-			return null;
-		}
-	}
-
-	public String getDescripcion() {
-		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgenda(), sessionMBean.getIdiomaActual());
-		if (textoAgenda != null) {
-			return textoAgenda.getTextoPaso3();
-		} else {
-			return null;
-		}
-	}
-
-	public String getDescripcionRecurso() {
-		TextoRecurso textoRecurso = getTextoRecurso(sessionMBean.getRecursoMarcado(), sessionMBean.getIdiomaActual());
-		if (textoRecurso != null) {
-			return textoRecurso.getTextoPaso3();
-		} else {
-			return null;
-		}
-	}
-
-	public String getEtiquetaDelRecurso() {
-		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgendaMarcada(), sessionMBean.getIdiomaActual());
-		if (textoAgenda != null) {
-			return textoAgenda.getTextoSelecRecurso();
-		} else {
-			return null;
-		}
-	}
-
-	public Date getDiaSeleccionado() {
-		return sessionMBean.getDiaSeleccionado();
-	}
-
-	public Date getHoraSeleccionada() {
-		if (sessionMBean.getDisponibilidad() != null) {
-			return sessionMBean.getDisponibilidad().getHoraInicio();
-		} else {
-			return null;
-		}
 	}
 
 	public String getClausulaConsentimiento() {
@@ -265,8 +267,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 										if (ultimo == null) {
 											ultimo = sDato.getDatoASolicitar();
 										} else {
-											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo
-													.getAgrupacionDato().getOrden().intValue()) {
+											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo.getAgrupacionDato().getOrden().intValue()) {
 												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
 												if (auxServiciosRecurso.size() > 1) {
 													auxServiciosRecurso.remove(sRec.getId());
@@ -274,8 +275,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 													serviciosAutocompletar.remove(ultimo.getId());
 												}
 												ultimo = sDato.getDatoASolicitar();
-											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == 
-											    ultimo.getAgrupacionDato().getOrden().intValue()) {
+											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == ultimo.getAgrupacionDato().getOrden().intValue()) {
 												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
 													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
 													if (auxServiciosRecurso.size() > 1) {
@@ -338,17 +338,12 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 				if (formularioDin == null) {
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
-
+					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,	FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
 					HashMap<Integer, HashMap<Integer, ServicioPorRecurso>> serviciosAutocompletar = new HashMap<Integer, HashMap<Integer, ServicioPorRecurso>>();
-
 					List<ServicioPorRecurso> lstServiciosPorRecurso = recursosEJB.consultarServicioAutocompletar(recurso);
-
 					for (ServicioPorRecurso sRec : lstServiciosPorRecurso) {
 						List<ServicioAutocompletarPorDato> lstDatos = sRec.getAutocompletadosPorDato();
 						List<ParametrosAutocompletar> parametros = sRec.getAutocompletado().getParametrosAutocompletados();
-
 						DatoASolicitar ultimo = null;
 						for (ParametrosAutocompletar param : parametros) {
 							if (ModoAutocompletado.SALIDA.equals(param.getModo())) {
@@ -357,8 +352,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 										if (ultimo == null) {
 											ultimo = sDato.getDatoASolicitar();
 										} else {
-											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > 
-											  ultimo.getAgrupacionDato().getOrden().intValue()) {
+											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo.getAgrupacionDato().getOrden().intValue()) {
 												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
 												if (auxServiciosRecurso.size() > 1) {
 													auxServiciosRecurso.remove(sRec.getId());
@@ -366,11 +360,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 													serviciosAutocompletar.remove(ultimo.getId());
 												}
 												ultimo = sDato.getDatoASolicitar();
-											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == 
-											    ultimo.getAgrupacionDato().getOrden().intValue()) {
+											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == ultimo.getAgrupacionDato().getOrden().intValue()) {
 												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
-													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = 
-													    serviciosAutocompletar.get(ultimo.getId());
+													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
 													if (auxServiciosRecurso.size() > 1) {
 														auxServiciosRecurso.remove(sRec.getId());
 													} else {
@@ -379,8 +371,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 													ultimo = sDato.getDatoASolicitar();
 												} else if (sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
 													if (sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
-														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = 
-														    serviciosAutocompletar.get(ultimo.getId());
+														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
 														if (auxServiciosRecurso.size() > 1) {
 															auxServiciosRecurso.remove(sRec.getId());
 														} else {
@@ -423,17 +414,13 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 
 	public String confirmarReserva() {
 		limpiarMensajesError();
-		
 		try {
-
 			boolean hayError = false;
-			
       if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
         hayError = true;
         addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_el_tramite"), FORM_ID+":tramite");
       }
-			
-			HtmlPanelGroup clausulaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:clausula");
+			HtmlPanelGroup clausulaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form1:clausula");
 			String clausulaStyleClass = clausulaGroup.getStyleClass();
 			if (this.aceptaCondiciones==null || !this.aceptaCondiciones.equals("SI")) {
 				hayError = true;
@@ -463,7 +450,12 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			}
 			
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
-			Reserva reserva = sessionMBean.getReserva();
+			
+			if(reserva == null) {
+  			Recurso recurso = sessionMBean.getRecursoMarcado();
+  			Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sessionMBean.getTimeZone());
+  			reserva = agendarReservasEJB.marcarReserva(disponibilidad);
+			}
 			reserva.setDatosReserva(datos);
 			
 			agendarReservasEJB.validarDatosReserva(sessionMBean.getEmpresaActual(), reserva);
@@ -478,7 +470,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			boolean confirmada = false;
 			while (!confirmada) {
 				try {
-					Reserva rConfirmada = agendarReservasEJB.confirmarReserva(sessionMBean.getEmpresaActual(), reserva, null, null, true);
+					Reserva rConfirmada = agendarReservasEJB.confirmarReservaPresencial(sessionMBean.getEmpresaActual(), reserva);
 					reserva.setSerie(rConfirmada.getSerie());
 					reserva.setNumero(rConfirmada.getNumero());
 					reserva.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
@@ -489,19 +481,10 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 				}
 			}
 			
-			//Enviar el mail de confirmacion
-			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-			String linkCancelacion = request.getScheme()+"://"+request.getServerName();
-			if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-				linkCancelacion = linkCancelacion + ":" + request.getServerPort();
-			}
-			Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-			linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
-			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, reserva, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
-
-			//La reserva se confirm�, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
-			sessionMBean.setReservaConfirmada(reserva);
-			sessionMBean.setReserva(null);
+			//generarTicket(reserva);
+			reservaConfirmada = reserva;
+			reserva = null;
+			
 		} catch (ValidacionPorCampoException e) {
 			//Alguno de los campos no tiene el formato esperado
 			List<String> idComponentesError = new ArrayList<String>();
@@ -513,10 +496,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 						mensaje = sessionMBean.getTextos().get("el_valor_ingresado_no_es_aceptable");
 					}
 					mensaje = mensaje.replace("{campo}", dato.getEtiqueta());
-					addErrorMessage(mensaje, "form:"+dato.getNombre());
+					addErrorMessage(mensaje, "form1:"+dato.getNombre());
 					idComponentesError.add(e.getNombreCampo(i));
 				}
-				//idComponentesError.add(e.getNombreCampo(i));
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
@@ -562,7 +544,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			for(int i = 0; i < e.getCantCampos(); i++) {
 				DatoASolicitar dato = sessionMBean.getDatosASolicitar().get(e.getNombreCampo(i));
 				String mensaje = sessionMBean.getTextos().get("debe_completar_el_campo_campo").replace("{campo}", dato.getEtiqueta());
-				addErrorMessage(mensaje, "form", "form:"+dato.getNombre());
+				addErrorMessage(mensaje, "form1", "form1:"+dato.getNombre());
 				idComponentesError.add(e.getNombreCampo(i));
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
@@ -580,7 +562,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 		//Blanqueo el formulario de datos de la reserva
 		datosReservaMBean.clear();
 		
-		return "reservaConfirmada";
+		return null;
 	}
 	
 	/**
@@ -705,4 +687,171 @@ public class Paso3AdminMBean extends PasoAdminMBean {
     return tramites;
   }
 	
+  public String imprimirTicket() {
+    
+    if(reservaConfirmada == null) {
+      addErrorMessage(sessionMBean.getTextos().get("debe_confirmar_la_reserva"), MSG_ID);
+      return null;
+    }
+    
+    try {
+      BaseFont helveticaBold = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+      BaseFont helveticaOblique = BaseFont.createFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
+      
+      SimpleDateFormat sdfFecha = new SimpleDateFormat (sessionMBean.getFormatoFecha());
+      
+      Rectangle pageSize = new Rectangle(210,225);
+      
+      Document document = new Document(pageSize);
+      document.addTitle(sessionMBean.getTextos().get("ticket_de_reserva"));
+      
+      ByteArrayOutputStream os = new ByteArrayOutputStream();
+      
+      PdfWriter pdfWriter = PdfWriter.getInstance(document, os);
+
+      document.addTitle(sessionMBean.getTextos().get("confirmacion"));
+      document.addSubject("SAE");
+      document.addAuthor("SAE");
+      document.addKeywords("SAE,ticket,"+sessionMBean.getTextos().get("confirmacion")+","+sessionMBean.getTextos().get("reserva"));
+      document.addProducer();
+      document.addCreator("SAE");
+      document.addHeader("Producer", "SAE");
+      
+      document.open();
+      
+      PdfContentByte pdfContent = pdfWriter.getDirectContent();
+
+      Empresa empresa = sessionMBean.getEmpresaActual();
+      if(empresa != null && empresa.getLogo()!=null) {
+        Image img = Image.getInstance(empresa.getLogo());
+        img.scaleAbsolute(100,30);
+        img.setAbsolutePosition(55, 170);
+        document.add(img);
+      }
+      
+      
+      int posY = 170;
+      
+      //Dibujo primer línea
+      LineSeparator line = new LineSeparator();
+      line.setAlignment(LineSeparator.ALIGN_CENTER);
+      line.setLineColor(BaseColor.BLACK);
+      line.setLineWidth(0.5f);
+      line.drawLine(pdfContent, 10, 200,  posY);
+      posY = posY - 15;
+
+      //Nombre de la agenda (trámite)
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaBold, 10);
+      pdfContent.setTextMatrix(15, posY);
+      pdfContent.showText(sessionMBean.getAgenda().getNombre());
+      pdfContent.endText();
+      posY = posY - 15;
+      
+      //Nombre del recurso (oficina)
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaBold, 10);
+      pdfContent.setTextMatrix(15, posY);
+      pdfContent.showText(sessionMBean.getRecurso().getNombre());
+      pdfContent.endText();
+      posY = posY - 15;
+      
+      //Fecha
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaBold, 12);
+      pdfContent.setTextMatrix(15, posY);
+      pdfContent.showText(sessionMBean.getTextos().get("fecha")+":");
+      pdfContent.endText();
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaBold, 12);
+      pdfContent.setTextMatrix(130, posY);
+      pdfContent.showText(sdfFecha.format(reservaConfirmada.getDisponibilidades().get(0).getFecha()));
+      pdfContent.endText();
+      posY = posY - 15;
+      
+      //Serie y número
+      String serieNumeroLabel = "";
+      String serieNumeroValue = "";
+      String serie = reservaConfirmada.getSerie();
+      if (serie != null && !serie.trim().isEmpty()) {
+        serieNumeroLabel = sessionMBean.getTextos().get("serie") + "/";
+        serieNumeroValue = serie + "/";
+      }
+      serieNumeroLabel = serieNumeroLabel + sessionMBean.getTextos().get("numero");
+      serieNumeroValue = serieNumeroValue + reservaConfirmada.getNumero().toString();
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaBold, 12);
+      pdfContent.setTextMatrix(15, posY);
+      pdfContent.showText(serieNumeroLabel+":");
+      pdfContent.endText();
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaBold, 12);
+      pdfContent.setTextMatrix(130, posY);
+      pdfContent.showText(serieNumeroValue);
+      pdfContent.endText();
+      posY = posY - 15;
+      
+      if(sessionMBean.getAgenda().getConTrazabilidad()!=null && sessionMBean.getAgenda().getConTrazabilidad().booleanValue()) {
+        pdfContent.beginText();
+        pdfContent.setFontAndSize(helveticaBold, 10);
+        pdfContent.setTextMatrix(15, posY);
+        pdfContent.showText(sessionMBean.getTextos().get("codigo_de_trazabilidad")+":");
+        pdfContent.endText();
+  
+        pdfContent.beginText();
+        pdfContent.setFontAndSize(helveticaBold, 12);
+        pdfContent.setTextMatrix(130, posY);
+        pdfContent.showText(reservaConfirmada.getTrazabilidadGuid());
+        pdfContent.endText();
+        posY = posY - 15;
+      }
+      
+      //Dibujo una línea separadora
+      posY = posY + 10;
+      line.setLineColor(BaseColor.BLACK);
+      line.drawLine(pdfWriter.getDirectContent(), 10, 200,  posY);
+      posY = posY - 15;
+      
+      pdfContent.beginText();
+      pdfContent.setFontAndSize(helveticaOblique, 6);
+      pdfContent.setTextMatrix(20, posY);
+      
+      //Cambiar el timezone del formateador de hora para ajustar la fecha de hoy
+      SimpleDateFormat sdfFechaHora = new SimpleDateFormat (sessionMBean.getFormatoFecha() + " " + sessionMBean.getFormatoHora());
+      sdfFechaHora.setTimeZone(sessionMBean.getTimeZone());
+      pdfContent.showText(sessionMBean.getTextos().get("reserva_realizada_el")+" "+sdfFechaHora.format(new Date()));
+      
+      pdfContent.endText();
+      posY = posY - 10;
+      
+      pdfWriter.addJavaScript("this.print({bUI: true, bSilent: true, bShrinkToFit: true});",false); 
+      pdfWriter.addJavaScript("this.closeDoc(true);");   
+      
+      document.close();
+      
+      FacesContext facesContext = FacesContext.getCurrentInstance();
+      HttpServletResponse response = (HttpServletResponse)facesContext.getExternalContext().getResponse();
+      response.setContentType("application/pdf");  
+      //response.setHeader("Content-Disposition","attachment");
+      os.writeTo(response.getOutputStream());
+      response.getOutputStream().flush();
+      response.getOutputStream().close();
+      facesContext.responseComplete();
+      
+      //RequestContext.getCurrentInstance().update("foo:bar");
+      
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    return null;
+  }
+  
+  public String nuevaReserva() {
+    tramiteCodigo = null;
+    aceptaCondiciones = null;
+    reservaConfirmada = null;
+    return null;
+  }
+  
 }

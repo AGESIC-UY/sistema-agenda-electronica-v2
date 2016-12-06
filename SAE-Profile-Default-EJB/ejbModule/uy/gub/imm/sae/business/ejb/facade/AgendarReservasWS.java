@@ -1,7 +1,6 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.TimeZone;
 
@@ -15,16 +14,11 @@ import javax.jws.soap.SOAPBinding.ParameterStyle;
 import javax.jws.soap.SOAPBinding.Style;
 import javax.jws.soap.SOAPBinding.Use;
 
-//import org.jboss.wsf.spi.annotation.WebContext;
-
-
-
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
-import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
@@ -125,19 +119,6 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 	}
 
 	@WebMethod
-	public @WebResult(name = "consultarReservaPorDatosClaveResult") Reserva consultarReservaPorDatosClave
-		(
-			@WebParam(name = "recurso") Recurso r, 
-			@WebParam(name = "datos") HashMap<DatoASolicitar, DatoReserva> datos
-		) 
-			throws ApplicationException{
-
-		AgendarReservas agendarReservasSession = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
-		
-		return agendarReservasSession.consultarReservaPorDatosClave(r, datos);
-	}
-
-	@WebMethod
 	public void desmarcarReserva(@WebParam(name = "reserva") Reserva r) throws BusinessException {
 		
 		AgendarReservas agendarReservasSession = null;
@@ -176,13 +157,13 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v,
       @WebParam(name = "timezone") TimeZone t
 		)
-			throws BusinessException {
+			throws UserException {
 		
 		AgendarReservas agendarReservasSession = null;
 		try{
 			agendarReservasSession = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
 		}catch (ApplicationException e){
-			throw new BusinessException(e.getCodigoError(),e.getMessage(),e.getCause());
+			throw new UserException(e.getCodigoError(),e.getMessage(),e.getCause());
 		}
 		
 		List<Integer> lst = agendarReservasSession.obtenerCuposPorDia(r, v, t);
@@ -197,23 +178,14 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 
 	@WebMethod
 	public @WebResult(name = "obtenerDisponibilidadesResult") ArrayList<Disponibilidad> obtenerDisponibilidades
-		(
-			@WebParam(name = "recurso") Recurso r, 
-			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v,
-			@WebParam(name = "timezone") String tz
-		) 
-			throws BusinessException {
-		
+		(@WebParam(name = "recurso") Recurso r,	@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v, @WebParam(name = "timezone") String tz) throws UserException {
 		AgendarReservas agendarReservasSession = null;
-		
 		try{
 			agendarReservasSession = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
 		}catch (ApplicationException e){
-			throw new BusinessException(e.getCodigoError(),e.getMessage(),e.getCause());
+			throw new UserException(e.getCodigoError(),e.getMessage(),e.getCause());
 		}
-		
 		List<Disponibilidad> lst = agendarReservasSession.obtenerDisponibilidades(r, v, TimeZone.getTimeZone(tz));
-		
 		if (lst instanceof ArrayList){
 			return (ArrayList<Disponibilidad>)lst;
 		}else{
@@ -223,20 +195,13 @@ public class AgendarReservasWS implements IAgendarReservasWS {
 	}
 
 	@WebMethod
-	public @WebResult(name = "obtenerVentanaCalendarioInternetResult") VentanaDeTiempo obtenerVentanaCalendarioInternet
-		(
-			@WebParam(name = "recurso") Recurso r
-		) 
-			throws BusinessException {
-
+	public @WebResult(name = "obtenerVentanaCalendarioInternetResult") VentanaDeTiempo obtenerVentanaCalendarioInternet(@WebParam(name = "recurso") Recurso r) throws UserException {
 		AgendarReservas agendarReservasSession = null;
-		
 		try{
 			agendarReservasSession = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
 		}catch (ApplicationException e){
-			throw new BusinessException(e.getCodigoError(),e.getMessage(),e.getCause());
+			throw new UserException(e.getCodigoError(),e.getMessage(),e.getCause());
 		}
-		
 		return agendarReservasSession.obtenerVentanaCalendarioInternet(r);
 	}
 

@@ -76,7 +76,6 @@ public class ServiciosNovedadesBean {
 	
 	private static Logger logger = Logger.getLogger(ServiciosNovedadesBean.class);
 
-
 	/**
 	 * @param empresa
 	 * @param reserva

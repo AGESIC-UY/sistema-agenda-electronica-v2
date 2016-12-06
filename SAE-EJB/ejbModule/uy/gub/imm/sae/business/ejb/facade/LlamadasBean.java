@@ -57,6 +57,7 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
 @RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_LLAMADOR"})
@@ -82,8 +83,10 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	
   static Logger logger = Logger.getLogger(LlamadasBean.class);
   
-	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, TimeZone timezone) throws BusinessException {
+	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, boolean atencionPresencial, TimeZone timezone) throws UserException {
 
+	  System.out.println("LlamadasBean.obtenerReservasEnEspera -- 1");
+	  
 		VentanaDeTiempo hoy = new VentanaDeTiempo();
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
@@ -91,13 +94,18 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 		
 		hoy.setFechaInicial(Utiles.time2InicioDelDia(ahora));
 		hoy.setFechaFinal(Utiles.time2FinDelDia(ahora));
+
+    System.out.println("LlamadasBean.obtenerReservasEnEspera -- 2");
 		
 		if (estados.size() == 1 && estados.contains(Estado.R) ) {
-			return consultas.consultarReservasEnEspera(recurso, timezone);
+	    System.out.println("LlamadasBean.obtenerReservasEnEspera -- 3");
+			return consultas.consultarReservasEnEspera(recurso, atencionPresencial, timezone);
 		} else if (estados.size() == 2 && estados.contains(Estado.R) && estados.contains(Estado.U)) {
-			return consultas.consultarReservasEnEsperaUtilizadas(recurso, timezone);
+	    System.out.println("LlamadasBean.obtenerReservasEnEspera -- 4");
+			return consultas.consultarReservasEnEsperaUtilizadas(recurso, atencionPresencial, timezone);
 		} else {
-			return consultas.consultarReservasPorPeriodoEstado(recurso, hoy, estados);
+	    System.out.println("LlamadasBean.obtenerReservasEnEspera -- 5");
+			return consultas.consultarReservasPorPeriodoEstado(recurso, hoy, estados, atencionPresencial);
 		}
 	
 	}	
@@ -219,14 +227,11 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
 		}
 
-		Query query = em.createQuery(
-				"select ll.id, ll.etiqueta, ll.fecha, ll.hora, ll.numero, ll.puesto, ll.reserva " +
-				"from   Llamada ll " +
-				"where   " +
-				"       ll.recurso.id IN (:recursos) and " +
-				"       ll.fecha = :hoy " +				
-				"order by ll.id desc " 
-		);
+		Query query = em.createQuery("SELECT ll.id, ll.etiqueta, ll.fecha, ll.hora, ll.numero, ll.puesto, ll.reserva " +
+				"FROM Llamada ll " +
+				"WHERE ll.recurso.id IN (:recursos) " +
+				"  AND ll.fecha = :hoy " +				
+				"ORDER BY ll.id DESC");
 		List<Integer> recursosIds = new ArrayList<Integer>();
 		for (Recurso recurso : recursos) {
 			recursosIds.add(recurso.getId());
@@ -246,16 +251,13 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 			dto.setFecha((Date)llamada[2]);
 			dto.setHora((Date)llamada[3]);
 			dto.setNumero((Integer)llamada[4]);
-			
 			if (puestos.containsKey(llamada[5])) {
 				dto.setPuesto(null);
 			} else {
 				dto.setPuesto((Integer)llamada[5]);
 				puestos.put((Integer)llamada[5], (Integer)llamada[5]);
 			}
-			
 			dto.setReserva((Reserva)llamada[6]);
-			
 			llamadasDTO.add(dto);
 		}
 		

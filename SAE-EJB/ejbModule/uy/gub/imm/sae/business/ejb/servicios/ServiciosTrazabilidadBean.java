@@ -25,6 +25,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Table;
+import javax.persistence.TemporalType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -673,7 +674,7 @@ public class ServiciosTrazabilidadBean {
 				logger.debug("Consulta para determinar las trazas a cerrar en la empresa ["+empresa.getNombre()+"]: "+sql1);
 				
 				Query query = globalEntityManager.createNativeQuery(sql1);
-				//query.setParameter("ahora", new Date(), TemporalType.DATE);
+				query.setParameter("ahora", new Date(), TemporalType.DATE);
 				List<Object[]> aTrazas = (List<Object[]>) query.getResultList();
 
         logger.debug("Se encontraron "+aTrazas.size()+" trazas.");

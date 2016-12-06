@@ -38,30 +38,22 @@
 				</h:form>
 			</p:dialog>
 
-			<h:form id="form"
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}"
-				class="cancelarReserva">
-
+			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}" class="cancelarReserva">
         <p:outputPanel styleClass="form-required">
           <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
         </p:outputPanel>
 				<p:outputPanel>
-					<h:panelGroup id="camposFiltroCancelar"
-						binding="#{reservaMBean.filtroConsulta}" layout="block">
+					<h:panelGroup id="camposFiltroCancelar" binding="#{reservaMBean.filtroConsulta}" layout="block">
 					</h:panelGroup>
-
 					<h:panelGroup id="codigoSeguridad" styleClass="Texto"
 						layout="block">
 						<fieldset>
 							<legend>
-								<h:outputText
-									value="#{sessionMBean.textos['codigo_de_seguridad_de_la_reserva']}" />
+								<h:outputText value="#{sessionMBean.textos['codigo_de_seguridad_de_la_reserva']}" />
 							</legend>
-
 							<div class="form-horizontal">
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel for="codSeg" class="col-sm-3 control-label label formularioCampoRequerido"
-										value="#{sessionMBean.textos['ingrese_el_codigo_de_seguridad']}" />
+									<h:outputLabel for="codSeg" class="col-sm-3 control-label label formularioCampoRequerido" value="#{sessionMBean.textos['ingrese_el_codigo_de_seguridad']}" />
 									<p:outputPanel styleClass="col-sm-9">
 										<h:inputText id="codSeg" value="#{sessionMBean.codigoSeguridadReserva}" styleClass="form-control" />
 										<p:message for="codSeg" />
@@ -72,11 +64,10 @@
 					</h:panelGroup>
 
 					<ul class="form-action-buttons">
-						<li class="action-buttons-primary"><p:commandButton
-								value="#{sessionMBean.textos['continuar']} #{reservaMBean.simboloSiguiente}"
-								actionListener="#{reservaMBean.buscarReservaDatos}"
-								update="@form"
-								styleClass="btn-lg btn-primario" /></li>
+						<li class="action-buttons-primary">
+						  <p:commandButton value="#{sessionMBean.textos['continuar']} #{reservaMBean.simboloSiguiente}"	actionListener="#{reservaMBean.buscarReservaDatos}"
+								update="@form" styleClass="btn-lg btn-primario" />
+						</li>
 					</ul>
 				</p:outputPanel>
 

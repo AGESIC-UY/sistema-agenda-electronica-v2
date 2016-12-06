@@ -21,11 +21,7 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.Date;
-
 import uy.gub.imm.sae.entity.Recurso;
-import uy.gub.imm.sae.exception.ApplicationException;
-
-
 
 public interface Calendario {
 
@@ -33,5 +29,5 @@ public interface Calendario {
 	 * Retrona true sii dia corresponde a un día habil
 	 * @throws ApplicationException 
 	 */
-	public Boolean esDiaHabil(Date dia, Recurso r) throws ApplicationException;
+	public Boolean esDiaHabil(Date dia, Recurso r);
 }

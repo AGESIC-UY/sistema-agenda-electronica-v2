@@ -66,13 +66,11 @@ public class RecursosPort implements Recursos{
 		}
 	}
 
-	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r)
-			throws ApplicationException {
+	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r) {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso)
-			throws BusinessException {
+	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso) {
 		throw new UnsupportedOperationException();
 	}
 
@@ -176,12 +174,12 @@ public class RecursosPort implements Recursos{
 	}
 
 	@Override
-	public byte[] exportarRecurso(Recurso r) throws UserException {
+	public byte[] exportarRecurso(Recurso r, String versionSAE) throws UserException {
 		throw new UnsupportedOperationException();
 	}
 	
 	@Override
-	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException {
+	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE) throws UserException {
 		throw new UnsupportedOperationException();
 	}
 

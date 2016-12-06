@@ -410,10 +410,10 @@ public class RecursoMBean extends BaseMBean{
 
 	@SuppressWarnings("unchecked")
 	public void copiar(ActionEvent event) {
-    Recurso r = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
-		if (r != null) {
+    Recurso recurso = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
+		if (recurso != null) {
 			try {
-				recursosEJB.copiarRecurso(r);
+				recursosEJB.copiarRecurso(recurso);
 				sessionMBean.cargarRecursos();
 				sessionMBean.desmarcarRecurso();
 				addInfoMessage(sessionMBean.getTextos().get("recurso_copiado"), MSG_ID);
@@ -881,7 +881,7 @@ public class RecursoMBean extends BaseMBean{
     Recurso recurso = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
 		if (recurso != null) {
 			try {
-				byte[] bytes = recursosEJB.exportarRecurso(recurso);
+				byte[] bytes = recursosEJB.exportarRecurso(recurso, sessionMBean.getVersion());
 				
 				FacesContext fc = FacesContext.getCurrentInstance();
 		    ExternalContext ec = fc.getExternalContext();
@@ -917,7 +917,7 @@ public class RecursoMBean extends BaseMBean{
 		
 		try {
 			byte[] bytes = IOUtils.toByteArray(archivo.getInputstream());
-			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes);
+			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes, sessionMBean.getVersion());
 			if(recurso != null) {
 				sessionMBean.cargarRecursos();
 				addInfoMessage(sessionMBean.getTextos().get("recurso_importado_exitosamente"), MSG_ID);

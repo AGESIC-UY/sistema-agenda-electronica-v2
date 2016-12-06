@@ -1889,45 +1889,32 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
-	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso)
-			throws BusinessException {
+	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084",
-					"El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1",
-					"No se encuentra el recurso indicado");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
-
 		List<AgrupacionDato> agrupacionesDTO = new ArrayList<AgrupacionDato>();
-
-		// Obtengo las agrupaciones vivas del recurso
-		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager
-				.createQuery(
-						"from AgrupacionDato agrupacion "
-								+ "where agrupacion.recurso = :r and agrupacion.fechaBaja is null "
-								+ "order by agrupacion.orden ")
+		//Obtener las agrupaciones de datos
+		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager.createQuery(
+				"FROM AgrupacionDato agrupacion "
+				+ "WHERE agrupacion.recurso = :r " 
+				+ "  AND agrupacion.fechaBaja IS NULL "
+				+ "ORDER BY agrupacion.orden")
 				.setParameter("r", recurso).getResultList();
-
-		// Para cada agrupacion obtengo los datos a solicitar de la misma.
+		//Para cada agrupación obtener sus datos
 		for (AgrupacionDato agrupacion : agrupaciones) {
-
 			AgrupacionDato agrupacionDTO = new AgrupacionDato(agrupacion);
 			agrupacionesDTO.add(agrupacionDTO);
-
 			List<DatoASolicitar> datosDTO = obtenerTodosDatosASolicitar(agrupacion);
 			agrupacionDTO.setDatosASolicitar(datosDTO);
-
 		}
-
 		return agrupacionesDTO;
 	}
 
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION" })
 	public Boolean mostrarDatosASolicitarEnLlamador(Recurso recurso)
 			throws BusinessException {
 
@@ -1999,34 +1986,24 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	private List<DatoASolicitar> obtenerTodosDatosASolicitar(
-			AgrupacionDato agrupacion) throws BusinessException {
-
+	private List<DatoASolicitar> obtenerTodosDatosASolicitar(AgrupacionDato agrupacion) {
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
-
-		// Obtengo los datos a solicitar vivos de la agrupacion
-		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager
-				.createQuery(
-						"from DatoASolicitar dato "
-								+ "where dato.agrupacionDato = :agrupacion and "
-								+ "      dato.fechaBaja is null "
-								+ "order by dato.fila, dato.columna ")
+		//Obtener los datos a solicitar de la agrupación
+		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager.createQuery(
+				  "FROM DatoASolicitar dato "
+				+ "WHERE dato.agrupacionDato = :agrupacion "
+				+ "  AND dato.fechaBaja IS NULL "
+				+ "ORDER BY dato.fila, dato.columna ")
 				.setParameter("agrupacion", agrupacion).getResultList();
-
-		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
-		// valores posibles.
+		//Para cada dato, si es de tipo lista obtener los valores posibles
 		for (DatoASolicitar datoASolicitar : datos) {
-
-			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(
-					datoASolicitar);
+			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(datoASolicitar);
 			datosDTO.add(datoASolicitarDTO);
-
 			if (datoASolicitarDTO.getTipo() == Tipo.LIST) {
 				List<ValorPosible> valoresDTO = obtenerTodosValoresPosibles(datoASolicitar);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
 		}
-
 		return datosDTO;
 	}
 
@@ -2084,20 +2061,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
-	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r)
-			throws ApplicationException {
+	public List<DatoASolicitar> consultarDatosSolicitar(Recurso recurso)  {
 
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
 
 		// Obtengo los datos a solicitar vivos de la agrupacion
-		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager
-				.createQuery(
-						"from DatoASolicitar dato "
-								+ "where dato.recurso = :recurso and "
-								+ "      dato.fechaBaja is null "
-								+ "order by dato.agrupacionDato.orden, dato.fila, dato.nombre ")
-				.setParameter("recurso", r).getResultList();
+		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager.createQuery(
+		"FROM DatoASolicitar dato "
+			+ "WHERE dato.recurso = :recurso "
+			+ "  AND dato.fechaBaja IS NULL "
+			+ "ORDER BY dato.agrupacionDato.orden, dato.fila, dato.nombre")
+		.setParameter("recurso", recurso).getResultList();
 
 		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
 		// valores posibles.
@@ -2143,11 +2117,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 
-	public void copiarRecurso(Recurso r) throws BusinessException,
+	public void copiarRecurso(Recurso recurso) throws BusinessException,
 			ApplicationException, UserException {
 
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null) {
+		recurso = entityManager.find(Recurso.class, recurso.getId());
+		if (recurso == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
@@ -2177,25 +2151,25 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		// ValidacionPorRecursoCopia>
 		// 6- Se copian disponibilidades
 
-		// 1
-		Recurso rCopia = new Recurso(r);
+		// 1 - Esto ya copia las propiedades básicas del recurso
+		Recurso rCopia = new Recurso(recurso);
 		rCopia.setId(null);
-		rCopia.setAgenda(r.getAgenda());
+		rCopia.setAgenda(recurso.getAgenda());
 
 		int contador = 0;
 		do {
 			contador++;
-			rCopia.setNombre("Copia " + contador + " de " + r.getNombre());
-			rCopia.setDescripcion("Copia " + contador + " de " + r.getDescripcion());
+			rCopia.setNombre("Copia " + contador + " de " + recurso.getNombre());
+			rCopia.setDescripcion("Copia " + contador + " de " + recurso.getDescripcion());
 		} while (existeRecursoPorNombre(rCopia));
 
 		entityManager.persist(rCopia);
 
 		// 2
 		rCopia.setTextosRecurso(new HashMap<String, TextoRecurso>());
-		if (r.getTextosRecurso() != null) {
-			for (String idioma : r.getTextosRecurso().keySet()) {
-				TextoRecurso viejo = r.getTextosRecurso().get(idioma);
+		if (recurso.getTextosRecurso() != null) {
+			for (String idioma : recurso.getTextosRecurso().keySet()) {
+				TextoRecurso viejo = recurso.getTextosRecurso().get(idioma);
 				TextoRecurso trCopia = new TextoRecurso();
 
 				trCopia.setRecurso(viejo.getRecurso());
@@ -2215,7 +2189,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		// 3
 		Map<ValidacionPorRecurso, ValidacionPorRecurso> validacionesDelRecurso = new HashMap<ValidacionPorRecurso, ValidacionPorRecurso>();
-		for (ValidacionPorRecurso vxr : r.getValidacionesPorRecurso()) {
+		for (ValidacionPorRecurso vxr : recurso.getValidacionesPorRecurso()) {
 			if (vxr.getFechaBaja() == null) {
 				ValidacionPorRecurso vxrCopia = new ValidacionPorRecurso();
 				vxrCopia.setId(null);
@@ -2228,7 +2202,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 
 		// 4
-		for (DatoDelRecurso ddr : r.getDatoDelRecurso()) {
+		for (DatoDelRecurso ddr : recurso.getDatoDelRecurso()) {
 
 			DatoDelRecurso ddrCopia = new DatoDelRecurso();
 			ddrCopia.setOrden(ddr.getOrden());
@@ -2240,7 +2214,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 
 		// 5
-		for (AgrupacionDato agrup : r.getAgrupacionDatos()) {
+		for (AgrupacionDato agrup : recurso.getAgrupacionDatos()) {
 
 			if (agrup.getFechaBaja() == null) {
 				AgrupacionDato agrupCopia = new AgrupacionDato(agrup);
@@ -2290,7 +2264,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		}// Fin 5
 			// 6
-		List<Disponibilidad> disponibilidades = r.getDisponibilidades();
+		List<Disponibilidad> disponibilidades = recurso.getDisponibilidades();
 		for (Disponibilidad disponibilidad : disponibilidades) {
 			Disponibilidad disponibilidadCopia = new Disponibilidad();
 			disponibilidadCopia.setCupo(disponibilidad.getCupo());
@@ -2334,33 +2308,23 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		return servicios;
 	}
 
-	public byte[] exportarRecurso(Recurso r) throws UserException {
-		if (r == null) {
+	public byte[] exportarRecurso(Recurso recurso, String versionSAE) throws UserException {
+		if (recurso == null) {
 			return null;
 		}
 		byte[] bytes = null;
-
 		try {
-			Recurso rbd = (Recurso) entityManager
-					.createQuery(
-							"SELECT r FROM Recurso r WHERE r.id=:idRecurso")
-					.setParameter("idRecurso", r.getId()).getSingleResult();
-
-			for (AgrupacionDato agrupacion : rbd.getAgrupacionDatos()) {
-				for (DatoASolicitar datoAsolicitar : agrupacion
-						.getDatosASolicitar()) {
+		  Query query = entityManager.createQuery("SELECT r FROM Recurso r WHERE r.id=:idRecurso");
+		  query = query.setParameter("idRecurso", recurso.getId());
+		  recurso = (Recurso) query.getSingleResult();
+			for (AgrupacionDato agrupacion : recurso.getAgrupacionDatos()) {
+				for (DatoASolicitar datoAsolicitar : agrupacion.getDatosASolicitar()) {
 					datoAsolicitar.getValoresPosibles().isEmpty();
-
 				}
-
 			}
-
-			RecursoExportar recursoExp = ExportarHelper.exportarRecurso(rbd);
-
+			RecursoExportar recursoExp = ExportarHelper.exportarRecurso(recurso, versionSAE);
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-			JAXBContext jaxbContext = JAXBContext
-					.newInstance(RecursoExportar.class);
+			JAXBContext jaxbContext = JAXBContext.newInstance(RecursoExportar.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(recursoExp, output);
@@ -2372,7 +2336,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 
-	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException {
+	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE) throws UserException {
 		if (b == null) {
 			return null;
 		}
@@ -2381,7 +2345,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			ByteArrayInputStream input = new ByteArrayInputStream(b);
 			RecursoExportar recursoExp = (RecursoExportar) jaxbUnmarshaller.unmarshal(input);
-			Recurso recurso = ExportarHelper.importarRecurso(recursoExp);
+			Recurso recurso = ExportarHelper.importarRecurso(recursoExp, versionSAE);
 			recurso = crearRecursoImportado(a, recurso);
 			recurso.setAgrupacionDatos(new ArrayList<AgrupacionDato>());
 			for(AgrupacionDatoExport agdExp : recursoExp.getAgrupaciones()){

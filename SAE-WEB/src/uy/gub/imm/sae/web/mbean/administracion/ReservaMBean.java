@@ -90,17 +90,13 @@ public class ReservaMBean extends BaseMBean {
 			return;
 		}
 		
-		try {
-			// guardo en session los datos a solicitar del recurso
-			List<DatoASolicitar> listaDatoSolicitar = recursosEJB.consultarDatosSolicitar(sessionMBean.getRecursoMarcado());
-			Map<String, DatoASolicitar> datoSolicMap = new HashMap<String, DatoASolicitar>();
-			for (DatoASolicitar dato : listaDatoSolicitar) {
-				datoSolicMap.put(dato.getNombre(), dato);
-			}
-			setDatosASolicitar(datoSolicMap);
-		} catch (ApplicationException e) {
-			addErrorMessage(e.getMessage());
+		// guardo en session los datos a solicitar del recurso
+		List<DatoASolicitar> listaDatoSolicitar = recursosEJB.consultarDatosSolicitar(sessionMBean.getRecursoMarcado());
+		Map<String, DatoASolicitar> datoSolicMap = new HashMap<String, DatoASolicitar>();
+		for (DatoASolicitar dato : listaDatoSolicitar) {
+			datoSolicMap.put(dato.getNombre(), dato);
 		}
+		setDatosASolicitar(datoSolicMap);
 
 	}
 

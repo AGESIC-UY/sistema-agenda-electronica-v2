@@ -268,10 +268,10 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 					datoSolicMap.put(dato.getNombre(), dato);
 				}
 				setDatosASolicitar(datoSolicMap);
-			} catch (ApplicationException ae) {
+			} catch (Exception ex) {
 				addErrorMessage(sesionMBean.getTextos().get("el_recurso_especificado_no_es_valido"));
 				limpiarSession();
-				ae.printStackTrace();
+				ex.printStackTrace();
 				return;
 			}
 				

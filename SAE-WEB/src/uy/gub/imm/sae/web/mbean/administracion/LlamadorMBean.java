@@ -50,8 +50,10 @@ import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
+import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Llamada;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.web.common.BaseMBean;
@@ -76,9 +78,6 @@ public class LlamadorMBean extends BaseMBean {
 	private LlamadorSessionMBean llamadorSessionMBean;
 	private SessionMBean sessionMBean;
 
-	private Llamada llamadaADestacar = null;
-	
-	private int number;
 	// Variables para redirigir al llamador
 	private static final String URL_BASE_TO_FORWARD_LLAMADOR = "/administracion/llamador/listaDeLlamadas.xhtml?agenda=";
 	
@@ -87,22 +86,16 @@ public class LlamadorMBean extends BaseMBean {
 		//Se controla que se haya Marcado una agenda para trabajar con los recursos
 		if (sessionMBean.getAgendaMarcada() == null){
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
-		}else
-		{
+		}else {
 			if (sessionMBean.getRecursoMarcado() != null) {
 				try {
-					
 					if (llamadorSessionMBean.getMostrarDatos() == null) {
-						llamadorSessionMBean.setMostrarDatos(
-								recursosEJB.mostrarDatosASolicitarEnLlamador(sessionMBean.getRecursoMarcado())
-						);
+						llamadorSessionMBean.setMostrarDatos(recursosEJB.mostrarDatosASolicitarEnLlamador(sessionMBean.getRecursoMarcado()));
 					}
-
 				} catch (Exception e) {
 					addErrorMessage(new ApplicationException(e), MSG_ID);
 				}
-			}else 
-			{
+			}else {
 				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 			}
 		}
@@ -143,7 +136,6 @@ public class LlamadorMBean extends BaseMBean {
 					if (agenda == null) {
 						throw new InvalidParameterException("La agenda no existe.");
 					}
-					
 					List<String> recursosParam = Arrays.asList(parametros.get("recursos").split(","));
 					if (recursosParam.isEmpty()) {
 						throw new InvalidParameterException("Recursos inválidos.");
@@ -155,7 +147,6 @@ public class LlamadorMBean extends BaseMBean {
 							recursos.add(r);
 						}
 					}
-					
 					llamadorSessionMBean.setRecursos(recursos);
 					TipoMonitor tipoMonitor = TipoMonitor.fromPulgadas(Integer.valueOf(parametros.get("tipoMonitor")));
 					llamadorSessionMBean.setTipoMonitor((tipoMonitor != null ? tipoMonitor :  TipoMonitor.fromPulgadas(Integer.valueOf("22"))));
@@ -177,16 +168,17 @@ public class LlamadorMBean extends BaseMBean {
 		return ret;
 	}
 	
-	
 	public Integer getCantLlamadas() {
-		return llamadorSessionMBean.getTipoMonitor().getLineas();
+	  if(llamadorSessionMBean.getTipoMonitor()==null) {
+	    return 0;
+	  }
+	  return llamadorSessionMBean.getTipoMonitor().getLineas();
 	}
 
 	public String getNombreAgenda() {
 		if (sessionMBean.getAgendaMarcada() != null) {
 			return sessionMBean.getAgendaMarcada().getNombre().toUpperCase();
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -194,7 +186,7 @@ public class LlamadorMBean extends BaseMBean {
 	public String getDescripcionRecurso() {
 		if (sessionMBean.getRecursoMarcado() != null) {
 			return sessionMBean.getRecursoMarcado().getNombre().toUpperCase();
-		}else {
+		} else {
 			return "";
 		}
 	}
@@ -247,12 +239,14 @@ public class LlamadorMBean extends BaseMBean {
 				}
 			}
 			llamadorSessionMBean.setLlamadas(llamadasNuevas);
-			llamadaADestacar = llamadorSessionMBean.getLlamadasADestacar().poll();
+			Llamada llamadaADestacar = llamadorSessionMBean.getLlamadasADestacar().poll();
 			if(llamadaADestacar != null) {
+			  Reserva reserva = llamadaADestacar.getReserva();
 				RequestContext requestContext = RequestContext.getCurrentInstance();
-				requestContext.execute("setearValor('varPuesto','"+llamadaADestacar.getReserva().getLlamada().getPuesto()+"');");
-				requestContext.execute("setearValor('varDocumento','"+llamadaADestacar.getReserva().getNumeroDocumento()+"');");
-				requestContext.execute("setearValor('varNumero','"+llamadaADestacar.getReserva().getNumero()+"');");
+				requestContext.execute("setearValor('varPuesto','"+reserva.getLlamada().getPuesto()+"');");
+				requestContext.execute("setearValor('varDocumento','"+(reserva.getNumeroDocumento()!=null?reserva.getNumeroDocumento():"")+"');");
+				requestContext.execute("setearValor('varSerie','"+(reserva.getSerie()!=null?reserva.getSerie():"")+"');");
+        requestContext.execute("setearValor('varNumero','"+(reserva.getNumero()!=null?reserva.getNumero().toString():"")+"');");
 				requestContext.execute("PF('llamadaDestacada').show();");
 			}
 		} catch (Exception e) {
@@ -266,12 +260,9 @@ public class LlamadorMBean extends BaseMBean {
 	 * @return
 	 */
 	public void abrirLlamador() {
-		
 		FacesContext ctx = FacesContext.getCurrentInstance();
 		HttpServletRequest request = (HttpServletRequest)ctx.getExternalContext().getRequest();
-					
 		StringBuffer urlLlamador = new StringBuffer(request.getContextPath() + URL_BASE_TO_FORWARD_LLAMADOR);
-		
 		if (sessionMBean.getAgendaMarcada() != null) {
 			if (sessionMBean.getRecursoMarcado() != null) {
 				try {
@@ -290,7 +281,6 @@ public class LlamadorMBean extends BaseMBean {
 		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-		
 	}
 	
 	/** 
@@ -308,26 +298,6 @@ public class LlamadorMBean extends BaseMBean {
 		llamadorSessionMBean.setTipoMonitor(TipoMonitor.fromPulgadas(Integer.valueOf(e.getNewValue().toString())));
 	}
 
-
-	public int getNumber() {
-		return number;
-	}
-
-
-	public void setNumber(int number) {
-		this.number = number;
-	}
-	
-	public void increment() {
-        number++;
-    }
-	
-	
-	public Llamada getLlamadaADestacar() {
-		return llamadaADestacar;
-	}
-
-
 	public List<LlamadasPorHorario> getLlamadasPorHorario() {
 		List<Llamada> llamadas = llamadorSessionMBean.getLlamadas();
 		if(llamadas == null) {
@@ -337,31 +307,34 @@ public class LlamadorMBean extends BaseMBean {
 		
 		DateFormat df = new SimpleDateFormat("HHmm");
 		for(Llamada llamada : llamadas) {
+		  Reserva reserva = llamada.getReserva();
 			String horaLLamada = df.format(llamada.getHora());
 			LlamadasPorHorario llamadasPorHorario = mapLlamadasPorHorario.get(horaLLamada);
 			if(llamadasPorHorario == null) {
-				llamadasPorHorario = new LlamadasPorHorario(llamada.getReserva().getDisponibilidades().get(0).getHoraInicio());
+			  Disponibilidad disp = reserva.getDisponibilidades().get(0);
+				llamadasPorHorario = new LlamadasPorHorario(disp.getHoraInicio(), disp.getPresencial());
 				mapLlamadasPorHorario.put(horaLLamada, llamadasPorHorario);
 			}
 			String puesto = llamada.getPuesto()!=null?llamada.getPuesto().toString():"";
 			String documento = "";
-			for(DatoReserva dato : llamada.getReserva().getDatosReserva()) {
+			for(DatoReserva dato : reserva.getDatosReserva()) {
 				DatoASolicitar datoSol = dato.getDatoASolicitar();
 				if("NroDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
 					documento = dato.getValor();
 				}
 			}
-			String numero = llamada.getReserva().getNumero()!=null?llamada.getReserva().getNumero().toString():"";
-			LlamadaPorHorario llamada1 = new LlamadaPorHorario(puesto, documento, numero);
+			String serie = reserva.getSerie()!=null?reserva.getSerie():"";
+      String numero = reserva.getNumero()!=null?reserva.getNumero().toString():"";
+      Boolean presencial = reserva.getDisponibilidades().get(0).getPresencial();
+			LlamadaPorHorario llamada1 = new LlamadaPorHorario(puesto, documento, serie, numero, presencial);
 			llamadasPorHorario.getLlamadas().add(llamada1);
 		}
 		
 		List<String> horarios = new ArrayList<String>();
 		horarios.addAll(mapLlamadasPorHorario.keySet());
 		Collections.sort(horarios);
-
-		List<LlamadasPorHorario> llamadasPorHorario = new ArrayList<LlamadasPorHorario>(llamadas.size());
 		
+		List<LlamadasPorHorario> llamadasPorHorario = new ArrayList<LlamadasPorHorario>(llamadas.size());
 		for(String horario : horarios) {
 			llamadasPorHorario.add(mapLlamadasPorHorario.get(horario));
 		}
@@ -371,56 +344,55 @@ public class LlamadorMBean extends BaseMBean {
 
 
 	public class LlamadasPorHorario {
-		
 		private Date hora;
+		private Boolean presencial;
 		private List<LlamadaPorHorario> llamadas;
-
-		public LlamadasPorHorario(Date hora) {
+		public LlamadasPorHorario(Date hora, Boolean presencial) {
 			this.hora = hora;
+      this.presencial = presencial;
 			this.llamadas = new ArrayList<LlamadaPorHorario>();
 		}
-		
 		public Date getHora() {
 			return this.hora;
 		}
-		
 		public List<LlamadaPorHorario> getLlamadas() {
 			return this.llamadas;
 		}
+    public Boolean getPresencial() {
+      return presencial;
+    }
 		
 	}
 	
 	public class LlamadaPorHorario {
-		
 		private String puesto;
 		private String documento;
+		private String serie;
 		private String numero;
-		
-		public LlamadaPorHorario(String puesto, String documento, String numero) {
+		private Boolean presencial;
+		public LlamadaPorHorario(String puesto, String documento, String serie, String numero, Boolean presencial) {
 			super();
 			this.puesto = puesto;
 			this.documento = documento;
+			this.serie = serie;
 			this.numero = numero;
+      this.presencial = presencial;
 		}
-		
 		public String getPuesto() {
 			return puesto;
-		}
-		public void setPuesto(String puesto) {
-			this.puesto = puesto;
 		}
 		public String getDocumento() {
 			return documento;
 		}
-		public void setDocumento(String documento) {
-			this.documento = documento;
-		}
 		public String getNumero() {
 			return numero;
 		}
-		public void setNumero(String numero) {
-			this.numero = numero;
-		}
+    public String getSerie() {
+      return serie;
+    }
+    public Boolean getPresencial() {
+      return presencial;
+    }
 	}
 	
 	private boolean detenerPolling = false;

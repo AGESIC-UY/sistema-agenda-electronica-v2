@@ -32,25 +32,24 @@ import uy.gub.imm.sae.entity.Atencion;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 public interface Consultas {
 
 	
 	public Reserva consultarReservaId(Integer id, Integer recId) throws UserException;
-	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws BusinessException, UserException;
+	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws UserException;
 
-	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, Estado estado) throws BusinessException;
-	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados) throws BusinessException;
-	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, TimeZone timezone) throws BusinessException;
-	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, TimeZone timezone) throws BusinessException;
+	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, Estado estado, boolean atencionPresencial) throws UserException;
+	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados, boolean atencionPresencial) throws UserException;
+	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, boolean atencionPresencial, TimeZone timezone) throws UserException;
+	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, boolean atencionPresencial, TimeZone timezone) throws UserException;
 	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso);
 	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos, Recurso recurso, Date fecha, String codigoTramite);	
-	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo) throws BusinessException;
+	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo) throws UserException;
 	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos ,Recurso recurso,String codigoSeguridadReserva, TimeZone timezone);
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta);
 	
-	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc)throws BusinessException;
+	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException;
 }

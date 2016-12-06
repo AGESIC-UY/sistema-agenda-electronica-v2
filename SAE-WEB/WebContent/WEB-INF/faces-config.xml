@@ -290,6 +290,23 @@
 		</managed-property>
 	</managed-bean>
 
+  <managed-bean>
+    <managed-bean-name>atencionPresencialMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.AtencionPresencialMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>datosReservaMBean</property-name>
+      <property-class>java.util.Map</property-class>
+      <value>#{datosReservaMBean}</value>
+    </managed-property>
+  </managed-bean>
+
+
 	<managed-bean>
 		<managed-bean-name>reservaSessionMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ReservaSessionMBean</managed-bean-class>
@@ -344,17 +361,6 @@
 			<property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
 			<value>#{sessionMBean}</value>
 		</managed-property>
-		<managed-property>
-			<property-name>consultaSessionMBean</property-name>
-			<property-class>uy.gub.imm.sae.web.mbean.administracion.ConsultaSessionMBean</property-class>
-			<value>#{consultaSessionMBean}</value>
-		</managed-property>
-	</managed-bean>
-
-	<managed-bean>
-		<managed-bean-name>consultaSessionMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ConsultaSessionMBean</managed-bean-class>
-		<managed-bean-scope>session</managed-bean-scope>
 	</managed-bean>
 
 	<managed-bean>

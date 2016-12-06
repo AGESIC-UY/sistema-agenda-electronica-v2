@@ -175,48 +175,27 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone t)
-			throws BusinessException {
-
-		try {
-			return this.reservas.obtenerCuposPorDia(r, v, t);
-		} catch (BusinessException_Exception e) {
-			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
-		}
+	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone t) throws UserException {
+    throw new UnsupportedOperationException();
 	}
 
-	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone tz) throws BusinessException {
-
-		try {
-			return this.reservas.obtenerDisponibilidades(r, v);
-		} catch (BusinessException_Exception e) {
-			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
-		}
+	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone tz) throws UserException {
+    throw new UnsupportedOperationException();
 	}
 
-	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r)
-			throws BusinessException {
-
-		//Se da una implementacion para cumplir con la interfaz pero nunca se ejecuta este método
-		return null;
+	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) 	throws UserException {
+    throw new UnsupportedOperationException();
 	}
 
-	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r)
-			throws BusinessException {
-
-		try {
-			return this.reservas.obtenerVentanaCalendarioInternet(r);
-		} catch (BusinessException_Exception e) {
-			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
-		}
+	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws UserException {
+    throw new UnsupportedOperationException();
 	}
 	
 	public void reagendarReservas(List<Reserva> reservas, Date fechaHora) {
 		throw new UnsupportedOperationException();
 	}
 
-	public void validarDatosReserva(Recurso recurso, List<DatoReserva> datos)
-			throws BusinessException, UserException, ApplicationException {
+	public void validarDatosReserva(Recurso recurso, List<DatoReserva> datos) throws BusinessException, UserException, ApplicationException {
 		throw new UnsupportedOperationException();
 	}
 
@@ -254,11 +233,6 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-//	@Override
-//	public List<String> consultarFrasesCaptcha(String idioma) throws ApplicationException {
-//		throw new UnsupportedOperationException();
-//	}
-
 	@Override
 	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException {
 		throw new UnsupportedOperationException();
@@ -276,6 +250,12 @@ public class AgendarReservasPort implements AgendarReservas {
 
   @Override
   public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva)
+      throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
     throw new UnsupportedOperationException();
   }
 }

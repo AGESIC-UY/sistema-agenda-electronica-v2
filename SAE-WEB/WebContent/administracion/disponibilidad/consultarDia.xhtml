@@ -15,19 +15,16 @@
 				<h2>
 					<h:outputText value="#{sessionMBean.textos['disponibilidades_para_el_dia']} " />
 					<h:outputText value="#{dispSessionMBean.fechaActual}">
-						<f:convertDateTime type="both" pattern="dd 'de' MMMM 'de' yyyy"
-							timeZone="GMT" locale="#{sessionMBean.locale}" />
+						<f:convertDateTime type="both" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sessionMBean.locale}" />
 					</h:outputText>
 				</h2>
 
 				<div class="row">
 					<div class="col-sm-6">
-						<p:dataTable id="tablaMatutina"
-							binding="#{disponibilidadMBean.tablaDispMatutina}"
-							value="#{dispSessionMBean.disponibilidadesDelDiaMatutina}"
-							var="row" caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}"
-							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
-							>
+					
+					  <!-- Disponibilidades en la mañana -->
+						<p:dataTable id="tablaMatutina" binding="#{disponibilidadMBean.tablaDispMatutina}" value="#{dispSessionMBean.disponibilidadesDelDiaMatutina}"
+							var="row" caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"	>
 
 							<f:facet name="header">
 								<h:panelGroup>
@@ -38,8 +35,7 @@
 							<p:column>
 								<f:facet name="header"><h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" /></f:facet>
 								<h:outputText value="#{row.data.horaInicio}">
-									<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
-										timeZone="GMT" />
+									<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 								</h:outputText>
 							</p:column>
 
@@ -47,12 +43,8 @@
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
 								</f:facet>
-								<h:outputText value="#{row.data.cupo}"
-									rendered="#{(row.data.cupoDisponible > 0 ? true  : false)}"
-									styleClass="verde"></h:outputText>
-								<h:outputText value="#{row.data.cupo}"
-									rendered="#{(row.data.cupoDisponible > 0 ? false  : true)}"
-									styleClass="rojo"></h:outputText>
+								<h:outputText value="#{row.data.cupo}" rendered="#{(row.data.cupoDisponible > 0 ? true  : false)}" styleClass="verde"></h:outputText>
+								<h:outputText value="#{row.data.cupo}" rendered="#{(row.data.cupoDisponible > 0 ? false  : true)}" styleClass="rojo"></h:outputText>
 							</p:column>
 
 							<p:column>
@@ -64,11 +56,10 @@
 						</p:dataTable>
 					</div>
 					<div class="col-sm-6">
-						<p:dataTable id="tablaVespertina"
-							binding="#{disponibilidadMBean.tablaDispVespertina}"
-							value="#{dispSessionMBean.disponibilidadesDelDiaVespertina}"
-							var="row" caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}"
-							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+					
+            <!-- Disponibilidades en la tarde -->
+						<p:dataTable id="tablaVespertina" binding="#{disponibilidadMBean.tablaDispVespertina}" value="#{dispSessionMBean.disponibilidadesDelDiaVespertina}"
+							var="row" caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 
 							<f:facet name="header">
 								<h:panelGroup>
@@ -79,8 +70,7 @@
 							<p:column>
 								<f:facet name="header"><h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" /></f:facet>
 								<h:outputText value="#{row.data.horaInicio}">
-									<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
-										timeZone="GMT" />
+									<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 								</h:outputText>
 							</p:column>
 
@@ -88,12 +78,8 @@
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
 								</f:facet>
-								<h:outputText value="#{row.data.cupo}"
-									rendered="#{(row.data.cupoDisponible > 0 ? true  : false)}"
-									styleClass="verde"></h:outputText>
-								<h:outputText value="#{row.data.cupo}"
-									rendered="#{(row.data.cupoDisponible > 0 ? false  : true)}"
-									styleClass="rojo"></h:outputText>
+								<h:outputText value="#{row.data.cupo}" rendered="#{(row.data.cupoDisponible > 0 ? true  : false)}" styleClass="verde"></h:outputText>
+								<h:outputText value="#{row.data.cupo}" rendered="#{(row.data.cupoDisponible > 0 ? false  : true)}" styleClass="rojo"></h:outputText>
 							</p:column>
 
 							<p:column>
@@ -107,11 +93,13 @@
 				</div>
 
 				<ul class="form-action-buttons">
-					<li class="action-buttons-primary"></li>
+					<li class="action-buttons-primary">
+					</li>
 					<li class="action-buttons-second">
 						<ul>
-							<li class="float-left"><h:commandButton
-									styleClass="btn-lg btn-link" value="#{sessionMBean.textos['volver']}" action="volver" /></li>
+							<li class="float-left">
+							  <h:commandButton styleClass="btn-lg btn-link" value="#{sessionMBean.textos['volver']}" action="volver" />
+						  </li>
 						</ul>
 					</li>
 				</ul>

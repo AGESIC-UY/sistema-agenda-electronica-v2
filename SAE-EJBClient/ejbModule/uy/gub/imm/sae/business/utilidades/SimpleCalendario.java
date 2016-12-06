@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package uy.gub.imm.sae.common.profile.factories.impl;
+package uy.gub.imm.sae.business.utilidades;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -28,6 +28,10 @@ import uy.gub.imm.sae.entity.Recurso;
 
 public class SimpleCalendario implements Calendario {
 
+  public SimpleCalendario(Object o) {
+    //Constructor falso para ver donde se usa
+  }
+  
 	public Boolean esDiaHabil(Date dia, Recurso r) {
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(dia);

@@ -27,25 +27,21 @@ import java.util.TimeZone;
 import uy.gub.imm.sae.common.DisponibilidadReserva;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Disponibilidad;
-import uy.gub.imm.sae.entity.Plantilla;
 import uy.gub.imm.sae.entity.Recurso;
-import uy.gub.imm.sae.exception.ApplicationException;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
 
 public interface Disponibilidades {
-	public List<Date> generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, Integer frecuencia, Integer cupo) throws UserException, ApplicationException;
-	public void generarDisponibilidades(Recurso r, Date f, VentanaDeTiempo periodo, Boolean[] dias) throws UserException, ApplicationException;	
-	public void generarPatronSemana(Recurso r, VentanaDeTiempo semana, VentanaDeTiempo periodo) throws BusinessException, UserException, ApplicationException;	
-	public List<Disponibilidades> consultarDisponibilidadesSolapadas(Recurso r, Plantilla p, VentanaDeTiempo v);
-	public void generarDisponibilidaesAutomaticamente();
-	public void eliminarDisponibilidades(Recurso r, VentanaDeTiempo v) throws BusinessException, UserException;
-	public List<DisponibilidadReserva> obtenerDisponibilidadesReservas(Recurso r, VentanaDeTiempo v) throws BusinessException, RolException;
-	public int modificarCupoDeDisponibilidad(Disponibilidad d) throws UserException, BusinessException;
-	public void modificarCupoPeriodo(Disponibilidad d) throws UserException, BusinessException;
-	public Integer cantDisponibilidadesDia(Recurso r, Date f) throws UserException, BusinessException;
-	public Date ultFechaGenerada(Recurso r) throws UserException, BusinessException;
-	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor,int tipoOperacion, Boolean[] dias) throws UserException, BusinessException ;
-	public boolean esDiaHabil(Date fecha, Recurso r) throws ApplicationException;
+	public List<Date> generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, Integer frecuencia, Integer cupo) throws UserException;
+	public void generarDisponibilidades(Recurso r, Date f, VentanaDeTiempo periodo, Boolean[] dias) throws UserException;	
+	public void eliminarDisponibilidades(Recurso r, VentanaDeTiempo v) throws UserException;
+	public List<DisponibilidadReserva> obtenerDisponibilidadesReservas(Recurso r, VentanaDeTiempo v) throws UserException, RolException;
+	public int modificarCupoDeDisponibilidad(Disponibilidad d) throws UserException;
+	public void modificarCupoPeriodo(Disponibilidad d) throws UserException;
+	public boolean hayDisponibilidadesFecha(Recurso r, Date f) throws UserException;
+	public Date ultFechaGenerada(Recurso r) throws UserException;
+	public List<String> modificarCupoPeriodoValorOperacion(Disponibilidad d, TimeZone timezone, int valor,int tipoOperacion, Boolean[] dias) throws UserException ;
+	public boolean esDiaHabil(Date fecha, Recurso r) throws UserException;
+	
+	public Disponibilidad obtenerDisponibilidadPresencial(Recurso recurso, TimeZone timezone);
 }
