@@ -6,8 +6,7 @@
 	xmlns:h="http://java.sun.com/jsf/html"
 	lang="#{sesionMBean.idiomaActual}">
 
-<f:view beforePhase="#{parametroBean.beforePhase}"
-	beforePhaseListener="#{parametroBean.beforePhase}">
+<f:view beforePhase="#{parametroBean.beforePhase}" >
 
 	<h:head>
 		<title><h:outputText value="#{sesionMBean.textos['nombre_aplicacion']}" /></title>

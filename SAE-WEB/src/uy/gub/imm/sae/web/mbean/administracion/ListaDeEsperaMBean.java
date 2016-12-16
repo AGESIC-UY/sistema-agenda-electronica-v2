@@ -86,26 +86,22 @@ public class ListaDeEsperaMBean extends BaseMBean {
 		
 		atencionPresencial = false;
 		
-		if (listaDeEsperaSessionMBean.getAgrupaciones() == null && sessionMBean.getRecursoMarcado() != null) {
-			try {
-				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
-				listaDeEsperaSessionMBean.setAgrupaciones(agrupaciones);
-				if (listaDeEsperaSessionMBean.getHorarios() == null) {
-					try {
-						refrescarHorariosDeEspera(null, atencionPresencial);
-					} catch (Exception e) {
-						addErrorMessage(e, MSG_ID);
-					}
+		try {
+			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
+			listaDeEsperaSessionMBean.setAgrupaciones(agrupaciones);
+				try {
+					refrescarHorariosDeEspera(null, atencionPresencial);
+				} catch (Exception e) {
+					addErrorMessage(e, MSG_ID);
 				}
-			} catch (BusinessException be) {
-				if (be.getCodigoError().equals("AE20084")) {
-					addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
-				} else {
-					addErrorMessage(be, MSG_ID);
-				}
-			} catch (Exception e) {
-				addErrorMessage(e, MSG_ID);
+		} catch (BusinessException be) {
+			if (be.getCodigoError().equals("AE20084")) {
+				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+			} else {
+				addErrorMessage(be, MSG_ID);
 			}
+		} catch (Exception e) {
+			addErrorMessage(e, MSG_ID);
 		}
 	}
 	
@@ -225,13 +221,7 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	}
 
 	private void refrescarHorariosDeEspera(List<Estado> estados, boolean atencionPresencial) {
-	  
-	  System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 1");
-	  
 		listaDeEsperaSessionMBean.setHorarios(new ArrayList<Horario>());
-
-    System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 2");
-		
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
 		if (sessionMBean.getRecursoMarcado() != null) {
 			try {
@@ -239,36 +229,24 @@ public class ListaDeEsperaMBean extends BaseMBean {
 					getListaDeEsperaSessionMBean().setEstadosSeleccionado(new ArrayList<Estado>());
 					getListaDeEsperaSessionMBean().getEstadosSeleccionado().add(Estado.R);
 				}
-			
 				if(estados == null) {
 					estados = getListaDeEsperaSessionMBean().getEstadosSeleccionado();
 				}
-			
-		    System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 3");
-				
 				List<ReservaDTO> reservas = llamadasEJB.obtenerReservasEnEspera(recursoMarcado, estados, atencionPresencial, sessionMBean.getTimeZone());
-
-        System.out.println("ListaDeEsperaMBean.refrescarHorariosDeEspera -- 4 - reservas: "+reservas);
-				
 				Horario horario = null;
-				
 				//Recorro las reservas agrupándolas por horario
 				for (ReservaDTO reserva : reservas) {
-				
 					//Si el horario es nulo o la reserva no tiene el mismo horario -> Creo un nuevo grupo con esta reserva
 					//Si no -> la agrego al grupo actual
 					if (horario == null || ! reserva.getHoraInicio().equals(horario.getHora())) {
-						
 						horario = new Horario();
 						horario.setHora(reserva.getHoraInicio());
 						horario.getListaEspera().add(crearEspera(reserva));
-						
 						listaDeEsperaSessionMBean.getHorarios().add(horario);
 					} else {
 						horario.getListaEspera().add(crearEspera(reserva));
 					}
 				}
-			
 				//Habilito refresco automatico en el caso que el filtro muestre solo las reservadas.
 				if (getListaDeEsperaSessionMBean().getEstadosSeleccionado().size() == 1 &&
 					getListaDeEsperaSessionMBean().getEstadosSeleccionado().get(0).equals(Estado.R)) {
@@ -310,7 +288,8 @@ public class ListaDeEsperaMBean extends BaseMBean {
 		if (sessionMBean.getRecursoMarcado() != null) {
 			Reserva siguienteReserva = null;
 			try {
-				siguienteReserva = llamadasEJB.siguienteEnEspera(sessionMBean.getRecursoMarcado(), iPuesto);
+			  //Obtener la siguiente reserva (no se hace con los datos en sesión porque es posible que otros usuarios hayan hecho más llamadas) 
+				siguienteReserva = llamadasEJB.siguienteEnEspera(sessionMBean.getRecursoMarcado(), iPuesto, atencionPresencial);
 				listaDeEsperaSessionMBean.setSiguienteReserva(siguienteReserva);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
@@ -450,7 +429,6 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	}
 	
 	public void cambioAtencionPresencial() {
-	  System.out.println("ListaDeEsperaMBean.cambioAtencionPresencial -- Cambio el indicador de atención presencial, ahora es: "+atencionPresencial);
 	  refrescarHorariosDeEspera(null, atencionPresencial);
 	}
 	

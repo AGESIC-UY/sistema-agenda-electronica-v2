@@ -18,8 +18,7 @@
 	</ui:define>
 
 	<ui:define name="cuerpo">
-		<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
-			widgetVar="eliminarReserva" zindex="2000" modal="true">
+		<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarReserva" zindex="2000" modal="true">
 
 			<f:facet name="header">
 				<h:outputText value="#{sesionMBean.textos['confirmacion']}" />
@@ -28,23 +27,15 @@
 				<h:outputText value="#{sesionMBean.textos['confirma_cancelar_la_reserva']}" />
 				<p:outputPanel styleClass="row panelBotonesPopUp">
 					<p:outputPanel styleClass="col-sm-6">
-						<p:commandButton id="btn_eliminar"
-							update="@all"
-							actionListener="#{cancelarReservaPublicMBean.cancelarReserva}"
-							value="#{sesionMBean.textos['si']}"
-							onclick="PF('eliminarReserva').hide();"
-							styleClass="btn-primario btn-100 btn">
+						<p:commandButton id="btn_eliminar" update="@all" actionListener="#{cancelarReservaPublicMBean.cancelarReserva}" 
+						  value="#{sesionMBean.textos['si']}" onclick="PF('eliminarReserva').hide();" styleClass="btn-primario btn-100 btn">
 						</p:commandButton>
 					</p:outputPanel>
 					<p:outputPanel styleClass="col-sm-6">
-						<p:commandButton id="btn_noeliminar" 
-						  onclick="PF('eliminarReserva').hide();"
-							value="#{sesionMBean.textos['no']}"
-							styleClass="btn-secundario btn-100 btn">
+						<p:commandButton id="btn_noeliminar" onclick="PF('eliminarReserva').hide();" value="#{sesionMBean.textos['no']}" styleClass="btn-secundario btn-100 btn">
 						</p:commandButton>
 					</p:outputPanel>
 				</p:outputPanel>
-
 			</h:form>
 		</p:dialog>
 		
@@ -97,8 +88,7 @@
           <ul class="form-action-buttons" >
             <li class="action-buttons-primary">
               <p:commandButton value="#{sesionMBean.textos['continuar']} #{cancelarReservaPublicMBean.simboloSiguiente}"
-                actionListener="#{cancelarReservaPublicMBean.verificarDatos}"
-                update="@all" styleClass="btn-lg btn-primario" />
+                actionListener="#{cancelarReservaPublicMBean.verificarDatos}" update="@all" styleClass="btn-lg btn-primario" />
             </li>
           </ul>
            
@@ -107,21 +97,17 @@
     
     </h:form>
 		
-		<h:form id="formConBusqueda" class="cancelarReserva" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='BUSCAR_RESERVAS'}">
-
+		<h:form id="formConBusqueda" class="cancelarReserva" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='BUSCAR_RESERVAS'}" >
       <p:outputPanel styleClass="form-required">
         <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
       </p:outputPanel>
 			<p:outputPanel id="filtroBusqueda" >
-				<h:panelGroup id="camposFiltroCancelar" binding="#{cancelarReservaPublicMBean.filtroConsulta}" layout="block">
-				</h:panelGroup>
-
+				<h:panelGroup id="camposFiltroCancelar" binding="#{cancelarReservaPublicMBean.filtroConsulta}" layout="block" />
 				<h:panelGroup id="codigoSeguridad" styleClass="Texto" layout="block">
 					<fieldset>
 						<legend>
 							<h:outputText value="#{sesionMBean.textos['codigo_de_seguridad_de_la_reserva']}" />
 						</legend>
-
 						<div class="form-horizontal">
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel for="codSeg" class="col-sm-3 control-label label" value="#{sesionMBean.textos['ingrese_el_codigo_de_seguridad']}" />
@@ -133,32 +119,23 @@
 						</div>
 					</fieldset>
 				</h:panelGroup>
-
         <ul class="form-action-buttons" >
           <li class="action-buttons-primary">
             <p:commandButton value="#{sesionMBean.textos['continuar']} #{cancelarReservaPublicMBean.simboloSiguiente}"
-							actionListener="#{cancelarReservaPublicMBean.buscarReservaDatos}"
-							update="@all" styleClass="btn-lg btn-primario" id="BtnContinuar" />
+							actionListener="#{cancelarReservaPublicMBean.buscarReservaDatos}" update="@all" styleClass="btn-lg btn-primario" id="BtnContinuar" />
 					</li>
 				</ul>
 			</p:outputPanel>
-
 		</h:form>
-		
+			
     <h:form id="formConfirmarCancelacion" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='LISTAR_RESERVAS'}">
       <p:outputPanel styleClass="form-required">
         <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
       </p:outputPanel>
       <p:outputPanel>
         <p:outputPanel id="resultadosBusquedaCancelar">
-          <p:dataGrid layout="grid" columns="1"
-            value="#{sesionMBean.listaReservas}"
-            var="reserva" id="resultadoBusquedaCancelar"
-            binding="#{cancelarReservaPublicMBean.reservasDataTable}"
-            emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
-            rendered="#{not empty sesionMBean.listaReservas}"
-            >
-
+          <p:dataGrid layout="grid" columns="1" value="#{sesionMBean.listaReservas}" var="reserva" id="resultadoBusquedaCancelar" binding="#{cancelarReservaPublicMBean.reservasDataTable}"
+            emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}" rendered="#{not empty sesionMBean.listaReservas}" >
             <div class="box box-grey datosReservaCancelar">
               <div class="row">
                 <div class="col-sm-8">
@@ -168,60 +145,43 @@
                   <div class="fechaHoraReserva">
                     <h:outputText value="#{reserva.disponibilidades[0].fecha}"
                       styleClass="resaltado">
-                      <f:convertDateTime type="date"
-                        pattern="dd 'de' MMMM 'de' yyyy"
-                        timeZone="GMT"
-                        locale="#{sesionMBean.locale}" />
+                      <f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sesionMBean.locale}" />
                     </h:outputText>
                     <h:outputText value=" #{sesionMBean.textos['a_las']} " />
-                    <h:outputText
-                      value="#{reserva.disponibilidades[0].horaInicio}"
-                      styleClass="resaltado">
-                      <f:convertDateTime type="date"
-                        pattern="#{sesionMBean.formatoHora}"
-                        timeZone="GMT" locale="es" />
+                    <h:outputText value="#{reserva.disponibilidades[0].horaInicio}" styleClass="resaltado"> 
+                      <f:convertDateTime type="date" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" locale="es" />
                     </h:outputText>
                     <h:outputText value="." />
                   </div>
                   <div>
-                    <h:outputText
-                      value="#{reserva.disponibilidades[0].recurso.nombre}" />
+                    <h:outputText value="#{reserva.disponibilidades[0].recurso.nombre}" />
                   </div>
                 </div>
                 <div class="col-sm-4 alinDer">
-                  <p:commandLink id="consultarLinkCancelar"
-                    oncomplete="PF('eliminarReserva').show();"
-                    actionListener="#{cancelarReservaPublicMBean.selecReservaEliminar}"
-                    styleClass="btn-lg btn-primario"
-                    value="#{sesionMBean.textos['cancelar_reserva']}">
-                    <h:graphicImage value="#{saeProperties['ui.resource.base.url']}/recursos/images/delete2.gif"
-                      style="border:0" height="16" width="16" title="#{sesionMBean.textos['cancelar_reserva']}" />
+                  <p:commandLink id="consultarLinkCancelar" oncomplete="PF('eliminarReserva').show();" actionListener="#{cancelarReservaPublicMBean.selecReservaEliminar}"
+                    styleClass="btn-lg btn-primario" value="#{sesionMBean.textos['cancelar_reserva']}">
+                    <h:graphicImage value="#{saeProperties['ui.resource.base.url']}/recursos/images/delete2.gif" style="border:0" height="16" width="16" 
+                      title="#{sesionMBean.textos['cancelar_reserva']}" />
                   </p:commandLink>
                 </div>
               </div>
             </div>
-
           </p:dataGrid>
-
-
 		      <ul class="form-action-buttons">
 		        <li class="action-buttons-second">
 		          <ul>
 		            <li class="float-left">
 		              <h:outputLink value="#{cancelarReservaPublicMBean.urlBuscarReservas}" rendered="#{not empty cancelarReservaPublicMBean.urlBuscarReservas}">
-		                <h:outputText value="#{cancelarReservaPublicMBean.simboloAnterior} #{sesionMBean.textos['ir_a_la_busqueda_de_reservas']}"></h:outputText>
+		                <h:outputText value="#{cancelarReservaPublicMBean.simboloAnterior} #{sesionMBean.textos['ir_a_la_busqueda_de_reservas']}" />
 	                </h:outputLink>
                 </li>
 		          </ul>
 		        </li>
 		      </ul>
-
-
         </p:outputPanel>
       </p:outputPanel>
-
     </h:form>		
-		
+
 	</ui:define>
 </ui:composition>
 </html>

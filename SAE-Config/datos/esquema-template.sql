@@ -85,7 +85,7 @@ CREATE TABLE ae_agendas (
     fecha_baja timestamp without time zone,
     nombre character varying(100) NOT NULL,
     tramite_id character varying(25),
-    timezone character varying(25),
+    timezone character varying(100),
     idiomas character varying(100),
     con_cda boolean DEFAULT false,
     tramite_codigo character varying(10),
@@ -273,7 +273,8 @@ CREATE TABLE ae_disponibilidades (
     numerador integer NOT NULL,
     version integer NOT NULL,
     aepl_id integer,
-    aere_id integer NOT NULL
+    aere_id integer NOT NULL,
+    presencial boolean DEFAULT false NOT NULL
 );
 
 
@@ -441,7 +442,16 @@ CREATE TABLE ae_recursos (
     latitud numeric,
     longitud numeric,
     mostrar_id_en_ticket boolean,
-    domingo_es_habil boolean DEFAULT false NOT NULL
+    domingo_es_habil boolean DEFAULT false NOT NULL,
+    presencial_admite boolean DEFAULT false NOT NULL,
+    presencial_lunes boolean DEFAULT false NOT NULL,
+    presencial_martes boolean DEFAULT false NOT NULL,
+    presencial_miercoles boolean DEFAULT false NOT NULL,
+    presencial_jueves boolean DEFAULT false NOT NULL,
+    presencial_viernes boolean DEFAULT false NOT NULL,
+    presencial_sabado boolean DEFAULT false NOT NULL,
+    presencial_domingo boolean DEFAULT false NOT NULL,
+    presencial_cupos integer DEFAULT 0 NOT NULL
 );
 
 
@@ -465,7 +475,8 @@ CREATE TABLE ae_reservas (
     codigo_seguridad character varying(10) DEFAULT '00000'::character varying,
     trazabilidad_guid character varying(25),
     tramite_codigo character varying(10),
-    tramite_nombre character varying(100)
+    tramite_nombre character varying(100),
+    serie character varying(3)
 );
 
 
@@ -482,6 +493,19 @@ CREATE TABLE ae_reservas_disponibilidades (
 
 
 ALTER TABLE ae_reservas_disponibilidades OWNER TO sae;
+
+--
+-- Name: ae_roles_usuario_recurso; Type: TABLE; Schema: {esquema}; Owner: sae
+--
+
+CREATE TABLE ae_roles_usuario_recurso (
+    usuario_id integer NOT NULL,
+    recurso_id integer NOT NULL,
+    roles character varying(4000)
+);
+
+
+ALTER TABLE ae_roles_usuario_recurso OWNER TO sae;
 
 --
 -- Name: ae_serv_autocomp_por_dato; Type: TABLE; Schema: {esquema}; Owner: sae
@@ -1363,6 +1387,12 @@ INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P
 
 
 --
+-- Data for Name: ae_roles_usuario_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
+--
+
+
+
+--
 -- Data for Name: ae_serv_autocomp_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
@@ -1881,6 +1911,14 @@ ALTER TABLE ONLY ae_reservas
 
 
 --
+-- Name: ae_roles_usuario_recurso_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae
+--
+
+ALTER TABLE ONLY ae_roles_usuario_recurso
+    ADD CONSTRAINT ae_roles_usuario_recurso_pkey PRIMARY KEY (usuario_id, recurso_id);
+
+
+--
 -- Name: ae_serv_autocomp_por_dato_pkey; Type: CONSTRAINT; Schema: {esquema}; Owner: sae
 --
 
@@ -1974,6 +2012,20 @@ ALTER TABLE ONLY ae_valor_constante_val_rec
 
 ALTER TABLE ONLY ae_valores_del_dato
     ADD CONSTRAINT ae_valores_del_dato_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: ae_reservas_disponibilidades_disponibilidad; Type: INDEX; Schema: {esquema}; Owner: sae
+--
+
+CREATE INDEX ae_reservas_disponibilidades_disponibilidad ON ae_reservas_disponibilidades USING btree (aedi_id);
+
+
+--
+-- Name: ae_reservas_disponibilidades_reserva; Type: INDEX; Schema: {esquema}; Owner: sae
+--
+
+CREATE INDEX ae_reservas_disponibilidades_reserva ON ae_reservas_disponibilidades USING btree (aers_id);
 
 
 --

@@ -8,18 +8,18 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view
-			beforePhase="#{consultaMBean.beforePhaseConsultarAsistenciaPeriodo}" >
+		<f:view beforePhase="#{consultaMBean.beforePhaseConsultarAtencionPresencialPeriodo}" >
 			<p:outputPanel>
-				<h:form id="form">
+				<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 		      <p:outputPanel styleClass="form-required">
 		        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
 		      </p:outputPanel>
 					<fieldset>
 						<legend>
-							<h:outputText value="#{sessionMBean.textos['reporte_asistencia_por_periodo']}" />
+							<h:outputText value="#{sessionMBean.textos['reporte_atencion_presencial']}" />
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
+
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha_de_inicio']}" for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
@@ -29,6 +29,7 @@
 									<p:message for="fechaDesde" />
 								</p:outputPanel>
 							</p:outputPanel>
+
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha_de_fin']}" for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
@@ -42,7 +43,7 @@
 					</fieldset>
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary">
-						  <h:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{reporteMBean.reporteAsistenciaFecha}" styleClass="btn-lg btn-primario" />
+						  <h:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{reporteMBean.reporteAtencionPresencialPeriodo}" styleClass="btn-lg btn-primario" />
 					  </li>
 					</ul>
 				</h:form>

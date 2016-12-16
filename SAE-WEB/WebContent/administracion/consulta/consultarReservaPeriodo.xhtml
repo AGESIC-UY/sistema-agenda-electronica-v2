@@ -22,39 +22,29 @@
 						<p:outputPanel styleClass="form-horizontal">
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['fecha_desde']}"
-									for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['fecha_desde']}" for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText value="#{reporteMBean.fechaDesde}"
-										styleClass="datepicker" id="fechaDesde">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
-											timeZone="GMT" />
+									<h:inputText value="#{reporteMBean.fechaDesde}" styleClass="datepicker" id="fechaDesde">
+										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 									</h:inputText>
                   <p:message for="fechaDesde" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['fecha_hasta']}"
-									for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['fecha_hasta']}" for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText value="#{reporteMBean.fechaHasta}"
-										styleClass="datepicker" id="fechaHasta">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
-											timeZone="GMT" />
+									<h:inputText value="#{reporteMBean.fechaHasta}" styleClass="datepicker" id="fechaHasta">
+										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 									</h:inputText>
                   <p:message for="fechaHasta" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['estado']}"
-									for="estado"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['estado']}" for="estado" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:selectOneMenu id="estado"
-										value="#{reporteMBean.estadoReservaSeleccionado}"
-										styleClass="form-control">
+									<h:selectOneMenu id="estado" value="#{reporteMBean.estadoReservaSeleccionado}" styleClass="form-control">
 										<f:selectItems value="#{reporteMBean.estadosReserva}" />
 									</h:selectOneMenu>
                   <p:message for="estado" />
@@ -64,12 +54,8 @@
 					</fieldset>
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary">
-						  <h:commandButton
-								value="#{sessionMBean.textos['consultar']}"
-								action="#{reporteMBean.reporteReservaFecha}"
-								styleClass="btn-lg btn-primario"
-								update="@form" />
-							</li>
+						  <h:commandButton value="#{sessionMBean.textos['consultar']}" action="#{reporteMBean.reporteReservaFecha}" styleClass="btn-lg btn-primario" update="@form" />
+						</li>
 					</ul>
 				</h:form>
 			</p:outputPanel>

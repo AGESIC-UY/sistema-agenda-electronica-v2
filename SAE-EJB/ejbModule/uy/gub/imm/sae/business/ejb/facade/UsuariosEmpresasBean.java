@@ -487,6 +487,12 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				String wsUser = confBean.getString("WS_TRAMITE_USER");
 				String wsPass = confBean.getString("WS_TRAMITE_PASS");
 				
+        //Obtener el timeout desde la configuracion
+        Long timeout = confBean.getLong("WS_TRAMITE_TIMEOUT");
+        if(timeout == null) {
+          timeout = 5000L;
+        }
+        
 				//Consultar el servicio web
 				WsTramite wsTramite = new WsTramite(urlWsdl);
 				WsTramiteSoap port = wsTramite.getWsTramiteSoap();
@@ -494,8 +500,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	      customHandlerChain.add(new SoapHandler());
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", timeout);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", timeout);
 				String organismos = port.obtenerOrganismos(wsUser, wsPass);
 
 				//Parsear el string para obtener los organismos
@@ -549,6 +555,12 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				String wsUser = confBean.getString("WS_TRAMITE_USER");
 				String wsPass = confBean.getString("WS_TRAMITE_PASS");
 				
+        //Obtener el timeout desde la configuracion
+        Long timeout = confBean.getLong("WS_TRAMITE_TIMEOUT");
+        if(timeout == null) {
+          timeout = 5000L;
+        }
+				
 				//Consultar el servicio web
 				WsTramite wsTramite = new WsTramite(urlWsdl);
 				WsTramiteSoap port = wsTramite.getWsTramiteSoap();
@@ -558,8 +570,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
 
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", timeout);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", timeout);
 	      
 	      String uEjecutoras = port.obtenerUnidadesEjecutoras(wsUser, wsPass);
 				
@@ -647,6 +659,12 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 				
 				List<Tramite> tramitesAInsertar = new ArrayList();
 				
+				//Obtener el timeout desde la configuracion
+				Long timeout = confBean.getLong("WS_TRAMITE_TIMEOUT");
+				if(timeout == null) {
+				  timeout = 5000L;
+				}
+				
 				for(String letra : letras0) {
 					//Si es la primera letra hay que invocar si o si porque no se saben cuales estan deshabilitadas
 					if("A".equals(letra) || (!letrasDeshabilitadas.contains(letra) && !letrasDeshabilitadas.contains(letra.toLowerCase()))) {
@@ -655,8 +673,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			      BindingProvider bindingProvider = (BindingProvider) port;
 			      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
 						
-			      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 2000);
-			      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 2000);
+			      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", timeout);
+			      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", timeout);
 			      
 						entrada.setLetra(letra);
 						ObtTramitesEnOrdenAlfabeticoResponseType resp = port.obtTramitesPorOrgEnOrdenAlfabetico(entrada);
@@ -713,6 +731,13 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		
 		if(actualizar) {
 			try {
+			  
+        //Obtener el timeout desde la configuracion
+        Long timeout = confBean.getLong("WS_TRAMITE_TIMEOUT");
+        if(timeout == null) {
+          timeout = 5000L;
+        }
+			  
 				URL urlWsdl = GuiaTramites.class.getResource("GuiaTramites.wsdl");
 				Tramite tramite = globalEntityManager.find(Tramite.class, tramiteEmpresaId);
 				//Consultar el servicio web
@@ -724,8 +749,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	      BindingProvider bindingProvider = (BindingProvider) port;
 	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
 				
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 2000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 2000);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", timeout);
+	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", timeout);
 	      
 	      String tramiteId = null;
 	      if(tramiteEmpresaId.indexOf("-")>0) {

@@ -23,7 +23,9 @@ package uy.gub.imm.sae.web.mbean.administracion;
 import java.io.ByteArrayOutputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -155,7 +157,23 @@ public class AtencionPresencialMBean extends BaseMBean {
     if(recurso.getPresencialAdmite()==null || !recurso.getPresencialAdmite().booleanValue()) {
       addErrorMessage(sessionMBean.getTextos().get("el_recurso_no_admite_atencion_presencial"), MSG_ID);
       return;
+    }else {
+      //Determinar si el recurso admite atención presencial para el día actual
+      Calendar cal = new GregorianCalendar();
+      cal.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(cal.getTimeInMillis()));
+      int diaSemana = cal.get(Calendar.DAY_OF_WEEK);
+      if((diaSemana==Calendar.MONDAY && (recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue())) ||
+         (diaSemana==Calendar.TUESDAY && (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue())) ||
+         (diaSemana==Calendar.WEDNESDAY && (recurso.getPresencialMiercoles()==null || !recurso.getPresencialMiercoles().booleanValue())) ||
+         (diaSemana==Calendar.THURSDAY && (recurso.getPresencialJueves()==null || !recurso.getPresencialJueves().booleanValue())) ||
+         (diaSemana==Calendar.FRIDAY && (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue())) ||
+         (diaSemana==Calendar.SATURDAY && (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue())) ||
+         (diaSemana==Calendar.SUNDAY && (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue()))) {
+        addErrorMessage(sessionMBean.getTextos().get("el_recurso_no_admite_atencion_presencial_para_hoy"), MSG_ID);
+        return;
+      }
     }
+    
     //Determinar si quedan cupos disponibles para hoy
     Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sessionMBean.getTimeZone());
     if(disponibilidad == null) {
@@ -205,6 +223,20 @@ public class AtencionPresencialMBean extends BaseMBean {
     if(recurso==null || recurso.getPresencialAdmite()==null || !recurso.getPresencialAdmite().booleanValue()) {
       return false;
     }
+    //Determinar si el recurso admite atención presencial para el día actual
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(cal.getTimeInMillis()));
+    int diaSemana = cal.get(Calendar.DAY_OF_WEEK);
+    if((diaSemana==Calendar.MONDAY && (recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue())) ||
+       (diaSemana==Calendar.TUESDAY && (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue())) ||
+       (diaSemana==Calendar.WEDNESDAY && (recurso.getPresencialMiercoles()==null || !recurso.getPresencialMiercoles().booleanValue())) ||
+       (diaSemana==Calendar.THURSDAY && (recurso.getPresencialJueves()==null || !recurso.getPresencialJueves().booleanValue())) ||
+       (diaSemana==Calendar.FRIDAY && (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue())) ||
+       (diaSemana==Calendar.SATURDAY && (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue())) ||
+       (diaSemana==Calendar.SUNDAY && (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue()))) {
+      return false;
+    }
+    
     Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sessionMBean.getTimeZone());
     if(disponibilidad == null || disponibilidad.getCupo().intValue() <= disponibilidad.getNumerador().intValue()) {
       return false;

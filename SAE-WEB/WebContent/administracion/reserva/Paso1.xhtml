@@ -15,7 +15,7 @@
 		<ui:param name="bodyId" value="paso1" />
 		<ui:param name="paso_numero" value="1" />
 		<ui:param name="paso_texto" value="#{sessionMBean.textos['seleccione_ubicacion']}" />
-		<ui:param name="mensaje_error" value="#{paso1AdminMBean.mensajeError}" />
+    <ui:param name="hay_error" value="#{paso1AdminMBean.errorInit}" />
 		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-6" />
 		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-5" />
 
@@ -24,7 +24,7 @@
 
 	    <f:view beforePhase="#{paso1AdminMBean.beforePhase}" >
 	
-				<h:panelGroup id="infoRecurso" layout="block">
+				<h:panelGroup id="infoRecurso" layout="block" >
 	
 					<p:outputPanel styleClass="infoDireccion"  rendered="#{sessionMBean.agendaMarcada != null}">
 						<h:panelGroup>

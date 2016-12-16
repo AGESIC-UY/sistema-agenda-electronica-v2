@@ -59,7 +59,7 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	private SessionMBean sessionMBean;
 
 	/* Será utilizado solamente en casos extermos, como que no tenga permiso para acceder a la agenda, o la misma no sea valida, etc...*/
-	private String mensajeError = null;
+	private boolean errorInit = false;
 	
 	private List<Recurso> recursos;
 	private List<SelectItem> recursosItems;
@@ -80,38 +80,45 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	@PostConstruct
 	public void init() {
 		try {
+		  errorInit = false;
+		  
 			recursosItems = new ArrayList<SelectItem>();
-			Agenda a = sessionMBean.getAgendaMarcada();
+			Agenda agenda = sessionMBean.getAgendaMarcada();
+			
+      if (agenda == null) {
+        addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
+        errorInit = true;
+        return;
+      }
+			
 			Recurso recursoDefecto = sessionMBean.getRecursoMarcado();
-			mensajeError = null;
 			//Cargo los recursos
-			if (a != null) {
-				sessionMBean.setAgenda(a);
-				recursos = agendarReservasEJB.consultarRecursos(a);
-				for (Recurso recurso : recursos) {
-					SelectItem item = new SelectItem();
-					item.setLabel(recurso.getNombre());
-					item.setValue(recurso.getId());
-					recursosItems.add(item);
-				}
-				//Selecciono el recurso por defecto.
-				if (! recursos.isEmpty() ) {
-					if (recursoDefecto == null ){
-						//No se ingreso un recurso en la url, o no existe ese recurso vivo para la agenda.
-						//Si hay un recurso seleccionado, me quedo con ese, sino se carga el primero.
-						if (sessionMBean.getRecurso() == null){
-							sessionMBean.setRecurso(recursos.get(0));
-						}
-					} else {
-						//Se ingreso un recurso en la url y se encontro para la agenda.
-						sessionMBean.setRecurso(recursoDefecto);
-					}
-				} 
-			}else {
-				addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
-				mensajeError = sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada");
-				return;
+			sessionMBean.setAgenda(agenda);
+			recursos = agendarReservasEJB.consultarRecursos(agenda);
+			if(recursos.isEmpty()) {
+        addErrorMessage(sessionMBean.getTextos().get("no_hay_recursos_disponibles_para_la_agenda_seleccionada"));
+        errorInit = true;
+        return;
 			}
+			for (Recurso recurso : recursos) {
+				SelectItem item = new SelectItem();
+				item.setLabel(recurso.getNombre());
+				item.setValue(recurso.getId());
+				recursosItems.add(item);
+			}
+			//Selecciono el recurso por defecto.
+			if (! recursos.isEmpty() ) {
+				if (recursoDefecto == null ){
+					//No se ingreso un recurso en la url, o no existe ese recurso vivo para la agenda.
+					//Si hay un recurso seleccionado, me quedo con ese, sino se carga el primero.
+					if (sessionMBean.getRecurso() == null){
+						sessionMBean.setRecurso(recursos.get(0));
+					}
+				} else {
+					//Se ingreso un recurso en la url y se encontro para la agenda.
+					sessionMBean.setRecurso(recursoDefecto);
+				}
+			} 
 			mostrarMapa(sessionMBean.getRecurso());
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -120,8 +127,8 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	}
 	
 	
-	public String getMensajeError() {
-		return mensajeError;
+	public boolean getErrorInit() {
+		return errorInit;
 	}
 
 	public String getAgendaNombre() {
@@ -229,32 +236,25 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	
 
 	public String getDescripcion() {
-		if (getMensajeError() != null) return null;
-			Agenda a = sessionMBean.getAgenda();
-			
-			if (a != null)
-			{
-				//TextoAgenda ta = a.getTextoAgenda();
-				TextoAgenda ta = getTextoAgenda(a, sessionMBean.getIdiomaActual());
-				if (ta!=null)	{
-					String str = ta.getTextoPaso1();
-					if (str!=null) {
-						return str;
-					}	else {
-						return "";
-					}
-				}
-				else {
+		Agenda a = sessionMBean.getAgenda();
+		if (a != null) {
+			TextoAgenda ta = getTextoAgenda(a, sessionMBean.getIdiomaActual());
+			if (ta!=null)	{
+				String str = ta.getTextoPaso1();
+				if (str!=null) {
+					return str;
+				}	else {
 					return "";
 				}
-			}else{
+			} else {
 				return "";
 			}
-		
+		}else{
+			return "";
+		}
 	}
 
 	public String getEtiquetaSeleccionDelRecurso() {
-		if (getMensajeError() != null) return null;
 		Agenda a = sessionMBean.getAgenda();
 		if (a != null)
 		{
@@ -279,7 +279,6 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	
 	//Implementacion de la interfaz SAECalendarioDataSource
 	public List<Integer> obtenerCuposXDia(Date desde, Date hasta) {
-		if (getMensajeError() != null) return null;
 
 		//Si cambio el mes: actualizo.
 		if (! sessionMBean.getVentanaMesSeleccionado().getFechaInicial().equals(Utiles.time2InicioDelDia(desde)) ||

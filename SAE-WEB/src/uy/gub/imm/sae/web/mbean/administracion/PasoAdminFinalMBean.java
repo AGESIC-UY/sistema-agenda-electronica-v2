@@ -63,15 +63,11 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	
 	@PostConstruct
 	public void init() {
-
 			if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null || sessionMBean.getReservaConfirmada() == null) {
-				
 				logger.debug("RESERVA: ESTADO INVALIDO PASO FINAL" + "  Agenda: "+sessionMBean.getAgenda()+ " Recurso: "+sessionMBean.getRecurso()+ " ReservaConfirmada: "+sessionMBean.getReservaConfirmada());
-				
 				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
 				return;
 			}
-		
 	}	
 
 	

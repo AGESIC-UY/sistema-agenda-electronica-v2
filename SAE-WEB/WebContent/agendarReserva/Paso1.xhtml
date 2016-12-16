@@ -16,7 +16,7 @@
 		<ui:param name="bodyId" value="paso1" />
 		<ui:param name="paso_numero" value="1" />
 		<ui:param name="paso_texto" value="#{sesionMBean.textos['seleccione_ubicacion']}" />
-		<ui:param name="mensaje_error" value="#{paso1MBean.mensajeError}" />
+		<ui:param name="hay_error" value="#{paso1MBean.errorInit}" />
 		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-6" />
 		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-5" />
 
@@ -26,8 +26,7 @@
 
 				<p:outputPanel styleClass="infoDireccion" rendered="#{!paso1MBean.errorInit}">
 					<h:panelGroup >
-					  <iframe  src="#{paso1MBean.urlMapa}"  class="iframeMapa"  title="#{sesionMBean.textos['mapa_de_locacion']}">
-					  </iframe>
+					  <iframe  src="#{paso1MBean.urlMapa}"  class="iframeMapa"  title="#{sesionMBean.textos['mapa_de_locacion']}" />
 					</h:panelGroup>
 					<div class="direccion">
 						<h:outputText value="#{paso1MBean.direccionCompleta}" />
@@ -55,18 +54,14 @@
 
 		<ui:define name="contenido">
 
-			<h:inputHidden id="e" value="#{sesionMBean.empresaActual.id}"></h:inputHidden>
-			<h:inputHidden id="a" value="#{sesionMBean.agenda.id}"></h:inputHidden>
+			<h:inputHidden id="e" value="#{sesionMBean.empresaActual.id}" />
+			<h:inputHidden id="a" value="#{sesionMBean.agenda.id}" />
 
 			<p:outputPanel rendered="#{!paso1MBean.errorInit}">
 				<div id="recurso" class="row">
-					<h:outputFormat escape="false"
-						value="#{paso1MBean.etiquetaSeleccionDelRecurso}:"
-						styleClass="label label-align-top col-sm-4 col-md-5" />
+					<h:outputFormat escape="false" value="#{paso1MBean.etiquetaSeleccionDelRecurso}:" styleClass="label label-align-top col-sm-4 col-md-5" />
 					<div class="col-sm-8 col-md-7">
-						<p:selectOneRadio value="#{paso1MBean.recursoId}"
-							layout="responsive" columns="1"
-							valueChangeListener="#{paso1MBean.cambioRecurso}" id="recursoId">
+						<p:selectOneRadio value="#{paso1MBean.recursoId}" layout="responsive" columns="1" valueChangeListener="#{paso1MBean.cambioRecurso}" id="recursoId">
 							<p:ajax update="infoRecurso mensajes" />
 							<f:selectItems value="#{paso1MBean.recursosItems}" />
 						</p:selectOneRadio>
@@ -79,10 +74,10 @@
 				<ul class="form-action-buttons">
 					<li class="action-buttons-primary">
 						<ul>
-							<li><h:commandButton styleClass="btn-lg btn-primario"
-									name="botonElegirHora" id="botonElegirHora"
-									value="#{sesionMBean.textos['elegir_dia_y_hora']} #{paso1MBean.simboloSiguiente}"
-									action="#{paso1MBean.siguientePaso}"></h:commandButton></li>
+							<li>
+							  <h:commandButton styleClass="btn-lg btn-primario" name="botonElegirHora" id="botonElegirHora" 
+							     value="#{sesionMBean.textos['elegir_dia_y_hora']} #{paso1MBean.simboloSiguiente}" action="#{paso1MBean.siguientePaso}" />
+				      </li>
 						</ul>
 					</li>
 				</ul>

@@ -48,6 +48,7 @@ import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 import com.itextpdf.text.BaseColor;
@@ -63,7 +64,7 @@ import com.itextpdf.text.pdf.draw.LineSeparator;
  * @author im2716295
  *
  */
-public class PasoFinalMBean extends PasoMBean {
+public class PasoFinalMBean extends BaseMBean {
 
 	private Recursos recursosEJB;
 	

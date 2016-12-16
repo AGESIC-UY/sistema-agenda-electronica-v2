@@ -22,13 +22,9 @@
 			<h:form id="formMenu">
 				<h:panelGroup>
 					<h:outputLink value="#{sesionMBean.paginaDeRetorno}">
-						<h:outputText
-							value="&#187; #{sesionMBean.textos['volver_a_la_pagina_principal']}" />
+						<h:outputText value="&#187; #{sesionMBean.textos['volver_a_la_pagina_principal']}" />
 					</h:outputLink>
-
-					<h:commandLink
-						value="&#187; #{sesionMBean.textos['nueva_reserva']}"
-						action="inicio" />
+					<h:commandLink value="&#187; #{sesionMBean.textos['nueva_reserva']}" action="inicio" />
 				</h:panelGroup>
 			</h:form>
 		</ui:define>
@@ -43,8 +39,7 @@
               </p:outputPanel>
 							<div class="form-group">
 								<h:outputLabel for="idioma" value="#{sesionMBean.textos['idioma']}" class="label" />
-								<h:selectOneMenu id="idioma" value="#{sesionMBean.idiomaActual}"
-									valueChangeListener="#{sesionMBean.cambioIdiomaActual}" styleClass="form-control">
+								<h:selectOneMenu id="idioma" value="#{sesionMBean.idiomaActual}" valueChangeListener="#{sesionMBean.cambioIdiomaActual}" styleClass="form-control">
 									<p:ajax update="@all" process="@this" />
 									<f:selectItems value="#{sesionMBean.idiomasSoportados}" />
 								</h:selectOneMenu>
@@ -59,56 +54,48 @@
 				</div>
 
 				<div>
-					<h:outputText value="#{mensaje_error}"
-						rendered="#{mensaje_error != null}" styleClass="mensajeError" />
 
-					<h:panelGroup rendered="#{mensaje_error == null}"
-						id="contenedorPaso" layout="block">
+          <p:messages id="mensajes" for="form" infoClass="mensajeInfo"
+            warnClass="mensajeWarn" errorClass="mensajeError"
+            infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}"
+            warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}"
+            errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" />
+              
+					<h:panelGroup rendered="#{not hay_error}" id="contenedorPaso" layout="block">
 
 						<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
 							<ul class="wizard-nav-tabs wizard-nav-tabs-3">
-								<li class="#{(paso_numero == 1) ? 'active' : ''}"><h:outputText
-										value="1" styleClass="wizard-step" /> <h:outputText
-										value="#{sesionMBean.textos['detalle_y_ubicacion']}"
-										styleClass="wizard-step-description" /></li>
-								<li class="#{(paso_numero == 2) ? 'active' : ''}"><h:outputText
-										value="2" styleClass="wizard-step" /> <h:outputText
-										value="#{sesionMBean.textos['dia_y_hora']}"
-										styleClass="wizard-step-description" /></li>
-								<li class="#{(paso_numero == 3) ? 'active' : ''}"><h:outputText
-										value="3" styleClass="wizard-step" /> <h:outputText
-										value="#{sesionMBean.textos['datos_necesarios']}"
-										styleClass="wizard-step-description" /></li>
+								<li class="#{(paso_numero == 1) ? 'active' : ''}">
+								  <h:outputText value="1" styleClass="wizard-step" /> 
+								  <h:outputText value="#{sesionMBean.textos['detalle_y_ubicacion']}" styleClass="wizard-step-description" />
+							  </li>
+								<li class="#{(paso_numero == 2) ? 'active' : ''}">
+								  <h:outputText value="2" styleClass="wizard-step" /> 
+							    <h:outputText value="#{sesionMBean.textos['dia_y_hora']}" styleClass="wizard-step-description" />
+						    </li>
+								<li class="#{(paso_numero == 3) ? 'active' : ''}">
+								  <h:outputText value="3" styleClass="wizard-step" /> 
+								  <h:outputText value="#{sesionMBean.textos['datos_necesarios']}" styleClass="wizard-step-description" />
+							  </li>
 							</ul>
 						</h:panelGroup>
 
 						<ui:insert name="mensaje">
-							<h:outputText value="CONFIRMACIÓN DE HORA SELECCIONADA"
-								rendered="#{paso_numero==2 or paso_numero==3}" />
+							<h:outputText value="CONFIRMACIÓN DE HORA SELECCIONADA" rendered="#{paso_numero==2 or paso_numero==3}" />
 						</ui:insert>
 
-						<p:messages id="mensajes" for="form" infoClass="mensajeInfo"
-							warnClass="mensajeWarn" errorClass="mensajeError"
-							infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}"
-							warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}"
-							errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" />
 						<fieldset>
 							<legend>#{paso_texto}</legend>
-
-
 							<div class="row">
 								<div class="#{clase_columna_izq}">
 									<ui:insert name="contenido">CONTENIDO DEL PASO</ui:insert>
 								</div>
-
 								<div class="#{clase_columna_der}">
 									<ui:insert name="descripcion">DESCRIPCION DEL PASO</ui:insert>
 								</div>
 							</div>
 						</fieldset>
-
 						<ui:insert name="botones">
-
 						</ui:insert>
 
 					</h:panelGroup>

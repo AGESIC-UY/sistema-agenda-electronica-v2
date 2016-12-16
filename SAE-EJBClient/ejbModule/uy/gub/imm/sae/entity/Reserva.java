@@ -265,7 +265,7 @@ public class Reserva implements Serializable {
   }
 
   public String getSerie() {
-    return serie;
+    return serie!=null?serie:"";
   }
 
   public void setSerie(String serie) {

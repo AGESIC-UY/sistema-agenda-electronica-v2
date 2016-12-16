@@ -19,13 +19,13 @@ public class AtencionLLamadaReporteDT implements Serializable {
   private Date fechaHoraReserva;
   private String atencion;
   private Integer reservaId;
+  private String serie;
+  private Integer numero;
   private String tramiteCodigo;
   private String tramiteNombre;
 
-  public AtencionLLamadaReporteDT(String nombFun, String nomAgenda,
-      String nomRecurso, Integer nroPuesto, Date fechaHoraLlam,
-      Date fechaHoraAten, String resolucionAtencion, Integer reservId,
-      Date fechaHoraReserv, String tramiteCodigo, String tramiteNombre) {
+  public AtencionLLamadaReporteDT(String nombFun, String nomAgenda, String nomRecurso, Integer nroPuesto, Date fechaHoraLlam, Date fechaHoraAten, String resolucionAtencion, 
+      Integer reservId, String serie, Integer numero, Date fechaHoraReserv, String tramiteCodigo, String tramiteNombre) {
     this.nombFuncionario = nombFun;
     this.nombAgenda = nomAgenda;
     this.nombRecurso = nomRecurso;
@@ -34,6 +34,8 @@ public class AtencionLLamadaReporteDT implements Serializable {
     this.puesto = nroPuesto;
     this.atencion = resolucionAtencion;
     this.reservaId = reservId;
+    this.serie = serie;
+    this.numero = numero;
     this.fechaHoraReserva = fechaHoraReserv;
     this.tramiteCodigo = tramiteCodigo;
     this.tramiteNombre = tramiteNombre;
@@ -133,6 +135,22 @@ public class AtencionLLamadaReporteDT implements Serializable {
 
   public void setTramiteNombre(String tramiteNombre) {
     this.tramiteNombre = tramiteNombre;
+  }
+
+  public String getSerie() {
+    return serie;
+  }
+
+  public void setSerie(String serie) {
+    this.serie = serie;
+  }
+
+  public Integer getNumero() {
+    return numero;
+  }
+
+  public void setNumero(Integer numero) {
+    this.numero = numero;
   }
 
 }

@@ -22,72 +22,44 @@
 					</legend>
 					<p:outputPanel styleClass="form-horizontal">
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['cedula_de_identidad']}"
-								for="codigoUsuario"
-								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputLabel value="#{sessionMBean.textos['cedula_de_identidad']}" for="codigoUsuario" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-9">
-								<p:inputText id="codigoUsuario"
-									value="#{usuarioMBean.usuarioEditar.codigo}"
-									valueChangeListener="#{usuarioMBean.cambioCodigoUsuario}"
-									maxlength="25"
-									disabled="#{usuarioMBean.usuarioEditar.id != null}"
-									styleClass="form-control textoMedio">
+								<p:inputText id="codigoUsuario" value="#{usuarioMBean.usuarioEditar.codigo}" valueChangeListener="#{usuarioMBean.cambioCodigoUsuario}"
+									maxlength="25" disabled="#{usuarioMBean.usuarioEditar.id != null}" styleClass="form-control textoMedio"> 
 									<p:ajax event="blur" update="@form" />
 								</p:inputText>
-								<h:outputText styleClass="input-msg"
-									value="#{sessionMBean.textos['este_campo_sera_su_codigo_de_usuario']}" />
-								<p:message for="codigoUsuario"></p:message>
+								<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['este_campo_sera_su_codigo_de_usuario']}" />
+								<p:message for="codigoUsuario" />
 							</p:outputPanel>
 						</p:outputPanel>
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['nombre_y_apellido']}"
-								styleClass="col-sm-3 control-label label formularioCampoRequerido"
-								for="nombreUsuario" />
+							<p:outputLabel value="#{sessionMBean.textos['nombre_y_apellido']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" for="nombreUsuario" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="nombreUsuario"
-									value="#{usuarioMBean.usuarioEditar.nombre}" maxlength="100"
-									styleClass="form-control" />
-								<p:message for="nombreUsuario"></p:message>
+								<h:inputText id="nombreUsuario" value="#{usuarioMBean.usuarioEditar.nombre}" maxlength="100" styleClass="form-control" />
+								<p:message for="nombreUsuario" />
 							</p:outputPanel>
 						</p:outputPanel>
 						<p:outputPanel styleClass="form-group">
-							<p:outputLabel
-								value="#{sessionMBean.textos['correo_electronico']}"
-								styleClass="col-sm-3 control-label label formularioCampoRequerido"
-								for="correoeUsuario" />
+							<p:outputLabel value="#{sessionMBean.textos['correo_electronico']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" for="correoeUsuario" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="correoeUsuario"
-									value="#{usuarioMBean.usuarioEditar.correoe}" maxlength="100"
-									styleClass="form-control textoLargo" />
-								<p:message for="correoeUsuario"></p:message>
+								<h:inputText id="correoeUsuario" value="#{usuarioMBean.usuarioEditar.correoe}" maxlength="100" styleClass="form-control textoLargo" />
+								<p:message for="correoeUsuario" />
 							</p:outputPanel>
 						</p:outputPanel>
 						<p:outputPanel styleClass="form-group">
-							<h:outputText value="#{sessionMBean.textos['tipo_usuario']}"
-								styleClass="col-sm-3 control-label label" />
+							<h:outputText value="#{sessionMBean.textos['tipo_usuario']}" styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
-								<p:selectBooleanCheckbox id="superadministrador"
-									value="#{usuarioMBean.usuarioEditar.superadmin}"
-									disabled="#{not sessionMBean.usuarioActual.superadmin}">
+								<p:selectBooleanCheckbox id="superadministrador" value="#{usuarioMBean.usuarioEditar.superadmin}" disabled="#{not sessionMBean.usuarioActual.superadmin}">
 									<p:ajax update="selRolesEmp selRolesRecurso" listener="#{usuarioMBean.cambioSuperadmin}" />
 								</p:selectBooleanCheckbox>
-								<p:outputLabel
-									value="#{sessionMBean.textos['superadministrador']}"
-									for="superadministrador" />
+								<p:outputLabel value="#{sessionMBean.textos['superadministrador']}" for="superadministrador" />
 							</p:outputPanel>
 						</p:outputPanel>
-						<p:outputPanel styleClass="form-group"
-							rendered="#{not sessionMBean.backendConCda}">
-							<p:outputLabel value="#{sessionMBean.textos['contrasena']}"
-								styleClass="col-sm-3 control-label label" for="pass" />
+						<p:outputPanel styleClass="form-group" rendered="#{not sessionMBean.backendConCda}">
+							<p:outputLabel value="#{sessionMBean.textos['contrasena']}" styleClass="col-sm-3 control-label label" for="pass" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:commandButton
-									value="#{sessionMBean.textos['enviar_por_correo']}"
-									action="#{usuarioMBean.enviarPassword}"
-									disabled="#{usuarioMBean.usuarioEditar.id == null}"
-									styleClass="btn btn-secundario" id="pass" />
+								<h:commandButton value="#{sessionMBean.textos['enviar_por_correo']}" action="#{usuarioMBean.enviarPassword}" 
+								  disabled="#{usuarioMBean.usuarioEditar.id == null}" styleClass="btn btn-secundario" id="pass" />
 							</p:outputPanel>
 						</p:outputPanel>
 					</p:outputPanel>
@@ -101,45 +73,28 @@
 							<h:outputText value="#{sessionMBean.textos['rol']}" styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<p:outputPanel>
-									<p:selectBooleanCheckbox id="administrador"
-										value="#{usuarioMBean.usuarioEmpresaRolesEditar.administrador}"
-										disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
-									<p:outputLabel value="#{sessionMBean.textos['administrador']}"
-										for="administrador" />
+									<p:selectBooleanCheckbox id="administrador" value="#{usuarioMBean.usuarioEmpresaRolesEditar.administrador}" disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
+									<p:outputLabel value="#{sessionMBean.textos['administrador']}" for="administrador" />
 									<p:message for="administrador" />
 								</p:outputPanel>
 								<p:outputPanel>
-									<p:selectBooleanCheckbox id="planificador"
-										value="#{usuarioMBean.usuarioEmpresaRolesEditar.planificador}"
-										disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
-									<p:outputLabel value="#{sessionMBean.textos['planificador']}"
-										for="planificador" />
+									<p:selectBooleanCheckbox id="planificador" value="#{usuarioMBean.usuarioEmpresaRolesEditar.planificador}" disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
+									<p:outputLabel value="#{sessionMBean.textos['planificador']}" for="planificador" />
 									<p:message for="planificador" />
 								</p:outputPanel>
 								<p:outputPanel>
-									<p:selectBooleanCheckbox id="callCenter"
-										value="#{usuarioMBean.usuarioEmpresaRolesEditar.fCallCenter}"
-										disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
-									<p:outputLabel
-										value="#{sessionMBean.textos['funcionario_de_call_center']}"
-										for="callCenter" />
+									<p:selectBooleanCheckbox id="callCenter" value="#{usuarioMBean.usuarioEmpresaRolesEditar.fCallCenter}" disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
+									<p:outputLabel value="#{sessionMBean.textos['funcionario_de_call_center']}" for="callCenter" />
 									<p:message for="callCenter" />
 								</p:outputPanel>
 								<p:outputPanel>
-									<p:selectBooleanCheckbox id="atencion"
-										value="#{usuarioMBean.usuarioEmpresaRolesEditar.fAtencion}"
-										disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
-									<p:outputLabel
-										value="#{sessionMBean.textos['funcionario_de_atencion']}"
-										for="atencion" />
+									<p:selectBooleanCheckbox id="atencion" value="#{usuarioMBean.usuarioEmpresaRolesEditar.fAtencion}" disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
+									<p:outputLabel value="#{sessionMBean.textos['funcionario_de_atencion']}" for="atencion" />
 									<p:message for="atencion" />
 								</p:outputPanel>
 								<p:outputPanel>
-									<p:selectBooleanCheckbox id="llamador"
-										value="#{usuarioMBean.usuarioEmpresaRolesEditar.llamador}"
-										disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
-									<p:outputLabel value="#{sessionMBean.textos['llamador']}"
-										for="llamador" />
+									<p:selectBooleanCheckbox id="llamador" value="#{usuarioMBean.usuarioEmpresaRolesEditar.llamador}" disabled="#{usuarioMBean.usuarioEditar.superadmin}" />
+									<p:outputLabel value="#{sessionMBean.textos['llamador']}" for="llamador" />
 									<p:message for="llamador" />
 								</p:outputPanel>
 							</p:outputPanel>
@@ -151,7 +106,7 @@
             <h:outputText value="#{sessionMBean.textos['roles_del_usuario_por_recurso']}" />
           </legend>
           <p:outputPanel id="selRolesRecurso" styleClass="form-horizontal">
-            <p:dataGrid var="rec" value="#{usuarioMBean.listaRecursos}" columns="2" layout="grid" styleClass="grid-roles-recurso">             
+            <p:dataGrid var="rec" value="#{usuarioMBean.listaRecursos}" columns="2" layout="grid" styleClass="grid-roles-recurso" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">             
               <p:outputPanel styleClass="form-group" >
                 <h:outputText value="#{rec.agenda.nombre} / #{rec.nombre}" styleClass="col-sm-7 control-label label" />
                 <p:outputPanel styleClass="col-sm-5">
@@ -167,17 +122,16 @@
 				<ul class="form-action-buttons">
 					<li class="action-buttons-primary">
 						<ul>
-							<li><p:commandButton
-									value="#{sessionMBean.textos['guardar']}"
-									actionListener="#{usuarioMBean.guardar}" process="@form"
-									update="@form" styleClass="btn-lg btn-primario" /></li>
+							<li>
+							  <p:commandButton value="#{sessionMBean.textos['guardar']}" actionListener="#{usuarioMBean.guardar}" process="@form" update="@form" styleClass="btn-lg btn-primario" />
+						  </li>
 						</ul>
 					</li>
 					<li class="action-buttons-second">
 						<ul>
-							<li class="float-left"><p:commandButton
-									value="#{sessionMBean.textos['cancelar']}" action="cancelar"
-									immediate="true" styleClass="btn-lg btn-link" /></li>
+							<li class="float-left">
+							  <p:commandButton value="#{sessionMBean.textos['cancelar']}" action="cancelar" immediate="true" styleClass="btn-lg btn-link" />
+						  </li>
 						</ul>
 					</li>
 				</ul>

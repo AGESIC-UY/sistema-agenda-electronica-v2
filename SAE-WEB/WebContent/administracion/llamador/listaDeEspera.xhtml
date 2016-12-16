@@ -21,16 +21,15 @@
 					<p:outputPanel id="todo">
 						<div class="form-inline">
 							<div class="form-group">
-                <p:outputLabel value="#{sessionMBean.textos['atencion_presencial']}" for="atencionPresencial" />
-                <p:selectBooleanCheckbox id="atencionPresencial" value="#{listaDeEsperaMBean.atencionPresencial}">
+                <p:outputLabel value="#{sessionMBean.textos['atencion_presencial']}" for="atencionPresencial" rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}" />
+                <p:selectBooleanCheckbox id="atencionPresencial" value="#{listaDeEsperaMBean.atencionPresencial}" rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}">
                   <p:ajax update="form1:todo" listener="#{listaDeEsperaMBean.cambioAtencionPresencial}" />
                 </p:selectBooleanCheckbox>
-
 								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label formularioCampoRequerido" for="puesto" />
 								<h:inputText size="3" maxlength="3" id="puesto" value="#{sessionMBean.puesto}" styleClass="form-control" />
 							</div>
 							<p:commandButton value="#{sessionMBean.textos['llamar_al_siguiente']}" actionListener="#{listaDeEsperaMBean.siguiente}" update="form1:todo"
-								rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="btn-lg btn-primario" />
+								rendered="#{listaDeEsperaSessionMBean.estadosSeleccionado=='[R]' and !listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="btn-lg btn-primario" />
 						</div>
 
 						<p:outputPanel rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="form-inline alinDer margen_inf">
@@ -49,6 +48,11 @@
 							<p:outputPanel styleClass="recuadro margen_sup margen_inf">
 								<p:outputPanel styleClass="row">
 									<p:outputPanel styleClass="col-sm-8">
+                    <div>
+                      <h:outputText value="#{sessionMBean.textos['tramite']}: " />
+                      <h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.tramiteNombre}" styleClass="resaltado" /> 
+                      <h:outputText value="." />
+                    </div>
 										<div class="fechaHoraReserva">
 											<h:outputText value="#{sessionMBean.textos['numero']} " />
 											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.numero}" styleClass="resaltado" />
@@ -61,9 +65,10 @@
 											  <f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sessionMBean.locale}"/>
 											</h:outputText>
 											<h:outputText value=", " />
-											<h:outputText value="#{listaDeEsperaMBean.siguienteReservaDisponibilidad.horaInicio}">
+											<h:outputText value="#{listaDeEsperaMBean.siguienteReservaDisponibilidad.horaInicio}" rendered="#{not listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}">
 												<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 											</h:outputText>
+                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" rendered="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}" />
 											<h:outputText value="." />
 										</div>
 									</p:outputPanel>

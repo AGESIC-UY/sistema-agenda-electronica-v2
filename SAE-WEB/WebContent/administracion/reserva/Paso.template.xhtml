@@ -24,7 +24,7 @@
 				<h:panelGroup layout="block">
 					<h:form id="form">
 						<div>
-							<h:panelGroup rendered="#{mensaje_error == null}" id="contenedorPaso" layout="block">
+							<h:panelGroup rendered="#{not hay_error}" id="contenedorPaso" layout="block">
 
 								<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
 									<ul class="wizard-nav-tabs wizard-nav-tabs-3">

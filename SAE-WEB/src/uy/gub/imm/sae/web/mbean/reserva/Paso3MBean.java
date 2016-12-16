@@ -66,6 +66,7 @@ import uy.gub.imm.sae.exception.ErrorValidacionException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 /**
@@ -76,7 +77,7 @@ import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
  *
  */
 
-public class Paso3MBean extends PasoMBean {
+public class Paso3MBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso3MBean.class);
 	public static final String FORMULARIO_ID = "datosReserva";

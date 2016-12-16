@@ -34,9 +34,10 @@ import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.login.Utilidades;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
 
-public class CancelarReservaPublicMBean extends PasoMBean {
+public class CancelarReservaPublicMBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(CancelarReservaPublicMBean.class);
 
@@ -116,10 +117,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 					limpiarSession();
 					hayErrorInit = true;
 					return;
-				}else {
-					
 				}
-				
 			}
 			
 			//Poner en sesion los datos de la empresa  y la agenda para la válvula de CDA 
@@ -130,45 +128,42 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 			
 			String remoteUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
 
-			if (remoteUser == null || !remoteUser.startsWith("sae" + empresaId)) {
-				//No hay usuario o hay un usuario que no es de esta empresa (puede ser de CDA u otra empresa)
-				try {
-					// Crear un usuario falso temporal
-					String falsoUsuario = null;
-					if(remoteUser == null) {
-						//No hay usuario, se crea uno
-						sesionMBean.setUsuarioCda(null);
+			try {
+				// Crear un usuario falso temporal
+				String falsoUsuario = null;
+				if(remoteUser == null) {
+					//No hay usuario, se crea uno
+					sesionMBean.setUsuarioCda(null);
+					falsoUsuario = "sae" + empresaId;
+				}else {
+					//Hay usuario, dos alternativas: es de cda o es local de otra empresa
+					if(!remoteUser.startsWith("sae")) {
+						//Es un usuario de CDA
+						falsoUsuario = remoteUser;
+						sesionMBean.setUsuarioCda(remoteUser);
+					}else  {
+						//Es un usuario de otra empresa
 						falsoUsuario = "sae" + empresaId;
-					}else {
-						//Hay usuario, dos alternativas: es de cda o es local de otra empresa
-						if(!remoteUser.startsWith("sae")) {
-							//Es un usuario de CDA
-							falsoUsuario = remoteUser;
-							sesionMBean.setUsuarioCda(remoteUser);
-						}else  {
-							//Es un usuario de otra empresa
-							falsoUsuario = "sae" + empresaId;
-							sesionMBean.setUsuarioCda(null);
-						}
-						//Desloguear al usuario actual (inválido)
-						try {
-							request.logout();
-						}catch(Exception ex) {
-							ex.printStackTrace();
-						}
+						sesionMBean.setUsuarioCda(null);
 					}
-					Random random = new Random();
-					if(falsoUsuario.startsWith("cda")) {
-						falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+					//Desloguear al usuario actual (inválido)
+					try {
+						request.logout();
+					}catch(Exception ex) {
+						ex.printStackTrace();
 					}
-					falsoUsuario = falsoUsuario+ "/" + empresaId;
-					// Autenticarlo
-					String password = Utilidades.encriptarPassword(falsoUsuario);
-					request.login(falsoUsuario, password);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 				}
+				Random random = new Random();
+				if(falsoUsuario.startsWith("cda")) {
+					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+				}
+				falsoUsuario = falsoUsuario+ "/" + empresaId;
+				// Autenticarlo
+				String password = Utilidades.encriptarPassword(falsoUsuario);
+				request.login(falsoUsuario, password);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 			}
 			
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
@@ -274,8 +269,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				ex.printStackTrace();
 				return;
 			}
-				
-
 		} catch (Exception e) {
 			logger.error(e);
 			redirect(ERROR_PAGE_OUTCOME);
@@ -296,12 +289,12 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 
 	public void setFiltroConsulta(UIComponent filtroConsulta) {
 		
-		this.filtroConsulta = filtroConsulta;
-		
-		if(this.sesionMBean.getReserva()==null && this.sesionMBean.getRecurso()==null) {
+		if(hayErrorInit || (this.sesionMBean.getReserva()==null && this.sesionMBean.getRecurso()==null)) {
 			return;
 		}
 		
+    this.filtroConsulta = filtroConsulta;
+    
 		try {
 			if (this.sesionMBean.getReservaId() !=null && this.sesionMBean.getEmpresaId() != null) {
 				if(this.sesionMBean.getReservaDatos() == null) {
@@ -334,8 +327,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				}
 				agrupaciones.clear();
 				agrupaciones.add(agrupacion);
-				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sesionMBean.getRecurso(), filtroConsulta, 
-						agrupaciones, sesionMBean.getFormatoFecha());
+				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sesionMBean.getRecurso(), filtroConsulta, agrupaciones, sesionMBean.getFormatoFecha());
 			}
 
 		} catch (Exception e) {
@@ -383,8 +375,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 			return;
 		}
 		
-		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos,
-						sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
 		if (reservas.isEmpty()) {
 			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
 			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
@@ -427,8 +418,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		this.campos = campos;
 		try {
 			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sesionMBean.getRecurso(), sesionMBean.getTimeZone());
-			FormularioDinReservaClient.armarFormularioLecturaDinamico(sesionMBean.getRecurso(),
-					this.sesionMBean.getReservaDatos(), this.campos, agrupaciones, sesionMBean.getFormatoFecha());
+			FormularioDinReservaClient.armarFormularioLecturaDinamico(sesionMBean.getRecurso(), this.sesionMBean.getReservaDatos(), this.campos, agrupaciones, sesionMBean.getFormatoFecha());
 		} catch (BusinessException be) {
 			addErrorMessage(be);
 		} catch (Exception e) {

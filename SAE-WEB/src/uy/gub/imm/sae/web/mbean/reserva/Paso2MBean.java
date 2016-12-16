@@ -50,10 +50,11 @@ import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
 
-public class Paso2MBean extends PasoMBean {
+public class Paso2MBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso2MBean.class);
 

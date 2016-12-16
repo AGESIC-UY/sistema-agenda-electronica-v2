@@ -91,9 +91,14 @@ Versión 2.0
 * Se modificó la lógica de despliegue de textos para que en caso de no encontrar una etiqueta en la tabla ae_textos principal en lugar de dar un error se muestra la propia etiqueta como texto.
 * Se corrigió un error por el cual se mostraba la adevertencia "No hay otro administrador" cuando se creaba un usuario nuevo y se marcaba y desmarcaba la casilla "superadministrador".
 * Se corrigió un error por el cual al clonar una agenda no se copiaban los trámites asociados.
-* Se separaron las consultas de reservas de los reportes.
+* Se separaron las consultas de reservas de los reportes en el menú principal.
 * Se añadió la posibilidad se asociar algunos roles a los usuarios en recursos individuales. Los roles admitidos son "planificador" y "emisor de reportes".
 * Se modificaron los roles necesarios para permitir realizar consultas de reservas y generar reportes.
 * Se corrigieron errores en los controles de datos de recursos y los mensajes desplegados.
 * Se añadió la versión de la aplicación al archivo generado por la exportación de un recurso.
-* Se añadió el mecanismo de atención presencial (configuración del recurso, reserva, llamada y atención) (falta reporte).
+* Se añadió el mecanismo de atención presencial (configuración del recurso, reserva, llamada y atención, reporte).
+* Se añadió la posibilidad de configurar el timeout de los servicios web de TrámitesUy
+* Se corrigió un error por el cual la pantalla quedaba en blanco cuando se intentaba pasar al paso 2 de la reserva privada en una agenda que no tenía recursos.
+* En la pantalla "Lista de espera" se oculta el botón "LLamar siguiente" cuando se visualizan las llamadas anteriores.
+* Se añadió el reporte de asistencias presenciales.
+* Se mejoró el manejo de los casos de la reserva pública cuando se especifica un recurso que no existe o no está habilitado para internet.

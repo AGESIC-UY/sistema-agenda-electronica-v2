@@ -72,7 +72,7 @@ CREATE TABLE ae_empresas (
     cc_responsable character varying(100) DEFAULT ''::character varying NOT NULL,
     cc_direccion character varying(100) DEFAULT ''::character varying NOT NULL,
     logo_texto character varying(100),
-    timezone character varying(25),
+    timezone character varying(100),
     formato_fecha character varying(25),
     formato_hora character varying(25),
     oid character varying(50),
@@ -317,53 +317,54 @@ ALTER TABLE s_ae_usuario OWNER TO sae;
 -- Data for Name: ae_configuracion; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'FALSE');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_CABEZAL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_LINEA', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_CABEZAL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_ALIAS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_ALIAS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_ALIAS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA', 'http://testservicios.pge.red.uy/agesic/LineaService/preprod');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_CABEZAL', 'http://ws.web.bruto.itramites.agesic.gub.uy/cabezalService/persist');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_LINEA', 'http://ws.web.bruto.itramites.agesic.gub.uy/lineaService/persist');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_CABEZAL', 'http://testservicios.pge.red.uy/agesic/cabezalService/preprod');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', 'http://testservicios.pge.red.uy/SAENovedades/publicacion');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', 'http://testservicios.pge.red.uy/SAENovedades/publicacion/nuevaNovedad');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'false');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_ALIAS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_PATH', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_TS_PATH', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', 'AGESIC');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', 'SAENovedades');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'TRUE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('MOSTRAR_FECHA_ACTUAL', 'true');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_TIMEOUT', '9000');
 
 
 --
 -- Data for Name: ae_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-INSERT INTO ae_empresas (id, nombre, datasource, fecha_baja, org_id, org_codigo, org_nombre, unej_id, unej_codigo, unej_nombre, logo, cc_finalidad, cc_responsable, cc_direccion, logo_texto, timezone, formato_fecha, formato_hora, oid, pie_publico) VALUES (2, 'Empresa 1', 'empresa1', NULL, 28, '152', 'Intendencia de Montevideo', 13, '16', 'Intendencia de Montevideo', NULL, 'No configurado', 'No configurado', 'No configurado', 'Noconfigurado', 'America/Montevideo', 'dd/MM/yyyy', 'HH:mm', '2.16.858.0.0.3.10', '');
 
 
 --
@@ -375,6 +376,7 @@ INSERT INTO ae_empresas (id, nombre, datasource, fecha_baja, org_id, org_codigo,
 --
 -- Data for Name: ae_oficinas; Type: TABLE DATA; Schema: global; Owner: sae
 --
+
 
 
 --
@@ -429,7 +431,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('cualquier_horario', 'Cualquier ho
 INSERT INTO ae_textos (codigo, texto) VALUES ('solo_matutino', 'Solo por la mañana');
 INSERT INTO ae_textos (codigo, texto) VALUES ('solo_vespertino', 'Solo por la tarde');
 INSERT INTO ae_textos (codigo, texto) VALUES ('seleccione_un_dia', 'Seleccione un día');
-INSERT INTO ae_textos (codigo, texto) VALUES ('horarios_diponibles', 'Horarios diponibles');
 INSERT INTO ae_textos (codigo, texto) VALUES ('por_la_manana', 'Por la mañana');
 INSERT INTO ae_textos (codigo, texto) VALUES ('por_la_tarde', 'Por la tarde');
 INSERT INTO ae_textos (codigo, texto) VALUES ('completar_datos', 'Completar datos');
@@ -486,6 +487,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('verificacion_de_seguridad', 'Veri
 INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_eliminar_la_empresa', '¿Está seguro que desea eliminar la empresa?');
 INSERT INTO ae_textos (codigo, texto) VALUES ('eliminar', 'Eliminar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('cancelar', 'Cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('horarios_diponibles', 'Horarios disponibles');
 INSERT INTO ae_textos (codigo, texto) VALUES ('listado_de_empresas', 'Listado de empresas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('identificador', 'Identificador');
 INSERT INTO ae_textos (codigo, texto) VALUES ('nombre', 'Nombre');
@@ -743,13 +745,11 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('debe_seleccionar_un_horario_con_d
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_del_recurso_es_obligatorio', 'El nombre del recurso es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_descripcion_del_recurso_es_obligatoria', 'La descripción del recurso es obligatoria');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio', 'Los días de inicio de la ventana de intranet es obligatorio');
-INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero', 'Los días de inicio de la ventana de intranet debe ser mayor a cero');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_la_ventana_de_intranet_es_obligatorio', 'Los días de la ventana de intranet es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero', 'Los días de la ventana de intranet debe ser mayor a cero');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero', 'Los días de la ventana de internet debe ser mayor a cero');
 INSERT INTO ae_textos (codigo, texto) VALUES ('version', 'Versión');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_la_ventana_de_internet_es_obligatorio', 'Los días de la ventana de internet es obligatorio');
-INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero', 'Los días de inicio de la ventana de internet debe ser mayor a cero');
 INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_inicio_de_la_ventana_de_internet_es_obligatorio', 'Los días de inicio de la ventana de internet es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_cantidad_de_cupos_minimos_es_obligatoria', 'La cantidad de cupos mínimos es obligatoria');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero', 'La cantidad de cupos mínimos debe ser mayor o igual a cero');
@@ -1023,7 +1023,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('subir_archivo', 'Subir archivo');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_tamano_maximo_admitido_es_de_1mb', 'El archivo debe ser menor a 1 MB');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_el_archivo', 'No se pudo cargar el archivo');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_realizar_la_exportacion', 'No se pudo realizar la exportación');
-INSERT INTO ae_textos (codigo, texto) VALUES ('recurso_importado_exitosamente', 'Recusro importado exitosamente');
 INSERT INTO ae_textos (codigo, texto) VALUES ('archivo_cargado', 'Archivo cargado');
 INSERT INTO ae_textos (codigo, texto) VALUES ('gestionar_tokens', 'Gestionar tokens');
 INSERT INTO ae_textos (codigo, texto) VALUES ('token', 'Token');
@@ -1097,12 +1096,12 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('el_host_de_la_accion_es_obligator
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_nombre_del_parametro_es_obligatorio', 'El nombre del parámetro es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_largo_del_parametro_es_obligatorio', 'El largo del parámetro es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('asociar_acciones_a_recurso', 'Asociar acciones al recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recurso_importado_exitosamente', 'Recurso importado correctamente');
 INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_la_accion', 'Datos de la acción');
 INSERT INTO ae_textos (codigo, texto) VALUES ('orden_de_ejecucion', 'Orden de ejecución');
 INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_la_asignacion', 'Datos de la asignación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('evento', 'Evento');
 INSERT INTO ae_textos (codigo, texto) VALUES ('dato_a_solicitar', 'Dato a solicitar');
-INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_asociacion', 'Agregar asociacion');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_accion_es_obligatoria', 'La acción es obligatoria');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_orden_de_ejecucion_es_obligatorio', 'El orden de ejecución es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_orden_de_ejecucion_debe_ser_mayor_a_cero', 'El orden de ejecución debe ser mayor a cero');
@@ -1146,6 +1145,57 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('reservar', 'Reservar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('tipo', 'Tipo');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_y_el_nombre_del_tramite_son_obligatorios', 'El código y el nombre del trámite son obligatorios');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_seleccionar_al_menos_un_idioma', 'Debe seleccionar al menos un idioma');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agregar_asociacion', 'Agregar asociación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('hay_tramites_repetidos', 'Ha especificado el mismo trámite más de una vez');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agenda_copiada', 'Agenda copiada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_disponibilidad', 'Debe especificar la disponibilidad');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_horario_acaba_de_quedar_sin_cupos', 'El horario seleccionado acaba de quedar sin cupos, debe elegir otro horario');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_generaron_disponibilidades_para_todos_los_horarios', 'No se generaron disponibilidades para todas las horas porque ya estaban generadas anteriormente');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_vigencia_es_obligatoria', 'La fecha de inicio de vigencia es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia', 'La fecha de fin de vigencia debe ser posterior a la fecha de inicio de vigencia');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_disponibilidad_es_obligatoria', 'La fecha de inicio de atención al público es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_disponibilidad_es_obligatoria', 'La fecha de fin de atención al público es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia', 'La fecha de fin de atención al público debe ser posterior a la fecha de inicio de atención al público');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia', 'La fecha de inicio de atención al público debe ser posterior a la fecha de inicio de vigencia');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_vigencia_es_obligatoria', 'La fecha de fin de vigencia es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia', 'La fecha de fin de atención al público debe ser anterior a la fecha de fin de vigencia');
+INSERT INTO ae_textos (codigo, texto) VALUES ('este_campo_sera_su_codigo_de_usuario', 'Este campo será su código de usuario');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_no_corresponde_al_recurso_seleccionado', 'La reserva no corresponde al recurso seleccionado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reportes', 'Reportes');
+INSERT INTO ae_textos (codigo, texto) VALUES ('roles_del_usuario_por_recurso', 'Roles del usuario por recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('generador_de_reportes', 'Generador de reportes');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_a_aplicar', 'Días a los cuales aplicar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('lunes', 'Lunes');
+INSERT INTO ae_textos (codigo, texto) VALUES ('martes', 'Martes');
+INSERT INTO ae_textos (codigo, texto) VALUES ('miercoles', 'Miércoles');
+INSERT INTO ae_textos (codigo, texto) VALUES ('jueves', 'Jueves');
+INSERT INTO ae_textos (codigo, texto) VALUES ('viernes', 'Viernes');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_de_atencion_presencial', 'Configuración de atención presencial');
+INSERT INTO ae_textos (codigo, texto) VALUES ('atencion_presencial', 'Atención presencial');
+INSERT INTO ae_textos (codigo, texto) VALUES ('admite_atencion_presencial', 'Admite atención presencial');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cupos_por_dia', 'Cupos por día');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero', 'La cantidad de cupos por día debe ser mayor a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero', 'Los días de inicio de la ventana de internet debe ser mayor o igual a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero', 'Los días de inicio de la ventana de intranet debe ser mayor o igual a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_no_admite_atencion_presencial', 'El recurso seleccionado no admite atención presencial');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_hay_cupos_disponibles_para_hoy', 'No hay cupos disponibles para hoy');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_ventana', 'Debe especificar la ventana');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_el_token_especificado', 'No se encuentra el token especificado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_ventana_especificada_no_es_valida', 'La ventana especificada no es válida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_atencion_presencial', 'Reporte de atención presencial');
+INSERT INTO ae_textos (codigo, texto) VALUES ('puesto', 'Puesto');
+INSERT INTO ae_textos (codigo, texto) VALUES ('funcionario', 'Funcionario');
+INSERT INTO ae_textos (codigo, texto) VALUES ('tiempo_en_minutos', 'Tiempo (mins)');
+INSERT INTO ae_textos (codigo, texto) VALUES ('atencion', 'Atención');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_marcado', 'No marcado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('asistencias', 'Asistencias');
+INSERT INTO ae_textos (codigo, texto) VALUES ('inasistencias', 'Inasistencias');
+INSERT INTO ae_textos (codigo, texto) VALUES ('atenciones', 'Atenciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_para_todas_las_agendas_y_recursos', 'No tiene un recurso ni agenda seleccionada, el reporte se genera contemplando a todos los recursos y agendas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_para_todos_los_recursos', 'No tiene un recurso seleccionado, el reporte se genera contemplando a todos los recursos de la agenda seleccionada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_no_admite_atencion_presencial_para_hoy', 'El recurso no admite atención presencial en el día de hoy');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_hay_recursos_disponibles_para_la_agenda_seleccionada', 'No hay recursos disponibles para la agenda seleccionada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('presencial', 'Presencial');
 
 
 --

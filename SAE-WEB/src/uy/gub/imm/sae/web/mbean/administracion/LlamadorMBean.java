@@ -84,19 +84,25 @@ public class LlamadorMBean extends BaseMBean {
 	@PostConstruct
 	public void init() {
 		//Se controla que se haya Marcado una agenda para trabajar con los recursos
-		if (sessionMBean.getAgendaMarcada() == null){
-			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
-		}else {
-			if (sessionMBean.getRecursoMarcado() != null) {
-				try {
-					if (llamadorSessionMBean.getMostrarDatos() == null) {
-						llamadorSessionMBean.setMostrarDatos(recursosEJB.mostrarDatosASolicitarEnLlamador(sessionMBean.getRecursoMarcado()));
-					}
-				} catch (Exception e) {
-					addErrorMessage(new ApplicationException(e), MSG_ID);
+	  boolean hayError = false;
+
+    if (sessionMBean.getAgendaMarcada() == null){
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
+    }	  
+	  
+		if (sessionMBean.getRecursoMarcado() == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"));
+		}
+
+		if(!hayError) {
+			try {
+				if (llamadorSessionMBean.getMostrarDatos() == null) {
+					llamadorSessionMBean.setMostrarDatos(recursosEJB.mostrarDatosASolicitarEnLlamador(sessionMBean.getRecursoMarcado()));
 				}
-			}else {
-				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+			} catch (Exception e) {
+				addErrorMessage(new ApplicationException(e));
 			}
 		}
 	}

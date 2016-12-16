@@ -111,7 +111,6 @@ public class ReporteMBean extends BaseMBean {
 				estadosReserva.add(s);
 			}
 		}
-		
 	}
 
 	public String reporteReservaFecha() {
@@ -188,7 +187,9 @@ public class ReporteMBean extends BaseMBean {
 							}
 						}
 					}
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estadoReservaSeleccionado, false);
+			    List<Estado> estados = new ArrayList<Estado>();
+			    estados.add(estadoReservaSeleccionado);
+					List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estados, null);
 					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
 					contenido.addAll(contenido1);
 					
@@ -280,7 +281,7 @@ public class ReporteMBean extends BaseMBean {
 				}
 				List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
 				for(Recurso recurso : recursos) {
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasUsadasPeriodo(recurso, periodo);
+					List<ReservaDTO> reservas = consultaEJB.consultarReservasUsadasPeriodo(recurso, periodo, null);
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
 					contenido.addAll(contenido1);
@@ -364,16 +365,19 @@ public class ReporteMBean extends BaseMBean {
 				filaDatos.add(new TableCellValue(total));
 				contenido.add(filaDatos);
 			}
+			
 			LabelValue[] filtros = { 
 			   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
 			   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
 			};
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
-				String[]  cabezales = {"Empresa","Agenda","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
+				String[]  cabezales = {sessionMBean.getTextos().get("empresa"), sessionMBean.getTextos().get("agenda"), sessionMBean.getTextos().get("funcionario"),
+				    sessionMBean.getTextos().get("asistencias"), sessionMBean.getTextos().get("inasistencias"), sessionMBean.getTextos().get("atenciones")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}else {
-				String[]  cabezales = {"Agenda","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
+				String[]  cabezales = {sessionMBean.getTextos().get("agenda"), sessionMBean.getTextos().get("funcionario"),
+				    sessionMBean.getTextos().get("asistencias"), sessionMBean.getTextos().get("inasistencias"), sessionMBean.getTextos().get("atenciones")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
 						
@@ -467,26 +471,22 @@ public class ReporteMBean extends BaseMBean {
 			}
 		}
 		
-		if(!error)
-		{
-			
-			List<AtencionLLamadaReporteDT> listAtencionLLamadaReportDT = new ArrayList<AtencionLLamadaReporteDT>();
-			if (this.todasLasEmpresas)
-			{
+		if(!error){
+			List<AtencionLLamadaReporteDT> llamadas = new ArrayList<AtencionLLamadaReporteDT>();
+			if (this.todasLasEmpresas) {
 					Empresa empresaActual = sessionMBean.getEmpresaActual();
 					try {
-						for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas())
-						{
+						for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas()) {
 							try {
 								sessionMBean.seleccionarEmpresa(emp.getId());
-								List<AtencionLLamadaReporteDT> listAtencionLlamada	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
-								Collections.sort(listAtencionLlamada, new AtencionLlamadaReporteComparator());
+								List<AtencionLLamadaReporteDT> llamada	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
+								Collections.sort(llamada, new AtencionLlamadaReporteComparator());
 								int i=0;
-								while (i<listAtencionLlamada.size()) {
-									listAtencionLlamada.get(i).setNombEmpresa(emp.getNombre());
+								while (i<llamada.size()) {
+									llamada.get(i).setNombEmpresa(emp.getNombre());
 									i++;
 								}
-								listAtencionLLamadaReportDT.addAll(listAtencionLlamada);
+								llamadas.addAll(llamada);
 							} catch (Exception e1) {
 								e1.printStackTrace();
 							}
@@ -497,12 +497,12 @@ public class ReporteMBean extends BaseMBean {
 						sessionMBean.seleccionarEmpresa(empresaActual.getId());
 					}
 			}else {
-				listAtencionLLamadaReportDT	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
-				Collections.sort(listAtencionLLamadaReportDT, new AtencionLlamadaReporteComparator());
+				llamadas	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
+				Collections.sort(llamadas, new AtencionLlamadaReporteComparator());
 			}
 			
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
-			for (AtencionLLamadaReporteDT atencionLlamadaReporteDT : listAtencionLLamadaReportDT) {
+			for (AtencionLLamadaReporteDT atencionLlamadaReporteDT : llamadas) {
 				List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
 				if(this.todasLasEmpresas) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombEmpresa()));
@@ -529,22 +529,27 @@ public class ReporteMBean extends BaseMBean {
 				if(atencionLlamadaReporteDT.getAtencion()!= null) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getAtencion()));
 				}else {
-					filaDatos.add(new TableCellValue("No Marcado"));
+					filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("no_marcado")));
 				}
 				
 				contenido.add(filaDatos);
 			}
 			
 			LabelValue[] filtros = { 
-	          		   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
-	          		   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
+	          		   new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
+	          		   new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA))
 	             };
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
-				String[]  cabezales = {"Empresa","Tramite","Oficina","Id Reserva","Trámite","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+				String[]  cabezales = {sessionMBean.getTextos().get("empresa"), sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("oficina"),
+				    sessionMBean.getTextos().get("reserva"), sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("fecha"),
+				    sessionMBean.getTextos().get("puesto"), sessionMBean.getTextos().get("funcionario"), sessionMBean.getTextos().get("tiempo_en_minutos"),
+				    sessionMBean.getTextos().get("atencion")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}else {
-				String[]  cabezales = {"Tramite","Oficina","Id Reserva","Trámite","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+				String[]  cabezales = {sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("oficina"), sessionMBean.getTextos().get("reserva"),
+				    sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("fecha"), sessionMBean.getTextos().get("puesto"), 
+				    sessionMBean.getTextos().get("funcionario"), sessionMBean.getTextos().get("tiempo_en_minutos"), sessionMBean.getTextos().get("atencion")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
 			
@@ -558,6 +563,87 @@ public class ReporteMBean extends BaseMBean {
 		}
 	}
 	
+  public void reporteAtencionPresencialPeriodo(ActionEvent e) {
+    
+    limpiarMensajesError();
+    
+    boolean error = false;
+    
+    if (fechaDesde == null){
+      error = true;
+      addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
+    }
+    
+    if (fechaHasta == null){
+      error = true;
+      addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
+    }
+    
+    if(fechaDesde!=null && fechaHasta!=null) {
+      Calendar c1 =  new GregorianCalendar();
+      c1.setTime(fechaDesde);
+      Calendar c2 =  new GregorianCalendar();
+      c2.setTime(fechaHasta);
+      if(c1.after(c2)) {
+        error = true;
+        addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+      }
+    }
+    Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
+    if(recursoMarcado == null) {
+      error = true;
+      addErrorMessage("debe_haber_un_recurso_seleccionado");
+    }
+    
+    if (!error){
+      
+      try {
+        //Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
+        LabelValue[] filtros = {
+            new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
+            new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ", Utiles.date2string(fechaDesde, Utiles.DIA))
+        };
+
+        List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
+        List<AtencionLLamadaReporteDT> llamadas = consultaEJB.consultarAtencionesPresencialesRecursoPeriodo(recursoMarcado, fechaDesde, fechaHasta);
+        Collections.sort(llamadas, new AtencionLlamadaReporteComparator());
+        for (AtencionLLamadaReporteDT llamada : llamadas) {
+          List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
+          filaDatos.add(new TableCellValue(llamada.getReservaId()));
+          filaDatos.add(new TableCellValue(Utiles.date2string(llamada.getFechaHoraReserva(), Utiles.DIA)));
+          filaDatos.add(new TableCellValue(llamada.getNumero()));
+          filaDatos.add(new TableCellValue(llamada.getTramiteNombre()));
+          if(llamada.getFechaHoraAtencion()!=null) {
+            long tiempo = llamada.getFechaHoraAtencion().getTime() - llamada.getFechaHoraLlamada().getTime(); 
+            tiempo = Math.abs(tiempo/(1000 * 60));
+            filaDatos.add(new TableCellValue(String.valueOf(tiempo)));
+          }else {
+            filaDatos.add(new TableCellValue("---"));
+          }
+          if(llamada.getAtencion()!= null) {
+            filaDatos.add(new TableCellValue(llamada.getAtencion()));
+          }else {
+            filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("no_marcado")));
+          }
+          contenido.add(filaDatos);
+        }
+        
+        String[] cabezales = {sessionMBean.getTextos().get("reserva"), sessionMBean.getTextos().get("fecha"), sessionMBean.getTextos().get("numero"),
+            sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("tiempo_en_minutos"), sessionMBean.getTextos().get("atencion")};
+        StandardCSVFile fileCSV = new StandardCSVFile(filtros, cabezales, contenido);
+        
+        String nombre = sessionMBean.getTextos().get("reporte_atencion_presencial");
+        nombre = nombre.replace(" ", "_");
+              
+        CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
+        printer.print(); 
+
+      } catch (Exception e1) {
+        addErrorMessage(e1);
+      }
+    }
+  } 
+
 	public Date getFechaDesde() {
 		return fechaDesde;
 	}
@@ -583,7 +669,6 @@ public class ReporteMBean extends BaseMBean {
 		return estado;
 	}
 
-
 	public void setEstado(Estado estado) {
 		this.estado = estado;
 	}
@@ -595,11 +680,9 @@ public class ReporteMBean extends BaseMBean {
 		return unaPaginaPorHora;
 	}
 
-
 	public void setUnaPaginaPorHora(Boolean unaPaginaPorHora) {
 		this.unaPaginaPorHora = unaPaginaPorHora;
 	}
-
 
 	public void setEstadoDescripcion(String estadoDescripcion) {
 		this.estadoDescripcion = estadoDescripcion;
@@ -613,11 +696,9 @@ public class ReporteMBean extends BaseMBean {
 		this.estadosReserva = estadosReserva;
 	}
 
-
 	public Estado getEstadoReservaSeleccionado() {
 		return estadoReservaSeleccionado;
 	}
-
 
 	public void setEstadoReservaSeleccionado(Estado estadoReservaSeleccionado) {
 		this.estadoReservaSeleccionado = estadoReservaSeleccionado;
@@ -681,8 +762,12 @@ public class ReporteMBean extends BaseMBean {
 		for (ReservaDTO reserva:reservas) {
 			List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
 			filaDatos.add(new TableCellValue(reserva.getId().toString()));
-			filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getFecha(), Utiles.DIA)));
-			filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
+      filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getFecha(), Utiles.DIA)));
+			if(reserva.getPresencial()!=null && reserva.getPresencial().booleanValue()) {
+        filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("presencial")));
+			}else {
+	      filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
+			}
 			filaDatos.add(new TableCellValue(reserva.getNumero()));
 			for(AgrupacionDato grupo: agrupaciones) {
 				for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
@@ -720,37 +805,28 @@ public class ReporteMBean extends BaseMBean {
 		return todasLasEmpresas;
 	}
 
-
 	public void setTodasLasEmpresas(Boolean todasLasEmpresas) {
 		this.todasLasEmpresas = todasLasEmpresas;
 	}
 
 	public class AtencionComparator implements Comparator<Atencion> {
-
 		@Override
 		public int compare(Atencion o1, Atencion o2) {
-		
 			Agenda a1 = o1.getReserva().getDisponibilidades().get(0).getRecurso().getAgenda();
 			Agenda a2 = o2.getReserva().getDisponibilidades().get(0).getRecurso().getAgenda();
 			String nomb1 = a1.getNombre();
 			String nomb2 = a2.getNombre();
-			if (nomb1.compareTo(nomb2)==0)
-			{
+			if (nomb1.compareTo(nomb2)==0) {
 				return o1.getFuncionario().compareTo(o2.getFuncionario());
 			}
-			
 			return nomb1.compareTo(nomb2);
 		}
 	}
 	
 	public class AtencionLlamadaReporteComparator implements Comparator<AtencionLLamadaReporteDT> {
-
 		@Override
 		public int compare(AtencionLLamadaReporteDT o1, AtencionLLamadaReporteDT o2) {
-		
-			return o1.getReservaId() < o2.getReservaId() ? -1
-			       : o1.getReservaId() > o2.getReservaId() ? 1
-			       : 0;
+			return o1.getReservaId() < o2.getReservaId() ? -1 : o1.getReservaId() > o2.getReservaId() ? 1 : 0;
 		}
 	}
 	

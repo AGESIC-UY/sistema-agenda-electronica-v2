@@ -136,6 +136,22 @@ public class ConsultaMBean extends SessionCleanerMBean {
     }
   }
   
+  public void beforePhaseConsultarAtencionPresencialPeriodo(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (sessionMBean.getAgendaMarcada() == null){
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+    }
+    if (sessionMBean.getRecursoMarcado() == null){
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_atencion_presencial"));
+    }
+  }
+  
 	@PostConstruct
 	public void initAgendaRecurso(){
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
@@ -160,13 +176,12 @@ public class ConsultaMBean extends SessionCleanerMBean {
 			//En estos casos se permite no tener seleccionado un recurso o agenda porque el reporte se hace para todos
 			if (sessionMBean.getRecursoMarcado() == null){
 				if (sessionMBean.getAgendaMarcada() == null){
-					addAdvertenciaMessage("No tiene un recurso ni agenda seleccionada, el reporte se genera contemplando a todos los recursos y agendas");
+					addAdvertenciaMessage(sessionMBean.getTextos().get("reporte_para_todas_las_agendas_y_recursos"));
 				}else {
-					addAdvertenciaMessage("No tiene un recurso seleccionado, el reporte se genera contemplando a todos los recursos de la agenda seleccionada");
+					addAdvertenciaMessage(sessionMBean.getTextos().get("reporte_para_todos_los_recursos"));
 				}
 			}
 		}
-		
 	}
 
 	public SessionMBean getSessionMBean() {

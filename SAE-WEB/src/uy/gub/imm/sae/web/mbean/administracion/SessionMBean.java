@@ -110,21 +110,6 @@ public class SessionMBean extends SessionCleanerMBean {
   private Configuracion configuracionEJB;
 	
 	
-	@PostConstruct
-	public void postConstruct() {
-		//Se cargan los textos antes que los datos del usuario porque hay cosas que dependen de esto
-		cargarTextos();
-		//Se cargan los datos del usuario
-		cargarDatosUsuario();
-		//Se vuelven a cargar los textos despues de los datos del usuario para incluir los traducidos en el idioma actual
-		cargarTextos();
-		//Cargar las propiedades de configuracion
-		Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
-		if(bMostrarFechaActual!=null) {
-		  mostrarFechaActual = bMostrarFechaActual.booleanValue();
-		}
-	}
-	
 	private String idiomaActual = Locale.getDefault().getLanguage();
 	
 	// Pagina que se debe desplegar en la sección "pantalla" de la pagina principal
@@ -170,6 +155,21 @@ public class SessionMBean extends SessionCleanerMBean {
 	
 	private List<SelectItem> idiomasSoportados = null;
 
+  @PostConstruct
+  public void postConstruct() {
+    //Se cargan los textos antes que los datos del usuario porque hay cosas que dependen de esto
+    cargarTextos();
+    //Se cargan los datos del usuario
+    cargarDatosUsuario();
+    //Se vuelven a cargar los textos despues de los datos del usuario para incluir los traducidos en el idioma actual
+    cargarTextos();
+    //Cargar las propiedades de configuracion
+    Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
+    if(bMostrarFechaActual!=null) {
+      mostrarFechaActual = bMostrarFechaActual.booleanValue();
+    }
+  }
+  
 	public TimeZone getTimeZone() {
 		//Primero se devuelve la de la Agenda, si tiene
 		Agenda agenda = getAgendaMarcada();

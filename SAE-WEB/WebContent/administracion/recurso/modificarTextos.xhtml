@@ -9,8 +9,7 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{textoRecursoMBean.beforePhaseModifTexto}" >
 
-			<h:form id="form"
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 
 				<p:outputPanel styleClass="form-inline margen_inf">
 					<p:outputPanel styleClass="form-group">

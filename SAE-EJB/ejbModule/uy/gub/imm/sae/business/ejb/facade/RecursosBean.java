@@ -1593,8 +1593,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	}
 
-	public Boolean existeRecursoPorNombre(Recurso r)
-			throws ApplicationException {
+	public Boolean existeRecursoPorNombre(Recurso r) throws ApplicationException {
 		try {
 			Long cant = (Long) entityManager
 					.createQuery(
@@ -1839,11 +1838,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 */
 	@SuppressWarnings("unchecked")
 	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
-	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso,
-			TimeZone timezone) throws BusinessException {
+	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws BusinessException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084",
-					"El recurso no puede ser nulo");
+			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
 		}
 
 		recurso = entityManager.find(Recurso.class, recurso.getId());
