@@ -48,22 +48,11 @@ public class DatoASolicitarMBean extends BaseMBean {
 	public SessionMBean sessionMBean;
 	private DatoASSessionMBean datoASSessionMBean;
 
-	// Lista de agrupaciones para usar al crear o modificar
-	// un datoASolicitar.
 	private List<SelectItem> listaAgrupaciones = new ArrayList<SelectItem>();
-	// agrupacionDatoId es para cargar la agrupación seleccionada por el usuario
-	// en el selectOneListBox.
-	// Luego hay que buscar la agrupación con ese ID.
-	//private Integer agrupacionDatoId = null;
-	// Lista de tipos del dato a Solicitar al crear o modificar
 	private List<SelectItem> listaTipos = new ArrayList<SelectItem>();
 	private boolean visualizarLargoMax;
 	private boolean visualizarValoresPosibles;
 	
-	/*
-	 * private UIDataTable camposDataTableBorrar; private UIDataTable
-	 * camposDataTableConsultar; private UIDataTable camposDataTableModificar;
-	 */
 	private DatoASolicitar datoASolicitarNuevo;
 
 	public SessionMBean getSessionMBean() {
@@ -111,8 +100,6 @@ public class DatoASolicitarMBean extends BaseMBean {
 		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-
-		
 		datoASolicitarNuevo = new DatoASolicitar();
 		visualizarLargoMax = true;
 		visualizarValoresPosibles = false;
@@ -126,10 +113,6 @@ public class DatoASolicitarMBean extends BaseMBean {
 			}
 		}
 	}
-
-	/*
-	 * MODIFICACION
-	 */
 
 	public void seleccionarDato(int rowIndex) {
 		DatoASolicitar d = datoASSessionMBean.getDatosASolicitar().get(rowIndex);

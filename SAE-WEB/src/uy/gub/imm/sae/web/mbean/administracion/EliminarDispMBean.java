@@ -36,6 +36,7 @@ import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 
+import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Disponibilidades;
 import uy.gub.imm.sae.common.DisponibilidadReserva;
 import uy.gub.imm.sae.common.Utiles;
@@ -43,19 +44,21 @@ import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Dia;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.CeldaDia;
+import uy.gub.imm.sae.web.common.RowList;
 
 public class EliminarDispMBean extends BaseMBean {
 
 	public static final String MSG_ID = "pantalla";
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/DisponibilidadesBean!uy.gub.imm.sae.business.ejb.facade.DisponibilidadesRemote")
-	Disponibilidades disponibilidadesBean;
+	Disponibilidades disponibilidadesEJB;
+	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
+  private AgendarReservas agendarReservasEJB;
+  
 	
 	private SessionMBean sessionMBean;
 
-	private Date semana;
-	private List<List<Object>> horariosSemanales;
-	
 	@PostConstruct
 	public void init(){
 		//Se controla que se haya Marcado una agenda para trabajar con los recursos
@@ -65,7 +68,6 @@ public class EliminarDispMBean extends BaseMBean {
 		if (sessionMBean.getRecursoMarcado() == null){
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-		
 	}
 	
 	public SessionMBean getSessionMBean() {
@@ -76,7 +78,7 @@ public class EliminarDispMBean extends BaseMBean {
 	}
 
 
-	public void beforePhase(PhaseEvent event) {
+	public void beforePhaseEliminarSemana(PhaseEvent event) {
     //Verificar que el usuario tiene permisos para acceder a esta página
     if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
@@ -84,11 +86,28 @@ public class EliminarDispMBean extends BaseMBean {
     }
     //Establecer el título de la pantalla
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("eliminar_disponibilidades"));
+			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("eliminar_disponibilidades_semana"));
 		}
 	}
 	
+  public void beforePhaseEliminarPeriodo(PhaseEvent event) {
+    //Verificar que el usuario tiene permisos para acceder a esta página
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    //Establecer el título de la pantalla
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("eliminar_disponibilidades_periodo"));
+    }
+  }
 	
+  //==============================================================================================
+  // Eliminación por semana
+  
+  private Date semana;
+  private List<List<Object>> horariosSemanales;
+  
 	public Date getSemana() {
 		return semana;
 	}
@@ -106,7 +125,7 @@ public class EliminarDispMBean extends BaseMBean {
 			VentanaDeTiempo ventanaSemana = obtenerSemana(semana);
 			horariosSemanales = null;
 			try {
-				List<DisponibilidadReserva> disponibilidades = disponibilidadesBean.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventanaSemana);
+				List<DisponibilidadReserva> disponibilidades = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventanaSemana);
 				horariosSemanales = armarHorariosSemanales(disponibilidades);
 			} catch (Exception e) {
 				addErrorMessage(e);
@@ -124,7 +143,6 @@ public class EliminarDispMBean extends BaseMBean {
 		VentanaDeTiempo v = new VentanaDeTiempo();
 		v.setFechaInicial(semanaInicio);
 		v.setFechaFinal(semanaFin);
-		
 		return v;
 	}
 	
@@ -150,7 +168,7 @@ public class EliminarDispMBean extends BaseMBean {
 		VentanaDeTiempo vSemana = obtenerSemana(semana);
 			
 		try {
-			disponibilidadesBean.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), vSemana);
+			disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), vSemana);
 			addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas")); 	
 		} catch (Exception ex) {
 			addErrorMessage(ex);
@@ -292,5 +310,103 @@ public class EliminarDispMBean extends BaseMBean {
 		return calHora.getTime();
 	}
 	
+  //==============================================================================================
+  // Eliminación por período
+	
+  private Date fechaDesde;
+  private Date fechaHasta;
+  private RowList<DisponibilidadReserva> cuposPorDia;
+	
+  public Date getFechaDesde() {
+    return fechaDesde;
+  }
+
+  public void setFechaDesde(Date fechaDesde) {
+    this.fechaDesde = fechaDesde;
+  }
+
+  public Date getFechaHasta() {
+    return fechaHasta;
+  }
+
+  public void setFechaHasta(Date fechaHasta) {
+    this.fechaHasta = fechaHasta;
+  }
+
+  public RowList<DisponibilidadReserva> getCuposPorDia() {
+    return cuposPorDia;
+  }
+  
+  public void setCuposPorDia(RowList<DisponibilidadReserva> cuposPorDia) {
+    this.cuposPorDia = cuposPorDia;
+  }
+  
+  public void obtenerCuposPeriodo(ActionEvent e){
+    
+    boolean hayError = false;
+
+    if (fechaDesde == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+    }
+    if (fechaHasta == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
+    }
+    
+    if(hayError) {
+      setCuposPorDia(null);
+      return;
+    }
+    
+    VentanaDeTiempo ventana = new VentanaDeTiempo();
+    ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));
+    ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
+    setCuposPorDia(obtenerCuposPeriodo(ventana));
+  }
+  
+  private RowList<DisponibilidadReserva> obtenerCuposPeriodo(VentanaDeTiempo ventana){
+    RowList<DisponibilidadReserva> cuposAux = null;
+    try{
+      if (sessionMBean.getRecursoMarcado() != null){
+        List<DisponibilidadReserva> dispsRess = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventana);
+        cuposAux= new RowList<DisponibilidadReserva>(dispsRess);
+      } else{
+        addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"));
+      }
+    }catch (Exception ex) {
+        addErrorMessage(ex, MSG_ID);
+    }
+    return cuposAux;
+  }
+  
+  public void eliminarDisponibilidadesPeriodo() {
+
+    boolean hayError = false;
+
+    if (fechaDesde == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+    }
+    if (fechaHasta == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
+    }
+    
+    if(hayError) {
+      return;
+    }
+    
+    try {
+      VentanaDeTiempo ventana = new VentanaDeTiempo();
+      ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));
+      ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
+      disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), ventana);
+      addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas"));
+    } catch (Exception ex) {
+      addErrorMessage(ex);
+    }
+    
+  }
 	
 }

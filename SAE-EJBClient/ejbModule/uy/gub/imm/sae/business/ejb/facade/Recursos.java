@@ -51,7 +51,7 @@ public interface Recursos {
 	public void modificarAgrupacionDato(AgrupacionDato a) throws UserException;
 	public void eliminarAgrupacionDato(AgrupacionDato a, boolean controlarDatos) throws UserException, ApplicationException;
 	public List<AgrupacionDato> consultarAgrupacionesDatos(Recurso r) throws ApplicationException;
-	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws BusinessException;
+	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws UserException;
 	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso) throws UserException;
 	//Métodos asociados a DatoASolicitar
 	public DatoASolicitar agregarDatoASolicitar(Recurso r,AgrupacionDato a, DatoASolicitar d) throws UserException, ApplicationException, BusinessException;

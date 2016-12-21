@@ -58,10 +58,6 @@
 
 		<ui:define name="contenido">
 			<p:outputPanel rendered="#{!paso3MBean.errorInit}">
-        <p:outputPanel styleClass="form-required">
-          <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
-        </p:outputPanel>
-        
         
         <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3MBean.tramites}">
 	        <fieldset>
@@ -69,11 +65,9 @@
 	            <h:outputText value="#{sesionMBean.textos['tramite']}" />
 	          </legend>
 	          <p:outputPanel styleClass="form-group">
-	            <h:outputLabel value="#{sesionMBean.textos['tramite']}"
-	              for="tramite" styleClass="col-sm-3 control-label label" />
+	            <h:outputLabel value="#{sesionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 	            <p:outputPanel styleClass="col-sm-9">
-	              <h:selectOneMenu id="tramite" value="#{paso3MBean.tramiteCodigo}"
-	                styleClass="form-control">
+	              <h:selectOneMenu id="tramite" value="#{paso3MBean.tramiteCodigo}" styleClass="form-control">
 	                <f:selectItems value="#{paso3MBean.tramites}" />
 	              </h:selectOneMenu>
                 <h:message for="tramite" styleClass="mensajeError" />
@@ -90,8 +84,7 @@
 				<h:panelGroup binding="#{paso3MBean.camposError}" />
 				<fieldset>
 					<legend>
-						<h:outputText
-							value="#{sesionMBean.textos['clausula_de_consentimiento_informado']}" />
+						<h:outputText value="#{sesionMBean.textos['clausula_de_consentimiento_informado']}" />
 					</legend>
 					<div class="form-horizontal">
 						<div class="form-group">
@@ -119,8 +112,7 @@
 				<h:panelGroup layout="block">
 					<fieldset>
 						<legend>
-							<h:outputText
-								value="#{sesionMBean.textos['verificacion_de_seguridad']}" />
+							<h:outputText value="#{sesionMBean.textos['verificacion_de_seguridad']}" />
 						</legend>
             <div class="form-horizontal">
 							<h:panelGroup id="captcha" styleClass="form-group" layout="block">
@@ -128,8 +120,7 @@
 								<p:outputPanel styleClass="col-sm-9">
 									<h:outputText styleClass="textoCaptcha" value="#{paso3MBean.textoIndicativoCaptcha}" />
 									<h:inputText id="secureText" size="10" styleClass="form-control" value="#{paso3MBean.textoCaptchaUsuario}" />
-									<p:commandLink styleClass="recargarCaptcha"
-										name="btnRecargarCaptcha" id="btnRecargarCaptcha" value="#{sesionMBean.textos['solicitar_otra_frase']}"
+									<p:commandLink styleClass="recargarCaptcha" name="btnRecargarCaptcha" id="btnRecargarCaptcha" value="#{sesionMBean.textos['solicitar_otra_frase']}"
 										actionListener="#{paso3MBean.recargarCaptcha}" update="captcha" />
 									<h:message id="captchaErrorMessage" for="secureText" errorClass="mensajeError" warnClass="mensajeWarn" infoClass="mensajeInfo" />
 								</p:outputPanel>
@@ -146,18 +137,18 @@
 				<ul class="form-action-buttons">
 					<li class="action-buttons-primary">
 						<ul>
-							<li><h:commandButton styleClass="btn-lg btn-primario"
-									name="botonConfirmarResrva" id="botonConfirmarResrva"
-									value="#{sesionMBean.textos['confirmar_reserva']} #{paso3MBean.simboloSiguiente}"
-									action="#{paso3MBean.confirmarReserva}" /></li>
+							<li>
+							  <h:commandButton styleClass="btn-lg btn-primario" name="botonConfirmarResrva" id="botonConfirmarResrva" 
+							     value="#{sesionMBean.textos['confirmar_reserva']} #{paso3MBean.simboloSiguiente}" action="#{paso3MBean.confirmarReserva}" />
+					     </li>
 						</ul>
 					</li>
 					<li class="action-buttons-second">
 						<ul>
-							<li class="float-left"><h:commandButton name="botonDiaHora"
-									id="botonDiaHora" styleClass="btn-lg btn-link"
-									value="#{paso3MBean.simboloAnterior} #{sesionMBean.textos['dia_y_hora']}"
-									action="pasoAnterior" /></li>
+							<li class="float-left">
+							  <h:commandButton name="botonDiaHora" id="botonDiaHora" styleClass="btn-lg btn-link" value="#{paso3MBean.simboloAnterior} #{sesionMBean.textos['dia_y_hora']}"
+									action="pasoAnterior" />
+							</li>
 						</ul>
 					</li>
 				</ul>

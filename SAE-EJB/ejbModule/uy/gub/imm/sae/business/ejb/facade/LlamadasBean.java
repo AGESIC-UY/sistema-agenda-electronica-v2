@@ -176,7 +176,6 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 			reserva = helper.reintentarLlamadaMutex(recurso.getId(), reservaId, puesto);
 		} catch (EJBException e) {
 			if (e.getCausedByException() instanceof OptimisticLockException) {
-				logger.info("ACCESO MULTIPLE A RESERVA EN VOLVER A LLAMAR (id = "+reservaId+") "+e.getMessage()+" "+e.getCause().getClass().toString());
 				reserva = null;
 			} else {
 				throw e;
@@ -200,7 +199,7 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 				"FROM Llamada ll " +
 				"WHERE ll.recurso.id IN (:recursos) " +
 				"  AND ll.fecha = :hoy " +				
-				"ORDER BY ll.id DESC");
+				"ORDER BY ll.hora DESC");
 		List<Integer> recursosIds = new ArrayList<Integer>();
 		for (Recurso recurso : recursos) {
 			recursosIds.add(recurso.getId());

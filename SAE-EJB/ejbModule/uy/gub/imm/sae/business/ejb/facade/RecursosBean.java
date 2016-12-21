@@ -1047,13 +1047,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throws ApplicationException {
 		try {
 			List<AgrupacionDato> agrupacionDato = (List<AgrupacionDato>) entityManager
-					.createQuery(
-							"SELECT a from AgrupacionDato a "
-									+ "WHERE a.recurso = :r "
-									+ "AND a.fechaBaja is null "
-									+ "ORDER BY a.orden").setParameter("r", r)
-					// TODO CONTROLAR ROLES
-					.getResultList();
+				.createQuery(
+						"SELECT a from AgrupacionDato a "
+								+ "WHERE a.recurso = :r "
+								+ "AND a.fechaBaja is null "
+								+ "ORDER BY a.orden").setParameter("r", r)
+				.getResultList();
 			return agrupacionDato;
 		} catch (Exception e) {
 			throw new ApplicationException(e);
@@ -1838,38 +1837,29 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 */
 	@SuppressWarnings("unchecked")
 	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
-	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws BusinessException {
+	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1",
-					"No se encuentra el recurso indicado");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		List<AgrupacionDato> agrupacionesDTO = new ArrayList<AgrupacionDato>();
-
-		// Obtengo las agrupaciones vivas del recurso
 		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager
-				.createQuery(
-						"from AgrupacionDato agrupacion "
-								+ "where agrupacion.recurso = :r and agrupacion.fechaBaja is null "
-								+ "order by agrupacion.orden ")
+				.createQuery("FROM AgrupacionDato a "
+					+ "WHERE a.recurso = :r "
+					+ "AND a.fechaBaja IS NULL "
+					+ "ORDER BY a.orden ")
 				.setParameter("r", recurso).getResultList();
-
-		// Para cada agrupacion obtengo los datos a solicitar de la misma.
+		//Para cada agrupacion obtener los datos a solicitar
 		for (AgrupacionDato agrupacion : agrupaciones) {
-
 			AgrupacionDato agrupacionDTO = new AgrupacionDato(agrupacion);
 			agrupacionDTO.setRecurso(recurso);
 			agrupacionesDTO.add(agrupacionDTO);
-
-			List<DatoASolicitar> datosDTO = obtenerDatosASolicitar(agrupacion,
-					timezone);
+			List<DatoASolicitar> datosDTO = obtenerDatosASolicitar(agrupacion, timezone);
 			agrupacionDTO.setDatosASolicitar(datosDTO);
-
 		}
 
 		return agrupacionesDTO;
@@ -1897,10 +1887,10 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		List<AgrupacionDato> agrupacionesDTO = new ArrayList<AgrupacionDato>();
 		//Obtener las agrupaciones de datos
 		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager.createQuery(
-				"FROM AgrupacionDato agrupacion "
-				+ "WHERE agrupacion.recurso = :r " 
-				+ "  AND agrupacion.fechaBaja IS NULL "
-				+ "ORDER BY agrupacion.orden")
+				"FROM AgrupacionDato a "
+				+ "WHERE a.recurso = :r " 
+				+ "  AND a.fechaBaja IS NULL "
+				+ "ORDER BY a.orden")
 				.setParameter("r", recurso).getResultList();
 		//Para cada agrupación obtener sus datos
 		for (AgrupacionDato agrupacion : agrupaciones) {
@@ -1938,32 +1928,20 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<DatoASolicitar> obtenerDatosASolicitar(
-			AgrupacionDato agrupacion, TimeZone timezone)
-			throws BusinessException {
-
+	private List<DatoASolicitar> obtenerDatosASolicitar(AgrupacionDato agrupacion, TimeZone timezone) {
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
-
-		// Obtengo los datos a solicitar vivos de la agrupacion
 		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager
-				.createQuery(
-						"from DatoASolicitar dato "
-								+ "where dato.agrupacionDato = :agrupacion and "
-								+ "      dato.fechaBaja is null "
-								+ "order by dato.fila, dato.columna ")
+				.createQuery("FROM DatoASolicitar d "
+					+ "WHERE d.agrupacionDato = :agrupacion "
+					+ "  AND d.fechaBaja IS NULL "
+					+ "ORDER BY d.fila, d.columna ")
 				.setParameter("agrupacion", agrupacion).getResultList();
-
-		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
-		// valores posibles.
+		//Para cada dato a solicitar que sea del tipo Lista obtener los valores posibles.
 		for (DatoASolicitar datoASolicitar : datos) {
-
-			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(
-					datoASolicitar);
+			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(datoASolicitar);
 			datosDTO.add(datoASolicitarDTO);
-
 			if (datoASolicitarDTO.getTipo() == Tipo.LIST) {
-				List<ValorPosible> valoresDTO = obtenerValoresPosibles(
-						datoASolicitar, timezone);
+				List<ValorPosible> valoresDTO = obtenerValoresPosibles(datoASolicitar, timezone);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
 		}
@@ -2005,26 +1983,19 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<ValorPosible> obtenerValoresPosibles(DatoASolicitar dato,
-			TimeZone timezone) {
-
+	private List<ValorPosible> obtenerValoresPosibles(DatoASolicitar dato, TimeZone timezone) {
 		List<ValorPosible> valoresDTO = new ArrayList<ValorPosible>();
-
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 		Date hoy = cal.getTime();
-
-		// Obtengo los valores posibles vivos del dato
 		List<ValorPosible> valores = (List<ValorPosible>) entityManager
-				.createQuery(
-						"from ValorPosible valor "
-								+ "where valor.dato = :dato and "
-								+ "      :hoy >= valor.fechaDesde and "
-								+ "      (valor.fechaHasta is null or :hoy <= valor.fechaHasta) "
-								+ "order by valor.orden ")
-				.setParameter("dato", dato)
-				.setParameter("hoy", hoy, TemporalType.DATE).getResultList();
-
+			.createQuery("FROM ValorPosible valor "
+				+ "WHERE valor.dato = :dato "
+				+ "  AND :hoy >= valor.fechaDesde "
+				+ "  AND (valor.fechaHasta IS NULL OR :hoy <= valor.fechaHasta) "
+				+ "ORDER BY valor.orden ")
+			.setParameter("dato", dato)
+			.setParameter("hoy", hoy, TemporalType.DATE).getResultList();
 		for (ValorPosible valorPosible : valores) {
 			valoresDTO.add(new ValorPosible(valorPosible));
 		}
@@ -2062,26 +2033,22 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
 
-		// Obtengo los datos a solicitar vivos de la agrupacion
+		//Obtener los datos a solicitar vivos de la agrupación
 		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager.createQuery(
-		"FROM DatoASolicitar dato "
+		    "FROM DatoASolicitar dato "
 			+ "WHERE dato.recurso = :recurso "
 			+ "  AND dato.fechaBaja IS NULL "
 			+ "ORDER BY dato.agrupacionDato.orden, dato.fila, dato.nombre")
 		.setParameter("recurso", recurso).getResultList();
 
-		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
-		// valores posibles.
+		//Para cada dato a solicitar que sea del tipo Lista, obtener los valores posibles.
 		for (DatoASolicitar datoASolicitar : datos) {
-
-			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(
-					datoASolicitar);
+			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(datoASolicitar);
 			datosDTO.add(datoASolicitarDTO);
 			if (datoASolicitar.getTipo() == Tipo.LIST) {
 				List<ValorPosible> valoresDTO = obtenerTodosValoresPosibles(datoASolicitar);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
-
 		}
 		return datosDTO;
 	}

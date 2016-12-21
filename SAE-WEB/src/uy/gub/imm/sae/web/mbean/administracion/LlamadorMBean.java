@@ -56,6 +56,7 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.exception.ApplicationException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.TipoMonitor;
 
@@ -255,8 +256,8 @@ public class LlamadorMBean extends BaseMBean {
         requestContext.execute("setearValor('varNumero','"+(reserva.getNumero()!=null?reserva.getNumero().toString():"")+"');");
 				requestContext.execute("PF('llamadaDestacada').show();");
 			}
-		} catch (Exception e) {
-			addErrorMessage(new ApplicationException(e), MSG_ID);
+		} catch (UserException uEx) {
+			addErrorMessage(uEx, MSG_ID);
 		}
 	}
 
@@ -314,7 +315,14 @@ public class LlamadorMBean extends BaseMBean {
 		DateFormat df = new SimpleDateFormat("HHmm");
 		for(Llamada llamada : llamadas) {
 		  Reserva reserva = llamada.getReserva();
-			String horaLLamada = df.format(llamada.getHora());
+			String horaLLamada = null;
+			if(reserva.getPresencial()!=null && reserva.getPresencial().booleanValue()) {
+			  horaLLamada = "9999";
+			}else {
+			  Disponibilidad disp = reserva.getDisponibilidades().get(0);
+			  horaLLamada = df.format(disp.getHoraInicio());
+			}
+			
 			LlamadasPorHorario llamadasPorHorario = mapLlamadasPorHorario.get(horaLLamada);
 			if(llamadasPorHorario == null) {
 			  Disponibilidad disp = reserva.getDisponibilidades().get(0);

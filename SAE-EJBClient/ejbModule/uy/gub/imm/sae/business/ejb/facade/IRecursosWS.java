@@ -13,6 +13,7 @@ import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 
 @WebService
 public interface IRecursosWS {
@@ -32,7 +33,7 @@ public interface IRecursosWS {
 				@WebParam(name = "timezone") TimeZone timezone
 		)
 		throws 
-			BusinessException;
+			UserException;
 
 	@WebMethod
 	public  @WebResult(name = "pingResult") String ping();

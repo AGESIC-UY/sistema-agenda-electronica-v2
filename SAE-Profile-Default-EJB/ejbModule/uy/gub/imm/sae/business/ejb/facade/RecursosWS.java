@@ -17,12 +17,14 @@ import javax.jws.soap.SOAPBinding.Use;
 //import org.jboss.wsf.spi.annotation.WebContext;
 
 
+
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
 @WebService(serviceName = "ManejoRecursosService",  targetNamespace = "http://montevideo.gub.uy/schema/sae/1.0/", portName = "ManejoRecursosPort")
@@ -55,14 +57,14 @@ public class RecursosWS implements IRecursosWS {
 			@WebParam(name = "recurso") Recurso recurso,
 			@WebParam(name = "timezone") TimeZone timezone
 		)
-			throws BusinessException {
+			throws UserException {
 
 		Recursos recursosEJB = null;
 
 		try{
 			recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
 		}catch (ApplicationException e){
-			throw new BusinessException(e.getCodigoError(),e.getMessage(),e.getCause());
+			throw new UserException(e.getCodigoError(),e.getMessage(),e.getCause());
 		}
 
 		List<AgrupacionDato> lst = recursosEJB.consultarDefinicionDeCampos(recurso, timezone);

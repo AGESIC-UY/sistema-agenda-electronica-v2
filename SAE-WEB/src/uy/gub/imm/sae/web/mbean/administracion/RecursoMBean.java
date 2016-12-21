@@ -389,12 +389,9 @@ public class RecursoMBean extends BaseMBean{
 	
 	@SuppressWarnings("unchecked")
 	public String modificar() {
-
     Recurso recurso1 = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
-		
 		if (recurso1 != null) {
 			recursoNuevo = new Recurso(recurso1);
-
 			sessionMBean.setRecursoSeleccionado(recursoNuevo);
 			//Se agrega para que si cambiamos de recurso no queden cargados los datos viejos 
 			sessionMBean.setDatoDelRecursoSeleccionado(null);

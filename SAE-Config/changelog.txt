@@ -40,7 +40,7 @@ Versión 1.3 (2016-09-09)
 Versión 1.4 (2016-10-06)
 * Se corrigió el bug por el cual no se mostraban las disponibilidades de los meses posteriores al actual.
 * Se corrigió el problema por el cual la fecha que se muestra en el ticket estaba siempre en GMT0.
-* Se cambió la forma de determinar el primer día disponiblela para reservar de forma de saltear los días no hábiles.
+* Se cambió la forma de determinar el primer día disponible para reservar de forma de saltear los días no hábiles.
 * Se quitó la obligatoriedad del campo descripción para las agendas.
 * Se quitó la carga automática del campo descripción cuando se elige un trámite en la creación de una agenda.
 * Se corrigió el problema por el cual solo se mostraban hasta 25 días en la consulta de disponibilidades.
@@ -86,7 +86,8 @@ Versión 1.5 (2016-11-21)
 * Se añadió el parámetro "q" a la URL de la reserva pública para permitir especificar el trámite a realizar.
 * Se añadió el despliegue opcional de la fecha actual (según la agenda seleccionada) en la parte superior de ambas interfaces.
 
-Versión 2.0
+Versión 2.0.0
+* Se pasó a utilizar el sistema de versionado semántico (mayor.minor.release[-build])
 * Se corrige un bug por el cual los envíos fallidos al Sistema de Notificaciones se reintentaban indefinidamente.
 * Se modificó la lógica de despliegue de textos para que en caso de no encontrar una etiqueta en la tabla ae_textos principal en lugar de dar un error se muestra la propia etiqueta como texto.
 * Se corrigió un error por el cual se mostraba la adevertencia "No hay otro administrador" cuando se creaba un usuario nuevo y se marcaba y desmarcaba la casilla "superadministrador".
@@ -102,3 +103,6 @@ Versión 2.0
 * En la pantalla "Lista de espera" se oculta el botón "LLamar siguiente" cuando se visualizan las llamadas anteriores.
 * Se añadió el reporte de asistencias presenciales.
 * Se mejoró el manejo de los casos de la reserva pública cuando se especifica un recurso que no existe o no está habilitado para internet.
+* En la pantalla de consulta de datos a solicitar se cambió para mostrar el nombre de la agrupación junto a su identificador en lugar de mostrar el orden.
+* Se solucionó un problema por el cual al deseleccionar una agenda o un recurso y volver a la página de selección de agenda y recurso éstos seguían marcados.
+* Se añadió la funcionalidad para eliminar disponibilidades especificando un período de fechas.

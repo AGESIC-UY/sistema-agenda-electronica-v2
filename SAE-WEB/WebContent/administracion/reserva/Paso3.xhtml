@@ -27,13 +27,10 @@
 					<li><h:outputText value="#{sessionMBean.textos['datos_marcados_obligatorios']}." /></li>
 				</ul>
 				<div class="descripcionAgenda">
-					<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcion}" 
-						rendered="#{paso3AdminMBean.descripcion != null}"/>
+					<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcion}" rendered="#{paso3AdminMBean.descripcion != null}"/>
 				</div>
 				<div class="descripcionAgenda">
-					<h:outputFormat escape="false"
-						value="#{paso3AdminMBean.descripcionRecurso}"
-						rendered="#{paso3AdminMBean.descripcionRecurso != null}" />
+					<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcionRecurso}" rendered="#{paso3AdminMBean.descripcionRecurso != null}" />
 				</div>
 			</f:view>
 		</ui:define>
@@ -41,16 +38,12 @@
 		<ui:define name="mensaje">
 			<div class="box box-grey datosReserva">
 				<div class="fechaHoraReserva">
-					<h:outputText value="#{paso3AdminMBean.diaSeleccionado}"
-						styleClass="resaltado">
-						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy"
-							timeZone="GMT" locale="#{sessionMBean.locale}"/>
+					<h:outputText value="#{paso3AdminMBean.diaSeleccionado}" styleClass="resaltado">
+						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sessionMBean.locale}"/>
 					</h:outputText>
 					<h:outputText value=" a las " />
-					<h:outputText value="#{paso3AdminMBean.horaSeleccionada}"
-						styleClass="resaltado">
-						<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
-							timeZone="GMT" />
+					<h:outputText value="#{paso3AdminMBean.horaSeleccionada}" styleClass="resaltado">
+						<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 					</h:outputText>
 					<h:outputText value=" hs" />
 				</div>
@@ -62,9 +55,6 @@
 
 		<ui:define name="contenido">
 			<p:outputPanel>
-	      <p:outputPanel styleClass="form-required">
-	        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
-	      </p:outputPanel>
 	      
         <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3AdminMBean.tramites}">
           <fieldset>
@@ -72,11 +62,9 @@
               <h:outputText value="#{sessionMBean.textos['tramite']}" />
             </legend>
             <p:outputPanel styleClass="form-group">
-              <h:outputLabel value="#{sessionMBean.textos['tramite']}"
-                for="tramite" styleClass="col-sm-3 control-label label" />
+              <h:outputLabel value="#{sessionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
               <p:outputPanel styleClass="col-sm-9">
-                <h:selectOneMenu id="tramite" value="#{paso3AdminMBean.tramiteCodigo}"
-                  styleClass="form-control">
+                <h:selectOneMenu id="tramite" value="#{paso3AdminMBean.tramiteCodigo}" styleClass="form-control">
                   <f:selectItems value="#{paso3AdminMBean.tramites}" />
                 </h:selectOneMenu>
                 <h:message for="tramite" styleClass="mensajeError" />
@@ -126,17 +114,15 @@
 			<ul class="form-action-buttons">
 				<li class="action-buttons-primary">
 					<ul>
-						<li><h:commandButton styleClass="btn-lg btn-primario"
-								value="#{sessionMBean.textos['confirmar_reserva']} #{paso3AdminMBean.simboloSiguiente}"
-								action="#{paso3AdminMBean.confirmarReserva}" /></li>
+						<li>
+						  <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['confirmar_reserva']} #{paso3AdminMBean.simboloSiguiente}" action="#{paso3AdminMBean.confirmarReserva}" />
+					  </li>
 					</ul>
 				</li>
 				<li class="action-buttons-second">
 					<ul>
 						<li class="float-left">
-						  <h:commandButton styleClass="btn-lg btn-link" 
-						    value="#{paso3AdminMBean.simboloAnterior} #{sessionMBean.textos['dia_y_hora']}"
-								action="pasoAnterior" />
+						  <h:commandButton styleClass="btn-lg btn-link" value="#{paso3AdminMBean.simboloAnterior} #{sessionMBean.textos['dia_y_hora']}" action="pasoAnterior" />
 						</li>
 					</ul>
 				</li>

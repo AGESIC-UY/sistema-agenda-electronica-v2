@@ -7,13 +7,10 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view
-			beforePhase="#{datoASolicitarMBean.beforePhaseModificarConsultar}" >
+		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificarConsultar}" >
 
-			<p:outputPanel
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
-				<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
-					widgetVar="eliminarDato" zindex="2000" modal="true">
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarDato" zindex="2000" modal="true">
 					<f:facet name="header">
 						<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 					</f:facet>
@@ -21,24 +18,19 @@
 						<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_campo']}" />
 						<p:outputPanel styleClass="row panelBotonesPopUp">
 							<p:outputPanel styleClass="col-sm-6">
-								<p:commandButton id="btn_eliminar"
-									update="formDatosMod:panelDatosMod"
-									actionListener="#{datoASolicitarMBean.eliminarDato}"
-									value="#{sessionMBean.textos['eliminar']}" onclick="PF('eliminarDato').hide();"
-									styleClass="btn-primario btn-100 btn">
+								<p:commandButton id="btn_eliminar" update="formDatosMod:panelDatosMod" actionListener="#{datoASolicitarMBean.eliminarDato}"
+									value="#{sessionMBean.textos['eliminar']}" onclick="PF('eliminarDato').hide();" styleClass="btn-primario btn-100 btn">
 								</p:commandButton>
 							</p:outputPanel>
 							<p:outputPanel styleClass="col-sm-6">
-								<p:commandButton onclick="PF('eliminarDato').hide();"
-									value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
+								<p:commandButton onclick="PF('eliminarDato').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
 								</p:commandButton>
 							</p:outputPanel>
 						</p:outputPanel>
 					</h:form>
 				</p:dialog>
 
-				<ui:include
-					src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
+				<ui:include src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
 
 				<h:form id="formDatosMod">
           <p:outputPanel id="panelDatosMod">
@@ -46,11 +38,8 @@
 						<ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
 					</p:outputPanel>
 
-					<p:dataTable value="#{datoASSessionMBean.datosASolicitar}"
-						var="row" id="tablaDatosSolicitarMod" rows="25" paginator="true"
-						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-						rowIndexVar="rowIndex" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
-						>
+					<p:dataTable value="#{datoASSessionMBean.datosASolicitar}" var="row" id="tablaDatosSolicitarMod" rows="25" paginator="true" rowIndexVar="rowIndex"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" >
 						
 						<p:column>
 							<f:facet name="header">
@@ -105,7 +94,7 @@
 							<f:facet name="header">
 								<h:outputText value="#{sessionMBean.textos['agrupacion']}"></h:outputText>
 							</f:facet>
-							<h:outputText value="#{row.agrupacionDato.orden}"></h:outputText>
+							<h:outputText value="#{row.agrupacionDato.nombre} (#{row.agrupacionDato.id})"></h:outputText>
 						</p:column>
 
 						<p:column>
@@ -119,15 +108,11 @@
 							<f:facet name="header">
 								<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 							</f:facet>
-							<p:commandButton id="modificarLink" reRender="pantalla" 
-							  value="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only"
-								actionListener="#{datoASolicitarMBean.seleccionarDato(rowIndex)}"
-								action="modificar" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
+							<p:commandButton id="modificarLink" reRender="pantalla" value="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only"
+								actionListener="#{datoASolicitarMBean.seleccionarDato(rowIndex)}" action="modificar" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
 							</p:commandButton>
-							<p:commandButton id="eliminarLink" value="#{sessionMBean.textos['eliminar']}"
-								oncomplete="PF('eliminarDato').show();" styleClass="ui-button-icon-only"
-								actionListener="#{datoASolicitarMBean.seleccionarDatoParaEliminar(rowIndex)}"
-								icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+							<p:commandButton id="eliminarLink" value="#{sessionMBean.textos['eliminar']}" oncomplete="PF('eliminarDato').show();" styleClass="ui-button-icon-only"
+								actionListener="#{datoASolicitarMBean.seleccionarDatoParaEliminar(rowIndex)}" icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 							</p:commandButton>
 						</p:column>
 					</p:dataTable>

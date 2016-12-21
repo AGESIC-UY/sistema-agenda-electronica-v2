@@ -147,10 +147,6 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	private Map<String, DatoASolicitar> datosASolicitar;
 
-	// Numero de puesto asignado al usuario en el momento de atender reservas
-	// con el modulo Llamador
-	private String puesto = "";
-
 	private String codigoSeguridadReserva;
 	
 	private List<SelectItem> idiomasSoportados = null;
@@ -446,12 +442,12 @@ public class SessionMBean extends SessionCleanerMBean {
 	 * */
 	public RowList<Recurso> getRecursosSeleccion() {
 		
-		RowList<Recurso> ret = new RowList<Recurso>();
 		if(recursos==null || recursos.isEmpty()) {
 			cargarRecursos();
 		}
 		
-		if(recursos !=null) {
+		RowList<Recurso> ret = new RowList<Recurso>();
+    if(recursos !=null) {
 			ret.addAll(recursos);
 		}
 
@@ -462,7 +458,6 @@ public class SessionMBean extends SessionCleanerMBean {
 		ret.add(0, new Row<Recurso>(ninguno, ret));
 		
 		return ret;
-		
 	}
 
 	// Si hay recurso selecciondada, se cargan los datos del recurso asociados.
@@ -570,14 +565,6 @@ public class SessionMBean extends SessionCleanerMBean {
 		this.datosASolicitar = datosASolicitar;
 	}
 
-	public String getPuesto() {
-		return puesto;
-	}
-
-	public void setPuesto(String puesto) {
-		this.puesto = puesto;
-	}
-
 	public Boolean getMostrarLlamador() {
 		if (recursos != null && recursos.getSelectedRow() != null) {
 			mostrarLlamador = recursos.getSelectedRow().getData()
@@ -593,6 +580,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public Row<Agenda> getRowSelectAgenda() {
+    if(getAgendaMarcada() == null) {
+      return getAgendas().get(0);
+    }
 		return rowSelectAgenda;
 	}
 
@@ -601,6 +591,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public Row<Recurso> getRowSelectRecurso() {
+	  if(getRecursoMarcado() == null) {
+	    return getRecursosSeleccion().get(0);
+	  }
 		return rowSelectRecurso;
 	}
 

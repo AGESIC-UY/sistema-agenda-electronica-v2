@@ -10,8 +10,7 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{recursoMBean.beforePhaseModificarConsultar}" >
 
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
-				widgetVar="eliminarRecurso" zindex="2000" modal="true">
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarRecurso" zindex="2000" modal="true">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
@@ -19,16 +18,12 @@
 					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_recurso']}" />
 					<p:outputPanel styleClass="row panelBotonesPopUp">
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton id="btn_eliminar"
-								update="@all"
-								actionListener="#{recursoMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
-								onclick="PF('eliminarRecurso').hide();"
-								styleClass="btn-primario btn-100 btn">
+							<p:commandButton id="btn_eliminar" update="@all" actionListener="#{recursoMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarRecurso').hide();" styleClass="btn-primario btn-100 btn">
 							</p:commandButton>
 						</p:outputPanel>
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton onclick="PF('eliminarRecurso').hide();"
-								value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
+							<p:commandButton onclick="PF('eliminarRecurso').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
 							</p:commandButton>
 						</p:outputPanel>
 					</p:outputPanel>
@@ -36,90 +31,77 @@
 			</p:dialog>
 
 
-			<h:form id="formRecModCon"
-				rendered="#{sessionMBean.agendaMarcada != null}">
+			<h:form id="formRecModCon" rendered="#{sessionMBean.agendaMarcada != null}">
 
-				<p:dataTable value="#{sessionMBean.recursos}" var="row"
-					id="tablaRecursos" rows="25" binding="#{recursoMBean.recursosDataTableConsultar}"
-					paginator="true" caption="#{sessionMBean.textos['listado_de_recursos']}"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+				<p:dataTable value="#{sessionMBean.recursos}" var="row" id="tablaRecursos" rows="25" binding="#{recursoMBean.recursosDataTableConsultar}"
+					paginator="true" caption="#{sessionMBean.textos['listado_de_recursos']}" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
 					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['identificador']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['identificador']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.id}"></h:outputText>
+						<h:outputText value="#{row.data.id}" />
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['nombre']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.nombre}"></h:outputText>
+						<h:outputText value="#{row.data.nombre}" />
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['descripcion']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['descripcion']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.descripcion}" escape="false"></h:outputText>
+						<h:outputText value="#{row.data.descripcion}" escape="false" />
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['inicio_de_vigencia']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['inicio_de_vigencia']}" />
 						</f:facet>
 						<h:outputText value="#{row.data.fechaInicio}">
-							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}"
-								timeZone="GMT" />
+							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 						</h:outputText>
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['fin_de_vigencia']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['fin_de_vigencia']}" />
 						</f:facet>
 						<h:outputText value="#{row.data.fechaFin}">
-							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}"
-								timeZone="GMT" />
+							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 						</h:outputText>
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['inicio_de_disponibilidad']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['inicio_de_disponibilidad']}" />
 						</f:facet>
 						<h:outputText value="#{row.data.fechaInicioDisp}">
-							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}"
-								timeZone="GMT" />
+							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 						</h:outputText>
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['fin_de_disponibilidad']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['fin_de_disponibilidad']}" />
 						</f:facet>
 						<h:outputText value="#{row.data.fechaFinDisp}">
-							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}"
-								timeZone="GMT" />
+							<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 						</h:outputText>
 					</p:column>
 					<p:column styleClass="alinCentro">
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['acciones']}" />
 						</f:facet>
-						<p:commandButton id="modificarRecLink" value="#{sessionMBean.textos['modificar']}"
-							action="#{recursoMBean.modificar}" icon="ui-icon-pencil"
+						<p:commandButton id="modificarRecLink" value="#{sessionMBean.textos['modificar']}" action="#{recursoMBean.modificar}" icon="ui-icon-pencil"
 							title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
-						<p:commandButton id="copiarRecLink" value="#{sessionMBean.textos['copiar']}"
-							actionListener="#{recursoMBean.copiar}"
-							update="formRecModCon:tablaRecursos" icon="ui-icon-copy"
-							title="#{sessionMBean.textos['copiar']}" styleClass="ui-button-icon-only">
+						<p:commandButton id="copiarRecLink" value="#{sessionMBean.textos['copiar']}" actionListener="#{recursoMBean.copiar}"
+							update="formRecModCon:tablaRecursos" icon="ui-icon-copy" title="#{sessionMBean.textos['copiar']}" styleClass="ui-button-icon-only">
 						</p:commandButton>
-						<p:commandButton id="elimRecLink" value="#{sessionMBean.textos['eliminar']}"
-							oncomplete="PF('eliminarRecurso').show();" styleClass="ui-button-icon-only"
-							actionListener="#{recursoMBean.selecRecursoEliminar}"
-							icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+						<p:commandButton id="elimRecLink" value="#{sessionMBean.textos['eliminar']}" oncomplete="PF('eliminarRecurso').show();" styleClass="ui-button-icon-only"
+							actionListener="#{recursoMBean.selecRecursoEliminar}" icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>
-            <p:commandButton id="expRecLink" value="#{sessionMBean.textos['exportar']}"
-              actionListener="#{recursoMBean.selecRecursoExportar}" styleClass="ui-button-icon-only"
-              icon="ui-icon-arrowthickstop-1-s" title="#{sessionMBean.textos['exportar']}" ajax="false">
+            <p:commandButton id="expRecLink" value="#{sessionMBean.textos['exportar']}" actionListener="#{recursoMBean.selecRecursoExportar}" 
+              styleClass="ui-button-icon-only" icon="ui-icon-arrowthickstop-1-s" title="#{sessionMBean.textos['exportar']}" ajax="false">
             </p:commandButton>
 					</p:column>
 

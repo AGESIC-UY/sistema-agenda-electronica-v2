@@ -26,7 +26,7 @@
                   <p:ajax update="form1:todo" listener="#{listaDeEsperaMBean.cambioAtencionPresencial}" />
                 </p:selectBooleanCheckbox>
 								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label formularioCampoRequerido" for="puesto" />
-								<h:inputText size="3" maxlength="3" id="puesto" value="#{sessionMBean.puesto}" styleClass="form-control" />
+								<h:inputText size="3" maxlength="3" id="puesto" value="#{listaDeEsperaMBean.puesto}" styleClass="form-control" />
 							</div>
 							<p:commandButton value="#{sessionMBean.textos['llamar_al_siguiente']}" actionListener="#{listaDeEsperaMBean.siguiente}" update="form1:todo"
 								rendered="#{listaDeEsperaSessionMBean.estadosSeleccionado=='[R]' and !listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="btn-lg btn-primario" />
@@ -61,11 +61,11 @@
 											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.numeroDocumento}" styleClass="resaltado" />
 										</div>
 										<div>
-											<h:outputText value="#{listaDeEsperaMBean.siguienteReservaDisponibilidad.fecha}"> 
+											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].fecha}"> 
 											  <f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sessionMBean.locale}"/>
 											</h:outputText>
 											<h:outputText value=", " />
-											<h:outputText value="#{listaDeEsperaMBean.siguienteReservaDisponibilidad.horaInicio}" rendered="#{not listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}">
+											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].horaInicio}" rendered="#{not listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}" >
 												<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 											</h:outputText>
                       <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" rendered="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}" />
@@ -84,10 +84,7 @@
 							</p:outputPanel>
 
 							<p:outputPanel id="siguienteBody">
-
-								<p:outputPanel id="camposDin" binding="#{listaDeEsperaMBean.camposSiguienteReserva}">
-								</p:outputPanel>
-
+								<p:outputPanel id="camposDin" binding="#{listaDeEsperaMBean.camposSiguienteReserva}" />
 							</p:outputPanel>
 						</p:outputPanel>
 
@@ -110,26 +107,32 @@
 
 								<p:subTable value="#{horario.listaEspera}" var="espera" id="tablaLlamadosPorHora" binding="#{listaDeEsperaMBean.subTablaListaDeEspera}">
 									<f:facet name="header">
-                    <h:outputText value="#{horario.hora}">
-                      <f:convertDateTime type="date" dateStyle="medium" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
-                    </h:outputText>
-                    <h:outputText value=" - " rendered="#{not listaDeEsperaMBean.atencionPresencial}" />
-										<h:outputText value="#{horario.hora}" rendered="#{not listaDeEsperaMBean.atencionPresencial}">
-											<f:convertDateTime type="time" dateStyle="medium" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
-										</h:outputText>
+                    <p:outputPanel rendered="#{listaDeEsperaMBean.atencionPresencial}"> 
+                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}: #{listaDeEsperaMBean.atencionPresencial}" />
+                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" />
+                    </p:outputPanel>
+									  <p:outputPanel rendered="#{not listaDeEsperaMBean.atencionPresencial}"> 
+	                    <h:outputText value="#{horario.hora}">
+	                      <f:convertDateTime type="date" dateStyle="medium" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+	                    </h:outputText>
+	                    <h:outputText value=" - " />
+											<h:outputText value="#{horario.hora}">
+												<f:convertDateTime type="time" dateStyle="medium" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+											</h:outputText>
+										</p:outputPanel>
 									</f:facet>
 									<p:column>
 										<h:outputText value="#{espera.reserva.numero}" />
 									</p:column>
 									<p:column>
-										<h:outputText value="#{espera.reserva.numeroDocumento}"  />
+										<h:outputText value="#{espera.reserva.numeroDocumento}" />
 									</p:column>
 									<p:column styleClass="colPuesto">
 										<h:outputText value="#{espera.reserva.puestoLlamada}" rendered="#{espera.reserva.puestoLlamada != null}" />
 									</p:column>
 									<p:column>
 										<p:commandLink id="volverALlamar" value="#{sessionMBean.textos['volver_a_llamar']}" rendered="#{espera.reserva.estado == 'U'}"
-											actionListener="#{listaDeEsperaMBean.llamar}" update="form1:todo" ignoreDupResponses="true">
+											actionListener="#{listaDeEsperaMBean.llamar}" update="form1:todo" >
 										</p:commandLink>
 									</p:column>
 								</p:subTable>

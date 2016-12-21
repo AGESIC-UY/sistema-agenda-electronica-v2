@@ -9,23 +9,19 @@
 <ui:composition template="/templates/layout.xhtml">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view
-			beforePhase="#{sessionMBean.beforePhaseSeleccionAgendaRecurso}" >
+		<f:view beforePhase="#{sessionMBean.beforePhaseSeleccionAgendaRecurso}" >
 
 			<h:form id="formSeleccionAgendaRecruso">
 				<p:outputPanel styleClass="row" id="mpTablas">
 					<div class="col-sm-6">
-						<p:dataTable id="tablaAgendas" var="row" value="#{sessionMBean.agendas}"  
-							selection="#{sessionMBean.rowSelectAgenda}" rowKey="#{row.data.id}" caption="Lista de agendas" 
-							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"	>
+						<p:dataTable id="tablaAgendas" var="row" value="#{sessionMBean.agendas}" selection="#{sessionMBean.rowSelectAgenda}" rowKey="#{row.data.id}" 
+						  caption="Lista de agendas" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"	>
 
 							<f:facet name="header">
 								<h:outputText value="Agendas"></h:outputText>
 							</f:facet>
 
-							<p:ajax event="rowSelectRadio"
-								listener="#{sessionMBean.seleccionarAgenda}"
-								update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:mpTablas" />
+							<p:ajax event="rowSelectRadio" listener="#{sessionMBean.seleccionarAgenda}" update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:mpTablas" />
 								
               <p:column selectionMode="single" selectRow="true" id="colSelAgenda" >
                 <p:outputLabel value="#{row.data.nombre}" for="colSelAgenda" styleClass="ui-helper-hidden-accessible" />
@@ -48,16 +44,14 @@
 					</div>
 
 					<div class="col-sm-6">
-						<p:dataTable value="#{sessionMBean.recursosSeleccion}" var="row" id="tablaRecursos" 
-						  selection="#{sessionMBean.rowSelectRecurso}" rowKey="#{row.data.id}" 
-						  caption="#{sessionMBean.textos['listado_de_recursos']}" 
-						  emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+						<p:dataTable value="#{sessionMBean.recursosSeleccion}" var="row" id="tablaRecursos" selection="#{sessionMBean.rowSelectRecurso}" rowKey="#{row.data.id}" 
+						  caption="#{sessionMBean.textos['listado_de_recursos']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 							<f:facet name="header">
 								<h:outputText value="Recursos"></h:outputText>
 							</f:facet>
 
-							<p:ajax event="rowSelectRadio" listener="#{sessionMBean.desseleccionarRecurso}"
-								update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:tablaRecursos :formMenu:menuLateral" />
+							<p:ajax event="rowSelectRadio" listener="#{sessionMBean.desseleccionarRecurso}" 
+							  update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:tablaRecursos :formMenu:menuLateral" />
 
               <p:column selectionMode="single"  id="colSelRecurso">
                 <p:outputLabel value="#{row.data.nombre}" for="colSelRecurso" styleClass="ui-helper-hidden-accessible" />
@@ -80,7 +74,7 @@
 					</div>
 				</p:outputPanel>
 				<div class="ui-helper-hidden-accessible">
-					<h:commandButton value="dummy"></h:commandButton>
+					<h:commandButton value="dummy" />
 				</div>
 			</h:form>
 
