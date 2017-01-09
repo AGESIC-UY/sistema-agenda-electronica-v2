@@ -78,8 +78,6 @@
 					<h:panelGroup binding="#{paso3AdminMBean.campos}" layout="block"/>
 				</p:outputPanel>
 
-				<h:panelGroup binding="#{paso3AdminMBean.camposError}" />
-
 				<fieldset>
 					<legend><h:outputText value="#{sessionMBean.textos['clausula_de_consentimiento_informado']}" /></legend>
 					
@@ -93,7 +91,7 @@
 						</div>
 						<h:panelGroup id="clausula" class="form-group" layout="block">
 							<span class="col-sm-3 control-label label formularioCampoRequerido">
-								<h:outputText value="#{sessionMBean.textos['terminos_de_la_clausula']}:" />
+								<h:outputText value="#{sessionMBean.textos['terminos_de_la_clausula']}" />
 						  </span>
 							<div class="col-sm-9">
 								<p:selectOneRadio id="condiciones"

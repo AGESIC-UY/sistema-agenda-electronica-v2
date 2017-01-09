@@ -100,26 +100,28 @@
 									<p:row>
 										<p:column headerText="#{sessionMBean.textos['numero']}" />
 										<p:column headerText="#{sessionMBean.textos['documento']}" />
+                    <p:column headerText="#{sessionMBean.textos['tramite']}" />
 										<p:column headerText="#{sessionMBean.textos['numero_de_puesto']}" styleClass="colPuesto"/>
 										<p:column headerText="" styleClass="colLlamar"/>
 									</p:row>
 								</p:columnGroup>
 
-								<p:subTable value="#{horario.listaEspera}" var="espera" id="tablaLlamadosPorHora" binding="#{listaDeEsperaMBean.subTablaListaDeEspera}">
+								<p:subTable id="tablaLlamadosPorHora" value="#{horario.listaEspera}" var="espera" binding="#{listaDeEsperaMBean.subTablaListaDeEspera}">
 									<f:facet name="header">
-                    <p:outputPanel rendered="#{listaDeEsperaMBean.atencionPresencial}"> 
-                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}: #{listaDeEsperaMBean.atencionPresencial}" />
-                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" />
+									  <p:outputPanel>
+										  <p:outputPanel rendered="#{not listaDeEsperaMBean.atencionPresencial}"> 
+		                    <h:outputText value="#{horario.hora}">
+		                      <f:convertDateTime type="date" dateStyle="medium" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+		                    </h:outputText>
+		                    <h:outputText value=" - " />
+												<h:outputText value="#{horario.hora}">
+													<f:convertDateTime type="time" dateStyle="medium" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+												</h:outputText>
+											</p:outputPanel>
+	                    <p:outputPanel rendered="#{listaDeEsperaMBean.atencionPresencial}"> 
+	                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" />
+	                    </p:outputPanel>
                     </p:outputPanel>
-									  <p:outputPanel rendered="#{not listaDeEsperaMBean.atencionPresencial}"> 
-	                    <h:outputText value="#{horario.hora}">
-	                      <f:convertDateTime type="date" dateStyle="medium" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
-	                    </h:outputText>
-	                    <h:outputText value=" - " />
-											<h:outputText value="#{horario.hora}">
-												<f:convertDateTime type="time" dateStyle="medium" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
-											</h:outputText>
-										</p:outputPanel>
 									</f:facet>
 									<p:column>
 										<h:outputText value="#{espera.reserva.numero}" />
@@ -127,6 +129,9 @@
 									<p:column>
 										<h:outputText value="#{espera.reserva.numeroDocumento}" />
 									</p:column>
+                  <p:column>
+                    <h:outputText value="#{espera.reserva.tramiteNombre}" />
+                  </p:column>
 									<p:column styleClass="colPuesto">
 										<h:outputText value="#{espera.reserva.puestoLlamada}" rendered="#{espera.reserva.puestoLlamada != null}" />
 									</p:column>

@@ -56,9 +56,7 @@
       <p:outputPanel rendered="#{!paso2MBean.errorInit}">
 				<div class="form-horizontal">
 					<div class="form-group">
-						<span class="label label-align-top col-sm-4 col-md-5">
-						 <h:outputText value="#{sesionMBean.textos['preferencia_de_horario']}" for="filtroHorarios" />
-						</span>
+						<h:outputText value="#{sesionMBean.textos['preferencia_de_horario']}" styleClass="label control-label col-sm-4 col-md-5"/>
 						<div class="col-sm-8 col-md-7">
 							<p:selectOneRadio id="filtroHorarios"
 								value="#{paso2MBean.filtroHorarios}" layout="responsive"
@@ -76,9 +74,7 @@
 							<h:outputLabel value="#{sesionMBean.textos['fechas_disponibles']}"  for="fechasdisp" styleClass="ui-helper-hidden-accessible" />
 							<h:inputText type="hidden" id="fechasdisp" value="#{paso2MBean.jsonArrayFchDisp}" disabled="true" />
 						</div>					
-						<span class="control-label col-sm-4 col-md-5 label label-align-top">
-							<h:outputText value="#{sesionMBean.textos['seleccione_un_dia']}" />
-						</span>
+						<h:outputText value="#{sesionMBean.textos['seleccione_un_dia']}" styleClass="control-label col-sm-4 col-md-5 label label-align-top"/>
 						<div class="col-sm-8 col-md-7">
 							<div id="datepickerinline" class="calendar-disponibilidad"></div>
 							<p:outputLabel for="diaSelect" value="día seleccionado" styleClass="hidden" />
@@ -94,9 +90,9 @@
 					<p:outputPanel id="seleccionHorario">
 	
 						<div class="form-group">
-							<div class="col-sm-4 col-md-5">
-								<h:outputText styleClass="label label-align-top" value="#{sesionMBean.textos['horarios_diponibles']}:" />
-								<h:outputText styleClass="label comentario" value="#{sesionMBean.textos['zona_horaria']}: #{sesionMBean.timeZone.ID}" />
+							<div class="col-sm-4 col-md-5 no-padding">
+								<h:outputText styleClass="label label-align-top no-padding" value="#{sesionMBean.textos['horarios_diponibles']}:" />
+								<h:outputText styleClass="label comentario no-padding" value="#{sesionMBean.textos['zona_horaria']}: #{sesionMBean.timeZone.ID}" />
 							</div>
 							<div class="col-sm-8 col-md-7">
 								<div class="row">

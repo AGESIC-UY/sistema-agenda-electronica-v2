@@ -183,9 +183,7 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			}
 		
 			List<Date> horasConflicto = disponibilidadesEJB.generarDisponibilidadesNuevas(sessionMBean.getRecursoMarcado(),crearDispSessionMBean.getFechaCrear(), 
-					crearDispSessionMBean.getHoraDesde(), crearDispSessionMBean.getHoraHasta(), 
-					crearDispSessionMBean.getFrecuencia(), crearDispSessionMBean.getCupo());
-			addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"), MSG_ID);
+					crearDispSessionMBean.getHoraDesde(), crearDispSessionMBean.getHoraHasta(), crearDispSessionMBean.getFrecuencia(), crearDispSessionMBean.getCupo());
 			if(!horasConflicto.isEmpty()) {
 			  String msg = sessionMBean.getTextos().get("no_se_generaron_disponibilidades_para_todos_los_horarios")+": ";
 			  StringBuilder sb = new StringBuilder();
@@ -198,6 +196,7 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			  }
 			  addAdvertenciaMessage(msg+sb.toString(), MSG_ID);
 			}
+      addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"), MSG_ID);
 			this.configurarDisponibilidadesDelDia();
 		} catch (OptimisticLockException lockE){
 			addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"), MSG_ID);

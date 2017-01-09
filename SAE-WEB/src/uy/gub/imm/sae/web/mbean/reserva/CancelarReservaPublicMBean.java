@@ -33,6 +33,7 @@ import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.login.Utilidades;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
@@ -464,13 +465,16 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 				Reserva r = consultaEJB.consultarReservaPorNumero(sesionMBean.getRecurso(), sesionMBean.getDisponibilidadCancelarReserva().getHoraInicio(),sesionMBean.getReservaDatos().getNumero());
 				List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean,	datosASolicitar);
 				
+				try {
 				//Enviar el mail de confirmacion
-				agendarReservasEJB.enviarComunicacionesCancelacion(r, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
+				  agendarReservasEJB.enviarComunicacionesCancelacion(r, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
+				}catch(UserException ex) {
+	        addAdvertenciaMessage(sesionMBean.getTextos().get(ex.getCodigoError()));
+				}
 
 				//Recargar el resto de las reservas
 				ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos,	sesionMBean.getRecurso(),	
-						sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos,	sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
 				this.sesionMBean.setListaReservas(reservas);
 
 				//Quitar los datos de la reserva cancelada (por si acaso)
@@ -481,7 +485,6 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 				
 			} catch (Exception ex) {
 				addErrorMessage(ex);
-				ex.printStackTrace();
 			}
 		}
 	}

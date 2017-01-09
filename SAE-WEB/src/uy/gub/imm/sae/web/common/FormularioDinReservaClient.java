@@ -58,7 +58,7 @@ public class FormularioDinReservaClient {
 		// pagina, es solo para que no salte la excepcion en el log, pues de todas formas sera
 		// redirigido a una pagina de error.
 		if (filtroConsulta.getChildCount() == 0 && recurso != null) {
-			FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(DATOS_FILTRO_RESERVA_MBEAN, FORMULARIO_ID, FormularioDinamicoReserva.TipoFormulario.CONSULTA, formatoFecha);
+			FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(DATOS_FILTRO_RESERVA_MBEAN, FORMULARIO_ID, FormularioDinamicoReserva.TipoFormulario.CONSULTA, null, formatoFecha);
 			formularioDin.armarFormulario(agrupaciones, null);
 			UIComponent formulario = formularioDin.getComponenteFormulario();
 			filtroConsulta.getChildren().add(formulario);

@@ -1,9 +1,9 @@
 /* **** GENERALES **** */
 #content:focus, #page-content-wrapper:focus{
-	outline: none;
+  outline: none;
 }
 #content{
-	margin-bottom: 30px;
+  margin-bottom: 30px;
 }
 .ui-widget, .ui-widget-content {
     font-size: 1.001em;
@@ -34,48 +34,48 @@ a:active,
 }
 .ui-datatable table {
     table-layout: auto;
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 .ui-datatable .ui-paginator {
     background: none;
     border: none;
 }
 .ui-paginator.ui-paginator-top{
-	padding-bottom: 8px;
+  padding-bottom: 8px;
 }
 .ui-paginator.ui-paginator-bottom{
-	padding-top: 10px;
+  padding-top: 10px;
 }
 .ui-paginator .ui-paginator-page, .ui-paginator .ui-paginator-pages, .ui-paginator .ui-paginator-next, .ui-paginator .ui-paginator-last, .ui-paginator .ui-paginator-first, .ui-paginator .ui-paginator-prev, .ui-paginator .ui-paginator-current{
-	padding: 2px 6px 4px 6px;
+  padding: 2px 6px 4px 6px;
 }
 .ui-paginator .ui-paginator-page.ui-state-default{
-	border: none;
+  border: none;
     background: none;
     color: #003dc6;
     text-decoration: underline;
 }
 .ui-paginator .ui-paginator-page.ui-state-active{
-	color: #141414;
+  color: #141414;
     text-decoration: none;
     font-weight: bold;
 }
 .ui-grid-responsive{
-	border: none;
+  border: none;
 }
 .ui-datagrid-column{
-	padding: 0;
+  padding: 0;
 }
 .grid-roles-recurso .ui-grid-row{
   margin-bottom: -5px;
 }
 .grid-roles-recurso .ui-datagrid-content > .ui-grid-row{
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 .ui-shadow {
     -webkit-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
-	-moz-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
-	box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
+  -moz-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
+  box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
 }
 .ui-state-default, .ui-widget-content .ui-state-default, .ui-widget-header .ui-state-default {
     border: 1px solid #bebebe;
@@ -83,11 +83,11 @@ a:active,
     font-weight: normal;
     color: #141414;
     text-shadow: none;
-	box-shadow: none;
+  box-shadow: none;
 }
 .ui-inputfield.ui-state-focus, .ui-widget-content .ui-inputfield.ui-state-focus, .ui-widget-header .ui-inputfield.ui-state-focus,
 .form-control:focus{
-	border-width: 1px;
+  border-width: 1px;
     border-color: #1B75BB;
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
 }
@@ -95,7 +95,7 @@ a:active,
     color: #141414;
     text-shadow: none;
 }
-input[type="radio"], input[type="checkbox"] {
+input[type="radio"], input[type="checkbox"], input[type="radio"][disabled], input[type="checkbox"][disabled] {
     box-shadow: none;
     width: auto;
 }
@@ -128,13 +128,13 @@ input[type="radio"].form-control, input[type="checkbox"].form-control {
     text-shadow: none;
 }
 .procesando {
-	text-align: center; 
-	vertical-align: middle; 
-	padding: 0;
+  text-align: center; 
+  vertical-align: middle; 
+  padding: 0;
 }
 .procesando .rich-mpnl-mask-div {
-	filter:alpha(opacity=20);
-	opacity:0.2;	
+  filter:alpha(opacity=20);
+  opacity:0.2;  
 }
 fieldset legend {
     width: auto;
@@ -142,14 +142,14 @@ fieldset legend {
 input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea,
 .ui-inputfield, .ui-widget-content .ui-inputfield, .ui-widget-header .ui-inputfield,
 .form-control {
-	padding: 5px 10px;
-	line-height: 1.5;
-	border: 1px solid #bebebe;
-	width:295px;
-	max-width: 100%;
-	border-radius: 2px;
-	box-shadow: none;
-	background: #fff;
+  padding: 5px 10px;
+  line-height: 1.5;
+  border: 1px solid #bebebe;
+  width:295px;
+  max-width: 100%;
+  border-radius: 2px;
+  box-shadow: none;
+  background: #fff;
 }
 input[type="text"].formularioCampoConError, 
 input[type="email"].formularioCampoConError, 
@@ -167,19 +167,19 @@ textarea.formularioCampoConError,
 .form-group-con-error input[type="date"], 
 .form-group-con-error select, 
 .form-group-con-error textarea{
-	border-color: #a94442;
+  border-color: #a94442;
 }
 input[type="text"].textoCorto, input[type="tel"].textoCorto, select.textoCorto, textarea.textoCorto, .ui-inputfield.textoCorto, .form-control.textoCorto{
-	width:70px;
+  width:70px;
 }
 input[type="text"].textoMedio, input[type="tel"].textoMedio, select.textoMedio, textarea.textoMedio, .ui-inputfield.textoMedio, .form-control.textoMedio{
-	width:155px;
+  width:155px;
 }
 input[type="text"].textoLargo, input[type="tel"].textoLargo, select.textoLargo, textarea.textoLargo, .ui-inputfield.textoLargo, .form-control.textoLargo{
-	width:500px;
+  width:500px;
 }
 input[type="text"].texto100, input[type="tel"].texto100, select.texto100, textarea.texto100, .ui-inputfield.texto100, .form-control.texto100{
-	width:100%;
+  width:100%;
 }
 .ui-chkbox .ui-chkbox-box {
     background-color: #fff;
@@ -187,12 +187,12 @@ input[type="text"].texto100, input[type="tel"].texto100, select.texto100, textar
     height: 19px;
 }
 .ui-chkbox .ui-chkbox-box.ui-state-focus{
-	border-color: #1B75BB;
+  border-color: #1B75BB;
     box-shadow: inset 0 1px 1px rgba(0,0,0,.075),0 0 8px rgba(102,175,233,.6);
 }
 .ui-chkbox + label, .ui-selectmanycheckbox.ui-grid label {
-	font-weight: 400;
-	vertical-align: middle;
+  font-weight: 400;
+  vertical-align: middle;
     margin-bottom: 0;
     margin-left: 7px;
     display: inline-block;
@@ -201,38 +201,38 @@ input[type="text"].texto100, input[type="tel"].texto100, select.texto100, textar
 .ui-selectmanycheckbox.ui-grid label:after,
 .ui-selectoneradio label:after,
 .ui-datatable-selectable label:after {
-	content: "";
+  content: "";
 }
 .form-horizontal .control-label {
-	padding: 7px 0 0 15px;
+  padding: 7px 0 0 15px;
 }
 .variasColumnas.variasColumnas .form-group{
-	margin:0;
+  margin:0;
 }
 .variasColumnas.variasColumnas .form-group.col-xs-12,
 .variasColumnas.variasColumnas .form-group.col-sm-12,
 .variasColumnas.variasColumnas .form-group.col-md-12,
 .variasColumnas.variasColumnas .form-group.col-xl-12{
-	/*margin-bottom: 15px;*/
+  /*margin-bottom: 15px;*/
 }
 .form-control {
     height: 32px;
 }
 .form-control-static{
-	display: block;
+  display: block;
 }
 .form-group:last-child{
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 .form-group .ui-chkbox{
 vertical-align: middle;
 }
 .ui-selectoneradio .ui-helper-hidden-accessible, .ui-chkbox .ui-helper-hidden-accessible, .ui-radiobutton .ui-helper-hidden-accessible{
-	position: relative;
-	overflow: visible;
-	height: auto;
-	width: auto;
-	margin: 0;
+  position: relative;
+  overflow: visible;
+  height: auto;
+  width: auto;
+  margin: 0;
 }
 .ui-radiobutton-box, .ui-chkbox .ui-chkbox-box {
   display: none;
@@ -242,11 +242,14 @@ vertical-align: middle;
   margin: 3px 5px 3px;
 }
 .ui-selectmanymenu{
-	padding: 0;
+  padding: 0;
+}
+.form-horizontal .form-group input[type="radio"], .form-horizontal .form-group input[type="checkbox"]{
+  margin-top: 8px;
+  margin-bottom: 11px;
 }
 .form-group input[type="radio"], .form-group input[type="checkbox"]{
-	margin-top: 8px;
-  margin-bottom: 11px;
+  margin-right: 0;
 }
 .form-group .ui-message.ui-widget{
   padding: 6px 0px;
@@ -255,7 +258,7 @@ vertical-align: middle;
   clear: both;
 }
 .form-group-con-error{
-	padding: 10px 40px 10px 15px;
+  padding: 10px 40px 10px 15px;
   background-color: #ffeded;
   border: 1px solid #e3c4c4;
   background-image: url(../images/icn-circle-error.png);
@@ -263,7 +266,7 @@ vertical-align: middle;
   background-repeat: no-repeat;
 }
 .form-group .ui-message.ui-widget .ui-message-error-icon{
-	display: none;
+  display: none;
 }
 .form-group input, 
 .form-group select, 
@@ -281,34 +284,39 @@ vertical-align: middle;
     margin-left: 10px;
 }
 .form-group .ui-commandlink{
-	margin-left: 15px;
-	/*line-height: 32px;*/
-	display: inline-block;
+  margin-left: 15px;
+  /*line-height: 32px;*/
+  display: inline-block;
 }
 .form-group[class*="col-"]{
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 form div + fieldset{
-	margin-top: 45px;
+  margin-top: 45px;
 }
 form div.botonesDerecha + fieldset{
-	margin-top: 0;
+  margin-top: 0;
 }
 .ui-selectonemenu .ui-selectonemenu-label {
-	padding: 0;
-	line-height: 21px;
+  padding: 0;
+  line-height: 21px;
 }
 button, 
 html input[type=button], 
 input[type=reset], 
 input[type=submit]{
-	border: 1px solid transparent;
+  border: 1px solid transparent;
 }
-.ui-selectoneradio label{
-	text-align: left;
-	font-weight: normal;
-    font-size: 13px;
-    width: auto;
+.ui-selectoneradio.ui-grid label{
+  text-align: left;
+  font-weight: normal;
+  font-size: 13px;
+  width: auto;
+  vertical-align: middle;
+  margin-top: 4px;
+}
+.ui-radiobutton {
+    margin: 0;
 }
 .ui-radiobutton .ui-radiobutton-box {
     background: #fff;
@@ -320,24 +328,24 @@ input[type=submit]{
 .ui-state-focus .ui-radiobutton-icon,
 .ui-state-hover .ui-radiobutton-icon,
 .ui-state-active .ui-radiobutton-icon{
-	margin-left: -1px;
+  margin-left: -1px;
     margin-top: -2px;
-	cursor: pointer;
+  cursor: pointer;
 }
 .ui-state-active .ui-radiobutton-icon {
-	background-image: url("/sae/javax.faces.resource/images/ui-icons_616161_256x240.png.xhtml?ln=primefaces-aristo");
+  background-image: url("/sae/javax.faces.resource/images/ui-icons_616161_256x240.png.xhtml?ln=primefaces-aristo");
 }
 .ui-selectoneradio .ui-grid-row{
-	margin-bottom: 7px;
+  margin-bottom: 0px;
 }
 .alinDer{
-	text-align: right;
+  text-align: right;
 }
 .alinIzq{
-	text-align: left;
+  text-align: left;
 }
 .alinCentro{
-	text-align: center;
+  text-align: center;
 }
 .label {
     padding: 0 15px;
@@ -349,37 +357,37 @@ input[type=submit]{
     white-space: normal;
 }
 input.hasDatepicker.ui-inputfield, input.hasDatepicker, input.datepicker, input.datepicker-dis{
-	width: 100%;
-	max-width: 110px;
-	background: #ffffff url("../images/calendar.png") no-repeat center right;
-	padding-right: 25px;
+  width: 100%;
+  max-width: 110px;
+  background: #ffffff url("../images/calendar.png") no-repeat center right;
+  padding-right: 25px;
 }
 .ui-datepicker{
-	font-size: 16px;
-	padding: .2em .4em 0;
+  font-size: 16px;
+  padding: .2em .4em 0;
 }
 #datepickerinline .ui-datepicker{
-	max-width: 26em;
-	width: auto;
-	border: none;
-	padding: 0;
-	font-size: 18px;
+  max-width: 26em;
+  width: auto;
+  border: none;
+  padding: 0;
+  font-size: 18px;
 }
 .ui-datepicker .ui-datepicker-header {
     background: none;
     border: none;
-	text-shadow: none;
-	padding: 0;
+  text-shadow: none;
+  padding: 0;
     margin-bottom: 5px;
 }
 .ui-datepicker table{
-	font-size: .95em;
+  font-size: .95em;
 }
 .ui-datepicker .ui-datepicker-title select{
-	font-size: .9em;
+  font-size: .9em;
 }
 .ui-datepicker table tr{
-	background: transparent;
+  background: transparent;
 }
 .ui-datepicker th {
     background: transparent;
@@ -392,7 +400,7 @@ input.hasDatepicker.ui-inputfield, input.hasDatepicker, input.datepicker, input.
     padding: 0;
 }
 .ui-datepicker td.fechaFutura, .ui-datepicker td.fechaHoy {
-	opacity: 1;
+  opacity: 1;
 }
 
 .ui-datepicker .ui-datepicker-calendar .ui-state-default { /*los dias seleccionables de cualquier calendar*/
@@ -401,8 +409,8 @@ input.hasDatepicker.ui-inputfield, input.hasDatepicker, input.datepicker, input.
     padding: .4em .2em .3em;
     text-align: center;
     text-shadow: none;
-	box-shadow: none;
-	font-size: 1.2em;
+  box-shadow: none;
+  font-size: 1.2em;
 }
 .calendar-disponibilidad .ui-datepicker-calendar .ui-state-default { /*los dias disponibles para las reserva*/
     background: #d5edc3;
@@ -413,63 +421,72 @@ input.hasDatepicker.ui-inputfield, input.hasDatepicker, input.datepicker, input.
     background: #006837;
 }
 .ui-datepicker td.ui-datepicker-unselectable .ui-state-default{ /*los dias NO disponibles*/
-	background: transparent;
-	font-weight: normal;
+  background: transparent;
+  font-weight: normal;
     color: #141414;
 }
 .ui-datepicker td.ui-datepicker-other-month{
-	border: none;
+  border: none;
 }
 .ui-datepicker td.ui-datepicker-current-day .ui-state-default{/*dia seleccionado*/
-	color: #ffffff;
+  color: #ffffff;
     background: #006837;
     text-shadow: none;
 }
 
 .ui-datepicker td.ui-datepicker-today.ui-datepicker-unselectable .ui-state-default{/*hoy no seleccionable*/
-	color: #141414 !important;
-	background: url(../images/hoy.png) no-repeat center;
+  color: #141414 !important;
+  background: url(../images/hoy.png) no-repeat center;
     font-weight: bold;
 }
 .ui-datepicker td.ui-datepicker-today a.ui-state-default{/*hoy seleccionable*/
-	background-image:  url(../images/hoy.png);
-	background-position: center;
-	background-repeat: no-repeat;
-	font-weight: bold;
+  background-image:  url(../images/hoy.png);
+  background-position: center;
+  background-repeat: no-repeat;
+  font-weight: bold;
+}
+.ui-datepicker .ui-datepicker-prev, .ui-datepicker .ui-datepicker-next{
+  height: 1.6em;
 }
 .ui-datepicker .ui-datepicker-next-hover, .ui-datepicker .ui-datepicker-prev-hover{
-	border:none;
-	top: 2px;
+  border:none;
+  top: 2px;
+}
+.ui-datepicker .ui-datepicker-prev-hover {
+    left: 2px;
+}
+.ui-datepicker .ui-datepicker-next-hover {
+    right: 2px;
 }
 .hora{
-	max-width: 70px;
+  max-width: 70px;
 }
 .ui-state-default .ui-icon{
-	background-image: url("../images/ui-icons_337ab7_256x240.png");
+  background-image: url("../images/ui-icons_337ab7_256x240.png");
 }
 .ui-state-default.btn-secundario .ui-icon, .ui-state-default.btn-primario .ui-icon{
-	background-image: url("../images/ui-icons_ffffff_256x240.png");
+  background-image: url("../images/ui-icons_ffffff_256x240.png");
 }
 .ui-widget-header .ui-icon{
-	background-image: url("../images/ui-icons_337ab7_256x240.png");
+  background-image: url("../images/ui-icons_337ab7_256x240.png");
 }
 .ui-state-hover .ui-icon, .ui-state-focus .ui-icon{
-	background-image: url("../images/ui-icons_296192_256x240.png");
+  background-image: url("../images/ui-icons_296192_256x240.png");
 }
 .comentario{
-	font-size: 0.85em;
+  font-size: 0.85em;
     color: #555;
 }
 label .comentario {
     display: block;
 }
 .form-control + .comentario, .datepicker + .comentario{
-	padding-left: 15px;
-	display: inline-block;
+  padding-left: 15px;
+  display: inline-block;
     padding-top: 5px;
 }
 /*fieldset.ui-widget-content{
-	margin-bottom: 45px;
+  margin-bottom: 45px;
     padding: 0px 32px 30px 32px;
     border: 1px solid #59595C;
     border-radius: 0;
@@ -486,47 +503,47 @@ fieldset.ui-widget-content legend.ui-state-default.ui-fieldset-legend {
     background: none;
 }
 fieldset fieldset.ui-widget-content{
-	margin-left: 15px;
+  margin-left: 15px;
     margin-right: 15px;
     margin-top: 0;
     margin-bottom: 35px;
     border: 1px solid #808184;
-	padding: 0px 32px 30px 32px;
+  padding: 0px 32px 30px 32px;
 }
 fieldset fieldset.ui-widget-content legend.ui-state-default.ui-fieldset-legend,
 fieldset fieldset legend {
-	/*font-size: 1em;*/
-	width: auto;
-	border: none;
+  /*font-size: 1em;*/
+  width: auto;
+  border: none;
 }
 .dialog-box{
-	color: #000000;
+  color: #000000;
 }
 .ui-message-error {
     border: none;
 }
 .ui-messages-error, .ui-messages-info, .ui-messages-warn{
-	color: #000000;
-	padding: 0;
+  color: #000000;
+  padding: 0;
 }
 .ui-messages-error {
-	background-color: #ffeded;
+  background-color: #ffeded;
     border-color: #e3c4c4;
 }
 .ui-messages-info{
-	border-color: #c1e0b4;
+  border-color: #c1e0b4;
     background: #ecf6e8;
 }
 .ui-messages-warn{
-	border-color: #e7e2c5;
+  border-color: #e7e2c5;
     background: #fbf8ea;
 }
 .ui-messages-error:after, .ui-message-error:after,
 .ui-messages-info:after, .ui-message-info:after,
 .ui-messages-warn:after, .ui-message-warn:after{
-	content: "";
-	clear: both;
-	display: block;
+  content: "";
+  clear: both;
+  display: block;
 }
 .ui-messages-info-icon, .ui-messages-warn-icon, .ui-messages-error-icon, .ui-messages-fatal-icon {
     height: 81px;
@@ -541,13 +558,13 @@ fieldset fieldset legend {
     background: url("../images/icn-circle-error-lg.png") center no-repeat;
 }
 .ui-messages-info-icon{
-	background: url("../images/icn-circle-success-lg.png") center no-repeat;
+  background: url("../images/icn-circle-success-lg.png") center no-repeat;
 }
 .ui-messages-warn-icon, .icn-warning-lg{
-	background: url("../images/icn-warning-lg.png") center no-repeat;
+  background: url("../images/icn-warning-lg.png") center no-repeat;
 }
 .ui-messages-error-title, .ui-messages-info-title, .ui-messages-warn-title{
-	padding-top: 20px;
+  padding-top: 20px;
     font-size: 1.25em;
     margin-bottom: 10px;
     line-height: 1.1;
@@ -556,27 +573,27 @@ fieldset fieldset legend {
 }
 .ui-messages-info-detail, .ui-messages-warn-detail, .ui-messages-error-detail, .ui-messages-fatal-detail{
     margin-left: 10px;
-	line-height: 18px;
+  line-height: 18px;
 }
 .ui-message-info-detail, .ui-message-warn-detail, .ui-message-error-detail, .ui-message-fatal-detail {
     margin-left: 0;
-	line-height: 18px;
+  line-height: 18px;
 }
 .ui-message-error-detail, .mensajeError{
-	color: #BF2026;
+  color: #BF2026;
 }
 .mensajeError{
     display: block;
     padding: 6px 0;
 }
 .ui-messages-error-summary,.ui-messages-info-summary,.ui-messages-warn-summary, .ui-messages-fatal-summary {
-	display: block;
+  display: block;
     font-weight: normal;
     line-height: 1.1;
     margin-left: 0;
 }
 fieldset .ui-message.ui-widget{
-	margin: 0 15px 20px;
+  margin: 0 15px 20px;
 }
 .ui-messages ul{
     padding: 0 20px 20px 0;
@@ -584,57 +601,57 @@ fieldset .ui-message.ui-widget{
     overflow: hidden;
 }
 .ui-messages ul li {
-	margin-bottom: 8px;
+  margin-bottom: 8px;
 }
 .ui-messages ul li:last-child {
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 .ui-messages ul li .ui-messages-info-detail,
 .ui-messages ul li .ui-messages-warn-detail,
 .ui-messages ul li .ui-messages-error-detail,
 .ui-messages ul li .ui-messages-fatal-detail {
-	margin-left: 0px;
+  margin-left: 0px;
 }
 label:after, .control-label:after{
-	content: ":";
-	display: inline-block;
-	
+  content: ":";
+  display: inline-block;
+  
   
   /*spio
   content: "XXX:";
   color: red;
   font-weigth: bold;
-	*/
+  */
 }
 .formularioCampoRequerido:after{
-	content: "*:";
-	display: inline-block;
+  content: "*:";
+  display: inline-block;
 }
 .textoCaptcha{
-	margin-bottom: 5px;
+  margin-bottom: 5px;
     display: block;
     padding-top: 7px;
     line-height: 18px;
 }
 .form-group .recargarCaptcha{
-	display: block;
-	margin: 5px 0 0;
+  display: block;
+  margin: 5px 0 0;
 }
 .verde{
-	color: #006837;
+  color: #006837;
 }
 .rojo{
-	color: red;
+  color: red;
 }
 .negrita{
-	font-weight: bold;
+  font-weight: bold;
 }
 .panelBotonesPopUp{
-	margin-top: 20px;
+  margin-top: 20px;
 }
 .ui-dialog {
-	border: 1px solid #d9d8d8;
-	border-radius: 0;
+  border: 1px solid #d9d8d8;
+  border-radius: 0;
 }
 .ui-dialog .ui-dialog-titlebar {
     padding: .5em 20px;
@@ -643,48 +660,48 @@ label:after, .control-label:after{
     padding: 20px;
 }
 .hidden {
-	visibility: hidden
+  visibility: hidden
 }
 .recuadro, .recuadro.ui-widget{
-	padding: 20px;
-	font-size: 1.3em;
-	border: 1px solid #d9d8d8;
-	background: #F4F7FA;
-	-webkit-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
-	-moz-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
-	box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
+  padding: 20px;
+  font-size: 1.3em;
+  border: 1px solid #d9d8d8;
+  background: #F4F7FA;
+  -webkit-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
+  -moz-box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
+  box-shadow: 0px 2px 10px 0px rgba(0,0,0,0.3);
 }
 .recuadro .btn-primario, .recuadro .btn-secundario {
     font-size: 0.85em;
 }
 .margen_sup{
-	margin-top: 20px;
+  margin-top: 20px;
 }
 .margen_inf{
-	margin-bottom: 20px;
+  margin-bottom: 20px;
 }
 .form-inline label, .form-inline input, .form-inline select{
-	margin-right: 10px;
-	vertical-align: middle;/*para el select de idiomas*/
+  margin-right: 10px;
+  vertical-align: middle;/*para el select de idiomas*/
     margin-bottom: 0;/*para el select de idiomas*/
 }
 .form-inline label.label{
-	margin-right: 0;
+  margin-right: 0;
 }
 .form-inline button.ui-button{
-	margin-bottom: 0;
+  margin-bottom: 0;
 }
 .botonesDerecha{
-	text-align: right;
+  text-align: right;
 }
 .ui-tabs{
-	padding: 0 0 15px;
-	border: none;
-	margin-bottom: 30px;
-	border-bottom: 1px solid #999;
+  padding: 0 0 15px;
+  border: none;
+  margin-bottom: 30px;
+  border-bottom: 1px solid #999;
 }
 .ui-tabs.ui-tabs-top > .ui-tabs-nav{
-	border-bottom: 1px solid #999;
+  border-bottom: 1px solid #999;
     margin-bottom: 15px;
     background: none;
     padding: 0 0 0 1.4em;
@@ -693,9 +710,9 @@ label:after, .control-label:after{
     float: left;
     margin-bottom: -1px;
     top: 0;
-	border: 0;
-	background: none;
-	margin-right: 10px;
+  border: 0;
+  background: none;
+  margin-right: 10px;
 }
 .ui-tabs .ui-tabs-nav li a {
     background: #F5F5F5;
@@ -735,51 +752,51 @@ label:after, .control-label:after{
     margin: 0;
 }
 .no-padding{
-	padding: 0;
+  padding: 0;
 }
 /* ---- GENERALES ---- */
 
 
 /* **** RESERVA **** */
 .cabezalPublico{
-	border-bottom: 2px solid #7E8080;
-	margin-bottom: 40px;
-	min-height: 102px;
+  border-bottom: 2px solid #7E8080;
+  margin-bottom: 40px;
+  min-height: 102px;
 }
 .cabezalLogin{
-	border-bottom: 2px solid #7E8080;
-	margin-bottom: 40px;
+  border-bottom: 2px solid #7E8080;
+  margin-bottom: 40px;
 }
 .cabezalEmpresa,.cabezalTramites{
-	padding-top: 10px;
-	padding-bottom: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
 }
 .cabezalPrivado .cabezalTramites {
     padding-top: 10px;
 }
 .cabezalEmpresa *{
-	display: inline-block;
-	vertical-align: middle;
+  display: inline-block;
+  vertical-align: middle;
 }
 .cabezalEmpresa select{
     margin: 25px 0;
 }
 .logoEmpresa{
-	max-width: 230px;
-	max-height: 80px;
-	margin-right: 20px;
+  max-width: 230px;
+  max-height: 80px;
+  margin-right: 20px;
 }
 .cabezalTramites{
-	text-align: right;
-	padding-top: 15px;
+  text-align: right;
+  padding-top: 15px;
 }
 .logoTramites{
-	margin-top: 23px;
+  margin-top: 23px;
 }
 .piePublico{
-	border-top: 1px solid #C0CFDB;
-	padding: 20px 0;
-	margin-top: 45px;
+  border-top: 1px solid #C0CFDB;
+  padding: 20px 0;
+  margin-top: 45px;
 }
 .nombre-activo{
   color: #141414;
@@ -797,11 +814,11 @@ label:after, .control-label:after{
     max-height: 80px;
     margin-right: 25px;
 }
-#logo {/*el logo del público*/
+#logo {/*el logo del pÃºblico*/
     display: table-row;
     height: 60px;
 }
-.cabezalPublico #logo {/*el logo del público*/
+.cabezalPublico #logo {/*el logo del pÃºblico*/
     height: 80px;
 }
 .cabezalPrivado #logo-correo {/*el logo del admin*/
@@ -810,7 +827,7 @@ label:after, .control-label:after{
 .cabezalPrivado #logo {/*el logo del admin*/
     height: 42px;
 }
-#logo > *{/*el logo del público*/
+#logo > *{/*el logo del pÃºblico*/
     display: table-cell;
     vertical-align: middle;
     margin-right: 10px;
@@ -854,71 +871,71 @@ label:after, .control-label:after{
     max-height: 35px;
 }
 .infoDireccion{
-	border: 1px solid #41609e;
+  border: 1px solid #41609e;
 }
 iframe {
   border: 0;
 }
 iframe.iframeMapa {
-	width: 100%;
-	height: 235px;
+  width: 100%;
+  height: 235px;
 }
 .mapa-body{
   margin: 0;
 }
 .mapa{
-	max-width: 100%;
-	height: 230px;
-	margin-bottom: 5px;
+  max-width: 100%;
+  height: 230px;
+  margin-bottom: 5px;
 }
 .map-canvas{
-	width:100%;
-	height:100%;
+  width:100%;
+  height:100%;
 }
 .direccion{
-	margin: 10px;
-	font-size: 1.1em;
-	font-weight: bold;
+  margin: 10px;
+  font-size: 1.1em;
+  font-weight: bold;
 }
 .horario{
-	margin: 10px;
+  margin: 10px;
 }
 .descripcionAgenda{
-	margin-top: 15px;
-	color: #666;
-	font-style: italic;
+  margin-top: 15px;
+  color: #666;
+  font-style: italic;
 }
 .tips{
-	border: 1px solid #d9d8d8;
-	padding: 15px 15px 15px 30px;
+  border: 1px solid #d9d8d8;
+  padding: 15px 15px 15px 30px;
 }
 .infoAdicional{
-	font-size: 1.1em;
-	border: 1px solid #d9d8d8;
-	padding: 15px;
-	margin-top: 20px;
+  font-size: 1.1em;
+  border: 1px solid #d9d8d8;
+  padding: 15px;
+  margin-top: 20px;
 }
 .infoAdicional .ui-widget-content{
-	background: none;
-	border: none;
+  background: none;
+  border: none;
 }
 .infoAdicional ul{
-	padding-left: 30px;
+  padding-left: 30px;
 }
 .infoAdicional ul li{
-	margin-bottom: 15px;
+  margin-bottom: 15px;
 }
 .tituloResalte{
-	font-size: 1.4em;
+  font-size: 1.4em;
     margin-bottom: 20px;
     display: block;
 }
 .diaSeleccionado, 
 input[type="text"].diaSeleccionado{
-	width: 100%;
-	border: none;
-	background: #006837;
-	text-shadow: none;
+  width: 100%;
+  border: none;
+  background: #006837;
+  text-shadow: none;
     color: #fff;
     text-align: center;
     font-weight: bold;
@@ -926,9 +943,9 @@ input[type="text"].diaSeleccionado{
     height: 42px;
 }
 .horarioDisponible{
-	border: none;
-	padding: 0;
-	border-radius: 0;
+  border: none;
+  padding: 0;
+  border-radius: 0;
 }
 .horarioDisponible .ui-panel-titlebar{
     border-radius: 0;
@@ -943,100 +960,100 @@ input[type="text"].diaSeleccionado{
     display: block;
 }
 .horarioDisponible .ui-panel-content{
-	padding:0;
+  padding:0;
 }
 .horarioDisponible .ui-widget-content, .horarioDisponible table tbody tr td, .horarioDisponible table thead tr th.ui-state-default{
-	border:none;
-	padding: 0 3px 7px;
-	background: none;
+  border:none;
+  padding: 0 3px;
+  background: none;
 }
 .horarioDisponible tbody td:first-child{
-	width: 22px;
+  width: 22px;
 }
 .horarioDisponible thead th.ui-state-default{
-	padding: 0;
+  padding: 0;
 }
 .horarioDisponible .ui-state-highlight{
-	color:#4f4f4f;
+  color:#4f4f4f;
 }
 .horarioDisponible label{
-	display: inline-block;
-	text-align: left;
-	margin-bottom: 0;
+  display: inline-block;
+  text-align: left;
+  margin-bottom: 0;
 }
 .radioColumn{
-	width: 47px;
+  width: 47px;
 }
 .datosReserva, .datosReservaConfirmada, .datosReservaCancelar{
-	padding: 20px 20px 20px 117px;
-	background-image: url("../images/calendario.png");
-	background-position: 46px center;
-	background-repeat: no-repeat;
-	border: 1px solid #d9d8d8;
+  padding: 20px 20px 20px 117px;
+  background-image: url("../images/calendario.png");
+  background-position: 46px center;
+  background-repeat: no-repeat;
+  border: 1px solid #d9d8d8;
     font-size: 1.3em;
 }
 .datosReservaConfirmada{
-	border: 1px solid #006837;
-	background-color: #f1fff0;
+  border: 1px solid #006837;
+  background-color: #f1fff0;
 }
 .datosReservaCancelar{
-	border: 1px solid #e7e2c5;
-	background-color: #fbf8ea;
+  border: 1px solid #e7e2c5;
+  background-color: #fbf8ea;
 }
 .datosReservaCancelar .row > div{
-	display: inline-block;
+  display: inline-block;
     vertical-align: middle;
     float: none;
 }
 .datosReservaCancelar .row > div.alinDer{
-	margin-left: -6px;
+  margin-left: -6px;
 }
 .datosReservaCancelar a.btn-primario {
-	font-size: 0.85em;
-	color: #fff;
+  font-size: 0.85em;
+  color: #fff;
     text-decoration: none;
 }
 .fechaHoraReserva{
-	margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 .fechaHoraReserva .resaltado{
-	font-size: 1.3em;
+  font-size: 1.3em;
 }
 .seguridad{
-	font-size: .75em;
+  font-size: .75em;
     margin-top: 12px;
 }
 .tips{
-	color: #666;
+  color: #666;
 }
 .cancelarReserva fieldset{
-	margin-bottom: 35px;
+  margin-bottom: 35px;
 }
 .idioma{
-	float: right;
+  float: right;
 }
 .idioma select{
-	margin: 0;
+  margin: 0;
 }
 .tituloPagina{
-	overflow: hidden;
+  overflow: hidden;
 }
 /* ---- RESERVA ---- */
 
 /* **** ADMIN **** */
 .bodyAdmin{
-	padding-top: 55px;
+  padding-top: 55px;
 }
 .cabezalPrivado .containerAdmin{
-	border-bottom: 2px solid #7E8080;
-	min-height: 0px;
-	padding: 0 20px;
-	background-color: #fff;
-	height: 56px;
+  border-bottom: 2px solid #7E8080;
+  min-height: 0px;
+  padding: 0 20px;
+  background-color: #fff;
+  height: 56px;
 }
 .cabezalPrivado .logoTramites {
     margin: 3px 0;
-	width: 170px;
+  width: 170px;
 }
 .cabezalPrivado .logoEmpresa {
     max-width: 200px;
@@ -1047,10 +1064,10 @@ input[type="text"].diaSeleccionado{
     padding-top: 6px;
 }
 .botonesConfirmacion{
-	margin-top: 20px;
+  margin-top: 20px;
 }
 .datosCabezal{
-	padding: 5px 20px;
+  padding: 5px 20px;
     background: #e2e9ef;
     margin: -20px;
     margin-bottom: 20px;
@@ -1060,46 +1077,46 @@ input[type="text"].diaSeleccionado{
     float: none;
 }
 .datosCabezal ul{
-	list-style: none;
-	margin-bottom: 0;
+  list-style: none;
+  margin-bottom: 0;
 }
 .datosCabezal li{
-	display: inline-block;
-	margin-left: 20px;
-	vertical-align: middle;
+  display: inline-block;
+  margin-left: 20px;
+  vertical-align: middle;
 }
 #sidebar-wrapper{
-	background: #EAEFF3;
+  background: #EAEFF3;
     border: 1px solid #d9d8d8;
     padding-bottom: 55px;
 }
 .empresa {
-	padding: 5px 0;
+  padding: 5px 0;
 }
 .empresa .form-group{
-	margin: 0;
+  margin: 0;
 }
 .ui-panelmenu {
-	border-top:1px solid #d9d8d8;
+  border-top:1px solid #d9d8d8;
 }
 .ui-panelmenu .ui-panelmenu-header {
     border-radius: 0;
-	border: none;
-	border-bottom:1px solid #d9d8d8;
+  border: none;
+  border-bottom:1px solid #d9d8d8;
     font-size: 1.1em;
     background: #EAEFF3;
 }
 .ui-panelmenu .ui-panelmenu-header:hover {
-	background: #e2e9ef;
+  background: #e2e9ef;
 }
 .ui-panelmenu .ui-panelmenu-header a {
     padding: .7em .5em .7em 2.2em;
 }
 .ui-panelmenu .ui-menuitem-text{
-	color: #141414;
+  color: #141414;
 }
 .ui-panelmenu .ui-state-hover .ui-menuitem-text{
-	color: #296192;
+  color: #296192;
 }
 .ui-panelmenu .ui-panelmenu-content {
     border: none;
@@ -1113,10 +1130,10 @@ input[type="text"].diaSeleccionado{
 }
 .ui-panelmenu .ui-menuitem-link {
     border-radius: 0;
-	padding: 0.5em 0.3em 0.4em 2em;
+  padding: 0.5em 0.3em 0.4em 2em;
 }
 .version{
-	text-align: right;
+  text-align: right;
     margin-right: 20px;
     margin-top: 20px;
     font-size: 0.9em;
@@ -1124,110 +1141,110 @@ input[type="text"].diaSeleccionado{
     margin-bottom: 15px;
 }
 .listaReservas table{
-	background: #F4F7FA;
+  background: #F4F7FA;
 }
 .listaReservas table tr:nth-child(1n),
 .listaReservas table tr:nth-child(2n) {
-	background: #FFF;
+  background: #FFF;
 }
 .listaReservas table tr.ui-widget-header, .listaReservas table tr.ui-widget-header td{
-	background: #F4F7FA;
-	border: none;
-	font-size: 0.88em;
+  background: #F4F7FA;
+  border: none;
+  font-size: 0.88em;
 }
 .listaReservas table tr th{
-	text-align: left;
+  text-align: left;
 }
 .listaReservas table tr .alinDer{
-	text-align: right;
+  text-align: right;
 }
 .listaReservas table tr.ui-widget-header{
-	display: inline-block;
+  display: inline-block;
 }
 .listaReservas table tr.ui-widget-header:before{
-	background: #F4F7FA;
-	content: " ";
-	display: inline-block;
-	width: 10px;
-	position: absolute;
-	height: 19px;
-	left: 10px;
-	border-bottom: 1px solid #e2e9ef;
+  background: #F4F7FA;
+  content: " ";
+  display: inline-block;
+  width: 10px;
+  position: absolute;
+  height: 19px;
+  left: 10px;
+  border-bottom: 1px solid #e2e9ef;
 }
 .listaReservas table tr.ui-widget-header td{
-	padding: 3px 0;
-	display: inline-block;
+  padding: 3px 0;
+  display: inline-block;
 }
 .listaReservas table tbody{
-	border: none;
-	background: transparent;
+  border: none;
+  background: transparent;
 }
 .listaReservas table tr.ui-widget-content td{
-	font-weight: bold;
-	padding: 9px 15px;
+  font-weight: bold;
+  padding: 9px 15px;
 }
 .listaReservas table tr.ui-widget-content td:first-child, .listaReservas table tr th:first-child{
-	text-align: center;
-	width: 100px;
+  text-align: center;
+  width: 100px;
 }
 .colPuesto{
-	width: 50px;
-	text-align: center;
+  width: 100px;
+  text-align: center;
 }
 .colLlamar{
-	width: 130px;
+  width: 130px;
 }
 /* ---- ADMIN ---- */
 @media screen and (max-width: 991px){
-	fieldset fieldset.ui-widget-content{
-		padding: 20px 20px 30px 20px;
-	}
-	.container {
-	    width: 100%;
-	}
+  fieldset fieldset.ui-widget-content{
+    padding: 20px 20px 30px 20px;
+  }
+  .container {
+      width: 100%;
+  }
 }
 @media (min-width: 768px){
-	#menu-toggle {
-	    display: none;
-	}
+  #menu-toggle {
+      display: none;
+  }
 }
 @media (max-width: 766px){
-	.columnaDerecha {
-		margin-top: 20px;
-	}
-	.logoTramites {
-	    margin-top: 0;
-	    width: 170px;
-	}
-	.cabezalEmpresa select {
-	    margin: 25px 0 0;
-	}
-	label, span.label, fieldset label, fieldset span.label {
-		text-align: left;
-	}
-	.ui-datepicker{
-		margin: 10px auto;
-	}
-	fieldset label, fieldset span.label, .label {
-		font-weight: normal;
-		font-size: 1.3em;
-		margin-bottom: 3px;
-		display: inline-block;
-	}
-	.form-group input, .form-group select, .form-group textarea, .form-group .ui-inputfield, .form-group .form-control {
-	    margin-bottom: 15px;
-	}
-	.form-group > div:last-child input, .form-group > div:last-child select, .form-group > div:last-child textarea, .form-group > div:last-child .ui-inputfield, .form-group > div:last-child .form-control {
-	    margin-bottom: 0;
-	}
+  .columnaDerecha {
+    margin-top: 20px;
+  }
+  .logoTramites {
+      margin-top: 0;
+      width: 170px;
+  }
+  .cabezalEmpresa select {
+      margin: 25px 0 0;
+  }
+  label, span.label, fieldset label, fieldset span.label {
+    text-align: left;
+  }
+  .ui-datepicker{
+    margin: 10px auto;
+  }
+  fieldset label, fieldset span.label, .label {
+    font-weight: normal;
+    font-size: 1.3em;
+    margin-bottom: 3px;
+    display: inline-block;
+  }
+  .form-group input, .form-group select, .form-group textarea, .form-group .ui-inputfield, .form-group .form-control {
+      margin-bottom: 15px;
+  }
+  .form-group > div:last-child input, .form-group > div:last-child select, .form-group > div:last-child textarea, .form-group > div:last-child .ui-inputfield, .form-group > div:last-child .form-control {
+      margin-bottom: 0;
+  }
 }
 
 dt {
-	font-weight: 100;
+  font-weight: 100;
 }
 
 /*
-Esto es para solucionar el problema que hace que el botón para subir archivos solo funcione cuando se hace
+Esto es para solucionar el problema que hace que el botÃ³n para subir archivos solo funcione cuando se hace
 clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
 */
 .ui-fileupload-buttonbar .ui-fileupload-choose input {
@@ -1235,5 +1252,5 @@ clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
     width: 100%; 
 }
 .ui-datalist-content {
-	border:none;
+  border:none;
 }

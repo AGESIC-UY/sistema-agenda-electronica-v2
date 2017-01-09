@@ -60,6 +60,7 @@ public class DatoASolicitar implements Serializable{
 	private Integer largo;	
 	private Boolean requerido;
 	private Boolean esClave;
+	private Boolean soloLectura; //Si se especifica el valor en la URL (reserva pública) entonces el campo no es modificable
 	private Integer fila;
 	private Integer columna = 1; //Solo se admite 1 columna por fila
 	private Date fechaBaja;
@@ -70,6 +71,9 @@ public class DatoASolicitar implements Serializable{
 	private Boolean incluirEnLlamador;
 	private Integer largoEnLlamador;
 	private Integer ordenEnLlamador;
+	
+  //Indica si se puede eliminar o no (solo los datos a solicitar por defecto deberían tener esta bandera en false ya que es utilizada
+  //para determinar justamente eso, si es un dato a solicitar por defecto)
 	private Boolean borrarFlag;
 	
 	private List<DatoReserva> datosReserva;
@@ -91,7 +95,7 @@ public class DatoASolicitar implements Serializable{
 		
 		incluirEnLlamador = false;
 		borrarFlag = true;
-		
+		soloLectura = false;
 	}
 	
 	
@@ -112,6 +116,7 @@ public class DatoASolicitar implements Serializable{
 		largo = d.getLargo();
 		requerido = d.getRequerido();
 		esClave = d.getEsClave();
+		soloLectura = d.getSoloLectura();
 		fila = d.getFila();
 		columna = d.getColumna();
 		fechaBaja = d.getFechaBaja();
@@ -120,11 +125,10 @@ public class DatoASolicitar implements Serializable{
 		incluirEnLlamador = d.getIncluirEnLlamador();
 		largoEnLlamador = d.getLargoEnLlamador();
 		ordenEnLlamador = d.getOrdenEnLlamador();
-		if (d.getBorrarFlag()!=null)
-		{
+		
+		if (d.getBorrarFlag()!=null) {
 			borrarFlag = d.getBorrarFlag();
-		}else
-		{
+		}else {
 			borrarFlag = true;
 		}
 		
@@ -132,77 +136,103 @@ public class DatoASolicitar implements Serializable{
 		recurso = new Recurso(d.getRecurso());
 	}
 
-	
-	
 	@Id
 	@GeneratedValue (strategy = GenerationType.SEQUENCE, generator="seq_datoASolicitar")
 	@SequenceGenerator (name ="seq_datoASolicitar", initialValue = 1, sequenceName = "s_ae_datoasolicitar",allocationSize=1)
 	public Integer getId() {
 		return id;
 	}
+	
 	public void setId(Integer id) {
 		this.id = id;
 	}
+	
 	@Column (nullable = false, length=50)
 	public String getNombre() {
 		return nombre;
 	}
+	
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+	
 	@Column (nullable = false, length=50)
 	public String getEtiqueta() {
 		return etiqueta;
 	}
+	
 	public void setEtiqueta(String etiqueta) {
 		this.etiqueta = etiqueta;
 	}
+	
 	@Column (name="texto_ayuda", length=100)
 	public String getTextoAyuda() {
 		return textoAyuda;
 	}
+	
 	public void setTextoAyuda(String textoAyuda) {
 		this.textoAyuda = textoAyuda;
 	}
+	
 	@Column (nullable = false, length=30)
 	@Enumerated(EnumType.STRING)
 	public Tipo getTipo() {
 		return tipo;
 	}
+	
 	public void setTipo(Tipo tipo) {
 		this.tipo = tipo;
 	}
+	
 	public Integer getLargo() {
 		return largo;
 	}
+	
 	public void setLargo(Integer largo) {
 		this.largo = largo;
 	}
+	
 	@Column (nullable = false)
 	public Boolean getRequerido() {
 		return requerido;
 	}
+	
 	public void setRequerido(Boolean requerido) {
 		this.requerido = requerido;
 	}
+	
 	@Column (name = "es_clave", nullable = false)
 	public Boolean getEsClave() {
 		return esClave;
 	}
+	
 	public void setEsClave(Boolean esClave) {
 		this.esClave = esClave;
 	}
-	@Column (nullable = false)
+	
+  @Column (name="solo_lectura", length=100)
+	public Boolean getSoloLectura() {
+    return soloLectura;
+  }
+
+  public void setSoloLectura(Boolean soloLectura) {
+    this.soloLectura = soloLectura;
+  }
+
+  @Column (nullable = false)
 	public Integer getFila() {
 		return fila;
 	}
+  
 	public void setFila(Integer fila) {
 		this.fila = fila;
 	}
+	
 	@Column (nullable = false)
 	public Integer getColumna() {
 		return columna;
 	}
+	
 	public void setColumna(Integer columna) {
 		this.columna = columna;
 	}
@@ -212,6 +242,7 @@ public class DatoASolicitar implements Serializable{
 	public Date getFechaBaja() {
 		return fechaBaja;
 	}
+	
 	public void setFechaBaja(Date fechaBaja) {
 		this.fechaBaja = fechaBaja;
 	}
@@ -220,6 +251,7 @@ public class DatoASolicitar implements Serializable{
 	public Boolean getIncluirEnReporte() {
 		return incluirEnReporte;
 	}
+	
 	public void setIncluirEnReporte(Boolean incluirEnReporte) {
 		this.incluirEnReporte = incluirEnReporte;
 	}
@@ -228,6 +260,7 @@ public class DatoASolicitar implements Serializable{
 	public Integer getAnchoDespliegue() {
 		return anchoDespliegue;
 	}
+	
 	public void setAnchoDespliegue(Integer anchoDespliegue) {
 		this.anchoDespliegue = anchoDespliegue;
 	}
@@ -239,6 +272,7 @@ public class DatoASolicitar implements Serializable{
 		}
 		return incluirEnLlamador;
 	}
+	
 	public void setIncluirEnLlamador(Boolean incluirEnLlamador) {
 		this.incluirEnLlamador = incluirEnLlamador;
 	}
@@ -247,6 +281,7 @@ public class DatoASolicitar implements Serializable{
 	public Integer getLargoEnLlamador() {
 		return largoEnLlamador;
 	}
+	
 	public void setLargoEnLlamador(Integer largoEnLlamador) {
 		this.largoEnLlamador = largoEnLlamador;
 	}
@@ -255,14 +290,15 @@ public class DatoASolicitar implements Serializable{
 	public Integer getOrdenEnLlamador() {
 		return ordenEnLlamador;
 	}
+	
 	public void setOrdenEnLlamador(Integer ordenEnLlamador) {
 		this.ordenEnLlamador = ordenEnLlamador;
 	}
+	
 	@Column (name = "borrar_flag", nullable = false)
 	public Boolean getBorrarFlag() {
 		return borrarFlag;
 	}
-
 
 	public void setBorrarFlag(Boolean borrarFlag) {
 		this.borrarFlag = borrarFlag;
@@ -273,6 +309,7 @@ public class DatoASolicitar implements Serializable{
 	public List<DatoReserva> getDatosReserva() {
 		return datosReserva;
 	}
+	
 	public void setDatosReserva(List<DatoReserva> datosReserva) {
 		this.datosReserva = datosReserva;
 	}
@@ -282,6 +319,7 @@ public class DatoASolicitar implements Serializable{
 	public List<ValidacionPorDato> getValidacionesPorDato() {
 		return validacionesPorDato;
 	}
+	
 	public void setValidacionesPorDato(List<ValidacionPorDato> validacionesPorDato) {
 		this.validacionesPorDato = validacionesPorDato;
 	}
@@ -291,6 +329,7 @@ public class DatoASolicitar implements Serializable{
 	public List<AccionPorDato> getAccionesPorDato() {
 		return accionesPorDato;
 	}
+	
 	public void setAccionesPorDato(List<AccionPorDato> accionesPorDato) {
 		this.accionesPorDato = accionesPorDato;
 	}
@@ -300,6 +339,7 @@ public class DatoASolicitar implements Serializable{
 	public List<ValorPosible> getValoresPosibles() {
 		return valoresPosibles;
 	}
+	
 	public void setValoresPosibles(List<ValorPosible> valoresPosibles) {
 		this.valoresPosibles = valoresPosibles;
 	}
@@ -310,6 +350,7 @@ public class DatoASolicitar implements Serializable{
 	public AgrupacionDato getAgrupacionDato() {
 		return agrupacionDato;
 	}
+	
 	public void setAgrupacionDato(AgrupacionDato agrupacionDato) {
 		this.agrupacionDato = agrupacionDato;
 	}
@@ -320,28 +361,19 @@ public class DatoASolicitar implements Serializable{
 	public Recurso getRecurso() {
 		return recurso;
 	}
+	
 	public void setRecurso(Recurso recurso) {
 		this.recurso = recurso;
 	}
 	
 	@Override
 	public boolean equals(Object obj) {
-		
 		if (obj instanceof DatoASolicitar) {
 			DatoASolicitar val = (DatoASolicitar) obj;
-			if (val.getId().equals(this.getId())) {
-				return true;
-			}
-			else {
-				return false;
-			}
-		}
-		else {
+			return (val.getId().equals(this.getId()));
+		} else {
 			return false;
 		}
 	}
-
-
-	
 
 }

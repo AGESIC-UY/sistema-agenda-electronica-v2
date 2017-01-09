@@ -25,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -90,7 +89,6 @@ public class Paso3MBean extends BaseMBean {
 	private SesionMBean sesionMBean;
 	
 	private UIComponent campos;
-	private UIComponent camposError;
 	private Map<String, Object> datosReservaMBean;
 	private FormularioDinamicoReserva formularioDin;
 
@@ -101,9 +99,6 @@ public class Paso3MBean extends BaseMBean {
 	
 
 	private boolean errorInit;
-	
-	public void beforePhase (PhaseEvent event) {
-	}
 	
 	@PostConstruct
 	public void init() {
@@ -168,6 +163,11 @@ public class Paso3MBean extends BaseMBean {
       errorInit = true;
 		}
 	}
+	
+  public void beforePhase(PhaseEvent event) {
+    disableBrowserCache(event);
+  }
+
 	
 	public SesionMBean getSesionMBean() {
 		return sesionMBean;
@@ -247,7 +247,6 @@ public class Paso3MBean extends BaseMBean {
 		texto = texto.replace("{finalidad}", empresa.getCcFinalidad());
 		texto = texto.replace("{responsable}", empresa.getCcResponsable());
 		texto = texto.replace("{direccion}", empresa.getCcDireccion());
-		
 		return texto;
 	}
 	
@@ -272,8 +271,7 @@ public class Paso3MBean extends BaseMBean {
 					if(valoresCampos!=null) {
 						cargarCamposPorDefecto(valoresCampos, agrupaciones);
 					}
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sesionMBean.getFormatoFecha());
+					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, FormularioDinamicoReserva.TipoFormulario.EDICION, this.datosReservaMBean, sesionMBean.getFormatoFecha());
 					formularioDin.armarFormulario(agrupaciones, null);
 				}
 				UIComponent formulario = formularioDin.getComponenteFormulario();
@@ -284,35 +282,6 @@ public class Paso3MBean extends BaseMBean {
 		}
 	}
 	
-	public UIComponent getCamposError() {
-		return camposError;
-	}
-
-	public void setCamposError(UIComponent camposError) {
-		this.camposError = camposError;
-		try {
-			Recurso recurso = sesionMBean.getRecurso();
-
-			//El chequeo de recurso != null es en caso de un acceso directo a la pagina, es solo
-			//para que no salte la excepcion en el log, pues de todas formas sera redirigido a una pagina de error.
-			if (camposError.getChildCount() == 0 && recurso != null) {
-				
-				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sesionMBean.getTimeZone());
-					sesionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sesionMBean.getFormatoFecha());
-					
-					formularioDin.armarFormulario(agrupaciones, null);
-				}
-				UIComponent errores = formularioDin.getComponenteMensajes();
-				camposError.getChildren().add(errores);
-			}
-		} catch (Exception e) {
-			addErrorMessage(e, FORMULARIO_ID);
-		}
-	}
-
 	public Map<String,Object> getDatosReservaMBean() {
 		return datosReservaMBean;
 	}
@@ -607,71 +576,70 @@ public class Paso3MBean extends BaseMBean {
 	public void setAceptaCondiciones(String aceptaCondiciones) {
 		this.aceptaCondiciones = aceptaCondiciones;
 	}
-	
-	private void cargarCamposPorDefecto(String valoresCampos, List<AgrupacionDato> agrupaciones)
-	{
-		String parametros[] = valoresCampos.split("\\;");
+
+	/**
+	 * El parámetro valoresCampos debe ser una lista separada por punto y coma de elementos de la forma <agrupacion>.<dato>.<valor>, 
+	 * donde <agrupacion> es el identificador o el nombre de la agrupación, <dato> es el identificador o el nombre del dato, y <valor> 
+	 * es el valor a poner en el campo. Notar que el valor no puede contener el signo ";" porque sería interpretado como un cambio de
+	 * parámetro. 
+	 * @param valoresCampos
+	 * @param agrupaciones
+	 */
+	private void cargarCamposPorDefecto(String valoresCampos, List<AgrupacionDato> agrupaciones) {
+	  //Armar dos mapas con los datos a solicitar, uno por ids y otro por nombre para accederlos más rápido
+	  Map<String, DatoASolicitar> porId = new HashMap<String, DatoASolicitar>();
+    Map<String, DatoASolicitar> porNombre = new HashMap<String, DatoASolicitar>();
+    for(AgrupacionDato agrupacion : agrupaciones) {
+      for(DatoASolicitar datoSolicitar : agrupacion.getDatosASolicitar()) {
+        porId.put(agrupacion.getId().toString()+"."+datoSolicitar.getId().toString(), datoSolicitar);
+        porNombre.put(agrupacion.getNombre()+"."+datoSolicitar.getNombre(), datoSolicitar);
+      }
+    }
+	  //Obtener cada uno de los campos cortando el string por los punto y coma
+	  String parametros[] = valoresCampos.split("\\;");
+		//Procesar cada uno de los parámetros, que deberían ser de la forma <agrupacion>.<dato>.<valor>
 		for (String parm : parametros) {
+		  //Obtener las tres partes (agrupación, dato, valor)
 			String agrupCampoValor[] = parm.split("\\.", 3);
-			boolean largoCorrecto = false;
-		
-			if (agrupCampoValor.length > 3 && agrupCampoValor[2].contains("@")) {
-				String mail = agrupCampoValor[2]+"."+agrupCampoValor[3];
-				agrupCampoValor[2] = mail;
-				largoCorrecto = true;
-			}else {
-				largoCorrecto = (agrupCampoValor.length == 3);
-			}
-			if (largoCorrecto) {
-				String sAgrupacionId = agrupCampoValor[0];
-				String sDatoSolId = agrupCampoValor[1];
-				String valor = agrupCampoValor[2];
-				try {
-					Integer agrupId = Integer.valueOf(sAgrupacionId);
-					Integer datoSolId = Integer.valueOf(sDatoSolId);
-					boolean salirWhile = false;
-					Iterator<AgrupacionDato> it = agrupaciones.iterator();
-					while (!salirWhile && it.hasNext()) {
-						AgrupacionDato agrupDato = (AgrupacionDato) it.next();
-						if (agrupDato.getId()==agrupId)
-						{
-							Iterator<DatoASolicitar> itDato = agrupDato.getDatosASolicitar().iterator();
-							while (!salirWhile && itDato.hasNext()) {
-								DatoASolicitar datoASolicitar = (DatoASolicitar) itDato.next();
-								if(datoASolicitar.getId()==datoSolId)
-								{
-									if(datoASolicitar.getTipo()==Tipo.DATE)
-									{
-										DateFormat format = new SimpleDateFormat(sesionMBean.getFormatoFecha());
-										Date date = format.parse(valor);
-										this.datosReservaMBean.put(datoASolicitar.getNombre(), date);
-									}else if(datoASolicitar.getTipo()==Tipo.LIST || datoASolicitar.getTipo()==Tipo.STRING )
-									{
-										this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
-									}else if(datoASolicitar.getTipo()==Tipo.NUMBER)
-									{
-										Integer numero = Integer.valueOf(valor);
-										this.datosReservaMBean.put(datoASolicitar.getNombre(), numero);
-									}
-									salirWhile = true;
-								} 
-							}
-						}
-					}
-					
-				}catch(Exception e)
-				{
-					//no se hace nada
-				}
-				
-				
-			}
+			String sAgrupacion = agrupCampoValor[0];
+			String sDatoSol = agrupCampoValor[1];
+			String sValor = agrupCampoValor[2];
 			
+			//Determinar el dato a solicitar indicado por la agrupación y el dato
+      //Si tanto la agrupacion como el dato son numéricos se asume que son los ids, sino se asume que son los nombres
+			DatoASolicitar datoASolicitar = null;
+			try {
+			  Integer.valueOf(sAgrupacion);
+        Integer.valueOf(sDatoSol);
+        //Son identificadores, buscar el dato a solicitar correspondiente
+        datoASolicitar = porId.get(sAgrupacion+"."+sDatoSol);
+      }catch(NumberFormatException nfEx) {
+        //No son identificadores, son nombres
+        datoASolicitar = porNombre.get(sAgrupacion+"."+sDatoSol);
+			}
+			//Si se encontró un dato a solicitar poner el valor apropiado
+			if(datoASolicitar != null) {
+			  try {
+    			if(datoASolicitar.getTipo()==Tipo.DATE) {
+            DateFormat format = new SimpleDateFormat("yyyyMMdd");
+            Date valor = format.parse(sValor);
+            this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);            
+    			}else if(datoASolicitar.getTipo()==Tipo.LIST || datoASolicitar.getTipo()==Tipo.STRING ) {
+    				this.datosReservaMBean.put(datoASolicitar.getNombre(), sValor);
+    			}else if(datoASolicitar.getTipo()==Tipo.NUMBER) {
+    				Integer valor = Integer.valueOf(sValor);
+    				this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
+    			}else if(datoASolicitar.getTipo()==Tipo.BOOLEAN) {
+            Boolean valor = Boolean.valueOf(sValor);
+            this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
+          }
+			  }catch(Exception ex) {
+			    //Seguramente el valor no puede ser convertido al formato apropiado
+			  }
+			}
 		}
-	
 	}
-
-
+	
 	// =========================================================
 	// Captcha
 	
@@ -705,10 +673,8 @@ public class Paso3MBean extends BaseMBean {
 		this.textoCaptchaUsuario = textoCaptchaUsuario;
 	}
 	
-
 	public void recargarCaptcha() {
 		sesionMBean.setPaso3Captcha(null);
-		
 		HtmlPanelGroup captchaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:captcha");
 		String captchaStyleClass = captchaGroup.getStyleClass();
 		if(captchaStyleClass.contains(FormularioDinamicoReserva.STYLE_CLASS_DATO_CON_ERROR)) {

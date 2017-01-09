@@ -1,10 +1,10 @@
 Versión 1.1 (2016-05-24)
-*Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
-*Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
-*Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
-*Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
-*Se cambió la versión de OpenLayers para que funcione en IE 9.
-*Se corrigieron problemas de visualización de los scrolls.
+* Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
+* Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
+* Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
+* Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
+* Se cambió la versión de OpenLayers para que funcione en IE 9.
+* Se corrigieron problemas de visualización de los scrolls.
 
 Versión 1.2 (2016-08-31)
 * Se incorporó un servicio web REST que permite obtener información sobre las reservas.
@@ -106,3 +106,9 @@ Versión 2.0.0
 * En la pantalla de consulta de datos a solicitar se cambió para mostrar el nombre de la agrupación junto a su identificador en lugar de mostrar el orden.
 * Se solucionó un problema por el cual al deseleccionar una agenda o un recurso y volver a la página de selección de agenda y recurso éstos seguían marcados.
 * Se añadió la funcionalidad para eliminar disponibilidades especificando un período de fechas.
+* Se añadió un campo "etiqueta" a las agrupaciones de datos a solicitar, y el campo "nombre" pasó a ser utilizado igual que el campo "nombre" de los datos a solicitar.
+* Se añadió la posibilidad de especificar los valores por defecto de los campos especificando el nombre de las agrupaciones y campos en lugar del identificador.
+* Se añadió la posibilidad de configurar que los datos a solicitar sean solo lectura si se especifican valores por defecto en la URL.
+* Se añadió la funcionalidad para permitir cancelar reservas en forma masiva especificando un período.
+* Se modificó el reporte de reservas para incluir datos relacionados con la cancelación de reservas (fecha, tipo, usuario).
+* Se añadió el nombre del trámite a realizar en la lista de espera.

@@ -37,12 +37,14 @@ public class ReservaDTO implements Serializable{
 	private Integer puestoLlamada;
 	private String origen;
 	private String ucrea;
-	private String ucancela;
 	private Boolean asistio;	
 	private String numeroDocumento;	
 	private String tramiteCodigo;
 	private String tramiteNombre;
 	private Boolean presencial;
+  private String ucancela;
+  private String tcancela;
+  private Date fcancela;
 	
 	public ReservaDTO() {
 		datos = new HashMap<String, Object>();
@@ -137,4 +139,17 @@ public class ReservaDTO implements Serializable{
   public void setPresencial(Boolean presencial) {
     this.presencial = presencial;
   }
+  public String getTcancela() {
+    return tcancela;
+  }
+  public void setTcancela(String tcancela) {
+    this.tcancela = tcancela;
+  }
+  public Date getFcancela() {
+    return fcancela;
+  }
+  public void setFcancela(Date fcancela) {
+    this.fcancela = fcancela;
+  }
+  
 }

@@ -49,6 +49,7 @@ public class Comunicacion implements Serializable {
 	private Tipo2 tipo2; //RESERVA, CANCELA
 	
 	private String destino; //Dirección de email, número de celular, número fijo
+	private String mensaje;
 	
 	private Recurso recurso;
 	
@@ -59,7 +60,7 @@ public class Comunicacion implements Serializable {
 	public Comunicacion () {
 	}
 
-	public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, Reserva reserva) {
+	public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, Reserva reserva, String mensaje) {
 		super();
 		this.tipo1 = tipo1;
 		this.tipo2 = tipo2;
@@ -67,6 +68,7 @@ public class Comunicacion implements Serializable {
 		this.recurso = recurso;
 		this.reserva = reserva;
 		this.procesado = false;
+		this.mensaje = mensaje;
 	}
 
 	@Id
@@ -140,6 +142,14 @@ public class Comunicacion implements Serializable {
 	public static long getSerialversionuid() {
 		return serialVersionUID;
 	}
+
+  public String getMensaje() {
+    return mensaje;
+  }
+
+  public void setMensaje(String mensaje) {
+    this.mensaje = mensaje;
+  }
 	
 	
 }

@@ -61,23 +61,23 @@
 
            <div class="form-horizontal">
              <p:outputPanel styleClass="form-group">
-               <h:outputLabel for="tipoDoc" class="col-sm-3 control-label label" value="#{sesionMBean.textos['tipo_de_documento']}" />
+               <h:outputLabel for="tipoDoc" class="col-sm-3 control-label label formularioCampoRequerido" value="#{sesionMBean.textos['tipo_de_documento']}" />
                <p:outputPanel styleClass="col-sm-9">
                  <h:selectOneMenu id="tipoDoc" value="#{cancelarReservaPublicMBean.tipoDocumento}" styleClass="form-control">
                    <f:selectItems value="#{cancelarReservaPublicMBean.tiposDocumento}" />
                  </h:selectOneMenu>
-                   <p:message for="tipoDoc" />
+                 <p:message for="tipoDoc" />
                </p:outputPanel>
              </p:outputPanel>
              <p:outputPanel styleClass="form-group">
-               <h:outputLabel for="numDoc" class="col-sm-3 control-label label" value="#{sesionMBean.textos['numero_de_documento']}" />
+               <h:outputLabel for="numDoc" class="col-sm-3 control-label label formularioCampoRequerido" value="#{sesionMBean.textos['numero_de_documento']}" />
                <p:outputPanel styleClass="col-sm-9">
                  <h:inputText id="numDoc" value="#{cancelarReservaPublicMBean.numeroDocumento}"/>
                  <p:message for="numDoc" />
                </p:outputPanel>
              </p:outputPanel>
              <p:outputPanel styleClass="form-group">
-               <h:outputLabel for="codSeg" class="col-sm-3 control-label label" value="#{sesionMBean.textos['codigo_de_seguridad']}" />
+               <h:outputLabel for="codSeg" class="col-sm-3 control-label label formularioCampoRequerido" value="#{sesionMBean.textos['codigo_de_seguridad']}" />
                <p:outputPanel styleClass="col-sm-9">
                  <h:inputText id="codSeg" value="#{cancelarReservaPublicMBean.codigoSeguridad}"/>
                  <p:message for="codSeg" />

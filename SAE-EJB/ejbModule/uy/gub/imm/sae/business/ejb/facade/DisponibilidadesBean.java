@@ -95,12 +95,14 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
       "  AND d.presencial = false " +
   		"  AND d.fechaBaja IS NULL " +
   		"  AND d.fecha BETWEEN :fi AND :ff " +
-  		"  AND (reserva.estado <> :cancelado) ")
+  		"  AND reserva.estado <> :cancelado" +
+      "  AND reserva.estado <> :pendiente" )
   		.setParameter("r", recurso)
   		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
   		.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
   		.setParameter("cancelado", Estado.C)
-  		.getSingleResult();		
+      .setParameter("pendiente", Estado.P)
+  		.getSingleResult();
 		
 		if ( cantReservasVivas > 0){
 			throw new UserException("no_se_puede_eliminar_las_disponibilidades_porque_hay_reservas_vivas");			
@@ -414,7 +416,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
       "  AND d.presencial = false " +
   		"  AND d.fechaBaja IS NULL " +
   		"  AND d.fecha BETWEEN :fi AND :ff " +
-  		"  AND (reserva.estado <> :cancelado) " +
+  		"  AND reserva.estado <> :cancelado " +
   		"GROUP BY d.id, d.fecha, d.horaInicio " +
   		"ORDER BY d.fecha ASC, d.horaInicio ASC ")
 		.setParameter("r", recurso)

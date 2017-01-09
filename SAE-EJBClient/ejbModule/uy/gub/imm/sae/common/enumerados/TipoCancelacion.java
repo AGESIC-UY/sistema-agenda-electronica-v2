@@ -17,15 +17,14 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package uy.gub.imm.sae.common.enumerados;
 
-public enum Estado {
-	P("pendiente"), R("reservada"), C("cancelada"), U("usada");
+public enum TipoCancelacion {
+	M("masiva"), I("individual");
 	
 	private final String descripcion;
 	
-	private Estado(String descripcion) {
+	private TipoCancelacion(String descripcion) {
 		this.descripcion = descripcion;
 	}
 	

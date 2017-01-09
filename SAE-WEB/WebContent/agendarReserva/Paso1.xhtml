@@ -57,9 +57,9 @@
 			<h:inputHidden id="e" value="#{sesionMBean.empresaActual.id}" />
 			<h:inputHidden id="a" value="#{sesionMBean.agenda.id}" />
 
-			<p:outputPanel rendered="#{!paso1MBean.errorInit}">
-				<div id="recurso" class="row">
-					<h:outputFormat escape="false" value="#{paso1MBean.etiquetaSeleccionDelRecurso}:" styleClass="label label-align-top col-sm-4 col-md-5" />
+			<p:outputPanel rendered="#{!paso1MBean.errorInit}" styleClass="form-horizontal">
+				<div id="recurso" class="form-group">
+					<h:outputFormat escape="false" value="#{paso1MBean.etiquetaSeleccionDelRecurso}" styleClass="label control-label col-sm-4 col-md-5" />
 					<div class="col-sm-8 col-md-7">
 						<p:selectOneRadio value="#{paso1MBean.recursoId}" layout="responsive" columns="1" valueChangeListener="#{paso1MBean.cambioRecurso}" id="recursoId">
 							<p:ajax update="infoRecurso mensajes" />

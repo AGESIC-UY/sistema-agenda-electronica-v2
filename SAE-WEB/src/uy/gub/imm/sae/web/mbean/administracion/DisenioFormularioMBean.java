@@ -55,7 +55,6 @@ public class DisenioFormularioMBean extends BaseMBean {
 	private Recursos recursosEJB;
 	
 	private UIComponent campos;
-	private UIComponent camposError;
 	private Map<String, Object> datosReservaMBean;
 	
 	private FormularioDinamicoReserva formularioDin;
@@ -93,45 +92,13 @@ public class DisenioFormularioMBean extends BaseMBean {
 				if (formularioDin == null) {
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
+					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,	FormularioDinamicoReserva.TipoFormulario.EDICION, null, sessionMBean.getFormatoFecha());
 					
 					//TODO: VER ESTOOO!!!!!!
 					formularioDin.armarFormulario(agrupaciones,null);
 				}
 				UIComponent formulario = formularioDin.getComponenteFormulario();
 				campos.getChildren().add(formulario);
-			}
-		} catch (Exception e) {
-			addErrorMessage(e);
-		}
-	}
-
-	public UIComponent getCamposError() {
-		return camposError;
-	}
-
-	public void setCamposError(UIComponent camposError) {
-		this.camposError = camposError;
-
-		try {
-			Recurso recurso = sessionMBean.getRecursoMarcado();
-
-			//El chequeo de recurso != null es en caso de un acceso directo a la pagina, es solo
-			//para que no salte la excepcion en el log, pues de todas formas sera redirigido a una pagina de error.
-			if (camposError.getChildCount() == 0 && recurso != null) {
-				
-				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
-					
-					//TODO: VER ESTOOO!!!!!!
-					formularioDin.armarFormulario(agrupaciones,null);
-				}
-				UIComponent errores = formularioDin.getComponenteMensajes();
-				camposError.getChildren().add(errores);
 			}
 		} catch (Exception e) {
 			addErrorMessage(e);
@@ -157,8 +124,7 @@ public class DisenioFormularioMBean extends BaseMBean {
 			if (recurso != null) {
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 				sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-				FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, 
-						FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
+				FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, FormularioDinamicoReserva.TipoFormulario.EDICION, null, sessionMBean.getFormatoFecha());
 				formularioDin.armarFormulario(agrupaciones, null);
 				UIComponent formulario = formularioDin.getComponenteFormulario();
 				campos.getChildren().add(formulario);

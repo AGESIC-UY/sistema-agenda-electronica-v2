@@ -106,25 +106,23 @@ public class FormularioDinamicoReserva {
 	/*
 	 * Crea un formulario editable de un tipo (consulta o edicion)
 	 */	
-	public FormularioDinamicoReserva(String managedBeanName, String nombreFormulario, TipoFormulario tipo, String formatoFecha) {
+	public FormularioDinamicoReserva(String managedBeanName, String nombreFormulario, TipoFormulario tipo, Map<String, Object> valores, String formatoFecha) {
 		this.managedBean = managedBeanName;
 		this.nombreFormulario = nombreFormulario;
 		this.app = FacesContext.getCurrentInstance().getApplication();
-	
 		this.tipoFormulario = tipo;
 		this.soloLectura = (tipo == TipoFormulario.LECTURA);
-
+		if(valores != null) {
+		  this.valores = new HashMap<String, Object>(valores);
+		}
 		configurarFormatoFecha(formatoFecha);
 	}
 	
 	public FormularioDinamicoReserva(Map<String, Object> valores, String formatoFecha) {
-		
 		this.valores = new HashMap<String, Object>(valores);
 		this.app = FacesContext.getCurrentInstance().getApplication();
-
 		this.tipoFormulario = TipoFormulario.LECTURA;
 		this.soloLectura = true;
-		
 		configurarFormatoFecha(formatoFecha);
 	}
 
@@ -218,7 +216,7 @@ public class FormularioDinamicoReserva {
 	
 	private UIComponent armarAgrupacion(AgrupacionDato agrupacionDato, HashMap<Integer,HashMap<Integer,ServicioPorRecurso>> serviciosAutocompletar) {
 		Fieldset panel = new Fieldset();
-		panel.setLegend(agrupacionDato.getNombre());
+		panel.setLegend(agrupacionDato.getEtiqueta());
 		
 		HtmlPanelGroup grid = (HtmlPanelGroup) app.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		grid.setLayout("block");
@@ -297,6 +295,7 @@ public class FormularioDinamicoReserva {
 	 *  [3] = {si hay ayuda, mensaje de error, sino nada}
 	 */
 	private UIComponent [] armarCampo(DatoASolicitar dato) {
+	  
 		HtmlOutputLabel etiqueta = new HtmlOutputLabel();
 		etiqueta.setValue(dato.getEtiqueta());
 		etiqueta.setStyleClass(STYLE_CLASS_TEXTO_ETIQUETA);
@@ -350,10 +349,6 @@ public class FormularioDinamicoReserva {
 			campo[2] = mensaje;
 		}
 		
-//		if (!soloLectura) {
-//			mensajesGrilla.getChildren().add(armarMensajeValidacion(dato.getNombre()));
-//		}
-			
 		return campo;
 	}
 	
@@ -375,7 +370,15 @@ public class FormularioDinamicoReserva {
 			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), String.class);
 			input.setValueExpression("value", ve);
+	    //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+	    if(dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+	      if(this.valores!=null && this.valores.get(dato.getNombre())!=null) {
+	        input.setReadonly(true);
+	        input.setDisabled(true);
+	      }
+	    }
 		}
+		
 		return input;
 	}
 	
@@ -411,13 +414,17 @@ public class FormularioDinamicoReserva {
 			calendario.setLang(getLocale().getLanguage());
 			calendario.setNavigator(true);
 			calendario.setYearRange("1900:c+10");
-			
 			//Le configuro el managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), Date.class);
 			calendario.setValueExpression("value", ve);
-			
 	    calendario.setPattern(formatoFecha);
-
+      //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+      if(dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+        if(this.valores!=null && this.valores.get(dato.getNombre())!=null) {
+          calendario.setReadonly(true);
+          calendario.setDisabled(true);
+        }
+      }
 			campo = calendario;
 		}
 		
@@ -436,7 +443,6 @@ public class FormularioDinamicoReserva {
 			input.setStyleClass(STYLE_CLASS_CAMPO);
 			input.setReadonly(true);
 			input.setDisabled(true);
-			
 			//Busco la etiqueta del valor posible:
 			Iterator<ValorPosible> iter = dato.getValoresPosibles().iterator();
 			String etiqueta = null;
@@ -453,8 +459,7 @@ public class FormularioDinamicoReserva {
 				input.setValue(this.valores.get(dato.getNombre()));
 			}
 			campo = input;
-		}
-		else {
+		}	else {
 			HtmlSelectOneMenu lista = (HtmlSelectOneMenu) app.createComponent(HtmlSelectOneMenu.COMPONENT_TYPE);
 			lista.setStyleClass(STYLE_CLASS_CAMPO + " " + STYLE_CLASS_CAMPO_SIN_ERROR);
 	
@@ -462,14 +467,18 @@ public class FormularioDinamicoReserva {
 			for (UISelectItem item: items) {
 				lista.getChildren().add(item);
 			}
-
 			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), String.class);
 			lista.setValueExpression("value", ve);
-			
+      //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+      if(dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+        if(this.valores!=null && this.valores.get(dato.getNombre())!=null) {
+          lista.setReadonly(true);
+          lista.setDisabled(true);
+        }
+      }
 			campo = lista;
 		}
-			
 		return campo;
 	}
 	
@@ -478,9 +487,7 @@ public class FormularioDinamicoReserva {
 	 * Una lista de SelectItem done cada elemento tiene la etiqueta y el valor que se mostrara en la lista desplegable.
 	 */
 	private List<UISelectItem> armarListaDeValores (DatoASolicitar dato) {
-		
 		List<UISelectItem> items = new ArrayList<UISelectItem>();
-		
 		// Agrego el resto de las opciones
 		for (ValorPosible valor: dato.getValoresPosibles()) {
 			UISelectItem item = new UISelectItem();
@@ -488,7 +495,6 @@ public class FormularioDinamicoReserva {
 			item.setItemValue(valor.getValor());
 			items.add(item);
 		}
-
 		return items;
 	}
 	
@@ -496,38 +502,36 @@ public class FormularioDinamicoReserva {
 	 * Un campo de tipo boolean consiste en un campo editable.
 	 */
 	private UIComponent armarCampoBoolean (DatoASolicitar dato) {
-
 		UIComponent campo = null;
-		
 		if (soloLectura) {
 			HtmlSelectBooleanCheckbox input = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);
 			input.setValue(Boolean.valueOf(this.valores.get(dato.getNombre()).toString()));
 			input.setDisabled(true);
 			campo = input;
-		}
-		else {
-			HtmlSelectBooleanCheckbox input = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);			
-
+		}	else {
+			HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);			
 			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), Boolean.class);
-			input.setValueExpression("value", ve);
-			
-			campo = input;
+			checkbox.setValueExpression("value", ve);
+      //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+      if(this.valores!=null && dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+        if(this.valores.get(dato.getNombre())!=null) {
+          checkbox.setReadonly(true);
+          checkbox.setDisabled(true);
+        }
+      }
+			campo = checkbox;
 		}
-		
 		return campo;
 	}
 
 	
 	private ValueExpression armarExpresion(String nombre, Class<?> clazz) { 
-	
 		//Armo la EL que liga el valor del campo editable a un managed bean generico (Map) que recolectará los datos del formulario
 		ELContext elContext = FacesContext.getCurrentInstance().getELContext();
 		ExpressionFactory expFactory = FacesContext.getCurrentInstance().getApplication().getExpressionFactory();
-		//TODO sacar el managed bean a atributo de la clase.
 		String el = "#{"+managedBean+"."+nombre+"}"; 
 		ValueExpression ve = expFactory.createValueExpression(elContext, el, clazz);
-
 		return ve;
 	}
 
@@ -537,7 +541,6 @@ public class FormularioDinamicoReserva {
 		mensaje.setId("mensaje"+para);
 		return mensaje;
 	}
-	
 	
 	public static Map<String, DatoASolicitar> obtenerCampos(List<AgrupacionDato> agrupaciones) {
 		

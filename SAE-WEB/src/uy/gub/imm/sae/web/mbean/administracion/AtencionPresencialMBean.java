@@ -111,7 +111,6 @@ public class AtencionPresencialMBean extends BaseMBean {
 	private SessionMBean sessionMBean;
 
 	private UIComponent campos;
-	private UIComponent camposError;
 	private Map<String, Object> datosReservaMBean;
 	private FormularioDinamicoReserva formularioDin;
 
@@ -280,8 +279,7 @@ public class AtencionPresencialMBean extends BaseMBean {
 				if (formularioDin == null) {
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
+					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, FormularioDinamicoReserva.TipoFormulario.EDICION, null, sessionMBean.getFormatoFecha());
 
 					HashMap<Integer, HashMap<Integer, ServicioPorRecurso>> serviciosAutocompletar = new HashMap<Integer, HashMap<Integer, ServicioPorRecurso>>();
 
@@ -345,91 +343,6 @@ public class AtencionPresencialMBean extends BaseMBean {
 				}
 				UIComponent formulario = formularioDin.getComponenteFormulario();
 				campos.getChildren().add(formulario);
-			}
-		} catch (Exception e) {
-			addErrorMessage(e, FORMULARIO_ID);
-		}
-	}
-
-	public UIComponent getCamposError() {
-		return camposError;
-	}
-
-	public void setCamposError(UIComponent camposError) {
-		this.camposError = camposError;
-
-		try {
-			Recurso recurso = sessionMBean.getRecurso();
-
-			// El chequeo de recurso != null es en caso de un acceso directo a
-			// la pagina, es solo
-			// para que no salte la excepcion en el log, pues de todas formas
-			// sera redirigido a una pagina de error.
-			if (camposError.getChildCount() == 0 && recurso != null) {
-
-				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,	FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
-					HashMap<Integer, HashMap<Integer, ServicioPorRecurso>> serviciosAutocompletar = new HashMap<Integer, HashMap<Integer, ServicioPorRecurso>>();
-					List<ServicioPorRecurso> lstServiciosPorRecurso = recursosEJB.consultarServicioAutocompletar(recurso);
-					for (ServicioPorRecurso sRec : lstServiciosPorRecurso) {
-						List<ServicioAutocompletarPorDato> lstDatos = sRec.getAutocompletadosPorDato();
-						List<ParametrosAutocompletar> parametros = sRec.getAutocompletado().getParametrosAutocompletados();
-						DatoASolicitar ultimo = null;
-						for (ParametrosAutocompletar param : parametros) {
-							if (ModoAutocompletado.SALIDA.equals(param.getModo())) {
-								for (ServicioAutocompletarPorDato sDato : lstDatos) {
-									if (sDato.getNombreParametro().equals(param.getNombre())) {
-										if (ultimo == null) {
-											ultimo = sDato.getDatoASolicitar();
-										} else {
-											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo.getAgrupacionDato().getOrden().intValue()) {
-												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-												if (auxServiciosRecurso.size() > 1) {
-													auxServiciosRecurso.remove(sRec.getId());
-												} else {
-													serviciosAutocompletar.remove(ultimo.getId());
-												}
-												ultimo = sDato.getDatoASolicitar();
-											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == ultimo.getAgrupacionDato().getOrden().intValue()) {
-												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
-													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-													if (auxServiciosRecurso.size() > 1) {
-														auxServiciosRecurso.remove(sRec.getId());
-													} else {
-														serviciosAutocompletar.remove(ultimo.getId());
-													}
-													ultimo = sDato.getDatoASolicitar();
-												} else if (sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
-													if (sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
-														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-														if (auxServiciosRecurso.size() > 1) {
-															auxServiciosRecurso.remove(sRec.getId());
-														} else {
-															serviciosAutocompletar.remove(ultimo.getId());
-														}
-														ultimo = sDato.getDatoASolicitar();
-													}
-												}
-											}
-										}
-										if (serviciosAutocompletar.containsKey(ultimo.getId())) {
-											serviciosAutocompletar.get(ultimo.getId()).put(sRec.getId(), sRec);
-										} else {
-											HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = new HashMap<Integer, ServicioPorRecurso>();
-											auxServiciosRecurso.put(sRec.getId(), sRec);
-											serviciosAutocompletar.put(ultimo.getId(), auxServiciosRecurso);
-										}
-									}
-								}
-							}
-						}
-					}
-					formularioDin.armarFormulario(agrupaciones, serviciosAutocompletar);
-				}
-				UIComponent errores = formularioDin.getComponenteMensajes();
-				camposError.getChildren().add(errores);
 			}
 		} catch (Exception e) {
 			addErrorMessage(e, FORMULARIO_ID);
@@ -732,7 +645,7 @@ public class AtencionPresencialMBean extends BaseMBean {
       
       SimpleDateFormat sdfFecha = new SimpleDateFormat (sessionMBean.getFormatoFecha());
       
-      Rectangle pageSize = new Rectangle(210,225);
+      Rectangle pageSize = new Rectangle(210,190);
       
       Document document = new Document(pageSize);
       document.addTitle(sessionMBean.getTextos().get("ticket_de_reserva"));
@@ -757,12 +670,11 @@ public class AtencionPresencialMBean extends BaseMBean {
       if(empresa != null && empresa.getLogo()!=null) {
         Image img = Image.getInstance(empresa.getLogo());
         img.scaleAbsolute(100,30);
-        img.setAbsolutePosition(55, 170);
+        img.setAbsolutePosition(55, 145);
         document.add(img);
       }
       
-      
-      int posY = 170;
+      int posY = 130;
       
       //Dibujo primer línea
       LineSeparator line = new LineSeparator();
@@ -864,14 +776,10 @@ public class AtencionPresencialMBean extends BaseMBean {
       FacesContext facesContext = FacesContext.getCurrentInstance();
       HttpServletResponse response = (HttpServletResponse)facesContext.getExternalContext().getResponse();
       response.setContentType("application/pdf");  
-      //response.setHeader("Content-Disposition","attachment");
       os.writeTo(response.getOutputStream());
       response.getOutputStream().flush();
       response.getOutputStream().close();
       facesContext.responseComplete();
-      
-      //RequestContext.getCurrentInstance().update("foo:bar");
-      
     } catch (Exception e) {
       e.printStackTrace();
     }

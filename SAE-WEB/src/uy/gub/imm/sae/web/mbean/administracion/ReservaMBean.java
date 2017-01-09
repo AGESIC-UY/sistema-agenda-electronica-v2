@@ -21,6 +21,7 @@
 package uy.gub.imm.sae.web.mbean.administracion;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,16 +35,21 @@ import javax.faces.event.PhaseId;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
+import uy.gub.imm.sae.business.ejb.facade.Disponibilidades;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.common.DisponibilidadReserva;
+import uy.gub.imm.sae.common.Utiles;
+import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
+import uy.gub.imm.sae.web.common.RowList;
 
 import org.primefaces.component.datagrid.DataGrid;
 
@@ -60,6 +66,9 @@ public class ReservaMBean extends BaseMBean {
 	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
 
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/DisponibilidadesBean!uy.gub.imm.sae.business.ejb.facade.DisponibilidadesRemote")
+  Disponibilidades disponibilidadesEJB;
+	
 	private ReservaSessionMBean reservaSessionMBean;
 	private SessionMBean sessionMBean;
 
@@ -100,24 +109,35 @@ public class ReservaMBean extends BaseMBean {
 
 	}
 
+  public void beforePhaseCancelarReserva(PhaseEvent event) {
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("cancelar_reserva"));
+    }
+  }
+  
+  public void beforePhaseCancelarReservasPeriodo(PhaseEvent event) {
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("cancelar_reserva_por_periodo"));
+    }
+  }
+	
 	public String volverPagInicio() {
 		return "volver";
 	}
 
 	public void buscarReservaDatos(ActionEvent e) {
+	  
+	  limpiarMensajesError();
+	  
 		boolean huboError = false;
-		ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-
 		if (sessionMBean.getAgendaMarcada() == null && !huboError) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-
 		if (sessionMBean.getRecursoMarcado() == null && !huboError) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-		
 		if(huboError) {
 			return;
 		}
@@ -135,10 +155,11 @@ public class ReservaMBean extends BaseMBean {
 		if (!huboError) {
 
 			// Voy a negocio a buscar las reservas
-			reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
+		  List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
 					sessionMBean.getCodigoSeguridadReserva(), sessionMBean.getTimeZone());
 			this.reservaSessionMBean.setListaReservas(reservas);
-			if (reservas.isEmpty()) {addErrorMessage("No se encontraron reservas con los filtros de búsqueda.", MSG_ID);
+			if (reservas.isEmpty()) {
+			  addErrorMessage("No se encontraron reservas con los filtros de búsqueda.", MSG_ID);
 			} else {
 				this.reservaSessionMBean.setListaReservas(reservas);
 			}
@@ -147,6 +168,9 @@ public class ReservaMBean extends BaseMBean {
 	}
 
 	public void cancelarReserva(ActionEvent event) {
+	  
+	  limpiarMensajesError();
+	  
 		boolean huboError = false;
 
 		if (sessionMBean.getAgendaMarcada() == null) {
@@ -181,8 +205,12 @@ public class ReservaMBean extends BaseMBean {
 				reservaSessionMBean.setReservaDatos(r);
 				List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean,	datosASolicitar);
 				
-				//Enviar el mail de confirmacion
-				agendarReservasEJB.enviarComunicacionesCancelacion(r, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
+				try {
+  				//Enviar el mail de confirmacion
+  				agendarReservasEJB.enviarComunicacionesCancelacion(r, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
+				}catch(UserException ex) {
+          addAdvertenciaMessage(sessionMBean.getTextos().get(ex.getCodigoError()));
+        }
 				
 				//Recargar la lista de reservas
 				ArrayList<Reserva> reservas = new ArrayList<Reserva>();
@@ -273,7 +301,6 @@ public class ReservaMBean extends BaseMBean {
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}
-
 	}
 
 	public Map<String, Object> getDatosFiltroReservaMBean() {
@@ -301,17 +328,168 @@ public class ReservaMBean extends BaseMBean {
 		this.reservaSessionMBean = reservaSessionMBean;
 	}
 
-	public void beforePhaseCancelar(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("cancelar_reserva"));
-		}
-	}
-	
 	public void selecReservaEliminar(ActionEvent e) {
 		int iSelectedPos = getReservasDataTable().getRowIndex();
 		Reserva r = reservaSessionMBean.getListaReservas().get(iSelectedPos);
 		reservaSessionMBean.setReservaDatos(r);
 		reservaSessionMBean.setDisponibilidad(r.getDisponibilidades().get(0));
 	}
+	
+	//======================================================================
+	// Cancelación de reservas en un período de tiempo
+	
+  private Date fechaDesde;
+  private Date fechaHasta;
+  private RowList<DisponibilidadReserva> cuposPorDia;
+  private String asuntoMensaje;
+  private String cuerpoMensaje;
+  
+  public Date getFechaDesde() {
+    return fechaDesde;
+  }
+
+  public void setFechaDesde(Date fechaDesde) {
+    this.fechaDesde = fechaDesde;
+  }
+
+  public Date getFechaHasta() {
+    return fechaHasta;
+  }
+
+  public void setFechaHasta(Date fechaHasta) {
+    this.fechaHasta = fechaHasta;
+  }
+
+  public RowList<DisponibilidadReserva> getCuposPorDia() {
+    return cuposPorDia;
+  }
+  
+  public void setCuposPorDia(RowList<DisponibilidadReserva> cuposPorDia) {
+    this.cuposPorDia = cuposPorDia;
+  }
+	
+  public String getAsuntoMensaje() {
+    return asuntoMensaje;
+  }
+
+  public void setAsuntoMensaje(String asuntoMensaje) {
+    this.asuntoMensaje = asuntoMensaje;
+  }
+
+  public String getCuerpoMensaje() {
+    return cuerpoMensaje;
+  }
+
+  public void setCuerpoMensaje(String cuerpoMensaje) {
+    this.cuerpoMensaje = cuerpoMensaje;
+  }
+
+  public void obtenerReservasPeriodo(ActionEvent e){
+    
+    limpiarMensajesError();
+    
+    boolean hayError = false;
+
+    if (fechaDesde == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+    }
+    if (fechaHasta == null) {
+      hayError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
+    }
+    
+    if(fechaDesde!=null && fechaHasta!=null) {
+      if(fechaDesde.after(fechaHasta)) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), MSG_ID);
+      }
+    }
+    
+    if(hayError) {
+      setCuposPorDia(null);
+      return;
+    }
+    
+    VentanaDeTiempo ventana = new VentanaDeTiempo();
+    ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));
+    ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
+    
+    try{
+      List<DisponibilidadReserva> dispsRess = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventana);
+      cuposPorDia = new RowList<DisponibilidadReserva>(dispsRess);
+    }catch (Exception ex) {
+        addErrorMessage(ex, MSG_ID);
+    }
+  }
+
+  /**
+   * Cancela todas las reservas existentes en el recurso actual para el período especificado, enviando un mensaje de 
+   * confirmación a cada uno de los ciudadanos. Además, elimina las disponibilidades existentes en el mismo período para
+   * que no se pueda generar otra reserva.
+   */
+  public void cancelarReservasPeriodo() {
+    boolean huboError = false;
+
+    if (sessionMBean.getAgendaMarcada() == null) {
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+    }
+
+    if (sessionMBean.getRecursoMarcado() == null) {
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+    }
+
+    if (fechaDesde == null) {
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+    }
+    
+    if (fechaHasta == null) {
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
+    }
+    
+    if(fechaDesde!=null && fechaHasta!=null) {
+      if(fechaDesde.after(fechaHasta)) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), MSG_ID);
+      }
+    }
+
+    if (asuntoMensaje == null || asuntoMensaje.isEmpty()) {
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("el_asunto_del_mensaje_es_obligatorio"), "form:txtAsunto");
+    }
+    
+    if (cuerpoMensaje == null || cuerpoMensaje.isEmpty()) {
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("el_cuerpo_del_mensaje_es_obligatorio"), "form:txtCuerpo");
+    }
+    
+    if (!huboError) {
+      try {
+        VentanaDeTiempo ventana = new VentanaDeTiempo();
+        ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));
+        ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
+        
+        //Cancelar las reservas
+        List<Integer> reservasSinEnviarComunicacion = agendarReservasEJB.cancelarReservasPeriodo(sessionMBean.getEmpresaActual(), sessionMBean.getRecursoMarcado(),  
+            ventana, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), asuntoMensaje, cuerpoMensaje);
+        
+        if(!reservasSinEnviarComunicacion.isEmpty()) {
+          addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_enviar_comunicacion_para_las_reservas")+": "+reservasSinEnviarComunicacion.toString(), MSG_ID);
+        }
+
+        addInfoMessage(sessionMBean.getTextos().get("reservas_canceladas"), MSG_ID);
+        
+        //Eliminar las disponibilidades
+        disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), ventana);
+        
+        addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas"), MSG_ID);
+      } catch (Exception e) {
+        addErrorMessage(e, MSG_ID);
+      }
+    }
+  }
 
 }

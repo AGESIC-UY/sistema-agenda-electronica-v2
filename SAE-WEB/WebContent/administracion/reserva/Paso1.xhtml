@@ -60,12 +60,12 @@
 
 		<ui:define name="contenido">
 
-			<p:outputPanel  rendered="#{sessionMBean.agendaMarcada != null}">
-				<div id="recurso" class="row">
+			<p:outputPanel  rendered="#{sessionMBean.agendaMarcada != null}" styleClass="form-horizontal">
+				<div id="recurso" class="form-group">
 					<div class="col-sm-4 col-md-5">
 						<h:outputFormat escape="false"
-							value="#{paso1AdminMBean.etiquetaSeleccionDelRecurso}:"
-							styleClass="label label-align-top" />
+							value="#{paso1AdminMBean.etiquetaSeleccionDelRecurso}"
+							styleClass="label control-label" />
 					</div>
 					<div class="col-sm-8 col-md-7">
 						<p:selectOneRadio value="#{paso1AdminMBean.recursoId}"

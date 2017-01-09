@@ -44,6 +44,7 @@ import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Tipo;
+import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 import uy.gub.imm.sae.entity.Atencion;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
@@ -105,6 +106,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 				 "FROM Reserva res " +
 				 "JOIN res.disponibilidades d " +
 				 "WHERE d.recurso = :recurso " +
+         "  AND d.fechaBaja IS NULL " +
          "  AND d.presencial = false " +
 				 "  AND d.fecha = :fecha " +
 				 "  AND d.horaInicio = :horaInicio " +
@@ -514,7 +516,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
   		}
 		}
 		String queryString = 
-			"SELECT r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, a.asistio, r.tramiteCodigo, r.tramiteNombre, d.presencial " +
+			"SELECT r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, a.asistio, r.tramiteCodigo, "	+ 
+			    "r.tramiteNombre, d.presencial, r.fcancela, r.ucancela, r.tcancela " +
 			"FROM Reserva r " +
 			"JOIN r.disponibilidades d " +
 			"LEFT JOIN r.datosReserva dr " +
@@ -549,18 +552,21 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			Object[] rowReserva = iterator.next();
 			Integer reservaId        = (Integer)rowReserva[0];
 			Integer reservaNumero    = (Integer)rowReserva[1];
-			String  reservaEstado    = ((Estado) rowReserva[2]).toString();
-			Date    dispFecha        = (Date) rowReserva[4];
-			Date    dispHoraInicio   = (Date) rowReserva[5];
+			String reservaEstado    = ((Estado) rowReserva[2]).toString();
+			Date dispFecha        = (Date) rowReserva[4];
+			Date dispHoraInicio   = (Date) rowReserva[5];
 			Integer datoASolicitarId = (Integer) rowReserva[6];
-			String  nombreDatoReserva= (String) rowReserva[7];
-			Tipo    tipoDatoReserva  = (Tipo) rowReserva[8];
-			Object  valorDatoReserva = (Object) rowReserva[9];
+			String nombreDatoReserva= (String) rowReserva[7];
+			Tipo tipoDatoReserva  = (Tipo) rowReserva[8];
+			Object valorDatoReserva = (Object) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
 			Boolean asistio          = (Boolean)rowReserva[11];
-      String  tramiteCodigo    = (String) rowReserva[12];
-      String  tramiteNombre    = (String) rowReserva[13];
+      String tramiteCodigo    = (String) rowReserva[12];
+      String tramiteNombre    = (String) rowReserva[13];
       Boolean presencial       = (Boolean)rowReserva[14];
+      Date fcancela           = (Date) rowReserva[15];
+      String ucancela         = (String) rowReserva[16];
+      TipoCancelacion tcancela    = (TipoCancelacion) rowReserva[17];
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
 				idReservaActual = reservaId;
 				if (reservaDTO != null) {
@@ -577,6 +583,9 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		    reservaDTO.setTramiteCodigo(tramiteCodigo);
 		    reservaDTO.setTramiteNombre(tramiteNombre);
 		    reservaDTO.setPresencial(presencial);
+        reservaDTO.setFcancela(fcancela);
+        reservaDTO.setUcancela(ucancela);
+        reservaDTO.setTcancela(tcancela==null?null:tcancela.toString());
 			}
 			if (nombreDatoReserva != null) {
 				if (tipoDatoReserva == Tipo.LIST) {

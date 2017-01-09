@@ -84,6 +84,7 @@ public class ExportarHelper {
 		AgrupacionDatoExport age = new AgrupacionDatoExport();
 
 		age.setNombre(ag.getNombre());
+		age.setEtiqueta(ag.getEtiqueta());
 		age.setOrden(ag.getOrden());
 		age.setFechaBaja(ag.getFechaBaja());
 		age.setBorrarFlag(ag.getBorrarFlag());
@@ -94,6 +95,7 @@ public class ExportarHelper {
 				dsexp.setColumna(datoASolicitar.getColumna());
 				dsexp.setEsClave(datoASolicitar.getEsClave());
 				dsexp.setEtiqueta(datoASolicitar.getEtiqueta());
+        dsexp.setSoloLectura(datoASolicitar.getSoloLectura());
 				dsexp.setFechaBaja(datoASolicitar.getFechaBaja());
 				dsexp.setFila(datoASolicitar.getFila());
 				dsexp.setIncluirEnReporte(datoASolicitar.getIncluirEnReporte());
@@ -207,6 +209,7 @@ public class ExportarHelper {
 		agd.setBorrarFlag(agexp.getBorrarFlag());
 		agd.setFechaBaja(agexp.getFechaBaja());
 		agd.setNombre(agexp.getNombre());
+    agd.setEtiqueta(agexp.getEtiqueta());
 		agd.setOrden(agexp.getOrden());
 
 		return agd;
@@ -241,6 +244,7 @@ public class ExportarHelper {
 		das.setBorrarFlag(dasExp.getBorrarFlag());
 		das.setColumna(dasExp.getColumna());
 		das.setEsClave(dasExp.getEsClave());
+    das.setSoloLectura(dasExp.getSoloLectura());
 		das.setEtiqueta(dasExp.getEtiqueta());
 		das.setFechaBaja(dasExp.getFechaBaja());
 		das.setFila(dasExp.getFila());

@@ -23,7 +23,6 @@ package uy.gub.imm.sae.common;
 import java.util.Calendar;
 import java.util.Date;
 
-
 public class Utiles {
 
 	public static Integer DIA = 1;
@@ -111,4 +110,5 @@ public class Utiles {
 		return resp;
 	}
 	
+
 }

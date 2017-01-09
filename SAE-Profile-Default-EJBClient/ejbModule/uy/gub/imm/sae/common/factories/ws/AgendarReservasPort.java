@@ -50,11 +50,14 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-	public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva)
-			throws BusinessException {
+	public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
 		throw new UnsupportedOperationException();
 	}
 
+	public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
+    throw new UnsupportedOperationException();
+	}
+	
 	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException,
 			BusinessException, ValidacionException, AccesoMultipleException, UserException {
 		

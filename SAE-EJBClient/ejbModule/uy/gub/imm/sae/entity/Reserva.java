@@ -50,6 +50,7 @@ import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlTransient;
 
 import uy.gub.imm.sae.common.enumerados.Estado;
+import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 
 @Entity
 @Table (name = "ae_reservas")
@@ -68,7 +69,9 @@ public class Reserva implements Serializable {
 	private Llamada llamada;
 	private String origen;
 	private String ucrea;
+	private Date fcancela;
 	private String ucancela;
+	private TipoCancelacion tcancela;
 	
 	private String codigoSeguridad; //Código utilizado para la cencelación
 	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
@@ -281,6 +284,23 @@ public class Reserva implements Serializable {
 		this.trazabilidadGuid = trazabilidadGuid;
 	}
 	
+  @Enumerated (EnumType.STRING)
+  public TipoCancelacion getTcancela() {
+    return tcancela;
+  }
+
+  public void setTcancela(TipoCancelacion tcancela) {
+    this.tcancela = tcancela;
+  }
+
+  public Date getFcancela() {
+    return fcancela;
+  }
+
+  public void setFcancela(Date fcancela) {
+    this.fcancela = fcancela;
+  }
+
   @Transient
   public String getEstadoDescripcion(){
     return getEstadoDescripcion(estado);

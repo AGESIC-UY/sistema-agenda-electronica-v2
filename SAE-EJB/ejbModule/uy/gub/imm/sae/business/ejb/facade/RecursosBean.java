@@ -236,7 +236,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		entityManager.persist(r);
 		// paso a agregar agrupacion
 		AgrupacionDato agrupDato = new AgrupacionDato();
-		agrupDato.setNombre("Datos Personales");
+		agrupDato.setNombre("datos_personales");
+		agrupDato.setEtiqueta("Datos personales");
 		agrupDato.setOrden(1);
 		agrupDato.setBorrarFlag(false);
 		agregarAgrupacionDato(r, agrupDato);
@@ -251,6 +252,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		d1.setAgrupacionDato(agrupDato);
 		d1.setAnchoDespliegue(100);
 		d1.setEsClave(true);
+    d1.setSoloLectura(false);
 		d1.setEtiqueta("Tipo de documento");
 		d1.setIncluirEnLlamador(true);
 		d1.setLargo(20);
@@ -900,10 +902,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 * @throws ApplicationException
 	 */
-	public AgrupacionDato agregarAgrupacionDato(Recurso r, AgrupacionDato a)
-			throws UserException, ApplicationException {
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+	public AgrupacionDato agregarAgrupacionDato(Recurso r, AgrupacionDato a) throws UserException, ApplicationException {
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class, r.getId());
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
@@ -911,28 +911,28 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 		a.setRecurso(r);
-		if (existeAgrupacionPorNombre(a)) {
-			throw new UserException(
-					"ya_existe_una_agrupacion_con_el_nombre_especificado");
-		}
-		if (a.getNombre() == null) {
-			throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
-		}
+    if (a.getNombre() == null || a.getNombre().isEmpty()) {
+      throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
+    }else {
+  		if (existeAgrupacionPorNombre(a)) {
+  			throw new UserException("ya_existe_una_agrupacion_con_el_nombre_especificado");
+  		}
+    }
+    if(a.getEtiqueta() == null || a.getEtiqueta().isEmpty()) {
+      throw new UserException("la_etiqueta_de_la_agrupacion_es_obligatoria");
+    }
 		if (a.getOrden() == null) {
 			throw new UserException("el_orden_de_la_agrupacion_es_obligatorio");
 		} else {
 			if (a.getOrden() < 1) {
-				throw new UserException(
-						"el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
+				throw new UserException("el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
 			}
 		}
 		entityManager.persist(a);
 		return a;
 	}
 	
-	public AgrupacionDato agregarAgrupacionDatoImportar(Recurso recursoActual, AgrupacionDato a)
-			throws UserException, ApplicationException {
-		
+	public AgrupacionDato agregarAgrupacionDatoImportar(Recurso recursoActual, AgrupacionDato a) throws UserException, ApplicationException {
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
@@ -940,13 +940,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 		a.setRecurso(recursoActual);
-		if (existeAgrupacionPorNombre(a)) {
-			throw new UserException(
-					"ya_existe_una_agrupacion_con_el_nombre_especificado");
-		}
-		if (a.getNombre() == null) {
-			throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
-		}
+    if (a.getNombre() == null || a.getNombre().isEmpty()) {
+      throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
+    }else {
+  		if (existeAgrupacionPorNombre(a)) {
+  			throw new UserException("ya_existe_una_agrupacion_con_el_nombre_especificado");
+  		}
+    }
+    if(a.getEtiqueta() == null || a.getEtiqueta().isEmpty()) {
+      throw new UserException("la_etiqueta_de_la_agrupacion_es_obligatoria");
+    }
+		
 		if (a.getOrden() == null) {
 			throw new UserException("el_orden_de_la_agrupacion_es_obligatorio");
 		} else {
@@ -966,34 +970,38 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * 
 	 * @throws UserException
 	 */
-	public void modificarAgrupacionDato(AgrupacionDato a) throws UserException {
+	public void modificarAgrupacionDato(AgrupacionDato a) throws UserException, ApplicationException {
 
-		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(
-				AgrupacionDato.class, a.getId());
+		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(AgrupacionDato.class, a.getId());
 
 		if (agrupacionActual == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
 
-		if (a.getNombre() == "") {
+		if (a.getNombre() == null || a.getNombre().isEmpty()) {
 			throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
+		}else {
+		  if(existeAgrupacionPorNombre(a)) {
+		    throw new UserException("ya_existe_una_agrupacion_con_el_nombre_especificado");
+		  }
 		}
+    if (a.getEtiqueta() == null || a.getEtiqueta().isEmpty()) {
+      throw new UserException("la_etiqueta_de_la_agrupacion_es_obligatoria");
+    }
 
 		if (a.getOrden() == null) {
 			throw new UserException("el_orden_de_la_agrupacion_es_obligatorio");
 		} else {
 			if (a.getOrden().intValue() < 0) {
-				throw new UserException(
-						"el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
+				throw new UserException("el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
 			}
 		}
 		if (agrupacionActual.getFechaBaja() != null) {
-			throw new UserException(
-					"no_se_puede_modifcar_una_agrupacion_eliminada");
+			throw new UserException("no_se_puede_modifcar_una_agrupacion_eliminada");
 		}
 
 		agrupacionActual.setNombre(a.getNombre());
+    agrupacionActual.setEtiqueta(a.getEtiqueta());
 		agrupacionActual.setOrden(a.getOrden());
 
 	}
@@ -1008,25 +1016,21 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	public void eliminarAgrupacionDato(AgrupacionDato a, boolean controlarDatos)
 			throws UserException, ApplicationException {
 
-		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(
-				AgrupacionDato.class, a.getId());
+		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(AgrupacionDato.class, a.getId());
 
 		if (agrupacionActual == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
 		if (agrupacionActual.getFechaBaja() != null) {
 			throw new UserException("la_agrupacion_ya_esta_eliminada");
 		}
 		if (controlarDatos) {
 			if (existeDatoASolicPorAgrupacion(a.getId())) {
-				throw new UserException(
-						"no_se_puede_eliminar_la_agrupación_porque_tiene_datos_asociados");
+				throw new UserException("no_se_puede_eliminar_la_agrupación_porque_tiene_datos_asociados");
 			}
 		} else {
 			if (agrupacionActual.getDatosASolicitar() != null) {
-				for (DatoASolicitar dato : agrupacionActual
-						.getDatosASolicitar()) {
+				for (DatoASolicitar dato : agrupacionActual.getDatosASolicitar()) {
 					eliminarDatoASolicitar(dato);
 				}
 			}
@@ -1047,11 +1051,10 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throws ApplicationException {
 		try {
 			List<AgrupacionDato> agrupacionDato = (List<AgrupacionDato>) entityManager
-				.createQuery(
-						"SELECT a from AgrupacionDato a "
-								+ "WHERE a.recurso = :r "
-								+ "AND a.fechaBaja is null "
-								+ "ORDER BY a.orden").setParameter("r", r)
+				.createQuery("SELECT a from AgrupacionDato a "
+					+ "WHERE a.recurso = :r "
+					+ "AND a.fechaBaja is null "
+					+ "ORDER BY a.orden").setParameter("r", r)
 				.getResultList();
 			return agrupacionDato;
 		} catch (Exception e) {
@@ -1073,30 +1076,24 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			DatoASolicitar d) throws UserException, ApplicationException,
 			BusinessException {
 
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class, r.getId());
 
 		if (recursoActual == null) {
-			throw new BusinessException(
-					"no_se_encuentra_el_recurso_especificado");
+			throw new BusinessException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		recursoActual.getAgrupacionDatos().size();
 
 		if (a == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
-		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(
-				AgrupacionDato.class, a.getId());
+		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(AgrupacionDato.class, a.getId());
 		if (agrupacionActual == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
 
 		if (agrupacionActual.getFechaBaja() != null) {
-			throw new UserException(
-					"no_se_puede_modifcar_una_agrupacion_eliminada");
+			throw new UserException("no_se_puede_modifcar_una_agrupacion_eliminada");
 		}
 
 		d.setRecurso(recursoActual);
@@ -1106,10 +1103,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("el_nombre_del_dato_es_obligatorio");
 		}
 
-		if (existeDatoASolicPorNombre(d.getNombre(), recursoActual.getId(),
-				null)) {
-			throw new UserException(
-					"Ya existe un dato con el nombre especificado");
+		if (existeDatoASolicPorNombre(d.getNombre(), recursoActual.getId(),	null)) {
+			throw new UserException("Ya existe un dato con el nombre especificado");
 		}
 
 		if (d.getEtiqueta() == null || d.getEtiqueta().equals("")) {
@@ -1140,10 +1135,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("el_ancho_de_despliegue_es_obligatorio");
 		}
 
-		if (d.getIncluirEnReporte() == true
-				&& d.getAnchoDespliegue().intValue() <= 0) {
-			throw new UserException(
-					"el_ancho_de_despliegue_debe_ser_mayor_a_cero");
+		if (d.getIncluirEnReporte() == true && d.getAnchoDespliegue().intValue() <= 0) {
+			throw new UserException("el_ancho_de_despliegue_debe_ser_mayor_a_cero");
 		}
 
 		if (d.getOrdenEnLlamador() == null && d.getIncluirEnReporte()) {
@@ -1262,95 +1255,44 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 * @throws ApplicationException
 	 */
-	public void modificarDatoASolicitar(DatoASolicitar d) throws UserException,
-			ApplicationException {
+	public void modificarDatoASolicitar(DatoASolicitar d) throws UserException, ApplicationException {
 
-		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(
-				DatoASolicitar.class, d.getId());
+		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(DatoASolicitar.class, d.getId());
 
 		if (datoActual == null) {
-			throw new UserException("AE10055",
-					"No existe el dato a Solicitar: " + d.getId().toString());
-		}
-
-		// No se puede modificar un dato con fecha de baja
-		if (datoActual.getFechaBaja() != null) {
-			throw new UserException("AE10056",
-					"No se puede modificar un dato con fecha de baja");
-		}
-
-		if (existeDatoASolicPorNombre(d.getNombre(), datoActual.getRecurso()
-				.getId(), d.getId())) {
-			throw new UserException("AE10054",
-					"Ya existe ese dato a solicitar para el recurso");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		if (d.getNombre() == null) {
-			throw new UserException("AE10045",
-					"El nombre del dato a solicitar no puede ser nulo");
+      throw new UserException("el_nombre_del_dato_es_obligatorio");
+    }
+
+		if (existeDatoASolicPorNombre(d.getNombre(), datoActual.getRecurso().getId(), d.getId())) {
+			throw new UserException("ya_existe_un_dato_con_el_nombre_especificado");
 		}
 
 		if (d.getEtiqueta() == null) {
-			throw new UserException("AE10046",
-					"La etiqueta del dato a solicitar no puede ser nula");
+			throw new UserException("la_etiqueta_del_dato_es_obligatoria");
 		}
 
 		if (d.getTipo() == null) {
-			throw new UserException("AE10047",
-					"El tipo del dato a solicitar no puede ser nulo");
-		}
-
-		if (d.getRequerido() == null) {
-			throw new UserException("AE10048",
-					"Se debe indicar si el dato a solicitar debe es requerido");
-		}
-
-		if (d.getEsClave() == null) {
-			throw new UserException("AE10049",
-					"Se debe indicar si el dato a solicitar debe es clave");
+			throw new UserException("el_tipo_del_dato_es_obligatorio");
 		}
 
 		if (d.getFila() == null) {
-			throw new UserException("AE10050", "La fila no puede ser nula");
+			throw new UserException("la_fila_del_dato_es_obligatoria");
 		}
 
 		if (d.getColumna() == null) {
-			throw new UserException("AE10051", "La columna no puede ser nula");
+			throw new UserException("la_columna_del_dato_es_obligatoria");
 		}
 
 		if (d.getLargo() == null) {
-			throw new UserException("AE10052", "El largo no puede ser nulo");
-		}
-
-		if (d.getIncluirEnReporte() == null) {
-			throw new UserException("AE10120",
-					"Incluir en Reporte no puede ser nulo");
+			throw new UserException("el_largo_del_dato_es_obligatorio");
 		}
 
 		if (d.getAnchoDespliegue() == null) {
-			throw new UserException("AE10121",
-					"El ancho de despliegue no puede ser nulo");
-		}
-
-		if (d.getIncluirEnReporte() == true
-				&& d.getAnchoDespliegue().intValue() <= 0) {
-			throw new UserException("AE10122",
-					"El ancho de despliegue debe ser mayor que cero");
-		}
-
-		if (d.getIncluirEnLlamador() == null) {
-			throw new UserException("-1",
-					"Incluir en llamador no puede ser nulo");
-		}
-
-		if (d.getOrdenEnLlamador() == null && d.getIncluirEnReporte()) {
-			throw new UserException(
-					"-1",
-					"Debe indicar el orden en el que se mostrará el dato en la pantalla del llamador");
-		}
-
-		else if (d.getOrdenEnLlamador() == null) {
-			d.setOrdenEnLlamador(1);
+			throw new UserException("el_ancho_de_despliegue_es_obligatorio");
 		}
 
 		if (d.getLargoEnLlamador() == null) {
@@ -1360,18 +1302,19 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		datoActual.setNombre(d.getNombre());
 		datoActual.setEtiqueta(d.getEtiqueta());
 		datoActual.setTipo(d.getTipo());
-		datoActual.setRequerido(d.getRequerido());
-		datoActual.setEsClave(d.getEsClave());
+		datoActual.setRequerido(d.getRequerido()!=null?d.getRequerido():false);
+		datoActual.setEsClave(d.getEsClave()!=null?d.getEsClave():false);
+    datoActual.setSoloLectura(d.getSoloLectura()!=null?d.getSoloLectura():false);
 		datoActual.setFila(d.getFila());
 		datoActual.setColumna(d.getColumna());
 		datoActual.setLargo(d.getLargo());
 		datoActual.setTextoAyuda(d.getTextoAyuda());
 		datoActual.setAgrupacionDato(d.getAgrupacionDato());
-		datoActual.setIncluirEnReporte(d.getIncluirEnReporte());
+		datoActual.setIncluirEnReporte(d.getIncluirEnReporte()!=null?d.getIncluirEnReporte():false);
 		datoActual.setAnchoDespliegue(d.getAnchoDespliegue());
-		datoActual.setIncluirEnLlamador(d.getIncluirEnLlamador());
-		datoActual.setLargoEnLlamador(d.getLargoEnLlamador());
-		datoActual.setOrdenEnLlamador(d.getOrdenEnLlamador());
+		datoActual.setIncluirEnLlamador(d.getIncluirEnLlamador()!=null?d.getIncluirEnLlamador():false);
+		datoActual.setLargoEnLlamador(d.getLargoEnLlamador()!=null?d.getLargoEnLlamador():d.getLargo());
+		datoActual.setOrdenEnLlamador(d.getOrdenEnLlamador()!=null?d.getOrdenEnLlamador():1);
 	}
 
 	/**
@@ -1382,9 +1325,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 */
 	public void eliminarDatoASolicitar(DatoASolicitar d) throws UserException {
-
-		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(
-				DatoASolicitar.class, d.getId());
+		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(DatoASolicitar.class, d.getId());
 		if (datoActual == null) {
 			throw new UserException("no_se_encuentra_el_dato_especificado");
 		}
@@ -1401,19 +1342,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 * @throws ApplicationException
 	 */
-	public ValorPosible agregarValorPosible(DatoASolicitar d, ValorPosible vp)
-			throws UserException, ApplicationException {
+	public ValorPosible agregarValorPosible(DatoASolicitar d, ValorPosible vp) throws UserException, ApplicationException {
 
-		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(
-				DatoASolicitar.class, d.getId());
+		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(DatoASolicitar.class, d.getId());
 
 		if (datoActual == null) {
 			throw new UserException("no_se_encuentra_el_dato_especificado");
-		}
-
-		// No se puede modificar un dato con fecha de baja
-		if (datoActual.getFechaBaja() != null) {
-			throw new UserException("no_se_puede_modifcar_un_dato_eliminado");
 		}
 
 		vp.setDato(d);
@@ -1438,15 +1372,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
 
-		// fechaDesde <= fechaHasta o fechaHasta == NULL
-		if ((vp.getFechaHasta() != null)
-				&& (vp.getFechaDesde().compareTo(vp.getFechaHasta()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if ((vp.getFechaHasta() != null) && (vp.getFechaDesde().compareTo(vp.getFechaHasta()) > 0)) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		if (existeValorPosiblePeriodo(vp)) {
-			throw new UserException(
-					"ya_existe_otro_valor_con_la_misma_etiqueta_y_valor");
+			throw new UserException("ya_existe_otro_valor_con_la_misma_etiqueta_y_valor");
 		}
 
 		entityManager.persist(vp);
@@ -1456,15 +1386,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	public ValorPosible agregarValorPosibleImportar(DatoASolicitar datoActual, ValorPosible vp)
 			throws UserException, ApplicationException {
 
-		
-
 		if (datoActual == null) {
 			throw new UserException("no_se_encuentra_el_dato_especificado");
-		}
-
-		// No se puede modificar un dato con fecha de baja
-		if (datoActual.getFechaBaja() != null) {
-			throw new UserException("no_se_puede_modifcar_un_dato_eliminado");
 		}
 
 		vp.setDato(datoActual);
@@ -1677,13 +1600,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 
-	private Boolean existeAgrupacionPorNombre(AgrupacionDato a)
-			throws ApplicationException {
+	private Boolean existeAgrupacionPorNombre(AgrupacionDato a) throws ApplicationException {
 		try {
 
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(a) from AgrupacionDato a "
+					.createQuery("SELECT COUNT(a) FROM AgrupacionDato a "
 									+ "WHERE a.nombre = :nombre "
 									+ "AND (a.id <> :id OR :id is null)"
 									+ "AND  a.recurso = :recurso "

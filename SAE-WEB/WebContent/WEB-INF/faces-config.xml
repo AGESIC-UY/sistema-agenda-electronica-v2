@@ -323,7 +323,7 @@
 	<managed-bean>
 		<managed-bean-name>reservaMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ReservaMBean</managed-bean-class>
-		<managed-bean-scope>request</managed-bean-scope>
+		<managed-bean-scope>view</managed-bean-scope>
 		<managed-property>
 			<property-name>sessionMBean</property-name>
 			<property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
@@ -940,14 +940,6 @@
 		</navigation-case>
 	</navigation-rule>
 
-	<validator>
-		<validator-id>agendaNombreValidator</validator-id>
-		<validator-class>uy.gub.imm.sae.web.validator.AgendaNombreValidator</validator-class>
-	</validator>
-	<validator>
-		<validator-id>datoSolicitarNombreValidator</validator-id>
-		<validator-class>uy.gub.imm.sae.web.validator.DatoSolitarNombreValidator</validator-class>
-	</validator>
 	<validator>
 		<validator-id>xmlValidator</validator-id>
 		<validator-class>uy.gub.imm.sae.web.validator.XMLValidator</validator-class>

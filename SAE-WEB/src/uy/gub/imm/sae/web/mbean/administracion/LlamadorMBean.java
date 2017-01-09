@@ -86,17 +86,14 @@ public class LlamadorMBean extends BaseMBean {
 	public void init() {
 		//Se controla que se haya Marcado una agenda para trabajar con los recursos
 	  boolean hayError = false;
-
     if (sessionMBean.getAgendaMarcada() == null){
       hayError = true;
       addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
     }	  
-	  
 		if (sessionMBean.getRecursoMarcado() == null) {
       hayError = true;
       addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"));
 		}
-
 		if(!hayError) {
 			try {
 				if (llamadorSessionMBean.getMostrarDatos() == null) {
@@ -108,29 +105,13 @@ public class LlamadorMBean extends BaseMBean {
 		}
 	}
 	
-	public LlamadorSessionMBean getLlamadorSessionMBean() {
-		return llamadorSessionMBean;
-	}
-
-	public void setLlamadorSessionMBean(LlamadorSessionMBean llamadorSessionMBean) {
-		this.llamadorSessionMBean = llamadorSessionMBean;
-	}
-
-	public SessionMBean getSessionMBean() {
-		return sessionMBean;
-	}
-
-	public void setSessionMBean(SessionMBean sessionMBean) {
-		this.sessionMBean = sessionMBean;
-	}
-	
-	/** Configura titulo pantalla de configuracion del llamador cuando se accede desde la administracion */
-	public void beforePhaseConfiguracionLlamador(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("configuracion_del_llamador"));
-		}
-	}
-	
+  /** Configura titulo pantalla de configuracion del llamador cuando se accede desde la administracion */
+  public void beforePhaseConfiguracionLlamador(PhaseEvent event) {
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("configuracion_del_llamador"));
+    }
+  }
+  
 	/** Valida parametros para armar el llamador generico */
 	public void beforePhaseListaDeLlamadas(PhaseEvent event) {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
@@ -165,6 +146,22 @@ public class LlamadorMBean extends BaseMBean {
 		}
 	}
 	
+  public LlamadorSessionMBean getLlamadorSessionMBean() {
+    return llamadorSessionMBean;
+  }
+
+  public void setLlamadorSessionMBean(LlamadorSessionMBean llamadorSessionMBean) {
+    this.llamadorSessionMBean = llamadorSessionMBean;
+  }
+
+  public SessionMBean getSessionMBean() {
+    return sessionMBean;
+  }
+
+  public void setSessionMBean(SessionMBean sessionMBean) {
+    this.sessionMBean = sessionMBean;
+  }
+  
 	public String getPulgadasMonitor() {
 		return llamadorSessionMBean.getTipoMonitor().getPulgadas().toString();
 	}

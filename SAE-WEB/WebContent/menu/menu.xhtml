@@ -74,6 +74,7 @@
 					<p:menuitem value="#{sessionMBean.textos['reservar']}" icon="ui-icon-calendar" url="/administracion/reserva/Paso1.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['cancelar_reserva']}" icon="ui-icon-close" url="/administracion/reserva/cancelarReserva.xhtml" />
           <p:menuitem value="#{sessionMBean.textos['atencion_presencial']}" icon="ui-icon-person" url="/administracion/reserva/atencionPresencial.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['cancelar_reserva_por_periodo']}" icon="ui-icon-close" url="/administracion/reserva/cancelarReservasPeriodo.xhtml" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}" />
 				</p:submenu>
 				<p:submenu id="submenuLlamador" label="#{sessionMBean.textos['llamador']}" aria-level="2" rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}">
 					<p:menuitem value="#{sessionMBean.textos['lista_de_espera']}" icon="ui-icon-clock" url="/administracion/llamador/listaDeEspera.xhtml"
@@ -98,7 +99,7 @@
         <h:outputText value="#{sessionMBean.textos['version']} #{sessionMBean.version}"></h:outputText>
       </div>
 			<div class="ui-helper-hidden-accessible">
-				<h:commandButton value="dummy"></h:commandButton>
+				<h:commandButton value="dummy" />
 			</div>
 		</h:form>
 	</ui:composition>

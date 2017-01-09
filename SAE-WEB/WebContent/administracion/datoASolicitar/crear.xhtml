@@ -10,10 +10,8 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseCrear}" >
 
-			<p:outputPanel
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
-				<ui:include
-					src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<ui:include src="/administracion/datoASolicitar/disenioFormulario.xhtml" />
 
 				<h:form id="formCrear">
 					<p:outputPanel styleClass="botonesDerecha">
@@ -29,22 +27,16 @@
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['agenda']}"
-									for="agenda" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['agenda']}" for="agenda" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="agenda"
-										value="#{sessionMBean.agendaMarcada.nombre }" readonly="true"
-										styleClass="form-control" />
+									<h:inputText id="agenda" value="#{sessionMBean.agendaMarcada.nombre }" readonly="true" styleClass="form-control" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['recurso']}"
-									for="recurso" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['recurso']}" for="recurso" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="recurso"
-										value="#{sessionMBean.recursoMarcado.nombre}" readonly="true"
-										styleClass="form-control" />
+									<h:inputText id="recurso" value="#{sessionMBean.recursoMarcado.nombre}" readonly="true" styleClass="form-control" />
 								</p:outputPanel>
 							</p:outputPanel>
 
@@ -52,118 +44,88 @@
 					</fieldset>
 					<fieldset>
 						<legend>
-							<h:outputText
-								value="#{sessionMBean.textos['diseno_del_formulario']}" />
+							<h:outputText value="#{sessionMBean.textos['diseno_del_formulario']}" />
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
 
               <p:outputPanel styleClass="form-group">
-                <p:outputLabel value="#{sessionMBean.textos['agrupacion']}"
-                  for="agrupaciones"
-                  styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                <p:outputLabel value="#{sessionMBean.textos['agrupacion']}" for="agrupaciones" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
                 <p:outputPanel styleClass="col-sm-9">
-                  <h:selectOneListbox size="1" id="agrupaciones"
-                    value="#{datoASSessionMBean.agrupacionDatoId}"
-                    styleClass="form-control">
-                    <f:selectItems
-                      value="#{datoASolicitarMBean.listaAgrupaciones}" />
+                  <h:selectOneListbox size="1" id="agrupaciones" value="#{datoASSessionMBean.agrupacionDatoId}" styleClass="form-control">
+                    <f:selectItems value="#{datoASolicitarMBean.listaAgrupaciones}" />
                   </h:selectOneListbox>
                 </p:outputPanel>
               </p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['nombre']}"
-									for="VName"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['nombre']}" for="VName" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="VName"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.nombre}"
-										maxlength="50" styleClass="form-control">
-										
-									</h:inputText>
-									<p:message for="VName"></p:message>
+									<h:inputText id="VName" value="#{datoASolicitarMBean.datoASolicitarNuevo.nombre}" maxlength="50" styleClass="form-control" />
+									<p:message for="VName" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['etiqueta']}"
-									for="etiqueta"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['etiqueta']}" for="etiqueta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="etiqueta"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.etiqueta}"
-										maxlength="50" styleClass="form-control" />
-									<p:message for="etiqueta"></p:message>
+									<h:inputText id="etiqueta" value="#{datoASolicitarMBean.datoASolicitarNuevo.etiqueta}" maxlength="50" styleClass="form-control" />
+									<p:message for="etiqueta" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['texto_de_ayuda']}"
-									for="ayuda" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['texto_de_ayuda']}" for="ayuda" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="ayuda"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.textoAyuda}"
-										maxlength="100" styleClass="form-control textoLargo" />
+									<h:inputText id="ayuda" value="#{datoASolicitarMBean.datoASolicitarNuevo.textoAyuda}" maxlength="100" styleClass="form-control textoLargo" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['tipo_de_dato']}"
-									for="tipoDato"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['tipo_de_dato']}" for="tipoDato" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:selectOneMenu id="tipoDato"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.tipo}"
-										styleClass="form-control textoMedio"
-										 >
+									<h:selectOneMenu id="tipoDato" value="#{datoASolicitarMBean.datoASolicitarNuevo.tipo}" styleClass="form-control textoMedio">
 										<p:ajax update=":formCrear:largoMax" listener="#{datoASolicitarMBean.selectOneTipoDatoNuevo}"/>
 										<f:selectItems value="#{datoASolicitarMBean.listaTipos}" />
 									</h:selectOneMenu>
-									<p:message for="tipoDato"></p:message>
+									<p:message for="tipoDato" />
 								</p:outputPanel>
 							</p:outputPanel>
 							
-							<p:outputPanel id="largoMax" styleClass="form-group">
-								<p:outputPanel rendered="#{datoASolicitarMBean.visualizarLargoMax}">
-									<p:outputLabel value="#{sessionMBean.textos['largo_maximo']}"
-										for="VLargo"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
+							<p:outputPanel id="largoMax">
+								<p:outputPanel styleClass="form-group" rendered="#{datoASolicitarMBean.visualizarLargoMax}">
+									<p:outputLabel value="#{sessionMBean.textos['largo_maximo']}" for="VLargo" styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="VLargo"
-											value="#{datoASolicitarMBean.datoASolicitarNuevo.largo}"
-											maxlength="5" styleClass="form-control textoCorto"
-											rendered="#{datoASolicitarMBean.visualizarLargoMax}" />
-										<p:message for="VLargo"></p:message>
+										<h:inputText id="VLargo" value="#{datoASolicitarMBean.datoASolicitarNuevo.largo}" maxlength="5" styleClass="form-control textoCorto" 
+										  rendered="#{datoASolicitarMBean.visualizarLargoMax}" converter="integerConverter" />
+										<p:message for="VLargo" />
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
 							
 							<p:outputPanel styleClass="form-group">
-								<h:outputText value="#{sessionMBean.textos['dato_es']}"
-									styleClass="col-sm-3 control-label label" />
+								<h:outputText value="#{sessionMBean.textos['dato_es']}" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
 									<p:outputPanel>
-										<p:selectBooleanCheckbox id="clave"
-											value="#{datoASolicitarMBean.datoASolicitarNuevo.esClave}" />
+										<p:selectBooleanCheckbox id="clave" value="#{datoASolicitarMBean.datoASolicitarNuevo.esClave}" />
 										<p:outputLabel value="#{sessionMBean.textos['clave']}" for="clave" />
 									</p:outputPanel>
 									<p:outputPanel>
-										<p:selectBooleanCheckbox id="requerido"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.requerido}" />
+										<p:selectBooleanCheckbox id="requerido" value="#{datoASolicitarMBean.datoASolicitarNuevo.requerido}" />
 										<p:outputLabel value="#{sessionMBean.textos['requerido']}" for="requerido" />
 									</p:outputPanel>
+                  <p:outputPanel>
+                    <p:selectBooleanCheckbox id="sololectura" value="#{datoASolicitarMBean.datoASolicitarNuevo.soloLectura}" />
+                    <p:outputLabel value="#{sessionMBean.textos['solo_lectura_si_hay_valor_en_la_url']}" for="sololectura" />
+                  </p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['fila']}"
-									for="VFila"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['fila']}" for="VFila" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="VFila"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.fila}"
-										maxlength="5" styleClass="form-control textoCorto" />
-									<p:message for="VFila"></p:message>
+									<h:inputText id="VFila" value="#{datoASolicitarMBean.datoASolicitarNuevo.fila}" maxlength="5" styleClass="form-control textoCorto" 
+									  converter="integerConverter" />
+									<p:message for="VFila" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -171,35 +133,25 @@
 
 					<fieldset>
 						<legend>
-							<h:outputText
-								value="#{sessionMBean.textos['diseno_del_reporte']}" />
+							<h:outputText value="#{sessionMBean.textos['diseno_del_reporte']}" />
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<h:outputText
-									value="#{sessionMBean.textos['incluir_en_el_reporte']}"
-									styleClass="col-sm-3 control-label label" />
+								<h:outputText value="#{sessionMBean.textos['incluir_en_el_reporte']}" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<p:selectBooleanCheckbox id="reporte"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.incluirEnReporte}">
+									<p:selectBooleanCheckbox id="reporte" value="#{datoASolicitarMBean.datoASolicitarNuevo.incluirEnReporte}">
 										 <p:ajax update="formCrear:VAncho" listener="#{datoASolicitarMBean.limpiarAnchoDespliegueReporteNuevo}" />
 									</p:selectBooleanCheckbox>
-									<p:outputLabel
-									value="#{sessionMBean.textos['incluir']}"
-									for="reporte" />
+									<p:outputLabel value="#{sessionMBean.textos['incluir']}" for="reporte" />
 								</p:outputPanel>
 							</p:outputPanel>
 
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel value="#{sessionMBean.textos['ancho']}"
-									for="VAncho"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputLabel value="#{sessionMBean.textos['ancho']}" for="VAncho" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="VAncho"
-										value="#{datoASolicitarMBean.datoASolicitarNuevo.anchoDespliegue}"
-										maxlength="3" styleClass="form-control textoCorto" readonly="#{!datoASolicitarMBean.datoASolicitarNuevo.incluirEnReporte}"/>
-									<p:message for="VAncho" errorClass="mensajeError"
-										infoClass="mensajeInfo"></p:message>
+									<h:inputText id="VAncho" value="#{datoASolicitarMBean.datoASolicitarNuevo.anchoDespliegue}" maxlength="3" styleClass="form-control textoCorto" 
+									  readonly="#{!datoASolicitarMBean.datoASolicitarNuevo.incluirEnReporte}" converter="integerConverter"/>
+									<p:message for="VAncho" errorClass="mensajeError" infoClass="mensajeInfo" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -208,24 +160,21 @@
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary">
 							<ul>
-								<li><p:commandButton
-										value="#{sessionMBean.textos['guardar']}"
-										actionListener="#{datoASolicitarMBean.crearDato}"
-										update=":formCrear" styleClass="btn-lg btn-primario" /></li>
+								<li>
+								  <p:commandButton value="#{sessionMBean.textos['guardar']}" actionListener="#{datoASolicitarMBean.crearDato}" update=":formCrear" styleClass="btn-lg btn-primario" />
+							  </li>
 							</ul>
 						</li>
 						<li class="action-buttons-second">
 							<ul>
-								<li class="float-left"><p:commandButton value="#{sessionMBean.textos['cancelar']}" action="cancelar"
-										styleClass="btn-lg btn-link" /></li>
+								<li class="float-left">
+								  <p:commandButton value="#{sessionMBean.textos['cancelar']}" action="cancelar" styleClass="btn-lg btn-link" />
+							  </li>
 							</ul>
 						</li>
 					</ul>
-
-
 				</h:form>
 			</p:outputPanel>
-
 		</f:view>
 	</ui:define>
 </ui:composition>

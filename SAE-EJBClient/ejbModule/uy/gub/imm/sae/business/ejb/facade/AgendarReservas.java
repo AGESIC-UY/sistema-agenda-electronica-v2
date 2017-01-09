@@ -59,7 +59,7 @@ public interface AgendarReservas {
 	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public Reserva consultarReservaPorNumero(Recurso r, Integer numero) throws BusinessException;
-	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws BusinessException, ApplicationException;
+	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws UserException;
 	
 	public List<Reserva> consultarReservasEnPeriodo(Recurso r, VentanaDeTiempo v);
 	
@@ -92,4 +92,5 @@ public interface AgendarReservas {
 
 	public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
+	public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException;
 }

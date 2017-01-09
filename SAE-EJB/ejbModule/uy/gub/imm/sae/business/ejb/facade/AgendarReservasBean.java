@@ -57,6 +57,7 @@ import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Evento;
+import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Comunicacion;
 import uy.gub.imm.sae.entity.Comunicacion.Tipo1;
@@ -277,32 +278,25 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		return null;
 	}
 
-	public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws BusinessException, ApplicationException {
+  public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
+    cancelarReserva(empresa, recurso, reserva, false);
+  }
+	
+	private void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva, boolean masiva) throws UserException {
 		
 		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
 
 		if (reserva == null) {
-			throw new BusinessException("AE20085", "La reserva no puede ser nula");
+			throw new UserException("debe_especificar_la_reserva");
 		}
-
 		
 		Reserva r = entityManager.find(Reserva.class, reserva.getId());
 		
 		if (r == null) {
-			throw new BusinessException("AE10086", "No se encontro la reserva indicada");
+			throw new UserException("no_se_encuentra_la_reserva_especificada");
 		}
-		if (r.getEstado() != Estado.R) {
-			throw new BusinessException("AE10087", "Solo se pueden cancelar reservas en estado Reservada");
-		}
-		
-		Integer id = reserva.getDisponibilidades().get(0).getRecurso().getId();
-		if (recurso.getId().intValue() != id.intValue()) {
-			throw new BusinessException("AE10088", "El recurso asociado a la reserva no se corresponde con el recurso indicado");			
-		}
-		
-		//chequearPermiso(recurso.getAgenda());
 		
 		ReservaDTO reservaDTO = new ReservaDTO();
 		reservaDTO.setEstado(r.getEstado().toString());
@@ -314,6 +308,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		reservaDTO.setTramiteCodigo(r.getTramiteCodigo());
 		reservaDTO.setTramiteNombre(r.getTramiteNombre());
 		reservaDTO.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase()); //el usuario de sesion es el que esta cancelando la reserva anterior y ese dato lo enviamos hacia GAP
+		reservaDTO.setTcancela(masiva?TipoCancelacion.M.toString():TipoCancelacion.I.toString());
+		reservaDTO.setFcancela(new Date());
 		if (r.getLlamada() != null) {
 			reservaDTO.setPuestoLlamada(r.getLlamada().getPuesto());
 		}
@@ -325,14 +321,15 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
     try{
       helperAccion.ejecutarAccionesPorEvento(valores, reservaDTO, recurso, Evento.C);
-    }catch (ErrorAccionException e){
-      throw new BusinessException(e.getCodigoError(), e.getMessage());
+    }catch (Exception ex){
+      throw new UserException(ex.getMessage());
     }
 		
-		//Cancelo la reserva, paso el estado a Cancelada.
 		r.setEstado(Estado.C);
 		r.setObservaciones(reserva.getObservaciones());
-		r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase()); //se guarda en SAE el usuario que cancela la reserva anterior 
+		r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+		r.setTcancela(masiva?TipoCancelacion.M:TipoCancelacion.I);
+		r.setFcancela(reservaDTO.getFcancela());
 
 		//Registrar la cancelacion en el sistema de trazas del PEU
 		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), r.getTramiteCodigo(), r.getId());
@@ -893,9 +890,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		almacenarSmsYTav(Comunicacion.Tipo2.RESERVA, reserva, formatoFecha, formatoHora);
 	}
 	
-	public void enviarComunicacionesCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException {
+	public void enviarComunicacionesCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
 		//Enviar mail
-		enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora);
+		enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora, null, null);
 		//Almacenar datos para SMS y TextoAVoz, si corresponde
 		almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
 	}
@@ -907,7 +904,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		try {
 			recurso = reserva.getDisponibilidades().get(0).getRecurso();
 			Agenda agenda = recurso.getAgenda();
-			//TextoAgenda textoAgenda = agenda.getTextoAgenda();
 			TextoAgenda textoAgenda = null;
 			if(agenda.getTextosAgenda()!=null) {
 				textoAgenda = agenda.getTextosAgenda().get(idioma);
@@ -935,8 +931,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 					
 					String texto = textoAgenda.getTextoCorreoConf();
 					
-					if(texto != null && !texto.isEmpty())
-					{
+					if(texto != null && !texto.isEmpty()) {
 						texto = texto.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
 						texto = texto.replace("{{RECURSO}}", recurso.getNombre());
             texto = texto.replace("{{TRAMITE}}", reserva.getTramiteNombre());
@@ -954,11 +949,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 						MailUtiles.enviarMail(email, "Confirmación de reserva", texto, MailUtiles.CONTENT_TYPE_HTML);
 					}
 					
-					
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, texto);
 					comunicacion.setProcesado(true);
 					entityManager.persist(comunicacion);
-					
 				}
 			}
 		}catch(MessagingException mEx) {
@@ -967,90 +960,79 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 					if(email == null) {
 						email = "***";
 					}
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, null);
 					entityManager.persist(comunicacion);
 				}
 			}catch(Exception ex) {
 				ex.printStackTrace();
 			}
-			
 			throw new ApplicationException("no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva", mEx);
 		}
-		
 	}
 
-
-	private void enviarMailCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException {
+	private void enviarMailCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
+	  
 		//Se envía el mail obligatorio al usuario
-		String email = null;
 		Recurso recurso = null;
 		try {
 			recurso = reserva.getDisponibilidades().get(0).getRecurso();
-			Agenda agenda = recurso.getAgenda();
-			//TextoAgenda textoAgenda = agenda.getTextoAgenda();
-			TextoAgenda textoAgenda = null;
-			if(agenda.getTextosAgenda()!=null) {
-				textoAgenda = agenda.getTextosAgenda().get(idioma);
+			
+			if(cuerpo == null) {
+  			Agenda agenda = recurso.getAgenda();
+  			TextoAgenda textoAgenda = null;
+  			if(agenda.getTextosAgenda()!=null) {
+  				textoAgenda = agenda.getTextosAgenda().get(idioma);
+  			}
+  			if(textoAgenda == null) {
+  				for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
+  					if(ta.isPorDefecto()) {
+  						textoAgenda = ta;
+  					}
+  				}
+  			}
+  			if(textoAgenda != null) {
+  				cuerpo = textoAgenda.getTextoCorreoCanc();
+  			}
 			}
-			if(textoAgenda == null) {
-				for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
-					if(ta.isPorDefecto()) {
-						textoAgenda = ta;
-					}
-				}
-			}
-			if(textoAgenda == null) {
-				textoAgenda = new TextoAgenda();
+			
+			if(asunto == null) {
+			  asunto = "Cancelación de reserva";
 			}
 			
 			//Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
+	    String emailTo = null;
 			for(DatoReserva dato : reserva.getDatosReserva()) {
 				DatoASolicitar datoSol = dato.getDatoASolicitar();
 				if("Mail".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-					email = dato.getValor();
-
-					SimpleDateFormat sdfFecha = new SimpleDateFormat(formatoFecha);
-					SimpleDateFormat sdfHora = new SimpleDateFormat(formatoHora);
-					
-					String texto = textoAgenda.getTextoCorreoCanc();
-					
-					if(texto != null && !texto.isEmpty())
-					{
-						texto = texto.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
-						texto = texto.replace("{{RECURSO}}", recurso.getNombre());
-            texto = texto.replace("{{TRAMITE}}", reserva.getTramiteNombre());
-						texto = texto.replace("{{DIRECCION}}", recurso.getDireccion());
-						texto = texto.replace("{{FECHA}}", sdfFecha.format(reserva.getDisponibilidades().get(0).getFecha()));
-						texto = texto.replace("{{HORA}}", sdfHora.format(reserva.getDisponibilidades().get(0).getHoraInicio()));
-						texto = texto.replace("{{SERIE}}", recurso.getSerie()!=null?recurso.getSerie():"---");
-						texto = texto.replace("{{NUMERO}}", reserva.getNumero()!=null?reserva.getNumero().toString():"---");
-            texto = texto.replace("{{IDRESERVA}}", reserva.getId().toString());
-
-						MailUtiles.enviarMail(email, "Cancelación de reserva", texto, MailUtiles.CONTENT_TYPE_HTML);
-					}
-						
-					
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, email, recurso, reserva);
-					comunicacion.setProcesado(true);
-					entityManager.persist(comunicacion);
+				  emailTo = dato.getValor();
 				}
-			}
-		}catch(MessagingException mEx) {
-			try {
-				if(recurso != null) {
-					if(email == null) {
-						email = "***";
-					}
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, email, recurso, reserva);
-					entityManager.persist(comunicacion);
-				}
-			}catch(Exception ex) {
-				ex.printStackTrace();
 			}
 			
-			throw new ApplicationException("no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva", mEx);
+			if(emailTo != null) {
+        SimpleDateFormat sdfFecha = new SimpleDateFormat(formatoFecha);
+        SimpleDateFormat sdfHora = new SimpleDateFormat(formatoHora);
+        if(cuerpo != null && !cuerpo.isEmpty()) {
+          cuerpo = cuerpo.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
+          cuerpo = cuerpo.replace("{{RECURSO}}", recurso.getNombre());
+          cuerpo = cuerpo.replace("{{TRAMITE}}", reserva.getTramiteNombre());
+          cuerpo = cuerpo.replace("{{DIRECCION}}", recurso.getDireccion());
+          cuerpo = cuerpo.replace("{{FECHA}}", sdfFecha.format(reserva.getDisponibilidades().get(0).getFecha()));
+          cuerpo = cuerpo.replace("{{HORA}}", sdfHora.format(reserva.getDisponibilidades().get(0).getHoraInicio()));
+          cuerpo = cuerpo.replace("{{SERIE}}", recurso.getSerie()!=null?recurso.getSerie():"---");
+          cuerpo = cuerpo.replace("{{NUMERO}}", reserva.getNumero()!=null?reserva.getNumero().toString():"---");
+          cuerpo = cuerpo.replace("{{IDRESERVA}}", reserva.getId().toString());
+
+          MailUtiles.enviarMail(emailTo, asunto, cuerpo, MailUtiles.CONTENT_TYPE_HTML);
+        }
+        Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, emailTo, recurso, reserva, asunto+"/"+cuerpo);
+        comunicacion.setProcesado(true);
+        entityManager.persist(comunicacion);
+			}else {
+	      throw new UserException("no_hay_una_direccion_de_correo_a_la_cual_enviar_el_mensaje");
+			}
+		}catch(MessagingException mEx) {
+			throw new UserException("no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva");
 		}
-		
 	}
 	
 	private void almacenarSmsYTav(Comunicacion.Tipo2 tipo2, Reserva reserva, String formatoFecha, String formatoHora) throws UserException {
@@ -1064,13 +1046,13 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				if("TelefonoMovil".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
 					//Tiene telefono movil, se envia SMS
 					String telefonoMovil = dato.getValor();
-					Comunicacion comunicacion = new Comunicacion(Tipo1.SMS, tipo2, telefonoMovil, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.SMS, tipo2, telefonoMovil, recurso, reserva, null);
 					entityManager.persist(comunicacion);
 				}
 				if("TelefonoFijo".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
 					//Tiene telefono movil, se envia SMS
 					String telefonoFijo = dato.getValor();
-					Comunicacion comunicacion = new Comunicacion(Tipo1.TEXTOAVOZ, tipo2, telefonoFijo, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.TEXTOAVOZ, tipo2, telefonoFijo, recurso, reserva, null);
 					entityManager.persist(comunicacion);
 				}
 			}
@@ -1108,7 +1090,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				}
 			}
 		}catch(Exception pEx) {
-			//pEx.printStackTrace();
 			//Nada que hacer, se usan solo los textos globales
 		}
 		
@@ -1141,37 +1122,17 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
     try{
       List<TramiteAgenda> tramites = (List<TramiteAgenda>) entityManager
-                  .createQuery("SELECT t from TramiteAgenda t " +
-                      "WHERE t.agenda = :a " +
-                      "ORDER BY t.tramiteNombre")
-                  .setParameter("a", a)
-                  .getResultList();
+        .createQuery("SELECT t from TramiteAgenda t " +
+            "WHERE t.agenda = :a " +
+            "ORDER BY t.tramiteNombre")
+        .setParameter("a", a)
+        .getResultList();
       return tramites;
       } catch (Exception e){
         throw new ApplicationException(e);
       }
   }
 	
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
   
   /**
    * Confirma la reserva.
@@ -1300,4 +1261,37 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     return reserva;
   }  
 	
+  @SuppressWarnings("unchecked")
+  public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
+    
+    //Obtener las reservas en estado Reservado o Usado para el período indicado
+    List<Reserva> reservas = entityManager.createQuery("SELECT r FROM Reserva r " +
+      "JOIN r.disponibilidades d " +
+      "WHERE d.recurso.id = :recursoId " +
+      "  AND r.estado IN ('R', 'U') " +
+      "  AND d.fecha BETWEEN :fi AND :ff " +
+      "  AND d.presencial = false ")
+      .setParameter("recursoId", recurso.getId())
+      .setParameter("fi", ventana.getFechaInicial())
+      .setParameter("ff", ventana.getFechaFinal())
+      .getResultList();
+    
+    List<Integer> reservasSinEnviarComunicacion = new ArrayList<Integer>();
+    
+    //Para cada reserva encontrada, cancelarla, enviando las comunicaciones correspondientes
+    for(Reserva reserva : reservas) {
+      cancelarReserva(empresa, recurso, reserva, true);
+      //Enviar mail
+      try {
+        enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora, asunto, cuerpo);
+        //Almacenar datos para SMS y TextoAVoz, si corresponde
+        almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
+      }catch(Exception ex) {
+        reservasSinEnviarComunicacion.add(reserva.getId());
+      }
+    }
+    
+    return reservasSinEnviarComunicacion;
+    
+  }
 }

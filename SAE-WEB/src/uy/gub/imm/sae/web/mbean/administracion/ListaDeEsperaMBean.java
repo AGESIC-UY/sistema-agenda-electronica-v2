@@ -58,6 +58,9 @@ public class ListaDeEsperaMBean extends BaseMBean {
     }
   }
   
+  public ListaDeEsperaMBean() {
+  }
+  
 	@PostConstruct
 	public void init() {
 		boolean huboError = false;
@@ -190,7 +193,6 @@ public class ListaDeEsperaMBean extends BaseMBean {
 
 	private void refrescarHorariosDeEspera(List<Estado> estados, boolean atencionPresencial) {
 		listaDeEsperaSessionMBean.setHorarios(new ArrayList<Horario>());
-		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
 		if (sessionMBean.getRecursoMarcado() != null) {
 			try {
 				if (getListaDeEsperaSessionMBean().getEstadosSeleccionado() == null) {
@@ -200,6 +202,7 @@ public class ListaDeEsperaMBean extends BaseMBean {
 				if(estados == null) {
 					estados = getListaDeEsperaSessionMBean().getEstadosSeleccionado();
 				}
+		    Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
 				List<ReservaDTO> reservas = llamadasEJB.obtenerReservasEnEspera(recursoMarcado, estados, atencionPresencial, sessionMBean.getTimeZone());
 				Horario horario = null;
 				//Recorro las reservas agrupándolas por horario
@@ -215,7 +218,6 @@ public class ListaDeEsperaMBean extends BaseMBean {
 						horario.getListaEspera().add(crearEspera(reserva));
 					}
 				}
-				
 			} catch (UserException uEx) {
 				addErrorMessage(uEx, MSG_ID);
 			}

@@ -60,9 +60,7 @@
 	          <h:outputLabel value="Fechas disponibles"  for="fechasdisp" styleClass="ui-helper-hidden-accessible" />
 	          <h:inputText type="hidden" id="fechasdisp" value="#{paso2AdminMBean.jsonArrayFchDisp}" disabled="true" />
 	         </div>
-					<span class="control-label col-sm-4 col-md-5 label label-align-top">
-						<h:outputText value="#{sessionMBean.textos['seleccione_un_dia']}" />
-					</span>
+					<h:outputText value="#{sessionMBean.textos['seleccione_un_dia']}" styleClass="control-label col-sm-4 col-md-5 label label-align-top"/>
 					<div class="col-sm-8 col-md-7">
 						<div id="datepickerinline" class="calendar-disponibilidad"></div>
 						<p:inputText value="#{paso2AdminMBean.diaSeleccionadoStr}"
@@ -77,10 +75,10 @@
 				</div>
 
 				<div class="form-group">
-					<div class="col-sm-4 col-md-5">
-						<h:outputText styleClass="label label-align-top"
+					<div class="col-sm-4 col-md-5 no-padding">
+						<h:outputText styleClass="label label-align-top no-padding"
 							value="#{sessionMBean.textos['horarios_diponibles']}:" />
-						<h:outputText styleClass="label comentario"
+						<h:outputText styleClass="label comentario no-padding"
 							value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
 					</div>
 					<div class="col-sm-8 col-md-7">

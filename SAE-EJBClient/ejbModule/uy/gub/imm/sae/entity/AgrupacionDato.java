@@ -47,9 +47,12 @@ public class AgrupacionDato implements Serializable{
 	
 	private Integer id;
 	private String nombre;
+  private String etiqueta;
 	private Integer orden;
 	private Date fechaBaja;
-	private boolean borrarFlag;
+	//Indica si se puede eliminar o no (solo las agrupaciones por defecto deberían tener esta bandera en false ya que es utilizada
+	//para determinar justamente eso, si es la agrupación por defecto)
+	private boolean borrarFlag; 
 	private Recurso recurso;
 	private List<DatoASolicitar> datosASolicitar;
 	
@@ -65,6 +68,7 @@ public class AgrupacionDato implements Serializable{
 	public AgrupacionDato (AgrupacionDato a) {
 		id = a.getId();
 		nombre = a.getNombre();
+		etiqueta = a.getEtiqueta();
 		orden = a.getOrden();
 		fechaBaja = a.getFechaBaja();
 		borrarFlag = a.getBorrarFlag(); 
@@ -78,20 +82,34 @@ public class AgrupacionDato implements Serializable{
     public Integer getId() {
 		return id;
 	}
+	
 	public void setId(Integer id) {
 		this.id = id;
 	}
+	
 	@Column (nullable=false, length=50)	
 	public String getNombre() {
 		return nombre;
 	}
+	
 	public void setNombre(String nombre) {
 		this.nombre = nombre;
 	}
+	
+  @Column (nullable=false, length=50) 
+  public String getEtiqueta() {
+    return etiqueta;
+  }
+  
+  public void setEtiqueta(String etiqueta) {
+    this.etiqueta = etiqueta;
+  }
+  
 	@Column (nullable=false)
 	public Integer getOrden() {
 		return orden;
 	}
+	
 	public void setOrden(Integer orden) {
 		this.orden = orden;
 	}
@@ -101,6 +119,7 @@ public class AgrupacionDato implements Serializable{
 	public Date getFechaBaja() {
 		return fechaBaja;
 	}
+	
 	public void setFechaBaja(Date fin) {
 		this.fechaBaja = fin;
 	}
@@ -114,13 +133,13 @@ public class AgrupacionDato implements Serializable{
 		this.borrarFlag = borrarFlag;
 	}
 
-	
 	@XmlTransient
 	@ManyToOne (optional = false)
 	@JoinColumn (name = "aere_id", nullable = false)
 	public Recurso getRecurso() {
 		return recurso;
 	}
+	
 	public void setRecurso(Recurso recurso) {
 		this.recurso = recurso;
 	}
@@ -129,9 +148,9 @@ public class AgrupacionDato implements Serializable{
 	public List<DatoASolicitar> getDatosASolicitar() {
 		return datosASolicitar;
 	}
+	
 	public void setDatosASolicitar(List<DatoASolicitar> datosASolicitar) {
 		this.datosASolicitar = datosASolicitar;
 	}
-	
 	
 }

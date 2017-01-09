@@ -354,6 +354,12 @@ public class EliminarDispMBean extends BaseMBean {
       addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
     }
     
+    if(fechaDesde!=null && fechaHasta!=null) {
+      if(fechaDesde.after(fechaHasta)) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), MSG_ID);
+      }
+    }
+    
     if(hayError) {
       setCuposPorDia(null);
       return;

@@ -628,10 +628,6 @@ public class SesionMBean	extends BaseMBean {
 		this.paso3Captcha = paso3Captcha;
 	}
 	
-	//====================================================================
-	
-	
-	
 }
 
 
