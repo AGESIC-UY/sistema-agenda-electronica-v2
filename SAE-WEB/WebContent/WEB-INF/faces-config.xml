@@ -280,8 +280,8 @@
 	</managed-bean>
 
 	<managed-bean>
-		<managed-bean-name>pasoAdminFinalMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.PasoAdminFinalMBean</managed-bean-class>
+		<managed-bean-name>pasoFinalAdminMBean</managed-bean-name>
+		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.PasoFinalAdminMBean</managed-bean-class>
 		<managed-bean-scope>view</managed-bean-scope>
 		<managed-property>
 			<property-name>sessionMBean</property-name>

@@ -110,7 +110,11 @@ $.datepicker.regional['es'] = {
 $.datepicker.setDefaults($.datepicker.regional['es']);
 
 $(function() {
-	var formatoFecha = document.getElementById('formatoFecha').value;
+  var formatoFecha0 = document.getElementById('formatoFecha');
+  var formatoFecha = "dd/MM/yyyy";
+  if(formatoFecha0 != null) {
+    formatoFecha = formatoFecha0.value;
+  }
   $( "#datepickerinline" ).datepicker({
   	dateFormat: formatoFecha,
   	onSelect: function(date) { 

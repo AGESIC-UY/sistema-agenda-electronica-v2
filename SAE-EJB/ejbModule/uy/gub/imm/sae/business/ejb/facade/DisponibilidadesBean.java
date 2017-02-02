@@ -69,7 +69,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	 * No toma en cuenta las disponibilidades presenciales
 	 */
 	@SuppressWarnings("unchecked")
-	public void eliminarDisponibilidades(Recurso recurso, VentanaDeTiempo ventana) throws UserException {
+	public int eliminarDisponibilidades(Recurso recurso, VentanaDeTiempo ventana) throws UserException {
 		
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
@@ -123,16 +123,12 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
   		.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
   		.getResultList();				
 		
-		//Si la lista obtenida es vacía no hay nada que eliminar
-		if (disponibilidades == null || disponibilidades.isEmpty()){
-			throw new UserException("no_hay_disponibilidades_para_el_periodo_especificado");			
-		} else {
-			Date ahora = new Date();
-			for (Disponibilidad d : disponibilidades) {
-				d.setFechaBaja(ahora);
-			}
+		Date ahora = new Date();
+		for (Disponibilidad d : disponibilidades) {
+			d.setFechaBaja(ahora);
 		}
-		
+
+		return disponibilidades.size();
 	}
 
 	/**

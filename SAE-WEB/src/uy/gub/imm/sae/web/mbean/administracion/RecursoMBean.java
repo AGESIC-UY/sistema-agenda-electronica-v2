@@ -23,6 +23,8 @@ package uy.gub.imm.sae.web.mbean.administracion;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,7 +50,9 @@ import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
+import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Oficina;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -56,6 +60,7 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
+import uy.gub.imm.sae.web.common.TicketUtiles;
 
 public class RecursoMBean extends BaseMBean{
 
@@ -89,6 +94,41 @@ public class RecursoMBean extends BaseMBean{
 	private List<SelectItem> oficinas = new ArrayList<SelectItem>(0);
 
 	private UploadedFile archivo;
+
+  List<SelectItem> nombresFuentes = null;
+  List<SelectItem> tamaniosFuentes = null;
+	
+  
+  @PostConstruct
+  public void initRecurso(){
+    limpiarMensajesError();
+    
+    Agenda agenda = sessionMBean.getAgendaMarcada();
+    //Se controla que se haya Marcado una agenda para trabajar con los recursos
+    if (agenda == null){
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+    }
+    
+    try {
+      List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, false);
+      setOficinas(oficinas);
+    }catch(ApplicationException aEx) {
+      addErrorMessage(aEx.getMessage());
+      aEx.printStackTrace();
+    }
+
+    TicketUtiles ticketUtiles = new TicketUtiles();
+    nombresFuentes = new ArrayList<SelectItem>();
+    for(String fuente : ticketUtiles.obtenerFuentesDisponibles()) {
+      nombresFuentes.add(new SelectItem(fuente, fuente));
+    }
+    tamaniosFuentes = new ArrayList<SelectItem>();
+    for(int i=4; i<20; i++) {
+      tamaniosFuentes.add(new SelectItem(i, ""+i));
+    }
+    
+  }
+
 	/**************************************************************************/
 	/*                           Getters y Setters                            */	
 	/**************************************************************************/	
@@ -100,11 +140,13 @@ public class RecursoMBean extends BaseMBean{
 		this.sessionMBean = sessionMBean;
 	}
 	
-
 	public Recurso getRecursoNuevo() {
-
 		if (recursoNuevo == null) {
 			recursoNuevo = new Recurso();
+			recursoNuevo.setFuenteTicket("helvetica");
+			recursoNuevo.setTamanioFuenteChica(6);
+      recursoNuevo.setTamanioFuenteNormal(10);
+      recursoNuevo.setTamanioFuenteGrande(12);
 		}
 		return recursoNuevo;
 	}
@@ -113,7 +155,6 @@ public class RecursoMBean extends BaseMBean{
 		recursoNuevo = r;
 	}
 	
-
 	//Recurso seleccionado para eliminacion/modificacion
 	public Recurso getRecursoSeleccionado() {
 		return sessionMBean.getRecursoSeleccionado();
@@ -154,42 +195,18 @@ public class RecursoMBean extends BaseMBean{
 	}
 
 	public DatoDelRecurso getDatoDelRecursoNuevo() {
-
 		if (datoDelRecursoNuevo == null) {
 			datoDelRecursoNuevo = new DatoDelRecurso();
-			
 		}
 		return datoDelRecursoNuevo;
 	}
 
-	
-	
 	public UploadedFile getArchivo() {
 		return archivo;
 	}
 
 	public void setArchivo(UploadedFile archivo) {
 		this.archivo = archivo;
-	}
-
-	@PostConstruct
-	public void initRecurso(){
-		limpiarMensajesError();
-		
-		Agenda agenda = sessionMBean.getAgendaMarcada();
-		//Se controla que se haya Marcado una agenda para trabajar con los recursos
-		if (agenda == null){
-			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
-		}
-		
-		try {
-		  List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, false);
-		  setOficinas(oficinas);
-		}catch(ApplicationException aEx) {
-			addErrorMessage(aEx.getMessage());
-			aEx.printStackTrace();
-		}
-		
 	}
 
 	/**************************************************************************/
@@ -317,6 +334,16 @@ public class RecursoMBean extends BaseMBean{
         error = true;
         addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero"), FORM_ID+":cuposPresencial");
   		}
+      if((recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue()) && 
+          (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue()) && 
+          (recurso.getPresencialMiercoles()==null || !recurso.getPresencialMiercoles().booleanValue()) &&
+          (recurso.getPresencialJueves()==null || !recurso.getPresencialJueves().booleanValue()) &&
+          (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue()) &&
+          (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue()) &&
+          (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue())) {
+        error = true;
+        addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_dia"), FORM_ID+":diaAplicarHidden");
+      }
     }
 		
 		recurso.setNombre(getRecursoNuevo().getNombre().trim());
@@ -360,25 +387,22 @@ public class RecursoMBean extends BaseMBean{
 	public void eliminar(ActionEvent ev) {
 		limpiarMensajesError();
 		
-		Recurso r = this.sessionMBean.getRecursoSeleccionado();
-		if ( r != null) {
+		Recurso recurso = this.sessionMBean.getRecursoSeleccionado();
+		if (recurso != null) {
  			try {
- 				if(sessionMBean.getRecursoMarcado()!=null && sessionMBean.getRecursoMarcado().getId().equals(r.getId())) {
+ 				if(sessionMBean.getRecursoMarcado()!=null && sessionMBean.getRecursoMarcado().getId().equals(recurso.getId())) {
  					sessionMBean.desseleccionarRecurso();
  				}
- 				
- 				recursosEJB.eliminarRecurso(r);
+ 				recursosEJB.eliminarRecurso(recurso, sessionMBean.getTimeZone());
  				sessionMBean.cargarRecursos();
  				sessionMBean.desmarcarRecurso();
-
  				addInfoMessage(sessionMBean.getTextos().get("recurso_eliminado"), MSG_ID);
  			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
  			} finally {
  				this.sessionMBean.setRecursoSeleccionado(null);
  			}
- 		}
-		else {
+ 		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
 	}
@@ -546,6 +570,16 @@ public class RecursoMBean extends BaseMBean{
  	          error = true;
  	          addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero"), FORM_ID+":cuposPresencial");
  		      }
+ 		      if((recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue()) && 
+ 		          (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue()) && 
+ 		          (recurso.getPresencialMiercoles()==null || !recurso.getPresencialMiercoles().booleanValue()) &&
+ 		          (recurso.getPresencialJueves()==null || !recurso.getPresencialJueves().booleanValue()) &&
+ 		          (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue()) &&
+ 		          (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue()) &&
+ 		          (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue())) {
+            error = true;
+            addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_dia"), FORM_ID+":diaAplicarHidden");
+ 		      }
  		    }
  				recurso.setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
  				recurso.setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
@@ -660,37 +694,39 @@ public class RecursoMBean extends BaseMBean{
 		Recurso recursoBase;
 		try {
 			recursoBase = recursosEJB.consultarRecurso(recurso);
-			sessionMBean.getRecursoSeleccionado().setAgenda(recursoBase.getAgenda());
-			sessionMBean.getRecursoSeleccionado().setCantDiasAGenerar(recursoBase.getCantDiasAGenerar());
-			sessionMBean.getRecursoSeleccionado().setDepartamento(recursoBase.getDepartamento());
-			sessionMBean.getRecursoSeleccionado().setDescripcion(recursoBase.getDescripcion());
-			sessionMBean.getRecursoSeleccionado().setDiasInicioVentanaInternet(recursoBase.getDiasInicioVentanaInternet());
-			sessionMBean.getRecursoSeleccionado().setDiasInicioVentanaIntranet(recursoBase.getDiasInicioVentanaIntranet());
-			sessionMBean.getRecursoSeleccionado().setDiasVentanaInternet(recursoBase.getDiasVentanaInternet());
-			sessionMBean.getRecursoSeleccionado().setDiasVentanaIntranet(recursoBase.getDiasVentanaIntranet());
-			sessionMBean.getRecursoSeleccionado().setDireccion(recursoBase.getDireccion());
-			
-			
-			sessionMBean.getRecursoSeleccionado().setFechaFin(recursoBase.getFechaFin());
-			sessionMBean.getRecursoSeleccionado().setFechaFinDisp(recursoBase.getFechaFinDisp());
-			sessionMBean.getRecursoSeleccionado().setFechaInicio(recursoBase.getFechaInicio());
-			sessionMBean.getRecursoSeleccionado().setFechaInicioDisp(recursoBase.getFechaInicioDisp());
-			sessionMBean.getRecursoSeleccionado().setHorarios(recursoBase.getHorarios());
-			sessionMBean.getRecursoSeleccionado().setLargoListaEspera(recursoBase.getLargoListaEspera());
-			sessionMBean.getRecursoSeleccionado().setLatitud(recursoBase.getLatitud());
-			sessionMBean.getRecursoSeleccionado().setLocalidad(recursoBase.getLocalidad());
-			sessionMBean.getRecursoSeleccionado().setLongitud(recursoBase.getLongitud());
-			sessionMBean.getRecursoSeleccionado().setMostrarNumeroEnLlamador(recursoBase.getMostrarNumeroEnLlamador());
-			sessionMBean.getRecursoSeleccionado().setMostrarNumeroEnTicket(recursoBase.getMostrarNumeroEnTicket());
-			sessionMBean.getRecursoSeleccionado().setMostrarIdEnTicket(recursoBase.getMostrarIdEnTicket());
-			sessionMBean.getRecursoSeleccionado().setNombre(recursoBase.getNombre());
-			sessionMBean.getRecursoSeleccionado().setReservaMultiple(recursoBase.getReservaMultiple());
-			sessionMBean.getRecursoSeleccionado().setSabadoEsHabil(recursoBase.getSabadoEsHabil());
-      sessionMBean.getRecursoSeleccionado().setDomingoEsHabil(recursoBase.getDomingoEsHabil());
-			sessionMBean.getRecursoSeleccionado().setSerie(recursoBase.getSerie());
-			sessionMBean.getRecursoSeleccionado().setTelefonos(recursoBase.getTelefonos());
-			sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(recursoBase.getVentanaCuposMinimos());
-			sessionMBean.getRecursoSeleccionado().setVisibleInternet(recursoBase.getVisibleInternet());
+			recurso.setAgenda(recursoBase.getAgenda());
+			recurso.setCantDiasAGenerar(recursoBase.getCantDiasAGenerar());
+			recurso.setDepartamento(recursoBase.getDepartamento());
+			recurso.setDescripcion(recursoBase.getDescripcion());
+			recurso.setDiasInicioVentanaInternet(recursoBase.getDiasInicioVentanaInternet());
+			recurso.setDiasInicioVentanaIntranet(recursoBase.getDiasInicioVentanaIntranet());
+			recurso.setDiasVentanaInternet(recursoBase.getDiasVentanaInternet());
+			recurso.setDiasVentanaIntranet(recursoBase.getDiasVentanaIntranet());
+			recurso.setDireccion(recursoBase.getDireccion());
+			recurso.setFechaFin(recursoBase.getFechaFin());
+			recurso.setFechaFinDisp(recursoBase.getFechaFinDisp());
+			recurso.setFechaInicio(recursoBase.getFechaInicio());
+			recurso.setFechaInicioDisp(recursoBase.getFechaInicioDisp());
+			recurso.setHorarios(recursoBase.getHorarios());
+			recurso.setLargoListaEspera(recursoBase.getLargoListaEspera());
+			recurso.setLatitud(recursoBase.getLatitud());
+			recurso.setLocalidad(recursoBase.getLocalidad());
+			recurso.setLongitud(recursoBase.getLongitud());
+			recurso.setMostrarNumeroEnLlamador(recursoBase.getMostrarNumeroEnLlamador());
+      recurso.setMostrarIdEnTicket(recursoBase.getMostrarIdEnTicket());
+			recurso.setMostrarNumeroEnTicket(recursoBase.getMostrarNumeroEnTicket());
+			recurso.setFuenteTicket(recursoBase.getFuenteTicket());
+			recurso.setTamanioFuenteChica(recursoBase.getTamanioFuenteChica());
+			recurso.setTamanioFuenteNormal(recursoBase.getTamanioFuenteNormal());
+			recurso.setTamanioFuenteGrande(recursoBase.getTamanioFuenteGrande());
+			recurso.setNombre(recursoBase.getNombre());
+			recurso.setReservaMultiple(recursoBase.getReservaMultiple());
+			recurso.setSabadoEsHabil(recursoBase.getSabadoEsHabil());
+      recurso.setDomingoEsHabil(recursoBase.getDomingoEsHabil());
+			recurso.setSerie(recursoBase.getSerie());
+			recurso.setTelefonos(recursoBase.getTelefonos());
+			recurso.setVentanaCuposMinimos(recursoBase.getVentanaCuposMinimos());
+			recurso.setVisibleInternet(recursoBase.getVisibleInternet());
 		} catch (UserException e) {
 			e.printStackTrace();
 		}
@@ -934,5 +970,41 @@ public class RecursoMBean extends BaseMBean{
     }
     return oficinas;
 	}
+	
+	
+	public List<SelectItem> getTamaniosFuentes() {
+	  return tamaniosFuentes;
+	}
+
+
+  public List<SelectItem> getNombresFuentes() {
+    return nombresFuentes;
+  }
+  
+  /**
+   * Método que genera un ticket dummy con una reserva falsa, utilizado para probar cómo queda luego de cambiar la fuente
+   * @return
+   */
+  public String generarTicket(Recurso recurso) {
+    
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(cal.getTimeInMillis()));
+    Reserva reserva = new Reserva();
+    reserva.setCodigoSeguridad("00000");
+    reserva.setNumero(0);
+    reserva.setTrazabilidadGuid("XXXXXXXXX");
+    reserva.setId(0);
+    Disponibilidad disp = new Disponibilidad();
+    disp.setFecha(cal.getTime());
+    disp.setHoraInicio(cal.getTime());
+    reserva.getDisponibilidades().add(disp);
+    
+    TicketUtiles ticketUtiles = new TicketUtiles();
+    ticketUtiles.generarTicket(sessionMBean.getEmpresaActual(), sessionMBean.getAgendaMarcada(), recurso, sessionMBean.getTimeZone(), 
+        reserva, sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), sessionMBean.getTextos(), false);
+    
+    return null;
+  }
+
 	
 }

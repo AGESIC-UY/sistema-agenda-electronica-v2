@@ -264,16 +264,30 @@ public class GenDisponibilidadMBean extends BaseMBean {
 				}
 			}
 			
+      Calendar hoy = new GregorianCalendar();
+      hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
+      hoy.set(Calendar.HOUR_OF_DAY, 0);
+      hoy.set(Calendar.MINUTE, 0);
+      hoy.set(Calendar.SECOND, 0);
+      hoy.set(Calendar.MILLISECOND, 0);
 			if (genDispSessionMBean.getFechaInicial() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "formGenerarPatronDia:fechaDesde");
 				huboError = true;
+			}else {
+        if(genDispSessionMBean.getFechaInicial().before(hoy.getTime())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_hoy"), "formGenerarPatronDia:fechaDesde");
+          huboError = true;
+        }
 			}
-	
 			if (genDispSessionMBean.getFechaFinal() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), "formGenerarPatronDia:fechaHasta");
 				huboError = true;
-			}
-			
+			}else {
+        if(genDispSessionMBean.getFechaFinal().before(hoy.getTime())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_igual_o_posterior_a_hoy"), "formGenerarPatronDia:fechaHasta");
+          huboError = true;
+        }
+      }
 			if(genDispSessionMBean.getFechaInicial()!=null && genDispSessionMBean.getFechaFinal()!=null){
 				if(genDispSessionMBean.getFechaInicial().compareTo(genDispSessionMBean.getFechaFinal()) > 0) {
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formGenerarPatronDia:fechaDesde", "formGenerarPatronDia:fechaHasta");

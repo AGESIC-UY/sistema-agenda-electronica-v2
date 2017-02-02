@@ -169,7 +169,7 @@ public class Paso2MBean extends BaseMBean {
 		if(sesionMBean.getDisponibilidadesDelDiaMatutina()==null) {
 			return false;
 		}
-		return sesionMBean.getDisponibilidadesDelDiaMatutina().size() != 0;
+		return !sesionMBean.getDisponibilidadesDelDiaMatutina().isEmpty();
 	}
 
 	public RowList<Disponibilidad> getDisponibilidadesMatutina() {
@@ -184,7 +184,7 @@ public class Paso2MBean extends BaseMBean {
 		if(sesionMBean.getDisponibilidadesDelDiaVespertina()==null) {
 			return false;
 		}
-		return sesionMBean.getDisponibilidadesDelDiaVespertina().size() != 0;
+		return !sesionMBean.getDisponibilidadesDelDiaVespertina().isEmpty();
 	}
 
 	public RowList<Disponibilidad> getDisponibilidadesVespertina() {
@@ -517,5 +517,11 @@ public class Paso2MBean extends BaseMBean {
 		return errorInit;
 	}
 	
+	public String claseSegunCupo(Disponibilidad disponibilidad) {
+	  if(disponibilidad.getCupo()==null || disponibilidad.getCupo()<1) {
+	    return "cupoNoSeleccionable";
+	  }
+	  return "";
+	}
 	
 }

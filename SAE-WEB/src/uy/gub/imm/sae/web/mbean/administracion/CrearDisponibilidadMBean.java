@@ -105,20 +105,31 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
 				huboError = true;
-			}else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
-				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
-				huboError = true;
-			}else {
-				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
-					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-					huboError = true;
-				}
-				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
-					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
-						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-						huboError = true;
-					}
-				}
+			}else { 
+		    Calendar hoy = new GregorianCalendar();
+		    hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
+		    hoy.set(Calendar.HOUR_OF_DAY, 0);
+		    hoy.set(Calendar.MINUTE, 0);
+		    hoy.set(Calendar.SECOND, 0);
+		    hoy.set(Calendar.MILLISECOND, 0);
+		    if(crearDispSessionMBean.getFechaCrear().before(hoy.getTime())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_hoy"), "formCrearDisponibilidad:fecha");
+          huboError = true;
+		    }else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
+  				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
+  				huboError = true;
+  			}else {
+  				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
+  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
+  					huboError = true;
+  				}
+  				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
+  					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
+  						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
+  						huboError = true;
+  					}
+  				}
+  			}
 			}
 			
 

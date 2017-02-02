@@ -64,15 +64,15 @@
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
 									</f:facet>
-									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? true  : false)}" styleClass="verde"></h:outputText>
-									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? false  : true)}" styleClass="rojo"></h:outputText>
+									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? true  : false)}" styleClass="verde" />
+									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? false  : true)}" styleClass="rojo" />
 								</p:column>
 
 								<p:column>
 									<f:facet name="header">
-										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}" />
 									</f:facet>
-									<h:outputText value="#{rowMM.data.cantReservas}"></h:outputText>
+									<h:outputText value="#{rowMM.data.cantReservas}" />
 								</p:column>
 							</p:dataTable>
 						</div>
@@ -83,7 +83,7 @@
 
 								<f:facet name="header">
 									<h:panelGroup>
-										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}" />
 									</h:panelGroup>
 								</f:facet>
 
@@ -98,17 +98,17 @@
 
 								<p:column>
 									<f:facet name="header">
-										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}" />
 									</f:facet>
-									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? true  : false)}" styleClass="verde"></h:outputText>
-									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? false  : true)}" styleClass="rojo"></h:outputText>
+									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? true  : false)}" styleClass="verde" />
+									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? false  : true)}" styleClass="rojo" />
 								</p:column>
 
 								<p:column>
 									<f:facet name="header">
-										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}" />
 									</f:facet>
-									<h:outputText value="#{rowVM.data.cantReservas}"></h:outputText>
+									<h:outputText value="#{rowVM.data.cantReservas}" />
 								</p:column>
 
 							</p:dataTable>
@@ -133,7 +133,7 @@
 										<f:selectItems value="#{crearDisponibilidadMBean.minutos}" />
 									</h:selectOneMenu>
 									<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
-									<p:message for="seleccionHoraD"></p:message>
+									<p:message for="seleccionHoraD" />
 								</p:outputPanel>
 							</p:outputPanel>
 
@@ -149,7 +149,7 @@
 										<f:selectItems value="#{crearDisponibilidadMBean.minutos}" />
 									</h:selectOneMenu>
 									<h:outputText styleClass="comentario" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
-									<p:message for="seleccionHoraH"></p:message>
+									<p:message for="seleccionHoraH" />
 								</p:outputPanel>
 							</p:outputPanel>
 
@@ -157,7 +157,8 @@
 								<h:outputLabel value="#{sessionMBean.textos['frecuencia']}" for="frecuencia" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText id="frecuencia" value="#{crearDispSessionMBean.frecuencia}" maxlength="5" styleClass="form-control textoCorto" converter="integerConverter" />
-									<p:message for="frecuencia"></p:message>
+									<h:outputText styleClass="comentario" value="(#{sessionMBean.textos['minutos']})" />
+									<p:message for="frecuencia" />
 								</p:outputPanel>
 							</p:outputPanel>
 
@@ -165,7 +166,7 @@
 								<h:outputLabel value="#{sessionMBean.textos['cupo_por_periodo']}" for="cupos" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText id="cupos" value="#{crearDispSessionMBean.cupo}" maxlength="5" styleClass="form-control textoCorto" converter="integerConverter" />
-									<p:message for="cupos"></p:message>
+									<p:message for="cupos" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>

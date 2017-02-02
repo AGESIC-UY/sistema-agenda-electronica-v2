@@ -262,7 +262,7 @@ public class UsuarioMBean extends BaseMBean {
 		if (usuarioEliminar != null){
 			try {
 				Empresa empActual = sessionMBean.getEmpresaActual();
-				usuariosEJB.eliminarUsuarioEmpresa(usuarioEliminar,empActual);
+				usuariosEJB.eliminarUsuarioEmpresa(usuarioEliminar, empActual);
 				//Recargar la lista de usuarios
 				List<Usuario> entidades = usuariosEJB.consultarUsuarios();
 				usuariosSeleccion = new RowList<Usuario>(entidades);

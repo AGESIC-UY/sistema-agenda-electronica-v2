@@ -106,7 +106,8 @@ CREATE TABLE ae_agrupaciones_datos (
     nombre character varying(50) NOT NULL,
     orden integer NOT NULL,
     aere_id integer NOT NULL,
-    borrar_flag boolean NOT NULL
+    borrar_flag boolean NOT NULL,
+    etiqueta character varying(50)
 );
 
 
@@ -153,7 +154,8 @@ CREATE TABLE ae_comunicaciones (
     destino character varying(100) NOT NULL,
     recurso_id integer NOT NULL,
     reserva_id integer NOT NULL,
-    procesado boolean DEFAULT false NOT NULL
+    procesado boolean DEFAULT false NOT NULL,
+    mensaje character varying(4000)
 );
 
 
@@ -198,7 +200,8 @@ CREATE TABLE ae_datos_a_solicitar (
     tipo character varying(30) NOT NULL,
     aead_id integer NOT NULL,
     aere_id integer NOT NULL,
-    borrar_flag boolean DEFAULT true NOT NULL
+    borrar_flag boolean DEFAULT true NOT NULL,
+    solo_lectura boolean DEFAULT false NOT NULL
 );
 
 
@@ -451,7 +454,11 @@ CREATE TABLE ae_recursos (
     presencial_viernes boolean DEFAULT false NOT NULL,
     presencial_sabado boolean DEFAULT false NOT NULL,
     presencial_domingo boolean DEFAULT false NOT NULL,
-    presencial_cupos integer DEFAULT 0 NOT NULL
+    presencial_cupos integer DEFAULT 0 NOT NULL,
+    fuente_ticket character varying(100) DEFAULT 'Helvetica-Bold'::character varying NOT NULL,
+    tamanio_fuente_grande integer DEFAULT 12 NOT NULL,
+    tamanio_fuente_normal integer DEFAULT 10 NOT NULL,
+    tamanio_fuente_chica integer DEFAULT 8 NOT NULL
 );
 
 
@@ -476,7 +483,9 @@ CREATE TABLE ae_reservas (
     trazabilidad_guid character varying(25),
     tramite_codigo character varying(10),
     tramite_nombre character varying(100),
-    serie character varying(3)
+    serie character varying(3),
+    tcancela character varying(1),
+    fcancela timestamp without time zone
 );
 
 

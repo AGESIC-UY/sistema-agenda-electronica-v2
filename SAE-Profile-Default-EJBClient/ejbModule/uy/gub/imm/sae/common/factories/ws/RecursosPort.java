@@ -5,8 +5,6 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
-import uy.gub.imm.sae.common.factories.ws.client.recursos.ApplicationException_Exception;
-import uy.gub.imm.sae.common.factories.ws.client.recursos.BusinessException_Exception;
 import uy.gub.imm.sae.common.factories.ws.client.recursos.RecursosWS;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
@@ -22,10 +20,7 @@ import uy.gub.imm.sae.exception.UserException;
 
 public class RecursosPort implements Recursos{
 
-	private RecursosWS recursos;
-	
 	public RecursosPort (RecursosWS recursos){
-		this.recursos = recursos;
 	}
 	
 	public AgrupacionDato agregarAgrupacionDato(Recurso r, AgrupacionDato a) throws UserException, ApplicationException {
@@ -92,7 +87,7 @@ public class RecursosPort implements Recursos{
 		throw new UnsupportedOperationException();
 	}
 
-	public void eliminarRecurso(Recurso r) throws UserException, ApplicationException {
+	public void eliminarRecurso(Recurso recurso, TimeZone timezone) throws UserException, ApplicationException {
 		throw new UnsupportedOperationException();
 	}
 

@@ -27,9 +27,6 @@ public class ErrorPageRedirectPhaseListener implements javax.faces.event.PhaseLi
 
 	private static final long serialVersionUID = 1L;
 
-	private static String ERROR_OUTCOME = "error";
-	
-	
 	public ErrorPageRedirectPhaseListener() {
 	}
 

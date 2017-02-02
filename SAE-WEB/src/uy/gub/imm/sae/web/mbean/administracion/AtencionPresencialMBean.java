@@ -20,11 +20,8 @@ package uy.gub.imm.sae.web.mbean.administracion;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-import java.io.ByteArrayOutputStream;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -40,18 +37,8 @@ import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.model.SelectItem;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.log4j.Logger;
-
-import com.itextpdf.text.BaseColor;
-import com.itextpdf.text.Document;
-import com.itextpdf.text.Image;
-import com.itextpdf.text.Rectangle;
-import com.itextpdf.text.pdf.BaseFont;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.text.pdf.draw.LineSeparator;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Disponibilidades;
@@ -81,6 +68,7 @@ import uy.gub.imm.sae.exception.ValidacionPorCampoException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
+import uy.gub.imm.sae.web.common.TicketUtiles;
 
 /**
  * Maneja la lógica de generación dinámica de los componentes gráficos que
@@ -157,6 +145,17 @@ public class AtencionPresencialMBean extends BaseMBean {
       addErrorMessage(sessionMBean.getTextos().get("el_recurso_no_admite_atencion_presencial"), MSG_ID);
       return;
     }else {
+      //Determinar si el recurso está vigente para el día actual
+      Calendar hoy = new GregorianCalendar();
+      hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
+      hoy.set(Calendar.HOUR_OF_DAY, 0);
+      hoy.set(Calendar.MINUTE, 0);
+      hoy.set(Calendar.SECOND, 0);
+      hoy.set(Calendar.MILLISECOND, 0);
+      if(recurso.getFechaInicioDisp().after(hoy.getTime()) || recurso.getFechaFinDisp().before(hoy.getTime())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_recurso_no_esta_vigente"), MSG_ID);
+        return;
+      }    
       //Determinar si el recurso admite atención presencial para el día actual
       Calendar cal = new GregorianCalendar();
       cal.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(cal.getTimeInMillis()));
@@ -222,6 +221,16 @@ public class AtencionPresencialMBean extends BaseMBean {
     if(recurso==null || recurso.getPresencialAdmite()==null || !recurso.getPresencialAdmite().booleanValue()) {
       return false;
     }
+    //Determinar si el recurso está vigente para el día actual
+    Calendar hoy = new GregorianCalendar();
+    hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
+    hoy.set(Calendar.HOUR_OF_DAY, 0);
+    hoy.set(Calendar.MINUTE, 0);
+    hoy.set(Calendar.SECOND, 0);
+    hoy.set(Calendar.MILLISECOND, 0);
+    if(recurso.getFechaInicioDisp().after(hoy.getTime()) || recurso.getFechaFinDisp().before(hoy.getTime())) {
+      return false;
+    }    
     //Determinar si el recurso admite atención presencial para el día actual
     Calendar cal = new GregorianCalendar();
     cal.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(cal.getTimeInMillis()));
@@ -426,7 +435,6 @@ public class AtencionPresencialMBean extends BaseMBean {
 				}
 			}
 			
-			//generarTicket(reserva);
 			reservaConfirmada = reserva;
 			reserva = null;
 			
@@ -639,150 +647,9 @@ public class AtencionPresencialMBean extends BaseMBean {
       return null;
     }
     
-    try {
-      BaseFont helveticaBold = BaseFont.createFont(BaseFont.HELVETICA_BOLD, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-      BaseFont helveticaOblique = BaseFont.createFont(BaseFont.HELVETICA_OBLIQUE, BaseFont.CP1252, BaseFont.NOT_EMBEDDED);
-      
-      SimpleDateFormat sdfFecha = new SimpleDateFormat (sessionMBean.getFormatoFecha());
-      
-      Rectangle pageSize = new Rectangle(210,190);
-      
-      Document document = new Document(pageSize);
-      document.addTitle(sessionMBean.getTextos().get("ticket_de_reserva"));
-      
-      ByteArrayOutputStream os = new ByteArrayOutputStream();
-      
-      PdfWriter pdfWriter = PdfWriter.getInstance(document, os);
-
-      document.addTitle(sessionMBean.getTextos().get("confirmacion"));
-      document.addSubject("SAE");
-      document.addAuthor("SAE");
-      document.addKeywords("SAE,ticket,"+sessionMBean.getTextos().get("confirmacion")+","+sessionMBean.getTextos().get("reserva"));
-      document.addProducer();
-      document.addCreator("SAE");
-      document.addHeader("Producer", "SAE");
-      
-      document.open();
-      
-      PdfContentByte pdfContent = pdfWriter.getDirectContent();
-
-      Empresa empresa = sessionMBean.getEmpresaActual();
-      if(empresa != null && empresa.getLogo()!=null) {
-        Image img = Image.getInstance(empresa.getLogo());
-        img.scaleAbsolute(100,30);
-        img.setAbsolutePosition(55, 145);
-        document.add(img);
-      }
-      
-      int posY = 130;
-      
-      //Dibujo primer línea
-      LineSeparator line = new LineSeparator();
-      line.setAlignment(LineSeparator.ALIGN_CENTER);
-      line.setLineColor(BaseColor.BLACK);
-      line.setLineWidth(0.5f);
-      line.drawLine(pdfContent, 10, 200,  posY);
-      posY = posY - 15;
-
-      //Nombre de la agenda (trámite)
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaBold, 10);
-      pdfContent.setTextMatrix(15, posY);
-      pdfContent.showText(sessionMBean.getAgenda().getNombre());
-      pdfContent.endText();
-      posY = posY - 15;
-      
-      //Nombre del recurso (oficina)
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaBold, 10);
-      pdfContent.setTextMatrix(15, posY);
-      pdfContent.showText(sessionMBean.getRecurso().getNombre());
-      pdfContent.endText();
-      posY = posY - 15;
-      
-      //Fecha
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaBold, 12);
-      pdfContent.setTextMatrix(15, posY);
-      pdfContent.showText(sessionMBean.getTextos().get("fecha")+":");
-      pdfContent.endText();
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaBold, 12);
-      pdfContent.setTextMatrix(130, posY);
-      pdfContent.showText(sdfFecha.format(reservaConfirmada.getDisponibilidades().get(0).getFecha()));
-      pdfContent.endText();
-      posY = posY - 15;
-      
-      //Serie y número
-      String serieNumeroLabel = "";
-      String serieNumeroValue = "";
-      String serie = reservaConfirmada.getSerie();
-      if (serie != null && !serie.trim().isEmpty()) {
-        serieNumeroLabel = sessionMBean.getTextos().get("serie") + "/";
-        serieNumeroValue = serie + "/";
-      }
-      serieNumeroLabel = serieNumeroLabel + sessionMBean.getTextos().get("numero");
-      serieNumeroValue = serieNumeroValue + reservaConfirmada.getNumero().toString();
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaBold, 12);
-      pdfContent.setTextMatrix(15, posY);
-      pdfContent.showText(serieNumeroLabel+":");
-      pdfContent.endText();
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaBold, 12);
-      pdfContent.setTextMatrix(130, posY);
-      pdfContent.showText(serieNumeroValue);
-      pdfContent.endText();
-      posY = posY - 15;
-      
-      if(sessionMBean.getAgenda().getConTrazabilidad()!=null && sessionMBean.getAgenda().getConTrazabilidad().booleanValue()) {
-        pdfContent.beginText();
-        pdfContent.setFontAndSize(helveticaBold, 10);
-        pdfContent.setTextMatrix(15, posY);
-        pdfContent.showText(sessionMBean.getTextos().get("codigo_de_trazabilidad")+":");
-        pdfContent.endText();
-  
-        pdfContent.beginText();
-        pdfContent.setFontAndSize(helveticaBold, 12);
-        pdfContent.setTextMatrix(130, posY);
-        pdfContent.showText(reservaConfirmada.getTrazabilidadGuid());
-        pdfContent.endText();
-        posY = posY - 15;
-      }
-      
-      //Dibujo una línea separadora
-      posY = posY + 10;
-      line.setLineColor(BaseColor.BLACK);
-      line.drawLine(pdfWriter.getDirectContent(), 10, 200,  posY);
-      posY = posY - 15;
-      
-      pdfContent.beginText();
-      pdfContent.setFontAndSize(helveticaOblique, 6);
-      pdfContent.setTextMatrix(20, posY);
-      
-      //Cambiar el timezone del formateador de hora para ajustar la fecha de hoy
-      SimpleDateFormat sdfFechaHora = new SimpleDateFormat (sessionMBean.getFormatoFecha() + " " + sessionMBean.getFormatoHora());
-      sdfFechaHora.setTimeZone(sessionMBean.getTimeZone());
-      pdfContent.showText(sessionMBean.getTextos().get("reserva_realizada_el")+" "+sdfFechaHora.format(new Date()));
-      
-      pdfContent.endText();
-      posY = posY - 10;
-      
-      pdfWriter.addJavaScript("this.print({bUI: true, bSilent: true, bShrinkToFit: true});",false); 
-      pdfWriter.addJavaScript("this.closeDoc(true);");   
-      
-      document.close();
-      
-      FacesContext facesContext = FacesContext.getCurrentInstance();
-      HttpServletResponse response = (HttpServletResponse)facesContext.getExternalContext().getResponse();
-      response.setContentType("application/pdf");  
-      os.writeTo(response.getOutputStream());
-      response.getOutputStream().flush();
-      response.getOutputStream().close();
-      facesContext.responseComplete();
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
+    TicketUtiles ticketUtiles = new TicketUtiles();
+    ticketUtiles.generarTicketPresencial(sessionMBean.getEmpresaActual(), sessionMBean.getAgenda(), sessionMBean.getRecurso(), sessionMBean.getTimeZone(), 
+        reservaConfirmada, sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), sessionMBean.getTextos(), true);
     
     return null;
   }

@@ -20,10 +20,13 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
@@ -94,26 +97,22 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	 * @throws ApplicationException 
 	 */
 	@SuppressWarnings({"unchecked" })
-	public void eliminarAgenda(Agenda a) throws UserException, ApplicationException {
-		Agenda agenda = (Agenda) entityManager.find(Agenda.class, a.getId());
-		
+	public void eliminarAgenda(Agenda agenda, TimeZone timezone) throws UserException, ApplicationException {
+		agenda = (Agenda) entityManager.find(Agenda.class, agenda.getId());
 		if (agenda == null) {
 			throw new UserException("no_se_encuentra_la_agenda_especificada");
 		}
-		
 		//Se controla que no existan reservas vivas para la agenda.
-		 if (hayReservasVivas(agenda)){
+		 if (hayReservasVivas(agenda, timezone)){
 			throw new UserException("no_se_puede_eliminar_la_agenda_porque_hay_reservas_vivas");
 		}
-		
 		//elimino recursos
 		 List<Recurso> recursos = (List<Recurso>)entityManager
 			.createQuery("SELECT r FROM Recurso r WHERE r.agenda = :agenda AND r.fechaBaja IS NULL")
-			.setParameter("agenda", a)
+			.setParameter("agenda", agenda)
 			.getResultList(); 
-		 
 		for (Recurso recurso : recursos) {
-			recursosEJB.eliminarRecurso(recurso);
+			recursosEJB.eliminarRecurso(recurso, timezone);
 		}
 		agenda.setFechaBaja(new Date());
 	}
@@ -404,19 +403,21 @@ private void copiarRecursoParaAgenda(Agenda acopia, Recurso r, String nombre, St
 		}
 	}
 	
-	private boolean hayReservasVivas(Agenda a) throws ApplicationException{
-		try {Long cant = (Long) entityManager
-					.createQuery("SELECT count(r) FROM Disponibilidad d JOIN d.reservas r " +
-							"WHERE d.recurso.agenda = :agenda " +
-							"  AND d.fecha >= :fecha" +
-							"  AND d.horaFin >= :hora" +
-							"  AND r.estado IN ('R','P')")
-					.setParameter("agenda", a)
-					.setParameter("fecha", new Date())
-					.setParameter("hora", new Date())
-					.getSingleResult();
-
-		return (cant > 0);
+	private boolean hayReservasVivas(Agenda agenda, TimeZone timezone) throws ApplicationException{
+		try {
+      Calendar cal = new GregorianCalendar();
+      cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
+		  Long cant = (Long) entityManager
+  			.createQuery("SELECT count(r) FROM Disponibilidad d JOIN d.reservas r " +
+  					"WHERE d.recurso.agenda = :agenda " +
+  					"  AND d.fecha >= :fecha" +
+  					"  AND d.horaFin >= :hora" +
+  					"  AND r.estado IN ('R','P')")
+  			.setParameter("agenda", agenda)
+  			.setParameter("fecha", cal.getTime())
+  			.setParameter("hora", cal.getTime())
+  			.getSingleResult();
+		  return (cant > 0);
 		}catch (Exception e){
 			throw new ApplicationException(e);
 		}

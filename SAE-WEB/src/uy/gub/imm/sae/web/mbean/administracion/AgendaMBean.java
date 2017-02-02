@@ -37,6 +37,7 @@ import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
 import org.primefaces.component.datatable.DataTable;
+import org.primefaces.context.RequestContext;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Agendas;
@@ -71,7 +72,6 @@ public class AgendaMBean extends BaseMBean {
 	private Row<Agenda> rowSelect;
 	private DataTable agendasDataTable;
 	
-	
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
@@ -89,17 +89,14 @@ public class AgendaMBean extends BaseMBean {
 		}
 		return agendasSeleccion;
 	}		
-
 	
 	public Agenda getAgendaNueva() {
-
 		if (agendaNueva == null) {
 			agendaNueva = new Agenda();
 		}
 		return agendaNueva;
 	}
 
-	
 	//Agenda seleccionada para eliminacion/modificacion
 	public Agenda getAgendaSeleccionada() {
 		return sessionMBean.getAgendaSeleccionada();
@@ -112,13 +109,9 @@ public class AgendaMBean extends BaseMBean {
 		}
 	}
 
-	
 	public void crear(ActionEvent e) {
-		
 		limpiarMensajesError();
-		
 		boolean hayErrores = false;
-		
 		Agenda agendaCrear = getAgendaNueva();
 		if(agendaCrear.getNombre() == null || agendaCrear.getNombre().trim().equals("")){
 			addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agenda_es_obligatorio"), "form:nombreAgenda");
@@ -145,6 +138,11 @@ public class AgendaMBean extends BaseMBean {
           addErrorMessage("", "form:tramites:codigoTramite");
           hayErrores = true;
         }else {
+          //Esto es necesario porque al utilizar el método addErrorMessage para colorear en rojo el fondo de los campos con error, dado que todas las instancias
+          //del bloque comparten el mismo componente JSF, todas ellas quedan con color rojo, incluso si no tienen error (JSF utiliza el mismo componente para todos los divs).
+          //Esto lo que hace es agendar un código JavaScript que le quita la clase 'form-group-con-error' al componente.
+          String compDomId = "form:tramites:"+ind+":fgCodigoTramite";
+          RequestContext.getCurrentInstance().execute("document.getElementById('"+compDomId+"').className=document.getElementById('"+compDomId+"').className.replace('form-group-con-error','')");
           String claveTramite = "["+tramite.getTramiteCodigo().trim()+"]["+tramite.getTramiteNombre().trim()+"]";
           claveTramite = claveTramite.toLowerCase();
           if(tramitesUsados.contains(claveTramite)) {
@@ -163,11 +161,9 @@ public class AgendaMBean extends BaseMBean {
 		if(hayErrores) {
 			return;
 		}
-		
     if(agendaCrear.getDescripcion() == null){
       agendaCrear.setDescripcion("");
     }
-		
 		String sIdiomasSeleccionados = "";
 		if(agendaSessionMBean.getIdiomasSeleccionados() != null) {
 			for(String idioma : agendaSessionMBean.getIdiomasSeleccionados()) {
@@ -200,34 +196,30 @@ public class AgendaMBean extends BaseMBean {
 	}
 	
 	public void eliminar(ActionEvent event) {
-		Agenda a = sessionMBean.getAgendaSeleccionada();
-		if (a != null){
+		Agenda agenda = sessionMBean.getAgendaSeleccionada();
+		if (agenda != null){
  			try {
- 				if(sessionMBean.getAgendaMarcada()!=null && sessionMBean.getAgendaMarcada().getId().equals(a.getId())) {
+ 				if(sessionMBean.getAgendaMarcada()!=null && sessionMBean.getAgendaMarcada().getId().equals(agenda.getId())) {
  					sessionMBean.desseleccionarAgenda();
  				}
- 				agendasEJB.eliminarAgenda(a);
+ 				agendasEJB.eliminarAgenda(agenda, sessionMBean.getTimeZone());
 				sessionMBean.cargarAgendas();
  				agendasSeleccion = null;
 				addInfoMessage(sessionMBean.getTextos().get("agenda_eliminada"), MSG_ID);
 			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
  			}
-		}
-		else {
+		}else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-		
 	}
 
 	@SuppressWarnings("unchecked")
 	public String modificar() {
 	  try {
-	  
   		this.rowSelect = (Row<Agenda>)agendasDataTable.getRowData();
   		if (this.rowSelect != null){
   			Agenda agenda = rowSelect.getData();
-  			
   			//Cargar los trámites de la agenda
   			List<TramiteAgenda> tramites = generalEJB.consultarTramites(agenda);
   			agenda.setTramites(tramites);
@@ -253,14 +245,10 @@ public class AgendaMBean extends BaseMBean {
 	  }
 	}
 
-	
 	public String guardar() {
-		
 		limpiarMensajesError();
-		
 		Agenda agendaSeleccionada = sessionMBean.getAgendaSeleccionada();
 		if (agendaSeleccionada != null) {
-			
 			boolean hayErrores = false;
 			if(agendaSeleccionada.getNombre() == null || agendaSeleccionada.getNombre().trim().equals("")){
 				addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agenda_es_obligatorio"), "form:nombreAgenda");
@@ -287,6 +275,11 @@ public class AgendaMBean extends BaseMBean {
             addErrorMessage("", "form:tramites:codigoTramite");
 	          hayErrores = true;
 	        }else {
+	          //Esto es necesario porque al utilizar el método addErrorMessage para colorear en rojo el fondo de los campos con error, dado que todas las instancias
+	          //del bloque comparten el mismo componente JSF, todas ellas quedan con color rojo, incluso si no tienen error (JSF utiliza el mismo componente para todos los divs).
+	          //Esto lo que hace es agendar un código JavaScript que le quita la clase 'form-group-con-error' al componente.
+	          String compDomId = "form:tramites:"+ind+":fgCodigoTramite";
+	          RequestContext.getCurrentInstance().execute("document.getElementById('"+compDomId+"').className=document.getElementById('"+compDomId+"').className.replace('form-group-con-error','')");
 	          String claveTramite = "["+tramite.getTramiteCodigo().trim()+"]["+tramite.getTramiteNombre().trim()+"]";
 	          claveTramite = claveTramite.toLowerCase();
 	          if(tramitesUsados.contains(claveTramite)) {
@@ -302,16 +295,12 @@ public class AgendaMBean extends BaseMBean {
 	        hayErrores = true;
 	      }
 	    }
-			
 			if(hayErrores) {
 				return null;
 			}
-
       if(agendaSeleccionada.getDescripcion() == null){
         agendaSeleccionada.setDescripcion("");
       }
-			
-			
 			String sIdiomasSeleccionados = "";
 			if(agendaSessionMBean.getIdiomasSeleccionados() != null) {
 				for(String idioma : agendaSessionMBean.getIdiomasSeleccionados()) {
@@ -322,14 +311,11 @@ public class AgendaMBean extends BaseMBean {
 				}
 			}
 			agendaSeleccionada.setIdiomas(sIdiomasSeleccionados);
-			
  			try {
- 				
  				if(agendasEJB.existeAgendaPorNombre(agendaSeleccionada)) {
  					addErrorMessage(sessionMBean.getTextos().get("ya_existe_una_agenda_con_el_nombre_especificado"), "form:nombreAgenda");
  					return null;
  				}
- 				
  				agendasEJB.modificarAgenda(agendaSeleccionada);
 				sessionMBean.cargarAgendas();
  				agendasSeleccion = null;
@@ -339,16 +325,16 @@ public class AgendaMBean extends BaseMBean {
  			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
  			}
-		}
-		else {
+		}else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-		
 		return null;
 	}
+	
 	public AgendaSessionMBean getAgendaSessionMBean() {
 		return agendaSessionMBean;
 	}
+	
 	public void setAgendaSessionMBean(AgendaSessionMBean agendaSessionMBean) {
 		this.agendaSessionMBean = agendaSessionMBean;
 	}
@@ -383,7 +369,6 @@ public class AgendaMBean extends BaseMBean {
 	public void setAgendasDataTable(DataTable agendasDataTable) {
 		this.agendasDataTable = agendasDataTable;
 	}
-	
 	
 	//=============================================================================
 	//Datos de los tramites 
@@ -423,22 +408,6 @@ public class AgendaMBean extends BaseMBean {
 	}
 	
 	private void recargarTramites(boolean actualizar) {
-	  /*	  
-	  //Para desarrollo si no funciona el servicio web de tramites
-    List<Tramite> ts = new ArrayList();
-    for(int i=1;i<10;i++) {
-      Tramite t = new Tramite();
-      t.setEmpresaId(sessionMBean.getEmpresaActual().getId());
-      t.setId(""+sessionMBean.getEmpresaActual().getId()+"-"+i);
-      t.setNombre("Trámite "+i);
-      ts.add(t);
-    }
-    setTramites(ts);
-    if(true) {
-      return;
-    }
-	  */
-	  
 		try {
 			if(sessionMBean.getEmpresaActual() == null) {
 				setTramites(null);
@@ -476,11 +445,9 @@ public class AgendaMBean extends BaseMBean {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void copiar(ActionEvent event) 
-	{
-		Agenda a=((Row<Agenda>)agendasDataTable.getRowData()).getData();
-		if (a != null) 
-		{
+	public void copiar(ActionEvent event) {
+		Agenda a=((Row<Agenda>)agendasDataTable.getRowData()).getData(); 
+		if (a != null) {
 			try {
 				agendasEJB.copiarAgenda(a);
 				sessionMBean.cargarAgendas();
@@ -507,8 +474,8 @@ public class AgendaMBean extends BaseMBean {
 		agendaSessionMBean.setIdiomasSeleccionados(idiomasSeleccionados);
 	}
 	
-	
 	public void agregarTramite() {
+	  limpiarMensajesError();
 	  TramiteAgenda tramite = new TramiteAgenda();
 	  tramite.setAgenda(this.agendaNueva);
 	  this.agendaNueva.getTramites().add(tramite);
@@ -535,20 +502,20 @@ public class AgendaMBean extends BaseMBean {
   }
 
   public void quitarTramite(Integer ordinal) {
+    limpiarMensajesError();
     TramiteAgenda ta = this.agendaNueva.getTramites().remove(ordinal.intValue());
     ta.setAgenda(null);
   }
   
-  
-  
-  
   public void agregarTramiteMod() {
+    limpiarMensajesError();
     TramiteAgenda tramite = new TramiteAgenda();
     tramite.setAgenda(this.agendaNueva);
     this.getAgendaSeleccionada().getTramites().add(tramite);
   }
   
   public void quitarTramiteMod(Integer ordinal) {
+    limpiarMensajesError();
     TramiteAgenda ta = this.getAgendaSeleccionada().getTramites().remove(ordinal.intValue());
     ta.setAgenda(null);
   }

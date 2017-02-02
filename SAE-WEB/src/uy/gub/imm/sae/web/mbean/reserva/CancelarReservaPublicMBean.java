@@ -1,7 +1,9 @@
 package uy.gub.imm.sae.web.mbean.reserva;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -219,12 +221,33 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 				//Obtener la reserva
 				Reserva reserva = consultaEJB.consultarReservaId(reservaId, recurso.getId());
 				
-				if(reserva==null || !reserva.getEstado().toString().equals("R")) {
-					addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
-					limpiarSession();
-					hayErrorInit = true;
-					return;
+				if(reserva == null) {
+          addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
+          limpiarSession();
+          hayErrorInit = true;
+          return;
+				}else {
+	        if(!reserva.getEstado().toString().equals("R")) {
+	          //Determinar si la reserva está en estado Reservada
+	          addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
+	          limpiarSession();
+	          hayErrorInit = true;
+	          return;
+	        }else {
+  				  //Determinar si la reserva está vigente
+  			    Calendar calAhora = new GregorianCalendar();
+  			    calAhora.add(Calendar.MILLISECOND, sesionMBean.getTimeZone().getOffset(calAhora.getTimeInMillis()));
+  			    Calendar calReserva = new GregorianCalendar();
+  			    calReserva.setTime(reserva.getDisponibilidades().get(0).getHoraInicio());
+  			    if(calReserva.before(calAhora)) {
+              addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
+              limpiarSession();
+              hayErrorInit = true;
+              return;
+  			    }
+	        }
 				}
+				
 				//this.sesionMBean.setReserva(reserva); //Para la cancelación se usa setReservaDatos
 				this.sesionMBean.setReservaDatos(reserva);
 				this.sesionMBean.setCodigoSeguridadReserva("");

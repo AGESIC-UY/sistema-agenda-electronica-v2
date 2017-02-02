@@ -41,13 +41,14 @@ import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoAgenda;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 /**
  * Presenta todos los datos de la reserva y da la opción de imprimir un recibo.
  * @author im2716295
  *
  */
-public class PasoAdminFinalMBean extends PasoAdminMBean {
+public class PasoFinalAdminMBean extends BaseMBean {
 
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
@@ -58,19 +59,17 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	
 	private UIComponent campos;
 	
-	private Logger logger = Logger.getLogger(PasoAdminFinalMBean.class);
+	private Logger logger = Logger.getLogger(PasoFinalAdminMBean.class);
 
 	
 	@PostConstruct
 	public void init() {
-			if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null || sessionMBean.getReservaConfirmada() == null) {
-				logger.debug("RESERVA: ESTADO INVALIDO PASO FINAL" + "  Agenda: "+sessionMBean.getAgenda()+ " Recurso: "+sessionMBean.getRecurso()+ " ReservaConfirmada: "+sessionMBean.getReservaConfirmada());
-				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
-				return;
-			}
+		if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null || sessionMBean.getReservaConfirmada() == null) {
+			redirect("inicio");
+			return;
+		}
 	}	
 
-	
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
@@ -82,25 +81,21 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	public String getAgendaNombre() {
 		if (sessionMBean.getAgenda() != null) {
 			return sessionMBean.getAgenda().getNombre();
-		}
-		else {
+		}else {
 			return null;
 		}
 	}	
 	
 	public String getEtiquetaDelRecurso() {
-		//TextoAgenda textoAgenda = sessionMBean.getAgenda().getTextoAgenda();
 		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgenda(), sessionMBean.getIdiomaActual());
 		if (textoAgenda != null) {
 			return textoAgenda.getTextoSelecRecurso();
-		}
-		else {
+		}	else {
 			return null;
 		}
 	}
 	
 	public List<DatoDelRecurso> getInfoRecurso() {
-
 		if (infoRecurso == null) {
 			if (sessionMBean.getRecurso() != null) {
 				try {
@@ -121,37 +116,22 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	}
 	
 	public void setCampos(UIComponent campos) {
-		
 		this.campos = campos;
-		
 		String mensajeError = "";
 		try {
 			Recurso recurso = sessionMBean.getRecurso();
-
-			
-			//El chequeo de recurso != null es en caso de un acceso directo a la pagina, es solo
-			//para que no salte la excepcion en el log, pues de todas formas sera redirigido a una pagina de error.
 			if (campos.getChildCount() == 0 && recurso != null) {
-				
-				
 				mensajeError = "RESERVA: ";
-				
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-				
 				Reserva rtmp = sessionMBean.getReservaConfirmada();
-
 				if (rtmp == null) {
 					mensajeError += "nulo";
-				}
-				else {
+				}	else {
 					mensajeError += rtmp.getId() + ":" + rtmp.getFechaCreacion() + ":";
-					
 					if (rtmp.getDatosReserva()== null) {
 						mensajeError += "DatosReserva nulo";
 					}
-				
 				}
-				
 				Map<String, Object> valores = obtenerValores(sessionMBean.getReservaConfirmada().getDatosReserva());
 				FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(valores, sessionMBean.getFormatoFecha());
 				formularioDin.armarFormulario(agrupaciones, null);
@@ -165,20 +145,18 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 	}
 
 	public String getDescripcion() {
-		//TextoAgenda textoAgenda = sessionMBean.getAgenda().getTextoAgenda();
 		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgenda(), sessionMBean.getIdiomaActual());
 		if (textoAgenda != null) {
 			String str = textoAgenda.getTextoTicketConf();
-			if(str!=null)
+			if(str!=null) {
 				return str;
-			else
+			} else {
 				return "";
-		}
-		else {
+			}
+		} else {
 			return null;
 		}
 	}
-	
 
 	/**
 	 * @param datos de alguna reserva
@@ -189,7 +167,6 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 		for (DatoReserva dato : datos) {
 			valores.put(dato.getDatoASolicitar().getNombre(), dato.getValor());
 		}
-		
 		return valores;
 	}
 	
@@ -231,10 +208,5 @@ public class PasoAdminFinalMBean extends PasoAdminMBean {
 			return null;
 		}
 	}
-
-	
 	
 }
-
-	
-	

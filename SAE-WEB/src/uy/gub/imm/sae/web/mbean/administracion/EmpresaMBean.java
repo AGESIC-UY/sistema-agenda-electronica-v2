@@ -277,7 +277,7 @@ public class EmpresaMBean extends BaseMBean {
 					seleccionEmpliminar = true;
 					sessionMBean.seleccionarEmpresa(empresaEliminar.getId());
 				}
-				empresasEJB.eliminarEmpresa(empresaEliminar);
+				empresasEJB.eliminarEmpresa(empresaEliminar, sessionMBean.getTimeZone());
 				//Recargar la lista de empresas
 				List<Empresa> entidades = empresasEJB.consultarEmpresas();
 				empresasSeleccion = new RowList<Empresa>(entidades);
@@ -399,6 +399,18 @@ public class EmpresaMBean extends BaseMBean {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void quitarLogo() {
+    empresaSessionMBean.getEmpresaEditar().setLogo(null);
+    if(sessionMBean.getEmpresaActualId()!=null && empresaSessionMBean.getEmpresaEditar()!=null && empresaSessionMBean.getEmpresaEditar().getId()!=null) {
+      Integer empresaActualId = Integer.valueOf(sessionMBean.getEmpresaActualId());
+      Integer empresaEditarId  = empresaSessionMBean.getEmpresaEditar().getId();
+      if(empresaActualId.intValue() == empresaEditarId.intValue()) {
+        //si la empresa que edito es la actual tengo que modificar el logo en el cabezal
+        sessionMBean.setEmpresaActualLogoBytes(null);
+      }
+    }
 	}
 	
 }

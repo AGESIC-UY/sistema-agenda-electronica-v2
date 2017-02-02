@@ -167,14 +167,13 @@ public class AgrupacionMBean extends BaseMBean {
 				datoASSessionMBean.setAgrupacionSeleccionada(null);
 				setAgrupacionDatoNuevo(null);
 				addInfoMessage(sessionMBean.getTextos().get("agrupacion_eliminada"), MSG_ID);
-			} catch (Exception e) {
+			}catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
 			}
-			
 			datoASSessionMBean.cargarAgrupaciones();
-			
-		} else {
+		}else {
 			if (!agrupacion.getBorrarFlag()) {
+        datoASSessionMBean.setAgrupacionSeleccionada(null);
 				addErrorMessage(sessionMBean.getTextos().get("no_se_permite_eliminar_esta_agrupacion"),	MSG_ID);
 			}else {
 				addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agrupacion_seleccionada"),	MSG_ID);

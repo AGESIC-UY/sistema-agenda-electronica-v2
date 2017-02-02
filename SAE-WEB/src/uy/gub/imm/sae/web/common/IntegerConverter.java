@@ -24,8 +24,6 @@ import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.convert.Converter;
 
-import uy.gub.imm.sae.web.mbean.administracion.SessionMBean;
-
 public class IntegerConverter implements Converter {
 
 	public IntegerConverter() {

@@ -62,13 +62,12 @@
 	
 								<f:facet name="header">
 									<h:panelGroup>
-										<h:outputText value="#{sessionMBean.textos['por_la_manana']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['por_la_manana']}" />
 									</h:panelGroup>
 								</f:facet>
 	
 								<p:column>
 									<f:facet name="header">
-										
 										<h:selectBooleanCheckbox id="todasM" value="#{disponibilidadMBean.selectAllMatutino}" title="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}">
 											<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarTodosMatutino}" />
 										</h:selectBooleanCheckbox>
@@ -78,9 +77,7 @@
 									<p:outputLabel value=" #{rowMM.data.horaInicio}" for="horaM" styleClass="ui-helper-hidden-accessible">
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</p:outputLabel>
-									
 								</p:column>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
@@ -89,7 +86,6 @@
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</h:outputText>
 								</p:column>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
@@ -97,7 +93,6 @@
 									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? true  : false)}" styleClass="verde"></h:outputText>
 									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? false  : true)}" styleClass="rojo"></h:outputText>
 								</p:column>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
@@ -109,13 +104,11 @@
 						<div class="col-sm-6">
 							<p:dataTable id="tablaVespertina" binding="#{disponibilidadMBean.tablaDispVespertinaModif}" value="#{dispSessionMBean.disponibilidadesDelDiaVespertinaModif}"
 								var="rowVM" caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-	
 								<f:facet name="header">
 									<h:panelGroup>
 										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}"></h:outputText>
 									</h:panelGroup>
 								</f:facet>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:selectBooleanCheckbox id="todasT" value="#{disponibilidadMBean.selectAllVespertino}">
@@ -127,9 +120,7 @@
 									<p:outputLabel value=" #{rowVM.data.horaInicio}" for="horaT" styleClass="ui-helper-hidden-accessible">
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</p:outputLabel>
-									
 								</p:column>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
@@ -138,7 +129,6 @@
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</h:outputText>
 								</p:column>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
@@ -146,7 +136,6 @@
 									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? true : false)}" styleClass="verde"></h:outputText>
 									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? false : true)}" styleClass="rojo"></h:outputText>
 								</p:column>
-	
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>

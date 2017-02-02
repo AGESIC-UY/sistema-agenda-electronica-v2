@@ -44,9 +44,10 @@ import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.SAECalendarioDataSource;
 
-public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioDataSource {
+public class Paso1AdminMBean extends BaseMBean implements SAECalendarioDataSource {
 	
 	static Logger logger = Logger.getLogger(Paso1AdminMBean.class);
 	

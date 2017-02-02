@@ -63,7 +63,7 @@
     <param><param-name>sqlSchemaResolverQuery</param-name><param-value></param-value></param>
     <param><param-name>sqlCDARequiredQuery</param-name><param-value></param-value></param>
   </valve>
-  -->
+-->
 
 <!--Descomentar esto solo si NO se utiliza un Apache delante del JBoss -->
 <!-- - ->  

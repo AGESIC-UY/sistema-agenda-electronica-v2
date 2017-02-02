@@ -34,7 +34,7 @@ import uy.gub.imm.sae.exception.UserException;
 public interface Disponibilidades {
 	public List<Date> generarDisponibilidadesNuevas(Recurso r, Date fecha, Date horaDesde, Date horaHasta, Integer frecuencia, Integer cupo) throws UserException;
 	public void generarDisponibilidades(Recurso r, Date f, VentanaDeTiempo periodo, Boolean[] dias) throws UserException;	
-	public void eliminarDisponibilidades(Recurso r, VentanaDeTiempo v) throws UserException;
+	public int eliminarDisponibilidades(Recurso r, VentanaDeTiempo v) throws UserException;
 	public List<DisponibilidadReserva> obtenerDisponibilidadesReservas(Recurso r, VentanaDeTiempo v) throws UserException, RolException;
 	public int modificarCupoDeDisponibilidad(Disponibilidad d) throws UserException;
 	public void modificarCupoPeriodo(Disponibilidad d) throws UserException;

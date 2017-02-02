@@ -36,6 +36,10 @@ public class RecursoExportar {
 	private Boolean mostrarNumeroEnLlamador;
 	private Boolean visibleInternet;
 	private Boolean mostrarNumeroEnTicket;
+  private String fuenteTicket;
+  private Integer tamanioFuenteGrande;
+  private Integer tamanioFuenteNormal;
+  private Integer tamanioFuenteChica;
 	private Boolean mostrarIdEnTicket;
 	private Boolean usarLlamador;
 	private String serie;
@@ -414,6 +418,38 @@ public class RecursoExportar {
 
   public void setVersionSAE(String versionSAE) {
     this.versionSAE = versionSAE;
+  }
+
+  public String getFuenteTicket() {
+    return fuenteTicket;
+  }
+
+  public void setFuenteTicket(String fuenteTicket) {
+    this.fuenteTicket = fuenteTicket;
+  }
+
+  public Integer getTamanioFuenteGrande() {
+    return tamanioFuenteGrande;
+  }
+
+  public void setTamanioFuenteGrande(Integer tamanioFuenteGrande) {
+    this.tamanioFuenteGrande = tamanioFuenteGrande;
+  }
+
+  public Integer getTamanioFuenteNormal() {
+    return tamanioFuenteNormal;
+  }
+
+  public void setTamanioFuenteNormal(Integer tamanioFuenteNormal) {
+    this.tamanioFuenteNormal = tamanioFuenteNormal;
+  }
+
+  public Integer getTamanioFuenteChica() {
+    return tamanioFuenteChica;
+  }
+
+  public void setTamanioFuenteChica(Integer tamanioFuenteChica) {
+    this.tamanioFuenteChica = tamanioFuenteChica;
   }
 
 }

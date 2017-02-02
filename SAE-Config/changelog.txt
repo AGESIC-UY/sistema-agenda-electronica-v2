@@ -86,7 +86,7 @@ Versión 1.5 (2016-11-21)
 * Se añadió el parámetro "q" a la URL de la reserva pública para permitir especificar el trámite a realizar.
 * Se añadió el despliegue opcional de la fecha actual (según la agenda seleccionada) en la parte superior de ambas interfaces.
 
-Versión 2.0.0
+Versión 2.0.0 (2017-01-09)
 * Se pasó a utilizar el sistema de versionado semántico (mayor.minor.release[-build])
 * Se corrige un bug por el cual los envíos fallidos al Sistema de Notificaciones se reintentaban indefinidamente.
 * Se modificó la lógica de despliegue de textos para que en caso de no encontrar una etiqueta en la tabla ae_textos principal en lugar de dar un error se muestra la propia etiqueta como texto.
@@ -112,3 +112,21 @@ Versión 2.0.0
 * Se añadió la funcionalidad para permitir cancelar reservas en forma masiva especificando un período.
 * Se modificó el reporte de reservas para incluir datos relacionados con la cancelación de reservas (fecha, tipo, usuario).
 * Se añadió el nombre del trámite a realizar en la lista de espera.
+
+Versión 2.0.1 (2017-02-02)
+* Se cambió el período de ejecución del depurador de reservas no confirmadas de 30 minutos a 5, pero se continúa dando plazo de 10 minutos para la confirmación.
+* Se corrigió un bug por el cual se podía eliminar agendas y recursos con reservas vivas para el día de hoy.
+* Se añadió la posibilidad de eliminar el logo de las empresas.
+* Se cambió el paso 2 de la reserva para no mostrar las horas que no tienen cupos disponibles.
+* Se cambió el comportamiento de la aplicación cuando inicia sesión un usuario que no tiene ninguna empresa asociada para mostrar un mensaje de error y no permitir hacer nada más que logout.
+* Se cambió el comportamiento para que al eliminar un usuario de una empresa, si esa era la última empresa del usuario entonces se lo marca como eliminado (se puede recuperar creando otro usuario con el mismo documento).
+* No se permite cancelar reservas vencidas.
+* Se corrigió un bug por el cual luego de crear un dato a solicitar de tipo lista no se volvía a mostrar el campo "largo".
+* Se mejoró la validación del campo "Valor" de las opciones de los datos a solicitar de tipo lista.
+* Al configurar un recurso, si se marca que admite atención presencial entonces se obliga a marcar al menos un día de la semana.
+* Se corrigió la edición de recursos cuando tiene disponibilidades presenciales creadas (no permitría cambiar la fecha de disponibilidad).
+* Se añadió un control para no permitir atención presencial en recursos que no están vigentes en el día actual.
+* Al generar el ticket de confirmación, si el nombre de la agenda o del recurso es muy largo se permite que ocupe más de una línea.
+* Se permite configurar la fuente y el tamaño de la letra utilizada para generar el ticket de confirmación.
+* Se corrigió un bug por el cual al momento de configurar una agenda, si había un error en alguno de los trámites asociados, todos los trámites quedaban marcados con error.
+

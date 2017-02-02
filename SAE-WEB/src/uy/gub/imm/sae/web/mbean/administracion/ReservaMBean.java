@@ -485,7 +485,6 @@ public class ReservaMBean extends BaseMBean {
         //Eliminar las disponibilidades
         disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), ventana);
         
-        addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas"), MSG_ID);
       } catch (Exception e) {
         addErrorMessage(e, MSG_ID);
       }

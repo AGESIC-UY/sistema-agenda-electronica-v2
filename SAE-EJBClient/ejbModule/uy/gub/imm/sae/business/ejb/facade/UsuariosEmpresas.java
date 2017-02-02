@@ -22,6 +22,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 
 import java.util.List;
+import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.dto.UsuarioEmpresaRoles;
 import uy.gub.imm.sae.entity.global.Empresa;
@@ -47,7 +48,7 @@ public interface UsuariosEmpresas {
 	public Empresa obtenerEmpresaPorNombre(String nombre) throws ApplicationException;
 	public List<Empresa> consultarEmpresas() throws ApplicationException;
 	public Empresa guardarEmpresa(Empresa empresa) throws ApplicationException, UserException; 
-	public void eliminarEmpresa(Empresa empresa) throws ApplicationException, UserException;
+	public void eliminarEmpresa(Empresa empresa, TimeZone timezone) throws ApplicationException, UserException;
 
 	public List<String> obtenerRolesUsuarioEmpresa(Integer usuarioId, Integer empresaId) throws ApplicationException;
 	public void guardarRolesUsuarioEmpresa(UsuarioEmpresaRoles roles) throws ApplicationException;

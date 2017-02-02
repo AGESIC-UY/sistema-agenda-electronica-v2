@@ -168,8 +168,12 @@ public class EliminarDispMBean extends BaseMBean {
 		VentanaDeTiempo vSemana = obtenerSemana(semana);
 			
 		try {
-			disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), vSemana);
-			addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas")); 	
+			int cantEliminadas = disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), vSemana);
+			if(cantEliminadas > 0) {
+			  addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas"));
+			}else {
+        addAdvertenciaMessage(sessionMBean.getTextos().get("no_hay_disponibilidades_para_el_periodo_especificado"));
+			}
 		} catch (Exception ex) {
 			addErrorMessage(ex);
 		}
@@ -407,8 +411,12 @@ public class EliminarDispMBean extends BaseMBean {
       VentanaDeTiempo ventana = new VentanaDeTiempo();
       ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));
       ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
-      disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), ventana);
-      addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas"));
+      int cantEliminadas = disponibilidadesEJB.eliminarDisponibilidades(sessionMBean.getRecursoMarcado(), ventana);
+      if(cantEliminadas > 0) {
+        addInfoMessage(sessionMBean.getTextos().get("disponibilidades_eliminadas"));
+      }else {
+        addAdvertenciaMessage(sessionMBean.getTextos().get("no_hay_disponibilidades_para_el_periodo_especificado"));
+      }
     } catch (Exception ex) {
       addErrorMessage(ex);
     }

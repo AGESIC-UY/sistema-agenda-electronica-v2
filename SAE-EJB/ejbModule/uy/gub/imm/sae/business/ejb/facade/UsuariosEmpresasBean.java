@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -263,7 +264,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		return empresa;
 	}
 	
-	public void eliminarEmpresa(Empresa empresa) throws ApplicationException, UserException {
+	public void eliminarEmpresa(Empresa empresa, TimeZone timezone) throws ApplicationException, UserException {
 		if(empresa==null || empresa.getId() == null) {
 			return;
 		}
@@ -286,7 +287,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			List<Agenda> agendasEliminar = agendasEJB.consultarAgendas();
 			for (Agenda agenda : agendasEliminar) {
 				try {
-					agendasEJB.eliminarAgenda(agenda);
+					agendasEJB.eliminarAgenda(agenda, timezone);
 				} catch (UserException e) {
 					throw new UserException("no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas");
 					
@@ -377,6 +378,10 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	    query.executeUpdate();
 			//Desasociar el usuario de la empresa
 			usuario.getEmpresas().remove(emp);
+			//Si no quedan empresas asociadas al usuario, se marca como eliminado
+			if(usuario.getEmpresas().isEmpty()) {
+			  usuario.setFechaBaja(new Date());
+			}
 		}else{
 			return;
 		}

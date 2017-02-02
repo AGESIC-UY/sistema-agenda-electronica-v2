@@ -107,7 +107,8 @@
 												rowKey="#{row.data.id}"
 												caption="#{sesionMBean.textos['disponibilidades_en_la_manana']}"
 												captionClass="ui-helper-hidden-accessible"
-												emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}">
+												emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
+												rowStyleClass="#{paso2MBean.claseSegunCupo(row.data)}">
 	
 												<p:ajax event="rowSelectRadio"
 													listener="#{paso2MBean.seleccionarHorarioMatutino}"
@@ -136,10 +137,11 @@
 												rowKey="#{row.data.id}"
 												caption="#{sesionMBean.textos['disponibilidades_en_la_tarde']}"
 												captionClass="ui-helper-hidden-accessible"
-												emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}">
+												emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
+												rowStyleClass="#{paso2MBean.claseSegunCupo(row.data)}">
 	
 												<p:ajax event="rowSelectRadio"
-													listener="#{paso2MBean.seleccionarHorarioVespertino}"
+													listener="#{paso2MBean.seleccionarHorarioVespertino}"  
 													update="form:panelMatutina" />
 												<p:column id="radioSel" selectionMode="single" />
 												<p:column>

@@ -66,6 +66,7 @@ import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 /**
@@ -77,7 +78,7 @@ import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
  *
  */
 
-public class Paso3AdminMBean extends PasoAdminMBean {
+public class Paso3AdminMBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso3AdminMBean.class);
 	public static final String FORMULARIO_ID = "datosReserva";
@@ -117,7 +118,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	public void init() {
 
 		if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null) {
-			redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+			redirect("inicio");
 			return;
 		}
 		
@@ -143,7 +144,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
       }
     }catch(Exception ex) {
       ex.printStackTrace();
-      redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+      redirect("inicio");
       return;
     }
 		

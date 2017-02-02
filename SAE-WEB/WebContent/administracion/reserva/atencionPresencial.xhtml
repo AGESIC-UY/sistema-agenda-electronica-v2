@@ -10,15 +10,11 @@
 
 		<ui:define name="cuerpo">
 		  <f:view beforePhase="#{atencionPresencialMBean.beforePhase}" >
-		  
   		  <h:form id="form1" rendered="#{atencionPresencialMBean.recursoPermitirAtencionPresencial}" class="cancelarReserva">
-  		  
 		      <p:outputPanel rendered="#{atencionPresencialMBean.reservaConfirmada == null}">
-		      
 		        <p:outputPanel styleClass="form-required">
 		          <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
 		        </p:outputPanel>
-		        
 		        <p:outputPanel styleClass="form-horizontal" rendered="#{not empty atencionPresencialMBean.tramites}">
 		          <fieldset>
 		            <legend>
@@ -35,15 +31,15 @@
 		            </p:outputPanel>
 		          </fieldset>
 		        </p:outputPanel>
-		        
 		        <!-- Formulario de ingreso de datos -->
 		        <p:outputPanel id="formulario">
 		          <h:panelGroup binding="#{atencionPresencialMBean.campos}" layout="block"/>
 		        </p:outputPanel>
-		        
 		        <!-- Cláusula de consentimiento informado -->
 		        <fieldset>
-		          <legend><h:outputText value="#{sessionMBean.textos['clausula_de_consentimiento_informado']}" /></legend>
+		          <legend>
+		            <h:outputText value="#{sessionMBean.textos['clausula_de_consentimiento_informado']}" />
+	            </legend>
 		          <div class="form-horizontal">
 		            <div class="form-group">
 		              <div class="col-sm-12">
@@ -66,27 +62,18 @@
 		            </h:panelGroup>
 		          </div>
             </fieldset>
-            
 		        <ul class="form-action-buttons">
 		          <li class="action-buttons-primary">
-                <h:commandButton styleClass="btn-lg btn-primario" 
-                  value="#{sessionMBean.textos['confirmar_reserva']}" action="#{atencionPresencialMBean.confirmarReserva}" />
+                <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['confirmar_reserva']}" action="#{atencionPresencialMBean.confirmarReserva}" />
               </li>
 		        </ul>
-            
-		        
 	        </p:outputPanel>
-	        
 	      </h:form>
         <h:form id="form2" rendered="#{atencionPresencialMBean.reservaConfirmada != null}" class="cancelarReserva">
-		  
 		        <div class="botonesConfirmacion">
-		          <h:commandLink value="#{sesionMBean.textos['imprimir_ticket']}" target="_blank"
-		            action="#{atencionPresencialMBean.imprimirTicket}" styleClass="btn btn-link" />
-		          <h:commandButton styleClass="btn-lg btn-primario" 
-                  value="#{sessionMBean.textos['nueva_reserva']}" action="#{atencionPresencialMBean.nuevaReserva}" />
+		          <h:commandLink value="#{sesionMBean.textos['imprimir_ticket']}" target="_blank" action="#{atencionPresencialMBean.imprimirTicket}" styleClass="btn btn-link" />
+		          <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['nueva_reserva']}" action="#{atencionPresencialMBean.nuevaReserva}" />
 		        </div>
-            
         </h:form>
       </f:view>			
 		</ui:define>

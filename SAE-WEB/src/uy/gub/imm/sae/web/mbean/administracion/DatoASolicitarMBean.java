@@ -410,7 +410,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 			}
 			recursosEJB.agregarDatoASolicitar(sessionMBean.getRecursoMarcado(), getDatoASolicitarNuevo().getAgrupacionDato(), getDatoASolicitarNuevo());
 			datoASSessionMBean.clearDatosASolicitar();
-			datoASolicitarNuevo = new DatoASolicitar();
+			init();
 			addInfoMessage(sessionMBean.getTextos().get("dato_creado"), MSG_ID);
 		} catch (Exception ex) {
 			addErrorMessage(ex, MSG_ID);

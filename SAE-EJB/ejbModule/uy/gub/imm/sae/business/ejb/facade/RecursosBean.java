@@ -612,24 +612,14 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
 		}
 
-		// Si reservaMultiple = True => se podrá cambiar su valor a reservaMultiple = FALSE
-		// solo si no existe reserva viva con más de una disponibilidad para ese recurso.
-		if ((recursoActual.getReservaMultiple() != r.getReservaMultiple())	&& (r.getReservaMultiple() == false)) {
-			// no existe reserva viva con más de una disponibilidad para ese recurso.
-			if (existeReservaVivaMultiple(r)) {
-				throw new UserException("AE10025",	"No se puede desactivar reservaMultiple si existen reservas multiples vivas");
-			}
-		}
-
-		// No pueden quedar disponibilidades vivas fuera del período
-		// fechaInicioDisp y fechaFinDisp.
-		if (hayDispVivasPorFecha(r.getId(), r.getFechaInicioDisp(),	r.getFechaFinDisp())) {
+		// No pueden quedar disponibilidades vivas fuera del período fechaInicioDisp y fechaFinDisp.
+		if (hayDisponibilidadesVivasFueraDelPeriodo(r.getId(), r.getFechaInicioDisp(),	r.getFechaFinDisp())) {
 			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_disponibilidades_fuera_del_periodo_especificado");
 		}
 
 		// No pueden quedar reservas vivas fuera del período fechaInicioDisp y fechaFinDisp.
-		if (hayReservasVivasPorFecha(r.getId(), r.getFechaInicioDisp(),	r.getFechaFinDisp())) {
-			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_reservas_vivas_fuera_del_periodo_especificado");
+		if (hayReservasVivasFueraDelPeriodo(r.getId(), r.getFechaInicioDisp(),	r.getFechaFinDisp())) {
+			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_reservas_fuera_del_periodo_especificado");
 		}
 
 		// Se controla que la serie no tenga largo mayor a 3
@@ -654,8 +644,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		recursoActual.setVisibleInternet(r.getVisibleInternet());
 		recursoActual.setReservaMultiple(r.getReservaMultiple());
 		recursoActual.setMostrarNumeroEnLlamador(r.getMostrarNumeroEnLlamador());
+    recursoActual.setMostrarIdEnTicket(r.getMostrarIdEnTicket());
 		recursoActual.setMostrarNumeroEnTicket(r.getMostrarNumeroEnTicket());
-		recursoActual.setMostrarIdEnTicket(r.getMostrarIdEnTicket());
+		recursoActual.setFuenteTicket(r.getFuenteTicket());
+		recursoActual.setTamanioFuenteChica(r.getTamanioFuenteChica());
+    recursoActual.setTamanioFuenteNormal(r.getTamanioFuenteNormal());
+    recursoActual.setTamanioFuenteGrande(r.getTamanioFuenteGrande());
 		recursoActual.setSabadoEsHabil(r.getSabadoEsHabil());
     recursoActual.setDomingoEsHabil(r.getDomingoEsHabil());
 
@@ -717,35 +711,29 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws ApplicationException
 	 */
 	@SuppressWarnings("unchecked")
-	public void eliminarRecurso(Recurso r) throws UserException,
-			ApplicationException {
-	  
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	r.getId());
-
+	public void eliminarRecurso(Recurso recurso, TimeZone timezone) throws UserException, ApplicationException {
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	recurso.getId());
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
-
 		//Se controla que no existan reservas vivas para el recurso.
-		if (hayReservasVivas(recursoActual)) {
+		if (hayReservasVivas(recursoActual, timezone)) {
 			throw new UserException("no_se_puede_eliminar_el_recurso_porque_hay_reservas_vivas");
 		}
-
 		//Se eliminan disponibilidades.
 		List<Disponibilidad> disponibilades = (List<Disponibilidad>) entityManager
-				.createQuery(
-						"SELECT d FROM Disponibilidad d "
-								+ "WHERE d.recurso = :recurso "
-								+ "  AND d.fecha >= :fecha"
-								+ "  AND d.horaFin >= :hora"
-								+ "  AND d.fechaBaja is null")
-				.setParameter("recurso", recursoActual)
-				.setParameter("fecha", new Date())
-				.setParameter("hora", new Date()).getResultList();
+			.createQuery(
+				"SELECT d FROM Disponibilidad d "
+						+ "WHERE d.recurso = :recurso "
+						+ "  AND d.fecha >= :fecha"
+						+ "  AND d.horaFin >= :hora"
+						+ "  AND d.fechaBaja is null")
+			.setParameter("recurso", recursoActual)
+			.setParameter("fecha", new Date())
+			.setParameter("hora", new Date()).getResultList();
 		for (Disponibilidad disponibilidad : disponibilades) {
 			disponibilidad.setFechaBaja(new Date());
 		}
-		
 		//Se eliminan agrupaciones de datos
 		List<AgrupacionDato> listaAgrupacion = (List<AgrupacionDato>) entityManager
 				.createQuery("SELECT ad FROM AgrupacionDato ad "
@@ -1534,66 +1522,38 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	}
 
-	private Boolean existeReservaVivaMultiple(Recurso r)
-			throws ApplicationException {
-		try {
-
-			Date ahora = new Date();
-
-			List<?> a = (List<?>) entityManager
-					.createQuery(
-							"SELECT r.id, count(d) FROM Disponibilidad d JOIN d.reservas r "
-									+ "WHERE d.recurso = :recurso "
-									+ "  AND d.fecha >= :fecha"
-									+ "  AND d.horaFin >= :hora_actual"
-									+ "  AND (r.estado = :reservado OR r.estado = :pendiente) "
-									+ "GROUP BY r.id " + "HAVING COUNT(d) > 1")
-					.setParameter("recurso", r)
-					.setParameter("fecha", ahora, TemporalType.DATE)
-					.setParameter("hora_actual", ahora, TemporalType.TIMESTAMP)
-					.setParameter("reservado", Estado.R)
-					.setParameter("pendiente", Estado.P).getResultList();
-
-			return (!a.isEmpty());
-		} catch (Exception e) {
-			throw new ApplicationException(e);
-		}
-	}
-
-	private Boolean hayReservasVivasPorFecha(Integer recursoId, Date desde,
-			Date hasta) throws ApplicationException {
+	private Boolean hayReservasVivasFueraDelPeriodo(Integer recursoId, Date desde, Date hasta) throws ApplicationException {
 		try {
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
-									+ "WHERE d.recurso.id = :recursoId "
-									+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )"
-									+ "  AND (r.estado = :reservado OR r.estado = :pendiente) ")
+					.createQuery("SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
+						+ "WHERE d.recurso.id = :recursoId "
+						+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )"
+            + "  AND d.presencial=false "
+						+ "  AND (r.estado = :reservado OR r.estado = :pendiente) ")
 					.setParameter("recursoId", recursoId)
 					.setParameter("fecha_desde", desde, TemporalType.DATE)
 					.setParameter("fecha_hasta", hasta, TemporalType.DATE)
 					.setParameter("reservado", Estado.R)
-					.setParameter("pendiente", Estado.P).getSingleResult();
-
+					.setParameter("pendiente", Estado.P)
+					.getSingleResult();
 			return (cant > 0);
 		} catch (Exception e) {
 			throw new ApplicationException(e);
 		}
 	}
 
-	private Boolean hayDispVivasPorFecha(Integer recursoId, Date desde,
-			Date hasta) throws ApplicationException {
+	private Boolean hayDisponibilidadesVivasFueraDelPeriodo(Integer recursoId, Date desde, Date hasta) throws ApplicationException {
 		try {
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(d) FROM Disponibilidad d "
-									+ "WHERE d.recurso.id = :recursoId "
-									+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )"
-									+ "  AND d.fechaBaja IS NULL")
+					.createQuery("SELECT count(d) FROM Disponibilidad d "
+						+ "WHERE d.recurso.id = :recursoId "
+						+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta)"
+						+ "  AND d.presencial=false "
+						+ "  AND d.fechaBaja IS NULL")
 					.setParameter("recursoId", recursoId)
-					.setParameter("fecha_desde", desde)
-					.setParameter("fecha_hasta", hasta).getSingleResult();
-
+					.setParameter("fecha_desde", desde, TemporalType.DATE)
+					.setParameter("fecha_hasta", hasta, TemporalType.DATE)
+					.getSingleResult();
 			return (cant > 0);
 		} catch (Exception e) {
 			throw new ApplicationException(e);
@@ -1983,19 +1943,20 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		return this.obtenerTodosValoresPosibles(d);
 	}
 
-	private Boolean hayReservasVivas(Recurso r) throws ApplicationException {
+	private Boolean hayReservasVivas(Recurso recurso, TimeZone timezone) throws ApplicationException {
 		try {
+	    Calendar cal = new GregorianCalendar();
+	    cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
-									+ "WHERE d.recurso = :recurso "
-									+ "  AND d.fecha >= :fecha"
-									+ "  AND d.horaFin >= :hora"
-									+ "  AND r.estado IN ('R','P')")
-					.setParameter("recurso", r)
-					.setParameter("fecha", new Date())
-					.setParameter("hora", new Date()).getSingleResult();
-
+				.createQuery(
+  				"SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
+  						+ "WHERE d.recurso = :recurso "
+  						+ "  AND d.fecha >= :fecha"
+  						+ "  AND d.horaFin >= :hora"
+  						+ "  AND r.estado IN ('R','P')")
+				.setParameter("recurso", recurso)
+				.setParameter("fecha", cal.getTime())
+				.setParameter("hora", cal.getTime()).getSingleResult();
 			return (cant > 0);
 		} catch (Exception e) {
 			throw new ApplicationException(e);

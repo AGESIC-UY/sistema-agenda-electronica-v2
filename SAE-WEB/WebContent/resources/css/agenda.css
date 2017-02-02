@@ -1194,6 +1194,9 @@ input[type="text"].diaSeleccionado{
 .colLlamar{
   width: 130px;
 }
+.cupoNoSeleccionable{
+	display: none;
+}
 /* ---- ADMIN ---- */
 @media screen and (max-width: 991px){
   fieldset fieldset.ui-widget-content{

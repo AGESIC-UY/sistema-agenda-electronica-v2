@@ -270,6 +270,10 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public void beforePhaseInicio(PhaseEvent event) {
+    if (empresasUsuario.isEmpty()) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			setPantallaTitulo(getTextos().get("inicio"));
 		}
@@ -567,8 +571,7 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	public Boolean getMostrarLlamador() {
 		if (recursos != null && recursos.getSelectedRow() != null) {
-			mostrarLlamador = recursos.getSelectedRow().getData()
-					.getUsarLlamador();
+			mostrarLlamador = recursos.getSelectedRow().getData().getUsarLlamador();
 		} else {
 			mostrarLlamador = true;
 		}
@@ -634,11 +637,9 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	
 	public void cargarDatosUsuario() {
-		
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			HttpSession session = request.getSession();
-			
 			//Esto es para prevenir el ataque de Session Fixation: cada vez que se pide recargar los datos del usuario se
 			//genera un id de sesión nuevo, y se copian todos los datos que estaban de la anterior
 			//1-Almacenar en un map temporal todas las propiedades de la sesión actual
@@ -656,7 +657,6 @@ public class SessionMBean extends SessionCleanerMBean {
 			for(String nombre : map0.keySet()) {
 				session.setAttribute(nombre, map0.get(nombre));
 			}
-			
 			if (usuarioActual == null) {
 				// No esta definido el usuario actual, se carga ahora
 				//Si está en la sesión el atributo "codigocda" se utiliza como código de usuario el atributo "documentocda",
@@ -667,20 +667,15 @@ public class SessionMBean extends SessionCleanerMBean {
 				Map<String, Object> sessionAttrs = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
 				if(sessionAttrs.containsKey("codigocda") && sessionAttrs.containsKey("documentocda") && 
 						sessionAttrs.containsKey("codigocda_encriptado") && sessionAttrs.containsKey("documentocda_encriptado")) {
-					
 					//Viene de la válvula de CDA
-					
 					String codigoCda = (String)sessionAttrs.get("documentocda");
 					byte[] codigoCdaEncriptado = (byte[])sessionAttrs.get("documentocda_encriptado");
-
 					loginUsername = codigoCda;
 					loginPassword = Base64.encodeBytes(codigoCdaEncriptado);
-					
 					try {
 		        if (request.getUserPrincipal() != null) {
 		        	request.logout();
 		        }
-		        
 						SecurityContext secContext = SecurityContextFactory.createSecurityContext("SDSAE");
 						SecurityContextAssociation.setSecurityContext(secContext);
 						request.login(loginUsername, loginPassword);
@@ -703,9 +698,6 @@ public class SessionMBean extends SessionCleanerMBean {
 					session.removeAttribute("codigocda_encriptado");
 					session.removeAttribute("documentocda_encriptado");
 				}
-				
-				/* */
-				
 				String codigo = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
 				if (codigo != null) {
 					try {
@@ -728,10 +720,19 @@ public class SessionMBean extends SessionCleanerMBean {
 							empresaActualLogoBytes = usuariosEmpresasEJB.obtenerLogoEmpresaPorEmpresaId((Integer) empresasUsuario.get(0).getValue());
 						} else {
 							empresaActual = null;
+              FacesContext ctx = FacesContext.getCurrentInstance();
+              ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
 						}
 					} catch (ApplicationException aEx) {
 						aEx.printStackTrace();
 					}
+				}else {
+          if("cda".equalsIgnoreCase(getTipoLogout())) {
+            ExternalContext ectx = FacesContext.getCurrentInstance().getExternalContext();
+            ectx.redirect("/sae-admin/logoutcda");
+          }else {
+            cerrarSesion();
+          }
 				}
 			}
 		} catch (Exception ex) {
@@ -875,13 +876,10 @@ public class SessionMBean extends SessionCleanerMBean {
 			return null;
 		}
 		try {
-			
 			request.login(username, password);
 			this.loginUsername = username;
 			this.loginPassword = password;
-
 			cargarDatosUsuario();
-
 			return "inicio";
 		} catch (Exception ex) {
 			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Código de usuario o contraseña incorrectos"));

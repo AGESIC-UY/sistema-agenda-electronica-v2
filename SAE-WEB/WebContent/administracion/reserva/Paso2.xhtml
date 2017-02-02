@@ -93,7 +93,8 @@
 										rowKey="#{row.data.id}"
 										caption="#{sessionMBean.textos['disponibilidades_en_la_manana']}"
 										captionClass="ui-helper-hidden-accessible"
-										emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+										emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+										rowStyleClass="#{paso2AdminMBean.claseSegunCupo(row.data)}">
 
 										<p:ajax event="rowSelectRadio"
 											listener="#{paso2AdminMBean.seleccionarHorarioMatutino}"
@@ -121,7 +122,8 @@
 										rowKey="#{row.data.id}"
 										caption="#{sessionMBean.textos['disponibilidades_en_la_tarde']}"
 										captionClass="ui-helper-hidden-accessible"
-										emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+										emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+                    rowStyleClass="#{paso2AdminMBean.claseSegunCupo(row.data)}">
 
 										<p:ajax event="rowSelectRadio"
 											listener="#{paso2AdminMBean.seleccionarHorarioVespertino}"

@@ -67,13 +67,18 @@ public class Recurso implements Serializable {
 	private Date fechaBaja;
 	private Boolean mostrarNumeroEnLlamador = false;
 	private Boolean visibleInternet;
-	private Boolean mostrarNumeroEnTicket;
-	private Boolean mostrarIdEnTicket;
 	private Boolean usarLlamador;
 	private String serie;
 	private Boolean sabadoEsHabil;
   private Boolean domingoEsHabil;
-	
+
+  private Boolean mostrarNumeroEnTicket;
+  private Boolean mostrarIdEnTicket;
+  private String fuenteTicket;
+  private Integer tamanioFuenteGrande;
+  private Integer tamanioFuenteNormal;
+  private Integer tamanioFuenteChica;
+  
 	//Datos obtenidos a partir de TramitesUy
 	private String oficinaId; //Esto es inventado, las oficinas no tienen id en TramitesUy
 	private String direccion;
@@ -166,7 +171,11 @@ public class Recurso implements Serializable {
 		fechaBaja = r.getFechaBaja();
 		mostrarNumeroEnLlamador = r.getMostrarNumeroEnLlamador();
 		mostrarNumeroEnTicket = r.getMostrarNumeroEnTicket();
-		mostrarIdEnTicket = r.getMostrarIdEnTicket();
+		fuenteTicket = r.getFuenteTicket();
+		tamanioFuenteChica = r.getTamanioFuenteChica();
+    tamanioFuenteNormal = r.getTamanioFuenteNormal();
+    tamanioFuenteGrande = r.getTamanioFuenteGrande();
+    mostrarIdEnTicket = r.getMostrarIdEnTicket();
 		usarLlamador = r.getUsarLlamador();
 		serie = r.getSerie();
 		visibleInternet = r.getVisibleInternet();
@@ -653,4 +662,41 @@ public class Recurso implements Serializable {
     this.presencialDomingo = presencialDomingo;
   }
 
+  @Column (name = "fuente_ticket", nullable = false)
+  public String getFuenteTicket() {
+    return fuenteTicket;
+  }
+
+  public void setFuenteTicket(String fuenteTicket) {
+    this.fuenteTicket = fuenteTicket;
+  }
+
+  @Column (name = "tamanio_fuente_grande", nullable = false)
+  public Integer getTamanioFuenteGrande() {
+    return tamanioFuenteGrande;
+  }
+
+  public void setTamanioFuenteGrande(Integer tamanioFuenteGrande) {
+    this.tamanioFuenteGrande = tamanioFuenteGrande;
+  }
+
+  @Column (name = "tamanio_fuente_normal", nullable = false)
+  public Integer getTamanioFuenteNormal() {
+    return tamanioFuenteNormal;
+  }
+
+  public void setTamanioFuenteNormal(Integer tamanioFuenteNormal) {
+    this.tamanioFuenteNormal = tamanioFuenteNormal;
+  }
+
+  @Column (name = "tamanio_fuente_chica", nullable = false)
+  public Integer getTamanioFuenteChica() {
+    return tamanioFuenteChica;
+  }
+
+  public void setTamanioFuenteChica(Integer tamanioFuenteChica) {
+    this.tamanioFuenteChica = tamanioFuenteChica;
+  }
+
+  
 }

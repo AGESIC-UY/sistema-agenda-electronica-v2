@@ -7,11 +7,8 @@
 
 <ui:composition template="/templates/layoutPublico.xhtml">
 	<ui:param name="parametroBean" value="#{cancelarReservaPublicMBean}" />
-	<ui:define name="css">
-	</ui:define>
-
-	<ui:define name="script">
-	</ui:define>
+	<ui:define name="css" />
+	<ui:define name="script" />
 
 	<ui:define name="titulo">
 		<h:outputText value="#{agenda_nombre}"></h:outputText>
@@ -19,7 +16,6 @@
 
 	<ui:define name="cuerpo">
 		<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarReserva" zindex="2000" modal="true">
-
 			<f:facet name="header">
 				<h:outputText value="#{sesionMBean.textos['confirmacion']}" />
 			</f:facet>
@@ -58,7 +54,6 @@
            <legend>
              <h:outputText value="#{sesionMBean.textos['confirmacion_de_datos']}" />
            </legend>
-
            <div class="form-horizontal">
              <p:outputPanel styleClass="form-group">
                <h:outputLabel for="tipoDoc" class="col-sm-3 control-label label formularioCampoRequerido" value="#{sesionMBean.textos['tipo_de_documento']}" />
@@ -84,17 +79,14 @@
                </p:outputPanel>
              </p:outputPanel>
            </div>
-           
-          <ul class="form-action-buttons" >
-            <li class="action-buttons-primary">
-              <p:commandButton value="#{sesionMBean.textos['continuar']} #{cancelarReservaPublicMBean.simboloSiguiente}"
-                actionListener="#{cancelarReservaPublicMBean.verificarDatos}" update="@all" styleClass="btn-lg btn-primario" />
-            </li>
-          </ul>
-           
+           <ul class="form-action-buttons" >
+             <li class="action-buttons-primary">
+               <p:commandButton value="#{sesionMBean.textos['continuar']} #{cancelarReservaPublicMBean.simboloSiguiente}"
+                 actionListener="#{cancelarReservaPublicMBean.verificarDatos}" update="@all" styleClass="btn-lg btn-primario" />
+             </li>
+           </ul>
          </fieldset>
        </h:panelGroup>
-    
     </h:form>
 		
 		<h:form id="formConBusqueda" class="cancelarReserva" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='BUSCAR_RESERVAS'}" >

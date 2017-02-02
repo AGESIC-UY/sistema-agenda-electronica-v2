@@ -50,10 +50,11 @@ import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
 
-public class Paso2AdminMBean extends PasoAdminMBean {
+public class Paso2AdminMBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso2AdminMBean.class);
 	public static final String MSG_ID = "pantalla";
@@ -79,7 +80,7 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 	public void init() {
 		try {
 			if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null) {
-				redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+        redirect("inicio");
 				return;
 			}
 			if (sessionMBean.getReserva() != null) {
@@ -484,4 +485,12 @@ public class Paso2AdminMBean extends PasoAdminMBean {
 			}
 			return nombreMes;
 	}
+
+  public String claseSegunCupo(Disponibilidad disponibilidad) {
+    if(disponibilidad.getCupo()==null || disponibilidad.getCupo()<1) {
+      return "cupoNoSeleccionable";
+    }
+    return "";
+  }
+	
 }

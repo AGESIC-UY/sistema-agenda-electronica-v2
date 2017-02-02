@@ -12,9 +12,9 @@
 
 	<ui:composition template="/administracion/reserva/Paso.template.xhtml">
 
-		<ui:param name="parametroBean" value="#{pasoAdminFinalMBean}" />
+		<ui:param name="parametroBean" value="#{pasoFinalAdminMBean}" />
 		<ui:param name="bodyId" value="pasoFinal" />
-		<ui:param name="agenda_nombre" value="#{pasoAdminFinalMBean.agendaNombre}" />
+		<ui:param name="agenda_nombre" value="#{pasoFinalAdminMBean.agendaNombre}" />
 		<ui:param name="paso_numero" value="4" />
 		<ui:param name="paso_texto" value="#{sessionMBean.textos['reserva_confirmada']}" />
     <ui:param name="hay_error" value="false" />
@@ -22,7 +22,7 @@
 		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />
 
 		<ui:define name="descripcion">
-      <f:view beforePhase="#{pasoAdminFinalMBean.beforePhase}" >
+      <f:view beforePhase="#{pasoFinalAdminMBean.beforePhase}" >
 				<div id="form:j_idt30" aria-live="polite" class="ui-message ui-message-warn ui-widget ui-corner-all" style="margin: 20px 0 0;">
 					<span class="ui-message-warn-icon"></span>
 					<span class="ui-message-warn-detail">
@@ -38,23 +38,23 @@
 					<h:outputText value="#{sessionMBean.textos['la_reserva_esta_confirmada']}" />
 				</div>
 				<div class="fechaHoraReserva">
-					<h:outputText value="#{pasoAdminFinalMBean.diaSeleccionado}"
+					<h:outputText value="#{pasoFinalAdminMBean.diaSeleccionado}"
 						styleClass="resaltado">
 						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy"
 							timeZone="GMT" locale="#{sessionMBean.locale}" />
 					</h:outputText>
 					<h:outputText value=" a las " />
-					<h:outputText value="#{pasoAdminFinalMBean.horaSeleccionada}"
+					<h:outputText value="#{pasoFinalAdminMBean.horaSeleccionada}"
 						styleClass="resaltado">
 						<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}"
 							timeZone="GMT" />
 					</h:outputText>
 					<h:outputText value=", " />
-					<h:outputText value="#{pasoAdminFinalMBean.reservaNumero}"
+					<h:outputText value="#{pasoFinalAdminMBean.reservaNumero}"
 						styleClass="resaltado" />
 				</div>
 				<div>
-					<h:outputText value="#{pasoAdminFinalMBean.recursoDescripcion}" />
+					<h:outputText value="#{pasoFinalAdminMBean.recursoDescripcion}" />
 				</div>
         <p:outputPanel rendered="#{sessionMBean.agenda.getConTrazabilidad()}">
 	        <div class="seguridad">
@@ -71,7 +71,7 @@
 
 		<ui:define name="contenido">
 			<div class="infoAdicional box-grey">
-				<h:outputFormat escape="false" value="#{pasoAdminFinalMBean.descripcion}" />
+				<h:outputFormat escape="false" value="#{pasoFinalAdminMBean.descripcion}" />
 			</div>
 		</ui:define>
 		

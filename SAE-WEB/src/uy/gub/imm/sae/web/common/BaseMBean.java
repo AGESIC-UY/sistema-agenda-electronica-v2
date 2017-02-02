@@ -43,7 +43,7 @@ import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "2.0.0";
+	public static final String version = "2.0.1";
 
 	protected static final String FORM_ID = "form";
 	
@@ -133,7 +133,7 @@ public abstract class BaseMBean {
    *   </p:outputPanel>
    * </p:outputPanel>
    */
-	protected void addErrorMessage (Exception e, String idComponente) {
+	protected void addErrorMessage(Exception e, String idComponente) {
 		FacesMessage m;
 		if (e instanceof UserException) {
 			UserException ue = (UserException) e;

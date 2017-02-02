@@ -50,7 +50,7 @@
 								</p:outputPanel>
 	
 								<p:outputPanel styleClass="form-group col-sm-12 col-md-6 col-lg-4">
-									<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="Fhasta" styleClass="col-xs-5 col-sm-3 col-md-6 control-label label" />
+									<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="Fhasta" styleClass="col-xs-5 col-sm-3 col-md-6 control-label label formularioCampoRequerido" />
 									<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
 										<h:inputText id="Fhasta" value="#{reservaMBean.fechaHasta}" styleClass="datepicker">
 											<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />

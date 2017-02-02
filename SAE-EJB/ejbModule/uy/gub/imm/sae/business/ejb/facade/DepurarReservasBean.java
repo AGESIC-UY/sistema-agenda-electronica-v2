@@ -55,7 +55,7 @@ public class DepurarReservasBean  {
 	 */ 
 	
 	@SuppressWarnings("unchecked")
-	@Schedule(second="0", minute="*/30", hour="*", persistent=false)
+	@Schedule(second="0", minute="*/5", hour="*", persistent=false)
 	public void eliminarReservasPendientes(){
 		
 		try {

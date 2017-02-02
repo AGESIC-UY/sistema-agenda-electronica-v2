@@ -146,9 +146,7 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 					buscarSiguiente = false;
 				}
 			} catch (EJBException e) {
-				if (e.getCausedByException() instanceof OptimisticLockException) {
-					logger.info("ACCESO MULTIPLE A RESERVA EN SIGUIETNE RESERVA (id = "+reservaId+") "+e.getMessage()+" "+e.getCause().getClass().toString());
-				}else {
+				if (!(e.getCausedByException() instanceof OptimisticLockException)) {
 					throw e;
 				}
 			}

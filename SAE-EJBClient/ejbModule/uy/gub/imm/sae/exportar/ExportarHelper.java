@@ -35,8 +35,12 @@ public class ExportarHelper {
 		recursoExportar.setFechaBaja(recurso.getFechaBaja());
 		recursoExportar.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
 		recursoExportar.setVisibleInternet(recurso.getVisibleInternet());
+    recursoExportar.setMostrarIdEnTicket(recurso.getMostrarIdEnTicket());
 		recursoExportar.setMostrarNumeroEnTicket(recurso.getMostrarNumeroEnTicket());
-		recursoExportar.setMostrarIdEnTicket(recurso.getMostrarIdEnTicket());
+		recursoExportar.setFuenteTicket(recurso.getFuenteTicket());
+		recursoExportar.setTamanioFuenteChica(recurso.getTamanioFuenteChica());
+		recursoExportar.setTamanioFuenteNormal(recurso.getTamanioFuenteNormal());
+		recursoExportar.setTamanioFuenteGrande(recurso.getTamanioFuenteGrande());
 		recursoExportar.setUsarLlamador(recurso.getUsarLlamador());
 		recursoExportar.setSerie(recurso.getSerie());
 		recursoExportar.setSabadoEsHabil(recurso.getSabadoEsHabil());
@@ -170,8 +174,12 @@ public class ExportarHelper {
 		recurso.setFechaBaja(recursoExportar.getFechaBaja());
 		recurso.setMostrarNumeroEnLlamador(recursoExportar.getMostrarNumeroEnLlamador());
 		recurso.setVisibleInternet(recursoExportar.getVisibleInternet());
+    recurso.setMostrarIdEnTicket(recursoExportar.getMostrarIdEnTicket());
 		recurso.setMostrarNumeroEnTicket(recursoExportar.getMostrarNumeroEnTicket());
-		recurso.setMostrarIdEnTicket(recursoExportar.getMostrarIdEnTicket());
+		recurso.setFuenteTicket(recursoExportar.getFuenteTicket());
+		recurso.setTamanioFuenteChica(recursoExportar.getTamanioFuenteChica());
+		recurso.setTamanioFuenteNormal(recursoExportar.getTamanioFuenteNormal());
+		recurso.setTamanioFuenteGrande(recursoExportar.getTamanioFuenteGrande());
 		recurso.setUsarLlamador(recursoExportar.getUsarLlamador());
 		recurso.setSerie(recursoExportar.getSerie());
 		recurso.setSabadoEsHabil(recursoExportar.getSabadoEsHabil());

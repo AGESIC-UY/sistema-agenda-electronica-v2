@@ -39,7 +39,7 @@ import uy.gub.imm.sae.exception.UserException;
 public interface Recursos {
 	public Recurso crearRecurso(Agenda a, Recurso r) throws UserException, ApplicationException, BusinessException;
 	public void modificarRecurso(Recurso r) throws UserException, BusinessException, ApplicationException;
-	public void eliminarRecurso(Recurso r) throws UserException, ApplicationException;
+	public void eliminarRecurso(Recurso recurso, TimeZone timezone) throws UserException, ApplicationException;
 	public Recurso consultarRecurso(Recurso r) throws UserException;	
     //Métodos asociados a DatoDelRecurso
 	public DatoDelRecurso agregarDatoDelRecurso(Recurso r, DatoDelRecurso d) throws UserException;
