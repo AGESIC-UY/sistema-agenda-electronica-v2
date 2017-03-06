@@ -2225,8 +2225,10 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			}
 			return recurso;
 		} catch (UserException uEx) {
+      uEx.printStackTrace();
 			throw uEx;
 		} catch (Exception ex) {
+      ex.printStackTrace();
 			throw new UserException("no_se_pudo_realizar_la_importacion");
 		}
 	}

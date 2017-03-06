@@ -48,7 +48,6 @@ public interface AgendarReservas {
 	public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException;
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException;
 	
-	public Boolean agendaActiva(Agenda a);
 	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) throws UserException;
 	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws UserException;
 	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;

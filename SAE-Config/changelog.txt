@@ -130,3 +130,10 @@ Versión 2.0.1 (2017-02-02)
 * Se permite configurar la fuente y el tamaño de la letra utilizada para generar el ticket de confirmación.
 * Se corrigió un bug por el cual al momento de configurar una agenda, si había un error en alguno de los trámites asociados, todos los trámites quedaban marcados con error.
 
+Versión 2.0.2 (2017-02-02)
+* Al quitar la última empresa de un usuario superadministrador no se marca como eliminado (aún puede acceder).
+* No se permite eliminar la última empresa
+
+Versión 2.0.3
+* Se cambiaron algunos textos.
+* Se solucionó un problema por el cual al cancelar reservas por período no se estaban cancelando las reservas pendientes pero no confirmadas.

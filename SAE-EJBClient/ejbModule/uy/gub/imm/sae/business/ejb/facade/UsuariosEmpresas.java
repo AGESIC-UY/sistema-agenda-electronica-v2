@@ -41,7 +41,6 @@ public interface UsuariosEmpresas {
 	public List<Usuario> consultarUsuarios() throws ApplicationException;
 	public List<Usuario> consultarUsuariosEmpresa(Integer empresaId) throws ApplicationException;
 	public Usuario guardarUsuario(Usuario usuario) throws ApplicationException; 
-	public void eliminarUsuario(Usuario usuario) throws ApplicationException;
 	public Usuario generarYEnviarPassword(Usuario usuarioEditar) throws ApplicationException;
 	
 	public Empresa obtenerEmpresaPorId(Integer empresaId) throws ApplicationException;

@@ -43,7 +43,7 @@ import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "2.0.1";
+	public static final String version = "2.0.3";
 
 	protected static final String FORM_ID = "form";
 	
@@ -219,15 +219,14 @@ public abstract class BaseMBean {
 	 * Deshabilta el cache del navegador para la pagina que se esta respondiendo.
 	 */
 	protected void disableBrowserCache(PhaseEvent phaseEvent) { 
-
 		if (phaseEvent.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-	        FacesContext facesContext = phaseEvent.getFacesContext();
-	        HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
-	        response.addHeader("Pragma", "no-cache");
-	        response.addHeader("Cache-Control", "no-cache");
-	        response.addHeader("Cache-Control", "no-store");
-	        response.addHeader("Cache-Control", "must-revalidate");
-	        response.addHeader("Expires", "Mon, 1 Jan 2006 05:00:00 GMT"); //en el pasado
+      FacesContext facesContext = phaseEvent.getFacesContext();
+      HttpServletResponse response = (HttpServletResponse) facesContext.getExternalContext().getResponse();
+      response.addHeader("Pragma", "no-cache");
+      response.addHeader("Cache-Control", "no-cache");
+      response.addHeader("Cache-Control", "no-store");
+      response.addHeader("Cache-Control", "must-revalidate");
+      response.addHeader("Expires", "Mon, 1 Jan 2006 05:00:00 GMT"); //en el pasado
 		}
 	}
 

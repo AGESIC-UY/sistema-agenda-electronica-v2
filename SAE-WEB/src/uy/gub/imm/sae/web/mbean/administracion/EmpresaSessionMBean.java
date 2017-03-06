@@ -45,6 +45,7 @@ public class EmpresaSessionMBean extends SessionCleanerMBean implements Removabl
 	
 	private Empresa empresaEditar;
 	private Empresa empresaEliminar;
+	private boolean ultimaEmpresaEliminar; //Indica si la empresa seleccionada para eliminar es la última
 	//Datos de los organismos 
 	private Map<Integer, Organismo> mapOrganismos = new HashMap<Integer, Organismo>();
 	private List<SelectItem> organismos = new ArrayList<SelectItem>(0);
@@ -170,6 +171,16 @@ public class EmpresaSessionMBean extends SessionCleanerMBean implements Removabl
 		formatos.add(new SelectItem("hh:mm a", "12 horas"));
 		return formatos;
 	}
+
+  public boolean isUltimaEmpresaEliminar() {
+    return ultimaEmpresaEliminar;
+  }
+
+  public void setUltimaEmpresaEliminar(boolean ultimaEmpresaEliminar) {
+    this.ultimaEmpresaEliminar = ultimaEmpresaEliminar;
+  }
+	
+	
 }
 
 

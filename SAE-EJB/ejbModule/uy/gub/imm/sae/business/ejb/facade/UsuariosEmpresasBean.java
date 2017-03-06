@@ -200,24 +200,9 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			//debo cargar las empresas que tienen correcto el esquema de base de datos
 			List<Empresa> empresasCorrectas = new ArrayList<Empresa>();
 			for (Empresa empresa : usu.getEmpresas()) {
-				if (esquemas.contains(empresa.getDatasource()))
-				{
+				if (esquemas.contains(empresa.getDatasource())) {
 					empresasCorrectas.add(empresa);
 				}
-				
-//				try {
-//					Query query = globalEntityManager.createNativeQuery("SELECT 1 from "+empresa.getDatasource() +".ae_agendas");
-//					query.getResultList();
-//					if(empresa.getFechaBaja()==null)
-//					{
-//						empresasCorrectas.add(empresa);
-//					}
-//				} catch(NoResultException nrEx) {
-//					empresasCorrectas.add(empresa);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-				
 			}
 			return empresasCorrectas;
 		} catch (Exception e){
@@ -232,7 +217,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		if(empresa == null) {
 			return null;
 		}
-		
 		//Verificar si ya está creado el esquema para la empresa (puede no contener tablas)
 		Connection connection = globalEntityManager.unwrap(SessionImpl.class).connection();
 		DatabaseMetaData metaData;
@@ -248,11 +232,9 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
 		if(!existeEsquema) {
 			throw new UserException("no_se_puede_guardar_la_empresa_porque_no_existe_el_esquema");
 		}
-
 		if(empresa.getId() == null) {
 			globalEntityManager.persist(empresa);
 			globalEntityManager.flush();
@@ -260,7 +242,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		}else {
 			empresa = globalEntityManager.merge(empresa);
 		}
-		
 		return empresa;
 	}
 	
@@ -268,7 +249,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		if(empresa==null || empresa.getId() == null) {
 			return;
 		}
-		
 		Connection connection = globalEntityManager.unwrap(SessionImpl.class).connection();
 		DatabaseMetaData metaData;
 		List<String> esquemas = null;
@@ -282,7 +262,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		if (esquemas.contains(empresa.getDatasource())) {
 			List<Agenda> agendasEliminar = agendasEJB.consultarAgendas();
 			for (Agenda agenda : agendasEliminar) {
@@ -290,11 +270,16 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 					agendasEJB.eliminarAgenda(agenda, timezone);
 				} catch (UserException e) {
 					throw new UserException("no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas");
-					
 				}
 			}
 		}
 
+		//Desasociar a todos los usuarios de esta empresa
+		List<Usuario> usuarios = consultarUsuariosEmpresa(empresa.getId());
+		for(Usuario usuario : usuarios) {
+		  usuario.getEmpresas().remove(empresa);
+		}
+		
 		//Marcar la empresa recibida como eliminada (por si el invocante la sigue usando)
 		empresa.setFechaBaja(new Date());
 		//Recuperar la empresa por si está detached
@@ -304,7 +289,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		globalEntityManager.persist(empresa);
 		globalEntityManager.flush();
 	}
-	
 	
 	@Override
 	public List<Usuario> consultarUsuarios() throws ApplicationException {
@@ -346,14 +330,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		return usuario;
 	}
 	
-	public void eliminarUsuario(Usuario usuario) throws ApplicationException {
-		if(usuario==null || usuario.getId() == null) {
-			return;
-		}
-		usuario.setFechaBaja(new Date());
-		guardarUsuario(usuario);
-	}
-	
 	public void eliminarUsuarioEmpresa(Usuario usuario, Empresa emp) throws ApplicationException {
 		if(usuario==null || usuario.getId() == null) {
 			return;
@@ -378,8 +354,8 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	    query.executeUpdate();
 			//Desasociar el usuario de la empresa
 			usuario.getEmpresas().remove(emp);
-			//Si no quedan empresas asociadas al usuario, se marca como eliminado
-			if(usuario.getEmpresas().isEmpty()) {
+			//Si no es superadministrador y no quedan empresas asociadas al usuario, se marca como eliminado
+			if(!usuario.isSuperadmin() && usuario.getEmpresas().isEmpty()) {
 			  usuario.setFechaBaja(new Date());
 			}
 		}else{

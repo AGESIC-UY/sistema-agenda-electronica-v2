@@ -273,11 +273,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		return recursos;
 	}
 
-	public Boolean agendaActiva(Agenda a) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
   public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
     cancelarReserva(empresa, recurso, reserva, false);
   }
@@ -1263,35 +1258,33 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	
   @SuppressWarnings("unchecked")
   public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
-    
-    //Obtener las reservas en estado Reservado o Usado para el período indicado
+    //Obtener las reservas en estado Pendiente, Reservado o Usado para el período indicado
     List<Reserva> reservas = entityManager.createQuery("SELECT r FROM Reserva r " +
       "JOIN r.disponibilidades d " +
       "WHERE d.recurso.id = :recursoId " +
-      "  AND r.estado IN ('R', 'U') " +
+      "  AND r.estado IN ('P', 'R', 'U') " +
       "  AND d.fecha BETWEEN :fi AND :ff " +
       "  AND d.presencial = false ")
       .setParameter("recursoId", recurso.getId())
       .setParameter("fi", ventana.getFechaInicial())
       .setParameter("ff", ventana.getFechaFinal())
       .getResultList();
-    
     List<Integer> reservasSinEnviarComunicacion = new ArrayList<Integer>();
-    
     //Para cada reserva encontrada, cancelarla, enviando las comunicaciones correspondientes
     for(Reserva reserva : reservas) {
+      Estado estadoReserva = reserva.getEstado();
       cancelarReserva(empresa, recurso, reserva, true);
-      //Enviar mail
-      try {
-        enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora, asunto, cuerpo);
-        //Almacenar datos para SMS y TextoAVoz, si corresponde
-        almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
-      }catch(Exception ex) {
-        reservasSinEnviarComunicacion.add(reserva.getId());
+      //Enviar mail (si no estaba pendiente)
+      if(!estadoReserva.equals(Estado.P)) {
+        try {
+          enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora, asunto, cuerpo);
+          //Almacenar datos para SMS y TextoAVoz, si corresponde
+          almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
+        }catch(Exception ex) {
+          reservasSinEnviarComunicacion.add(reserva.getId());
+        }
       }
     }
-    
     return reservasSinEnviarComunicacion;
-    
   }
 }
