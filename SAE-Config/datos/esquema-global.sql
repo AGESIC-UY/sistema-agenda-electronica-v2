@@ -1235,6 +1235,10 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('tamanio_fuente_chica', 'Tamaño d
 INSERT INTO ae_textos (codigo, texto) VALUES ('tamanio_fuente_normal', 'Tamaño de la fuente normal');
 INSERT INTO ae_textos (codigo, texto) VALUES ('tamanio_fuente_grande', 'Tamaño de la fuente grande');
 INSERT INTO ae_textos (codigo, texto) VALUES ('previsualizar_ticket', 'Previsualizar ticket');
+INSERT INTO ae_textos (codigo, texto) VALUES ('es_la_ultima_empresa', 'Es la última empresa');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_quedar_al_menos_una_empresa', 'Debe quedar al menos una empresa viva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_debe_ser_anterior_a_la_fecha_de_fin', 'La fecha de inicio debe ser anterior a la fecha de fin');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_realizar_la_importacion', 'No se pudo realizar la importación');
 
 
 --
