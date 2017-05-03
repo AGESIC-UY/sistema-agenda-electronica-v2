@@ -23,6 +23,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.io.ByteArrayInputStream;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -34,11 +35,13 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.ejb.EJB;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
 
@@ -62,10 +65,8 @@ import uy.gub.imm.sae.web.common.SelectItemComparator;
 
 public class SesionMBean	extends BaseMBean {
 	
-	static Logger logger = Logger.getLogger(SesionMBean.class);
+	private static Logger LOGGER = Logger.getLogger(SesionMBean.class);
 	
-	private AgendarReservas agendarReservasEJB;
-
 	private String paginaDeRetorno;
 	private Boolean soloCuerpo = false;
 	
@@ -76,7 +77,7 @@ public class SesionMBean	extends BaseMBean {
 	private VentanaDeTiempo ventanaCalendario;
 	private VentanaDeTiempo ventanaMesSeleccionado;
 	private List<Integer> cuposXdiaMesSeleccionado;
-    private Date currentDate;
+  private Date currentDate;
 	 
 	private Date diaSeleccionado;
 	private RowList<Disponibilidad> disponibilidadesDelDiaMatutina;
@@ -99,13 +100,14 @@ public class SesionMBean	extends BaseMBean {
 	private String idiomaActual = Locale.getDefault().getLanguage();
 	
 	private boolean mostrarFechaActual = false;
+
+  private AgendarReservas agendarReservasEJB;
 	
   @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionRemote")
   private Configuracion configuracionEJB;
 	
   @PostConstruct
   public void init() {
-
     try {
       agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
       //Cargar los textos dependientes del idioma
@@ -116,12 +118,11 @@ public class SesionMBean	extends BaseMBean {
         mostrarFechaActual = bMostrarFechaActual.booleanValue();
       }
     } catch (ApplicationException e) {
-      logger.error("NO SE PUDO OBTENER EJB AgendarReservas");
-      logger.error(e);
+      LOGGER.error("NO SE PUDO OBTENER EJB AgendarReservas");
+      LOGGER.error(e);
       redirect(ERROR_PAGE_OUTCOME);     
     }
   } 
-  
 	
 	public TimeZone getTimeZone() {
 		//Primero se devuelve la de la Agenda, si tiene
@@ -241,9 +242,8 @@ public class SesionMBean	extends BaseMBean {
 		return agenda;
 	}
 	
-	public void setAgenda(Agenda a)
-	{
-		agenda = a;
+	public void setAgenda(Agenda agenda) {
+		this.agenda = agenda;
 	} 
 
 	public Recurso getRecurso() {
@@ -361,28 +361,22 @@ public class SesionMBean	extends BaseMBean {
 	}
 	
 	private void limpiarSesion() {
-
 		agenda = null;
 		recurso = null;
 		datosASolicitar = null;
 		ventanaCalendario = null;
 		ventanaMesSeleccionado = null;
 		cuposXdiaMesSeleccionado = null;
-	    currentDate = null;
-		
+    currentDate = null;
 		diaSeleccionado = null;
-
 		limpiarPaso2();
 	}
 
 	public void limpiarPaso2() {
-
 		disponibilidadesDelDiaMatutina = null;
 		disponibilidadesDelDiaVespertina = null;
-
 		disponibilidad = null;
 		reserva = null;
-		
 		limpiarPaso3();
 	}
 
@@ -583,9 +577,32 @@ public class SesionMBean	extends BaseMBean {
 	}
   
 	public void cambioIdiomaActual(ValueChangeEvent event) {
-		idiomaActual = (String) event.getNewValue();
-		cargarTextos();
+	  limpiarMensajesError();
+    String idiomaSeleccionado = (String) event.getNewValue();
+    cambioIdiomaActual(idiomaSeleccionado);
 	}
+
+  public void cambioIdiomaActual(String idiomaSeleccionado) {
+    try {
+      LOGGER.debug("Cambiando idoma de la interfaz...");
+      List<String> idiomasDisponibles = Arrays.asList(agenda.getIdiomas().split(","));
+      //Se verifica que el idioma indicado sea uno de los disponibles, sino no se permite el cambio
+      LOGGER.debug("Verificando que el idioma seleccionado ("+idiomaSeleccionado+") sea uno de los soportados ("+idiomasDisponibles+")");
+      if(!idiomasDisponibles.contains(idiomaSeleccionado)) {
+        LOGGER.warn("No se pudo cambiar el idioma porque "+idiomaSeleccionado+" no es un idioma soportado");
+        return;
+      }
+      idiomaActual = idiomaSeleccionado;
+      //Este javascript es para cambiar el atributo lang del elemento <html> en la página actual
+      //(sin esto ese atributo no cambia en la página actual y UNIT lo marca como un error)
+      RequestContext.getCurrentInstance().execute("document.documentElement.lang='"+idiomaActual+"'");
+      LOGGER.debug("Idioma cambiado, cargando textos...");
+      cargarTextos();
+      LOGGER.debug("Textos cargados.");
+    }catch(Exception ex) {
+      LOGGER.error("No se pudo cambiar el idioma", ex);
+    }
+  }
 
 	public String getUrlTramite() {
 		return urlTramite;
@@ -610,7 +627,6 @@ public class SesionMBean	extends BaseMBean {
 	public void setCodigoTrazabilidadPadre(String codigoTrazabilidadPadre) {
 		this.codigoTrazabilidadPadre = codigoTrazabilidadPadre;
 	}
-
 	
   public String getCodigoTramite() {
     return codigoTramite;
@@ -627,6 +643,50 @@ public class SesionMBean	extends BaseMBean {
 	public void setPaso3Captcha(String paso3Captcha) {
 		this.paso3Captcha = paso3Captcha;
 	}
+	
+  @PreDestroy
+  public void preDestroy() {
+    try {
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      this.agenda = null;
+      this.agendarReservasEJB = null;
+      this.configuracionEJB = null;
+      if(this.cuposXdiaMesSeleccionado!=null) {
+        this.cuposXdiaMesSeleccionado.clear();
+      }
+      this.cuposXdiaMesSeleccionado = null;
+      if(this.datosASolicitar!=null) {
+        this.datosASolicitar.clear();
+      }
+      this.datosASolicitar = null;
+      this.disponibilidad = null;
+      this.disponibilidadCancelarReserva = null;
+      this.disponibilidadesDelDiaMatutina = null;
+      this.disponibilidadesDelDiaVespertina = null;
+      this.empresaActual = null;
+      if(this.listaReservas!=null) {
+        this.listaReservas.clear();
+      }
+      this.listaReservas = null;
+      if(this.preguntasCaptcha!=null) {
+        this.preguntasCaptcha.clear();
+      }
+      this.preguntasCaptcha = null;
+      this.recurso = null;
+      this.reserva = null;
+      this.reservaConfirmada = null;
+      this.reservaDatos = null;
+      if(this.textos!=null) {
+        this.textos.clear();
+      }
+      this.textos = null;
+      this.ventanaCalendario = null;
+      this.ventanaMesSeleccionado = null;
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+    }
+  }
 	
 }
 

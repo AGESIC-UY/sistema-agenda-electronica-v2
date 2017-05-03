@@ -428,7 +428,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	}
 	
 	
-	public void validarDatosReserva(Empresa empresa, Reserva reserva) 
+	public void validarDatosReserva(Empresa empresa, Reserva reserva)
 		throws BusinessException, ValidacionException, ApplicationException {
 		
 		if (reserva == null || reserva.getDatosReserva()==null) {

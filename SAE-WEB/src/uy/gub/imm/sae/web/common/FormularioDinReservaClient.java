@@ -71,7 +71,7 @@ public class FormularioDinReservaClient {
 			valores.put(dato.getDatoASolicitar().getNombre(), dato.getValor());
 		}
 		return valores;
-	 }
+	}
 
 	public static List<DatoReserva> obtenerDatosReserva(Map<String, Object> origen, Map<String, DatoASolicitar> datosASolicitar) {
 		List<DatoReserva> datos = new ArrayList<DatoReserva>();

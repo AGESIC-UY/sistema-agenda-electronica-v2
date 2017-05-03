@@ -1946,9 +1946,6 @@ table input[type="text"], table select, table textarea {
 	legend {
 		font-weight: normal;
 	}
-	form .form-required {
-		display: none;
-	}
 	/* Recuadro gris */
 	.align-to-form  {
 		padding-left: 36px;

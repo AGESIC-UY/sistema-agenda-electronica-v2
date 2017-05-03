@@ -217,122 +217,141 @@ public class RecursoMBean extends BaseMBean{
 		
 		limpiarMensajesError();
 		
-		boolean error = false;
+		boolean hayErrores = false;
 		if(getRecursoNuevo().getNombre() == null || getRecursoNuevo().getNombre().equals("")){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_recurso_es_obligatorio"), FORM_ID+":nombre");
+      hayErrores = true;
 		}
 		if(getRecursoNuevo().getDescripcion() == null || getRecursoNuevo().getDescripcion().equals("")){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
+      hayErrores = true;
 		}
 		Recurso recurso = getRecursoNuevo();
 		recurso.setVentanaCuposMinimos(0);
 		//Fechas de vigencia
 		if (recurso.getFechaInicio() == null){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
-		}else {
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaInicio())) {
+      addErrorMessage("la_fecha_de_inicio_de_vigencia_es_invalida", FORM_ID+":fechaInicio");
+      hayErrores = true;
+    }else {
 			recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
 		}
 		if(recurso.getFechaFin() == null) {
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_obligatoria"), FORM_ID+":fechaFin");
-		} else {
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaFin())) {
+      addErrorMessage("la_fecha_de_fin_de_vigencia_es_invalida", FORM_ID+":fechaFin");
+      hayErrores = true;
+    }else {
 			recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
 		}
-		if(recurso.getFechaInicio() != null && recurso.getFechaFin() != null && recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0) {
-			error = true;
+		if(recurso.getFechaInicio() != null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+		    recurso.getFechaFin() != null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
+      hayErrores = true;
 		}
     //Fechas de disponibilidad
 		if(recurso.getFechaInicioDisp() == null) {
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaIniDispon");
-		}else {
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaInicioDisp())) {
+      addErrorMessage("la_fecha_de_inicio_de_disponibilidad_es_invalida", FORM_ID+":fechaIniDispon");
+      hayErrores = true;
+    }else {
 			recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
 		}
-		if (recurso.getFechaFinDisp() == null){
-			error = true;
+		if(recurso.getFechaFinDisp() == null){
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaFinDispon");
-		} else {
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaFinDisp())) {
+      addErrorMessage("la_fecha_de_fin_de_disponibilidad_es_invalida", FORM_ID+":fechaFinDispon");
+      hayErrores = true;
+    }else {
 			recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));	
 		}
-		if (recurso.getFechaInicioDisp() != null && recurso.getFechaFinDisp() != null && recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0){
-			error = true;
+		if (recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) &&
+		    recurso.getFechaFinDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) && 
+		    recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0){
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaIniDispon");
+      hayErrores = true;
 		}
 		//Relaciones entre fechas de vigencia y disponibilidad
-		if (recurso.getFechaInicioDisp() != null && recurso.getFechaInicio()!= null && recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
-			error = true;
+		if (recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) && 
+		    recurso.getFechaInicio()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+		    recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaInicio",FORM_ID+":fechaIniDispon");
+      hayErrores = true;
 		}
-		if (recurso.getFechaFinDisp() != null && recurso.getFechaFin()!= null && recurso.getFechaFinDisp().compareTo(recurso.getFechaFin()) > 0) {
-			error = true;
+		if (recurso.getFechaFinDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) && 
+		    recurso.getFechaFin()!=null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && 
+		    recurso.getFechaFinDisp().compareTo(recurso.getFechaFin()) > 0) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
+      hayErrores = true;
 		}
 		if (recurso.getDiasInicioVentanaIntranet() == null){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasInicioVIntranet");
+      hayErrores = true;
 		}else if (recurso.getDiasInicioVentanaIntranet().intValue() < 0){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":DiasInicioVIntranet");
+      hayErrores = true;
 		}
 		if (recurso.getDiasVentanaIntranet() == null){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasVIntranet");
+      hayErrores = true;
 		}else if (recurso.getDiasVentanaIntranet().intValue() <= 0){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVIntranet");
+      hayErrores = true;
 		}
 		if(recurso.getVisibleInternet()!=null && recurso.getVisibleInternet().booleanValue()) {
 	    if (recurso.getDiasInicioVentanaInternet() == null){
-	      error = true;
 	      addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasInicioVInternet");
+        hayErrores = true;
 	    }else if (recurso.getDiasInicioVentanaInternet().intValue() < 0){
-	      error = true;
 	      addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":DiasInicioVInternet");
+        hayErrores = true;
 	    }
   		if (recurso.getDiasVentanaInternet() == null){
-  			error = true;
   			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasVInternet");
+        hayErrores = true;
   		}else if (recurso.getDiasVentanaInternet().intValue() <= 0){
-  			error = true;
   			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVInternet");
+        hayErrores = true;
   		}
 		}
     if (recurso.getVentanaCuposMinimos() == null){
-      error = true;
       addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposM");
+      hayErrores = true;
     }
 		if (recurso.getVentanaCuposMinimos()!=null && recurso.getVentanaCuposMinimos().intValue() < 0 ){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":VCuposM");
+      hayErrores = true;
 		}
 		if (recurso.getCantDiasAGenerar() == null){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_es_obligatoria"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
 		if (recurso.getCantDiasAGenerar()!=null && recurso.getCantDiasAGenerar().intValue() <= 0 ){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
 		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0 ){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
 		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0 ){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
 		if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera().intValue() <= 0 ){
-			error = true;
 			addErrorMessage(sessionMBean.getTextos().get("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero"), FORM_ID+":largoLista");
+      hayErrores = true;
 		}
     if(recurso.getPresencialAdmite()!=null && recurso.getPresencialAdmite().booleanValue()) {
   		if(recurso.getPresencialCupos() != null && recurso.getPresencialCupos().intValue() <= 0 ) {
-        error = true;
         addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero"), FORM_ID+":cuposPresencial");
+        hayErrores = true;
   		}
       if((recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue()) && 
           (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue()) && 
@@ -341,48 +360,42 @@ public class RecursoMBean extends BaseMBean{
           (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue()) &&
           (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue()) &&
           (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue())) {
-        error = true;
         addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_dia"), FORM_ID+":diaAplicarHidden");
+        hayErrores = true;
       }
     }
-		
 		recurso.setNombre(getRecursoNuevo().getNombre().trim());
 		recurso.setDescripcion(getRecursoNuevo().getDescripcion().trim());
-		
 		try {
 			if(recurso.getAgenda()==null) {
 				recurso.setAgenda(sessionMBean.getAgendaMarcada());
 			}
 			if(recursosEJB.existeRecursoPorNombre(recurso)) {
-				error = true;
+				hayErrores = true;
 				addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_recurso_con_el_nombre_especificado"), FORM_ID+":nombre");
 			}
-		} catch (ApplicationException e1) {
+		}catch (ApplicationException e1) {
 			addErrorMessage(e1, MSG_ID);
 		}
-		
-		if(!error) {
-			try {
-				recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), recurso);
-				sessionMBean.cargarRecursos();
-				sessionMBean.desmarcarRecurso();
-				//Se blanquea la info en la página
-				this.setRecursoNuevo(null);
-				addInfoMessage(sessionMBean.getTextos().get("recurso_creado"), MSG_ID);
-			
-			
-			} catch (Exception ex) {
-				addErrorMessage(ex, MSG_ID);
-			}
+		if(hayErrores) {
+		  return;
+		}
+		try {
+			recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), recurso);
+			sessionMBean.cargarRecursos();
+			sessionMBean.desmarcarRecurso();
+			//Se blanquea la info en la página
+			this.setRecursoNuevo(null);
+			addInfoMessage(sessionMBean.getTextos().get("recurso_creado"), MSG_ID);
+		} catch (Exception ex) {
+			addErrorMessage(ex, MSG_ID);
 		}
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	public void selecRecursoEliminar(ActionEvent e){
 		sessionMBean.setRecursoSeleccionado(((Row<Recurso>)this.getRecursosDataTableConsultar().getRowData()).getData());
 	}
-	
 	
 	public void eliminar(ActionEvent ev) {
 		limpiarMensajesError();
@@ -407,10 +420,6 @@ public class RecursoMBean extends BaseMBean{
 		}
 	}
 
-	/**************************************************************************/
-	/*                       Action  de Recurso  (navegación)                 */	
-	/**************************************************************************/	
-	
 	@SuppressWarnings("unchecked")
 	public String modificar() {
     Recurso recurso1 = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
@@ -426,7 +435,6 @@ public class RecursoMBean extends BaseMBean{
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 			return null;
 		}
-		
 	}
 
 	@SuppressWarnings("unchecked")
@@ -444,131 +452,148 @@ public class RecursoMBean extends BaseMBean{
 		}
 	}
 
-	
 	public String guardar() {
 		limpiarMensajesError();
-		
 		if (sessionMBean.getRecursoSeleccionado() != null) {
  			try {
- 				boolean error = false;
+ 				boolean hayErrores = false;
  				sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(0);
  				sessionMBean.getRecursoSeleccionado().setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
  				sessionMBean.getRecursoSeleccionado().setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
  				Recurso recurso = sessionMBean.getRecursoSeleccionado();
  				if(recurso.getNombre() == null || recurso.getNombre().equals("")){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_recurso_es_obligatorio"), FORM_ID+":nombre");
+          hayErrores = true;
  				}
  				if(recurso.getDescripcion() == null || recurso.getDescripcion().equals("")){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
+          hayErrores = true;
  				}
-
         //Fechas de vigencia
- 				if (recurso.getFechaInicio() == null){
- 					error = true;
+ 				if (recurso.getFechaInicio()==null){
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaInicio())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_invalida"), FORM_ID+":fechaInicio");
+          hayErrores = true;
  				}else {
  					recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
  				}
  				if(recurso.getFechaFin()==null) {
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_obligatoria"), FORM_ID+":fechaFin");
- 				} else {
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaFin())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_invalida"), FORM_ID+":fechaFin");
+          hayErrores = true;
+        }else {
  					recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
  				}
- 				if(recurso.getFechaInicio() != null && recurso.getFechaFin() != null && recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0 ) {
- 					error = true;
+ 				if(recurso.getFechaInicio()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+ 				    recurso.getFechaFin()!= null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && 
+ 				    recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0 ) {
+ 					hayErrores = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
  				}
  				//Fechas de disponibilidad
  				if(recurso.getFechaInicioDisp() == null) {
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaInicioDispon");
- 				}else {
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaInicioDisp())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_invalida"), FORM_ID+":fechaInicioDispon");
+          hayErrores = true;
+        }else {
  					recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
  				}
  				if(recurso.getFechaFinDisp() == null) {
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaFinDispon");
- 				}else {
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaFinDisp())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_invalida"), FORM_ID+":fechaFinDispon");
+          hayErrores = true;
+        }else {
  					recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));	
  				}
- 				if(recurso.getFechaInicioDisp()!=null && recurso.getFechaFinDisp() != null && recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0 ){
- 					error = true;
+ 				if(recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) &&
+ 				    recurso.getFechaFinDisp() != null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) &&
+ 				    recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp())>0){
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaInicioDispon");
+          hayErrores = true;
  				}
  				//Relaciones entre fechas de vigencia y disponibilidad
- 				if (recurso.getFechaInicioDisp() != null && recurso.getFechaInicio()!= null && recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
- 					error = true;
+ 				if (recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) && 
+ 				    recurso.getFechaInicio()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+ 				    recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaInicio",FORM_ID+":fechaInicioDispon");
+          hayErrores = true;
  				}
- 				if (recurso.getFechaFinDisp() != null && recurso.getFechaFin()!= null && recurso.getFechaFinDisp().compareTo(recurso.getFechaFin()) > 0) {
- 					error = true;
+ 				if (recurso.getFechaFinDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) && 
+ 				    recurso.getFechaFin()!=null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && 
+ 				    recurso.getFechaFinDisp().compareTo(recurso.getFechaFin())>0) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
+          hayErrores = true;
  				}
         if (recurso.getDiasInicioVentanaIntranet() == null){
-          error = true;
           addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasIVIntranet");
+          hayErrores = true;
         }else if (recurso.getDiasInicioVentanaIntranet().intValue() < 0){
-          error = true;
           addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":diasIVIntranet");
+          hayErrores = true;
         }
  				if (recurso.getDiasVentanaIntranet() == null){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasVIntranet");
+          hayErrores = true;
  				}else if (recurso.getDiasVentanaIntranet().intValue() <= 0){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":diasVIntranet");
+          hayErrores = true;
  				}
  		    if(recurso.getVisibleInternet()!=null && recurso.getVisibleInternet().booleanValue()) {
    				if (recurso.getDiasInicioVentanaInternet() == null){
-   					error = true;
    					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":diasIVInternet");
+            hayErrores = true;
    				}else if (recurso.getDiasInicioVentanaInternet().intValue() < 0){
-   					error = true;
    					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":diasIVInternet");
+            hayErrores = true;
    				}
           if (recurso.getDiasVentanaInternet() == null){
-            error = true;
             addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":diasVInternet");
+            hayErrores = true;
           }else if (recurso.getDiasVentanaInternet().intValue() <= 0){
-            error = true;
             addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":diasVInternet");
+            hayErrores = true;
           }
         }
  				if (recurso.getVentanaCuposMinimos() == null){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposMin");
+          hayErrores = true;
  				}
  				if (recurso.getVentanaCuposMinimos()!=null && recurso.getVentanaCuposMinimos().intValue() < 0 ){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":VCuposMin");
+          hayErrores = true;
  				}
  				if (recurso.getCantDiasAGenerar() == null){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_es_obligatoria"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
  				if (recurso.getCantDiasAGenerar()!=null && recurso.getCantDiasAGenerar().intValue() <= 0 ){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
  				if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0 ){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
  				if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0 ){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
  				if ((recurso.getLargoListaEspera() != null) && (recurso.getLargoListaEspera().intValue() <= 0 )){
- 					error = true;
  					addErrorMessage(sessionMBean.getTextos().get("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero"), FORM_ID+":largoListaEspera");
+          hayErrores = true;
  				}
  		    if(recurso.getPresencialAdmite()!=null && recurso.getPresencialAdmite().booleanValue()) {
  		      if(recurso.getPresencialCupos() != null && recurso.getPresencialCupos().intValue() <= 0 ) {
- 	          error = true;
  	          addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero"), FORM_ID+":cuposPresencial");
+            hayErrores = true;
  		      }
  		      if((recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue()) && 
  		          (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue()) && 
@@ -577,8 +602,8 @@ public class RecursoMBean extends BaseMBean{
  		          (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue()) &&
  		          (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue()) &&
  		          (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue())) {
-            error = true;
             addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_dia"), FORM_ID+":diaAplicarHidden");
+            hayErrores = true;
  		      }
  		    }
  				recurso.setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
@@ -588,13 +613,13 @@ public class RecursoMBean extends BaseMBean{
  						recurso.setAgenda(sessionMBean.getAgendaMarcada());
  					}
  					if(recursosEJB.existeRecursoPorNombre(recurso)) {
- 						error = true;
  						addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_recurso_con_el_nombre_especificado"), FORM_ID+":nombre");
+            hayErrores = true;
  					}
- 				} catch (ApplicationException e1) {
+ 				}catch (ApplicationException e1) {
  					addErrorMessage(e1, MSG_ID);
  				}
- 				if(error) {
+ 				if(hayErrores) {
  					return null;
  				}
  				recursosEJB.modificarRecurso(sessionMBean.getRecursoSeleccionado());

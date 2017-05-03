@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{agendaMBean.beforePhaseCrear}">
@@ -63,7 +61,7 @@
 								</p:outputPanel>
 							</p:outputPanel>
 							<p:outputPanel styleClass="form-group">
-								<h:outputText value="#{sessionMBean.textos['idiomas_soportados']}" styleClass="col-sm-3 control-label label" />
+								<h:outputText value="#{sessionMBean.textos['idiomas_soportados']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<p:selectManyCheckbox id="idiomasAgenda" value="#{agendaMBean.idiomasSeleccionados}" layout="responsive" columns="4">
 										<f:selectItems value="#{agendaMBean.idiomasDisponibles}" />
@@ -140,4 +138,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

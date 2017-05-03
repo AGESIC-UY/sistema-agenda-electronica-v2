@@ -321,18 +321,10 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_CABEZAL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_LINEA', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_CABEZAL', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'FALSE');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '');
@@ -344,7 +336,12 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('MOSTRAR_FECHA_ACTUAL', 'true');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_ALIAS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PATH', '');
@@ -356,46 +353,37 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', 
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'true');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_TIMEOUT', '9000');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('MOSTRAR_FECHA_ACTUAL', 'true');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
 
 
 --
 -- Data for Name: ae_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_novedades; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_oficinas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_organismos; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_rel_usuarios_empresas; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_rel_usuarios_roles; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_textos; Type: TABLE DATA; Schema: global; Owner: sae
@@ -900,7 +888,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_debe_ser_posterior_a_la_
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas', 'No se puede eliminar la empresa porque hay reservas vivas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mail_no_valido', 'La dirección de correo electrónica no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('continuar_tramite', 'Contrinuar con el trámite');
-INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_error', 'Hay {count} errores en el formulario que debe corregir');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_warn', 'Hay {count} advertencias a las cuales debe prestar atención');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_info', 'Ejecución exitosa');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_orden_de_la_agrupacion_es_obligatorio', 'El órden de la agrupación es obligatorio');
@@ -1239,37 +1226,36 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('es_la_ultima_empresa', 'Es la úl
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_quedar_al_menos_una_empresa', 'Debe quedar al menos una empresa viva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_debe_ser_anterior_a_la_fecha_de_fin', 'La fecha de inicio debe ser anterior a la fecha de fin');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_realizar_la_importacion', 'No se pudo realizar la importación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_es_invalida', 'La fecha de inicio es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_es_invalida', 'La fecha de fin es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_campo_campo_no_tiene_una_fecha_válida', 'El valor del campo {campo} no es una fecha válida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_vigencia_es_invalida', 'La fecha de inicio de vigencia es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_vigencia_es_invalida', 'La fecha de fin de vigencia es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_disponibilidad_es_invalida', 'La fecha de inicio de atención al público es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_disponibilidad_es_invalida', 'La fecha de fin de atenciónal público  es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_es_invalida', 'La fecha es inválida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_error', 'Hay {count} errores en el formulario');
 
 
 --
 -- Data for Name: ae_tokens; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_tramites; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_trazabilidad; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_unidadesejecutoras; Type: TABLE DATA; Schema: global; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_usuarios; Type: TABLE DATA; Schema: global; Owner: sae
 --
-
-
 
 --
 -- Name: s_ae_empresa; Type: SEQUENCE SET; Schema: global; Owner: sae

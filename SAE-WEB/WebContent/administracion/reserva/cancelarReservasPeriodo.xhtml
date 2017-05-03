@@ -1,11 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{reservaMBean.beforePhaseCancelarReservasPeriodo}" >
@@ -39,28 +37,33 @@
 							<legend>
 								<h:outputText value="#{sessionMBean.textos['periodo_a_consultar']}" />
 							</legend>
-							<p:outputPanel styleClass="form-horizontal row variasColumnas">
-								<p:outputPanel styleClass="form-group col-sm-12 col-md-6 col-lg-4">
-									<h:outputLabel value="#{sessionMBean.textos['desde']}" for="Fdesde" styleClass="col-xs-5 col-sm-3 col-md-6 control-label label formularioCampoRequerido" />
-									<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
-										<h:inputText id="Fdesde" value="#{reservaMBean.fechaDesde}" styleClass="datepicker">
-											<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+							<p:outputPanel styleClass="form-horizontal">
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['desde']}" for="Fdesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText id="Fdesde" value="#{reservaMBean.fechaDesde}" styleClass="datepicker" converter="dateConverter">
+	                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+	                    <f:attribute name="onError" value="zero"/>
 										</h:inputText>
+                    <p:message for="Fdesde" />
 									</p:outputPanel>
 								</p:outputPanel>
 	
-								<p:outputPanel styleClass="form-group col-sm-12 col-md-6 col-lg-4">
-									<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="Fhasta" styleClass="col-xs-5 col-sm-3 col-md-6 control-label label formularioCampoRequerido" />
-									<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
-										<h:inputText id="Fhasta" value="#{reservaMBean.fechaHasta}" styleClass="datepicker">
-											<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="Fhasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText id="Fhasta" value="#{reservaMBean.fechaHasta}" styleClass="datepicker" converter="dateConverter">
+	                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+	                    <f:attribute name="onError" value="zero"/>
 										</h:inputText>
+                    <p:message for="Fhasta" />
 									</p:outputPanel>
 								</p:outputPanel>
 	
-								<p:outputPanel styleClass="form-group col-sm-12 col-md-12 col-lg-4">
-									<p:outputPanel styleClass="col-xs-7 col-xs-offset-5 col-sm-9 col-sm-offset-3 col-md-3 col-md-offset-9 col-lg-12 col-lg-offset-0">
-										<p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{reservaMBean.obtenerReservasPeriodo}" update="pnlReservasPeriodo" styleClass="btn btn-secundario" />
+								<p:outputPanel styleClass="form-group">
+									<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+										<p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{reservaMBean.obtenerReservasPeriodo}" 
+										  update="form:panelForm" styleClass="btn btn-secundario" />
 									</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
@@ -140,7 +143,8 @@
 		            <li class="action-buttons-primary">
 		              <ul>
 		                <li>
-		                  <p:commandButton value="#{sessionMBean.textos['cancelar_las_reservas_de_todo_el_periodo']}" oncomplete="PF('wCancelarReservasPeriodo').show();" styleClass="btn-lg btn-primario" />
+		                  <p:commandButton value="#{sessionMBean.textos['cancelar_las_reservas_de_todo_el_periodo']}" oncomplete="PF('wCancelarReservasPeriodo').show();" 
+		                    styleClass="btn-lg btn-primario" />
 		                </li>
 		              </ul>
 		            </li>
@@ -154,4 +158,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

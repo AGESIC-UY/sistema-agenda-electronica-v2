@@ -1,11 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
@@ -25,10 +23,11 @@
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha']}" for="fechaHoraReserva" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText value="#{consultaMBean.fechaHoraReserva}" styleClass="datepicker" id="fechaHoraReserva">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									<h:inputText id="fechaHoraReserva" value="#{consultaMBean.fechaHoraReserva}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
-									<p:message for="fechaHoraReserva"></p:message>
+									<p:message for="fechaHoraReserva" />
 								</p:outputPanel>
 							</p:outputPanel>
 
@@ -38,13 +37,13 @@
 									<h:selectOneMenu id="seleccionHora" styleClass="hora form-control" value="#{consultaMBean.hora}">
 										<f:selectItems value="#{consultaMBean.horas}" />
 									</h:selectOneMenu>
-									<h:outputText value=" : "></h:outputText>
+									<h:outputText value=" : " />
 									<h:outputLabel value="#{sessionMBean.textos['minutos']}" for="seleccionMin" styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
 									<h:selectOneMenu id="seleccionMin" styleClass="hora form-control" value="#{consultaMBean.min}">
 										<f:selectItems value="#{consultaMBean.minutos}" />
 									</h:selectOneMenu>
-									<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
-									<p:message for="seleccionHora"></p:message>
+									<h:outputText styleClass="comentario" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+									<p:message for="seleccionHora" />
 								</p:outputPanel>
 							</p:outputPanel>
 
@@ -52,7 +51,7 @@
 								<h:outputLabel value="#{sessionMBean.textos['numero']}" for="nroRes" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
 									<h:inputText value="#{consultaMBean.numeroReserva}" styleClass="form-control textoCorto" id="nroRes" />
-                  <p:message for="nroRes"></p:message>
+                  <p:message for="nroRes" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -60,7 +59,8 @@
 
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary">
-						  <p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{consultaMBean.buscarReservaPorNumero}" update="@form" styleClass="btn-lg btn-primario" />
+						  <p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{consultaMBean.buscarReservaPorNumero}" 
+						    update="@form" styleClass="btn-lg btn-primario" />
 					  </li>
 					</ul>
 
@@ -153,4 +153,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

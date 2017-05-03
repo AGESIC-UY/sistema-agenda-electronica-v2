@@ -109,12 +109,9 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * @return
 	 */
 	public VentanaDeTiempo obtenerVentanaCalendarioEstaticaIntranet (Recurso recurso) {
-		
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		VentanaDeTiempo ventana = new VentanaDeTiempo();
-
     Calendario calendario = new SimpleCalendario(null);
-		
 		//Calcular la fecha inicial: hoy + diasInicioVentanaIntranet (tener en cuenta los días no hábiles)
 		Date hoy = Utiles.time2InicioDelDia(new Date());
 		Calendar cal = Calendar.getInstance();
@@ -129,14 +126,12 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
     }catch(Exception ex) {
       cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasInicioVentanaIntranet());
     }
-		
     //Fecha inicial
 		Date fechaInicial = cal.getTime();
 		ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		if (ventana.getFechaInicial().before(fechaInicial)) {
 			ventana.setFechaInicial(fechaInicial);
 		}
-		
     //Calcular la fecha final: fecha inicial + getDiasVentanaInternet (tener en cuenta los días no hábiles)
     try {
       for(int i=0; i<recurso.getDiasVentanaIntranet().intValue()-1; ) {
@@ -153,10 +148,8 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
     if (recurso.getFechaFinDisp() != null && recurso.getFechaFinDisp().before(ventana.getFechaFinal())) {
       ventana.setFechaFinal(recurso.getFechaFinDisp());
     }
-
 		return ventana;
 	}
-	
 
 	/**
 	 * Obtiene la ventana del calendario estatica, es decir sin verificar 
@@ -166,16 +159,12 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 */
 	public VentanaDeTiempo obtenerVentanaCalendarioEstaticaInternet (Recurso recurso) {
 		recurso = entityManager.find(Recurso.class, recurso.getId());
-		
 		VentanaDeTiempo ventana = new VentanaDeTiempo();
-
     Calendario calendario = new SimpleCalendario(null);
-		
 		//Calcular la fecha inicial: hoy + diasInicioVentanaInternet (tener en cuenta los días no hábiles)
 		Date hoy = Utiles.time2InicioDelDia(new Date());
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(hoy);
-		
 		try {
       for(int i=0; i<recurso.getDiasInicioVentanaInternet().intValue(); ) {
         if(calendario.esDiaHabil(cal.getTime(), recurso)) {
@@ -186,14 +175,12 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}catch(Exception ex) {
 		  cal.add(Calendar.DAY_OF_MONTH, recurso.getDiasInicioVentanaInternet());
 		}
-
 		//Fecha inicial
 		Date fechaInicial = cal.getTime();
 		ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		if (ventana.getFechaInicial().before(fechaInicial)) {
 			ventana.setFechaInicial(fechaInicial);
 		}
-
     //Calcular la fecha final: fecha inicial + getDiasVentanaInternet (tener en cuenta los días no hábiles)
     try {
       for(int i=0; i<recurso.getDiasVentanaInternet().intValue()-1; ) {
@@ -253,7 +240,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		return cuposAsignados;
 	}
 
-	
 	/**
 	 * Obtiene los cupos consumidos, es decir la suma de las reservas no canceladas
 	 * dentro de la ventana indicada. Para el rango de la ventana que caiga en el pasado o fuera 
@@ -298,18 +284,13 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		return cuposConsumidos;
 	}
 	
-	
 	//Armo la lista de resultados, indicando los cupos para todos los dias solicitados (parametro ventana)
 	public List<Integer> obtenerCuposXDia(VentanaDeTiempo v, List<Object[]> cuposAsignados, List<Object[]> cuposConsumidos) {
-	
 		Iterator<Object[]> iterCuposAsignados  = cuposAsignados.iterator();
 		Iterator<Object[]> iterCuposConsumidos = cuposConsumidos.iterator();
-
 		List<Integer> cuposXdia = new ArrayList<Integer>();
-		
 		Calendar cont = Calendar.getInstance();
 		cont.setTime(Utiles.time2InicioDelDia(v.getFechaInicial()));
-		
 		Object[] cupoAsignado  = null;
 		Object[] cupoConsumido = null;
 		if (iterCuposAsignados.hasNext()) {
@@ -318,12 +299,9 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		if (iterCuposConsumidos.hasNext()) {
 			cupoConsumido = iterCuposConsumidos.next();
 		}
-
 		//Recorro la ventana dia a dia y voy generando la lista completa de cupos x dia con -1, 0, >0 segun corresponda.
 		while (!cont.getTime().after(v.getFechaFinal())) {
-
 			Integer cantidadDeCupos = -1;
-			
 			//avanzo un lugar en la lista de cupos x dia si la fecha del cupo es igual a la fecha del contador.
 			if (cupoAsignado != null) {
 				Date fechaDelCupoA = (Date)cupoAsignado[0];
@@ -364,88 +342,69 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * Crea la reserva como pendiente, realiza todo en una transaccion independiente
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public Reserva crearReservaPendiente(Disponibilidad d) {
-		
-		d = entityManager.find(Disponibilidad.class, d.getId());
-		
+	public Reserva crearReservaPendiente(Disponibilidad disp) {
+	  disp = entityManager.find(Disponibilidad.class, disp.getId());
 		//Creo y seteo atributos
 		Reserva reserva = new Reserva();
 		reserva.setEstado(Estado.P);
-		reserva.getDisponibilidades().add(d);
+		reserva.getDisponibilidades().add(disp);
 		reserva.setFechaCreacion(new Date());
 		entityManager.persist(reserva);
-		
 		return reserva;
 	}
 	
 	public boolean chequeoCupoNegativo (Disponibilidad d) {
-		
 		int cantReservas = ((Long) entityManager.createQuery(
-		"select count(*) " +
-		"from  Disponibilidad d join d.reservas r " +
-		"where d = :d and " +
-		"      r.estado <> :cancelado "
-		)
+  		"SELECT COUNT(*) " +
+  		"FROM Disponibilidad d JOIN d.reservas r " +
+  		"WHERE d = :d " +
+  		"  AND r.estado <> :cancelado")
 		.setParameter("d", d)
 		.setParameter("cancelado", Estado.C)
 		.getSingleResult()).intValue();
-			
 		if (d.getCupo() - cantReservas < 0) {
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
-
-
 
 	/**
 	 * Retorna los datos a solicitar vivos del recurso 
 	 */
 	public List<DatoASolicitar> obtenerDatosASolicitar(Recurso r) {
-
 		@SuppressWarnings("unchecked")
 		List<DatoASolicitar> campos = (List<DatoASolicitar>) entityManager.createQuery(
-		"select c " +
-		"from  DatoASolicitar c " +
-		"where c.agrupacionDato.recurso = :r and " +
-		"      c.fechaBaja = null " +
-		"order by c.agrupacionDato.orden, c.fila, c.columna "
-		)
+  		"SELECT c " +
+  		"FROM DatoASolicitar c " +
+  		"WHERE c.agrupacionDato.recurso = :r " +
+  		"  AND c.fechaBaja = null " +
+  		"ORDER BY c.agrupacionDato.orden, c.fila, c.columna")
 		.setParameter("r", r)
 		.getResultList();
-
 		return campos;
 	}
 
-	
 	public List<ValidacionPorRecurso> obtenerValidacionesPorRecurso(Recurso r) {
-		
 		@SuppressWarnings("unchecked")
 		List<ValidacionPorRecurso> validaciones = (List<ValidacionPorRecurso>) entityManager.createQuery(
-		"select vxr " +
-		"from  ValidacionPorRecurso vxr " +
-		"where vxr.recurso = :r and " +
-		"      vxr.fechaBaja = null " +
-		"order by vxr.ordenEjecucion asc "
-		)
+  		"SELECT vxr " +
+  		"FROM ValidacionPorRecurso vxr " +
+  		"WHERE vxr.recurso = :r " +
+  		"  AND vxr.fechaBaja = null " +
+  		"ORDER BY vxr.ordenEjecucion ASC")
 		.setParameter("r", r)
 		.getResultList();
-
 		return validaciones;
 	}
 	
 	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws ValidacionException {
-
 		Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
 		for (DatoASolicitar datoASolicitar : campos) {
 			camposMap.put(datoASolicitar.getNombre(), datoASolicitar);
 		}
-		
 		List<String> camposInvalidos  = new ArrayList<String>();
 		List<String> mensajes = new ArrayList<String>();
-		
 		//Chequeo formato
 		for (DatoASolicitar campo : campos) {
 			DatoReserva dato = valores.get(campo.getNombre());
@@ -454,13 +413,30 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				mensajes.add("debe_completar_el_campo_campo");
 			} else if(dato != null) {
 				if (campo.getTipo() == Tipo.NUMBER) {
+				  //El tipo del dato es numérico, tratar de validarlo
 					try {
 						Integer.parseInt(dato.getValor());
 					} catch (NumberFormatException e) {
 						camposInvalidos.add(campo.getNombre());
 						mensajes.add("el_campo_campo_solo_puede_contener_digitos");
 					}
-				}else {
+				}else if (campo.getTipo() == Tipo.DATE) {
+				  if(dato.getValor()!=null && !dato.getValor().trim().isEmpty()) {
+  				  //El tipo del dato es fecha y no es vacía, tratar de validarlo
+            try {
+              Date fecha = Utiles.stringToDate(dato.getValor());
+              if(Utiles.esFechaInvalida(fecha)) {
+                //El formato es correcto pero la fecha es inválida
+                camposInvalidos.add(campo.getNombre());
+                mensajes.add("el_campo_campo_no_tiene_una_fecha_válida");
+              }
+            }catch(Exception ex) {
+              //No se puede parsear la fecha
+              camposInvalidos.add(campo.getNombre());
+              mensajes.add("el_campo_campo_no_tiene_una_fecha_válida");
+            }
+				  }
+        }else {
 					if(!campo.getAgrupacionDato().getBorrarFlag()) {
 					  //Si es un correo electrónico validar el formato
 						if("Mail".equalsIgnoreCase(campo.getNombre()))	{
@@ -487,32 +463,25 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				}
 			}
 		}
-
 		//Si hay campos invalidos
 		if (camposInvalidos.size() > 0) {
 			throw new ValidacionPorCampoException("-1", camposInvalidos, mensajes);
 		}
-		
 	}
 
 	//El parametro reservaNueva es opcional, si se pasa null la consulta de reservas existentes se haria partir 
 	//de ahora en lugar de tomar la fecha de creacion de la reserva.
 	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Reserva reservaNueva, 
 	    List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException {
-
   	//Se supone que si un campo es clave tiene que ser requerido.
   	//Si cambia este supuesto, se deberá revisar este procedimiento.
-  	
   	List<Reserva> listaReserva = new ArrayList<Reserva>();
   	List<DatoReserva> datoReservaLista = new ArrayList<DatoReserva>();
-  	
   	Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
   	for (DatoASolicitar datoASolicitar : campos) {
   		camposMap.put(datoASolicitar.getNombre(), datoASolicitar);
   	}
-  
   	List<DatoASolicitar> camposClave = new ArrayList<DatoASolicitar>();
-  	
   	//Se carga lista de camposClave
   	for (DatoASolicitar campo : campos) {
   		//Chequeo si el campo es clave
@@ -520,7 +489,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   			camposClave.add(campo);
   		}
   	}
-  	
   	//Se controla si existen campos clave
   	if (camposClave.size() > 0) {
   		//Se controla que no exista en la base otra reserva con la misma clave.
@@ -530,39 +498,28 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   			DatoReserva datoReserva = valores.get(datoASolicitar.getNombre());
   			datoReservaLista.add(datoReserva);
   		}
-  
   		Date fecha = reservaNueva.getDisponibilidades().get(0).getFecha();
-  		
   		// consulto las reservas por dato de reserva (solo para los campos clave)
   		listaReserva = consultaEJB.consultarReservaDatosFecha(datoReservaLista, recurso, fecha, reservaNueva.getTramiteCodigo());
-  		
   	}
 		return listaReserva;
-		
 	}
 
 	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, 
 		Map<String, DatoReserva> valores, ReservaDTO reserva) throws ApplicationException, BusinessException, 
 		ErrorValidacionException, ErrorValidacionCommitException {
-
 	 	Map<String, String> datosClave = new HashMap<String, String>();
 	 	// Si no hay ninguna validación no necesito armar el Map, de modo que no
 	 	// busco una forma alternativa de obtener el recurso.
     if (!validaciones.isEmpty()){
     	datosClave = copiarDatos(valores, validaciones.get(0).getRecurso());
     }
-		
 		for(ValidacionPorRecurso vXr : validaciones) {
-
 			Validacion v = vXr.getValidacion();
-
 			if (v.getFechaBaja() == null) {
-			
 				List<ValidacionPorDato> camposDeLaValidacion = vXr.getValidacionesPorDato();
-				
 				Map<String, Object> parametros = new HashMap<String, Object>();
 				List<String> nombreCampos = new ArrayList<String>();
-				
 				for (ValidacionPorDato validacionPorDato : camposDeLaValidacion) {
 					if (validacionPorDato.getFechaDesasociacion() == null) {
 						String nombreParametro = validacionPorDato.getNombreParametro();
@@ -585,31 +542,26 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 						nombreCampos.add(campo.getNombre());
 					}
 				}
-				
 				List<ValorConstanteValidacionRecurso> constantesDeLaValidacion = vXr.getConstantesValidacion();
 				for (ValorConstanteValidacionRecurso valorConstante: constantesDeLaValidacion){
 					if (valorConstante.getFechaDesasociacion() == null){
 						parametros.put(valorConstante.getNombreConstante(), valorConstante.getValor());
 					}
 				}
-				
         // Si parametros.isEmpty no llamo a la validacion, para que funcione bien con campos que
         // permiten valores nulos
   			if (!parametros.isEmpty() || nombreCampos.isEmpty()) {
   				parametros.put(PARAMETRO_RECURSO, copiarRecurso(vXr.getRecurso()));
   				parametros.put(PARAMETRO_RESERVA, reserva);
   				parametros.put(PARAMETRO_DATOS_CLAVE, datosClave);
-  				
   				ValidadorReserva validador = getValidador(v.getHost(), v.getServicio());
   				// Para que no reviente cuando la validación de reagenda devuelve false
   				if (nombreCampos.isEmpty()) {
   					nombreCampos.add("DUMMY");
   				}
-  				
   				try {
   					//Ejecuto la validacion
   					ResultadoValidacion resultado =  validador.validarDatosReserva(v.getNombre(), parametros);
-  					
   					//Hay errores
   					if (resultado.getErrores().size() > 0) {
   						List<String> mensajes = new ArrayList<String>();
@@ -620,8 +572,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   						}
   						throw new ErrorValidacionException("-1", nombreCampos, mensajes, codigosErrorMensajes, v.getNombre());
   					}
-  					
-  				
   					//Hay errores con commit
   					if (resultado.getErroresConCommit().size() > 0) {
   						List<String> mensajes = new ArrayList<String>();
@@ -632,7 +582,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   						}
   						throw new ErrorValidacionCommitException("-1", nombreCampos, mensajes, codigosErrorMensajes, v.getNombre());
   					}
-  					
   				} catch (UnexpectedValidationException e) {
   					throw new ApplicationException(e);
   				} catch (InvalidParametersException e) {
@@ -645,11 +594,8 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}
 	}
 	
-	
 	private RecursoDTO copiarRecurso(Recurso recurso) {
-		
 		RecursoDTO recursoDTO = new RecursoDTO();
-		
 		recursoDTO.setId(recurso.getId());
 		recursoDTO.setNombre(recurso.getNombre());
 		recursoDTO.setDescripcion(recurso.getDescripcion());
@@ -674,7 +620,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		recursoDTO.setPresencialJueves(recurso.getPresencialJueves());
 		recursoDTO.setPresencialViernes(recurso.getPresencialViernes());
 		recursoDTO.setPresencialSabado(recurso.getPresencialSabado());
-		
 		return recursoDTO;
 	}
 	
@@ -693,7 +638,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	}
 
 	private ValidadorReserva getValidador(String host, String jndiName) throws ApplicationException {
-
 		Object ejb = null;
 		try {
 			InitialContext ctx; 
@@ -706,34 +650,26 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 			} else {
 				ctx = new InitialContext();
 			}
-			
 			ejb = ctx.lookup(jndiName);
 		} catch (NamingException e) {
 			throw new ApplicationException("No se pudo acceder a un EJB de tipo ValidadorReserva (jndiName: "+jndiName+")", e);
     }
-		
 		ValidadorReserva validador = null;
 		if (ejb instanceof ValidadorReserva) {
 			validador = (ValidadorReserva) ejb;
-		}
-		else {
+		} else {
 			throw new ApplicationException("Se esperaba un EJB de tipo ValidadorReserva y se encontró uno del tipo " + ejb.getClass());
 		}
-		
 		return validador;
 	}
 	
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, ErrorAutocompletarException, WarningAutocompletarException{
-		
 		Map<String, Object> campos = new HashMap<String, Object>();
-		
 		List<ServicioAutocompletarPorDato> lstDatos = s.getAutocompletadosPorDato();
 		List<ParametrosAutocompletar> parametros = s.getAutocompletado().getParametrosAutocompletados();
-		
 		Map<String,Object> paramEntradaMap = new HashMap<String, Object>();
 		Map<String,Object> paramSalidaMap = new HashMap<String, Object>();
 		List<String> nombreCampos = new ArrayList<String>();
-		
 		//Se crean las estructuras para los parametros de entrada y salida, mapeando los parametros con los datos a solicitar
 		for (ParametrosAutocompletar param : parametros){
 			for (ServicioAutocompletarPorDato sDato : lstDatos){
@@ -747,21 +683,17 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				}
 			}
 		}
-		
 		//Se obtiene el servicio de autocompletar que se va a ejecutar
 		AutocompletadorReserva servicioAutocompletador = this.getAutocompletador(s.getAutocompletado().getHost(), s.getAutocompletado().getServicio());
-		
 		try {
 			//Se invoca el servicio de autocompletar
 			ResultadoAutocompletado resultado = servicioAutocompletador.autocompletarDatosReserva(s.getAutocompletado().getNombre(), paramEntradaMap);
-			
 			for (String resultKey : resultado.getResultados().keySet()){
 				//Mapeo los valores devueltos para los parametros de salida con los datos a solicitar que se van a completar
 				if (paramSalidaMap.containsKey(resultKey)){
 					campos.put(paramSalidaMap.get(resultKey).toString(), resultado.getResultados().get(resultKey));
 				}
 			}
-			
 			if (resultado.getErrores().size() > 0) {
 				List<String> mensajes = new ArrayList<String>();
 				List<String> codigosErrorMensajes = new ArrayList<String>();
@@ -771,7 +703,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				}
 				throw new ErrorAutocompletarException("-1", nombreCampos, mensajes, codigosErrorMensajes, s.getAutocompletado().getNombre());
 			}
-			
 			if (resultado.getErrores().size() > 0) {
 				List<String> mensajes = new ArrayList<String>();
 				List<String> codigosErrorMensajes = new ArrayList<String>();
@@ -781,7 +712,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				}
 				throw new ErrorAutocompletarException("-1", nombreCampos, mensajes, codigosErrorMensajes, s.getAutocompletado().getNombre());
 			}
-			
 			if (resultado.getWarnings().size() > 0) {
 				List<String> mensajes = new ArrayList<String>();
 				List<String> codigosWarningMensajes = new ArrayList<String>();
@@ -791,7 +721,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				}
 				throw new WarningAutocompletarException("-1", nombreCampos, mensajes, codigosWarningMensajes, s.getAutocompletado().getNombre());
 			}
-			
 		} catch (UnexpectedAutocompletadoException e) {
 			throw new ApplicationException(e);
 		} catch (uy.gub.sae.autocompletados.business.ejb.exception.InvalidParametersException e) {
@@ -799,13 +728,10 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 			mensajes.add(e.getMessage());
 			throw new ErrorAutocompletarException("-1", nombreCampos, mensajes);
 		}
-		
-		
 		return campos;
 	}
 	
 	private AutocompletadorReserva getAutocompletador(String host, String jndiName) throws ApplicationException {
-
 		Object ejb = null;
 		try {
 			InitialContext ctx; 
@@ -818,64 +744,47 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 			} else {
 				ctx = new InitialContext();
 			}
-			
 			ejb = ctx.lookup(jndiName);
 		} catch (NamingException e) {
 			throw new ApplicationException("No se pudo acceder a un EJB de tipo AutocompletadorReserva (jndiName: "+jndiName+")", e);
-	    }
-		
+    }
 		AutocompletadorReserva autocompletador = null;
 		if (ejb instanceof AutocompletadorReserva) {
 			autocompletador = (AutocompletadorReserva) ejb;
-		}
-		else {
+		} else {
 			throw new ApplicationException("Se esperaba un EJB de tipo AutocompletadorReserva y se encontró uno del tipo " + ejb.getClass());
 		}
-		
 		return autocompletador;
 	}
-
 	
 	public static boolean validarDigitoVerificadorCI(String ciStr){
 		if(ciStr==null) {
 			return false;
 		}
-		
 		ciStr = ciStr.trim();
-		
 		//La cédula solo puede contener dígitos, puntos y guiones
 		if(!ciStr.equals(ciStr.replaceAll("[^\\d.-]", ""))) {
 			return false;
 		}
-		
 		ciStr = ciStr.replaceAll("[^\\d]", "");
-		
 		if(ciStr.length()<7) {
 			return false;
 		}
-		
 		String digitoValidar = ciStr.substring(ciStr.length()-1);
 		ciStr = ciStr.substring(0, ciStr.length()-1);
-		
 		final int[] numerosCi = {1, 1, 4, 3, 2, 9, 8, 7, 6, 3, 4};
 		final int cantNumerosCi = 11;
 		final int topeDigitos = 10;
-		
 		int digitoCalculado = 0;
 		int iters = cantNumerosCi-ciStr.length();
 		int j = 0, suma = 0, digitoActual;
-	
 		while(iters<cantNumerosCi){
 			digitoActual = Integer.valueOf(ciStr.substring(j, j+1)).intValue();
-			
 			suma += digitoActual*numerosCi[iters];
-			
 			iters++;
 			j++;
 		}
-		
 		digitoCalculado = (topeDigitos - (suma%topeDigitos))%topeDigitos;
-		
 		return digitoValidar.equals(""+digitoCalculado);
 	}
 	

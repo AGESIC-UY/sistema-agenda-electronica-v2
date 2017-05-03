@@ -1,11 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view
@@ -23,8 +21,9 @@
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha_de_inicio']}" for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText value="#{reporteMBean.fechaDesde}" styleClass="datepicker" id="fechaDesde">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									<h:inputText id="fechaDesde" value="#{reporteMBean.fechaDesde}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}" />
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
 									<p:message for="fechaDesde" />
 								</p:outputPanel>
@@ -32,8 +31,9 @@
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha_de_fin']}" for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText value="#{reporteMBean.fechaHasta}" styleClass="datepicker" id="fechaHasta">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									<h:inputText id="fechaHasta" value="#{reporteMBean.fechaHasta}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}" />
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
 									<p:message for="fechaHasta" />
 								</p:outputPanel>
@@ -50,4 +50,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

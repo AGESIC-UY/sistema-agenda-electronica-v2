@@ -31,6 +31,7 @@ import java.util.Random;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.component.UIComponent;
 import javax.faces.component.html.HtmlPanelGroup;
 import javax.faces.context.FacesContext;
@@ -699,8 +700,35 @@ public class Paso3MBean extends BaseMBean {
     return tramites;
   }
 	
-
+  @PreDestroy
+  public void preDestroy() {
+    
+    try {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      
+      this.agendarReservasEJB = null;
+      this.campos = null;
+      if(this.datosReservaMBean!=null) {
+        this.datosReservaMBean.clear();
+      }
+      this.datosReservaMBean = null;
+      this.formularioDin = null;
+      this.recursosEJB = null;
+      this.sesionMBean = null;
+      if(this.tramites != null) {
+        this.tramites.clear();
+      }
+      this.tramites = null;
+      if(this.tramitesAgenda!=null) {
+        this.tramitesAgenda.clear();
+      }
+      this.tramitesAgenda = null;
+      
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+      
+    }
+  }
+  
 }
-
-	
-	

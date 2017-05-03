@@ -414,6 +414,11 @@ public class FormularioDinamicoReserva {
 			calendario.setLang(getLocale().getLanguage());
 			calendario.setNavigator(true);
 			calendario.setYearRange("1900:c+10");
+			
+			calendario.getAttributes().put("pattern", formatoFecha);
+      calendario.getAttributes().put("onError", "zero");
+			calendario.setConverter(new DateConverter());
+			
 			//Le configuro el managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), Date.class);
 			calendario.setValueExpression("value", ve);

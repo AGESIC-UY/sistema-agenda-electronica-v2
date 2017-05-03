@@ -21,6 +21,7 @@
 package uy.gub.imm.sae.web.mbean.reserva;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -29,6 +30,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -61,11 +63,9 @@ import uy.gub.imm.sae.web.common.SAECalendarioDataSource;
  * https://192.168.1.13:8443/sae/agendarReserva/Paso1.xhtml?e=1000001&a=29&u=http%3A%2F%2Fgoogle.com.uy&p=13.61.789456;13.60.CI;13.62.@@email
  * 
  */
-
-
 public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 
-	static Logger logger = Logger.getLogger(Paso1MBean.class);
+	private static Logger LOGGER = Logger.getLogger(Paso1MBean.class);
 
 	private AgendarReservas agendarReservasEJB;
 
@@ -113,15 +113,15 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
 			String sTramite = request.getParameter("q"); //Código de trámite
 			
-			logger.debug("Parámetros GET: ");
-      logger.debug("              : e=["+request.getParameter("e")+"]");
-      logger.debug("              : a=["+request.getParameter("a")+"]");
-      logger.debug("              : r=["+request.getParameter("r")+"]");
-      logger.debug("              : i=["+request.getParameter("i")+"]");
-      logger.debug("              : u=["+request.getParameter("u")+"]");
-      logger.debug("              : p=["+request.getParameter("p")+"]");
-      logger.debug("              : t=["+request.getParameter("t")+"]");
-      logger.debug("              : q=["+request.getParameter("q")+"]");
+			LOGGER.debug("Parámetros GET: ");
+      LOGGER.debug("              : e=["+request.getParameter("e")+"]");
+      LOGGER.debug("              : a=["+request.getParameter("a")+"]");
+      LOGGER.debug("              : r=["+request.getParameter("r")+"]");
+      LOGGER.debug("              : i=["+request.getParameter("i")+"]");
+      LOGGER.debug("              : u=["+request.getParameter("u")+"]");
+      LOGGER.debug("              : p=["+request.getParameter("p")+"]");
+      LOGGER.debug("              : t=["+request.getParameter("t")+"]");
+      LOGGER.debug("              : q=["+request.getParameter("q")+"]");
 			
 			if(sParms!=null) {
 				sesionMBean.setParmsDatosCiudadano(sParms);
@@ -224,12 +224,11 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 			}
 			
 			//Cargar los textos dependientes del idioma
-			sesionMBean.cargarTextos();
-			//Restauar beans necesarios
+			//sesionMBean.cargarTextos();
 			
 			BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
 			agendarReservasEJB = bl.getAgendarReservas();
-			recursosEJB =bl.getRecursos();
+			recursosEJB = bl.getRecursos();
 			
 			// Guardar la empresa en la sesion
 			try {
@@ -328,8 +327,14 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 						sesionMBean.setRecurso(recursoDefecto);
 					}
 				}
+				
+	      List<String> idiomasDisponibles = Arrays.asList(sesionMBean.getAgenda().getIdiomas().split(","));
+	      if(!idiomasDisponibles.contains(sesionMBean.getIdiomaActual()) && !idiomasDisponibles.isEmpty()) {
+	        LOGGER.debug("Cambiando el idioma porque el actual ("+sesionMBean.getIdiomaActual()+") no es un idioma soportado");
+	        sesionMBean.cambioIdiomaActual(idiomasDisponibles.get(0));
+	      }
+				
 			}
-
 			mostrarMapa(sesionMBean.getRecurso());
 		} catch (Exception e) {
 			addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
@@ -480,9 +485,9 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 		if (getMensajeError() != null) {
 			return null;
 		}
-		Agenda a = sesionMBean.getAgenda();
-		if (a != null) {
-			TextoAgenda textoAgenda = getTextoAgenda(a, sesionMBean.getIdiomaActual());
+		Agenda agenda = sesionMBean.getAgenda();
+		if (agenda != null) {
+			TextoAgenda textoAgenda = getTextoAgenda(agenda, sesionMBean.getIdiomaActual());
 			if (textoAgenda != null) {
 				String str = textoAgenda.getTextoPaso1();
 				if (str != null) {
@@ -496,15 +501,15 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 		} else {
 			return "";
 		}
-
 	}
 
 	public String getEtiquetaSeleccionDelRecurso() {
-		if (getMensajeError() != null)
+		if (getMensajeError() != null) {
 			return null;
-		Agenda a = sesionMBean.getAgenda();
-		if (a != null) {
-			TextoAgenda textoAgenda = getTextoAgenda(a, sesionMBean.getIdiomaActual());
+		}
+		Agenda agenda = sesionMBean.getAgenda();
+		if (agenda != null) {
+			TextoAgenda textoAgenda = getTextoAgenda(agenda, sesionMBean.getIdiomaActual());
 			if (textoAgenda != null) {
 				String str = textoAgenda.getTextoSelecRecurso();
 				if (str != null) {
@@ -522,9 +527,9 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 
 	// Implementacion de la interfaz SAECalendarioDataSource
 	public List<Integer> obtenerCuposXDia(Date desde, Date hasta) {
-		if (getMensajeError() != null)
+		if (getMensajeError() != null) {
 			return null;
-
+		}
 		if (!sesionMBean.getVentanaMesSeleccionado().getFechaInicial().equals(Utiles.time2InicioDelDia(desde))
 				|| !sesionMBean.getVentanaMesSeleccionado().getFechaFinal().equals(Utiles.time2FinDelDia(hasta))) {
 			sesionMBean.getVentanaMesSeleccionado().setFechaInicial(Utiles.time2InicioDelDia(desde));
@@ -540,7 +545,6 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 	}
 
 	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado) {
-
 		List<Integer> listaCupos = null;
 		try {
 			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado, sesionMBean.getTimeZone());
@@ -672,5 +676,35 @@ public class Paso1MBean extends BaseMBean implements SAECalendarioDataSource {
 	public void setErrorInit(boolean errorInit) {
 		this.errorInit = errorInit;
 	}
-
+	
+  @PreDestroy
+  public void preDestroy() {
+    
+    try {
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      
+      this.agendarReservasEJB = null;
+      if(this.infoRecurso != null) {
+        this.infoRecurso.clear();
+      }
+      this.infoRecurso = null;
+      this.jsonArrayFchDisp = null;
+      if(this.recursos!=null) {
+        this.recursos.clear();
+      }
+      this.recursos = null;
+      this.recursosEJB = null;
+      if(this.recursosItems!=null) {
+        this.recursosItems.clear();
+      }
+      this.recursosItems = null;
+      this.sesionMBean = null;
+      
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+      
+    }
+  }
+	
 }

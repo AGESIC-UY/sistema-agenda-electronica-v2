@@ -1,76 +1,68 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.textos['realizar_reserva']}" />
 
-<body>
+	<ui:define name="css">
+	</ui:define>
 
-	<ui:composition template="/templates/layout.xhtml">
-		<ui:param name="nombre_pagina" value="#{sessionMBean.textos['realizar_reserva']}" />
+	<ui:define name="script">
+	</ui:define>
 
-		<ui:define name="css">
-		</ui:define>
+	<ui:define name="titulo">
+		<h:outputText value="#{agenda_nombre}"></h:outputText>
+	</ui:define>
 
-		<ui:define name="script">
-		</ui:define>
+	<ui:define name="cuerpo">
+			<h:panelGroup layout="block">
+				<h:form id="form">
+					<div>
+						<h:panelGroup rendered="#{not hay_error}" id="contenedorPaso" layout="block">
 
-		<ui:define name="titulo">
-			<h:outputText value="#{agenda_nombre}"></h:outputText>
-		</ui:define>
-
-		<ui:define name="cuerpo">
-				<h:panelGroup layout="block">
-					<h:form id="form">
-						<div>
-							<h:panelGroup rendered="#{not hay_error}" id="contenedorPaso" layout="block">
-
-								<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
-									<ul class="wizard-nav-tabs wizard-nav-tabs-3">
-										<li class="#{(paso_numero == 1) ? 'active' : ''}">
-										  <h:outputText value="1" styleClass="wizard-step" /> 
-										  <h:outputText value="#{sessionMBean.textos['detalle_y_ubicacion']}" styleClass="wizard-step-description" />
-								    </li>
-										<li class="#{(paso_numero == 2) ? 'active' : ''}">
-										  <h:outputText value="2" styleClass="wizard-step" />
-											<h:outputText	value="#{sessionMBean.textos['dia_y_hora']}" styleClass="wizard-step-description" />
-										</li>
-										<li class="#{(paso_numero == 3) ? 'active' : ''}">
-										  <h:outputText value="3" styleClass="wizard-step" />
-										  <h:outputText	value="#{sessionMBean.textos['datos_necesarios']}" styleClass="wizard-step-description" />
-									  </li>
-								  </ul>
-								</h:panelGroup>
-
-								<ui:insert name="mensaje">
-									<h:outputText value="CONFIRMACIÓN DE HORA SELECCIONADA" rendered="#{paso_numero==2 or paso_numero==3}" />
-								</ui:insert>
-
-								<fieldset>
-									<legend>#{paso_texto}</legend>
-									<div class="row">
-										<div class="#{clase_columna_izq}">
-											<ui:insert name="contenido">CONTENIDO DEL PASO</ui:insert>
-										</div>
-
-										<div class="#{clase_columna_der}">
-											<ui:insert name="descripcion">DESCRIPCION DEL PASO</ui:insert>
-										</div>
-									</div>
-								</fieldset>
-
-								<ui:insert name="botones">
-
-								</ui:insert>
-
+							<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
+								<ul class="wizard-nav-tabs wizard-nav-tabs-3">
+									<li class="#{(paso_numero == 1) ? 'active' : ''}">
+									  <h:outputText value="1" styleClass="wizard-step" /> 
+									  <h:outputText value="#{sessionMBean.textos['detalle_y_ubicacion']}" styleClass="wizard-step-description" />
+							    </li>
+									<li class="#{(paso_numero == 2) ? 'active' : ''}">
+									  <h:outputText value="2" styleClass="wizard-step" />
+										<h:outputText	value="#{sessionMBean.textos['dia_y_hora']}" styleClass="wizard-step-description" />
+									</li>
+									<li class="#{(paso_numero == 3) ? 'active' : ''}">
+									  <h:outputText value="3" styleClass="wizard-step" />
+									  <h:outputText	value="#{sessionMBean.textos['datos_necesarios']}" styleClass="wizard-step-description" />
+								  </li>
+							  </ul>
 							</h:panelGroup>
-						</div>
-					</h:form>
-				</h:panelGroup>
-		</ui:define>
-	</ui:composition>
 
-</body>
+							<ui:insert name="mensaje">
+								<h:outputText value="CONFIRMACIÓN DE HORA SELECCIONADA" rendered="#{paso_numero==2 or paso_numero==3}" />
+							</ui:insert>
 
-</html>
+							<fieldset>
+								<legend>#{paso_texto}</legend>
+								<div class="row">
+									<div class="#{clase_columna_izq}">
+										<ui:insert name="contenido">CONTENIDO DEL PASO</ui:insert>
+									</div>
+
+									<div class="#{clase_columna_der}">
+										<ui:insert name="descripcion">DESCRIPCION DEL PASO</ui:insert>
+									</div>
+								</div>
+							</fieldset>
+
+							<ui:insert name="botones">
+
+							</ui:insert>
+
+						</h:panelGroup>
+					</div>
+				</h:form>
+			</h:panelGroup>
+	</ui:define>
+</ui:composition>

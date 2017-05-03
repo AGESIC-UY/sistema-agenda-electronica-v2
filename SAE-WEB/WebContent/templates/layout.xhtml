@@ -42,7 +42,7 @@
 				<div class="col-xs-6 cabezalEmpresa">
 					<div id="logo">
 						<div>
-							<p:graphicImage id="logo-correo" value="#{sessionMBean.empresaActualLogo}" styleClass="logoEmpresa" alt="#{sessionMBean.empresaActualLogoTexto}"
+							<p:graphicImage id="logoimg" value="#{sessionMBean.empresaActualLogo}" styleClass="logoEmpresa" alt="#{sessionMBean.empresaActualLogoTexto}"
 								rendered="#{sessionMBean.empresaActualLogo != null}" cache="false" />
 						</div>
 						<div>
@@ -126,7 +126,7 @@
 									</li>
 								</ul>
 							  <div class="ui-helper-hidden-accessible">
-								  <h:commandButton value="dummy" />
+								  <h:commandButton value="dummy" tabindex="-1" />
 				        </div>
 							</h:form>
 						</div>

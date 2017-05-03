@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -68,7 +69,6 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 	public void init() {
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-
 			//Estos dos son obligatorios
 			String sEmpresaId = request.getParameter("e");
 			String sAgendaId = request.getParameter("a");
@@ -312,20 +312,16 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 	}
 
 	public void setFiltroConsulta(UIComponent filtroConsulta) {
-		
 		if(hayErrorInit || (this.sesionMBean.getReserva()==null && this.sesionMBean.getRecurso()==null)) {
 			return;
 		}
-		
     this.filtroConsulta = filtroConsulta;
-    
 		try {
-			if (this.sesionMBean.getReservaId() !=null && this.sesionMBean.getEmpresaId() != null) {
+			if (this.sesionMBean.getReservaId()!=null && this.sesionMBean.getEmpresaId()!= null) {
 				if(this.sesionMBean.getReservaDatos() == null) {
 					Reserva reserva = consultaEJB.consultarReservaId(this.sesionMBean.getReservaId(), sesionMBean.getRecurso().getId());
 					sesionMBean.setReservaDatos(reserva);
 				}
-				
 				tiposDocumento = new ArrayList<SelectItem>();
 				List<DatoASolicitar> datos = recursosEJB.consultarDatosSolicitar(sesionMBean.getRecurso());
 				if(datos!=null) {
@@ -337,7 +333,6 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 						}
 					}
 				}
-				
 				tipoDocumento = (String) tiposDocumento.get(0).getValue();
 				numeroDocumento = "";
 			}else {
@@ -353,11 +348,9 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 				agrupaciones.add(agrupacion);
 				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sesionMBean.getRecurso(), filtroConsulta, agrupaciones, sesionMBean.getFormatoFecha());
 			}
-
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}
-
 	}
 
 	public void buscarReservaDatos(ActionEvent e) {
@@ -655,5 +648,37 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 	
 	}
 	
+  @PreDestroy
+  public void preDestroy() {
+    
+    try {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      
+      this.agendarReservasEJB = null;
+      this.campos = null;
+      this.consultaEJB = null;
+      if(this.datosASolicitar!=null) {
+        this.datosASolicitar.clear();
+      }
+      this.datosASolicitar = null;
+      if(this.datosFiltroReservaMBean!=null) {
+        this.datosFiltroReservaMBean.clear();
+      }
+      this.datosFiltroReservaMBean = null;
+      this.filtroConsulta = null;
+      this.recursosEJB = null;
+      this.reservasDataTable = null;
+      this.sesionMBean = null;
+      if(this.tiposDocumento!=null) {
+        this.tiposDocumento.clear();
+      }
+      this.tiposDocumento = null;
+      
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+      
+    }
+  }
 	
 }

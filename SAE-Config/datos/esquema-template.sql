@@ -455,10 +455,10 @@ CREATE TABLE ae_recursos (
     presencial_sabado boolean DEFAULT false NOT NULL,
     presencial_domingo boolean DEFAULT false NOT NULL,
     presencial_cupos integer DEFAULT 0 NOT NULL,
-    fuente_ticket character varying(100) DEFAULT 'Helvetica-Bold'::character varying NOT NULL,
     tamanio_fuente_grande integer DEFAULT 12 NOT NULL,
     tamanio_fuente_normal integer DEFAULT 10 NOT NULL,
-    tamanio_fuente_chica integer DEFAULT 8 NOT NULL
+    tamanio_fuente_chica integer DEFAULT 8 NOT NULL,
+    fuente_ticket character varying(100) DEFAULT 'Helvetica-Bold'::character varying NOT NULL
 );
 
 
@@ -1190,31 +1190,21 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 -- Data for Name: ae_acciones; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_acciones_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_acciones_por_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_agendas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_agrupaciones_datos; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_anios; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1226,13 +1216,9 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 -- Data for Name: ae_atencion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_comunicaciones; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_constante_validacion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1244,8 +1230,6 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 -- Data for Name: ae_datos_a_solicitar; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_datos_del_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
@@ -1255,8 +1239,6 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 --
 -- Data for Name: ae_datos_reserva; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_dias_del_mes; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1274,8 +1256,6 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 -- Data for Name: ae_disponibilidades; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_frases_captcha; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
@@ -1285,8 +1265,6 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 --
 -- Data for Name: ae_llamadas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_meses; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1298,8 +1276,6 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 -- Data for Name: ae_parametros_accion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_parametros_autocompletar; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
@@ -1309,8 +1285,6 @@ ALTER TABLE s_ae_valrecurso OWNER TO sae;
 --
 -- Data for Name: ae_parametros_validacion; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_plantillas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1381,25 +1355,17 @@ INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P
 -- Data for Name: ae_recursos; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_reservas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_reservas_disponibilidades; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_roles_usuario_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_serv_autocomp_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1429,8 +1395,6 @@ INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P
 -- Data for Name: ae_textos_agenda; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_textos_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
@@ -1441,25 +1405,17 @@ INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P
 -- Data for Name: ae_tramites_agendas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_validaciones; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_validaciones_por_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_validaciones_por_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Data for Name: ae_valor_constante_val_rec; Type: TABLE DATA; Schema: {esquema}; Owner: sae
@@ -1470,8 +1426,6 @@ INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P
 --
 -- Data for Name: ae_valores_del_dato; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
-
-
 
 --
 -- Name: s_ae_accion; Type: SEQUENCE SET; Schema: {esquema}; Owner: sae

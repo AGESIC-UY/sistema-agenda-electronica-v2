@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
@@ -260,5 +261,26 @@ public class PasoFinalMBean extends BaseMBean {
 	public boolean isErrorInit() {
 		return errorInit;
 	}
+	
+  @PreDestroy
+  public void preDestroy() {
+    
+    try {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      
+      this.campos = null;
+      if(this.infoRecurso != null) {
+        this.infoRecurso.clear();
+      }
+      this.infoRecurso = null;
+      this.recursosEJB = null;
+      this.sesionMBean = null;
+      
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+      
+    }
+  }
 	
 }

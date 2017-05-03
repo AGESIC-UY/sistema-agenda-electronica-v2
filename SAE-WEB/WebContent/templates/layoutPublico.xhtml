@@ -34,29 +34,27 @@
 					<div class="col-sm-8 cabezalEmpresa">
 						<div id="logo">
 							<div>
-								<p:graphicImage
-									value="#{sesionMBean.empresaActualLogo}"
-									styleClass="logoEmpresa"
-									alt="#{sesionMBean.empresaActualLogoTexto}"
+								<p:graphicImage value="#{sesionMBean.empresaActualLogo}" styleClass="logoEmpresa" alt="#{sesionMBean.empresaActualLogoTexto}"
 									rendered="#{sesionMBean.empresaActualLogo != null}" />
 							</div>
 							<div>
-								<h:outputText styleClass="nombre-activo"
-									value="#{sesionMBean.empresaActualNombre}" />
+								<h:outputText styleClass="nombre-activo" value="#{sesionMBean.empresaActualNombre}" />
 							</div>
 						</div>
 					</div>
 					<div class="col-sm-4 cabezalTramites">
 						<div class="logosSecundarios">
 							<ul class="listaHorizontal">
-								<li><a href="https://www.presidencia.gub.uy/"
-									title="Ir al sitio de Presidencia"> <img
-										src="../resources/images/logoPresidencia.png"
-										alt="Presidencia" /></a></li>
-								<li><a href="http://uruguaydigital.gub.uy/"
-									title="Ir al sitio de Uruguay Digital"> <img
-										src="../resources/images/logo-uruguayDigital.png"
-										alt="Uruguay Digital" /></a></li>
+								<li>
+								  <a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia"> 
+								    <img src="../resources/images/logoPresidencia.png" alt="Presidencia" />
+							    </a>
+						    </li>
+								<li>
+								  <a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital"> 
+								    <img src="../resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" />
+							    </a>
+						    </li>
 							</ul>
 						</div>
 						<h:panelGroup rendered="#{sesionMBean.usuarioCda != null}" styleClass="cabezalUsuario">
@@ -86,11 +84,9 @@
       <h:outputText value="#{sesionMBean.textos['version']} #{sesionMBean.version}" />
     </div>
 
-		<p:outputPanel styleClass="piePublico"
-			rendered="#{not empty sesionMBean.empresaActual.piePublico}">
+		<p:outputPanel styleClass="piePublico" rendered="#{not empty sesionMBean.empresaActual.piePublico}">
 			<p:outputPanel styleClass="container">
-				<h:outputText value="#{sesionMBean.empresaActual.piePublico}"
-					escape="false"></h:outputText>
+				<h:outputText value="#{sesionMBean.empresaActual.piePublico}" escape="false"></h:outputText>
 			</p:outputPanel>
 		</p:outputPanel>
 

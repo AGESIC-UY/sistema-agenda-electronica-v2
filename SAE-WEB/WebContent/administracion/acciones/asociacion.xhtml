@@ -1,10 +1,9 @@
-<html xmlns="http://www.w3.org/1999/xhtml"
+<ui:composition template="/templates/layout.xhtml" 
+  xmlns="http://www.w3.org/1999/xhtml"
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:p="http://primefaces.org/ui"
   xmlns:f="http://java.sun.com/jsf/core"
   xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
   <ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
   <ui:define name="cuerpo">
     <f:view beforePhase="#{accionAsignacionMBean.beforePhase}">
@@ -200,4 +199,3 @@
     </f:view>
   </ui:define>
 </ui:composition>
-</html>

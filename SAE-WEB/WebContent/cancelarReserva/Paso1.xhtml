@@ -1,11 +1,9 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layoutPublico.xhtml">
+<ui:composition template="/templates/layoutPublico.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="parametroBean" value="#{cancelarReservaPublicMBean}" />
 	<ui:define name="css" />
 	<ui:define name="script" />
@@ -94,6 +92,9 @@
         <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
       </p:outputPanel>
 			<p:outputPanel id="filtroBusqueda" >
+         <p:outputPanel styleClass="form-required">
+           <h:outputText value="#{sesionMBean.textos['debe_ingresar_al_menos_dos_de_los_datos_solicitados']}" />
+         </p:outputPanel>
 				<h:panelGroup id="camposFiltroCancelar" binding="#{cancelarReservaPublicMBean.filtroConsulta}" layout="block" />
 				<h:panelGroup id="codigoSeguridad" styleClass="Texto" layout="block">
 					<fieldset>
@@ -126,8 +127,9 @@
       </p:outputPanel>
       <p:outputPanel>
         <p:outputPanel id="resultadosBusquedaCancelar">
-          <p:dataGrid layout="grid" columns="1" value="#{sesionMBean.listaReservas}" var="reserva" id="resultadoBusquedaCancelar" binding="#{cancelarReservaPublicMBean.reservasDataTable}"
-            emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}" rendered="#{not empty sesionMBean.listaReservas}" >
+          <p:dataGrid id="resultadoBusquedaCancelar" layout="grid" columns="1" value="#{sesionMBean.listaReservas}" var="reserva" 
+            binding="#{cancelarReservaPublicMBean.reservasDataTable}" emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}" 
+            rendered="#{not empty sesionMBean.listaReservas}" >
             <div class="box box-grey datosReservaCancelar">
               <div class="row">
                 <div class="col-sm-8">
@@ -176,4 +178,3 @@
 
 	</ui:define>
 </ui:composition>
-</html>

@@ -111,35 +111,54 @@ public class DisponibilidadMBean extends BaseMBean {
 		this.cuposDataTable = cuposDataTable;
 	}
 
-	public void obtenerCuposCons(ActionEvent e){
-		VentanaDeTiempo ventana = new VentanaDeTiempo();
-		if (dispSessionMBean.getFechaDesde() != null) {
-			//Se setea hora 00:00:00
-			ventana.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaDesde()));
-			if (dispSessionMBean.getFechaHasta()== null) {
-				try {
-				  dispSessionMBean.setFechaHasta(disponibilidadesEJB.ultFechaGenerada(sessionMBean.getRecursoMarcado()));
-				}	catch (Exception ex){
-					addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_obtener_la_ultima_fecha_generada"), MSG_ID);
-				}
+	public void obtenerCuposCons(ActionEvent event){
+	  limpiarMensajesError();
+	  
+	  boolean hayErrores = false;
+	  VentanaDeTiempo ventana = new VentanaDeTiempo();
+    if (dispSessionMBean.getFechaDesde() == null) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "form:fDesde");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(dispSessionMBean.getFechaDesde())) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_invalida"), "form:fDesde");
+      hayErrores = true;
+    }
+    if(Utiles.esFechaInvalida(dispSessionMBean.getFechaHasta())) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_invalida"), "form:fHasta");
+      hayErrores = true;
+    }
+    
+    if(hayErrores) {
+      return;
+    }
+    
+		//Se setea hora 00:00:00
+		ventana.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaDesde()));
+		if (dispSessionMBean.getFechaHasta()== null) {
+			try {
+			  dispSessionMBean.setFechaHasta(disponibilidadesEJB.ultFechaGenerada(sessionMBean.getRecursoMarcado()));
+			}	catch (Exception ex){
+				addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_obtener_la_ultima_fecha_generada"), MSG_ID);
 			}
-			if (dispSessionMBean.getFechaHasta() != null){
-  			ventana.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaHasta()));
-  			dispSessionMBean.setCuposPorDia(obtenerCupos(ventana));
-			}
-		} else{
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+		}else{
+			ventana.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaHasta()));
+			dispSessionMBean.setCuposPorDia(obtenerCupos(ventana));
 		}
 	}
 	
 	public void obtenerCuposModif(ActionEvent e){
 		limpiarMensajesError();
-		VentanaDeTiempo v = new VentanaDeTiempo();
+    dispSessionMBean.setDisponibilidadesDelDiaMatutinaModif(null);
+    dispSessionMBean.setDisponibilidadesDelDiaVespertinaModif(null);
+		VentanaDeTiempo ventana = new VentanaDeTiempo();
 		boolean hayError = false;
 		if (dispSessionMBean.getFechaModifCupo() == null ) {
       addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "form:fecha");
       hayError = true;
-		}else {
+		}else if (Utiles.esFechaInvalida(dispSessionMBean.getFechaModifCupo())) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "form:fecha");
+      hayError = true;
+    }else {
       Calendar hoy = new GregorianCalendar();
       hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
       hoy.set(Calendar.HOUR_OF_DAY, 0);
@@ -151,15 +170,11 @@ public class DisponibilidadMBean extends BaseMBean {
         hayError = true;
       }
 		}
-		
 		if(hayError) {
 		  return;
 		}
-		
-		v.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaModifCupo()) );
-		v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaModifCupo()));
-		dispSessionMBean.setDisponibilidadesDelDiaMatutinaModif(null);
-		dispSessionMBean.setDisponibilidadesDelDiaVespertinaModif(null) ;
+		ventana.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaModifCupo()) );
+		ventana.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaModifCupo()));
 		configurarDisponibilidadesDelDiaModif();
 	}
 	
@@ -405,7 +420,7 @@ public class DisponibilidadMBean extends BaseMBean {
 
 	public void cancelarModifDisp(ActionEvent event) {
 		VentanaDeTiempo v = new VentanaDeTiempo();
-		if (dispSessionMBean.getFechaModifCupo() != null ) {
+		if (dispSessionMBean.getFechaModifCupo() != null) {
 			v.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaModifCupo()) );
 			v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaModifCupo()));
 			dispSessionMBean.setDisponibilidadesDelDiaMatutina(null);
@@ -501,13 +516,18 @@ public class DisponibilidadMBean extends BaseMBean {
 			}
 		}
 		
-		VentanaDeTiempo v = new VentanaDeTiempo();
+		if(!listDispReserva.isEmpty()) {
+		  //Volver a poner la fecha para la cual se consultó por si el usuario la modificó
+		  dispSessionMBean.setFechaModifCupo(listDispReserva.get(0).getData().getFecha());
+		}
+		
+		VentanaDeTiempo ventana = new VentanaDeTiempo();
 		//Se setea hora 00:00:00
-		v.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaModifCupo()) );
-		v.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaModifCupo()));
+		ventana.setFechaInicial(Utiles.time2InicioDelDia(dispSessionMBean.getFechaModifCupo()) );
+		ventana.setFechaFinal(Utiles.time2FinDelDia(dispSessionMBean.getFechaModifCupo()));
 		dispSessionMBean.setDisponibilidadesDelDiaMatutina(null);
 		dispSessionMBean.setDisponibilidadesDelDiaVespertina(null) ;
-		obtenerCupos(v);
+		obtenerCupos(ventana);
 		configurarDisponibilidadesDelDiaModif();
 		dispSessionMBean.setModificarTodos(false);
 		addInfoMessage(sessionMBean.getTextos().get("disponibilidades_modificadas"), MSG_ID);

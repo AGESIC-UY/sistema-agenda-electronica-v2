@@ -52,10 +52,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityContextFactory;
 import org.picketbox.commons.cipher.Base64;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -87,6 +89,8 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	public static final String MSG_ID = "pantalla";
 
+  private static Logger LOGGER = Logger.getLogger(SessionMBean.class);
+	
 	private Usuario usuarioActual;
 	private Empresa empresaActual;
 	private List<SelectItem> empresasUsuario;
@@ -1092,9 +1096,25 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public void cambioIdiomaActual(ValueChangeEvent event) {
+	  limpiarMensajesError();
 		idiomasSoportados = null;
-		idiomaActual = (String) event.getNewValue();
-		cargarTextos();
+		try {
+		  LOGGER.debug("Cambiando idoma de la interfaz...");
+  		String idiomaSeleccionado = (String) event.getNewValue();
+      List<String> idiomasDisponibles = usuariosEmpresasEJB.obtenerIdiomasSoportados();
+      LOGGER.debug("Verificando que el idioma seleccionado ("+idiomaSeleccionado+" sea uno de los soportados ("+idiomasDisponibles+")");
+  		if(!idiomasDisponibles.contains(idiomaSeleccionado)) {
+  		  LOGGER.warn("No se pudo cambiar el idioma porque "+idiomaSeleccionado+" no es un idioma soportado");
+  		  return;
+  		}
+  		idiomaActual = idiomaSeleccionado;
+  		RequestContext.getCurrentInstance().execute("document.documentElement.lang='"+idiomaActual+"'");
+      LOGGER.debug("Idioma cambiado, cargando textos...");
+      cargarTextos();
+      LOGGER.debug("Textos cargados.");
+		}catch(Exception ex) {
+		  LOGGER.error("No se pudo cambiar el idioma", ex);
+		}
 	}
 	
 	public byte[] getEmpresaActualLogoBytes() {
@@ -1176,6 +1196,5 @@ public class SessionMBean extends SessionCleanerMBean {
     }
     return false;
   }
-	
 	
 }

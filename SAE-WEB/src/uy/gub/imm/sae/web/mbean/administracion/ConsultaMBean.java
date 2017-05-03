@@ -39,6 +39,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
@@ -293,42 +294,39 @@ public class ConsultaMBean extends SessionCleanerMBean {
    * @param event
    */
 	public void buscarReservaPorNumero(ActionEvent event){
-		
 		limpiarMensajesError();
-		
 		reservaConsultada = null;
-		
-		boolean huboError=false;
-		
+		boolean hayErrores=false;
 		campos.getChildren().clear();
 		if (sessionMBean.getAgendaMarcada() == null){
-			huboError = true;
 			addErrorMessage("debe_haber_una_agenda_seleccionada");
+      hayErrores = true;
 		}
-		
 		if (sessionMBean.getRecursoMarcado() == null){
-			huboError = true;
 			addErrorMessage("debe_haber_un_recurso_seleccionado");
+      hayErrores = true;
 		}
-		
 		Integer iNumeroReserva = null;
-		if (fechaHoraReserva == null){
-			huboError = true;
+		if(fechaHoraReserva == null){
 			addErrorMessage("el_dia_y_la_hora_son_obligatorios", "form:fechaHoraReserva");
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaHoraReserva)) {
+      addErrorMessage("la_fecha_es_invalida", "form:fechaHoraReserva");
+      hayErrores = true;
 		}
 		if (numeroReserva == null || numeroReserva.trim().isEmpty()){
-			huboError = true;
 			addErrorMessage("el_numero_es_obligatorio", "form:nroRes");
+      hayErrores = true;
 		}else {
 			try {
 				iNumeroReserva = Integer.valueOf(numeroReserva);
 			}catch(NumberFormatException nfEx) {
-				huboError = true;
 				addErrorMessage("el_numero_ingresado_no_es_valido", "form:nroRes");
+        hayErrores = true;
 			}
 		}
 		
-		if (!huboError){
+		if (!hayErrores){
 			Calendar c = new GregorianCalendar();
 			c.setTime(fechaHoraReserva); //Debe estar en GMT0	
 			c.set(Calendar.HOUR_OF_DAY, hora);

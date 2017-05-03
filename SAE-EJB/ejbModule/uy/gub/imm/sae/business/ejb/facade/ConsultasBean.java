@@ -824,7 +824,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 					+ " WHERE rec.aeag_id=:idAgenda ";
 			}
 			query = query
-          + "   AND dis.presencial = false' "
+          + "   AND dis.presencial = false "
 					+ "   AND ds1.nombre='NroDocumento' "
 					+ "   AND dr1.valor=:numDoc "
 					+ "   AND ds2.nombre='TipoDocumento' "

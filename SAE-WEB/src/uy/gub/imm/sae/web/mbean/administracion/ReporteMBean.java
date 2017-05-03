@@ -116,44 +116,41 @@ public class ReporteMBean extends BaseMBean {
 	}
 
 	public String reporteReservasFecha() {
-		
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
+		boolean hayErrores = false;
 		Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
-		
-		if (fechaDesde == null){
-			error = true;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
 		}
-		
-		if (fechaHasta == null){
-			error = true;
+		if(fechaHasta == null){
+			hayErrores = true;
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
-		
-		if(fechaDesde!=null && fechaHasta!=null) {
+		}else if(Utiles.esFechaInvalida(fechaHasta)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+        hayErrores = true;
 			}
 		}
-		
 		if (estadoReservaSeleccionado == null){
-			error = true;
 			addErrorMessage("el_estado_es_obligatorio", "form:estado");
+      hayErrores = true;
 		}
-
-		if (error){
+		if (hayErrores){
 		  return null;
 		}
-		
 		VentanaDeTiempo periodo = new VentanaDeTiempo();
 		periodo.setFechaInicial(fechaDesde);
 		periodo.setFechaFinal(fechaHasta);
@@ -174,7 +171,6 @@ public class ReporteMBean extends BaseMBean {
 					}
 				}
 			}
-			
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
 			for(Recurso recurso : recursos) {
 				//Definicion de los campos dinamicos del reporte
@@ -197,68 +193,59 @@ public class ReporteMBean extends BaseMBean {
 				List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estados, null);
 				List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
 				contenido.addAll(contenido1);
-				
 			}
-			
 			String[] defColPlanilla = {};
 			LabelValue[] filtros = {
 					new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
 					new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
 					new CommonLabelValueImpl(sessionMBean.getTextos().get("estado")+": ", sessionMBean.getTextos().get(estadoReservaSeleccionado.getDescripcion()))
 			};
-			
       StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
-      
       String nombre = sessionMBean.getTextos().get("reporte_reservas");
       nombre = nombre.replace(" ", "_");
-      
       CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
       printer.print(); 
-			
 		} catch (Exception e1) {
 			addErrorMessage(e1);
 		}
-
 		return null;
 	}
 	
 	public void reporteAsistenciaFecha(ActionEvent e) {
-		
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
+		boolean hayErrores = false;
 		Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
-		
-		if (fechaDesde == null){
-			error = true;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
-		}
-		
-		if (fechaHasta == null){
-			error = true;
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+		if(fechaHasta == null){
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
 		
-		if(fechaDesde!=null && fechaHasta!=null) {
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaDesde)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+        hayErrores = true;
 			}
 		}
-
 		estadoReservaSeleccionado=Estado.U;
-
-		if (!error){
+		if (!hayErrores){
 			VentanaDeTiempo periodo = new VentanaDeTiempo();
 			periodo.setFechaInicial(fechaDesde);
 			periodo.setFechaFinal(fechaHasta);
-			
 			try {
 				String[] defColPlanilla = {};
 				//Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
@@ -266,7 +253,6 @@ public class ReporteMBean extends BaseMBean {
 						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
 						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA))
 				};
-
 				List<Recurso> recursos = new ArrayList<Recurso>();
 				if(recursoMarcado != null) {
 					//Hay un recurso marcado, el reporte es para ese recurso
@@ -290,12 +276,9 @@ public class ReporteMBean extends BaseMBean {
 					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
 					contenido.addAll(contenido1);
 				}
-				
         StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
-        
         String nombre = sessionMBean.getTextos().get("reporte_asistencias");
         nombre = nombre.replace(" ", "_");
-        
         CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
         printer.print(); 
 			} catch (Exception e1) {
@@ -306,31 +289,32 @@ public class ReporteMBean extends BaseMBean {
 	
 	public void reporteAtencionPeriodo(ActionEvent e) {
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
-		if (fechaDesde == null){
-			error = true;
+		boolean hayErrores = false;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
-		}
-		
-		if (fechaHasta == null){
-			error = true;
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+		if(fechaHasta == null){
+		  hayErrores = true;
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
-	
-		if(fechaDesde!=null && fechaHasta!=null) {
+		}else if(Utiles.esFechaInvalida(fechaHasta)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
+			  hayErrores = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
 			}
 		}
-		
-		if(!error) {
+		if(!hayErrores) {
 			List<AtencionReporteDT> listAtencionReportDT = new ArrayList<AtencionReporteDT>();
 			if (this.todasLasEmpresas) {
 					Empresa empresaActual = sessionMBean.getEmpresaActual();
@@ -353,7 +337,6 @@ public class ReporteMBean extends BaseMBean {
 			}else {
 				listAtencionReportDT = obtenerDatosReporteAtencionPeriodo(this.fechaDesde, this.fechaHasta);
 			}
-			
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
 			for (AtencionReporteDT atencionReporteDT : listAtencionReportDT) {
 				List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
@@ -369,7 +352,6 @@ public class ReporteMBean extends BaseMBean {
 				filaDatos.add(new TableCellValue(total));
 				contenido.add(filaDatos);
 			}
-			
 			LabelValue[] filtros = { 
 			   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
 			   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
@@ -384,11 +366,8 @@ public class ReporteMBean extends BaseMBean {
 				    sessionMBean.getTextos().get("asistencias"), sessionMBean.getTextos().get("inasistencias"), sessionMBean.getTextos().get("atenciones")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
-						
       String nombre = sessionMBean.getTextos().get("reporte_atencion_funcionario");
       nombre = nombre.replace(" ", "_");
-			
-			
 			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
       printer.print(); 
 		}
@@ -449,33 +428,34 @@ public class ReporteMBean extends BaseMBean {
 	}
 	
 	public void reporteTiemposAtencion() 	{
-		
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
-		if (fechaDesde == null){
-			error = true;
+		boolean hayErrores = false;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
-		}
-		
-		if (fechaHasta == null){
-			error = true;
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+		if(fechaHasta == null){
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
-		
-		if(fechaDesde!=null && fechaHasta!=null) {
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaHasta)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
+				hayErrores = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
 			}
 		}
 		
-		if(!error){
+		if(!hayErrores){
 			List<AtencionLLamadaReporteDT> llamadas = new ArrayList<AtencionLLamadaReporteDT>();
 			if (this.todasLasEmpresas) {
 					Empresa empresaActual = sessionMBean.getEmpresaActual();
@@ -568,83 +548,83 @@ public class ReporteMBean extends BaseMBean {
 	}
 	
   public void reporteAtencionPresencialPeriodo(ActionEvent e) {
-    
     limpiarMensajesError();
-    
-    boolean error = false;
-    
+    boolean hayErrores = false;
+    Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
+    if(recursoMarcado == null) {
+      addErrorMessage("debe_haber_un_recurso_seleccionado");
+      hayErrores = true;
+    }
     if (fechaDesde == null){
-      error = true;
       addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(fechaDesde)) {
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
     }
-    
     if (fechaHasta == null){
-      error = true;
       addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(fechaHasta)) {
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
     }
-    
-    if(fechaDesde!=null && fechaHasta!=null) {
+    if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde)  && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
       Calendar c1 =  new GregorianCalendar();
       c1.setTime(fechaDesde);
       Calendar c2 =  new GregorianCalendar();
       c2.setTime(fechaHasta);
       if(c1.after(c2)) {
-        error = true;
         addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+        hayErrores = true;
       }
     }
-    Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
-    if(recursoMarcado == null) {
-      error = true;
-      addErrorMessage("debe_haber_un_recurso_seleccionado");
+    if (hayErrores){
+      return;
     }
-    
-    if (!error){
-      
-      try {
-        //Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
-        LabelValue[] filtros = {
-            new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
-            new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ", Utiles.date2string(fechaDesde, Utiles.DIA))
-        };
+    try {
+      //Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
+      LabelValue[] filtros = {
+          new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
+          new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ", Utiles.date2string(fechaDesde, Utiles.DIA))
+      };
 
-        List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
-        List<AtencionLLamadaReporteDT> llamadas = consultaEJB.consultarAtencionesPresencialesRecursoPeriodo(recursoMarcado, fechaDesde, fechaHasta);
-        Collections.sort(llamadas, new AtencionLlamadaReporteComparator());
-        for (AtencionLLamadaReporteDT llamada : llamadas) {
-          List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
-          filaDatos.add(new TableCellValue(llamada.getReservaId()));
-          filaDatos.add(new TableCellValue(Utiles.date2string(llamada.getFechaHoraReserva(), Utiles.DIA)));
-          filaDatos.add(new TableCellValue(llamada.getNumero()));
-          filaDatos.add(new TableCellValue(llamada.getTramiteNombre()));
-          if(llamada.getFechaHoraAtencion()!=null) {
-            long tiempo = llamada.getFechaHoraAtencion().getTime() - llamada.getFechaHoraLlamada().getTime(); 
-            tiempo = Math.abs(tiempo/(1000 * 60));
-            filaDatos.add(new TableCellValue(String.valueOf(tiempo)));
-          }else {
-            filaDatos.add(new TableCellValue("---"));
-          }
-          if(llamada.getAtencion()!= null) {
-            filaDatos.add(new TableCellValue(llamada.getAtencion()));
-          }else {
-            filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("no_marcado")));
-          }
-          contenido.add(filaDatos);
+      List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
+      List<AtencionLLamadaReporteDT> llamadas = consultaEJB.consultarAtencionesPresencialesRecursoPeriodo(recursoMarcado, fechaDesde, fechaHasta);
+      Collections.sort(llamadas, new AtencionLlamadaReporteComparator());
+      for (AtencionLLamadaReporteDT llamada : llamadas) {
+        List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
+        filaDatos.add(new TableCellValue(llamada.getReservaId()));
+        filaDatos.add(new TableCellValue(Utiles.date2string(llamada.getFechaHoraReserva(), Utiles.DIA)));
+        filaDatos.add(new TableCellValue(llamada.getNumero()));
+        filaDatos.add(new TableCellValue(llamada.getTramiteNombre()));
+        if(llamada.getFechaHoraAtencion()!=null) {
+          long tiempo = llamada.getFechaHoraAtencion().getTime() - llamada.getFechaHoraLlamada().getTime(); 
+          tiempo = Math.abs(tiempo/(1000 * 60));
+          filaDatos.add(new TableCellValue(String.valueOf(tiempo)));
+        }else {
+          filaDatos.add(new TableCellValue("---"));
         }
-        
-        String[] cabezales = {sessionMBean.getTextos().get("reserva"), sessionMBean.getTextos().get("fecha"), sessionMBean.getTextos().get("numero"),
-            sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("tiempo_en_minutos"), sessionMBean.getTextos().get("atencion")};
-        StandardCSVFile fileCSV = new StandardCSVFile(filtros, cabezales, contenido);
-        
-        String nombre = sessionMBean.getTextos().get("reporte_atencion_presencial");
-        nombre = nombre.replace(" ", "_");
-              
-        CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
-        printer.print(); 
-
-      } catch (Exception e1) {
-        addErrorMessage(e1);
+        if(llamada.getAtencion()!= null) {
+          filaDatos.add(new TableCellValue(llamada.getAtencion()));
+        }else {
+          filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("no_marcado")));
+        }
+        contenido.add(filaDatos);
       }
+      
+      String[] cabezales = {sessionMBean.getTextos().get("reserva"), sessionMBean.getTextos().get("fecha"), sessionMBean.getTextos().get("numero"),
+          sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("tiempo_en_minutos"), sessionMBean.getTextos().get("atencion")};
+      StandardCSVFile fileCSV = new StandardCSVFile(filtros, cabezales, contenido);
+      
+      String nombre = sessionMBean.getTextos().get("reporte_atencion_presencial");
+      nombre = nombre.replace(" ", "_");
+            
+      CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
+      printer.print(); 
+
+    } catch (Exception e1) {
+      addErrorMessage(e1);
     }
   } 
 

@@ -1,11 +1,9 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{recursoMBean.beforePhaseModificar}" >
@@ -109,8 +107,9 @@
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['inicio_de_vigencia']}" for="fechaInicio" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="fechaInicio" value="#{recursoMBean.recursoSeleccionado.fechaInicio}" styleClass="datepicker">
-									<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								<h:inputText id="fechaInicio" value="#{recursoMBean.recursoSeleccionado.fechaInicio}" styleClass="datepicker" converter="dateConverter">
+                  <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                  <f:attribute name="onError" value="zero"/>
 								</h:inputText>
 								<p:message for="fechaInicio" id="fechaInicioMsgId" />
 							</p:outputPanel>
@@ -118,8 +117,9 @@
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['fin_de_vigencia']}" for="fechaFin" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="fechaFin" value="#{recursoMBean.recursoSeleccionado.fechaFin}" styleClass="datepicker">
-									<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								<h:inputText id="fechaFin" value="#{recursoMBean.recursoSeleccionado.fechaFin}" styleClass="datepicker" converter="dateConverter">
+                  <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                  <f:attribute name="onError" value="zero"/>
 								</h:inputText>
 								<p:message for="fechaFin" id="fechaFinMsgId" />
 							</p:outputPanel>
@@ -127,8 +127,9 @@
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['inicio_de_disponibilidad']}" for="fechaInicioDispon" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="fechaInicioDispon" value="#{recursoMBean.recursoSeleccionado.fechaInicioDisp}" styleClass="datepicker">
-									<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								<h:inputText id="fechaInicioDispon" value="#{recursoMBean.recursoSeleccionado.fechaInicioDisp}" styleClass="datepicker" converter="dateConverter">
+                  <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                  <f:attribute name="onError" value="zero"/>
 								</h:inputText>
 								<p:message for="fechaInicioDispon" id="fechaInicioDispMsgId" />
 							</p:outputPanel>
@@ -136,8 +137,9 @@
 						<p:outputPanel styleClass="form-group">
 							<p:outputLabel value="#{sessionMBean.textos['fin_de_disponibilidad']}" for="fechaFinDispon" styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="fechaFinDispon" value="#{recursoMBean.recursoSeleccionado.fechaFinDisp}" styleClass="datepicker">
-									<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+								<h:inputText id="fechaFinDispon" value="#{recursoMBean.recursoSeleccionado.fechaFinDisp}" styleClass="datepicker" converter="dateConverter">
+                  <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                  <f:attribute name="onError" value="zero"/>
 								</h:inputText>
 								<p:message for="fechaFinDispon" id="fechaFinDispMsgId" />
 							</p:outputPanel>
@@ -510,4 +512,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

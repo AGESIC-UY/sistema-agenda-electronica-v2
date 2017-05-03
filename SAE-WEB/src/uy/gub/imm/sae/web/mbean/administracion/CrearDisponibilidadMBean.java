@@ -99,13 +99,15 @@ public class CrearDisponibilidadMBean extends BaseMBean {
    */
 	public void crearDisponibilidades(ActionEvent event){
 		limpiarMensajesError();
-		
-		boolean huboError = false;
+		boolean hayError = false;
 		try{
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
-				huboError = true;
-			}else { 
+				hayError = true;
+			}else if (Utiles.esFechaInvalida(crearDispSessionMBean.getFechaCrear())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formCrearDisponibilidad:fecha");
+        hayError = true;
+      }else { 
 		    Calendar hoy = new GregorianCalendar();
 		    hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
 		    hoy.set(Calendar.HOUR_OF_DAY, 0);
@@ -114,32 +116,29 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 		    hoy.set(Calendar.MILLISECOND, 0);
 		    if(crearDispSessionMBean.getFechaCrear().before(hoy.getTime())) {
           addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_hoy"), "formCrearDisponibilidad:fecha");
-          huboError = true;
+          hayError = true;
 		    }else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
   				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
-  				huboError = true;
+  				hayError = true;
   			}else {
   				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
   					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-  					huboError = true;
+  					hayError = true;
   				}
   				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
   					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
   						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-  						huboError = true;
+  						hayError = true;
   					}
   				}
   			}
 			}
-			
-
 			Date fecha = crearDispSessionMBean.getFechaCrear();
 			if(fecha==null) {
 				fecha = new Date();
 			}
 			Calendar c0 = new GregorianCalendar();
 			c0.setTime(fecha); //Debe estar en GMT0
-			
 			Calendar c1 = new GregorianCalendar();
 			c1.set(Calendar.YEAR, c0.get(Calendar.YEAR));
 			c1.set(Calendar.MONTH, c0.get(Calendar.MONTH));
@@ -147,13 +146,11 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			c1.set(Calendar.HOUR_OF_DAY, crearDispSessionMBean.getHoraD());
 			c1.set(Calendar.MINUTE, crearDispSessionMBean.getMinD());
 			c1.set(Calendar.SECOND, 0);
-			
 			crearDispSessionMBean.setHoraDesde(c1.getTime());
 			if (crearDispSessionMBean.getHoraDesde() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_hora_de_inicio_es_obligatoria"), "formCrearDisponibilidad:seleccionHoraD");
-				huboError = true;
+				hayError = true;
 			}
-				
 			Calendar c2 = new GregorianCalendar();
 			c2.set(Calendar.YEAR, c0.get(Calendar.YEAR));
 			c2.set(Calendar.MONTH, c0.get(Calendar.MONTH));
@@ -161,38 +158,32 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			c2.set(Calendar.HOUR_OF_DAY, crearDispSessionMBean.getHoraH());
 			c2.set(Calendar.MINUTE, crearDispSessionMBean.getMinH());
 			c2.set(Calendar.SECOND, 0);
-			
 			crearDispSessionMBean.setHoraHasta(c2.getTime());
 			if (crearDispSessionMBean.getHoraHasta() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_hora_de_fin_es_obligatoria"), "formCrearDisponibilidad:seleccionHoraH");
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (crearDispSessionMBean.getHoraDesde().compareTo(crearDispSessionMBean.getHoraHasta()) >= 0){
 				addErrorMessage(sessionMBean.getTextos().get("la_hora_de_fin_debe_ser_posterior_a_la_hora_de_inicio"), "formCrearDisponibilidad:seleccionHoraD", "formCrearDisponibilidad:seleccionHoraH");
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (crearDispSessionMBean.getFrecuencia() == null){
 				addErrorMessage(sessionMBean.getTextos().get("la_frecuencia_es_obligatoria"), "formCrearDisponibilidad:frecuencia");
-				huboError = true;
+				hayError = true;
 			}else if (crearDispSessionMBean.getFrecuencia().intValue() < 1){
 				addErrorMessage(sessionMBean.getTextos().get("la_frecuencia_debe_ser_mayor_que_cero"), "formCrearDisponibilidad:frecuencia");
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (crearDispSessionMBean.getCupo() == null){
 				addErrorMessage(sessionMBean.getTextos().get("el_cupo_por_periodo_es_obligatorio"), "formCrearDisponibilidad:cupos");
-				huboError = true;
+				hayError = true;
 			}else if (crearDispSessionMBean.getCupo().intValue() < 1){
 				addErrorMessage(sessionMBean.getTextos().get("el_cupo_por_periodo_debe_ser_mayor_a_cero"), "formCrearDisponibilidad:cupos");
-				huboError = true;
+				hayError = true;
 			}
-			
-			if (huboError) {
+			if (hayError) {
 				return;
 			}
-		
 			List<Date> horasConflicto = disponibilidadesEJB.generarDisponibilidadesNuevas(sessionMBean.getRecursoMarcado(),crearDispSessionMBean.getFechaCrear(), 
 					crearDispSessionMBean.getHoraDesde(), crearDispSessionMBean.getHoraHasta(), crearDispSessionMBean.getFrecuencia(), crearDispSessionMBean.getCupo());
 			if(!horasConflicto.isEmpty()) {
@@ -285,33 +276,35 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	public void consultarDisponibilidadesDelDia(ActionEvent event) {
 		limpiarMensajesError();
 		try {
-			boolean huboError = false;
+			boolean hayError = false;
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
-				huboError = true;
+				hayError = true;
+			}else if(Utiles.esFechaInvalida(crearDispSessionMBean.getFechaCrear())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formCrearDisponibilidad:fecha");
+        hayError = true;
 			}else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
-				huboError = true;
+				hayError = true;
 			}else {
 				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-					huboError = true;
+					hayError = true;
 				}
 				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
 					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-						huboError = true;
+						hayError = true;
 					}
 				}
 			}
-			if(!huboError){
+			if(!hayError){
 				configurarDisponibilidadesDelDia();
 			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
 	}
-	
 	
 	private void configurarDisponibilidadesDelDia() {
 		List<DisponibilidadReserva> dispMatutinas   = new ArrayList<DisponibilidadReserva>();

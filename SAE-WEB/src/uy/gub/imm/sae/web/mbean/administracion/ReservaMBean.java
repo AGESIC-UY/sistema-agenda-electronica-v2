@@ -385,35 +385,34 @@ public class ReservaMBean extends BaseMBean {
   }
 
   public void obtenerReservasPeriodo(ActionEvent e){
-    
     limpiarMensajesError();
-    
-    boolean hayError = false;
-
-    if (fechaDesde == null) {
-      hayError = true;
-      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+    boolean hayErrores = false;
+    if(fechaDesde == null) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "form:Fdesde");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(fechaDesde)) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_invalida"), "form:Fdesde");
+      hayErrores = true;
     }
-    if (fechaHasta == null) {
-      hayError = true;
-      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
+    if(fechaHasta == null) {
+      hayErrores = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), "form:Fhasta");
+    }else if(Utiles.esFechaInvalida(fechaHasta)) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_invalida"), "form:Fhasta");
+      hayErrores = true;
     }
-    
-    if(fechaDesde!=null && fechaHasta!=null) {
+    if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
       if(fechaDesde.after(fechaHasta)) {
-        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), MSG_ID);
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "form:Fdesde", "form:Fhasta");
       }
     }
-    
-    if(hayError) {
+    if(hayErrores) {
       setCuposPorDia(null);
       return;
     }
-    
     VentanaDeTiempo ventana = new VentanaDeTiempo();
     ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));
     ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
-    
     try{
       List<DisponibilidadReserva> dispsRess = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventana);
       cuposPorDia = new RowList<DisponibilidadReserva>(dispsRess);
@@ -428,38 +427,44 @@ public class ReservaMBean extends BaseMBean {
    * que no se pueda generar otra reserva.
    */
   public void cancelarReservasPeriodo() {
-    boolean huboError = false;
+    boolean hayErrores = false;
     if (sessionMBean.getAgendaMarcada() == null) {
-      huboError = true;
+      hayErrores = true;
       addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
     }
     if (sessionMBean.getRecursoMarcado() == null) {
-      huboError = true;
+      hayErrores = true;
       addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
     }
-    if (fechaDesde == null) {
-      huboError = true;
-      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), MSG_ID);
+    if(fechaDesde == null) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "form:Fdesde");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(fechaDesde)) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_invalida"), "form:Fdesde");
+      hayErrores = true;
     }
-    if (fechaHasta == null) {
-      huboError = true;
-      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), MSG_ID);
+    if(fechaHasta == null) {
+      hayErrores = true;
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), "form:Fhasta");
+    }else if(Utiles.esFechaInvalida(fechaHasta)) {
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_invalida"), "form:Fhasta");
+      hayErrores = true;
     }
-    if(fechaDesde!=null && fechaHasta!=null) {
+    if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
       if(fechaDesde.after(fechaHasta)) {
-        huboError = true;
-        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), MSG_ID);
+        hayErrores = true;
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "form:Fdesde", "form:Fhasta");
       }
     }
     if (asuntoMensaje == null || asuntoMensaje.isEmpty()) {
-      huboError = true;
+      hayErrores = true;
       addErrorMessage(sessionMBean.getTextos().get("el_asunto_del_mensaje_es_obligatorio"), "form:txtAsunto");
     }
     if (cuerpoMensaje == null || cuerpoMensaje.isEmpty()) {
-      huboError = true;
+      hayErrores = true;
       addErrorMessage(sessionMBean.getTextos().get("el_cuerpo_del_mensaje_es_obligatorio"), "form:txtCuerpo");
     }
-    if (!huboError) {
+    if (!hayErrores) {
       try {
         VentanaDeTiempo ventana = new VentanaDeTiempo();
         ventana.setFechaInicial(Utiles.time2InicioDelDia(fechaDesde));

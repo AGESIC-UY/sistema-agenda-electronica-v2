@@ -134,6 +134,17 @@ Versión 2.0.2 (2017-02-02)
 * Al quitar la última empresa de un usuario superadministrador no se marca como eliminado (aún puede acceder).
 * No se permite eliminar la última empresa
 
-Versión 2.0.3
+Versión 1.5.p1 (2017-04-20)
+* Se cambió el procedimiento periódico de cierre de trazas para reducir las conexiones a la base de datos, reutilizar tokens STS y coordinar la ejecución de múltiples nodos.
+
+Versión 1.5.p2 (2017-04-25)
+* Se redujo el consumo de memoria en algunas clases.
+* Se realizó el cambio de versión de JSF (Mojarra 2.1.7 a 2.1.21) para solucionar un bug por el cual no se liberan los objetos correspondientes a managed beans de alcance view.
+
+Versión 2.0.3 (2017-05-03)
 * Se cambiaron algunos textos.
 * Se solucionó un problema por el cual al cancelar reservas por período no se estaban cancelando las reservas pendientes pero no confirmadas.
+* Se cambió el procedimiento periódico de cierre de trazas para reducir las conexiones a la base de datos, reutilizar tokens STS y coordinar la ejecución de múltiples nodos.
+* Se corrigió un problema por el cual el atributo lang del tag <html> no mostraba el idioma correcto al cambiarlo, tanto en la reserva pública como privada.
+* Se cambió la forma de verificar la validez de las fechas para hacerlo del lado del servidor como el resto de los campos y mostrar los errores todos juntos, y también para interpretar mejor las fechas incorrectas.
+* Se cambiaron algunos estilos para adecuarlos a los requerimientos de accesibilidad y usabilidad.

@@ -30,6 +30,7 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.model.SelectItem;
@@ -523,5 +524,40 @@ public class Paso2MBean extends BaseMBean {
 	  }
 	  return "";
 	}
+	
+  @PreDestroy
+  public void preDestroy() {
+    
+    try {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      
+      this.agendarReservasEJB = null;
+      if(this.disponibilidadesMatutina!=null) {
+        this.disponibilidadesMatutina.clear();
+      }
+      this.disponibilidadesMatutina = null;
+      if(this.disponibilidadesVespertina!=null) {
+        this.disponibilidadesVespertina.clear();
+      }
+      this.disponibilidadesVespertina = null;
+      this.jsonArrayFchDisp = null;
+      this.rowSelectMatutina = null;
+      this.rowSelectVespertina = null;
+      if(this.selectItemsDispMatutina!=null) {
+        this.selectItemsDispMatutina.clear();
+      }
+      this.selectItemsDispMatutina = null;
+      if(this.selectItemsDispVespertina!=null) {
+        this.selectItemsDispVespertina.clear();
+      }
+      this.selectItemsDispVespertina = null;
+      this.sesionMBean = null;
+      
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+      
+    }
+  }
 	
 }

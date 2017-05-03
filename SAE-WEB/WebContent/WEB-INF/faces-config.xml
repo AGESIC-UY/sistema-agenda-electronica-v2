@@ -961,5 +961,9 @@
     <converter-id>eventoConverter</converter-id>
     <converter-class>uy.gub.imm.sae.web.common.EventoConverter</converter-class>
   </converter>
+  <converter>
+    <converter-id>dateConverter</converter-id>
+    <converter-class>uy.gub.imm.sae.web.common.DateConverter</converter-class>
+  </converter>
 
 </faces-config>
