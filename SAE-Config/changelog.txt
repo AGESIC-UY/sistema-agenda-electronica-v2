@@ -149,7 +149,7 @@ Versión 2.0.3 (2017-05-03)
 * Se cambió la forma de verificar la validez de las fechas para hacerlo del lado del servidor como el resto de los campos y mostrar los errores todos juntos, y también para interpretar mejor las fechas incorrectas.
 * Se cambiaron algunos estilos para adecuarlos a los requerimientos de accesibilidad y usabilidad.
 
-Versión 2.0.4 (2017-06-06)
+Versión 2.0.4 (2017-07-06)
 * Se cambiaron algunos textos.
 * Se cambiaron los paginadores de la tablas para no utilizar íconos y en su lugar usar textos (requirió cambios en PrimeFaces 5.3)
 * Se corrigió el problema por el cual los pop-ups que solicitan confirmación no obtenían el foco para permitir seleccionar la opción deseada con el teclado.
