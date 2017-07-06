@@ -12,14 +12,14 @@
    <ui:param name="hay_error" value="#{paso1AdminMBean.errorInit}" />
 	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-6" />
 	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-5" />
+  <ui:param name="yaExisteReservaCamposClave" value="false" />
 
 	<ui:define name="descripcion">
     <f:view beforePhase="#{paso1AdminMBean.beforePhase}" >
 			<h:panelGroup id="infoRecurso" layout="block" >
-				<p:outputPanel styleClass="infoDireccion"  rendered="#{sessionMBean.agendaMarcada != null}">
+				<p:outputPanel styleClass="infoDireccion" rendered="#{sessionMBean.agendaMarcada != null}">
 					<h:panelGroup>
-            <iframe  src="#{paso1AdminMBean.urlMapa}"  class="iframeMapa"  title="mapa de locación" >
-            </iframe>
+            <iframe src="#{paso1AdminMBean.urlMapa}" class="iframeMapa" title="mapa de locación" />
 					</h:panelGroup>
 					<div class="direccion">
 						<h:outputText value="#{paso1AdminMBean.direccionCompleta}" />
@@ -29,7 +29,9 @@
 					</div>
 				</p:outputPanel>
 				<p:outputPanel styleClass="descripcionAgenda" rendered="#{sessionMBean.agendaMarcada != null}">
-					<h:outputFormat escape="false" value="#{paso1AdminMBean.descripcion}" />
+          <pre>
+	   				<h:outputFormat escape="false" value="#{paso1AdminMBean.descripcion}" />
+   				</pre>
 				</p:outputPanel>
 				<h:panelGroup rendered="#{paso1AdminMBean.infoRecurso != null}" styleClass="infoAdicional box-grey" layout="block">
 					<h:outputText value="Información adicional}: " styleClass="tituloResalte" />
@@ -49,7 +51,7 @@
 				</div>
 				<div class="col-sm-8 col-md-7">
 					<p:selectOneRadio value="#{paso1AdminMBean.recursoId}" layout="responsive" columns="1" valueChangeListener="#{paso1AdminMBean.cambioRecurso}">
-						<p:ajax update="infoRecurso" />
+						<p:ajax update="contenedorPaso" />
 						<f:selectItems value="#{paso1AdminMBean.recursosItems}" />
 					</p:selectOneRadio>
 				</div>
@@ -62,7 +64,8 @@
 			<li class="action-buttons-primary">
 				<ul>
 					<li>
-					  <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['elegir_dia_y_hora']} #{paso1AdminMBean.simboloSiguiente}" action="#{paso1AdminMBean.siguientePaso}" />
+					  <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['elegir_dia_y_hora']} #{paso1AdminMBean.simboloSiguiente}" 
+					    action="#{paso1AdminMBean.siguientePaso}" />
 				  </li>
 				</ul>
 			</li>

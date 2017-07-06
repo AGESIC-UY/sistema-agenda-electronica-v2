@@ -8,7 +8,7 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{disponibilidadMBean.beforePhaseModifCupo}" >
 
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="modificarCupos" zindex="2000" modal="true">
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="modificarCupos" zindex="2000" modal="true" focus="elimRec:btn_modificar" >
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
@@ -16,14 +16,12 @@
 					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_modificar_las_disponibilidades_marcadas']}" />
 					<p:outputPanel styleClass="row panelBotonesPopUp">
 						<p:outputPanel styleClass="col-sm-7">
-							<p:commandButton id="btn_modificar" update="form:panelForm" actionListener="#{disponibilidadMBean.guardarModifDisp}"
+							<p:commandButton id="btn_modificar" actionListener="#{disponibilidadMBean.guardarModifDisp}" update="form:panelForm"
 								value="#{sessionMBean.textos['modificar_cupos']}" onclick="PF('modificarCupos').hide();" styleClass="btn-primario btn-100 btn">
 							</p:commandButton>
 						</p:outputPanel>
 						<p:outputPanel styleClass="col-sm-5">
-							<p:commandButton onclick="PF('modificarCupos').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn"
-								actionListener="#{disponibilidadMBean.cancelarModifDisp}" update="form:panelForm">
-							</p:commandButton>
+							<p:commandButton onclick="PF('modificarCupos').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
 						</p:outputPanel>
 					</p:outputPanel>
 				</h:form>
@@ -58,21 +56,21 @@
 						<div class="col-sm-6">
 							<p:dataTable id="tablaMatutina" binding="#{disponibilidadMBean.tablaDispMatutinaModif}" value="#{dispSessionMBean.disponibilidadesDelDiaMatutinaModif}"
 								var="rowMM" caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-	
 								<f:facet name="header">
 									<h:panelGroup>
 										<h:outputText value="#{sessionMBean.textos['por_la_manana']}" />
 									</h:panelGroup>
 								</f:facet>
-	
 								<p:column>
 									<f:facet name="header">
-										<h:selectBooleanCheckbox id="todasM" value="#{disponibilidadMBean.selectAllMatutino}" title="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}">
+										<h:selectBooleanCheckbox id="todasM" title="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}">
 											<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarTodosMatutino}" />
 										</h:selectBooleanCheckbox>
 										<p:outputLabel value="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}" for="todasM" styleClass="ui-helper-hidden-accessible" />
 									</f:facet>
-									<h:selectBooleanCheckbox value="#{rowMM.data.seleccionado}" id="horaM" />
+									<h:selectBooleanCheckbox value="#{rowMM.data.seleccionado}" id="horaM">
+                    <p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarUno}" />
+                  </h:selectBooleanCheckbox>
 									<p:outputLabel value=" #{rowMM.data.horaInicio}" for="horaM" styleClass="ui-helper-hidden-accessible">
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</p:outputLabel>
@@ -110,12 +108,14 @@
 								</f:facet>
 								<p:column>
 									<f:facet name="header">
-										<h:selectBooleanCheckbox id="todasT" value="#{disponibilidadMBean.selectAllVespertino}">
+										<h:selectBooleanCheckbox id="todasT">
 											<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarTodosVespertino}" title="#{sessionMBean.textos['todas_las_horas_del_turno_vespertino']}" />
 										</h:selectBooleanCheckbox>
 										<p:outputLabel value="#{sessionMBean.textos['todas_las_horas_del_turno_vespertino']}" for="todasT" styleClass="ui-helper-hidden-accessible" />
 									</f:facet>
-									<h:selectBooleanCheckbox id="horaT" value="#{rowVM.data.seleccionado}" />
+									<h:selectBooleanCheckbox id="horaT" value="#{rowVM.data.seleccionado}">
+                    <p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarUno}" />
+                  </h:selectBooleanCheckbox>
 									<p:outputLabel value=" #{rowVM.data.horaInicio}" for="horaT" styleClass="ui-helper-hidden-accessible">
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</p:outputLabel>
@@ -145,21 +145,8 @@
 						</div>
 					</div>
 	
-					<ul class="form-action-buttons">
-						<li class="action-buttons-primary">
-							<ul>
-								<li>
-								  <p:commandButton id="linkModificarCupos" update="form:panelForm" actionListener="#{disponibilidadMBean.controlSelectDisponibilidades}"
-										value="#{sessionMBean.textos['continuar']}" styleClass="btn btn-secundario" />
-								</li>
-							</ul>
-						</li>
-						<li class="action-buttons-second"></li>
-					</ul>
-	
 					<p:outputPanel id="ap_modifDisp">
 						<p:outputPanel id="modifDisp" rendered="#{dispSessionMBean.mostrarDisponibilidad}">
-	
 							<fieldset>
 								<legend>
 									<h:outputText value="#{sessionMBean.textos['modificacion_de_disponibilidades_para_las_horas_seleccionadas']}" />
@@ -179,14 +166,14 @@
 												<f:selectItem itemLabel="#{sessionMBean.textos['disminuir_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{2}" />
 												<f:selectItem itemLabel="#{sessionMBean.textos['establecer_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{3}" />
 											</h:selectOneMenu>
-											<p:message for="oper"></p:message>
+											<p:message for="oper" />
 										</p:outputPanel>
 									</p:outputPanel>
-									<p:outputPanel styleClass="form-group">
+									<p:outputPanel id="pnlValor" styleClass="form-group">
 										<p:outputLabel value="#{sessionMBean.textos['cantidad_de_cupos']}" for="valor" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 										<p:outputPanel styleClass="col-sm-9">
 											<h:inputText id="valor" value="#{disponibilidadMBean.valor}" maxlength="5" styleClass="form-control textoCorto" />
-											<p:message for="valor" errorClass="mensajeError" />
+											<p:message for="valor" />
 										</p:outputPanel>
 									</p:outputPanel>
 									<p:outputPanel id="aplicarTodos" styleClass="form-group">
@@ -234,7 +221,8 @@
 								<li class="action-buttons-primary">
 									<ul>
 										<li>
-										  <p:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['modificar_cupos']}" oncomplete="PF('modificarCupos').show();" />
+										  <p:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['modificar_cupos']}" 
+										    oncomplete="PF('modificarCupos').show();" />
 									  </li>
 									</ul>
 								</li>

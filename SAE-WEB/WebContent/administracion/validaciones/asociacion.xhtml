@@ -8,167 +8,129 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{validacionAsignacionMBean.beforePhase}">
 
-      <p:dialog closable="false" shadowOpacity="0.4" autosized="false"
-        widgetVar="eliminarValidacion" zindex="2000" modal="true">
+      <p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarValidacion" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
         <f:facet name="header">
           <h:outputText value="#{sessionMBean.textos['confirmacion']}" />
         </f:facet>
         <h:form id="elimRec">
-          <h:outputText
-            value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_validacion']}" />
+          <h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_validacion']}" />
           <p:outputPanel styleClass="row panelBotonesPopUp">
             <p:outputPanel styleClass="col-sm-6">
-              <p:commandButton id="btn_eliminar" update="form:panelForm"
-                actionListener="#{validacionAsignacionMBean.eliminarValidacion}"
-                value="#{sessionMBean.textos['eliminar']}"
-                onclick="PF('eliminarValidacion').hide();"
-                styleClass="btn-primario btn-100 btn">
-              </p:commandButton>
+              <p:commandButton id="btn_eliminar" update="form:panelForm" actionListener="#{validacionAsignacionMBean.eliminarValidacion}" value="#{sessionMBean.textos['eliminar']}"
+                onclick="PF('eliminarValidacion').hide();" styleClass="btn-primario btn-100 btn" />
             </p:outputPanel>
             <p:outputPanel styleClass="col-sm-6">
-              <p:commandButton onclick="PF('eliminarValidacion').hide();"
-                value="#{sessionMBean.textos['cancelar']}"
-                styleClass="btn-link btn-100 btn">
-              </p:commandButton>
+              <p:commandButton onclick="PF('eliminarValidacion').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
             </p:outputPanel>
           </p:outputPanel>
         </h:form>
       </p:dialog>
 
-      <h:form id="form" 
-        rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+      <h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
         <p:outputPanel id="panelForm">
-
           <p:outputPanel styleClass="botonesDerecha">
-            <p:commandButton id="agregarValidacion"
-              value="#{sessionMBean.textos['agregar_validacion']}"
-              styleClass="btn btn-secundario"
-              actionListener="#{validacionAsignacionMBean.agregarValidacion}"
-              update="form:panelAsociaciones" />
+            <p:commandButton id="agregarValidacion" value="#{sessionMBean.textos['agregar_validacion']}" styleClass="btn btn-secundario"
+              actionListener="#{validacionAsignacionMBean.agregarValidacion}" update="form:panelAsociaciones" />
           </p:outputPanel>
 
-          <p:dataTable value="#{validacionAsignacionMBean.validacionesDelRecurso}"
-            var="row" id="tablaValidaciones" rows="25" paginator="true"
-            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-            binding="#{validacionAsignacionMBean.validacionesDataTable}"
-            caption="#{sessionMBean.textos['listado_de_validaciones']}"
-            emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-
+          <p:dataTable id="tablaValidaciones" value="#{validacionAsignacionMBean.validacionesDelRecurso}" var="row" binding="#{validacionAsignacionMBean.validacionesDataTable}" 
+            caption="#{sessionMBean.textos['listado_de_validaciones']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+            paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+            paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+            paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+            paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+            paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+          >
             <p:column headerText="#{sessionMBean.textos['nombre']}">
-              <h:outputText value="#{row.data.validacion.nombre}"></h:outputText>
+              <h:outputText value="#{row.data.validacion.nombre}" />
             </p:column>
             <p:column headerText="#{sessionMBean.textos['orden_de_ejecucion']}">
-              <h:outputText value="#{row.data.ordenEjecucion}"></h:outputText>
+              <h:outputText value="#{row.data.ordenEjecucion}" />
             </p:column>
             <p:column styleClass="alinCentro">
               <f:facet name="header">
-                <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+                <h:outputText value="#{sessionMBean.textos['acciones']}" />
               </f:facet>
-              <p:commandButton id="modificarValidacion" value="#{sessionMBean.textos['modificar']}"
-                actionListener="#{validacionAsignacionMBean.editarValidacion}"
-                icon="ui-icon-pencil" update="form:panelAsociaciones"
-                title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
-              </p:commandButton>
-              <p:commandButton id="eliminarValidacion" value="#{sessionMBean.textos['eliminar']}"
-                actionListener="#{validacionAsignacionMBean.selecValidacionEliminar}" 
-                update="form:panelAsociaciones"
-                oncomplete="PF('eliminarValidacion').show();" icon="ui-icon-trash"
-                title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
-              </p:commandButton>
+              <p:commandButton id="modificarValidacion" value="#{sessionMBean.textos['modificar']}" actionListener="#{validacionAsignacionMBean.editarValidacion}"
+                icon="ui-icon-pencil" update="form:panelAsociaciones" title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only" />
+              <p:commandButton id="eliminarValidacion" value="#{sessionMBean.textos['eliminar']}" actionListener="#{validacionAsignacionMBean.selecValidacionEliminar}" 
+                update="form:panelAsociaciones" oncomplete="PF('eliminarValidacion').show();" icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only" />
             </p:column>
           </p:dataTable>
 
           <p:outputPanel id="panelAsociaciones">
             <p:outputPanel rendered="#{validacionAsignacionMBean.validacionDelRecurso != null}">
-            
               <p:outputPanel styleClass="form-required">
-                <h:outputText
-                  value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+                <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
               </p:outputPanel>
               <fieldset id="basic">
                 <legend>
-                  <h:outputText
-                    value="#{sessionMBean.textos['datos_de_la_asignacion']}" />
+                  <h:outputText value="#{sessionMBean.textos['datos_de_la_asignacion']}" />
                 </legend>
                 <p:outputPanel styleClass="form-horizontal">
                   <p:outputPanel styleClass="form-group">
-                    <h:outputLabel value="#{sessionMBean.textos['validacion']}"
-                      for="validacionAsociacion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                    <h:outputLabel value="#{sessionMBean.textos['validacion']}" for="validacionAsociacion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
                     <p:outputPanel styleClass="col-sm-9">
-                      <h:selectOneMenu id="validacionAsociacion" 
-                        value="#{validacionAsignacionMBean.validacionDelRecurso.validacion.id}"
-                        valueChangeListener="#{validacionAsignacionMBean.cambioValidacionDelRecurso}"
-                        styleClass="form-control textoLargo" update="tablaValidacionesPorDato">
+                      <h:selectOneMenu id="validacionAsociacion" value="#{validacionAsignacionMBean.validacionDelRecurso.validacion.id}"
+                        valueChangeListener="#{validacionAsignacionMBean.cambioValidacionDelRecurso}" styleClass="form-control textoLargo" update="tablaValidacionesPorDato">
                         <p:ajax update="tablaValidacionesPorDato" process="@this" />
                         <f:selectItems value="#{validacionAsignacionMBean.validacionesItems}" />
                       </h:selectOneMenu>
-                      <p:message for="validacionAsociacion"></p:message>
+                      <p:message for="validacionAsociacion" />
                     </p:outputPanel>
                   </p:outputPanel>
                   <p:outputPanel styleClass="form-group">
-                    <h:outputLabel value="#{sessionMBean.textos['orden_de_ejecucion']}"
-                      for="ordenAsociacion"
-                      styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                    <h:outputLabel value="#{sessionMBean.textos['orden_de_ejecucion']}" for="ordenAsociacion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
                     <p:outputPanel styleClass="col-sm-9">
-                      <h:inputText id="ordenAsociacion" converter="integerConverter"
-                        value="#{validacionAsignacionMBean.validacionDelRecurso.ordenEjecucion}"
+                      <h:inputText id="ordenAsociacion" converter="integerConverter" value="#{validacionAsignacionMBean.validacionDelRecurso.ordenEjecucion}" 
                         maxlength="3" styleClass="form-control" />
-                      <p:message for="ordenAsociacion"></p:message>
+                      <p:message for="ordenAsociacion" />
                     </p:outputPanel>
                   </p:outputPanel>
-                <p:outputPanel styleClass="botonesDerecha">
-                  <p:commandButton id="agregarParametro"
-                    value="#{sessionMBean.textos['agregar_parametro']}"
-                    styleClass="btn btn-secundario"
-                    actionListener="#{validacionAsignacionMBean.crearValidacionPorDato}"
-                    update="form:tablaValidacionesPorDato" >
-                  </p:commandButton>
-                </p:outputPanel>
-                <p:dataTable
-                  value="#{validacionAsignacionMBean.validacionDelRecurso.validacionesPorDato}"
-                  var="row" id="tablaValidacionesPorDato" rowIndexVar="num" 
-                  caption="#{sessionMBean.textos['parametros']}"
-                  emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-                  <p:column headerText="#{sessionMBean.textos['dato_a_solicitar']}">
-                    <h:selectOneMenu id="parametroDatoASolicitar" value="#{row.datoASolicitar.id}">
-                      <f:selectItems value="#{validacionAsignacionMBean.datosASolicitarItems}" />
-                    </h:selectOneMenu>
-                  </p:column>
-                  <p:column headerText="#{sessionMBean.textos['parametro']}">
-                    <h:selectOneMenu id="parametroParametroDato" value="#{row.nombreParametro}">
-                      <f:selectItems value="#{validacionAsignacionMBean.parametrosDeLaValidacionItems}" />
-                    </h:selectOneMenu>
-                  </p:column>
-                  <p:column styleClass="alinCentro">
-                    <f:facet name="header">
-                      <h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
-                    </f:facet>
-                    <p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
-                      action="#{validacionAsignacionMBean.eliminarValidacionPorDato(num)}"
-                      icon="ui-icon-trash" update="form:panelAsociaciones"
-                      title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
-                    </p:commandButton>
-                  </p:column>
-                </p:dataTable>
-                  
+	                <p:outputPanel styleClass="botonesDerecha">
+	                  <p:commandButton id="agregarParametro" value="#{sessionMBean.textos['agregar_parametro']}" styleClass="btn btn-secundario"
+	                    actionListener="#{validacionAsignacionMBean.crearValidacionPorDato}" update="form:tablaValidacionesPorDato" >
+	                  </p:commandButton>
+	                </p:outputPanel>
+	                <p:dataTable id="tablaValidacionesPorDato" value="#{validacionAsignacionMBean.validacionDelRecurso.validacionesPorDato}" var="row" rowIndexVar="num" 
+	                  caption="#{sessionMBean.textos['parametros']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+	                  <p:column headerText="#{sessionMBean.textos['dato_a_solicitar']}">
+	                    <h:selectOneMenu id="parametroDatoASolicitar" value="#{row.datoASolicitar.id}">
+	                      <f:selectItems value="#{validacionAsignacionMBean.datosASolicitarItems}" />
+	                    </h:selectOneMenu>
+	                  </p:column>
+	                  <p:column headerText="#{sessionMBean.textos['parametro']}">
+	                    <h:selectOneMenu id="parametroParametroDato" value="#{row.nombreParametro}">
+	                      <f:selectItems value="#{validacionAsignacionMBean.parametrosDeLaValidacionItems}" />
+	                    </h:selectOneMenu>
+	                  </p:column>
+	                  <p:column styleClass="alinCentro">
+	                    <f:facet name="header">
+	                      <h:outputText value="#{sessionMBean.textos['acciones']}" />
+	                    </f:facet>
+	                    <p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}" action="#{validacionAsignacionMBean.eliminarValidacionPorDato(num)}"
+	                      icon="ui-icon-trash" update="form:panelAsociaciones" title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
+	                    </p:commandButton>
+	                  </p:column>
+	                </p:dataTable>
                 </p:outputPanel>
               </fieldset>
               <ul class="form-action-buttons">
                 <li class="action-buttons-primary">
                   <ul>
-                    <li><p:commandButton
-                        value="#{sessionMBean.textos['guardar']}"
-                        actionListener="#{validacionAsignacionMBean.guardarAsociacion}"
-                        styleClass="btn-lg btn-primario" update="form:panelForm form:panelAsociaciones" /></li>
+                    <li>
+                      <p:commandButton value="#{sessionMBean.textos['guardar']}" actionListener="#{validacionAsignacionMBean.guardarAsociacion}"
+                        styleClass="btn-lg btn-primario" update="form:panelForm form:panelAsociaciones" />
+                    </li>
                   </ul>
                 </li>
                 <li class="action-buttons-second">
                   <ul>
                     <li class="float-left">
-                      <p:commandButton
-                        value="#{sessionMBean.textos['cancelar']}"
-                        actionListener="#{validacionAsignacionMBean.cancelarAsociacion}"
-                        styleClass="btn-lg btn-link" update="form:panelForm form:panelAsociaciones" /></li>
+                      <p:commandButton value="#{sessionMBean.textos['cancelar']}" actionListener="#{validacionAsignacionMBean.cancelarAsociacion}"
+                        styleClass="btn-lg btn-link" update="form:panelForm form:panelAsociaciones" />
+                    </li>
                   </ul>
                 </li>
               </ul>

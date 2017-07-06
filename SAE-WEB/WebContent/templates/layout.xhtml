@@ -4,6 +4,7 @@
 	xmlns:p="http://primefaces.org/ui"
 	xmlns:f="http://java.sun.com/jsf/core"
 	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
 	lang="#{sessionMBean.idiomaActual}">
 <h:head>
   <f:facet name="first">
@@ -68,7 +69,6 @@
 				</div>
 			</div>
 		</div>
-
 	</div>
 	<div id="wrapper">
 		<div id="sidebar-wrapper">
@@ -90,13 +90,13 @@
 										  <p:outputPanel styleClass="form-group" rendered="#{sessionMBean.mostrarFechaActual}">
 										    <h:outputText value="#{sessionMBean.fechaActual}" />
 									    </p:outputPanel>
-											<div class="form-group">
+											<h:panelGroup class="form-group" rendered="#{fn:length(sessionMBean.idiomasSoportados) > 1}">
 												<h:outputLabel for="idioma" value="#{sessionMBean.textos['idioma']}" class="label" />
 												<h:selectOneMenu id="idioma" value="#{sessionMBean.idiomaActual}" valueChangeListener="#{sessionMBean.cambioIdiomaActual}" styleClass="form-control">
 													<p:ajax update="@all" process="@this" />
 													<f:selectItems value="#{sessionMBean.idiomasSoportados}" />
 												</h:selectOneMenu>
-											</div>
+											</h:panelGroup>
 										</div>
 									</li>
 									<li><h:outputText value="#{sessionMBean.textos['empresa']}: #{sessionMBean.empresaActual.nombre}" /></li>
@@ -136,18 +136,13 @@
 			<a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
 				<h:outputText value="#{sessionMBean.textos['menu']}" />
 			</a>
-
-
-			<h1 id="destino_saltar_contenido">
+			<h2 id="destino_saltar_contenido">
 				<h:outputText value="#{nombre_pagina}" />
-			</h1>
+			</h2>
 			<p:messages id="pantalla" showDetail="false" autoUpdate="true" 
-				infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
-				infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
-				warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}"
-				errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" />
+				infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError" infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
+				warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" />
 			<ui:insert name="cuerpo">
-
 			</ui:insert>
 		</div>
 	</div>

@@ -10,7 +10,7 @@
     <f:view beforePhase="#{agrupacionMBean.beforePhaseModificarAgrupaciones}" >
 
       <p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
-        <p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarAgrupacion" zindex="2000" modal="true">
+        <p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarAgrupacion" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
           <f:facet name="header">
             <h:outputText value="#{sessionMBean.textos['confirmacion']}" />
           </f:facet>
@@ -18,7 +18,7 @@
             <h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_agrupacion']}" />
             <p:outputPanel styleClass="row panelBotonesPopUp">
               <p:outputPanel styleClass="col-sm-6">
-                <p:commandButton id="btn_eliminar1" actionListener="#{agrupacionMBean.eliminarAgrupacionYDatos}" styleClass="btn-primario btn-100 btn"
+                <p:commandButton id="btn_eliminar" actionListener="#{agrupacionMBean.eliminarAgrupacionYDatos}" styleClass="btn-primario btn-100 btn"
                   value="#{sessionMBean.textos['eliminar']}" update="formModificarAgrup:panelModificarAgrup" oncomplete="PF('eliminarAgrupacion').hide();" />
               </p:outputPanel>
               <p:outputPanel styleClass="col-sm-6">
@@ -38,10 +38,15 @@
 	            <ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
 	          </p:outputPanel>
 	
-	          <p:dataTable value="#{datoASSessionMBean.agrupaciones}" var="row" id="tablaAgrupacion" rows="25" rowIndexVar="rowIndex" paginator="true" 
-	            caption="#{sessionMBean.textos['listado_de_agrupaciones']}" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-	            emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" >
-	            
+	          <p:dataTable id="tablaAgrupacion" value="#{datoASSessionMBean.agrupaciones}" var="row" rowIndexVar="rowIndex" 
+	            caption="#{sessionMBean.textos['listado_de_agrupaciones']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+              paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+              paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+              paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+              paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+              paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+              paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+            >
 	            <p:column>
 	              <f:facet name="header">
 	                <h:outputText value="#{sessionMBean.textos['identificador']}" />

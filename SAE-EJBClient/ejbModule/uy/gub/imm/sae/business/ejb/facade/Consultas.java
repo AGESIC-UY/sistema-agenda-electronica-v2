@@ -22,6 +22,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
@@ -50,6 +51,7 @@ public interface Consultas {
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta);
 	
-	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException;
+	public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException;
+  public List<Map<String, Object>> consultarReservasPorTokenYDocumentoFull(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException;
 	public List<AtencionLLamadaReporteDT> consultarAtencionesPresencialesRecursoPeriodo(Recurso recurso, Date fechaDesde, Date fechaHasta);
 }

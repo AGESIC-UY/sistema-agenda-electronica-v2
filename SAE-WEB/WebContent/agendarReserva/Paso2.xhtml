@@ -11,9 +11,10 @@
 	<ui:param name="bodyId" value="paso2" />
 	<ui:param name="paso_numero" value="2" />
 	<ui:param name="paso_texto" value="#{sesionMBean.textos['seleccione_dia_y_hora']}" />
-   <ui:param name="hay_error" value="#{paso2MBean.errorInit}" />
+  <ui:param name="hay_error" value="#{paso2MBean.errorInit}" />
 	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-7" />
 	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4 col-sm-offset-1" />
+  <ui:param name="yaExisteReservaCamposClave" value="false" />
 
 	<ui:define name="descripcion">
      <p:outputPanel rendered="#{!paso2MBean.errorInit}">
@@ -23,15 +24,16 @@
 				<li><h:outputText value="#{sesionMBean.textos['debajo_del_calendario_horarios_disponibles']}" /></li>
 				<li><h:outputText value="#{sesionMBean.textos['seleccione_un_horario']}" /></li>
 			</ul>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false" value="#{paso2MBean.descripcion}"
-					rendered="#{paso2MBean.descripcion != null}" />
-			</div>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false"
-					value="#{paso2MBean.descripcionRecurso}"
-					rendered="#{paso2MBean.descripcionRecurso != null}" />
-			</div>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{paso2MBean.descripcion != null}">
+        <pre>
+				  <h:outputFormat escape="false" value="#{paso2MBean.descripcion}" />
+				</pre>
+			</p:outputPanel>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{paso2MBean.descripcionRecurso != null}">
+        <pre>
+  				<h:outputFormat escape="false" value="#{paso2MBean.descripcionRecurso}" />
+        </pre>
+			</p:outputPanel>
 		</p:outputPanel>
 	</ui:define>
 
@@ -52,9 +54,7 @@
 				<div class="form-group">
 					<h:outputText value="#{sesionMBean.textos['preferencia_de_horario']}" styleClass="label control-label col-sm-4 col-md-5"/>
 					<div class="col-sm-8 col-md-7">
-						<p:selectOneRadio id="filtroHorarios"
-							value="#{paso2MBean.filtroHorarios}" layout="responsive"
-							columns="1">
+						<p:selectOneRadio id="filtroHorarios" value="#{paso2MBean.filtroHorarios}" layout="responsive" columns="1">
 							<p:ajax update="seleccionHorario" />
 							<f:selectItem itemLabel="#{sesionMBean.textos['cualquier_horario']}" itemValue="MV" />
 							<f:selectItem itemLabel="#{sesionMBean.textos['solo_matutino']}" itemValue="SM" />
@@ -74,10 +74,8 @@
 						<p:outputLabel for="diaSelect" value="día seleccionado" styleClass="hidden" />
 						<h:inputText value="#{paso2MBean.diaSeleccionadoStr}" id="diaSelect" styleClass="hidden" />
 						<p:outputLabel for="diaSelectFormat" value="día seleccionado" styleClass="hidden" />
-						<h:inputText value="#{paso2MBean.fechaFormatSelect}" id="diaSelectFormat" styleClass="diaSeleccionado"
-						  readonly="true" onkeypress="return soloTabs(event);" />
-						<p:commandButton action="#{paso2MBean.seleccionarFecha}" value="enter" id="callBean" styleClass="hidden"
-							update="form:panelMatutina form:panelVespertina form:diaSelectFormat" />
+						<h:inputText value="#{paso2MBean.fechaFormatSelect}" id="diaSelectFormat" styleClass="diaSeleccionado" readonly="true" onkeypress="return soloTabs(event);" />
+						<p:commandButton action="#{paso2MBean.seleccionarFecha}" value="enter" id="callBean" styleClass="hidden" update="form:panelMatutina form:panelVespertina form:diaSelectFormat" />
 					</div>
 				</div>
 
@@ -91,27 +89,16 @@
 						<div class="col-sm-8 col-md-7">
 							<div class="row">
 								<div class="col-xs-6">
-									<p:panel header="#{sesionMBean.textos['por_la_manana']}"
-										id="panelMatutina" styleClass="horarioDisponible"
-										rendered="#{paso2MBean.filtroHorarios != 'SV'}">
-										<p:dataTable id="tablaMatutina"
-											value="#{paso2MBean.disponibilidadesMatutina}" var="row"
-											rendered="#{paso2MBean.hayDisponibilidadesMatutina}"
-											selection="#{paso2MBean.rowSelectMatutina}"
-											rowKey="#{row.data.id}"
-											caption="#{sesionMBean.textos['disponibilidades_en_la_manana']}"
-											captionClass="ui-helper-hidden-accessible"
-											emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
+									<p:panel header="#{sesionMBean.textos['por_la_manana']}" id="panelMatutina" styleClass="horarioDisponible" rendered="#{paso2MBean.filtroHorarios != 'SV'}">
+										<p:dataTable id="tablaMatutina" value="#{paso2MBean.disponibilidadesMatutina}" var="row" rendered="#{paso2MBean.hayDisponibilidadesMatutina}"
+											selection="#{paso2MBean.rowSelectMatutina}" rowKey="#{row.data.id}" caption="#{sesionMBean.textos['disponibilidades_en_la_manana']}"
+											captionClass="ui-helper-hidden-accessible" emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
 											rowStyleClass="#{paso2MBean.claseSegunCupo(row.data)}">
-
-											<p:ajax event="rowSelectRadio"
-												listener="#{paso2MBean.seleccionarHorarioMatutino}"
-												update="form:panelVespertina" />
+											<p:ajax event="rowSelectRadio" listener="#{paso2MBean.seleccionarHorarioMatutino}" update="form:panelVespertina" />
 											<p:column selectionMode="single" id="radioSel" />
 											<p:column>
 												<p:outputLabel for="radioSel" value="#{row.data.horaInicio}">
-													<f:convertDateTime type="time"
-														pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
+													<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
 												</p:outputLabel>
 												<h:outputText value=" - " styleClass="comentario" />
 											 	<h:outputText value="#{row.data.cupo} #{sesionMBean.textos['lugar']}" rendered="#{row.data.cupo == 1}" styleClass="comentario" />
@@ -121,27 +108,16 @@
 									</p:panel>
 								</div>
 								<div class="col-xs-6">
-									<p:panel header="#{sesionMBean.textos['por_la_tarde']}"
-										id="panelVespertina" styleClass="horarioDisponible"
-										rendered="#{paso2MBean.filtroHorarios != 'SM'}">
-										<p:dataTable id="tablaVespertina"
-											value="#{paso2MBean.disponibilidadesVespertina}" var="row"
-											rendered="#{paso2MBean.hayDisponibilidadesVespertina}"
-											selection="#{paso2MBean.rowSelectVespertina}"
-											rowKey="#{row.data.id}"
-											caption="#{sesionMBean.textos['disponibilidades_en_la_tarde']}"
-											captionClass="ui-helper-hidden-accessible"
-											emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
+									<p:panel header="#{sesionMBean.textos['por_la_tarde']}" id="panelVespertina" styleClass="horarioDisponible" rendered="#{paso2MBean.filtroHorarios != 'SM'}">
+										<p:dataTable id="tablaVespertina" value="#{paso2MBean.disponibilidadesVespertina}" var="row" rendered="#{paso2MBean.hayDisponibilidadesVespertina}"
+											selection="#{paso2MBean.rowSelectVespertina}" rowKey="#{row.data.id}" caption="#{sesionMBean.textos['disponibilidades_en_la_tarde']}"
+											captionClass="ui-helper-hidden-accessible" emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}"
 											rowStyleClass="#{paso2MBean.claseSegunCupo(row.data)}">
-
-											<p:ajax event="rowSelectRadio"
-												listener="#{paso2MBean.seleccionarHorarioVespertino}"  
-												update="form:panelMatutina" />
+											<p:ajax event="rowSelectRadio" listener="#{paso2MBean.seleccionarHorarioVespertino}" update="form:panelMatutina" />
 											<p:column id="radioSel" selectionMode="single" />
 											<p:column>
 												<p:outputLabel for="radioSel" value="#{row.data.horaInicio}">
-													<f:convertDateTime type="time"
-														pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
+													<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
 												</p:outputLabel>
                          <h:outputText value=" - " styleClass="comentario" />
                          <h:outputText value="#{row.data.cupo} #{sesionMBean.textos['lugar']}" rendered="#{row.data.cupo == 1}" styleClass="comentario" />
@@ -157,27 +133,26 @@
 			</div>
      </p:outputPanel>
 	</ui:define>
-
 	<ui:define name="botones">
      <p:outputPanel rendered="#{!paso2MBean.errorInit}">
 			<ul class="form-action-buttons">
 				<li class="action-buttons-primary">
 					<ul>
-						<li><h:commandButton styleClass="btn-lg btn-primario" id="botonCompletarDatos" name="botonCompletarDatos"
-								value="#{sesionMBean.textos['completar_datos']} #{paso2MBean.simboloSiguiente}"
-								action="#{paso2MBean.siguientePaso}"></h:commandButton></li>
+						<li>
+						  <h:commandButton styleClass="btn-lg btn-primario" id="botonCompletarDatos" name="botonCompletarDatos" 
+						    value="#{sesionMBean.textos['completar_datos']} #{paso2MBean.simboloSiguiente}" action="#{paso2MBean.siguientePaso}" />
+				    </li>
 					</ul>
 				</li>
 				<li class="action-buttons-second">
 					<ul>
-						<li class="float-left"><h:commandButton id="botonDetalleUbicacion" name="botonDetalleUbicacion"
-								styleClass="btn-lg btn-link"
-								value="#{paso2MBean.simboloAnterior} #{sesionMBean.textos['detalle_y_ubicacion']}"
-								action="#{paso2MBean.Paso1()}" /></li>
+						<li class="float-left">
+						  <h:commandButton id="botonDetalleUbicacion" name="botonDetalleUbicacion" styleClass="btn-lg btn-link" 
+								value="#{paso2MBean.simboloAnterior} #{sesionMBean.textos['detalle_y_ubicacion']}" action="#{paso2MBean.Paso1()}" />
+					  </li>
 					</ul>
 				</li>
 			</ul>
 	  </p:outputPanel>
 	</ui:define>
-
 </ui:composition>

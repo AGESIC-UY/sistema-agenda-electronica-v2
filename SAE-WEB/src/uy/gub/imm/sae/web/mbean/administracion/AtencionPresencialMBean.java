@@ -62,6 +62,7 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAutocompletarException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
@@ -490,8 +491,7 @@ public class AtencionPresencialMBean extends BaseMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		}
-		catch (ValidacionException e) {
+		}catch (ValidacionException e) {
 			//Faltan campos requeridos
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -502,12 +502,15 @@ public class AtencionPresencialMBean extends BaseMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch(BusinessException bEx) {
+		}catch(UserException uEx) {
+      addErrorMessage(sessionMBean.getTextos().get(uEx.getCodigoError()));
+      return null;
+    }catch(BusinessException bEx) {
       //Seguramente esto fue lanzado por una Accion
       addErrorMessage(bEx.getMessage());
       bEx.printStackTrace();
       return null;
-    } catch(Exception ex) {
+    }catch(Exception ex) {
 			addErrorMessage(sessionMBean.getTextos().get("sistema_en_mantenimiento"));
 			ex.printStackTrace();
 			return null;
@@ -548,29 +551,19 @@ public class AtencionPresencialMBean extends BaseMBean {
 
 		try {
 			List<String> idComponentes = new ArrayList<String>();
-
 			for (String nombre : datosReservaMBean.keySet()) {
 				idComponentes.add(nombre);
 			}
-
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
-
 			String[] arrParamIdServicio = claves.split("\\|");
-
 			for (String paramIdServicio : arrParamIdServicio) {
 				ServicioPorRecurso sRec = new ServicioPorRecurso();
 				sRec.setId(new Integer(paramIdServicio));
-
-				Map<String, Object> valoresAutocompletar = this.agendarReservasEJB
-						.autocompletarCampo(sRec, datosReservaMBean);
-
+				Map<String, Object> valoresAutocompletar = this.agendarReservasEJB.autocompletarCampo(sRec, datosReservaMBean);
 				for (String nombre : valoresAutocompletar.keySet()) {
-
-					datosReservaMBean.put(nombre,
-							valoresAutocompletar.get(nombre).toString());
+					datosReservaMBean.put(nombre,	valoresAutocompletar.get(nombre).toString());
 				}
 			}
-
 		} catch (ErrorAutocompletarException e) {
 			List<String> idComponentesError = new ArrayList<String>();
 			for (int i = 0; i < e.getCantCampos(); i++) {

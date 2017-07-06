@@ -7,7 +7,7 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificar}" >
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarValor" zindex="2000" modal="true">
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarValor" zindex="2000" modal="true" focus="elimValor:btn_eliminar">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
@@ -204,9 +204,15 @@
 								actionListener="#{datoASolicitarValoresMBean.mostrarCrearValor}" update=":formModif2" />
 						</p:outputPanel>
 	
-						<p:dataTable value="#{datoASSessionMBean.valoresDelDato}" var="row" id="tablaValores" rows="25" rowKeyVar="rowIndex" rowKeyConverter="conversor" paginator="true"
-							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" rowIndexVar="rowIndex" 
-							caption="#{sessionMBean.textos['valores_posibles_para_el_dato']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+						<p:dataTable id="tablaValores" value="#{datoASSessionMBean.valoresDelDato}" var="row" rowKeyVar="rowIndex" rowKeyConverter="conversor" rowIndexVar="rowIndex"
+							caption="#{sessionMBean.textos['valores_posibles_para_el_dato']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+              paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+              paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+              paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera_']}"
+              paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+              paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+              paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+							>
 							<p:column>
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['etiqueta']}" />

@@ -9,7 +9,7 @@
 		<f:view beforePhase="#{datoASolicitarMBean.beforePhaseModificarConsultar}" >
 
 			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
-				<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarDato" zindex="2000" modal="true">
+				<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarDato" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
 					<f:facet name="header">
 						<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 					</f:facet>
@@ -37,9 +37,15 @@
 						<ui:include src="/administracion/datoASolicitar/verDisenioFormulario.xhtml" />
 					</p:outputPanel>
 
-					<p:dataTable value="#{datoASSessionMBean.datosASolicitar}" var="row" id="tablaDatosSolicitarMod" rows="25" paginator="true" rowIndexVar="rowIndex"
-						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" >
-						
+					<p:dataTable id="tablaDatosSolicitarMod" value="#{datoASSessionMBean.datosASolicitar}" var="row" rowIndexVar="rowIndex"
+						emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" 
+            paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+            paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+            paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+            paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+            paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+  				>
 						<p:column>
 							<f:facet name="header">
 								<h:outputText value="#{sessionMBean.textos['identificador']}"></h:outputText>

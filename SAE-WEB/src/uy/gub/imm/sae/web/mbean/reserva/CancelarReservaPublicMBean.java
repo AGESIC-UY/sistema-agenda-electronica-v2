@@ -552,7 +552,6 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 		this.hayErrorInit = hayErrorInit;
 	}
 
-	
 	public String getMostrar() {
 		return mostrar;
 	}

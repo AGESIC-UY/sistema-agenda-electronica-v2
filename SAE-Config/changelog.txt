@@ -148,3 +148,27 @@ Versión 2.0.3 (2017-05-03)
 * Se corrigió un problema por el cual el atributo lang del tag <html> no mostraba el idioma correcto al cambiarlo, tanto en la reserva pública como privada.
 * Se cambió la forma de verificar la validez de las fechas para hacerlo del lado del servidor como el resto de los campos y mostrar los errores todos juntos, y también para interpretar mejor las fechas incorrectas.
 * Se cambiaron algunos estilos para adecuarlos a los requerimientos de accesibilidad y usabilidad.
+
+Versión 2.0.4 (2017-06-06)
+* Se cambiaron algunos textos.
+* Se cambiaron los paginadores de la tablas para no utilizar íconos y en su lugar usar textos (requirió cambios en PrimeFaces 5.3)
+* Se corrigió el problema por el cual los pop-ups que solicitan confirmación no obtenían el foco para permitir seleccionar la opción deseada con el teclado.
+* Se cambió la funcionalidad para modificar cupos de un día para quitar el botón "Continuar" y hacer la visualización del formulario solo dependiente de los datos seleccionados. 
+* Se cambiaron los procesos de reenvío de trazas y novedades para sincronizar la ejecución de múltiples nodos y además reutilizar tokens STS.
+* Se cambió el código que integra la aplicación con el sistema de TramitesUy.
+* Se introdujo la posibilidad de configurar la URL final de los servicios web de Trazabilidad, TrámitesUy y Novedades mediante la base de datos .
+* En la pantalla de selección de agenda y recursos las opciones disponibles ahora se orden en forma alfabética.
+* En el listado de llamadas realizadas se añadió una columna para indicar si la persona llamada asistió o no.
+* Se añadió el reporte de atención presencial a la lista de reportes que pueden emitir los usuarios con el rol por recurso "Generador de reportes".
+* Se quitó en la configuración por defecto la protección de CDA (cuando está habilitada) para los servicios web REST.
+* Se corrigió un bug que provocaba que al intentar guardar una agenda luego de vaciar la lista de trámites se perdiese información sobre los trámites seleccionados (y entonces no permitía guardar la agenda).
+* Se corrigió un bug por el cual no se cargaban las preguntas de captcha si el idioma por defecto de la JVM coincide con el idioma por defecto del usuario (normalmente "es").
+* Se estableció un timeout de 30 minutos para los procesos vinculados al reenvío y cierre de trazas en el sistema de Trazabilidad.
+* En la reserva pública se oculta la lista de selección de idioma si solo hay un idioma disponible para la agenda.
+* En la interfaz de administración se oculta la lista de selección de idioma si solo hay un idioma disponible.
+* En la interfaz de administración se oculta la lista de selección de empresa si solo hay una disponible para el usuario.
+* Se añadió el nombre del recurso y el código de cancelación como datos de salida del servicio web REST de consulta de reservas por documento.
+* En la página final de la reserva pública según se muestre el botón "Contiuar con el trámite" o no se aplican estilos diferentes a los botones y links.
+* Se ajustaron algunos estilos CSS que cambiaron en el formulario tipo.
+* Se cambió el mensaje desplegado cuando se selecciona un recurso que no tiene disponibilidades (pasó de error a advertencia, y se utiliza un título y texto específico).
+* Se añadió el servicio web REST de consultas de todos los datos de todas las reservas de una persona identificada por su documento.

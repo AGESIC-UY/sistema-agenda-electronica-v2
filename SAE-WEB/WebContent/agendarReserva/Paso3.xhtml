@@ -11,21 +11,26 @@
 	<ui:param name="bodyId" value="paso3" />
 	<ui:param name="paso_numero" value="3" />
 	<ui:param name="paso_texto" value="#{sesionMBean.textos['datos_necesarios']}" />
-   <ui:param name="hay_error" value="#{paso3MBean.errorInit}" />
+  <ui:param name="hay_error" value="#{paso3MBean.errorInit}" />
 	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-8" />
 	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
+  <ui:param name="yaExisteReservaCamposClave" value="#{paso3MBean.yaExisteReservaCamposClave}" />
 
 	<ui:define name="descripcion">
      <p:outputPanel rendered="#{!paso3MBean.errorInit}">
 			<ul class="tips pasoTexto">
 				<li><h:outputText value="#{sesionMBean.textos['datos_marcados_obligatorios']}." /></li>
 			</ul>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false" value="#{paso3MBean.descripcion}" rendered="#{paso3MBean.descripcion != null}" />
-			</div>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false" value="#{paso3MBean.descripcionRecurso}" rendered="#{paso3MBean.descripcionRecurso != null}" />
-			</div>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{paso3MBean.descripcion != null}">
+			  <pre>
+				  <h:outputFormat escape="false" value="#{paso3MBean.descripcion}" />
+				</pre>
+			</p:outputPanel>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{paso3MBean.descripcionRecurso != null}">
+        <pre>
+  				<h:outputFormat escape="false" value="#{paso3MBean.descripcionRecurso}" />
+        </pre>
+			</p:outputPanel>
 		</p:outputPanel>
 	</ui:define>
 
@@ -51,26 +56,22 @@
 
 	<ui:define name="contenido">
 		<p:outputPanel rendered="#{!paso3MBean.errorInit}">
-       
-       <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3MBean.tramites}">
-        <fieldset>
-          <legend>
-            <h:outputText value="#{sesionMBean.textos['tramite']}" />
-          </legend>
-          <p:outputPanel styleClass="form-group">
-            <h:outputLabel value="#{sesionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
-            <p:outputPanel styleClass="col-sm-9">
-              <h:selectOneMenu id="tramite" value="#{paso3MBean.tramiteCodigo}" styleClass="form-control">
-                <f:selectItems value="#{paso3MBean.tramites}" />
-              </h:selectOneMenu>
-               <h:message for="tramite" styleClass="mensajeError" />
-            </p:outputPanel>
-          </p:outputPanel>
-        </fieldset>
-       </p:outputPanel>
-       
-       
-       
+	    <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3MBean.tramites}">
+	     <fieldset>
+	       <legend>
+	         <h:outputText value="#{sesionMBean.textos['tramite']}" />
+	       </legend>
+	       <p:outputPanel styleClass="form-group">
+	         <h:outputLabel value="#{sesionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+	         <p:outputPanel styleClass="col-sm-9">
+	           <h:selectOneMenu id="tramite" value="#{paso3MBean.tramiteCodigo}" styleClass="form-control">
+	             <f:selectItems value="#{paso3MBean.tramites}" />
+	           </h:selectOneMenu>
+	            <h:message for="tramite" styleClass="mensajeError" />
+	         </p:outputPanel>
+	       </p:outputPanel>
+	     </fieldset>
+	    </p:outputPanel>
 			<p:outputPanel id="formulario">
 				<h:panelGroup binding="#{paso3MBean.campos}" layout="block" />
 			</p:outputPanel>

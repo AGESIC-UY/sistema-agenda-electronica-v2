@@ -8,7 +8,7 @@
     <module>cda</module>
     <param><param-name>debug</param-name><param-value>false</param-value></param>
     <param><param-name>relaxValidityPeriod</param-name><param-value>true</param-value></param>
-    <param><param-name>idpUrlLogin</param-name><param-value>https://test-eid.portal.gub.uy:443/idp/profile/SAML2/POST/SSO</param-value></param>
+    <param><param-name>idpUrlLogin</param-name><param-value>https://test-eid.portal.gub.uy:443/v1.1/idp/profile/SAML2/POST/SSO</param-value></param>
     <param><param-name>providerId</param-name><param-value></param-value></param>
     <param><param-name>spReturnUrl</param-name><param-value></param-value></param>
     <param><param-name>returnPath</param-name><param-value>/cda</param-value></param>
@@ -19,7 +19,7 @@
     <param><param-name>truststorePass</param-name><param-value></param-value></param>
     <param><param-name>validarFirma</param-name><param-value>true</param-value></param>
     <param><param-name>restrictedUrls</param-name><param-value>/sae/*</param-value></param>
-    <param><param-name>excludedUrls</param-name><param-value>/sae/javax.faces.resource/*,/sae/resources/*,/sae/recursos/*,/sae/mapa/*</param-value></param>
+    <param><param-name>excludedUrls</param-name><param-value>/sae-admin/javax.faces.resource/*,/sae-admin/resources/*,/sae-admin/recursos/*,/sae-admin/mapa/*,/sae-admin/rest</param-value></param>
     <param><param-name>defaultRoles</param-name><param-value>usuario_autenticado</param-value></param>
     <param><param-name>getParameterMethod</param-name><param-value>GETPARAMETER</param-value></param>
     <param><param-name>setPrincipalEnable</param-name><param-value>true</param-value></param>
@@ -27,7 +27,7 @@
     <param><param-name>contextAttribute</param-name><param-value>CONTEXTO_VALVULA</param-value></param>
     <param><param-name>attributeMappings</param-name><param-value>sae.PrimerNombre=Nombre,sae.PrimerApellido=Apellido</param-value></param>
     <param><param-name>logoutPath</param-name><param-value>/logoutcda</param-value></param>
-    <param><param-name>idpUrlLogout</param-name><param-value>https://test-eid.portal.gub.uy/idp/profile/SAML2/Redirect/SLO</param-value></param>
+    <param><param-name>idpUrlLogout</param-name><param-value>https://test-eid.portal.gub.uy:443/v1.1/idp/profile/SAML2/Redirect/SLO</param-value></param>
     <param><param-name>sqlDatasource</param-name><param-value>java:/postgres-sae-global-ds</param-value></param>
     <param><param-name>sqlSchemaResolverQuery</param-name><param-value>select datasource from global.ae_empresas where id={e}</param-value></param>
     <param><param-name>sqlCDARequiredQuery</param-name><param-value>select con_cda from {esquema}.ae_agendas where id={a}</param-value></param>
@@ -39,7 +39,7 @@
     <module>cda</module>
     <param><param-name>debug</param-name><param-value>false</param-value></param>
     <param><param-name>relaxValidityPeriod</param-name><param-value>true</param-value></param>
-    <param><param-name>idpUrlLogin</param-name><param-value>https://test-eid.portal.gub.uy:443/idp/profile/SAML2/POST/SSO</param-value></param>
+    <param><param-name>idpUrlLogin</param-name><param-value>https://test-eid.portal.gub.uy:443/v1.1/idp/profile/SAML2/POST/SSO</param-value></param>
     <param><param-name>providerId</param-name><param-value>http://agenda.sofis.com.uy/sp/admin</param-value></param>
     <param><param-name>spReturnUrl</param-name><param-value>https://agenda2.sofis.com.uy:13002/sae-admin/cda</param-value></param>
     <param><param-name>returnPath</param-name><param-value>/cda</param-value></param>
@@ -58,7 +58,7 @@
     <param><param-name>contextAttribute</param-name><param-value>CONTEXTO_VALVULA</param-value></param>
     <param><param-name>attributeMappings</param-name><param-value>sae-admin.uid=codigocda,sae-admin.Documento=documentocda</param-value></param>
     <param><param-name>logoutPath</param-name><param-value>/logoutcda</param-value></param>
-    <param><param-name>idpUrlLogout</param-name><param-value>https://test-eid.portal.gub.uy/idp/profile/SAML2/Redirect/SLO</param-value></param>
+    <param><param-name>idpUrlLogout</param-name><param-value>https://test-eid.portal.gub.uy:443/v1.1/idp/profile/SAML2/Redirect/SLO</param-value></param>
     <param><param-name>sqlDatasource</param-name><param-value></param-value></param>
     <param><param-name>sqlSchemaResolverQuery</param-name><param-value></param-value></param>
     <param><param-name>sqlCDARequiredQuery</param-name><param-value></param-value></param>

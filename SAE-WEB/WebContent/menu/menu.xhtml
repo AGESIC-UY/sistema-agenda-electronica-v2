@@ -13,7 +13,7 @@
 				</h1>
 			</div>
 			<div class="form-horizontal empresa">
-				<div class="form-group">
+				<h:panelGroup class="form-group" rendered="#{fn:length(sessionMBean.empresasUsuario) > 1}">
 					<p:outputLabel for="empresa" value="#{sessionMBean.textos['empresa']}" styleClass="col-sm-4 control-label" />
 					<div class="col-sm-8">
 						<h:selectOneMenu id="empresa" value="#{sessionMBean.empresaActualId}" valueChangeListener="#{sessionMBean.cambioEmpresa}" styleClass="form-control">
@@ -21,7 +21,7 @@
 							<f:selectItems value="#{sessionMBean.empresasUsuario}" />
 						</h:selectOneMenu>
 					</div>
-				</div>
+				</h:panelGroup>
 			</div>
 			<div class="ui-helper-hidden-accessible">
 				<h2>
@@ -92,7 +92,7 @@
 					<p:menuitem value="#{sessionMBean.textos['reporte_asistencias']}" icon="ui-icon-search" url="/administracion/consulta/consultarAsistenciaPeriodo.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['reporte_atencion_funcionario']}" icon="ui-icon-search" url="/administracion/consulta/consultarAtencionFuncPeriodo.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}" />
 					<p:menuitem value="#{sessionMBean.textos['reporte_tiempo_atencion_funcionario']}" icon="ui-icon-search" url="/administracion/consulta/consultarTiempoAtencionFun.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}" />
-          <p:menuitem value="#{sessionMBean.textos['reporte_atencion_presencial']}" icon="ui-icon-search" url="/administracion/consulta/consultarAtencionPresencialPeriodo.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}" />
+          <p:menuitem value="#{sessionMBean.textos['reporte_atencion_presencial']}" icon="ui-icon-search" url="/administracion/consulta/consultarAtencionPresencialPeriodo.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR') or sessionMBean.tieneRol('AE_R_GENERADORREPORTES_X_RECURSO')}" />
 				</p:submenu>
 			</p:panelMenu>
       <div class="version">

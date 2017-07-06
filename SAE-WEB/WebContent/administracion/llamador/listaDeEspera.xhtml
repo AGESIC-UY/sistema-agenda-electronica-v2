@@ -101,6 +101,7 @@
 										<p:column headerText="#{sessionMBean.textos['documento']}" />
                     <p:column headerText="#{sessionMBean.textos['tramite']}" />
 										<p:column headerText="#{sessionMBean.textos['numero_de_puesto']}" styleClass="colPuesto"/>
+                    <p:column headerText="#{sessionMBean.textos['asistio']}" />
 										<p:column headerText="" styleClass="colLlamar"/>
 									</p:row>
 								</p:columnGroup>
@@ -134,6 +135,9 @@
 									<p:column styleClass="colPuesto">
 										<h:outputText value="#{espera.reserva.puestoLlamada}" rendered="#{espera.reserva.puestoLlamada != null}" />
 									</p:column>
+                  <p:column>
+                    <h:outputText value="#{espera.reserva.asistio}" converter="booleanConverter" rendered="#{espera.reserva.asistio != null}" />
+                  </p:column>
 									<p:column>
 										<p:commandLink id="volverALlamar" value="#{sessionMBean.textos['volver_a_llamar']}" rendered="#{espera.reserva.estado == 'U'}"
 											actionListener="#{listaDeEsperaMBean.llamar}" update="form1:todo" >

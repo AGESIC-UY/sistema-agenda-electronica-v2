@@ -26,6 +26,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Locale;
 import java.util.TimeZone;
 
 public class Utiles {
@@ -35,6 +36,7 @@ public class Utiles {
 
   //Formato de la fecha generada por Date.toString() para poder volver a comvertirlo
   private static final DateFormat FORMATEADOR_BASICO_FECHA = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+  private static final DateFormat FORMATEADOR_BASICO_FECHA_INGLES = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
   
   
 	public static Integer DIA = 1;
@@ -82,7 +84,13 @@ public class Utiles {
 	}
 	
 	public static Date stringToDate(String sFecha) throws ParseException {
-    return FORMATEADOR_BASICO_FECHA.parse(sFecha);
+	  try {
+	    //Se intenta parsear la fecha en el idioma por defecto de la instalación
+	    return FORMATEADOR_BASICO_FECHA.parse(sFecha);
+	  }catch(Exception ex) {
+	    //Si no se puede, se intenta parsearla en inglés (el calendar siempre la devuelve en inglés)
+	    return FORMATEADOR_BASICO_FECHA_INGLES.parse(sFecha);
+	  }
 	}
 	
 	public static String date2string(Date fecha, Integer formato) {

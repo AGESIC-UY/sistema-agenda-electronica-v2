@@ -19,5 +19,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="/SAE-Config/libs/jasperreports-3.0.0.jar"/>
 	<classpathentry kind="lib" path="WebContent/WEB-INF/lib/catalina-6.0.16.jar"/>
+	<classpathentry kind="lib" path="/SAE-Config/libs/gson-2.8.0.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

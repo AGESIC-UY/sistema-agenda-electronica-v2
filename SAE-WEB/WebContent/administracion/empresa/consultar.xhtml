@@ -7,7 +7,8 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{empresaMBean.beforePhaseConsultar}" >
-			<p:dialog closable="false" resizable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarEmpresa" zindex="2000" modal="true" dynamic="true">
+			<p:dialog closable="false" resizable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarEmpresa" zindex="2000" modal="true" dynamic="true" 
+        focus="#{empresaMBean.ultimaEmpresaEliminar? 'elimRec:btn_eliminar' : 'elimRec:btn_cancelar'}">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
@@ -26,16 +27,22 @@
 								onclick="PF('eliminarEmpresa').hide();" styleClass="btn-primario btn-100 btn" />
 						</p:outputPanel>
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton onclick="PF('eliminarEmpresa').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
+							<p:commandButton id="btn_cancelar" onclick="PF('eliminarEmpresa').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
 						</p:outputPanel>
 					</p:outputPanel>
 				</h:form>
 			</p:dialog>
 			
 			<h:form id="form">
-				<p:dataTable value="#{empresaMBean.empresasSeleccion}" var="row" id="tablaEmpresas" rows="25" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-					binding="#{empresaMBean.empresasDataTable}" caption="#{sessionMBean.textos['listado_de_empresas']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+        <p:dataTable id="tablaEmpresas" value="#{empresaMBean.empresasSeleccion}" var="row" binding="#{empresaMBean.empresasDataTable}" 
+          caption="#{sessionMBean.textos['listado_de_empresas']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+          paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}"
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+        >
 					<p:column>
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['identificador']}" />

@@ -12,18 +12,23 @@
    <ui:param name="hay_error" value="false" />
 	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-8" />
 	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
+  <ui:param name="yaExisteReservaCamposClave" value="#{paso3AdminMBean.yaExisteReservaCamposClave}" />
 
 	<ui:define name="descripcion">
      <f:view beforePhase="#{paso3AdminMBean.beforePhase}" >
 			<ul class="tips pasoTexto">
 				<li><h:outputText value="#{sessionMBean.textos['datos_marcados_obligatorios']}." /></li>
 			</ul>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcion}" rendered="#{paso3AdminMBean.descripcion != null}"/>
-			</div>
-			<div class="descripcionAgenda">
-				<h:outputFormat escape="false" value="#{paso3AdminMBean.descripcionRecurso}" rendered="#{paso3AdminMBean.descripcionRecurso != null}" />
-			</div>
+			<p:outputPanel styleClass="descripcionAgenda">
+        <pre>
+				  <h:outputFormat escape="false" value="#{paso3AdminMBean.descripcion}" rendered="#{paso3AdminMBean.descripcion != null}"/>
+        </pre>
+			</p:outputPanel>
+			<p:outputPanel styleClass="descripcionAgenda">
+        <pre>
+				  <h:outputFormat escape="false" value="#{paso3AdminMBean.descripcionRecurso}" rendered="#{paso3AdminMBean.descripcionRecurso != null}" />
+        </pre>
+			</p:outputPanel>
 		</f:view>
 	</ui:define>
 
@@ -47,24 +52,22 @@
 
 	<ui:define name="contenido">
 		<p:outputPanel>
-      
-       <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3AdminMBean.tramites}">
-         <fieldset>
-           <legend>
-             <h:outputText value="#{sessionMBean.textos['tramite']}" />
-           </legend>
-           <p:outputPanel styleClass="form-group">
-             <h:outputLabel value="#{sessionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
-             <p:outputPanel styleClass="col-sm-9">
-               <h:selectOneMenu id="tramite" value="#{paso3AdminMBean.tramiteCodigo}" styleClass="form-control">
-                 <f:selectItems value="#{paso3AdminMBean.tramites}" />
-               </h:selectOneMenu>
-               <h:message for="tramite" styleClass="mensajeError" />
-             </p:outputPanel>
-           </p:outputPanel>
-         </fieldset>
-       </p:outputPanel>
-      
+      <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3AdminMBean.tramites}">
+        <fieldset>
+          <legend>
+            <h:outputText value="#{sessionMBean.textos['tramite']}" />
+          </legend>
+          <p:outputPanel styleClass="form-group">
+            <h:outputLabel value="#{sessionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+            <p:outputPanel styleClass="col-sm-9">
+              <h:selectOneMenu id="tramite" value="#{paso3AdminMBean.tramiteCodigo}" styleClass="form-control">
+                <f:selectItems value="#{paso3AdminMBean.tramites}" />
+              </h:selectOneMenu>
+              <h:message for="tramite" styleClass="mensajeError" />
+            </p:outputPanel>
+          </p:outputPanel>
+        </fieldset>
+      </p:outputPanel>
       
 			<p:outputPanel id="formulario">
 				<h:panelGroup binding="#{paso3AdminMBean.campos}" layout="block"/>
@@ -105,7 +108,8 @@
 			<li class="action-buttons-primary">
 				<ul>
 					<li>
-					  <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['confirmar_reserva']} #{paso3AdminMBean.simboloSiguiente}" action="#{paso3AdminMBean.confirmarReserva}" />
+					  <h:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['confirmar_reserva']} #{paso3AdminMBean.simboloSiguiente}" 
+					    action="#{paso3AdminMBean.confirmarReserva}" />
 				  </li>
 				</ul>
 			</li>

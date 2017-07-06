@@ -28,8 +28,10 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.component.html.HtmlSelectBooleanCheckbox;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
+import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 
@@ -70,9 +72,6 @@ public class DisponibilidadMBean extends BaseMBean {
 	private DataTable tablaDispVespertinaModif;
 	private int tipoOperacion;
 	private String valor;
-	private boolean selectAllMatutino;
-	private boolean selectAllVespertino;
-	private String horasInicio;
 	
 	@PostConstruct
 	public void initDisponibilidad(){
@@ -430,9 +429,6 @@ public class DisponibilidadMBean extends BaseMBean {
 		} else{
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), MSG_ID);
 		}
-		this.selectAllMatutino = false;
-		this.selectAllVespertino = false;
-		this.horasInicio = null;
 		this.tipoOperacion = 1;
 		this.valor = "0";
 		dispSessionMBean.setModificarTodos(false);
@@ -531,98 +527,37 @@ public class DisponibilidadMBean extends BaseMBean {
 		configurarDisponibilidadesDelDiaModif();
 		dispSessionMBean.setModificarTodos(false);
 		addInfoMessage(sessionMBean.getTextos().get("disponibilidades_modificadas"), MSG_ID);
-		this.selectAllVespertino = false;
-		this.selectAllMatutino	= false;
-		this.horasInicio = null;
 		this.tipoOperacion = 1;
 		this.valor = "0";
 		dispSessionMBean.setModificarTodos(false);
 	}
 	
-	public void controlSelectDisponibilidades(ActionEvent event)
-	{
-		limpiarMensajesError();
-		
-		horasInicio = null;
-		RowList<DisponibilidadReserva> listDispReservaVespertina = dispSessionMBean.getDisponibilidadesDelDiaVespertinaModif();
-		RowList<DisponibilidadReserva> listDispReservaMatutina = dispSessionMBean.getDisponibilidadesDelDiaMatutinaModif();
-		boolean error = true;
-		SimpleDateFormat format = new SimpleDateFormat(sessionMBean.getFormatoHora());
-		GregorianCalendar cal = new GregorianCalendar();
-		if (listDispReservaMatutina != null) {
-			for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
-				if (row.getData().isSeleccionado()) {
-					error = false;
-					if (horasInicio==null) {
-						cal.setTime(row.getData().getHoraInicio());   
-				    horasInicio = format.format(cal.getTime());
-					}else {
-						cal.setTime(row.getData().getHoraInicio());   
-						horasInicio = horasInicio +", "+format.format(cal.getTime());
-					}
-					
-				}
-			}
-			if(listDispReservaVespertina!=null) {
-				for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-					if (row.getData().isSeleccionado()) {
-						error = false;
-						if (horasInicio==null) {
-							cal.setTime(row.getData().getHoraInicio());   
-							horasInicio = format.format(cal.getTime());
-						}else {
-							cal.setTime(row.getData().getHoraInicio());   
-							horasInicio = horasInicio+", "+format.format(cal.getTime());
-						}
-					}
-				}
-			}
-			
-		}else if(listDispReservaVespertina!=null) {
-			for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-				if (row.getData().isSeleccionado()) {
-					error = false;
-					if (horasInicio==null) {
-						cal.setTime(row.getData().getHoraInicio());   
-				        horasInicio = format.format(cal.getTime());
-					}else {
-						cal.setTime(row.getData().getHoraInicio());   
-						horasInicio = format.format(cal.getTime()) +","+ horasInicio;
-					}
-				}
-			}
-		}
-		
-		if(error) {
-			addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_una_disponibilidad"), MSG_ID);
-		}
-		
-	}
-
-	public void seleccionarTodosMatutino() {
-		RowList<DisponibilidadReserva> listDispReservaMatutina = dispSessionMBean.getDisponibilidadesDelDiaMatutinaModif();
-		if (this.selectAllMatutino) {
-			for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
-				row.getData().setSeleccionado(true);
-			}
-		}else {
-			for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
-				row.getData().setSeleccionado(false);
-			}
-		}
+	public void seleccionarTodosMatutino(AjaxBehaviorEvent event) {
+	  limpiarMensajesError();
+	  HtmlSelectBooleanCheckbox check = (HtmlSelectBooleanCheckbox)event.getSource();
+	  Boolean isChecked = (Boolean)check.getValue();
+    RowList<DisponibilidadReserva> listDispReservaMatutina = dispSessionMBean.getDisponibilidadesDelDiaMatutinaModif();
+    if(listDispReservaMatutina != null) {
+      for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
+        row.getData().setSeleccionado(isChecked);
+      }
+    }
 	}
 	
-	public void seleccionarTodosVespertino() {
-		RowList<DisponibilidadReserva> listDispReservaVespertina = dispSessionMBean.getDisponibilidadesDelDiaVespertinaModif();
-		if (this.selectAllVespertino) {
-			for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-				row.getData().setSeleccionado(true);
-			}
-		}else {
-			for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-				row.getData().setSeleccionado(false);
-			}
-		}
+	public void seleccionarTodosVespertino(AjaxBehaviorEvent event) {
+    limpiarMensajesError();
+    HtmlSelectBooleanCheckbox check = (HtmlSelectBooleanCheckbox)event.getSource();
+    Boolean isChecked = (Boolean)check.getValue();
+    RowList<DisponibilidadReserva> listDispReservaVespertina = dispSessionMBean.getDisponibilidadesDelDiaVespertinaModif();
+    if(listDispReservaVespertina != null) {
+      for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
+        row.getData().setSeleccionado(isChecked);
+      }
+    }
+	}
+	
+	public void seleccionarUno() {
+	  limpiarMensajesError();
 	}
 	
 	public int getTipoOperacion() {
@@ -641,29 +576,39 @@ public class DisponibilidadMBean extends BaseMBean {
 		this.valor = valor;
 	}
 
-
-	public boolean isSelectAllMatutino() {
-		return selectAllMatutino;
-	}
-
-	public void setSelectAllMatutino(boolean selectAllMatutino) {
-		this.selectAllMatutino = selectAllMatutino;
-	}
-
-	public boolean isSelectAllVespertino() {
-		return selectAllVespertino;
-	}
-
-	public void setSelectAllVespertino(boolean selectAllVespertino) {
-		this.selectAllVespertino = selectAllVespertino;
-	}
-
 	public String getHorasInicio() {
-		return horasInicio;
-	}
-
-	public void setHorasInicio(String horasInicio) {
-		this.horasInicio = horasInicio;
+    String horasInicio = null;
+    RowList<DisponibilidadReserva> listDispReservaVespertina = dispSessionMBean.getDisponibilidadesDelDiaVespertinaModif();
+    RowList<DisponibilidadReserva> listDispReservaMatutina = dispSessionMBean.getDisponibilidadesDelDiaMatutinaModif();
+    SimpleDateFormat format = new SimpleDateFormat(sessionMBean.getFormatoHora());
+    GregorianCalendar cal = new GregorianCalendar();
+    if (listDispReservaMatutina != null) {
+      for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
+        if (row.getData().isSeleccionado()) {
+          if (horasInicio==null) {
+            cal.setTime(row.getData().getHoraInicio());   
+            horasInicio = format.format(cal.getTime());
+          }else {
+            cal.setTime(row.getData().getHoraInicio());   
+            horasInicio = horasInicio +", "+format.format(cal.getTime());
+          }
+        }
+      }
+    }
+    if(listDispReservaVespertina!=null) {
+      for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
+        if (row.getData().isSeleccionado()) {
+          if (horasInicio==null) {
+            cal.setTime(row.getData().getHoraInicio());   
+            horasInicio = format.format(cal.getTime());
+          }else {
+            cal.setTime(row.getData().getHoraInicio());   
+            horasInicio = horasInicio +", "+format.format(cal.getTime());
+          }
+        }
+      }
+    }
+    return horasInicio;
 	}
 
 }

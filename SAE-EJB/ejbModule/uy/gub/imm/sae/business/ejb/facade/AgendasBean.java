@@ -131,7 +131,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 		if (existeAgendaPorNombre(a) ) {
 			throw new UserException("ya_existe_una_agenda_con_el_nombre_especificado");
 		}
-		
   	agendaActual.setNombre(a.getNombre());
   	agendaActual.setDescripcion(a.getDescripcion());
   	agendaActual.setTimezone(a.getTimezone());
@@ -139,7 +138,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
   	agendaActual.setConCda(a.getConCda());
   	agendaActual.setConTrazabilidad(a.getConTrazabilidad());
   	agendaActual.setPublicarNovedades(a.getPublicarNovedades());
-    	
   	for(TextoAgenda viejo : agendaActual.getTextosAgenda().values()) {
   		entityManager.remove(viejo);
   	}
@@ -162,7 +160,6 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	  		entityManager.persist(nuevo);
   		}
   	}
-  	
   	//Eliminar los trámites que fueron quitados
   	for(TramiteAgenda tramite : agendaActual.getTramites()) {
   	  if(!a.getTramites().contains(tramite)) {

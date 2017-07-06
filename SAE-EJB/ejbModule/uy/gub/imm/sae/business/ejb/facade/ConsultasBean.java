@@ -38,6 +38,8 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
+import org.apache.log4j.Logger;
+
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.common.Utiles;
@@ -62,6 +64,8 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;
+	
+  static Logger logger = Logger.getLogger(ConsultasBean.class);
 	
 	/**
 	 * Obtiene una reserva por su identificador.
@@ -315,7 +319,6 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		}
 		String consulta = selectStr + fromStr + whereStr ;
     consulta = consulta + ") ORDER BY reserva.fechaCreacion DESC ";
-
     Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTime().getTime()));
 		List<Reserva> reservas = (List<Reserva>)entityManager.createQuery(consulta)
@@ -796,7 +799,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	 * servicio tendrá que solicitar un token para cada empresa).
 	 * No considera las reservas correspondientes a disponibilidades presenciales.
 	 */
-	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException{
+	public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException{
 			
 		if(idAgenda==null && idRecurso==null) {
 			throw new UserException("debe_especificar_la_agenda_o_el_recurso");
@@ -807,20 +810,20 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			String query = "SELECT t FROM Token t WHERE t.token=:token";
 			Token oToken = (Token) globalEntityManager.createQuery(query).setParameter("token", token).getSingleResult();
 			String esquema = oToken.getEmpresa().getDatasource();
-			query = "SELECT dis.id, dis.fecha, dis.hora_inicio "
+			query = "SELECT dis.hora_inicio as reservaFechaHora, rec.nombre as nombreRecurso, res.codigo_seguridad as codigoCancelacion"
 					+ " FROM {esquema}.ae_reservas res "
 					+ " JOIN {esquema}.ae_datos_reserva dr1 ON dr1.aers_id=res.id "
 					+ " JOIN {esquema}.ae_datos_a_solicitar ds1 ON ds1.id=dr1.aeds_id "
 					+ " JOIN {esquema}.ae_datos_reserva dr2 ON dr2.aers_id=res.id "
 					+ " JOIN {esquema}.ae_datos_a_solicitar ds2 ON ds2.id=dr2.aeds_id "
 					+ " JOIN {esquema}.ae_reservas_disponibilidades rd ON rd.aers_id=res.id "
-					+ " JOIN {esquema}.ae_disponibilidades dis ON dis.id=rd.aedi_id ";
+					+ " JOIN {esquema}.ae_disponibilidades dis ON dis.id=rd.aedi_id "
+			    + " JOIN {esquema}.ae_recursos rec ON rec.id=dis.aere_id ";
 			//Si se tiene el id del recurso se filtra por ese valor, sino por el id de agenda
 			if(idRecurso!=null) {
 				query = query + " WHERE dis.aere_id=:idRecurso ";
 			}else if(idAgenda!=null) {
 				query = query 
-					+ " JOIN {esquema}.ae_recursos rec ON rec.id=dis.aere_id "
 					+ " WHERE rec.aeag_id=:idAgenda ";
 			}
 			query = query
@@ -841,12 +844,16 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			query1.setParameter("numDoc", numDoc);
 			query1.setParameter("tipoDoc", tipoDoc);
 			query1.setParameter("hoy", new Date(), TemporalType.DATE);
+
 			@SuppressWarnings("unchecked")
       List<Object[]> ress = query1.getResultList();
-			List<Date> resp = new ArrayList<Date>();
+			List<Map<String, Object>> resp = new ArrayList<Map<String, Object>>();
 			for(Object[] res : ress) {
-				Date fecha = (Date) res[2];
-				resp.add(fecha);
+				Map<String, Object> reserva = new HashMap<String, Object>();
+			  reserva.put("fechaHora", res[0]);
+        reserva.put("nombreRecurso", res[1]);
+        reserva.put("codigoCancelacion", res[2]);
+				resp.add(reserva);
 			}
 			return resp;
 		}catch(NoResultException nrEx) {
@@ -854,9 +861,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 		}catch(NonUniqueResultException nurEx) {
 			throw new UserException("no_se_encuentra_el_token_especificado");		
 		}
-		
 	}
-		
 	
   @SuppressWarnings("unchecked")
   public List<AtencionLLamadaReporteDT> consultarAtencionesPresencialesRecursoPeriodo(Recurso recurso, Date fechaDesde, Date fechaHasta) {
@@ -919,4 +924,100 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
     }
     return listAtencionLlamada;
   }
+  
+  /**
+   * Esta función es utilizada por el servicio web REST para determinar las fechas de las reservas
+   * que tiene una persona identificada por su tipo y número de documento en una agenda y recurso especial; la
+   * empresa se determina en base al token, el cual debe estar registrado (el organismo que desee invocar el
+   * servicio tendrá que solicitar un token para cada empresa).
+   * No considera las reservas correspondientes a disponibilidades presenciales.
+   */
+  public List<Map<String, Object>> consultarReservasPorTokenYDocumentoFull(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException{
+    if(idAgenda==null && idRecurso==null) {
+      throw new UserException("debe_especificar_la_agenda_o_el_recurso");
+    }
+    try {
+      //Determinar el esquema sobre el cual hay que hacer la consulta en base al token
+      String query = "SELECT t FROM Token t WHERE t.token=:token";
+      Token oToken = (Token) globalEntityManager.createQuery(query).setParameter("token", token).getSingleResult();
+      String esquema = oToken.getEmpresa().getDatasource();
+      query = "SELECT res.id, res.estado, res.serie, res.numero, res.codigo_seguridad, res.trazabilidad_guid, res.tramite_codigo, res.tramite_nombre,"
+          + " dis.hora_inicio, dis.presencial, rec.nombre as nombre_recurso, age.nombre as agenda_recurso, ate.funcionario, ate.asistio, ds.etiqueta, dr.valor"
+          + " FROM {esquema}.ae_reservas res "
+          + " JOIN {esquema}.ae_reservas_disponibilidades rd ON rd.aers_id=res.id "
+          + " JOIN {esquema}.ae_disponibilidades dis ON dis.id=rd.aedi_id "
+          + " JOIN {esquema}.ae_recursos rec ON rec.id=dis.aere_id "
+          + " JOIN {esquema}.ae_agendas age ON age.id=rec.aeag_id "
+          + " JOIN {esquema}.ae_datos_reserva dr ON dr.aers_id=res.id " 
+          + " JOIN {esquema}.ae_datos_a_solicitar ds ON ds.id=dr.aeds_id " 
+          + " JOIN {esquema}.ae_datos_reserva dr1 ON dr1.aers_id=res.id "
+          + " JOIN {esquema}.ae_datos_a_solicitar ds1 ON ds1.id=dr1.aeds_id "
+          + " JOIN {esquema}.ae_datos_reserva dr2 ON dr2.aers_id=res.id "
+          + " JOIN {esquema}.ae_datos_a_solicitar ds2 ON ds2.id=dr2.aeds_id "
+          + " LEFT JOIN {esquema}.ae_atencion ate ON ate.aers_id=res.id ";
+      //Si se tiene el id del recurso se filtra por ese valor, sino por el id de agenda
+      if(idRecurso!=null) {
+        query = query + " WHERE dis.aere_id=:idRecurso ";
+      }else if(idAgenda!=null) {
+        query = query 
+          + " WHERE rec.aeag_id=:idAgenda ";
+      }
+      query = query
+          + "   AND ds1.nombre='NroDocumento' "
+          + "   AND dr1.valor=:numDoc "
+          + "   AND ds2.nombre='TipoDocumento' "
+          + "   AND dr2.valor=:tipoDoc "
+          + " ORDER BY res.id";
+      query = query.replace("{esquema}", esquema);
+      Query query1 = globalEntityManager.createNativeQuery(query);
+      if(idRecurso!=null) {
+        query1.setParameter("idRecurso", idRecurso);
+      }else if(idAgenda!=null) {
+        query1.setParameter("idAgenda", idAgenda);
+      }
+      query1.setParameter("numDoc", numDoc);
+      query1.setParameter("tipoDoc", tipoDoc);
+      
+      @SuppressWarnings("unchecked")
+      List<Object[]> ress = query1.getResultList();
+      List<Map<String, Object>> resp = new ArrayList<Map<String, Object>>();
+      Integer reservaIdActual = null;
+      Map<String, Object> reserva = null;
+      Map<String,String> datos = null;
+      for(Object[] res : ress) {
+        Integer reservaId = (Integer)res[0];
+        if(reservaIdActual==null || !reservaIdActual.equals(reservaId)) {
+          reservaIdActual = reservaId;
+          reserva = new HashMap<String, Object>();
+          reserva.put("reservaId", reservaId);
+          reserva.put("estado", res[1]);
+          reserva.put("serie", res[2]);
+          reserva.put("numero", res[3]);
+          reserva.put("codigoCancelacion", res[4]);
+          reserva.put("codigoTrazabilidad", res[5]);
+          reserva.put("codigoTramite", res[6]);
+          reserva.put("nombreTramite", res[7]);
+          reserva.put("fechaHora", res[8]);
+          reserva.put("presencial", res[9]);
+          reserva.put("recurso", res[10]);
+          reserva.put("agenda", res[11]);
+          if(res[12]!=null) {
+            reserva.put("funcionario", res[12]);
+            reserva.put("asistio", res[13]);
+          }
+          datos = new HashMap<String,String>();
+          reserva.put("datos", datos);
+          resp.add(reserva);
+        }
+        datos.put((String)res[14], (String)res[15]);
+      }
+      return resp;
+    }catch(NoResultException nrEx) {
+      throw new UserException("no_se_encuentra_el_token_especificado");   
+    }catch(NonUniqueResultException nurEx) {
+      throw new UserException("no_se_encuentra_el_token_especificado");   
+    }
+    
+  }
+    
 }

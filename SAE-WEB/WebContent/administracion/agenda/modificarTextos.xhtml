@@ -9,43 +9,31 @@
 		<f:view beforePhase="#{textoAgendaMBean.beforePhaseModifTexto}" >
 
 			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and not empty textoAgendaMBean.idiomasSoportados}">
-
 				<p:outputPanel styleClass="form-inline margen_inf">
 					<p:outputPanel styleClass="form-group">
-						<p:outputLabel for="idioma"
-							value="#{sessionMBean.textos['idioma']}"
-							styleClass="control-label label" />
-						<h:selectOneMenu id="idioma"
-							value="#{textoAgendaMBean.idiomaTextos}"
-							valueChangeListener="#{textoAgendaMBean.cambioIdiomaTextos}"
+						<p:outputLabel for="idioma" value="#{sessionMBean.textos['idioma']}" styleClass="control-label label" />
+						<h:selectOneMenu id="idioma" value="#{textoAgendaMBean.idiomaTextos}" valueChangeListener="#{textoAgendaMBean.cambioIdiomaTextos}"
 							styleClass="form-control textoMedio">
 							<p:ajax update="@form" process="@this" />
 							<f:selectItems value="#{textoAgendaMBean.idiomasSoportados}" />
 						</h:selectOneMenu>
 					</p:outputPanel>
 					<p:outputPanel styleClass="form-group">
-						<p:selectBooleanCheckbox id="idiomaDefecto"
-							value="#{textoAgendaMBean.textoAux.porDefecto}"/>
-						<p:outputLabel for="idiomaDefecto"
-							value="#{sessionMBean.textos['establecer_como_idioma_por_defecto']}" />
+						<p:selectBooleanCheckbox id="idiomaDefecto" value="#{textoAgendaMBean.textoAux.porDefecto}"/>
+						<p:outputLabel for="idiomaDefecto" value="#{sessionMBean.textos['establecer_como_idioma_por_defecto']}" />
 					</p:outputPanel>
 				</p:outputPanel>
         <p:outputPanel styleClass="form-required" style="margin-bottom: 0px">
           <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
         </p:outputPanel>
 				<p:tabView>
-
 					<p:tab title="#{sessionMBean.textos['etiquetas']}">
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel
-									value="#{sessionMBean.textos['nomenclatura_para_recurso']}"
-									for="textoSeleccionRecurso"
+								<p:outputLabel value="#{sessionMBean.textos['nomenclatura_para_recurso']}" for="textoSeleccionRecurso"
 									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="textoSeleccionRecurso"
-										value="#{textoAgendaMBean.textoAux.textoSelecRecurso}"
-										maxlength="30" size="40" styleClass="form-control">
+									<h:inputText id="textoSeleccionRecurso" value="#{textoAgendaMBean.textoAux.textoSelecRecurso}" maxlength="30" size="40" styleClass="form-control">
 										<f:validator validatorId="xmlValidator" />
 									</h:inputText>
 								</p:outputPanel>
@@ -56,13 +44,9 @@
 					<p:tab title="#{sessionMBean.textos['texto_paso_1']}">
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel
-									value="#{sessionMBean.textos['texto_para_el_paso_1_de_la_reserva']}"
-									for="textoPaso1" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['texto_para_el_paso_1_de_la_reserva']}" for="textoPaso1" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputTextarea id="textoPaso1" maxlength="1000"
-										value="#{textoAgendaMBean.textoAux.textoPaso1}"
-										styleClass="form-control texto100" />
+									<h:inputTextarea id="textoPaso1" maxlength="1000" value="#{textoAgendaMBean.textoAux.textoPaso1}" styleClass="form-control texto100" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -71,13 +55,9 @@
 					<p:tab title="#{sessionMBean.textos['texto_paso_2']}">
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel
-									value="#{sessionMBean.textos['texto_para_el_paso_2_de_la_reserva']}"
-									for="textoPaso2" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['texto_para_el_paso_2_de_la_reserva']}" for="textoPaso2" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputTextarea id="textoPaso2" maxlength="1000"
-										value="#{textoAgendaMBean.textoAux.textoPaso2}"
-										styleClass="form-control texto100" />
+									<h:inputTextarea id="textoPaso2" maxlength="1000" value="#{textoAgendaMBean.textoAux.textoPaso2}" styleClass="form-control texto100" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -86,13 +66,9 @@
 					<p:tab title="#{sessionMBean.textos['texto_paso_3']}">
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel
-									value="#{sessionMBean.textos['texto_para_el_paso_3_de_la_reserva']}"
-									for="textoPaso3" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['texto_para_el_paso_3_de_la_reserva']}" for="textoPaso3" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputTextarea id="textoPaso3" maxlength="1000"
-										value="#{textoAgendaMBean.textoAux.textoPaso3}"
-										styleClass="form-control texto100" />
+									<h:inputTextarea id="textoPaso3" maxlength="1000" value="#{textoAgendaMBean.textoAux.textoPaso3}" styleClass="form-control texto100" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -101,17 +77,12 @@
 					<p:tab title="#{sessionMBean.textos['ticket_de_reserva']}">
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<p:outputLabel
-									value="#{sessionMBean.textos['texto_para_el_ticket_de_reserva']}"
-									for="textoTicket" styleClass="col-sm-3 control-label label" />
+								<p:outputLabel value="#{sessionMBean.textos['texto_para_el_ticket_de_reserva']}" for="textoTicket" styleClass="col-sm-3 control-label label" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputTextarea id="textoTicket" maxlength="1000"
-										value="#{textoAgendaMBean.textoAux.textoTicketConf}"
-										styleClass="form-control texto100" />
+									<h:inputTextarea id="textoTicket" maxlength="1000" value="#{textoAgendaMBean.textoAux.textoTicketConf}" styleClass="form-control texto100" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
-
 					</p:tab>
 
 					<p:tab title="#{sessionMBean.textos['correo_de_confirmacion']}">
@@ -119,11 +90,9 @@
 							<p:outputPanel styleClass="col-sm-8">
 								<p:outputPanel styleClass="form-horizontal">
 									<p:outputPanel styleClass="form-group">
-										<h:outputLabel value="#{sessionMBean.textos['texto_para_el_correo_de_confirmacion']}"
-											for="textocorreo" styleClass="control-label label col-sm-3" />
+										<h:outputLabel value="#{sessionMBean.textos['texto_para_el_correo_de_confirmacion']}" for="textocorreo" styleClass="control-label label col-sm-3" />
 										<p:outputPanel styleClass="col-sm-9">
-										  <p:inputTextarea id="textocorreo" rows="10" maxlength="1000" style="width:100%" resizable="true"
-										    value="#{textoAgendaMBean.textoAux.textoCorreoConf}" />
+										  <p:inputTextarea id="textocorreo" rows="10" maxlength="1000" style="width:100%" resizable="true" value="#{textoAgendaMBean.textoAux.textoCorreoConf}" />
                       <h:outputText value="#{sessionMBean.textos['puede_ingresar_codigo_html']}" />
 										</p:outputPanel>
 									</p:outputPanel>
@@ -153,12 +122,9 @@
 							<p:outputPanel styleClass="col-sm-8">
 								<p:outputPanel styleClass="form-horizontal">
 									<p:outputPanel styleClass="form-group">
-										<h:outputLabel
-											value="#{sessionMBean.textos['texto_para_el_correo_de_cancelacion']}" for="textocorreocanc"
-											styleClass="col-sm-3 control-label label" />
+										<h:outputLabel value="#{sessionMBean.textos['texto_para_el_correo_de_cancelacion']}" for="textocorreocanc" styleClass="col-sm-3 control-label label" />
 										<p:outputPanel styleClass="col-sm-9">
-                      <p:inputTextarea id="textocorreocanc" rows="10" maxlength="1000" style="width:100%" resizable="true"
-                        value="#{textoAgendaMBean.textoAux.textoCorreoCanc}" />
+                      <p:inputTextarea id="textocorreocanc" rows="10" maxlength="1000" style="width:100%" resizable="true" value="#{textoAgendaMBean.textoAux.textoCorreoCanc}" />
                       <h:outputText value="#{sessionMBean.textos['puede_ingresar_codigo_html']}" />
 										</p:outputPanel>
 									</p:outputPanel>
@@ -182,28 +148,24 @@
 					</p:tab>
 				</p:tabView>
 
-
 				<ul class="form-action-buttons">
 					<li class="action-buttons-primary">
 						<ul>
-							<li><p:commandButton
-									value="#{sessionMBean.textos['guardar']}"
-									actionListener="#{textoAgendaMBean.guardar}"
-									styleClass="btn-lg btn-primario" /></li>
+							<li>
+							  <p:commandButton value="#{sessionMBean.textos['guardar']}" actionListener="#{textoAgendaMBean.guardar}" styleClass="btn-lg btn-primario" />
+						  </li>
 						</ul>
 					</li>
           <li class="action-buttons-second">
 					 <ul>
 					   <li class="float-left">
-						  <p:commandButton value="#{sessionMBean.textos['cancelar']}"
-								action="cancelar" styleClass="btn-lg btn-link" /></li>
+						   <p:commandButton value="#{sessionMBean.textos['cancelar']}" action="cancelar" styleClass="btn-lg btn-link" />
+					   </li>
 						</ul>
 					</li>
 				</ul>
 
 			</h:form>
-
 		</f:view>
-
 	</ui:define>
 </ui:composition>

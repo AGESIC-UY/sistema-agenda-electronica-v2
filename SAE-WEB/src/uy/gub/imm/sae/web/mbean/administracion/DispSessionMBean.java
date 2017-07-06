@@ -34,7 +34,6 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	
 	public static final String MSG_ID = "pantalla";
 		
-	private CupoPorDia cupoPorDiaSeleccionado;
 	private RowList<CupoPorDia> cuposPorDia;
 	
 	private DisponibilidadReserva dispSeleccionado;
@@ -70,14 +69,6 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 		this.fechaActual = fechaActual;
 	}
 
-
-	
-	public CupoPorDia getCupoPorDiaSeleccionado() {
-		return cupoPorDiaSeleccionado;
-	}
-	public void setCupoPorDiaSeleccionado(CupoPorDia cupoPorDiaSeleccionado) {
-		this.cupoPorDiaSeleccionado = cupoPorDiaSeleccionado;
-	}
 	public RowList<CupoPorDia> getCuposPorDia() {
 		return cuposPorDia;
 	}
@@ -140,46 +131,34 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	}
 
 	public Boolean getMostrarDisponibilidad() {
-		
 		RowList<DisponibilidadReserva> listDispReservaVespertina = this.disponibilidadesDelDiaVespertinaModif;
 		RowList<DisponibilidadReserva> listDispReservaMatutina = this.disponibilidadesDelDiaMatutinaModif;
 		boolean mostrar = false;
-		if (listDispReservaMatutina != null)
-		{
+		if (listDispReservaMatutina != null) {
 			for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
-				if (row.getData().isSeleccionado())
-				{
+				if (row.getData().isSeleccionado()) {
 					mostrar = true;
 					break;
 				}
 			}
-			if(!mostrar && listDispReservaVespertina!=null)
-			{
+			if(!mostrar && listDispReservaVespertina!=null) {
 				for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-					if (row.getData().isSeleccionado())
-					{
+					if (row.getData().isSeleccionado()) {
 						mostrar = true;
 						break;
 					}
 				}
 			}
-		}else if(listDispReservaVespertina!=null)
-		{//listDispReservaMatutina == null
+		}else if(listDispReservaVespertina!=null) {//listDispReservaMatutina == null
 			for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-				if (row.getData().isSeleccionado())
-				{
+				if (row.getData().isSeleccionado()) {
 					mostrar = true;
 					break;
 				}
 			}
 		}
 		
-		if(mostrar)
-		{
-			this.mostrarDisponibilidad = true;
-		}else {
-			this.mostrarDisponibilidad = false;
-		}
+		this.mostrarDisponibilidad = mostrar;
 		
 		return this.mostrarDisponibilidad;
 	}

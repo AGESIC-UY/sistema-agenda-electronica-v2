@@ -485,18 +485,26 @@ public class AgendaMBean extends BaseMBean {
     limpiarMensajesError();
     UIInput input = (UIInput) event.getComponent();
     TramiteAgenda tramiteAgenda = (TramiteAgenda) input.getAttributes().get("tramiteAgenda");
+    String tramIdViejo = (String) event.getOldValue();
     String tramId = (String) event.getNewValue();
-    if(tramId == null || !mapTramites.containsKey(tramId)) {
+    //Si el valor nuevo es "0" y el viejo no está en la lista de trámites el cambio es porque
+    //cambió la lista de trámites y no puede seleccionar el trámite correspondiente. En este
+    //caso se cambia el id del trámite pero no el código y nombre
+    if("0".equals(tramId) && !mapTramites.containsKey(tramIdViejo)) {
       tramiteAgenda.setTramiteId(null);
-      tramiteAgenda.setTramiteCodigo("");
-      tramiteAgenda.setTramiteNombre("");
     }else {
-      Tramite tramite = mapTramites.get(tramId);
-      tramiteAgenda.setTramiteId(tramId);
-      tramiteAgenda.setTramiteNombre(tramite.getNombre());
-      String[] partes = tramId.split("-");
-      if(partes.length>1) {
-        tramiteAgenda.setTramiteCodigo(partes[1]);
+      if(tramId == null || !mapTramites.containsKey(tramId)) {
+        tramiteAgenda.setTramiteId(null);
+        tramiteAgenda.setTramiteCodigo("");
+        tramiteAgenda.setTramiteNombre("");
+      }else {
+        Tramite tramite = mapTramites.get(tramId);
+        tramiteAgenda.setTramiteId(tramId);
+        tramiteAgenda.setTramiteNombre(tramite.getNombre());
+        String[] partes = tramId.split("-");
+        if(partes.length>1) {
+          tramiteAgenda.setTramiteCodigo(partes[1]);
+        }
       }
     }
   }

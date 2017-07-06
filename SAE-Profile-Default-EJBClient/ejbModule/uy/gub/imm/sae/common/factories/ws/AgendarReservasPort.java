@@ -149,10 +149,6 @@ public class AgendarReservasPort implements AgendarReservas {
 		throw new UnsupportedOperationException();
 	}
 
-	public List<Reserva> consultarReservasEnPeriodo(Recurso r, VentanaDeTiempo v) {
-		throw new UnsupportedOperationException();
-	}
-
 	public void desmarcarReserva(Reserva r) throws BusinessException {
 		try {
 			this.reservas.desmarcarReserva(r);
@@ -161,13 +157,12 @@ public class AgendarReservasPort implements AgendarReservas {
 		}
 	}
 
-	public Reserva marcarReserva(Disponibilidad d) throws BusinessException,
-			UserException{
+	public Reserva marcarReserva(Disponibilidad d) throws UserException{
 
 		try {
 			return this.reservas.marcarReservaDisponible(d);
 		} catch (BusinessException_Exception e) {
-			throw new BusinessException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
+			throw new UserException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
 		} catch (UserException_Exception e) {
 			throw new UserException(e.getFaultInfo().getCodigoError(),e.getFaultInfo().getMessage());
 		} 

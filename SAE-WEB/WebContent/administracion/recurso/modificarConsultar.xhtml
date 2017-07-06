@@ -8,7 +8,7 @@
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{recursoMBean.beforePhaseModificarConsultar}" >
 
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarRecurso" zindex="2000" modal="true">
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarRecurso" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
@@ -31,10 +31,15 @@
 
 			<h:form id="formRecModCon" rendered="#{sessionMBean.agendaMarcada != null}">
 
-				<p:dataTable value="#{sessionMBean.recursos}" var="row" id="tablaRecursos" rows="25" binding="#{recursoMBean.recursosDataTableConsultar}"
-					paginator="true" caption="#{sessionMBean.textos['listado_de_recursos']}" paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-
+				<p:dataTable id="tablaRecursos" value="#{sessionMBean.recursos}" var="row" binding="#{recursoMBean.recursosDataTableConsultar}"
+				  caption="#{sessionMBean.textos['listado_de_recursos']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+					paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+					>
 					<p:column>
 						<f:facet name="header">
 							<h:outputText value="#{sessionMBean.textos['identificador']}" />

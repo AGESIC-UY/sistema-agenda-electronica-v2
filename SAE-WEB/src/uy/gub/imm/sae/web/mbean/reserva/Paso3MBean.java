@@ -76,7 +76,6 @@ import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
  *
  *
  */
-
 public class Paso3MBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso3MBean.class);
@@ -97,13 +96,15 @@ public class Paso3MBean extends BaseMBean {
 	private List<SelectItem> tramites;
 	private String tramiteCodigo;
 	private String aceptaCondiciones;
-	
 
 	private boolean errorInit;
+	
+	private boolean yaExisteReservaCamposClave = false;
 	
 	@PostConstruct
 	public void init() {
 		errorInit = false;
+		yaExisteReservaCamposClave = false;
 		try {
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
 			recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
@@ -116,7 +117,6 @@ public class Paso3MBean extends BaseMBean {
 			addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 			errorInit = true;
 		}
-		
 		try {
       this.tramiteCodigo = null;
       tramitesAgenda = new HashMap<String, TramiteAgenda>();
@@ -168,7 +168,6 @@ public class Paso3MBean extends BaseMBean {
   public void beforePhase(PhaseEvent event) {
     disableBrowserCache(event);
   }
-
 	
 	public SesionMBean getSesionMBean() {
 		return sesionMBean;
@@ -257,14 +256,11 @@ public class Paso3MBean extends BaseMBean {
 	
 	public void setCampos(UIComponent campos) {
 		this.campos = campos;
-
 		try {
 			Recurso recurso = sesionMBean.getRecurso();
-
 			//El chequeo de recurso != null es en caso de un acceso directo a la pagina, es solo
 			//para que no salte la excepcion en el log, pues de todas formas sera redirigido a una pagina de error.
 			if (campos.getChildCount() == 0 && recurso != null) {
-				
 				if (formularioDin == null) {
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sesionMBean.getTimeZone());
 					sesionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
@@ -293,16 +289,13 @@ public class Paso3MBean extends BaseMBean {
 
 	public String confirmarReserva() {
 		limpiarMensajesError();
-		
+		yaExisteReservaCamposClave = false;
 		try {
-
 			boolean hayError = false;
-			
 			if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
         hayError = true;
         addErrorMessage(sesionMBean.getTextos().get("debe_seleccionar_el_tramite"), FORM_ID, FORM_ID+":tramite");
 			}
-			
 			HtmlPanelGroup clausulaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:clausula");
 			String clausulaStyleClass = clausulaGroup.getStyleClass();
 			if (this.aceptaCondiciones==null || !this.aceptaCondiciones.equals("SI")) {
@@ -318,7 +311,6 @@ public class Paso3MBean extends BaseMBean {
 					clausulaGroup.setStyleClass(clausulaStyleClass);
 				}
 			}
-			
 			HtmlPanelGroup captchaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:captcha");
 			String captchaStyleClass = captchaGroup.getStyleClass();
 			if (textoCaptchaUsuario==null || textoCaptchaUsuario.trim().isEmpty()) {
@@ -341,7 +333,6 @@ public class Paso3MBean extends BaseMBean {
 					captchaGroup.setStyleClass(captchaStyleClass);
 				}
 			}
-			
 			List<String> idComponentes = new ArrayList<String>();
 			Set<DatoReserva> datos = new HashSet<DatoReserva>();
 			for (String nombre : datosReservaMBean.keySet()) {
@@ -356,18 +347,13 @@ public class Paso3MBean extends BaseMBean {
 			}
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
 			Reserva reserva = sesionMBean.getReserva();
-			
 			reserva.setDatosReserva(datos);
-			
 			agendarReservasEJB.validarDatosReserva(sesionMBean.getEmpresaActual(), reserva);
-			
 			if(hayError) {
 				return null;
 			}
-
       reserva.setTramiteCodigo(this.tramiteCodigo);
       reserva.setTramiteNombre(tramitesAgenda.get(this.tramiteCodigo).getTramiteNombre());
-			
 			String transaccionPadreId = null;
 			Long pasoPadre = null;
 			if(sesionMBean.getCodigoTrazabilidadPadre()!=null) {
@@ -381,7 +367,6 @@ public class Paso3MBean extends BaseMBean {
 					}
 				}
 			}
-			
 			boolean confirmada = false;
 			while (!confirmada) {
 				try {
@@ -395,7 +380,6 @@ public class Paso3MBean extends BaseMBean {
 					//Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
 				}
 			}
-			
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			String linkCancelacion = request.getScheme()+"://"+request.getServerName();
@@ -405,11 +389,10 @@ public class Paso3MBean extends BaseMBean {
 			Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
 			linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
 			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, reserva, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
-
 			//La reserva se confirmo, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
 			sesionMBean.setReservaConfirmada(reserva);
 			sesionMBean.setReserva(null);
-		} catch (ValidacionPorCampoException e) {
+		}catch(ValidacionPorCampoException e) {
 			//Alguno de los campos no tiene el formato esperado
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -427,21 +410,7 @@ public class Paso3MBean extends BaseMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch (ErrorValidacionException e) {
-			//Algun grupo de campos no es valido según alguna validacion
-			List<String> idComponentesError = new ArrayList<String>();
-			for(int i = 0; i < e.getCantCampos(); i++) {
-				idComponentesError.add(e.getNombreCampo(i));
-			}
-			String mensaje = e.getMensaje(0);
-			for(int i = 1; i < e.getCantMensajes(); i++) {
-				mensaje += "  |  "+e.getMensaje(i);
-			}
-			addErrorMessage(mensaje);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
-			
-			return null;
-		} catch (ErrorValidacionCommitException e) { 
+		}catch(ErrorValidacionException e) {
 			//Algun grupo de campos no es valido según alguna validacion
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -454,16 +423,35 @@ public class Paso3MBean extends BaseMBean {
 			addErrorMessage(mensaje);
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		}	catch (ValidacionClaveUnicaException vcuEx) {
-			//Guardo el estado de la confirmacion con warnings
-			addErrorMessage(vcuEx);
+		}catch(ErrorValidacionCommitException e) { 
+			//Algun grupo de campos no es valido según alguna validacion
+			List<String> idComponentesError = new ArrayList<String>();
+			for(int i = 0; i < e.getCantCampos(); i++) {
+				idComponentesError.add(e.getNombreCampo(i));
+			}
+			String mensaje = e.getMensaje(0);
+			for(int i = 1; i < e.getCantMensajes(); i++) {
+				mensaje += "  |  "+e.getMensaje(i);
+			}
+			addErrorMessage(mensaje);
+			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
+			return null;
+		}catch (ValidacionClaveUnicaException vcuEx) {
+		  //Ya hay otra reserva con el mismo valor en todos los campos clave
+		  yaExisteReservaCamposClave = true;
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < vcuEx.getCantCampos(); i++) {
 				idComponentesError.add(vcuEx.getNombreCampo(i));
+        addErrorMessage("ya_tiene_una_reserva_para_el_dia_seleccionado", "form:"+vcuEx.getNombreCampo(i));
+			}
+      //Si hay más de un trámite también forma parte de la clave
+			if(tramites.size()>1) {
+        idComponentesError.add("tramite");
+        addErrorMessage("ya_tiene_una_reserva_para_el_dia_seleccionado", "form:tramite");
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch (ValidacionException e) {
+		}catch (ValidacionException e) {
 			//Faltan campos requeridos
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -474,19 +462,18 @@ public class Paso3MBean extends BaseMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch(BusinessException bEx) {
+		}catch(BusinessException bEx) {
 		  //Seguramente esto fue lanzado por una Accion
 			addErrorMessage(bEx.getMessage());
 			bEx.printStackTrace();
 			return null;
-		} catch(Exception ex) {
+		}catch(Exception ex) {
       addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
       ex.printStackTrace();
       return null;
     }
 		//Blanqueo el formulario de datos de la reserva
 		datosReservaMBean.clear();
-		
 		return "reservaConfirmada";
 	}
 
@@ -650,11 +637,10 @@ public class Paso3MBean extends BaseMBean {
 	public String getTextoIndicativoCaptcha() {
 		Random rand = new Random();
 		
-		//Elegir una frase de todas las disponibles
+		//Elegir una frase de todas las disponibles, si no hay ninguna solo se usa la palabra "test"
 		String pregunta = "test";
 		String respuesta = "test";
 		Map<String, String> preguntasCaptcha = sesionMBean.getPreguntasCaptcha();
-		
 		if(preguntasCaptcha != null && !preguntasCaptcha.isEmpty()) {
 			String[] preguntas = preguntasCaptcha.keySet().toArray(new String[preguntasCaptcha.size()]);
 			int ind = rand.nextInt(preguntas.length);
@@ -700,12 +686,14 @@ public class Paso3MBean extends BaseMBean {
     return tramites;
   }
 	
+  public boolean isYaExisteReservaCamposClave() {
+    return yaExisteReservaCamposClave;
+  }
+
   @PreDestroy
   public void preDestroy() {
-    
     try {
       logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
-      
       this.agendarReservasEJB = null;
       this.campos = null;
       if(this.datosReservaMBean!=null) {
@@ -723,11 +711,9 @@ public class Paso3MBean extends BaseMBean {
         this.tramitesAgenda.clear();
       }
       this.tramitesAgenda = null;
-      
       logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
     }catch(Exception ex) {
       logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
-      
     }
   }
   

@@ -1,4 +1,8 @@
 /* **** GENERALES **** */
+#destino_saltar_contenido {
+	font-size: 2em;
+	margin: 0 0 30px;
+}
 #content:focus, #page-content-wrapper:focus{
   outline: none;
 }
@@ -21,6 +25,9 @@ a:active,
 .ui-widget-content a:active {
     color: #003dc6;
     text-decoration: none;
+}
+a:focus{
+	outline-offset: 1px;
 }
 .ui-widget-header {
     color: #141414;
@@ -49,16 +56,32 @@ a:active,
 .ui-paginator .ui-paginator-page, .ui-paginator .ui-paginator-pages, .ui-paginator .ui-paginator-next, .ui-paginator .ui-paginator-last, .ui-paginator .ui-paginator-first, .ui-paginator .ui-paginator-prev, .ui-paginator .ui-paginator-current{
   padding: 2px 6px 4px 6px;
 }
-.ui-paginator .ui-paginator-page.ui-state-default{
+.ui-paginator .ui-paginator-page.ui-state-default,
+.ui-paginator .ui-paginator-first.ui-state-default,
+.ui-paginator .ui-paginator-prev.ui-state-default,
+.ui-paginator .ui-paginator-next.ui-state-default,
+.ui-paginator .ui-paginator-last.ui-state-default{
   border: none;
     background: none;
     color: #003dc6;
     text-decoration: underline;
 }
+.ui-paginator .ui-paginator-page.ui-state-hover,
+.ui-paginator .ui-paginator-first.ui-state-hover,
+.ui-paginator .ui-paginator-prev.ui-state-hover,
+.ui-paginator .ui-paginator-next.ui-state-hover,
+.ui-paginator .ui-paginator-last.ui-state-hover{
+    text-decoration: none;
+}
 .ui-paginator .ui-paginator-page.ui-state-active{
   color: #141414;
     text-decoration: none;
     font-weight: bold;
+}
+.ui-paginator [class*="ui-paginator-"].ui-state-focus,
+.ui-paginator [class*="ui-paginator-"]:focus{
+  outline: thin dotted;
+  outline-offset: 1px;
 }
 .ui-grid-responsive{
   border: none;
@@ -138,6 +161,7 @@ input[type="radio"].form-control, input[type="checkbox"].form-control {
 }
 fieldset legend {
     width: auto;
+    margin-bottom: 0;
 }
 input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select, textarea,
 .ui-inputfield, .ui-widget-content .ui-inputfield, .ui-widget-header .ui-inputfield,
@@ -283,6 +307,9 @@ vertical-align: middle;
 }
 .form-group input + .btn, .form-group .form-control + .btn{
     margin-left: 10px;
+}
+.btn + .btn {
+    margin-left: 5px;
 }
 .form-group .ui-commandlink{
   margin-left: 15px;
@@ -1069,7 +1096,7 @@ input[type="text"].diaSeleccionado{
 }
 .datosCabezal{
   padding: 5px 20px;
-    background: #e2e9ef;
+    background: #D7D7D7;
     margin: -20px;
     margin-bottom: 20px;
 }
@@ -1257,4 +1284,9 @@ clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
 }
 .ui-datalist-content {
   border:none;
+}
+
+pre {
+	font-family: Arial,sans-serif;
+	background-color:transparent;
 }

@@ -80,6 +80,8 @@ import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Usuario;
 import uy.gub.imm.sae.exception.ApplicationException;
+import uy.gub.imm.sae.web.common.AgendaComparatorNombre;
+import uy.gub.imm.sae.web.common.RecursoComparatorNombre;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
 import uy.gub.imm.sae.web.common.SelectItemComparator;
@@ -154,6 +156,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	private String codigoSeguridadReserva;
 	
 	private List<SelectItem> idiomasSoportados = null;
+	
+	//Cantidad de filas por página que se muestra en las tablas
+  private Integer tablasFilasPorPagina = 25;
 
   @PostConstruct
   public void postConstruct() {
@@ -229,7 +234,12 @@ public class SessionMBean extends SessionCleanerMBean {
   }
 	
 	
-	// *****************************************************************************************************
+	public Integer getTablasFilasPorPagina() {
+    return tablasFilasPorPagina;
+  }
+
+
+  // *****************************************************************************************************
 	// ***************************Pasos para la reserva
 	// *****************************************************************************************************
 	private RowList<Disponibilidad> disponibilidadesDelDiaMatutina;
@@ -407,9 +417,11 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 	
 	public void cargarAgendas() {
-		List<Agenda> entidades;
 		try {
-			entidades = generalEJB.consultarAgendas();
+		  List<Agenda> entidades = generalEJB.consultarAgendas();
+		  //Ordenar las agendas
+		  Collections.sort(entidades, new AgendaComparatorNombre());
+		  //Añadir un item al inicio para la "no-selección"
 			Agenda ninguna = new Agenda();
 			ninguna.setId(0);
 			ninguna.setNombre(getTextos().get("ninguna"));
@@ -432,6 +444,8 @@ public class SessionMBean extends SessionCleanerMBean {
 			try {
 				List<Recurso> entidades;
 				entidades = generalEJB.consultarRecursos(getAgendaMarcada());
+	      //Ordenar los recursos
+	      Collections.sort(entidades, new RecursoComparatorNombre());
 				recursos = new RowList<Recurso>(entidades);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);

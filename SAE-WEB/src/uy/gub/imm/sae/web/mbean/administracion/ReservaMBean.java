@@ -187,9 +187,7 @@ public class ReservaMBean extends BaseMBean {
 				|| reservaSessionMBean.getReservaDatos().getId() == null) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_una_reserva"), MSG_ID);
-		}
-
-		if (reservaSessionMBean.getReservaDatos().getEstado() != Estado.R) {
+		}else if (reservaSessionMBean.getReservaDatos().getEstado() != Estado.R) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("no_es_posible_cancelar_la_reserva"), MSG_ID);
 		}

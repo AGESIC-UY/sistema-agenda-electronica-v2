@@ -52,15 +52,13 @@ public interface AgendarReservas {
 	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws UserException;
 	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
 	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
-	public Reserva marcarReserva(Disponibilidad d) throws BusinessException, UserException;
+	public Reserva marcarReserva(Disponibilidad d) throws UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;
 	public void validarDatosReserva(Empresa e, Reserva r) throws BusinessException, ValidacionException, ApplicationException;
 	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public Reserva consultarReservaPorNumero(Recurso r, Integer numero) throws BusinessException;
 	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws UserException;
-	
-	public List<Reserva> consultarReservasEnPeriodo(Recurso r, VentanaDeTiempo v);
 	
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, AutocompletarException, UserException;
 	

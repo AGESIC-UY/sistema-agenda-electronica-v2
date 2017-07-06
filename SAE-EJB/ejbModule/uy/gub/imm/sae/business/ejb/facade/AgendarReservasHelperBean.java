@@ -428,12 +428,13 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
               if(Utiles.esFechaInvalida(fecha)) {
                 //El formato es correcto pero la fecha es inválida
                 camposInvalidos.add(campo.getNombre());
-                mensajes.add("el_campo_campo_no_tiene_una_fecha_válida");
+                mensajes.add("el_campo_campo_no_tiene_una_fecha_válida"+1);
               }
             }catch(Exception ex) {
               //No se puede parsear la fecha
               camposInvalidos.add(campo.getNombre());
-              mensajes.add("el_campo_campo_no_tiene_una_fecha_válida");
+              mensajes.add("el_campo_campo_no_tiene_una_fecha_válida"+2);
+              ex.printStackTrace();
             }
 				  }
         }else {

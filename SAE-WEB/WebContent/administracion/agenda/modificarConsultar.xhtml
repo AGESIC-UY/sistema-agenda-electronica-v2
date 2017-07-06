@@ -7,12 +7,13 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{agendaMBean.beforePhaseModificarConsultar}" >
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarAgenda" zindex="2000" modal="true">
+
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarAgenda" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
 				<h:form id="elimRec">
-					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_agenda']}" />
+          <h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_agenda']}" />
 					<p:outputPanel styleClass="row panelBotonesPopUp">
 						<p:outputPanel styleClass="col-sm-6">
 							<p:commandButton id="btn_eliminar" update="form:panelForm" actionListener="#{agendaMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
@@ -26,11 +27,18 @@
 					</p:outputPanel>
 				</h:form>
 			</p:dialog>
+			
 			<h:form id="form" rendered="#{sessionMBean.empresaActual != null}">
 			  <p:outputPanel id="panelForm">
-				<p:dataTable value="#{agendaMBean.agendasSeleccion}" var="row" id="tablaAgendas" rows="25" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-					binding="#{agendaMBean.agendasDataTable}" caption="#{sessionMBean.textos['listado_de_agendas']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+				<p:dataTable id="tablaAgendas" value="#{agendaMBean.agendasSeleccion}" var="row" binding="#{agendaMBean.agendasDataTable}" 
+					caption="#{sessionMBean.textos['listado_de_agendas']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+          paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}"
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+				>
 					<p:column headerText="#{sessionMBean.textos['identificador']}">
 						<h:outputText value="#{row.data.id}" />
 					</p:column>

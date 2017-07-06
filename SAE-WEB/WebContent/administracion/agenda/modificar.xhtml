@@ -94,9 +94,9 @@
 		                    <h:outputLabel value="#{sessionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-2 control-label label" />
 		                    <p:outputPanel styleClass="col-sm-10">
 		                      <h:selectOneMenu id="tramite" value="#{tramite.tramiteId}" valueChangeListener="#{agendaMBean.cambioTramite}" styleClass="form-control textoLargo" 
-		                        update="pnlTramite">
+		                        update="tramites">
 		                        <f:attribute name="tramiteAgenda" value="#{tramite}" />
-		                        <p:ajax update="pnlTramite" process="@this" />
+		                        <p:ajax update="tramites" process="@this" />
 		                        <f:selectItems value="#{agendaMBean.tramites}" />
 		                      </h:selectOneMenu>
 		                    </p:outputPanel>

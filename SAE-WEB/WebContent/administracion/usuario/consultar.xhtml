@@ -7,9 +7,7 @@
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{usuarioMBean.beforePhaseConsultar}" >
-
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
-				widgetVar="eliminarUsuario" zindex="2000" modal="true">
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarUsuario" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
@@ -17,60 +15,52 @@
 					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_usuario']}" />
 					<p:outputPanel styleClass="row panelBotonesPopUp">
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton id="btn_eliminar" update="form:tablaUsuarios"
-								actionListener="#{usuarioMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
-								onclick="PF('eliminarUsuario').hide();"
-								styleClass="btn-primario btn-100 btn">
-							</p:commandButton>
+							<p:commandButton id="btn_eliminar" update="form:tablaUsuarios" actionListener="#{usuarioMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarUsuario').hide();" styleClass="btn-primario btn-100 btn" />
 						</p:outputPanel>
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton onclick="PF('eliminarUsuario').hide();"
-								value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
-							</p:commandButton>
+							<p:commandButton onclick="PF('eliminarUsuario').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
 						</p:outputPanel>
 					</p:outputPanel>
 				</h:form>
 			</p:dialog>
 
 			<h:form id="form">
-				<p:dataTable value="#{usuarioMBean.usuariosSeleccion}" var="row"
-					id="tablaUsuarios" rows="25" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-					binding="#{usuarioMBean.usuariosDataTable}"
-					caption="#{sessionMBean.textos['listado_de_usuarios']}"
-					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+				<p:dataTable id="tablaUsuarios" value="#{usuarioMBean.usuariosSeleccion}" var="row" binding="#{usuarioMBean.usuariosDataTable}"
+					caption="#{sessionMBean.textos['listado_de_usuarios']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+          paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+				>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['cedula_de_identidad']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['cedula_de_identidad']}" />
 						</f:facet>
 						<h:outputText value="#{row.data.codigo}"></h:outputText>
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['nombre_y_apellido']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['nombre_y_apellido']}" />
 						</f:facet>
 						<h:outputText value="#{row.data.nombre}"></h:outputText>
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['correo_electronico']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['correo_electronico']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.correoe}"></h:outputText>
+						<h:outputText value="#{row.data.correoe}" />
 					</p:column>
-
 					<p:column styleClass="alinCentro">
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['acciones']}" />
 						</f:facet>
-						<p:commandButton id="modificarUsuario" value="#{sessionMBean.textos['modificar']}"
-							action="#{usuarioMBean.modificar}" update="tablaUsuarios" styleClass="ui-button-icon-only"
-							icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}">
-						</p:commandButton>
-						<p:commandButton id="eliminarUsuario" value="#{sessionMBean.textos['eliminar']}"
-							oncomplete="PF('eliminarUsuario').show();" icon="ui-icon-trash"
-							actionListener="#{usuarioMBean.selecUsuarioEliminar}"
-							title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
-						</p:commandButton>
+						<p:commandButton id="modificarUsuario" value="#{sessionMBean.textos['modificar']}" action="#{usuarioMBean.modificar}" update="tablaUsuarios" 
+						  styleClass="ui-button-icon-only" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}" />
+						<p:commandButton id="eliminarUsuario" value="#{sessionMBean.textos['eliminar']}" oncomplete="PF('eliminarUsuario').show();" icon="ui-icon-trash"
+							actionListener="#{usuarioMBean.selecUsuarioEliminar}" title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only" />
 					</p:column>
 				</p:dataTable>
 			</h:form>

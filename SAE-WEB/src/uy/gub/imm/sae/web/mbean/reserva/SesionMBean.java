@@ -118,7 +118,6 @@ public class SesionMBean	extends BaseMBean {
         mostrarFechaActual = bMostrarFechaActual.booleanValue();
       }
     } catch (ApplicationException e) {
-      LOGGER.error("NO SE PUDO OBTENER EJB AgendarReservas");
       LOGGER.error(e);
       redirect(ERROR_PAGE_OUTCOME);     
     }
