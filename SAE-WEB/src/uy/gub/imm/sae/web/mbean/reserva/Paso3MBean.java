@@ -589,42 +589,47 @@ public class Paso3MBean extends BaseMBean {
 		for (String parm : parametros) {
 		  //Obtener las tres partes (agrupación, dato, valor)
 			String agrupCampoValor[] = parm.split("\\.", 3);
-			String sAgrupacion = agrupCampoValor[0];
-			String sDatoSol = agrupCampoValor[1];
-			String sValor = agrupCampoValor[2];
-			
-			//Determinar el dato a solicitar indicado por la agrupación y el dato
-      //Si tanto la agrupacion como el dato son numéricos se asume que son los ids, sino se asume que son los nombres
-			DatoASolicitar datoASolicitar = null;
-			try {
-			  Integer.valueOf(sAgrupacion);
-        Integer.valueOf(sDatoSol);
-        //Son identificadores, buscar el dato a solicitar correspondiente
-        datoASolicitar = porId.get(sAgrupacion+"."+sDatoSol);
-      }catch(NumberFormatException nfEx) {
-        //No son identificadores, son nombres
-        datoASolicitar = porNombre.get(sAgrupacion+"."+sDatoSol);
-			}
-			//Si se encontró un dato a solicitar poner el valor apropiado
-			if(datoASolicitar != null) {
-			  try {
-    			if(datoASolicitar.getTipo()==Tipo.DATE) {
-            DateFormat format = new SimpleDateFormat("yyyyMMdd");
-            Date valor = format.parse(sValor);
-            this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);            
-    			}else if(datoASolicitar.getTipo()==Tipo.LIST || datoASolicitar.getTipo()==Tipo.STRING ) {
-    				this.datosReservaMBean.put(datoASolicitar.getNombre(), sValor);
-    			}else if(datoASolicitar.getTipo()==Tipo.NUMBER) {
-    				Integer valor = Integer.valueOf(sValor);
-    				this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
-    			}else if(datoASolicitar.getTipo()==Tipo.BOOLEAN) {
-            Boolean valor = Boolean.valueOf(sValor);
-            this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
-          }
-			  }catch(Exception ex) {
-			    //Seguramente el valor no puede ser convertido al formato apropiado
-			  }
-			}
+      String sAgrupacion = null;
+      String sDatoSol = null;
+      String sValor = null;
+			if(agrupCampoValor.length==3) {
+  			sAgrupacion = agrupCampoValor[0];
+  			sDatoSol = agrupCampoValor[1];
+  			sValor = agrupCampoValor[2];
+  			//Determinar el dato a solicitar indicado por la agrupación y el dato
+        //Si tanto la agrupacion como el dato son numéricos se asume que son los ids, sino se asume que son los nombres
+  			DatoASolicitar datoASolicitar = null;
+  			try {
+  			  Integer.valueOf(sAgrupacion);
+          Integer.valueOf(sDatoSol);
+          //Son identificadores, buscar el dato a solicitar correspondiente
+          datoASolicitar = porId.get(sAgrupacion+"."+sDatoSol);
+        }catch(NumberFormatException nfEx) {
+          //No son identificadores, son nombres
+          datoASolicitar = porNombre.get(sAgrupacion+"."+sDatoSol);
+  			}
+  			//Si se encontró un dato a solicitar poner el valor apropiado
+  			if(datoASolicitar != null) {
+  			  try {
+      			if(datoASolicitar.getTipo()==Tipo.DATE) {
+              DateFormat format = new SimpleDateFormat("yyyyMMdd");
+              Date valor = format.parse(sValor);
+              this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);            
+      			}else if(datoASolicitar.getTipo()==Tipo.LIST || datoASolicitar.getTipo()==Tipo.STRING ) {
+      				this.datosReservaMBean.put(datoASolicitar.getNombre(), sValor);
+      			}else if(datoASolicitar.getTipo()==Tipo.NUMBER) {
+      				Integer valor = Integer.valueOf(sValor);
+      				this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
+      			}else if(datoASolicitar.getTipo()==Tipo.BOOLEAN) {
+              Boolean valor = Boolean.valueOf(sValor);
+              this.datosReservaMBean.put(datoASolicitar.getNombre(), valor);
+            }
+  			  }catch(Exception ex) {
+  			    //Seguramente el valor no puede ser convertido al formato apropiado
+  			    ex.printStackTrace();
+  			  }
+  			}
+	    }
 		}
 	}
 	

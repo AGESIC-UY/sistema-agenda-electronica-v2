@@ -8,9 +8,11 @@
 	<ui:param name="parametroBean" value="#{pasoFinalMBean}" />
 	<ui:param name="bodyId" value="pasoFinal" />
 	<ui:param name="agenda_nombre" value="#{pasoFinalMBean.agendaNombre}" />
-   <ui:param name="hay_error" value="#{pasoFinalMBean.errorInit}" />
+  <ui:param name="hay_error" value="#{pasoFinalMBean.errorInit}" />
 	<ui:param name="paso_numero" value="4" />
 	<ui:param name="paso_texto" value="#{sesionMBean.textos['reserva_confirmada']}" />
+  <ui:param name="yaExisteReservaCamposClave" value="false" />
+  <ui:param name="recursoSinDisponibilidad" value="false" />
 
 	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-12" />
 	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />

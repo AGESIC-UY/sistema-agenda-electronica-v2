@@ -303,9 +303,15 @@ public class EmpresaMBean extends BaseMBean {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			if(request.getParameter("n")!=null) {
+			  //Solicitud para crear una empresa nueva
 				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_empresa"));
 			}else {
-				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_empresa"));
+			  //Puede ser que sea editar una empresa existente o se está creando una nueva (se cambió el valor en un combo y no llega el parámetro n)
+			  String tituloActual = sessionMBean.getPantallaTitulo();
+			  //Si el título actual es el de crear empresa no se cambia
+			  if(tituloActual!=null && !tituloActual.equals(sessionMBean.getTextos().get("crear_empresa"))) {
+			    sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_empresa"));
+			  }
 			}
 		}
 	}

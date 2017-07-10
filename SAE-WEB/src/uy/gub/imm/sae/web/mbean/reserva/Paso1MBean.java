@@ -553,7 +553,7 @@ public class Paso1MBean extends BaseMBean {
 	}
 
 	public void cambioRecurso(ValueChangeEvent event) {
-	  recursoTieneDisponibilidad = false;
+	  recursoTieneDisponibilidad = true;
 		String sRecursoId = (String) event.getNewValue();
 		Integer recursoId = Integer.valueOf(sRecursoId);
 		Boolean encontre = false;

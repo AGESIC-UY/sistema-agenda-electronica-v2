@@ -172,3 +172,8 @@ Versión 2.0.4 (2017-07-06)
 * Se ajustaron algunos estilos CSS que cambiaron en el formulario tipo.
 * Se cambió el mensaje desplegado cuando se selecciona un recurso que no tiene disponibilidades (pasó de error a advertencia, y se utiliza un título y texto específico).
 * Se añadió el servicio web REST de consultas de todos los datos de todas las reservas de una persona identificada por su documento.
+
+Versión 2.0.5 (2017-07-10)
+* Se corrigió un problema por el cual al crear una empresa el título de la página cambiaba de "Crear empresa" a "Editar empresa".
+* Se corrigió un bug por el cual se perdían los valores por defecto de los atributos pasados por URL.
+* Se añadió una verificación sobre los valores de los parámetros pasados como valores por defecto por URL.

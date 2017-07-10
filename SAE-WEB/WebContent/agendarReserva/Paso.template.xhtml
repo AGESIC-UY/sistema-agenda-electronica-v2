@@ -55,7 +55,7 @@
         <p:messages id="mensajes" for="form" infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
           infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}" warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}"
           errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" />
-        <p:outputPanel id="warnSinCupos" styleClass="ui-messages ui-widget" aria-live="polite" rendered="#{not paso1MBean.recursoTieneDisponibilidad}">
+        <p:outputPanel id="warnSinCupos" styleClass="ui-messages ui-widget" aria-live="polite" rendered="#{recursoSinDisponibilidad}">
           <div class="ui-messages-warn ui-corner-all">
             <span class="ui-messages-warn-icon" />
             <p class="ui-messages-warn-title">
