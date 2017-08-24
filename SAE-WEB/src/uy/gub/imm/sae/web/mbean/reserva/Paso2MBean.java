@@ -196,10 +196,10 @@ public class Paso2MBean extends BaseMBean {
 		return this.disponibilidadesVespertina;
 	}
 
-	private void marcarReserva(Disponibilidad d) throws RolException, BusinessException, UserException {
-		Reserva reserva = agendarReservasEJB.marcarReserva(d);
+	private void marcarReserva(Disponibilidad disponibilidad) throws RolException, BusinessException, UserException {
+		Reserva reserva = agendarReservasEJB.marcarReserva(disponibilidad);
 		sesionMBean.setReserva(reserva);
-		sesionMBean.setDisponibilidad(d);
+		sesionMBean.setDisponibilidad(disponibilidad);
 	}
 
 	private void configurarDisponibilidadesDelDia() {

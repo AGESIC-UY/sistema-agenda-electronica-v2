@@ -7,6 +7,10 @@ public class ReservasPorDocumentoInput {
 	private Integer idRecurso;
 	private String tipoDocumento;
 	private String numeroDocumento;
+  private String codigoTramite;
+  //Las fechas deben ser en formato "yyyyMMdd"
+  private String fechaDesde;
+  private String fechaHasta;
 	
 	public String getToken() {
 		return token;
@@ -38,7 +42,23 @@ public class ReservasPorDocumentoInput {
 	public void setNumeroDocumento(String numeroDocumento) {
 		this.numeroDocumento = numeroDocumento;
 	}
-	
-	
+  public String getCodigoTramite() {
+    return codigoTramite;
+  }
+  public void setCodigoTramite(String codigoTramite) {
+    this.codigoTramite = codigoTramite;
+  }
+  public String getFechaDesde() {
+    return fechaDesde;
+  }
+  public void setFechaDesde(String fechaDesde) {
+    this.fechaDesde = fechaDesde;
+  }
+  public String getFechaHasta() {
+    return fechaHasta;
+  }
+  public void setFechaHasta(String fechaHasta) {
+    this.fechaHasta = fechaHasta;
+  }
 	
 }

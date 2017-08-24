@@ -157,7 +157,7 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 					}
 				}
 				Random random = new Random();
-				if(falsoUsuario.startsWith("cda")) {
+				if(falsoUsuario.startsWith("sae")) {
 					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
 				}
 				falsoUsuario = falsoUsuario+ "/" + empresaId;
@@ -529,8 +529,7 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 		this.reservasDataTable = reservasDataTable;
 	}
 	
-	private void limpiarSession()
-	{
+	private void limpiarSession() {
 		sesionMBean.setAgenda(null);
 		sesionMBean.setListaReservas(null);
 		sesionMBean.setReservaDatos(null);
@@ -588,7 +587,6 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 		this.numeroDocumento = numeroDocumento;
 	}
 	
-	
 	public void verificarDatos(ActionEvent event) {
 		
 		limpiarMensajesError();
@@ -644,15 +642,12 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 		reservas.add(reserva);
 		this.sesionMBean.setListaReservas(reservas);
 		mostrar = "LISTAR_RESERVAS";
-	
 	}
 	
   @PreDestroy
   public void preDestroy() {
-    
     try {
       logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
-      
       this.agendarReservasEJB = null;
       this.campos = null;
       this.consultaEJB = null;
@@ -672,11 +667,9 @@ public class CancelarReservaPublicMBean extends BaseMBean {
         this.tiposDocumento.clear();
       }
       this.tiposDocumento = null;
-      
       logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
     }catch(Exception ex) {
       logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
-      
     }
   }
 	

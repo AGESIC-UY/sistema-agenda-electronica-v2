@@ -20,6 +20,7 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -47,17 +49,24 @@ import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
+import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Atencion;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
+import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
+import uy.gub.imm.sae.entity.TextoAgenda;
+import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
+import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Token;
+import uy.gub.imm.sae.exception.ApplicationException;
+import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
-public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
+public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
@@ -65,6 +74,15 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;
 	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
+  private AgendarReservas agendarReservasEJB;
+  
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
+  private Recursos recursosEJB;
+  
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
+  private UsuariosEmpresas empresasEJB;
+  
   static Logger logger = Logger.getLogger(ConsultasBean.class);
 	
 	/**
@@ -799,12 +817,11 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 	 * servicio tendrá que solicitar un token para cada empresa).
 	 * No considera las reservas correspondientes a disponibilidades presenciales.
 	 */
-	public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException{
-			
+	public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, 
+	    String codTramite) throws UserException{
 		if(idAgenda==null && idRecurso==null) {
 			throw new UserException("debe_especificar_la_agenda_o_el_recurso");
 		}
-	
 		//Determinar el esquema sobre el cual hay que hacer la consulta en base al token
 		try {
 			String query = "SELECT t FROM Token t WHERE t.token=:token";
@@ -823,11 +840,16 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			if(idRecurso!=null) {
 				query = query + " WHERE dis.aere_id=:idRecurso ";
 			}else if(idAgenda!=null) {
-				query = query 
-					+ " WHERE rec.aeag_id=:idAgenda ";
+				query = query + " WHERE rec.aeag_id=:idAgenda ";
+			}else {
+			  //Nunca va a entrar acá porque idRecurso o idAgenda deben estar, pero por las dudas
+        query = query + " WHERE 1=0 ";
+			}
+			if(codTramite!=null && !codTramite.trim().isEmpty()) {
+		      query = query + " AND res.tramite_codigo=:codTramite";
 			}
 			query = query
-          + "   AND dis.presencial = false "
+          + "   AND dis.presencial=false "
 					+ "   AND ds1.nombre='NroDocumento' "
 					+ "   AND dr1.valor=:numDoc "
 					+ "   AND ds2.nombre='TipoDocumento' "
@@ -841,9 +863,14 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
 			}else if(idAgenda!=null) {
 				query1.setParameter("idAgenda", idAgenda);
 			}
+      if(codTramite!=null && !codTramite.trim().isEmpty()) {
+        query1.setParameter("codTramite", codTramite.trim());
+      }
 			query1.setParameter("numDoc", numDoc);
 			query1.setParameter("tipoDoc", tipoDoc);
 			query1.setParameter("hoy", new Date(), TemporalType.DATE);
+			
+			System.out.println("ConsultasBean.consultarReservasPorTokenYDocumento -- "+query+"/"+idRecurso+"/"+numDoc+"/"+tipoDoc+"/"+(new Date()));
 
 			@SuppressWarnings("unchecked")
       List<Object[]> ress = query1.getResultList();
@@ -932,11 +959,46 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
    * servicio tendrá que solicitar un token para cada empresa).
    * No considera las reservas correspondientes a disponibilidades presenciales.
    */
-  public List<Map<String, Object>> consultarReservasPorTokenYDocumentoFull(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc) throws UserException{
+  public List<Map<String, Object>> consultarReservasPorTokenYAgendaTramiteDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, 
+      String codTramite, Date fechaDesde, Date fechaHasta) throws UserException{
     if(idAgenda==null && idRecurso==null) {
       throw new UserException("debe_especificar_la_agenda_o_el_recurso");
     }
     try {
+      if(fechaDesde == null) {
+        if(fechaHasta == null) {
+          //Ambas fechas son nullas, se considera solo el día de hoy
+          fechaDesde = new Date();
+          fechaHasta = fechaDesde;
+        }else {
+          //La fecha final no es nula, se usa como fecha desde un año hacia atrás
+          Calendar calFechaHasta = new GregorianCalendar();
+          calFechaHasta.setTime(fechaHasta);
+          calFechaHasta.add(Calendar.YEAR, -1);
+          fechaDesde = calFechaHasta.getTime();
+        }
+      }else {
+        if(fechaHasta == null) {
+          //La fecha inicial no es nula, se usa como fecha desde un año hacia adelante
+          Calendar calFechaDesde = new GregorianCalendar();
+          calFechaDesde.setTime(fechaDesde);
+          calFechaDesde.add(Calendar.YEAR, 1);
+          fechaHasta = calFechaDesde.getTime();
+        }else {
+          //Ninguna de las fechas es nula, hay que validar que el período no sea mayor a 1 año
+          Calendar calFechaDesde = new GregorianCalendar();
+          calFechaDesde.setTime(fechaDesde);
+          Calendar calFechaHasta = new GregorianCalendar();
+          calFechaHasta.setTime(fechaHasta);
+          calFechaDesde.add(Calendar.YEAR, 1);
+          if(calFechaDesde.before(calFechaHasta)) {
+            throw new UserException("el_periodo_no_puede_ser_mayor_a_un_ano");
+          }
+        }
+      }
+      
+      System.out.println("ConsultasBean.consultarReservasPorTokenYAgendaTramiteDocumento -- Período: "+fechaDesde+" a "+fechaHasta);
+      
       //Determinar el esquema sobre el cual hay que hacer la consulta en base al token
       String query = "SELECT t FROM Token t WHERE t.token=:token";
       Token oToken = (Token) globalEntityManager.createQuery(query).setParameter("token", token).getSingleResult();
@@ -949,25 +1011,41 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
           + " JOIN {esquema}.ae_recursos rec ON rec.id=dis.aere_id "
           + " JOIN {esquema}.ae_agendas age ON age.id=rec.aeag_id "
           + " JOIN {esquema}.ae_datos_reserva dr ON dr.aers_id=res.id " 
-          + " JOIN {esquema}.ae_datos_a_solicitar ds ON ds.id=dr.aeds_id " 
-          + " JOIN {esquema}.ae_datos_reserva dr1 ON dr1.aers_id=res.id "
-          + " JOIN {esquema}.ae_datos_a_solicitar ds1 ON ds1.id=dr1.aeds_id "
-          + " JOIN {esquema}.ae_datos_reserva dr2 ON dr2.aers_id=res.id "
-          + " JOIN {esquema}.ae_datos_a_solicitar ds2 ON ds2.id=dr2.aeds_id "
-          + " LEFT JOIN {esquema}.ae_atencion ate ON ate.aers_id=res.id ";
+          + " JOIN {esquema}.ae_datos_a_solicitar ds ON ds.id=dr.aeds_id ";
+      if(numDoc!=null && !numDoc.trim().isEmpty()) {     
+        query = query + " JOIN {esquema}.ae_datos_reserva dr1 ON dr1.aers_id=res.id "
+            + " JOIN {esquema}.ae_datos_a_solicitar ds1 ON ds1.id=dr1.aeds_id ";
+      }
+      if(tipoDoc!=null && !tipoDoc.trim().isEmpty()) {     
+        query = query +  " JOIN {esquema}.ae_datos_reserva dr2 ON dr2.aers_id=res.id "
+            + " JOIN {esquema}.ae_datos_a_solicitar ds2 ON ds2.id=dr2.aeds_id ";
+      }
+      query = query + " LEFT JOIN {esquema}.ae_atencion ate ON ate.aers_id=res.id ";
       //Si se tiene el id del recurso se filtra por ese valor, sino por el id de agenda
       if(idRecurso!=null) {
         query = query + " WHERE dis.aere_id=:idRecurso ";
       }else if(idAgenda!=null) {
-        query = query 
-          + " WHERE rec.aeag_id=:idAgenda ";
+        query = query + " WHERE rec.aeag_id=:idAgenda ";
+      }else {
+        //Nunca va a entrar acá porque idRecurso o idAgenda deben estar, pero por las dudas
+        query = query + " WHERE 1=0 ";
       }
-      query = query
-          + "   AND ds1.nombre='NroDocumento' "
-          + "   AND dr1.valor=:numDoc "
-          + "   AND ds2.nombre='TipoDocumento' "
-          + "   AND dr2.valor=:tipoDoc "
-          + " ORDER BY res.id";
+      if(codTramite!=null && !codTramite.trim().isEmpty()) {
+        query = query + " AND res.tramite_codigo=:codTramite";
+      }
+      if(numDoc!=null && !numDoc.trim().isEmpty()) {
+        query = query + "   AND ds1.nombre='NroDocumento' AND dr1.valor=:numDoc ";
+      }
+      if(tipoDoc!=null && !tipoDoc.trim().isEmpty()) {
+        query = query + "   AND ds2.nombre='TipoDocumento' AND dr2.valor=:tipoDoc ";
+      }
+      if(fechaDesde!=null) {
+        query = query + "   AND DATE_TRUNC('day',dis.fecha) >=:fechaDesde ";
+      }
+      if(fechaHasta!=null) {
+        query = query + "   AND DATE_TRUNC('day',dis.fecha) <=:fechaHasta ";
+      }
+      query = query + " ORDER BY res.id";
       query = query.replace("{esquema}", esquema);
       Query query1 = globalEntityManager.createNativeQuery(query);
       if(idRecurso!=null) {
@@ -975,9 +1053,21 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
       }else if(idAgenda!=null) {
         query1.setParameter("idAgenda", idAgenda);
       }
-      query1.setParameter("numDoc", numDoc);
-      query1.setParameter("tipoDoc", tipoDoc);
-      
+      if(codTramite!=null && !codTramite.trim().isEmpty()) {
+        query1.setParameter("codTramite", codTramite.trim());
+      }
+      if(numDoc!=null && !numDoc.trim().isEmpty()) {
+        query1.setParameter("numDoc", numDoc);
+      }
+      if(tipoDoc!=null && !tipoDoc.trim().isEmpty()) {
+        query1.setParameter("tipoDoc", tipoDoc);
+      }
+      if(fechaDesde!=null) {
+        query1.setParameter("fechaDesde", fechaDesde, TemporalType.DATE);
+      }
+      if(fechaHasta!=null) {
+        query1.setParameter("fechaHasta", fechaHasta, TemporalType.DATE);
+      }
       @SuppressWarnings("unchecked")
       List<Object[]> ress = query1.getResultList();
       List<Map<String, Object>> resp = new ArrayList<Map<String, Object>>();
@@ -1017,7 +1107,163 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote{
     }catch(NonUniqueResultException nurEx) {
       throw new UserException("no_se_encuentra_el_token_especificado");   
     }
-    
   }
-    
+
+  /**
+   * Permite obtener los recursos para una agenda, según los requerimientos de la operación "recursos_por_agenda" del servicio web REST
+   */
+  public Map<String, Object> consultarRecursosPorAgenda(Integer idEmpresa, Integer idAgenda, String idioma) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = agendarReservasEJB.consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    try {
+      //Respuesta
+      Map<String, Object> resp = new HashMap<String, Object>();
+      //Textos del paso 1 de la agenda
+      if(idioma!=null && !idioma.isEmpty() && agenda.getTextosAgenda().containsKey(idioma)) {
+        resp.put("textoRecurso", agenda.getTextosAgenda().get(idioma).getTextoSelecRecurso());
+        resp.put("textoPaso1", agenda.getTextosAgenda().get(idioma).getTextoPaso1());
+      }else {
+        if(!agenda.getTextosAgenda().isEmpty()) {
+          resp.put("textoRecurso", agenda.getTextosAgenda().values().toArray(new TextoAgenda[0])[0].getTextoSelecRecurso());
+          resp.put("textoPaso1", agenda.getTextosAgenda().values().toArray(new TextoAgenda[0])[0].getTextoPaso1());
+        }
+      }
+      //Obtener los recursos de la agenda
+      List<Recurso> recursos = agendarReservasEJB.consultarRecursos(agenda);
+      //Extraer de los recursos solo los datos requeridos
+      List<Map<String, Object>> recs = new ArrayList<Map<String, Object>>();
+      for (Recurso recurso : recursos) {
+        if (recurso.getVisibleInternet()) {
+          Map<String, Object> rec = new HashMap<String, Object>();
+          rec.put("id", recurso.getId());
+          rec.put("nombre", recurso.getNombre());
+          rec.put("direccion", recurso.getDireccion());
+          rec.put("telefono", recurso.getTelefonos());
+          rec.put("latitud", recurso.getLatitud()!=null?recurso.getLatitud().toString():"");
+          rec.put("longitud", recurso.getLongitud().toString()!=null?recurso.getLongitud().toString():"");
+          recs.add(rec);
+        }
+      }
+      resp.put("recursos", recs);
+      return resp;
+    }catch(Exception nrEx) {
+      throw new UserException("error_no_solucionable");   
+    }
+  }
+
+  /**
+   * Permite consultar las disponibilidades para un recurso, según los requerimientos de la operación "disponibilidades_por_recurso" del servicio web REST
+   */
+  public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = agendarReservasEJB.consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    Recurso recurso;
+    try {
+      recurso = agendarReservasEJB.consultarRecursoPorId(agenda, idRecurso);
+      if(recurso==null) {
+        throw new UserException("no_se_encuentra_lel_recurso_especificado");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_lel_recurso_especificado");
+    }
+    try {
+      //Respuesta
+      Map<String, Object> resp = new HashMap<String, Object>();
+      //Textos del paso 2 de la agenda y el recurso (según idioma)
+      if(idioma!=null && !idioma.isEmpty() && agenda.getTextosAgenda().containsKey(idioma)) {
+        resp.put("textoAgendaPaso2", agenda.getTextosAgenda().get(idioma).getTextoPaso2());
+      }else {
+        if(!agenda.getTextosAgenda().isEmpty()) {
+          resp.put("textoAgendaPaso2", agenda.getTextosAgenda().values().toArray(new TextoAgenda[0])[0].getTextoPaso2());
+        }
+      }
+      if(idioma!=null && !idioma.isEmpty() && recurso.getTextosRecurso().containsKey(idioma)) {
+        resp.put("textoRecursoPaso2", recurso.getTextosRecurso().get(idioma).getTextoPaso2());
+      }else {
+        if(!recurso.getTextosRecurso().isEmpty()) {
+          resp.put("textoRecursoPaso2", recurso.getTextosRecurso().values().toArray(new TextoRecurso[0])[0].getTextoPaso2());
+        }
+      }
+      //Configurar las ventanas
+      VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
+      //Determinar el timezone según la agenda o la empresa
+      TimeZone timezone = TimeZone.getDefault();
+      if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(agenda.getTimezone());
+      }else {
+        if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+          timezone = TimeZone.getTimeZone(empresa.getTimezone());
+        }
+      }
+      //Obtener las disponibilidades para la ventana
+      List<Disponibilidad> disps = agendarReservasEJB.obtenerDisponibilidades(recurso, ventanaCalendario, timezone);
+      SimpleDateFormat formatoClave = new SimpleDateFormat("yyyyMMdd HH:mm");
+      //La clave está compuesta por la tupla [fecha hora id-disponibilidad] y el valor es la cantidad de cupos disponibles
+      Map<String, Integer> cuposPorFechaHora = new HashMap<String, Integer>();
+      for (Disponibilidad disp : disps) {
+        cuposPorFechaHora.put(formatoClave.format(disp.getHoraInicio())+" "+disp.getId(), disp.getCupo());
+      }
+      //Retornar la respuesta
+      resp.put("disponibilidades", cuposPorFechaHora);
+      return resp;
+    }catch(Exception ex) {
+      ex.printStackTrace();
+      throw new UserException("error_no_solucionable"); 
+    }
+  }
+
+  /**
+   * Valida que el token y el id de la empresa existan y se correspondan
+   */
+  public boolean validarTokenEmpresa(String token, Integer idEmpresa) {
+    try {
+      //Validar el token
+      String query = "SELECT t FROM Token t WHERE t.token=:token AND t.empresa.id=:idEmpresa";
+      globalEntityManager.createQuery(query).setParameter("token", token).setParameter("idEmpresa", idEmpresa).getSingleResult();
+      return true;
+    }catch(NoResultException nrEx) {
+      return false;   
+    }
+  }
 }

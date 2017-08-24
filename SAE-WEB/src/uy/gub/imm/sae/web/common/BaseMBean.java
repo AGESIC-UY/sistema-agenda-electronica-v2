@@ -43,7 +43,7 @@ import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "2.0.5";
+	public static final String version = "2.0.6";
 
 	protected static final String FORM_ID = "form";
 	
@@ -139,7 +139,7 @@ public abstract class BaseMBean {
 			UserException ue = (UserException) e;
 			m = new FacesMessage(FacesMessage.SEVERITY_ERROR, getTexto(ue.getCodigoError()), null);
 		} else {
-			m = new FacesMessage(FacesMessage.SEVERITY_ERROR, MENSAJE_MANTENIMIENTO , null);
+			m = new FacesMessage(FacesMessage.SEVERITY_ERROR, MENSAJE_MANTENIMIENTO, null);
 			e.printStackTrace(System.err);
 		}
 		FacesContext.getCurrentInstance().addMessage(idComponente, m);

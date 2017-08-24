@@ -90,4 +90,13 @@ public interface AgendarReservas {
 	public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException;
+	
+	/**
+	 * Este método es utilizado para marcar la reserva y confirmarla en un solo paso.
+	 * Está pensado para ser invocado mediante el servicio web REST confirmarReserva.
+	 * @return
+	 * @throws UserException
+	 */
+	public Reserva generarYConfirmarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos, 
+	    String idTransaccionPadre, String pasoTransaccionPadre, String idioma) throws UserException;
 }

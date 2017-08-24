@@ -200,9 +200,9 @@ public class Paso1MBean extends BaseMBean {
 						ex.printStackTrace();
 					}
 				}
-				Random random = new Random();
 				//Si no es un usuario de CDA se añade un número randómico para evitar conflictos con otros usuarios
-				if(falsoUsuario.startsWith("cda")) {
+				if(falsoUsuario.startsWith("sae")) {
+	        Random random = new Random();
 					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
 				}
 				falsoUsuario = falsoUsuario+ "/" + empresaId;

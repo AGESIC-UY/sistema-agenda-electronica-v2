@@ -52,9 +52,12 @@
 			</div>
 
 			<div>
-        <p:messages id="mensajes" for="form" infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
-          infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}" warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}"
-          errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" />
+		    <p:messages id="mensajes" for="form" autoUpdate="true" 
+		      infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+		      singleInfoTitle="#{sesionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}"
+		      singleWarnTitle="#{sesionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}" 
+		      singleErrorTitle="#{sesionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}"
+		    />
         <p:outputPanel id="warnSinCupos" styleClass="ui-messages ui-widget" aria-live="polite" rendered="#{recursoSinDisponibilidad}">
           <div class="ui-messages-warn ui-corner-all">
             <span class="ui-messages-warn-icon" />

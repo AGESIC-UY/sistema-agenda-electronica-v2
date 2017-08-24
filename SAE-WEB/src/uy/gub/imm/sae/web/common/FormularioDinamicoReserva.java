@@ -467,7 +467,11 @@ public class FormularioDinamicoReserva {
 		UIComponent campo = null;
 		if(soloLectura) {
 			HtmlSelectBooleanCheckbox input = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);
-			input.setValue(Boolean.valueOf(this.valores.get(dato.getNombre()).toString()));
+      if(this.valores.get(dato.getNombre())!=null) {
+        input.setValue(Boolean.valueOf(this.valores.get(dato.getNombre()).toString()));
+      }else {
+        input.setValue(null);
+      }
 			input.setDisabled(true);
 			campo = input;
 		}else {

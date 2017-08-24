@@ -62,6 +62,7 @@ import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Comunicacion;
 import uy.gub.imm.sae.entity.Comunicacion.Tipo1;
 import uy.gub.imm.sae.entity.Comunicacion.Tipo2;
+import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Disponibilidad;
@@ -108,6 +109,13 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	
 	@Resource
 	private SessionContext ctx;
+	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
+  private Recursos recursosEJB;
+  
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
+  private UsuariosEmpresas empresasEJB;
+  
 	
 	static Logger logger = Logger.getLogger(AgendarReservasBean.class);
 	
@@ -1165,4 +1173,161 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
     return reservasSinEnviarComunicacion;
   }
+  
+  /**
+   * Este método es utilizado para marcar la reserva y confirmarla en un solo paso.
+   * Está pensado para ser invocado mediante el servicio web REST confirmarReserva.
+   * @return
+   * @throws UserException
+   */
+  public Reserva generarYConfirmarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos, 
+      String idTransaccionPadre, String pasoTransaccionPadre, String idioma) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(idDisponibilidad==null) {
+      throw new UserException("debe_especificar_la_disponibilidad");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    //Determinar el timezone según la agenda o la empresa
+    TimeZone timezone = TimeZone.getDefault();
+    if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
+      timezone = TimeZone.getTimeZone(agenda.getTimezone());
+    }else {
+      if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(empresa.getTimezone());
+      }
+    }
+    //Obtener la disponibilidad
+    Disponibilidad disponibilidad = (Disponibilidad) entityManager.find(Disponibilidad.class, idDisponibilidad);
+    //Marcar la reserva
+    Reserva reserva = marcarReserva(disponibilidad);
+    //Cargar las agrupaciones
+    List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(disponibilidad.getRecurso(), timezone);
+    //Cargar los datos en la reserva; la respuesta puede contener datos que no están dentro de los datos a solicitar del recurso
+    Map<String, String> datosAdicionales = cargarDatosReserva(reserva, agrupaciones, valoresCampos);
+    //Cargar los datos de trazabilidad
+    Long pasoPadre = null;
+    try {
+      pasoPadre = Long.valueOf(pasoTransaccionPadre);
+    }catch(Exception ex) {
+      throw new UserException("error_no_solucionable");
+    }
+    //Cargar los datos del trámite si fueron incluidos (deben tener como clave tramite.codigo y tramite.nombre)
+    reserva.setTramiteCodigo(datosAdicionales.get("tramite.codigo"));
+    reserva.setTramiteNombre(datosAdicionales.get("tramite.nombre"));
+    boolean confirmada = false;
+    try {
+      while (!confirmada) {
+        try {
+          Reserva rConfirmada = confirmarReserva(empresa, reserva, idTransaccionPadre, pasoPadre, false);
+          reserva.setSerie(rConfirmada.getSerie());
+          reserva.setNumero(rConfirmada.getNumero());
+          reserva.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
+          reserva.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());
+          confirmada = true;
+        } catch (AccesoMultipleException e){
+          //Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
+        }
+      }
+    }catch(UserException uEx) {
+      throw uEx;
+    }catch(Exception ex) {
+      ex.printStackTrace();
+      throw new UserException("error_no_solucionable");
+    }
+    return reserva;
+  }
+  
+  /**
+   * Carga los datos de la reserva obtenidos por parámetro en la reserva.
+   * Los datos deben estar en el mismo formato en el que son pasados por GET como valores por defecto para los campos, es decir
+   * [agrupacion.campo.valor;]*.
+   * Los datos son cargados directamente en la reserva, excepto en los casos en que la clave agrupacion.campo no se encuentre en
+   * la lista de datos a solicitar del recurso, en cuyo caso se devuelven en el resultado.
+   * @param reserva
+   * @param agrupaciones
+   * @param valoresCampos
+   * @return
+   */
+  private Map<String, String> cargarDatosReserva(Reserva reserva, List<AgrupacionDato> agrupaciones, String valoresCampos) {
+    //Lista de datos obtenidos por parámetro que no están dentro de los datos a solicitar del recurso
+    //(Por ejemplo, el código y nombre del trámite (tramite.codigo y tramite.nombre)
+    Map<String, String> datosAdicionales = new HashMap<String, String>();
+    //Map<String, Object> datosReserva = new HashMap<String, Object>();
+    //Armar dos mapas con los datos a solicitar, uno por ids y otro por nombre para accederlos más rápido
+    Map<String, DatoASolicitar> porId = new HashMap<String, DatoASolicitar>();
+    Map<String, DatoASolicitar> porNombre = new HashMap<String, DatoASolicitar>();
+    for(AgrupacionDato agrupacion : agrupaciones) {
+      for(DatoASolicitar datoSolicitar : agrupacion.getDatosASolicitar()) {
+        porId.put(agrupacion.getId().toString()+"."+datoSolicitar.getId().toString(), datoSolicitar);
+        porNombre.put(agrupacion.getNombre()+"."+datoSolicitar.getNombre(), datoSolicitar);
+      }
+    }
+    //Obtener cada uno de los campos cortando el string por los punto y coma
+    String parametros[] = valoresCampos.split("\\;");
+    //Procesar cada uno de los parámetros, que deberían ser de la forma <agrupacion>.<dato>.<valor>
+    for (String parm : parametros) {
+      //Obtener las tres partes (agrupación, dato, valor)
+      String agrupCampoValor[] = parm.split("\\.", 3);
+      String sAgrupacion = null;
+      String sDatoSol = null;
+      String sValor = null;
+      if(agrupCampoValor.length==3) {
+        sAgrupacion = agrupCampoValor[0];
+        sDatoSol = agrupCampoValor[1];
+        sValor = agrupCampoValor[2];
+        //Determinar el dato a solicitar indicado por la agrupación y el dato
+        //Si tanto la agrupacion como el dato son numéricos se asume que son los ids, sino se asume que son los nombres
+        DatoASolicitar datoASolicitar = null;
+        try {
+          Integer.valueOf(sAgrupacion);
+          Integer.valueOf(sDatoSol);
+          //Son identificadores, buscar el dato a solicitar correspondiente
+          datoASolicitar = porId.get(sAgrupacion+"."+sDatoSol);
+        }catch(NumberFormatException nfEx) {
+          //No son identificadores, son nombres
+          datoASolicitar = porNombre.get(sAgrupacion+"."+sDatoSol);
+        }
+        //Si se encontró un dato a solicitar poner el valor apropiado
+        if(datoASolicitar != null) {
+          DatoReserva datoReserva = new DatoReserva();
+          datoReserva.setReserva(reserva);
+          datoReserva.setValor(sValor);
+          datoReserva.setDatoASolicitar(datoASolicitar);
+          reserva.getDatosReserva().add(datoReserva);
+        }else {
+          datosAdicionales.put(sAgrupacion+"."+sDatoSol, sValor);
+        }
+      }
+    }
+    return datosAdicionales;
+  }
+  
+  
 }

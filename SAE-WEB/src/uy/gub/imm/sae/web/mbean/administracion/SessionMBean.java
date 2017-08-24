@@ -890,7 +890,7 @@ public class SessionMBean extends SessionCleanerMBean {
 		String password = request.getParameter("formLogin:password");
 		
 		if(username==null || username.isEmpty() || password==null || password.isEmpty()) {
-			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Debe ingresar su código de usuario  y contraseña"));
+			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Advertencia", "Debe ingresar su código de usuario  y contraseña"));
 			return null;
 		}
 		try {

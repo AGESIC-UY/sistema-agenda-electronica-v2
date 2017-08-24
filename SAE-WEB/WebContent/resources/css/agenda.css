@@ -1289,4 +1289,5 @@ clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
 pre {
 	font-family: Arial,sans-serif;
 	background-color:transparent;
+	white-space: pre-wrap;
 }

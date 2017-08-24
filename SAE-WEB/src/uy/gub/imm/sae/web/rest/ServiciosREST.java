@@ -1,59 +1,72 @@
 package uy.gub.imm.sae.web.rest;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Context;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.factories.BusinessLocator;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
+import uy.gub.imm.sae.entity.Agenda;
+import uy.gub.imm.sae.entity.Reserva;
+import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.exception.UserException;
+import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
+import uy.gub.imm.sae.exception.ValidacionPorCampoException;
+import uy.gub.imm.sae.login.Utilidades;
 
 @Path("/consultas")
 public class ServiciosREST {
 
-	private final static SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm"); 	
+	private final static SimpleDateFormat FORMATOFECHA_CONHORA = new SimpleDateFormat("yyyyMMdd HH:mm"); 	
+  private final static SimpleDateFormat FORMATOFECHA_SINHORA = new SimpleDateFormat("yyyyMMdd");   
 	
+  @Context
+  private HttpServletRequest httpRequest;
+
 	@POST
   @Path("/reservas-por-agenda-y-documento")
   @Consumes("application/json")
   @Produces("application/json")
 	public String getReservasDocumento(ReservasPorDocumentoInput input) {
 		try {
-			
 			BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
 			Consultas consultas = bl.getConsultas();
-			
 			List<Map<String, Object>> reservas = consultas.consultarReservasPorTokenYDocumento(input.getToken(), input.getIdAgenda(), 
-					input.getIdRecurso(), input.getTipoDocumento(), input.getNumeroDocumento());
-			
-			StringBuilder resp = new StringBuilder("[");
+					input.getIdRecurso(), input.getTipoDocumento(), input.getNumeroDocumento(), input.getCodigoTramite());
+			JsonArray jReservas = new JsonArray();
 			for(Map<String, Object> reserva : reservas) {
-				if(resp.length()>1) {
-					resp.append(",");
-				}
-				Date fecha = (Date) reserva.get("fechaHora");
-        String nombreRecurso = (String) reserva.get("nombreRecurso");
-        String codigoCancelacion = (String) reserva.get("codigoCancelacion");
-				resp.append("{'fecha_reserva': '"+sdf.format(fecha)+"', 'nombre_recurso': '"+nombreRecurso+"', 'codigo_cancelacion': '"+codigoCancelacion+"'}");
+        JsonObject jReserva = new JsonObject();
+        jReserva.addProperty("fecha_reserva", FORMATOFECHA_CONHORA.format((Date) reserva.get("fechaHora")));
+        jReserva.addProperty("nombre_recurso", (String) reserva.get("nombreRecurso"));
+        jReserva.addProperty("codigo_cancelacion", (String) reserva.get("codigoCancelacion"));
+        jReservas.add(jReserva);
 			}
-			resp.append("]");
-			
-			return resp.toString();
+			return jReservas.toString();
 		}catch(UserException uEx) {
-      return "{'error':'"+uEx.getCodigoError()+"'}";
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", uEx.getCodigoError());
+      return jError.toString();
     }catch(Exception ex) {
-			return "{'error':'"+ex.getMessage()+"'}";
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", ex.getMessage());
+      return jError.toString();
 		}
   }	
 	
@@ -65,8 +78,24 @@ public class ServiciosREST {
     try {
       BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
       Consultas consultas = bl.getConsultas();
-      List<Map<String, Object>> reservas0 = consultas.consultarReservasPorTokenYDocumentoFull(input.getToken(), input.getIdAgenda(), 
-          input.getIdRecurso(), input.getTipoDocumento(), input.getNumeroDocumento());
+      Date fechaDesde = null;
+      Date fechaHasta = null;
+      if(input.getFechaDesde()!=null && !input.getFechaDesde().trim().isEmpty()) {
+        try {
+          fechaDesde = FORMATOFECHA_SINHORA.parse(input.getFechaDesde());
+        }catch(Exception ex) {
+          fechaDesde = new Date();
+        }
+      }
+      if(input.getFechaHasta()!=null && !input.getFechaHasta().trim().isEmpty()) {
+        try {
+          fechaHasta = FORMATOFECHA_SINHORA.parse(input.getFechaHasta());
+        }catch(Exception ex) {
+          fechaHasta = new Date();
+        }
+      }
+      List<Map<String, Object>> reservas0 = consultas.consultarReservasPorTokenYAgendaTramiteDocumento(input.getToken(), input.getIdAgenda(), 
+          input.getIdRecurso(), input.getTipoDocumento(), input.getNumeroDocumento(), input.getCodigoTramite(), fechaDesde, fechaHasta);
       JsonArray reservas1 = new JsonArray();
       JsonObject reserva1 = null;
       for(Map<String, Object> reserva0 : reservas0) {
@@ -89,7 +118,7 @@ public class ServiciosREST {
         reserva1.addProperty("codigoTrazabilidad", reserva0.get("codigoTrazabilidad")!=null?reserva0.get("codigoTrazabilidad").toString():"");
         reserva1.addProperty("codigoTramite", reserva0.get("codigoTramite")!=null?reserva0.get("codigoTramite").toString():"");
         reserva1.addProperty("nombreTramite", reserva0.get("nombreTramite")!=null?reserva0.get("nombreTramite").toString():"");
-        reserva1.addProperty("fechaHora", reserva0.get("fechaHora")!=null?reserva0.get("fechaHora").toString():"");
+        reserva1.addProperty("fechaHora", reserva0.get("fechaHora")!=null?FORMATOFECHA_CONHORA.format(reserva0.get("fechaHora")):"");
         reserva1.addProperty("presencial", reserva0.get("reservaId")!=null?reserva0.get("reservaId").toString().equalsIgnoreCase("true")?"si":"no":"");
         reserva1.addProperty("recurso", reserva0.get("recurso")!=null?reserva0.get("recurso").toString():"");
         reserva1.addProperty("agenda", reserva0.get("agenda")!=null?reserva0.get("agenda").toString():"");
@@ -106,14 +135,238 @@ public class ServiciosREST {
         reserva1.add("datos", datos1);
         reservas1.add(reserva1);
       }
-      JsonObject ret = new JsonObject();
-      ret.add("reservas", reservas1);
-      ret.addProperty("cantidad", reservas1.size());
-      return ret.toString();
+      JsonObject jReservas = new JsonObject();
+      jReservas.add("reservas", reservas1);
+      jReservas.addProperty("cantidad", reservas1.size());
+      return jReservas.toString();
     }catch(UserException uEx) {
-      return "{'error':'"+uEx.getCodigoError()+"'}";
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", uEx.getCodigoError());
+      return jError.toString();
     }catch(Exception ex) {
-      return "{'error':'"+ex.getMessage()+"'}";
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", ex.getMessage());
+      return jError.toString();
     }
   } 
+
+  @POST
+  @Path("/recursos_por_agenda")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public String getRecursosPorAgenda(RecursosPorAgendaInput input) {
+    try {
+      //Validar el token y la empresa
+      BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+      Consultas consultas = bl.getConsultas();
+      boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+      if(!tokenValido) {
+        JsonObject jError = new JsonObject();
+        jError.addProperty("resultado", "0");
+        jError.addProperty("mensaje", "no_se_encuentra_el_token_especificado");
+        return jError.toString();
+      }
+      //Hacer un login falso para que cambie el esquema
+      String falsoUsuario = "sae" + input.getIdEmpresa()+ "-" + ((new Date()).getTime()+(new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+      String password = Utilidades.encriptarPassword(falsoUsuario);
+      httpRequest.login(falsoUsuario, password);
+      //Obtener los recursos
+      Map<String, Object> agenda = consultas.consultarRecursosPorAgenda(input.getIdEmpresa(), input.getIdAgenda(), input.getIdioma());
+      //Transformar el resultado a un objeto Json para devolver
+      JsonObject jAgenda = new JsonObject();
+      jAgenda.addProperty("textoRecurso", (String)agenda.get("textoRecurso"));
+      jAgenda.addProperty("textoPaso1", (String)agenda.get("textoPaso1"));
+      @SuppressWarnings("unchecked")
+      List<Map<String, Object>> recursos = (List<Map<String, Object>>)agenda.get("recursos");
+      JsonArray jRecursos = new JsonArray();
+      for(Map<String, Object> recurso : recursos) {
+        JsonObject jRecurso = new JsonObject();
+        jRecurso.addProperty("id", (Integer)recurso.get("id"));
+        jRecurso.addProperty("nombre", (String)recurso.get("nombre"));
+        jRecurso.addProperty("direccion", (String)recurso.get("direccion"));
+        jRecurso.addProperty("telefono", (String)recurso.get("telefono"));
+        jRecurso.addProperty("latitud", (String)recurso.get("latitud"));
+        jRecurso.addProperty("longitud", (String)recurso.get("longitud"));
+        jRecursos.add(jRecurso);
+      }
+      jAgenda.add("recursos", jRecursos);
+      //Devolver el resultado en formato string
+      return jAgenda.toString();
+    }catch(UserException uEx) {
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", uEx.getCodigoError());
+      return jError.toString();
+    }catch(Exception ex) {
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", ex.getMessage());
+      return jError.toString();
+    } finally {
+      try {
+        httpRequest.logout();
+      }catch(Exception ex) {
+        //Nada para hacer
+      }
+    }
+  } 
+  
+  @POST
+  @Path("/disponibilidades_por_recurso")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public String getDisponibilidadesPorRecurso(DisponibilidadesPorRecursoInput input) {
+    try {
+      //Validar el token y la empresa
+      BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+      Consultas consultas = bl.getConsultas();
+      boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+      if(!tokenValido) {
+        JsonObject jError = new JsonObject();
+        jError.addProperty("resultado", "0");
+        jError.addProperty("error", "no_se_encuentra_el_token_especificado");
+        return jError.toString();
+      }
+      //Hacer un login falso para que cambie el esquema
+      String falsoUsuario = "sae" + input.getIdEmpresa()+ "-" + ((new Date()).getTime()+(new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+      String password = Utilidades.encriptarPassword(falsoUsuario);
+      httpRequest.login(falsoUsuario, password);
+      //Obtener las disponibilidades
+      Map<String, Object> resp = consultas.consultarDisponibilidadesPorRecurso(input.getIdEmpresa(),  input.getIdAgenda(), input.getIdRecurso(), 
+          input.getIdioma());
+      //Transformar el resultado a un objeto JSon para devolver
+      JsonObject jDisp = new JsonObject();
+      jDisp.addProperty("textoAgendaPaso2", (String)resp.get("textoAgendaPaso2"));
+      jDisp.addProperty("textoRecursoPaso2", (String)resp.get("textoRecursoPaso2"));
+      @SuppressWarnings("unchecked")
+      Map<String, Integer> disps = (Map<String, Integer>)resp.get("disponibilidades");
+      List<String> claves = new ArrayList<String>(disps.keySet());
+      Collections.sort(claves);
+      String fechaActual = null;
+      JsonArray jDisps = new JsonArray();
+      jDisp.add("disponibilidades", jDisps);
+      JsonObject porFecha = null;
+      JsonObject porHora = null;
+      for(String clave : claves) {
+        String[] fechaHoraId = clave.split(" ");
+        String fecha = fechaHoraId[0];
+        String hora = fechaHoraId[1];
+        String id = fechaHoraId[2];
+        if(fechaActual==null || !fechaActual.equals(fecha)) {
+          porFecha = new JsonObject();
+          porHora = new JsonObject();
+          porFecha.add(fecha, porHora);
+          jDisps.add(porFecha);
+          fechaActual = fecha;
+        }
+        JsonObject dispPorHora = new JsonObject();
+        dispPorHora.addProperty("id", id);
+        dispPorHora.addProperty("cupo", disps.get(clave));
+        porHora.add(hora, dispPorHora);
+      }
+      //Devolver el resultado en formato string
+      return jDisp.toString();
+    }catch(UserException uEx) {
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", uEx.getCodigoError());
+      return jError.toString();
+    }catch(Exception ex) {
+      JsonObject jError = new JsonObject();
+      jError.addProperty("error", ex.getMessage());
+      return jError.toString();
+    } finally {
+      try {
+        httpRequest.logout();
+      }catch(Exception ex) {
+        //Nada para hacer
+      }
+    }
+  }
+
+  @POST
+  @Path("/confirmar_reserva")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public String confirmarReserva(ConfirmarReservaInput input) {
+    try {
+      //Validar el token y la empresa
+      BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+      Consultas consultas = bl.getConsultas();
+      boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+      if(!tokenValido) {
+        JsonObject jError = new JsonObject();
+        jError.addProperty("resultado", "0");
+        jError.addProperty("error", "no_se_encuentra_el_token_especificado");
+        return jError.toString();
+      }
+      //Hacer un login falso para que cambie el esquema
+      String falsoUsuario = "sae" + input.getIdEmpresa()+ "-" + ((new Date()).getTime()+(new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+      String password = Utilidades.encriptarPassword(falsoUsuario);
+      httpRequest.login(falsoUsuario, password);
+      //Generar y confirmar la reserva
+      AgendarReservas agendarReservas = bl.getAgendarReservas();
+      Reserva reserva = agendarReservas.generarYConfirmarReserva(input.getIdEmpresa(), input.getIdAgenda(), input.getIdRecurso(), input.getIdDisponibilidad(),
+          input.getDatosReserva(), input.getIdTransaccionPadre(), input.getPasoTransaccionPadre(), input.getIdioma());
+      Agenda agenda = agendarReservas.consultarAgendaPorId(input.getIdAgenda());
+      JsonObject jReserva = new JsonObject();
+      jReserva.addProperty("resultado", "1");
+      jReserva.addProperty("id", reserva.getId());
+      jReserva.addProperty("serieNumero", reserva.getSerie()+"-"+reserva.getNumero());
+      jReserva.addProperty("codigoCancelacion", reserva.getCodigoSeguridad());
+      jReserva.addProperty("codigoTrazabilidad", reserva.getTrazabilidadGuid());
+      String idioma = input.getIdioma();
+      if(idioma!=null && !idioma.isEmpty() && agenda.getTextosAgenda().containsKey(idioma)) {
+        jReserva.addProperty("textoTicket", agenda.getTextosAgenda().get(idioma).getTextoTicketConf());
+      }else {
+        if(!agenda.getTextosAgenda().isEmpty()) {
+          jReserva.addProperty("textoTicket", agenda.getTextosAgenda().values().toArray(new TextoAgenda[0])[0].getTextoTicketConf());
+        }
+      }
+      return jReserva.toString();
+    }catch(UserException uEx) {
+      if(uEx instanceof ValidacionClaveUnicaException) {
+        //Ya existe una reserva para la clave
+        JsonObject jError = new JsonObject();
+        jError.addProperty("resultado", "0");
+        jError.addProperty("error", "ya_existe_una_reserva_para_el_dia_especificado_con_los_datos_proporcionados");
+        return jError.toString();
+      }
+      if(uEx instanceof ValidacionPorCampoException) {
+        //Hay al menos un campo que tiene problemas
+        JsonArray jMensajes = new JsonArray();
+        ValidacionPorCampoException vpcEx = (ValidacionPorCampoException)uEx;
+        for(int i=0; i<vpcEx.getCantCampos(); i++) {
+          jMensajes.add(vpcEx.getMensaje(i)+"/"+vpcEx.getNombreCampo(i));
+        }
+        JsonObject jError = new JsonObject();
+        jError.addProperty("resultado", "0");
+        jError.add("errores", jMensajes);
+        return jError.toString();
+      }
+      if("el_horario_acaba_de_quedar_sin_cupos".equals(uEx.getCodigoError())) {
+        //No hay cupos para la disponibilidad seleccionada
+        JsonObject jError = new JsonObject();
+        jError.addProperty("resultado", "2");
+        jError.addProperty("error", uEx.getCodigoError());
+        return jError.toString();
+      }
+      //Otro error no manejado específicamente
+      JsonObject jError = new JsonObject();
+      jError.addProperty("resultado", "0");
+      jError.addProperty("error", uEx.getCodigoError());
+      return jError.toString();
+    }catch(Exception ex) {
+      //Otro error no manejado específicamente
+      ex.printStackTrace();
+      JsonObject jError = new JsonObject();
+      jError.addProperty("resultado", "0");
+      jError.addProperty("error", ex.getMessage());
+      return jError.toString();
+    } finally {
+      try {
+        httpRequest.logout();
+      }catch(Exception ex) {
+        //Nada para hacer
+      }
+    }
+  }
+
 }

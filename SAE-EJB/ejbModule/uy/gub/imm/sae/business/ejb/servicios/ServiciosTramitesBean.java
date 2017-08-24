@@ -59,8 +59,6 @@ public class ServiciosTramitesBean {
 	
 	private static Logger logger = Logger.getLogger(ServiciosTramitesBean.class);
 
-//  private static final DateFormat FULL_TIME_DF = new SimpleDateFormat("yyyyMMdd HHmm ZZZ");
-
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public List<Organismo> obtenerOrganismos() throws ApplicationException {
     try {

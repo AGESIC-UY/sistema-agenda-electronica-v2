@@ -50,7 +50,6 @@ Se tocaron los siguientes archivos de Primefaces:
   /org/primefaces/component/selectonemenu/SelectOneMenuRenderer.java
   /org/primefaces/component/selectoneradio/SelectOneRadioRenderer.java
   /org/primefaces/component/tabview/TabViewRenderer.java
-  
   /org/primefaces/component/api/UIData.java
   /org/primefaces/component/paginator/PageLinkRenderer.java
   /org/primefaces/component/paginator/FirstPageLinkRenderer.java

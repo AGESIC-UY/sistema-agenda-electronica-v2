@@ -65,12 +65,12 @@
 			</div>
 		</div>
 
-		<p:messages id="pantalla" showDetail="true" autoUpdate="true" closable="true" 
+    <p:messages id="pantalla" showDetail="true" autoUpdate="true" closable="true"
       infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
-      infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}" 
-      warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" 
-      errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" 
-		/>
+      singleInfoTitle="#{sessionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
+      singleWarnTitle="#{sessionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" 
+      singleErrorTitle="#{ssesionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}"
+    />
 
 		<div id="page-content-wrapper">
 

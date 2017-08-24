@@ -177,3 +177,12 @@ Versión 2.0.5 (2017-07-10)
 * Se corrigió un problema por el cual al crear una empresa el título de la página cambiaba de "Crear empresa" a "Editar empresa".
 * Se corrigió un bug por el cual se perdían los valores por defecto de los atributos pasados por URL.
 * Se añadió una verificación sobre los valores de los parámetros pasados como valores por defecto por URL.
+
+Versión 2.0.6 (2017-08-24)
+* Se añadió el parámetro opcional codTramite al servicio web Obtener reservas por documento
+* Se añadieron los parámetros opcionales codTramite, fechaDesde y fechaHasta al servicio web "Obtener reservas por documento full".
+* Los parámetros tipoDocumento y numeroDocumento del servicio "Obtener reservas por documento full" pasaron a ser opcionales.
+* Se renombró el servicio web "Obtener reservas por documento full" para incorporar hecho de que el trámite y el documento son opcionales.
+* Se modificó el título de los mensajes de warning y error para el caso en que hay solo un mensaje a desplegar ("Hay 1 errores.." por "Hay un error")
+* Se añadieron los servicios web "Recursos por agenda", "Disponibilidades por recurso" y "Confirmar reserva".
+* Se modificó la parte donde se muestran los textos de cada paso en la reserva pública y privada para contemplar los saltos de línea y otros formatos provistos por el administrador.

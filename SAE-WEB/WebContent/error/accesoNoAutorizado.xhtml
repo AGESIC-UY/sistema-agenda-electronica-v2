@@ -80,15 +80,15 @@
         <h:outputText value="#{sessionMBean.textos['menu']}" />
       </a>
 
-
       <h1>
         <h:outputText value="#{nombre_pagina}"></h:outputText>
       </h1>
-      <p:messages id="pantalla" showDetail="false" autoUpdate="true"
-        infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
-        infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
-        warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}"
-        errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" />
+      <p:messages id="pantalla" showDetail="false" autoUpdate="true" 
+        infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+        singleInfoTitle="#{sessionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
+        singleWarnTitle="#{sessionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" 
+        singleErrorTitle="#{ssesionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}"
+      />
       <ui:insert name="cuerpo">
 
       </ui:insert>

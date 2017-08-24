@@ -65,6 +65,7 @@ import uy.gub.imm.sae.entity.Validacion;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
 import uy.gub.imm.sae.entity.ValorConstanteValidacionRecurso;
+import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAutocompletarException;
@@ -412,11 +413,13 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				camposInvalidos.add(campo.getNombre());
 				mensajes.add("debe_completar_el_campo_campo");
 			} else if(dato != null) {
+			  boolean campoInvalido = false;
 				if (campo.getTipo() == Tipo.NUMBER) {
 				  //El tipo del dato es numérico, tratar de validarlo
 					try {
 						Integer.parseInt(dato.getValor());
 					} catch (NumberFormatException e) {
+					  campoInvalido = true;
 						camposInvalidos.add(campo.getNombre());
 						mensajes.add("el_campo_campo_solo_puede_contener_digitos");
 					}
@@ -427,17 +430,50 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
               Date fecha = Utiles.stringToDate(dato.getValor());
               if(Utiles.esFechaInvalida(fecha)) {
                 //El formato es correcto pero la fecha es inválida
+                campoInvalido = true;
                 camposInvalidos.add(campo.getNombre());
-                mensajes.add("el_campo_campo_no_tiene_una_fecha_válida"+1);
+                mensajes.add("el_campo_campo_no_tiene_una_fecha_válida");
               }
             }catch(Exception ex) {
               //No se puede parsear la fecha
+              campoInvalido = true;
               camposInvalidos.add(campo.getNombre());
-              mensajes.add("el_campo_campo_no_tiene_una_fecha_válida"+2);
+              mensajes.add("el_campo_campo_no_tiene_una_fecha_válida");
               ex.printStackTrace();
             }
 				  }
-        }else {
+        }else if (campo.getTipo() == Tipo.BOOLEAN) {
+          if(dato.getValor()!=null && !dato.getValor().trim().isEmpty()) {
+            //El tipo del dato es booleano y no es vacío, tratar de validarlo
+            try {
+              Boolean.valueOf(dato.getValor());
+            }catch(Exception ex) {
+              //No se puede parsear el booleano
+              campoInvalido = true;
+              camposInvalidos.add(campo.getNombre());
+              mensajes.add("el_valor_ingresado_no_es_aceptable");
+              ex.printStackTrace();
+            }
+          }
+        }else if (campo.getTipo() == Tipo.LIST) {
+          if(dato.getValor()!=null && !dato.getValor().trim().isEmpty()) {
+            //El tipo del dato es lista y no es vacío, verificar que sea una de las opciones admitidas
+            campoInvalido = true;
+            for(ValorPosible valorPosible : campo.getValoresPosibles()) {
+              if(dato.getValor().equals(valorPosible.getValor())) {
+                campoInvalido = false;
+              }
+            }
+            if(campoInvalido) {
+              //No es un valor aceptable
+              campoInvalido = true;
+              camposInvalidos.add(campo.getNombre());
+              mensajes.add("el_valor_ingresado_no_es_aceptable");
+            }
+          }
+        }
+				//Si el campo no está marcado como inválido, aplicar validaciones específicas
+				if(!campoInvalido) {
 					if(!campo.getAgrupacionDato().getBorrarFlag()) {
 					  //Si es un correo electrónico validar el formato
 						if("Mail".equalsIgnoreCase(campo.getNombre()))	{

@@ -180,12 +180,10 @@ public class Paso2AdminMBean extends BaseMBean {
 		return this.disponibilidadesVespertina;
 	}
 	
-	private void marcarReserva(Disponibilidad d) throws RolException,
-			BusinessException, UserException {
-
-		Reserva r = agendarReservasEJB.marcarReserva(d);
+	private void marcarReserva(Disponibilidad disponibilidad) throws RolException, BusinessException, UserException {
+		Reserva r = agendarReservasEJB.marcarReserva(disponibilidad);
 		sessionMBean.setReserva(r);
-		sessionMBean.setDisponibilidad(d);
+		sessionMBean.setDisponibilidad(disponibilidad);
 	}
 
 	private void configurarDisponibilidadesDelDia() {
@@ -255,10 +253,8 @@ public class Paso2AdminMBean extends BaseMBean {
 	}
 	
 	private void cargarCuposADesplegar(Recurso recurso, VentanaDeTiempo ventana) {
-
-		List<Integer> listaCupos = null;
 		try {
-			listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventana, sessionMBean.getTimeZone());
+		  List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventana, sessionMBean.getTimeZone());
 			// Se carga la fecha inicial
 			Calendar cont = Calendar.getInstance();
 			cont.setTime(Utiles.time2InicioDelDia(sessionMBean.getVentanaMesSeleccionado().getFechaInicial()));
@@ -271,8 +267,7 @@ public class Paso2AdminMBean extends BaseMBean {
 			jsonArrayFchDisp = new JSONArray();
 			// Recorro la ventana dia a dia y voy generando la lista completa de
 			// cupos x dia con -1, 0, >0 según corresponda.
-			while (!cont.getTime().after(
-					sessionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
+			while (!cont.getTime().after(sessionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
 				if (cont.getTime().before(inicioDisp) || cont.getTime().after(finDisp)) {
 					listaCupos.set(i, -1);
 				}else {
@@ -284,12 +279,10 @@ public class Paso2AdminMBean extends BaseMBean {
 				cont.add(Calendar.DAY_OF_MONTH, 1);
 				i++;
 			}
-
 			sessionMBean.setCuposXdiaMesSeleccionado(listaCupos);
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}
-
 	}
 	
 	public void seleccionarFecha() {
@@ -307,20 +300,18 @@ public class Paso2AdminMBean extends BaseMBean {
 		}catch (RolException e) {
 			e.printStackTrace();
 		}
-				
 	}
+	
 	public void seleccionarHorarioMatutino(SelectEvent event) {
 		//al seleccionar un horario matutino se debe deseleccionar horario vespertino
-		if(this.rowSelectMatutina!=null)
-		{
+		if(this.rowSelectMatutina!=null) {
 			setRowSelectVespertina(null);
 		}
 	}
+	
 	public void seleccionarHorarioVespertino(SelectEvent event) {
-		
 		//al seleccionar un horario vespertino se debe deseleccionar horario matutino
-		if(this.rowSelectVespertina!=null)
-		{
+		if(this.rowSelectVespertina!=null) {
 			setRowSelectMatutina(null);
 		}
 	}

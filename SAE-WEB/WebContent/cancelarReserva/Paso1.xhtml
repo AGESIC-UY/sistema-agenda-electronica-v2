@@ -36,11 +36,11 @@
 		<h1>
 			<h:outputText value="#{sesionMBean.textos['cancelar_reserva_para_agenda']} #{sesionMBean.agenda.nombre}" />
 		</h1>
-		<p:messages id="pantalla" for="form" autoUpdate="true" 
+		<p:messages id="pantalla" autoUpdate="true" 
 	    infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
-	    infoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}" 
-	    warnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}" 
-	    errorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}" 
+	    singleInfoTitle="#{sesionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}"
+	    singleWarnTitle="#{sesionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}" 
+	    singleErrorTitle="#{sesionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}"
 		/>
 		
     <h:form id="formSinBusqueda" class="cancelarReserva" rendered="#{!cancelarReservaPublicMBean.hayErrorInit and cancelarReservaPublicMBean.mostrar=='VALIDAR_DATOS'}">

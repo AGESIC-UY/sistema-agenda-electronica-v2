@@ -256,4 +256,12 @@ public class AgendarReservasPort implements AgendarReservas {
       throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
     throw new UnsupportedOperationException();
   }
+  
+  
+  @Override
+  public Reserva generarYConfirmarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos, 
+      String idTransaccionPadre, String pasoTransaccionPadre, String idioma) throws UserException {
+    throw new UnsupportedOperationException();
+  }
+
 }
