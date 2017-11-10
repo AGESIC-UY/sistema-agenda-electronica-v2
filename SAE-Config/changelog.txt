@@ -186,3 +186,15 @@ Versión 2.0.6 (2017-08-24)
 * Se modificó el título de los mensajes de warning y error para el caso en que hay solo un mensaje a desplegar ("Hay 1 errores.." por "Hay un error")
 * Se añadieron los servicios web "Recursos por agenda", "Disponibilidades por recurso" y "Confirmar reserva".
 * Se modificó la parte donde se muestran los textos de cada paso en la reserva pública y privada para contemplar los saltos de línea y otros formatos provistos por el administrador.
+
+Versión 2.0.7 (2017-11-10)
+* Se corrigió un problema con el almacenamiento de los textos con caracteres especiales (tildes, eñes, etc) obtenidos desde los formularios dinámicos.
+* Se añadió la sección de configuración global al backend.
+* Se incorporó Google Analytics.
+* Se añadió el envío del correo electrónico de confirmación cuando se realiza la reserva mediante el servicio web.
+* Se corrigió un bug por el cual fallaba la reserva mediante el servicio web si en los datos no estaba indicado el paso de la transacción padre.
+* Se introdujo una transformación al número del documento cuando el tipo es "cédula de identidad", para quitar los puntos y los guiones, y así no permitir el registro de la misma cédula dos veces como si fuese diferente.
+* Se cambió el mensaje cuando en la reserva pública se accede a una agenda que no tiene recursos vigentes (de "parámetros incorrectos" a "no hay disponibilidades").
+* Se quitó el autocompletado del campo para el código de usuario en el formulario de inicio de sesión.
+* Se incorporó la posibilidad de invocar los servicios web REST mediante el método GET.
+* Se incorporó la reserva presencial autogestionada.

@@ -126,9 +126,7 @@ public class ReservaMBean extends BaseMBean {
 	}
 
 	public void buscarReservaDatos(ActionEvent e) {
-	  
 	  limpiarMensajesError();
-	  
 		boolean huboError = false;
 		if (sessionMBean.getAgendaMarcada() == null && !huboError) {
 			huboError = true;
@@ -141,75 +139,64 @@ public class ReservaMBean extends BaseMBean {
 		if(huboError) {
 			return;
 		}
-
-		List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
-		if (datos.size() <= 1) {
-			huboError = true;
-			addErrorMessage(sessionMBean.getTextos().get("debe_ingresar_al_menos_dos_de_los_datos_solicitados"), FORM_ID);
-		}
-		if (sessionMBean.getCodigoSeguridadReserva()==null || sessionMBean.getCodigoSeguridadReserva().trim().isEmpty()) {
-			huboError = true;
-			addErrorMessage(sessionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), FORM_ID+":codSeg");
-		}
-		
-		if (!huboError) {
-
-			// Voy a negocio a buscar las reservas
-		  List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
-					sessionMBean.getCodigoSeguridadReserva(), sessionMBean.getTimeZone());
-			this.reservaSessionMBean.setListaReservas(reservas);
-			if (reservas.isEmpty()) {
-			  addErrorMessage("No se encontraron reservas con los filtros de búsqueda.", MSG_ID);
-			} else {
-				this.reservaSessionMBean.setListaReservas(reservas);
-			}
-		}
-
+		try {
+  		List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
+  		if (datos.size() <= 1) {
+  			huboError = true;
+  			addErrorMessage(sessionMBean.getTextos().get("debe_ingresar_al_menos_dos_de_los_datos_solicitados"), FORM_ID);
+  		}
+  		if (sessionMBean.getCodigoSeguridadReserva()==null || sessionMBean.getCodigoSeguridadReserva().trim().isEmpty()) {
+  			huboError = true;
+  			addErrorMessage(sessionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), FORM_ID+":codSeg");
+  		}
+  		if (!huboError) {
+  		  List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
+  					sessionMBean.getCodigoSeguridadReserva(), sessionMBean.getTimeZone());
+  			this.reservaSessionMBean.setListaReservas(reservas);
+  			if (reservas.isEmpty()) {
+  			  addErrorMessage("No se encontraron reservas con los filtros de búsqueda.", MSG_ID);
+  			} else {
+  				this.reservaSessionMBean.setListaReservas(reservas);
+  			}
+  		}
+		}catch(Exception ex) {
+		  addErrorMessage(ex);
+	  }
 	}
 
 	public void cancelarReserva(ActionEvent event) {
-	  
 	  limpiarMensajesError();
-	  
 		boolean huboError = false;
-
 		if (sessionMBean.getAgendaMarcada() == null) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-
 		if (sessionMBean.getRecursoMarcado() == null) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-
-		if (reservaSessionMBean.getReservaDatos() == null
-				|| reservaSessionMBean.getReservaDatos().getId() == null) {
+		if (reservaSessionMBean.getReservaDatos() == null || reservaSessionMBean.getReservaDatos().getId() == null) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_una_reserva"), MSG_ID);
 		}else if (reservaSessionMBean.getReservaDatos().getEstado() != Estado.R) {
 			huboError = true;
 			addErrorMessage(sessionMBean.getTextos().get("no_es_posible_cancelar_la_reserva"), MSG_ID);
 		}
-
 		if (!huboError) {
 			try {
 				//Cancelar la reserva
 				agendarReservasEJB.cancelarReserva(sessionMBean.getEmpresaActual(), sessionMBean.getRecursoMarcado(), reservaSessionMBean.getReservaDatos());
-
 				//Recargar la reserva cancelada
 				Reserva r = consultaEJB.consultarReservaPorNumero(sessionMBean.getRecursoMarcado(), 
 						reservaSessionMBean.getDisponibilidad().getHoraInicio(), reservaSessionMBean.getReservaDatos().getNumero());
 				reservaSessionMBean.setReservaDatos(r);
 				List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean,	datosASolicitar);
-				
 				try {
   				//Enviar el mail de confirmacion
   				agendarReservasEJB.enviarComunicacionesCancelacion(r, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
 				}catch(UserException ex) {
           addAdvertenciaMessage(sessionMBean.getTextos().get(ex.getCodigoError()));
         }
-				
 				//Recargar la lista de reservas
 				ArrayList<Reserva> reservas = new ArrayList<Reserva>();
 				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
@@ -223,21 +210,12 @@ public class ReservaMBean extends BaseMBean {
 	}
 
 	public Boolean getConfirmarDeshabilitado() {
-
-		if (reservaSessionMBean.getReservaDatos() == null
-				|| reservaSessionMBean.getReservaDatos().getEstado() == Estado.C
-				|| reservaSessionMBean.getReservaDatos().getEstado() == Estado.U) {
-
+		if (reservaSessionMBean.getReservaDatos() == null	|| reservaSessionMBean.getReservaDatos().getEstado() == Estado.C || reservaSessionMBean.getReservaDatos().getEstado() == Estado.U) {
 			return true;
 		} else {
 			return false;
 		}
 	}
-
-	/**
-	 * *************************************************************************
-	 * ***
-	 */
 
 	public UIComponent getFiltroConsulta() {
 		return filtroConsulta;
@@ -248,7 +226,6 @@ public class ReservaMBean extends BaseMBean {
 		if(this.sessionMBean.getRecursoMarcado() != null) {
 			try {
 				List<AgrupacionDato> agrupaciones0 = recursosEJB.consultarDefCamposTodos(this.sessionMBean.getRecursoMarcado());
-				
 				List<AgrupacionDato> agrupaciones = new ArrayList<AgrupacionDato>();
 				for (AgrupacionDato agrupacionDato : agrupaciones0) {
 					if (!agrupacionDato.getBorrarFlag()) {
@@ -256,9 +233,7 @@ public class ReservaMBean extends BaseMBean {
 						break;
 					}
 				}
-				
-				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sessionMBean.getRecursoMarcado(), filtroConsulta, 
-						agrupaciones, sessionMBean.getFormatoFecha());
+				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sessionMBean.getRecursoMarcado(), filtroConsulta, agrupaciones, sessionMBean.getFormatoFecha());
 			} catch (BusinessException be) {
 				addErrorMessage(be, MSG_ID);
 			} catch (Exception e) {
@@ -290,10 +265,9 @@ public class ReservaMBean extends BaseMBean {
 	public void setCampos(UIComponent campos) {
 		this.campos = campos;
 		try {
-			List<AgrupacionDato> agrupaciones = recursosEJB
-					.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
-			FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), 
-					this.reservaSessionMBean.getReservaDatos(), this.campos, agrupaciones, sessionMBean.getFormatoFecha());
+			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
+			FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(),	this.reservaSessionMBean.getReservaDatos(), this.campos, agrupaciones, 
+			    sessionMBean.getFormatoFecha());
 		} catch (BusinessException be) {
 			addErrorMessage(be, MSG_ID);
 		} catch (Exception e) {
@@ -305,8 +279,7 @@ public class ReservaMBean extends BaseMBean {
 		return datosFiltroReservaMBean;
 	}
 
-	public void setDatosFiltroReservaMBean(
-			Map<String, Object> datosFiltroReservaMBean) {
+	public void setDatosFiltroReservaMBean(Map<String, Object> datosFiltroReservaMBean) {
 		this.datosFiltroReservaMBean = datosFiltroReservaMBean;
 	}
 

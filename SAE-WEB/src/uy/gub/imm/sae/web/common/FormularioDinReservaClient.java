@@ -73,14 +73,16 @@ public class FormularioDinReservaClient {
 		return valores;
 	}
 
-	public static List<DatoReserva> obtenerDatosReserva(Map<String, Object> origen, Map<String, DatoASolicitar> datosASolicitar) {
+	public static List<DatoReserva> obtenerDatosReserva(Map<String, Object> origen, Map<String, DatoASolicitar> datosASolicitar) throws Exception {
 		List<DatoReserva> datos = new ArrayList<DatoReserva>();
 		for (String nombre : origen.keySet()) {
 			Object valor = origen.get(nombre);
 			if (valor != null && !valor.toString().equals("") && !valor.toString().equals("NoSeleccion")) {
 				DatoReserva dato = new DatoReserva();
 				dato.setDatoASolicitar(datosASolicitar.get(nombre));
-				dato.setValor(valor.toString());
+        //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
+        String sValor = new String(valor.toString().getBytes("ISO-8859-1"), "UTF-8");
+        dato.setValor(sValor);
 				datos.add(dato);
 			}
 		}

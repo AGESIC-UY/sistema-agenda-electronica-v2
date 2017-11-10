@@ -1291,3 +1291,97 @@ pre {
 	background-color:transparent;
 	white-space: pre-wrap;
 }
+
+
+.form-publico fieldset {
+  padding:50px
+}
+.form-publico legend {
+	font-size: 22px;
+	font-weight: bold;
+}
+.form-publico label {
+	font-size: 18px;
+	margin-top:3px;
+}
+.form-publico input {
+	font-size: 18px;
+	height:40px
+}
+.form-publico select {
+  font-size: 18px;
+  height:40px;
+  width: 100%;
+}
+.form-publico button.btn-lg.btn-primario{
+  height:auto
+}
+.form-publico button span {
+  font-size: 17px;
+}
+.form-publico .form-group .ui-commandlink{
+	font-size:17px;
+	padding:0;
+}
+.form-publico ul{
+  margin-top:0;
+} 
+.form-publico .panel-botones {
+  text-align: center;
+}
+
+.form-publico .btnConfirmar {
+  margin: 50px auto;
+}
+.form-publico .btn-primario {
+    padding: 8px 18px;
+    margin:20px 0 0 -8px;
+}
+.form-publico .btn-primario span {
+    font-weight: bold;
+}
+
+.popup-publico.ui-dialog {
+border: 0;
+border-radius: 0;
+width: 40% !important;
+}
+.popup-publico.ui-dialog .ui-dialog-titlebar{
+padding:12px 25px;
+}
+.popup-publico.ui-dialog .ui-dialog-titlebar span{
+font-size:18px;
+}
+.popup-publico.ui-dialog .ui-dialog-content {
+padding: 25px 40px 20px 40px;
+}
+.popup-publico.ui-dialog .ui-dialog-content .ui-widget {
+font-size:18px;
+margin-bottom:10px;
+  text-align:center;
+}
+.popup-publico.ui-dialog .ui-dialog-content .ui-widget.confirmacion-texto1 {
+  font-size:32px;
+  font-weight:bold;
+  margin-bottom:10px;
+  text-align:center;
+}
+
+.popup-publico.ui-dialog .ui-dialog-content .ui-widget.confirmacion-texto2 {
+  font-size:22px;
+  margin-bottom:10px;
+  text-align:center;
+}
+.popup-publico.ui-dialog .ui-dialog-content .btn-primario {
+padding: 8px 18px;
+height:40px;
+margin:10px auto 0 auto;
+  display:block;
+width:50%;
+}
+.popup-publico.ui-dialog .ui-dialog-content .btn-primario span {
+font-weight: bold;
+}
+.popup-publico.ui-dialog .ui-dialog-content .col-sm-12 {
+padding: 0;
+} 

@@ -93,18 +93,7 @@ public class Paso1MBean extends BaseMBean {
 	public void init() {
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-
-			String sEmpresaId = request.getParameter("e"); //Id de la empresa
-			String sAgendaId = request.getParameter("a"); //Id de la agenda
-			String sRecursoId = request.getParameter("r"); //Id del recurso
-			
-			String sIdioma = request.getParameter("i"); //Idioma (es,en,...)
-			String sUrl = request.getParameter("u"); //URL de retorno al confirmar (URL encoded)
-			String sParms = request.getParameter("p"); //Parámetros para autocompletar: <idagrupacion>.<iddato>.<valor>;)
-			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
-			String sTramite = request.getParameter("q"); //Código de trámite
-			
-			LOGGER.debug("Parámetros GET: ");
+      LOGGER.debug("Parámetros GET: ");
       LOGGER.debug("              : e=["+request.getParameter("e")+"]");
       LOGGER.debug("              : a=["+request.getParameter("a")+"]");
       LOGGER.debug("              : r=["+request.getParameter("r")+"]");
@@ -113,6 +102,16 @@ public class Paso1MBean extends BaseMBean {
       LOGGER.debug("              : p=["+request.getParameter("p")+"]");
       LOGGER.debug("              : t=["+request.getParameter("t")+"]");
       LOGGER.debug("              : q=["+request.getParameter("q")+"]");
+
+      String sEmpresaId = request.getParameter("e"); //Id de la empresa
+			String sAgendaId = request.getParameter("a"); //Id de la agenda
+			String sRecursoId = request.getParameter("r"); //Id del recurso
+			
+			String sIdioma = request.getParameter("i"); //Idioma (es,en,...)
+			String sUrl = request.getParameter("u"); //URL de retorno al confirmar (URL encoded)
+			String sParms = request.getParameter("p"); //Parámetros para autocompletar: <idagrupacion>.<iddato>.<valor>;)
+			String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
+			String sTramite = request.getParameter("q"); //Código de trámite
 			
 			if(sParms!=null) {
 				sesionMBean.setParmsDatosCiudadano(sParms);
@@ -279,7 +278,7 @@ public class Paso1MBean extends BaseMBean {
 				try{
 					recursos = agendarReservasEJB.consultarRecursos(sesionMBean.getAgenda());
 					if(recursos.isEmpty()) {
-						addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+					  recursoTieneDisponibilidad = false;
 						errorInit = true;
 						return;
 					}

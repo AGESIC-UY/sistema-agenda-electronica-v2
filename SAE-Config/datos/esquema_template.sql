@@ -1399,8 +1399,6 @@ INSERT INTO ae_preguntas_captcha (clave, pregunta, respuesta, idioma) VALUES ('P
 -- Data for Name: ae_textos_recurso; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --
 
-
-
 --
 -- Data for Name: ae_tramites_agendas; Type: TABLE DATA; Schema: {esquema}; Owner: sae
 --

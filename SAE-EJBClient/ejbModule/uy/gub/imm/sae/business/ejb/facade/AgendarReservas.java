@@ -87,6 +87,7 @@ public interface AgendarReservas {
 	
 	public void limpiarTrazas();
 
+	public boolean hayCupoPresencial(Disponibilidad disponibilidad);
 	public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException;

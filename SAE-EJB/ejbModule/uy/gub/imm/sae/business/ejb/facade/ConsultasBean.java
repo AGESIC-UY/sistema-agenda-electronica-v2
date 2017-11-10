@@ -40,8 +40,6 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
-import org.apache.log4j.Logger;
-
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.common.Utiles;
@@ -83,8 +81,6 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
   @EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
   private UsuariosEmpresas empresasEJB;
   
-  static Logger logger = Logger.getLogger(ConsultasBean.class);
-	
 	/**
 	 * Obtiene una reserva por su identificador.
 	 * No toma en cuenta si la reserva corresponde o no a una disponibilidad presencial.
@@ -869,9 +865,6 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 			query1.setParameter("numDoc", numDoc);
 			query1.setParameter("tipoDoc", tipoDoc);
 			query1.setParameter("hoy", new Date(), TemporalType.DATE);
-			
-			System.out.println("ConsultasBean.consultarReservasPorTokenYDocumento -- "+query+"/"+idRecurso+"/"+numDoc+"/"+tipoDoc+"/"+(new Date()));
-
 			@SuppressWarnings("unchecked")
       List<Object[]> ress = query1.getResultList();
 			List<Map<String, Object>> resp = new ArrayList<Map<String, Object>>();
@@ -996,9 +989,6 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
           }
         }
       }
-      
-      System.out.println("ConsultasBean.consultarReservasPorTokenYAgendaTramiteDocumento -- Período: "+fechaDesde+" a "+fechaHasta);
-      
       //Determinar el esquema sobre el cual hay que hacer la consulta en base al token
       String query = "SELECT t FROM Token t WHERE t.token=:token";
       Token oToken = (Token) globalEntityManager.createQuery(query).setParameter("token", token).getSingleResult();
@@ -1264,6 +1254,21 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
       return true;
     }catch(NoResultException nrEx) {
       return false;   
+    }
+  }
+  
+  public Map<String, Object> consultarDatosEmpresa(Integer idEmpresa) {
+    try {
+      Empresa empresa = globalEntityManager.find(Empresa.class, idEmpresa);
+      if(empresa == null) {
+        return null;
+      }
+      Map<String, Object> datos = new HashMap<>();
+      datos.put("FORMATO_FECHA", empresa.getFormatoFecha()!=null?empresa.getFormatoFecha():"dd/MM/yyyy");
+      datos.put("FORMATO_HORA", empresa.getFormatoFecha()!=null?empresa.getFormatoFecha():"HH:mm");
+      return datos;
+    }catch(Exception ex) {
+      return null;   
     }
   }
 }

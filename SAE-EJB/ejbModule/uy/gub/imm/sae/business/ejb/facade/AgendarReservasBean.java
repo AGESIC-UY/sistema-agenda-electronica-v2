@@ -365,7 +365,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		//Chequeo que el cupo real no de negativo
 		//Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
 		//De lo contrario la reserva se ha marcado con exito
-		if (helper.chequeoCupoNegativo(disponibilidad)) {
+		if (helper.chequeoCupoDisponible(disponibilidad, true)) {
 			reserva = entityManager.find(Reserva.class, reserva.getId());
 			entityManager.remove(reserva);
 			entityManager.flush();
@@ -485,8 +485,27 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		for(DatoReserva dato : datosNuevos) {
 		  reserva.getDatosReserva().add(dato);
 		}
-		reserva.setTramiteCodigo(tramiteCodigo);
-		reserva.setTramiteNombre(tramiteNombre);
+    reserva.setTramiteCodigo(tramiteCodigo);
+    reserva.setTramiteNombre(tramiteNombre);
+		//Ajustar el número de documento si es una cédula (dejar solo dígitos)
+		String tipoDocumento = null;
+		String numeroDocumento = null;
+		for(DatoReserva datoReserva : reserva.getDatosReserva()) {
+		  if("NroDocumento".equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+		    numeroDocumento = datoReserva.getValor();
+		  }
+      if("TipoDocumento".equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+        tipoDocumento = datoReserva.getValor();
+      }
+		}
+		if("CI".equalsIgnoreCase(tipoDocumento) && numeroDocumento!=null) {
+		  numeroDocumento = numeroDocumento.replaceAll("[.-]", "");
+		  for(DatoReserva datoReserva : reserva.getDatosReserva()) {
+	      if("NroDocumento".equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+	        datoReserva.setValor(numeroDocumento);
+	      }
+		  }
+		}
 		//Validar los datos de la reserva: campos obligatorios, campos clave duplicados, validaciones extendidas 
     validarDatosReserva(empresa, reserva);
     //Pasó las validaciones
@@ -1033,6 +1052,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       }
   }
 
+  
+  public boolean hayCupoPresencial(Disponibilidad disponibilidad) {
+    return !helper.chequeoCupoDisponible(disponibilidad, false);
+  }
+  
   /**
    * Confirma la reserva.
    * Si la reserva debe tener datos, estos son exigidos y validados en este metodo, incluyendo la verificacion de clave unica
@@ -1233,10 +1257,12 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     Map<String, String> datosAdicionales = cargarDatosReserva(reserva, agrupaciones, valoresCampos);
     //Cargar los datos de trazabilidad
     Long pasoPadre = null;
-    try {
-      pasoPadre = Long.valueOf(pasoTransaccionPadre);
-    }catch(Exception ex) {
-      throw new UserException("error_no_solucionable");
+    if(pasoTransaccionPadre != null) {
+      try {
+        pasoPadre = Long.valueOf(pasoTransaccionPadre);
+      }catch(Exception ex) {
+        throw new UserException("error_no_solucionable");
+      }
     }
     //Cargar los datos del trámite si fueron incluidos (deben tener como clave tramite.codigo y tramite.nombre)
     reserva.setTramiteCodigo(datosAdicionales.get("tramite.codigo"));

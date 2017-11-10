@@ -38,6 +38,7 @@ public class Utiles {
   private static final DateFormat FORMATEADOR_BASICO_FECHA = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
   private static final DateFormat FORMATEADOR_BASICO_FECHA_INGLES = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
   
+  public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
   
 	public static Integer DIA = 1;
 	public static Integer DIA_HORA = 2;
@@ -161,5 +162,35 @@ public class Utiles {
     return cFecha.get(Calendar.YEAR) == FECHA_INVALIDA.get(Calendar.YEAR);
   }
   
+  public static boolean validarDigitoVerificadorCI(String ciStr){
+    if(ciStr==null) {
+      return false;
+    }
+    ciStr = ciStr.trim();
+    //La cédula solo puede contener dígitos, puntos y guiones
+    if(!ciStr.equals(ciStr.replaceAll("[^\\d.-]", ""))) {
+      return false;
+    }
+    ciStr = ciStr.replaceAll("[^\\d]", "");
+    if(ciStr.length()<7) {
+      return false;
+    }
+    String digitoValidar = ciStr.substring(ciStr.length()-1);
+    ciStr = ciStr.substring(0, ciStr.length()-1);
+    final int[] numerosCi = {1, 1, 4, 3, 2, 9, 8, 7, 6, 3, 4};
+    final int cantNumerosCi = 11;
+    final int topeDigitos = 10;
+    int digitoCalculado = 0;
+    int iters = cantNumerosCi-ciStr.length();
+    int j = 0, suma = 0, digitoActual;
+    while(iters<cantNumerosCi){
+      digitoActual = Integer.valueOf(ciStr.substring(j, j+1)).intValue();
+      suma += digitoActual*numerosCi[iters];
+      iters++;
+      j++;
+    }
+    digitoCalculado = (topeDigitos - (suma%topeDigitos))%topeDigitos;
+    return digitoValidar.equals(""+digitoCalculado);
+  }
 
 }

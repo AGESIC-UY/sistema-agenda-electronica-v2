@@ -62,6 +62,18 @@
 		</managed-property>
 	</managed-bean>
 
+  <managed-bean>
+    <managed-bean-name>configuracionMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ConfiguracionMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+
+
 	<managed-bean>
 		<managed-bean-name>recursoMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.RecursoMBean</managed-bean-class>
@@ -537,6 +549,17 @@
 			<value>#{datosFiltroReservaMBean}</value>
 		</managed-property>
 	</managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>presencialAutogestionMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.PresencialAutogestionMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
 
   <managed-bean>
     <managed-bean-name>tokensMBean</managed-bean-name>

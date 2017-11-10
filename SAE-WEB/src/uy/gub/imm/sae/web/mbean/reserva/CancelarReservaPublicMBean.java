@@ -372,33 +372,37 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 			return;
 		}
 
-		List<DatoReserva> datos;
-		if (this.sesionMBean.getReservaId() != null && this.sesionMBean.getEmpresaId() != null) {
-			datos = new ArrayList<DatoReserva>();
-			datos.addAll(this.sesionMBean.getReservaDatos().getDatosReserva());
-		} else {
-			datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
-		}
-		if (datos.size() <= 1) {
-			huboError = true;
-			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_al_menos_dos_de_los_datos_solicitados"));
-		}
-		if (sesionMBean.getCodigoSeguridadReserva().trim().isEmpty()) {
-			huboError = true;
-			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), "formConBusqueda:codSeg");
-		}
-		
-		if(huboError) {
-			return;
-		}
-		
-		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
-		if (reservas.isEmpty()) {
-			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
-			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
-		} else {
-			this.sesionMBean.setListaReservas(reservas);
-			mostrar = "LISTAR_RESERVAS";
+		try {
+  		List<DatoReserva> datos;
+  		if (this.sesionMBean.getReservaId() != null && this.sesionMBean.getEmpresaId() != null) {
+  			datos = new ArrayList<DatoReserva>();
+  			datos.addAll(this.sesionMBean.getReservaDatos().getDatosReserva());
+  		} else {
+  			datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
+  		}
+  		if (datos.size() <= 1) {
+  			huboError = true;
+  			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_al_menos_dos_de_los_datos_solicitados"));
+  		}
+  		if (sesionMBean.getCodigoSeguridadReserva().trim().isEmpty()) {
+  			huboError = true;
+  			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), "formConBusqueda:codSeg");
+  		}
+  		
+  		if(huboError) {
+  			return;
+  		}
+  		
+  		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+  		if (reservas.isEmpty()) {
+  			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
+  			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
+  		} else {
+  			this.sesionMBean.setListaReservas(reservas);
+  			mostrar = "LISTAR_RESERVAS";
+  		}
+		}catch(Exception ex) {
+		  addErrorMessage(ex);
 		}
 
 	}

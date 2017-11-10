@@ -106,6 +106,8 @@ public class SesionMBean	extends BaseMBean {
   @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionRemote")
   private Configuracion configuracionEJB;
 	
+  private String googleAnalytics;
+  
   @PostConstruct
   public void init() {
     try {
@@ -116,6 +118,11 @@ public class SesionMBean	extends BaseMBean {
       Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
       if(bMostrarFechaActual!=null) {
         mostrarFechaActual = bMostrarFechaActual.booleanValue();
+      }
+      //Cargar el código de Google Analytics, si existe
+      googleAnalytics = configuracionEJB.getString("GOOGLE_ANALYTICS");
+      if(googleAnalytics!=null && googleAnalytics.trim().isEmpty()) {
+        googleAnalytics = null;
       }
     } catch (ApplicationException e) {
       LOGGER.error(e);
@@ -518,11 +525,15 @@ public class SesionMBean	extends BaseMBean {
 		SeHizoSeleccion = seHizoSeleccion;
 	}
 
+  public String getGoogleAnalytics() {
+    return googleAnalytics;
+  }
+
 	//*******************************************************************
 	// PARA LOS TEXTOS DEPENDIENTES DEL IDIOMA
 	//*******************************************************************
 	
-	public String getIdiomaActual() {
+  public String getIdiomaActual() {
 		return idiomaActual;
 	}
 

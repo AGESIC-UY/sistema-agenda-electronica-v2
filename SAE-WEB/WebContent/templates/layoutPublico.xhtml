@@ -90,6 +90,10 @@
 			</p:outputPanel>
 		</p:outputPanel>
 
+    <p:outputPanel rendered="#{not empty sesionMBean.googleAnalytics}">
+      <h:outputText value="#{sesionMBean.googleAnalytics}" escape="false" />
+    </p:outputPanel>
+
 	</h:body>
 </f:view>
 </html>

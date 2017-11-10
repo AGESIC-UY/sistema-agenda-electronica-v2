@@ -56,5 +56,7 @@ public interface Consultas {
 	
   public boolean validarTokenEmpresa(String token, Integer idEmpresa);
   public Map<String, Object> consultarRecursosPorAgenda(Integer idEmpresa, Integer idAgenda, String idioma) throws UserException;
-	public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;	
+	public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;
+	
+	public Map<String, Object> consultarDatosEmpresa(Integer idEmpresa);
 }

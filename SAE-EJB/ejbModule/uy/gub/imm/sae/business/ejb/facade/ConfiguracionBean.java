@@ -20,6 +20,8 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
+import java.util.List;
+
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -59,5 +61,21 @@ public class ConfiguracionBean implements ConfiguracionLocal, ConfiguracionRemot
 		}
 		return Long.valueOf(valor);
 	}
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public List<Configuracion> getAll() {
+    String eql = "SELECT c FROM Configuracion c ORDER BY c.clave";
+    try {
+      return  (List<Configuracion>)globalEntityManager.createQuery(eql).getResultList();
+    }catch(Exception ex) {
+      return null;
+    }
+  }
+
+  @Override
+  public void guardar(Configuracion conf) {
+    globalEntityManager.merge(conf);
+  }
 
 }

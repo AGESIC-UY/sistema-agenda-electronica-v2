@@ -341,7 +341,9 @@ public class Paso3MBean extends BaseMBean {
 				if (valor != null && ! valor.toString().trim().equals("")) {
 					DatoReserva dato = new DatoReserva();
 					dato.setDatoASolicitar(sesionMBean.getDatosASolicitar().get(nombre));
-					dato.setValor(valor.toString());
+					//Esto es un workaround para un problema en la codificación de los strings que tienen tildes
+					String sValor = new String(valor.toString().getBytes("ISO-8859-1"), "UTF-8");
+					dato.setValor(sValor);
 					datos.add(dato);
 				}
 			}

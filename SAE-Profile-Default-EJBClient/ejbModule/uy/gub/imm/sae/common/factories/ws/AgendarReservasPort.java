@@ -264,4 +264,9 @@ public class AgendarReservasPort implements AgendarReservas {
     throw new UnsupportedOperationException();
   }
 
+  @Override
+  public boolean hayCupoPresencial(Disponibilidad disponibilidad) {
+    throw new UnsupportedOperationException();
+  }
+
 }

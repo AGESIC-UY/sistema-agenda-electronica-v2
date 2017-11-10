@@ -354,20 +354,22 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		return reserva;
 	}
 	
-	public boolean chequeoCupoNegativo (Disponibilidad d) {
+	/**
+	 * Verifica que existan cupos disponibles para la reserva.
+	 * Si el parámetro reservaTomada es true asume que pueden quedar 0 reservas porque el llamador ya tomó la reserva (la última)
+	 * Si el parámetro reservaTomada es false deben quedar al menos 1 cupo para que el llamador pueda tomarlo
+	 */
+	public boolean chequeoCupoDisponible (Disponibilidad disponibilidad, boolean reservaTomada) {
 		int cantReservas = ((Long) entityManager.createQuery(
   		"SELECT COUNT(*) " +
   		"FROM Disponibilidad d JOIN d.reservas r " +
   		"WHERE d = :d " +
   		"  AND r.estado <> :cancelado")
-		.setParameter("d", d)
+		.setParameter("d", disponibilidad)
 		.setParameter("cancelado", Estado.C)
 		.getSingleResult()).intValue();
-		if (d.getCupo() - cantReservas < 0) {
-			return true;
-		} else {
-			return false;
-		}
+		int minimo = reservaTomada?0:1;
+		return (disponibilidad.getCupo() - cantReservas) < minimo;
 	}
 
 	/**
@@ -477,9 +479,9 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 					if(!campo.getAgrupacionDato().getBorrarFlag()) {
 					  //Si es un correo electrónico validar el formato
 						if("Mail".equalsIgnoreCase(campo.getNombre()))	{
-							 Pattern pat = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2,4})$");
-							 Matcher mat = pat.matcher(dato.getValor());
-							 if(!mat.find()){
+						  Pattern pat = Pattern.compile(Utiles.EMAIL_PATTERN);
+							Matcher mat = pat.matcher(dato.getValor());
+							if(!mat.find()){
 								camposInvalidos.add(campo.getNombre());
 								mensajes.add("no_es_una_direccion_de_correo_electronico_valida");
 							}
@@ -489,7 +491,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 							//Ver si el tipo de documento es CI, si es así hay que validar la cédula uruguaya
 							DatoReserva tipoDoc = valores.get("TipoDocumento");
 							if(tipoDoc!=null && tipoDoc.getValor().equals("CI")) {
-								boolean ciOk = validarDigitoVerificadorCI(dato.getValor());
+								boolean ciOk = Utiles.validarDigitoVerificadorCI(dato.getValor());
 								if(!ciOk) {
 									camposInvalidos.add(campo.getNombre());
 									mensajes.add("cedula_de_identidad_invalida");
@@ -794,36 +796,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		return autocompletador;
 	}
 	
-	public static boolean validarDigitoVerificadorCI(String ciStr){
-		if(ciStr==null) {
-			return false;
-		}
-		ciStr = ciStr.trim();
-		//La cédula solo puede contener dígitos, puntos y guiones
-		if(!ciStr.equals(ciStr.replaceAll("[^\\d.-]", ""))) {
-			return false;
-		}
-		ciStr = ciStr.replaceAll("[^\\d]", "");
-		if(ciStr.length()<7) {
-			return false;
-		}
-		String digitoValidar = ciStr.substring(ciStr.length()-1);
-		ciStr = ciStr.substring(0, ciStr.length()-1);
-		final int[] numerosCi = {1, 1, 4, 3, 2, 9, 8, 7, 6, 3, 4};
-		final int cantNumerosCi = 11;
-		final int topeDigitos = 10;
-		int digitoCalculado = 0;
-		int iters = cantNumerosCi-ciStr.length();
-		int j = 0, suma = 0, digitoActual;
-		while(iters<cantNumerosCi){
-			digitoActual = Integer.valueOf(ciStr.substring(j, j+1)).intValue();
-			suma += digitoActual*numerosCi[iters];
-			iters++;
-			j++;
-		}
-		digitoCalculado = (topeDigitos - (suma%topeDigitos))%topeDigitos;
-		return digitoValidar.equals(""+digitoCalculado);
-	}
 	
 }
 

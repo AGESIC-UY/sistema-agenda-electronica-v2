@@ -129,14 +129,18 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
 		if (!huboError) {
-	    List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
-	    List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservaDatos(datos, sessionMBean.getRecursoMarcado());
-			this.consReservaDatosSessionMBean.setListaReservas(reservas);
-			if(reservas.isEmpty()) {
-				addErrorMessage(sessionMBean.getTextos().get("no_se_encontraron_reservas"),	MSG_ID);
-			} else {
-				this.consReservaDatosSessionMBean.setListaReservas(reservas);
-			}
+		  try {
+  	    List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
+  	    List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservaDatos(datos, sessionMBean.getRecursoMarcado());
+  			this.consReservaDatosSessionMBean.setListaReservas(reservas);
+  			if(reservas.isEmpty()) {
+  				addErrorMessage(sessionMBean.getTextos().get("no_se_encontraron_reservas"),	MSG_ID);
+  			} else {
+  				this.consReservaDatosSessionMBean.setListaReservas(reservas);
+  			}
+		  }catch(Exception ex) {
+		    addErrorMessage(ex);
+		  }
 		}
 	}
 

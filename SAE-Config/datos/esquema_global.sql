@@ -321,10 +321,18 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_CABEZAL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSAACTION_LINEA', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_CABEZAL', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_HABILITADO', 'FALSE');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_VERSION', '101');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PATH', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_KS_PATH', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ORG_KS_PATH', '');
@@ -336,12 +344,8 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_SSL_TS_PASS
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_ROL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_POLICY', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSATO', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_WSAACTION', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_MAXINTENTOS', '10');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TIMEOUT', '3500');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_PRODUCTOR', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_TOPICO', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_LOCATION_LINEA', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('MOSTRAR_FECHA_ACTUAL', 'true');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_ALIAS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_SSL_KS_ALIAS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PATH', '');
@@ -353,12 +357,14 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ORG_KS_PASS', 
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'FALSE');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_PASS', '');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_USER', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'false');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_TIMEOUT', '9000');
-INSERT INTO ae_configuracion (clave, valor) VALUES ('MOSTRAR_FECHA_ACTUAL', 'true');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_LOCATION_CABEZAL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_LOCATION', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_LOCATION_GUIA', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_LOCATION_INFO', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('GOOGLE_ANALYTICS', '');
 
 
 --
@@ -1235,7 +1241,31 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_disponibili
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_disponibilidad_es_invalida', 'La fecha de fin de atenciónal público  es inválida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_es_invalida', 'La fecha es inválida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_error', 'Hay {count} errores en el formulario');
-
+INSERT INTO ae_textos (codigo, texto) VALUES ('pagina', 'Página');
+INSERT INTO ae_textos (codigo, texto) VALUES ('pagina_anterior', 'Anterior');
+INSERT INTO ae_textos (codigo, texto) VALUES ('pagina_siguiente', 'Siguiente');
+INSERT INTO ae_textos (codigo, texto) VALUES ('pagina_primera', 'Primera');
+INSERT INTO ae_textos (codigo, texto) VALUES ('pagina_ultima', 'Última');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_hay_cupos_disponibles_para_el_recurso', 'En la oficina seleccionada no hay cupos disponibles');
+INSERT INTO ae_textos (codigo, texto) VALUES ('proximamente_se_añadiran_cupos', 'A la brevedad se añadirán cupos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ya_tiene_una_reserva_para_el_dia_seleccionado', 'Ya tiene una reserva para el día seleccionado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('solo_se_permite_una_reserva_diaria', 'Solo se permite una reserva diaria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('volver_al_paso_anterior_para_seleccionar_otro_dia', 'Puede volver al paso anterior para seleccionar otro día disponible');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mensaje_en_el_formulario_error', 'Hay un error en el formulario');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mensaje_en_el_formulario_info', 'Ejecución exitosa');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mensaje_en_el_formulario_warn', 'Hay una advertencia a la cual debe prestar atención');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_no_puede_ser_mayor_a_un_ano', 'El período no puede ser mayor a un año');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion', 'Configuración');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_global', 'Configuración global');
+INSERT INTO ae_textos (codigo, texto) VALUES ('editar_configuracion', 'Editar configuración');
+INSERT INTO ae_textos (codigo, texto) VALUES ('solicite_turno_para_ser_atendido', 'Solicite turno para ser atendido');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_tengo_cedula', 'No tengo cédula de identidad');
+INSERT INTO ae_textos (codigo, texto) VALUES ('solicitar_turno', 'Solicitar turno');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_seleccionar_el_tipo_de_documento', 'Debe seleccionar el tipo de documento');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_el_numero_de_documento', 'Debe ingresar el número de documento');
+INSERT INTO ae_textos (codigo, texto) VALUES ('solicitud_confirmada', 'Solicitud confirmada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('sera_llamado_por_documento', 'Será llamado por su número de documento');
+INSERT INTO ae_textos (codigo, texto) VALUES ('solicitud_de_atencion', 'Solicitud de atención');
 
 --
 -- Data for Name: ae_tokens; Type: TABLE DATA; Schema: global; Owner: sae

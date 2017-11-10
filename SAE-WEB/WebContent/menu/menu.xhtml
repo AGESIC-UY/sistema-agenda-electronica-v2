@@ -29,6 +29,9 @@
 				</h2>
 			</div>
 			<p:panelMenu id="menuLateral" aria-level="1" >
+        <p:submenu id="submenuConfiguracion" label="#{sessionMBean.textos['configuracion']}" aria-level="2" rendered="#{sessionMBean.usuarioActual.superadmin}">
+          <p:menuitem value="#{sessionMBean.textos['configuracion_global']}" icon="ui-icon-pencil" url="/administracion/configuracion/configuracion.xhtml" />
+        </p:submenu>
 				<p:submenu id="submenuEmpresas" label="#{sessionMBean.textos['empresas']}" aria-level="2" rendered="#{sessionMBean.usuarioActual.superadmin}">
 					<p:menuitem value="#{sessionMBean.textos['crear_empresa']}" icon="ui-icon-plus" url="/administracion/empresa/editar.xhtml?n=t" />
 					<p:menuitem value="#{sessionMBean.textos['consultar_empresas']}" icon="ui-icon-search" url="/administracion/empresa/consultar.xhtml" />

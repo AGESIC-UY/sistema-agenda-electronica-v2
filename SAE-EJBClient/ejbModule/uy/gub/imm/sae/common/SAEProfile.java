@@ -41,9 +41,7 @@ public class SAEProfile {
 	public static final String PROFILE_UI_TEMPLATES_IMAGES_LOGO_TICKET_KEY = "ui.images.logo.ticket";
 	
 	public static final String EJB_AGENDAR_RESERVAS_JNDI_KEY = "uy.gub.imm.sae.service.ejb.agendar_reservas.jndi";
-	//public static final String EJB_AGENDAR_RESERVAS_JNDI_KEY = "java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote";
 	public static final String EJB_RECURSOS_JNDI_KEY = "uy.gub.imm.sae.service.ejb.recursos.jndi";
-	//public static final String EJB_RECURSOS_JNDI_KEY = "java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote";
 	public static final String EJB_DEPURAR_RESERVAS_JNDI_KEY = "uy.gub.imm.sae.service.ejb.depurar_reservas.jndi";
 	
 	public static final String PROFILE_UI_RESOURCE_BASE_URL_KEY="ui.resource.base.url";

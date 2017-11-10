@@ -51,7 +51,7 @@ public interface AgendarReservasHelperLocal {
 	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
 	public List<Integer> obtenerCuposXDia(VentanaDeTiempo ventana, List<Object[]> cuposAsignados, List<Object[]> cuposConsumidos);
 	public Reserva crearReservaPendiente(Disponibilidad d);
-	public boolean chequeoCupoNegativo (Disponibilidad d);
+	public boolean chequeoCupoDisponible(Disponibilidad d, boolean reservaTomada);
 	public List<DatoASolicitar> obtenerDatosASolicitar(Recurso r);
 	public List<ValidacionPorRecurso> obtenerValidacionesPorRecurso(Recurso r);
 	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws ValidacionException;

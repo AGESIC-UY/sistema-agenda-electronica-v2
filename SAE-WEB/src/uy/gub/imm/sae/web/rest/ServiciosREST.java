@@ -10,9 +10,11 @@ import java.util.Random;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
 
 import com.google.gson.JsonArray;
@@ -40,11 +42,36 @@ public class ServiciosREST {
   @Context
   private HttpServletRequest httpRequest;
 
+  // ======================================================================================================================================
+  // ======================================================================================================================================
+  
 	@POST
   @Path("/reservas-por-agenda-y-documento")
   @Consumes("application/json")
   @Produces("application/json")
-	public String getReservasDocumento(ReservasPorDocumentoInput input) {
+	public String getReservasDocumentoPost(ReservasPorDocumentoInput input) {
+	  return getReservasDocumento(input);
+	}
+	
+  @GET
+  @Path("/reservas-por-agenda-y-documento")
+  @Produces("application/json")
+  public String getReservasDocumentoGet(@QueryParam("token") String token, @QueryParam("idAgenda") Integer idAgenda, @QueryParam("idRecurso") Integer idRecurso, 
+      @QueryParam("tipoDocumento") String tipoDocumento, @QueryParam("numeroDocumento") String numeroDocumento, @QueryParam("codigoTramite") String codigoTramite, 
+      @QueryParam("fechaDesde") String fechaDesde, @QueryParam("fechaHasta") String fechaHasta) {
+    ReservasPorDocumentoInput input = new ReservasPorDocumentoInput();
+    input.setCodigoTramite(codigoTramite);
+    input.setFechaDesde(fechaDesde);
+    input.setFechaHasta(fechaHasta);
+    input.setIdAgenda(idAgenda);
+    input.setIdRecurso(idRecurso);
+    input.setNumeroDocumento(numeroDocumento);
+    input.setTipoDocumento(tipoDocumento);
+    input.setToken(token);
+    return getReservasDocumento(input);
+  }
+	
+	private String getReservasDocumento(ReservasPorDocumentoInput input) {
 		try {
 			BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
 			Consultas consultas = bl.getConsultas();
@@ -70,11 +97,36 @@ public class ServiciosREST {
 		}
   }	
 	
+	// ======================================================================================================================================
+  // ======================================================================================================================================
+	
   @POST
   @Path("/reservas-por-agenda-y-documento-full")
   @Consumes("application/json")
   @Produces("application/json")
-  public String getReservasDocumentoFull(ReservasPorDocumentoInput input) {
+  public String getReservasDocumentoFullPost(ReservasPorDocumentoInput input) {
+    return getReservasDocumentoFull(input);
+  }
+  
+  @GET
+  @Path("/reservas-por-agenda-y-documento-full")
+  @Produces("application/json")
+  public String getReservasDocumentoFullGet(@QueryParam("token") String token, @QueryParam("idAgenda") Integer idAgenda, @QueryParam("idRecurso") Integer idRecurso, 
+      @QueryParam("tipoDocumento") String tipoDocumento, @QueryParam("numeroDocumento") String numeroDocumento, @QueryParam("codigoTramite") String codigoTramite, 
+      @QueryParam("fechaDesde") String fechaDesde, @QueryParam("fechaHasta") String fechaHasta) {
+    ReservasPorDocumentoInput input = new ReservasPorDocumentoInput();
+    input.setCodigoTramite(codigoTramite);
+    input.setFechaDesde(fechaDesde);
+    input.setFechaHasta(fechaHasta);
+    input.setIdAgenda(idAgenda);
+    input.setIdRecurso(idRecurso);
+    input.setNumeroDocumento(numeroDocumento);
+    input.setTipoDocumento(tipoDocumento);
+    input.setToken(token);
+    return getReservasDocumentoFull(input);
+  }
+  
+  private String getReservasDocumentoFull(ReservasPorDocumentoInput input) {
     try {
       BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
       Consultas consultas = bl.getConsultas();
@@ -150,11 +202,31 @@ public class ServiciosREST {
     }
   } 
 
+  // ======================================================================================================================================
+  // ======================================================================================================================================
+  
   @POST
   @Path("/recursos_por_agenda")
   @Consumes("application/json")
   @Produces("application/json")
-  public String getRecursosPorAgenda(RecursosPorAgendaInput input) {
+  public String getRecursosPorAgendaPost(RecursosPorAgendaInput input) {
+    return getRecursosPorAgenda(input);
+  }
+
+  @GET
+  @Path("/recursos_por_agenda")
+  @Produces("application/json")
+  public String getRecursosPorAgendaGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda, 
+      @QueryParam("idioma") String idioma) {
+    RecursosPorAgendaInput input = new RecursosPorAgendaInput();
+    input.setIdAgenda(idAgenda);
+    input.setIdEmpresa(idEmpresa);
+    input.setIdioma(idioma);
+    input.setToken(token);
+    return getRecursosPorAgenda(input);
+  }
+
+  private String getRecursosPorAgenda(RecursosPorAgendaInput input) {
     try {
       //Validar el token y la empresa
       BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
@@ -209,11 +281,32 @@ public class ServiciosREST {
     }
   } 
   
+  // ======================================================================================================================================
+  // ======================================================================================================================================
+  
   @POST
   @Path("/disponibilidades_por_recurso")
   @Consumes("application/json")
   @Produces("application/json")
-  public String getDisponibilidadesPorRecurso(DisponibilidadesPorRecursoInput input) {
+  public String getDisponibilidadesPorRecursoPost(DisponibilidadesPorRecursoInput input) {
+    return getDisponibilidadesPorRecurso(input);
+  }
+  
+  @GET
+  @Path("/disponibilidades_por_recurso")
+  @Produces("application/json")
+  public String getDisponibilidadesPorRecursoGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda, 
+      @QueryParam("idRecurso") Integer idRecurso, @QueryParam("idioma") String idioma) {
+    DisponibilidadesPorRecursoInput input = new DisponibilidadesPorRecursoInput();
+    input.setIdAgenda(idAgenda);
+    input.setIdEmpresa(idEmpresa);
+    input.setIdioma(idioma);
+    input.setIdRecurso(idRecurso);
+    input.setToken(token);    
+    return getDisponibilidadesPorRecurso(input);
+  }
+  
+  private String getDisponibilidadesPorRecurso(DisponibilidadesPorRecursoInput input) {
     try {
       //Validar el token y la empresa
       BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
@@ -281,11 +374,37 @@ public class ServiciosREST {
     }
   }
 
+  // ======================================================================================================================================
+  // ======================================================================================================================================
+  
   @POST
   @Path("/confirmar_reserva")
   @Consumes("application/json")
   @Produces("application/json")
-  public String confirmarReserva(ConfirmarReservaInput input) {
+  public String confirmarReservaPost(ConfirmarReservaInput input) {
+    return confirmarReserva(input);
+  }
+  
+  @GET
+  @Path("/confirmar_reserva")
+  @Produces("application/json")
+  public String confirmarReservaGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda, 
+      @QueryParam("idRecurso") Integer idRecurso, @QueryParam("idDisponibilidad") Integer idDisponibilidad, @QueryParam("idTransaccionPadre") String idTransaccionPadre, 
+      @QueryParam("pasoTransaccionPadre") String pasoTransaccionPadre, @QueryParam("idioma") String idioma, @QueryParam("datosReserva") String datosReserva) {
+    ConfirmarReservaInput input = new ConfirmarReservaInput();
+    input.setDatosReserva(datosReserva);
+    input.setIdAgenda(idAgenda);
+    input.setIdDisponibilidad(idDisponibilidad);
+    input.setIdEmpresa(idEmpresa);
+    input.setIdioma(idioma);
+    input.setIdRecurso(idRecurso);
+    input.setIdTransaccionPadre(idTransaccionPadre);
+    input.setPasoTransaccionPadre(pasoTransaccionPadre);
+    input.setToken(token);
+    return confirmarReserva(input);
+  }
+  
+  private String confirmarReserva(ConfirmarReservaInput input) {
     try {
       //Validar el token y la empresa
       BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
@@ -306,6 +425,17 @@ public class ServiciosREST {
       Reserva reserva = agendarReservas.generarYConfirmarReserva(input.getIdEmpresa(), input.getIdAgenda(), input.getIdRecurso(), input.getIdDisponibilidad(),
           input.getDatosReserva(), input.getIdTransaccionPadre(), input.getPasoTransaccionPadre(), input.getIdioma());
       Agenda agenda = agendarReservas.consultarAgendaPorId(input.getIdAgenda());
+      //Enviar el mail de confirmacion
+      String linkCancelacion = httpRequest.getScheme()+"://"+httpRequest.getServerName();
+      if("http".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=80 || "https".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=443) {
+        linkCancelacion = linkCancelacion + ":" + httpRequest.getServerPort();
+      }
+      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+      Map<String, Object> datosEmpresa = consultas.consultarDatosEmpresa(input.getIdEmpresa());
+      String formatoFecha = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_FECHA")?(String)datosEmpresa.get("FORMATO_FECHA"):"dd/MM/yyyy";
+      String formatoHora = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_HORA")?(String)datosEmpresa.get("FORMATO_HORA"):"HH:mm";
+      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, reserva, input.getIdioma(), formatoFecha, formatoHora);
+      //Enviar la respuesta
       JsonObject jReserva = new JsonObject();
       jReserva.addProperty("resultado", "1");
       jReserva.addProperty("id", reserva.getId());
@@ -349,6 +479,7 @@ public class ServiciosREST {
         return jError.toString();
       }
       //Otro error no manejado específicamente
+      uEx.printStackTrace();
       JsonObject jError = new JsonObject();
       jError.addProperty("resultado", "0");
       jError.addProperty("error", uEx.getCodigoError());
@@ -368,5 +499,9 @@ public class ServiciosREST {
       }
     }
   }
+
+  // ======================================================================================================================================
+  // ======================================================================================================================================
+  
 
 }
