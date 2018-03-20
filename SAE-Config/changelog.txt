@@ -198,3 +198,14 @@ Versión 2.0.7 (2017-11-10)
 * Se quitó el autocompletado del campo para el código de usuario en el formulario de inicio de sesión.
 * Se incorporó la posibilidad de invocar los servicios web REST mediante el método GET.
 * Se incorporó la reserva presencial autogestionada.
+* Se corrigió un problema por el cual la validación se correos electrónicos solo admitía minúsculas y rechazaba las direcciones que contuvieran mayúsculas.
+
+Versión 2.0.8 (2018-03-20)
+* Se corrigió un bug con los datos con tildes y otros caracteres cuando el formulario no puede ser validado.
+* Se corrigió un bug por el cual se mostraba la fecha en lugar de la hora en el mail de confirmación cuando se hacía la reserva mediante el servicio web.
+* Se corrigió un bug por el cual los reportes fallan si hay que incluir un campo de tipo lista que tiene como valor algo que no está actualmente entre los valores disponibles de la lista.
+* Se corrigió un bug en el mapa por el cual al hacer zoom out el marcador se iba corriendo hacia el norte.
+* Se hizo que el nombre del trámite en la confirmación mediante servicio web sea opcional y si no se especifica se busca entre los asociados a la agenda.
+* Se cambiaron las páginas de error cuando no se tiene permiso y no existe un recurso.
+* Se permite utilizar metavariables en el texto de la página del paso final (impresión del ticket).
+* Se cambiaron algunos textos.

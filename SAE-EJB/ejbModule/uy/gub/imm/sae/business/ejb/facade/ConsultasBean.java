@@ -575,7 +575,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 			Integer datoASolicitarId = (Integer) rowReserva[6];
 			String nombreDatoReserva= (String) rowReserva[7];
 			Tipo tipoDatoReserva  = (Tipo) rowReserva[8];
-			Object valorDatoReserva = (Object) rowReserva[9];
+			String valorDatoReserva = (String) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
 			Boolean asistio          = (Boolean)rowReserva[11];
       String tramiteCodigo    = (String) rowReserva[12];
@@ -605,8 +605,14 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
         reservaDTO.setTcancela(tcancela==null?null:tcancela.toString());
 			}
 			if (nombreDatoReserva != null) {
+			  if(valorDatoReserva == null) {
+			    valorDatoReserva = "";
+			  }
 				if (tipoDatoReserva == Tipo.LIST) {
 					String valor = valoresPosiblesPorEtiqueta.get(datoASolicitarId).get(valorDatoReserva);
+					if(valor==null) {
+					  valor = valorDatoReserva;
+					}
 					reservaDTO.getDatos().put(nombreDatoReserva, valor);			
 				} else {
 					reservaDTO.getDatos().put(nombreDatoReserva, valorDatoReserva);			
@@ -1265,7 +1271,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
       }
       Map<String, Object> datos = new HashMap<>();
       datos.put("FORMATO_FECHA", empresa.getFormatoFecha()!=null?empresa.getFormatoFecha():"dd/MM/yyyy");
-      datos.put("FORMATO_HORA", empresa.getFormatoFecha()!=null?empresa.getFormatoFecha():"HH:mm");
+      datos.put("FORMATO_HORA", empresa.getFormatoHora()!=null?empresa.getFormatoHora():"HH:mm");
       return datos;
     }catch(Exception ex) {
       return null;   

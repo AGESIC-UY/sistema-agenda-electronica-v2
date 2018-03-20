@@ -180,7 +180,6 @@ public class UsuarioMBean extends BaseMBean {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_correo_electronico_del_usuario_es_obligatorio"), "form:correoeUsuario");
 				}else {
-					//Pattern pat = Pattern.compile("^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)+(.[a-z]{2,4})$");
 				  Pattern pat = Pattern.compile(Utiles.EMAIL_PATTERN);
 					Matcher mat = pat.matcher(usuario.getCorreoe());
 					if(!mat.find()){

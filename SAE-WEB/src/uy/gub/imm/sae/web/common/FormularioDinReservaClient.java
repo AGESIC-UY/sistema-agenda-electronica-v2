@@ -28,6 +28,7 @@ import java.util.Set;
 
 import javax.faces.component.UIComponent;
 
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
@@ -81,7 +82,7 @@ public class FormularioDinReservaClient {
 				DatoReserva dato = new DatoReserva();
 				dato.setDatoASolicitar(datosASolicitar.get(nombre));
         //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
-        String sValor = new String(valor.toString().getBytes("ISO-8859-1"), "UTF-8");
+				String sValor = Utiles.convertirISO88591aUTF8(valor.toString());
         dato.setValor(sValor);
 				datos.add(dato);
 			}

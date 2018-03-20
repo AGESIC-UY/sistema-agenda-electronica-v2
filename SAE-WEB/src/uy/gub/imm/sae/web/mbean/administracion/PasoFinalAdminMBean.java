@@ -35,6 +35,8 @@ import javax.faces.event.PhaseId;
 import org.apache.log4j.Logger;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.business.utilidades.Metavariables;
+import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.DatoReserva;
@@ -43,6 +45,11 @@ import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.faces.context.FacesContext;
+
+
 /**
  * Presenta todos los datos de la reserva y da la opción de imprimir un recibo.
  * @author im2716295
@@ -144,19 +151,29 @@ public class PasoFinalAdminMBean extends BaseMBean {
 		}
 	}
 
-	public String getDescripcion() {
-		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgenda(), sessionMBean.getIdiomaActual());
-		if (textoAgenda != null) {
-			String str = textoAgenda.getTextoTicketConf();
-			if(str!=null) {
-				return str;
-			} else {
-				return "";
-			}
-		} else {
-			return null;
-		}
-	}
+  public String getDescripcion() {
+    TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgenda(), sessionMBean.getIdiomaActual());
+    if(textoAgenda != null) {
+      String str = textoAgenda.getTextoTicketConf();
+      if(str!=null) {
+        Agenda agenda = sessionMBean.getAgenda();
+        HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        String linkCancelacion = request.getScheme()+"://"+request.getServerName();
+        if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
+          linkCancelacion = linkCancelacion + ":" + request.getServerPort();
+        }
+        Reserva reserva = sessionMBean.getReservaConfirmada();
+        linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+        str = Metavariables.remplazarMetavariables(str, reserva, sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), linkCancelacion);
+        return str;
+      } else {
+        return "";
+      }
+    }
+    else {
+      return "";
+    }
+  }
 
 	/**
 	 * @param datos de alguna reserva

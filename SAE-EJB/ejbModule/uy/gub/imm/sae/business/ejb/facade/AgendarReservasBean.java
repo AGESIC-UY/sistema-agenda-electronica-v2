@@ -53,6 +53,7 @@ import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosNovedadesBean;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosTrazabilidadBean;
 import uy.gub.imm.sae.business.utilidades.MailUtiles;
+import uy.gub.imm.sae.business.utilidades.Metavariables;
 import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
@@ -860,23 +861,12 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 					email = dato.getValor();
 					SimpleDateFormat sdfFecha = new SimpleDateFormat (formatoFecha);
 					SimpleDateFormat sdfHora = new SimpleDateFormat (formatoHora);
-					String texto = textoAgenda.getTextoCorreoConf();
-					if(texto != null && !texto.isEmpty()) {
-						texto = texto.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
-						texto = texto.replace("{{RECURSO}}", recurso.getNombre());
-            texto = texto.replace("{{TRAMITE}}", reserva.getTramiteNombre());
-						texto = texto.replace("{{DIRECCION}}", recurso.getDireccion());
-						texto = texto.replace("{{FECHA}}", sdfFecha.format(reserva.getDisponibilidades().get(0).getFecha()));
-						texto = texto.replace("{{HORA}}", sdfHora.format(reserva.getDisponibilidades().get(0).getHoraInicio()));
-						texto = texto.replace("{{SERIE}}", recurso.getSerie()!=null?recurso.getSerie():"---");
-						texto = texto.replace("{{NUMERO}}", reserva.getNumero()!=null?reserva.getNumero().toString():"---");
-						texto = texto.replace("{{CODIGOSEGURIDAD}}", reserva.getCodigoSeguridad());
-						texto = texto.replace("{{CODIGOTRAZABILIDAD}}", reserva.getTrazabilidadGuid()!=null?reserva.getTrazabilidadGuid():"---");
-						texto = texto.replace("{{CANCELACION}}", linkCancelacion);
-						texto = texto.replace("{{IDRESERVA}}", reserva.getId().toString());
-						MailUtiles.enviarMail(email, "Confirmación de reserva", texto, MailUtiles.CONTENT_TYPE_HTML);
+					String cuerpo = textoAgenda.getTextoCorreoConf();
+					if(cuerpo != null && !cuerpo.isEmpty()) {
+					  cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion);
+						MailUtiles.enviarMail(email, "Confirmación de reserva", cuerpo, MailUtiles.CONTENT_TYPE_HTML);
 					}
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, texto);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, cuerpo);
 					comunicacion.setProcesado(true);
 					entityManager.persist(comunicacion);
 				}
@@ -934,15 +924,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         SimpleDateFormat sdfFecha = new SimpleDateFormat(formatoFecha);
         SimpleDateFormat sdfHora = new SimpleDateFormat(formatoHora);
         if(cuerpo != null && !cuerpo.isEmpty()) {
-          cuerpo = cuerpo.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
-          cuerpo = cuerpo.replace("{{RECURSO}}", recurso.getNombre());
-          cuerpo = cuerpo.replace("{{TRAMITE}}", reserva.getTramiteNombre());
-          cuerpo = cuerpo.replace("{{DIRECCION}}", recurso.getDireccion());
-          cuerpo = cuerpo.replace("{{FECHA}}", sdfFecha.format(reserva.getDisponibilidades().get(0).getFecha()));
-          cuerpo = cuerpo.replace("{{HORA}}", sdfHora.format(reserva.getDisponibilidades().get(0).getHoraInicio()));
-          cuerpo = cuerpo.replace("{{SERIE}}", recurso.getSerie()!=null?recurso.getSerie():"---");
-          cuerpo = cuerpo.replace("{{NUMERO}}", reserva.getNumero()!=null?reserva.getNumero().toString():"---");
-          cuerpo = cuerpo.replace("{{IDRESERVA}}", reserva.getId().toString());
+          cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, "");
           MailUtiles.enviarMail(emailTo, asunto, cuerpo, MailUtiles.CONTENT_TYPE_HTML);
         }
         Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, emailTo, recurso, reserva, asunto+"/"+cuerpo);
@@ -1264,9 +1246,23 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         throw new UserException("error_no_solucionable");
       }
     }
-    //Cargar los datos del trámite si fueron incluidos (deben tener como clave tramite.codigo y tramite.nombre)
-    reserva.setTramiteCodigo(datosAdicionales.get("tramite.codigo"));
-    reserva.setTramiteNombre(datosAdicionales.get("tramite.nombre"));
+    //Cargar los datos del trámite si fueron incluidos (deben tener como clave tramite.codigo y opcionalmente tramite.nombre)
+    String tramiteCodigo = datosAdicionales.get("tramite.codigo");
+    if(tramiteCodigo==null || tramiteCodigo.trim().isEmpty()) {
+      throw new UserException("el_codigo_del_tramite_es_obligatorio");
+    }
+    String tramiteNombre = datosAdicionales.get("tramite.nombre");
+    //Si no se especifica el nombre del trámite se busca uno asociado a la agenda
+    if(tramiteNombre==null || tramiteNombre.trim().isEmpty()) {
+      tramiteNombre = "---";
+      for(TramiteAgenda tramite : agenda.getTramites()) {
+        if(tramiteCodigo.equals(tramite.getTramiteCodigo())) {
+          tramiteNombre = tramite.getTramiteNombre();
+        }
+      }
+    }
+    reserva.setTramiteCodigo(tramiteCodigo);
+    reserva.setTramiteNombre(tramiteNombre);
     boolean confirmada = false;
     try {
       while (!confirmada) {

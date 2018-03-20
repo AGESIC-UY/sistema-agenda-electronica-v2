@@ -43,7 +43,9 @@ import org.primefaces.context.RequestContext;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.ModoAutocompletado;
+import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
@@ -316,6 +318,7 @@ public class Paso3AdminMBean extends BaseMBean {
 	public String confirmarReserva() {
 		limpiarMensajesError();
     yaExisteReservaCamposClave = false;
+    sessionMBean.setReservaConfirmada(null);
 		try {
 			boolean hayError = false;
       if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
@@ -345,9 +348,12 @@ public class Paso3AdminMBean extends BaseMBean {
 				if (valor != null && ! valor.toString().trim().equals("")) {
 					DatoReserva dato = new DatoReserva();
 					dato.setDatoASolicitar(sessionMBean.getDatosASolicitar().get(nombre));
-          //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
-          String sValor = new String(valor.toString().getBytes("ISO-8859-1"), "UTF-8");
-          dato.setValor(sValor);
+          String sValor = valor.toString().trim();
+          if(Tipo.STRING.equals(dato.getDatoASolicitar().getTipo()) || Tipo.NUMBER.equals(dato.getDatoASolicitar().getTipo())) {
+            //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
+            sValor = Utiles.convertirISO88591aUTF8(sValor);
+          }
+					dato.setValor(sValor);
 					datos.add(dato);
 				}
 			}
@@ -465,7 +471,20 @@ public class Paso3AdminMBean extends BaseMBean {
 			addErrorMessage(sessionMBean.getTextos().get("sistema_en_mantenimiento"));
 			ex.printStackTrace();
 			return null;
-		}
+		} finally {
+      //Si no hay una reserva confirmada es porque falló alguna validación y hay que deshacer el cambio de caracteres
+      if(sessionMBean.getReservaConfirmada() == null) {
+        for(String nombre : datosReservaMBean.keySet()) {
+          Object valor = datosReservaMBean.get(nombre);
+          DatoASolicitar datoSol = sessionMBean.getDatosASolicitar().get(nombre);
+          if(valor!=null && datoSol!=null && (Tipo.STRING.equals(datoSol.getTipo()) || Tipo.NUMBER.equals(datoSol.getTipo())) && !valor.toString().trim().isEmpty()) {
+            //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
+            String sValor = Utiles.convertirISO88591aUTF8(valor.toString().trim());
+            datosReservaMBean.put(nombre, sValor);
+          }
+        }
+      }
+    }
 		//Blanquear el formulario de datos de la reserva
 		datosReservaMBean.clear();
 		return "reservaConfirmada";

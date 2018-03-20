@@ -31,17 +31,24 @@
 				<div class="col-sm-8 cabezalEmpresa">
 					<div id="logo">
 						<div>
-							<h:outputText styleClass="nombre-activo" value="#{sesionMBean.textos['nombre_aplicacion']}" />
+              <h:outputText styleClass="nombre-activo" value="#{sesionMBean.textos['nombre_aplicacion']}" rendered="#{not empty sesionMBean.textos}" />
+              <h:outputText styleClass="nombre-activo" value="#{sessionMBean.textos['nombre_aplicacion']}" rendered="#{empty sesionMBean.textos}" />
 						</div>
 					</div>
 				</div>
 				<div class="col-sm-4 cabezalTramites">
 					<div class="logosSecundarios">
 						<ul class="listaHorizontal">
-							<li><a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia"> <img
-									src="/sae-admin/resources/images/logoPresidencia.png" alt="Presidencia" /></a></li>
-							<li><a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital"> <img
-									src="/sae-admin/resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" /></a></li>
+							<li>
+							  <a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia">
+							    <img src="/sae-admin/resources/images/logoPresidencia.png" alt="Presidencia" />
+						    </a>
+					    </li>
+							<li>
+							  <a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital">
+							    <img src="/sae-admin/resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" />
+						    </a>
+					    </li>
 						</ul>
 					</div>
 				</div>
@@ -56,13 +63,18 @@
 					<span class="icn icn-warning-lg"></span>
 				</div>
 				<div class="dialog-data">
-					<span class="dialog-title"><h:outputText value="#{sesionMBean.textos['recurso_no_encontrado']}" /></span>
-					<p>
-						<h:outputText value="#{sesionMBean.textos['el_recurso_solicitado_no_existe']}" />
-					</p>
-					<p>
-						<h:outputText value="#{sesionMBean.textos['verifique_la_direccion_especificada']}" />
-					</p>
+          <span class="dialog-title">
+            <h:outputText value="#{sesionMBean.textos['acceso_denegado']}" rendered="#{not empty sesionMBean.textos}" />
+            <h:outputText value="#{sessionMBean.textos['acceso_denegado']}" rendered="#{empty sesionMBean.textos}" />
+          </span>
+          <p>
+            <h:outputText value="#{sesionMBean.textos['no_tiene_acceso_al_recurso_o_no_existe']}" rendered="#{not empty sesionMBean.textos}" />
+            <h:outputText value="#{sessionMBean.textos['no_tiene_acceso_al_recurso_o_no_existe']}" rendered="#{empty sesionMBean.textos}" />
+          </p>
+          <p>
+            <h:outputText value="#{sesionMBean.textos['si_error_contacte_al_administrador']}" rendered="#{not empty sesionMBean.textos}" />
+            <h:outputText value="#{sessionMBean.textos['si_error_contacte_al_administrador']}" rendered="#{empty sesionMBean.textos}" />
+          </p>
 				</div>
 			</div>
 		</div>

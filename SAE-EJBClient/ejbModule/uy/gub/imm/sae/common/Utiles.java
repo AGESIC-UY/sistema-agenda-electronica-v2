@@ -20,6 +20,7 @@
 
 package uy.gub.imm.sae.common;
 
+import java.io.UnsupportedEncodingException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -193,4 +194,20 @@ public class Utiles {
     return digitoValidar.equals(""+digitoCalculado);
   }
 
+  public static String convertirISO88591aUTF8(String texto) {
+    try {
+      return new String(texto.getBytes("ISO-8859-1"), "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      return texto;
+    }
+  }
+  
+  public static String convertirUTF8aISO88591(String texto) {
+    try {
+      return new String(texto.getBytes("UTF-8"), "ISO-8859-1");
+    } catch (UnsupportedEncodingException e) {
+      return texto;
+    }
+  }
+  
 }

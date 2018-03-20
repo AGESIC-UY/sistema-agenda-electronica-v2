@@ -11,11 +11,6 @@
 	</managed-bean>
 
 	<managed-bean>
-		<managed-bean-name>utilMBean</managed-bean-name>
-		<managed-bean-class>uy.gub.imm.sae.web.mbean.UtilMBean</managed-bean-class>
-		<managed-bean-scope>request</managed-bean-scope>
-	</managed-bean>
-	<managed-bean>
 		<managed-bean-name>agendaSessionMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.AgendaSessionMBean</managed-bean-class>
 		<managed-bean-scope>session</managed-bean-scope>

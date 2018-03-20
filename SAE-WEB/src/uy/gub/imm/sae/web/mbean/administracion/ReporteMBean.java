@@ -765,7 +765,7 @@ public class ReporteMBean extends BaseMBean {
 					if (campo.getIncluirEnReporte()) {
 						String clave = campo.getNombre();
 						TableCellValue valor;
-						if (reserva.getDatos().containsKey(clave)){
+						if(reserva.getDatos().get(clave)!=null){
 							valor = new TableCellValue(reserva.getDatos().get(clave).toString());
 						} else {
 							valor = new TableCellValue("");

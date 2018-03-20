@@ -36,6 +36,7 @@ import javax.servlet.http.HttpServletRequest;
 import org.apache.log4j.Logger;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.business.utilidades.Metavariables;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
@@ -167,11 +168,19 @@ public class PasoFinalMBean extends BaseMBean {
 	}
 
 	public String getDescripcion() {
-		//TextoAgenda textoAgenda = sesionMBean.getAgenda().getTextosAgenda();
 		TextoAgenda textoAgenda = getTextoAgenda(sesionMBean.getAgenda(), sesionMBean.getIdiomaActual());
-		if (textoAgenda != null) {
+		if(textoAgenda != null) {
 			String str = textoAgenda.getTextoTicketConf();
 			if(str!=null) {
+        Agenda agenda = sesionMBean.getAgenda();
+			  HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        String linkCancelacion = request.getScheme()+"://"+request.getServerName();
+	      if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
+	        linkCancelacion = linkCancelacion + ":" + request.getServerPort();
+	      }
+	      Reserva reserva = sesionMBean.getReservaConfirmada();
+	      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+			  str = Metavariables.remplazarMetavariables(str, reserva, sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora(), linkCancelacion);
 				return str;
 			}	else {
 				return "";
