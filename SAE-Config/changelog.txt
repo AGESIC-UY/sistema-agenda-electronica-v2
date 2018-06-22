@@ -209,3 +209,8 @@ Versión 2.0.8 (2018-03-20)
 * Se cambiaron las páginas de error cuando no se tiene permiso y no existe un recurso.
 * Se permite utilizar metavariables en el texto de la página del paso final (impresión del ticket).
 * Se cambiaron algunos textos.
+
+Versión 2.0.8.R1 (2018-06-22)
+* Se corrigió un bug por el cual el servicio web de confirmación de reservas devolvía el texto a mostrar sin remplazar las metavariables.
+* Se añadió el servicio web "Reservas vigentes por documento".
+* Se añadió el servicio web "Cancelación de reserva".

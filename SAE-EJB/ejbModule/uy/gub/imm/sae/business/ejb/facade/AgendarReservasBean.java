@@ -21,13 +21,11 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -269,6 +267,53 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     cancelarReserva(empresa, recurso, reserva, false);
   }
 	
+  public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    //Obtener la reserva
+    Reserva reserva = (Reserva) entityManager.find(Reserva.class, idReserva);
+    if(reserva==null) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    if(!Estado.R.equals(reserva.getEstado())) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    //Obtener el recurso
+    Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+    //Cancelar la reserva
+    cancelarReserva(empresa, recurso, reserva, false);
+  }
+  
 	private void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva, boolean masiva) throws UserException {
 		if (recurso == null) {
 			throw new UserException("debe_especificar_el_recurso");
@@ -278,7 +323,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		}
 		Reserva r = entityManager.find(Reserva.class, reserva.getId());
 		if (r == null) {
-			throw new UserException("no_se_encuentra_la_reserva_especificada");
+			throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
 		}
 		ReservaDTO reservaDTO = new ReservaDTO();
 		reservaDTO.setEstado(r.getEstado().toString());
@@ -319,30 +364,24 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
 	}
 
-	/**
-	 * Consulta una reserva por numero y para un recurso.
-	 * Si se pasa el recurso, se valida que la reserva con <b>numero</b> corresponda al recurso indicado.
-	 * En caso contrario simplemente se busca la reserva por id y se la retorna (sin validar nada)
-	 */
-	public Reserva consultarReservaPorNumero(Recurso r, Integer numero) throws BusinessException {
-		Reserva reserva = entityManager.find(Reserva.class, numero);
-		if (reserva == null) {
-			throw new BusinessException("-1", "No se encuentra la reserva indicada");
-		}
-		if(r!=null){
-			boolean esReservaDeRecurso = false;
-			for (Iterator<Disponibilidad> iterator = reserva.getDisponibilidades().iterator(); iterator.hasNext() && !esReservaDeRecurso;) {
-				Disponibilidad disp = iterator.next();
-				if(disp.getRecurso().getId()==r.getId()){
-					esReservaDeRecurso = true;
-				}
-			}
-			if(esReservaDeRecurso){
-				throw new BusinessException("-1", "El numero de reserva no se corresponde con el recurso indicado");
-			}
-		}
-		return reserva;
-	}
+  /**
+   * Consulta una reserva por numero y para un recurso.
+   * Si se pasa el recurso, se valida que la reserva con <b>numero</b> corresponda al recurso indicado.
+   * En caso contrario simplemente se busca la reserva por id y se la retorna (sin validar nada)
+   */
+  public Reserva consultarReservaPorId(Integer idRecurso, Integer idReserva) throws UserException {
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    if(idRecurso==null){
+      throw new UserException("debe_especificar_el recurso");
+    }
+    Reserva reserva = entityManager.find(Reserva.class, idReserva);
+    if (reserva==null || !reserva.getDisponibilidades().get(0).getRecurso().getId().equals(idRecurso)) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    return reserva;
+  }
 
 	/**
 	 * Crea una nueva reserva en estado pendiente, controla que aun exista cupo.
@@ -859,8 +898,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				DatoASolicitar datoSol = dato.getDatoASolicitar();
 				if("Mail".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
 					email = dato.getValor();
-					SimpleDateFormat sdfFecha = new SimpleDateFormat (formatoFecha);
-					SimpleDateFormat sdfHora = new SimpleDateFormat (formatoHora);
 					String cuerpo = textoAgenda.getTextoCorreoConf();
 					if(cuerpo != null && !cuerpo.isEmpty()) {
 					  cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion);
@@ -921,8 +958,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				}
 			}
 			if(emailTo != null) {
-        SimpleDateFormat sdfFecha = new SimpleDateFormat(formatoFecha);
-        SimpleDateFormat sdfHora = new SimpleDateFormat(formatoHora);
         if(cuerpo != null && !cuerpo.isEmpty()) {
           cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, "");
           MailUtiles.enviarMail(emailTo, asunto, cuerpo, MailUtiles.CONTENT_TYPE_HTML);

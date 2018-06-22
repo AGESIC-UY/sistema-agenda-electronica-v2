@@ -5,7 +5,7 @@
 	<classpathentry combineaccessrules="false" kind="src" path="/SAE-Acciones-EJBClient"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SAE-Autocompletados-EJBClient"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/SAE-Validaciones-EJBClient"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/java-1.6.0-openjdk-1.6.0.0">
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<attributes>
 			<attribute name="owner.project.facets" value="java"/>
 		</attributes>
@@ -22,5 +22,21 @@
 	<classpathentry kind="lib" path="/SAE-Config/libs/hibernate-core-4.2.21.Final.jar"/>
 	<classpathentry kind="lib" path="/SAE-Config/libs/jdom-1.1.2.jar"/>
 	<classpathentry kind="lib" path="/SAE-Config/libs/commons-lang-2.1.jar"/>
+	<classpathentry kind="lib" path="/SAE-Config/libs/PGE/opensaml-2.3.1.jar"/>
+	<classpathentry kind="lib" path="/SAE-Config/libs/PGE/joda-time-1.6.2.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-ejb3-ext-api-2.0.0.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-ejb-api_3.1_spec-1.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-el-api_2.2_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-servlet-api_3.0_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/hibernate-jpa-2.0-api-1.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-annotations-api_1.1_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-jaxrpc-api_1.1_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-jaxrs-api_1.1_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-jsf-api_2.1_spec-2.0.1.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/jboss-transaction-api_1.1_spec-1.0.0.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/log4j-1.2.16.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/mail-1.4.4.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/picketbox-4.0.7.Final.jar"/>
+	<classpathentry kind="lib" path="/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-Config/libs/picketbox-commons-1.0.0.final.jar"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>

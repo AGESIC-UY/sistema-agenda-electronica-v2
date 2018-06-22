@@ -51,9 +51,11 @@ public interface Consultas {
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta);
   public List<AtencionLLamadaReporteDT> consultarAtencionesPresencialesRecursoPeriodo(Recurso recurso, Date fechaDesde, Date fechaHasta);
-	public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite) throws UserException;
-  public List<Map<String, Object>> consultarReservasPorTokenYAgendaTramiteDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite, Date fechaDesde, Date fechaHasta) throws UserException;
 	
+  public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite) throws UserException;
+  public List<Map<String, Object>> consultarReservasPorTokenYAgendaTramiteDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite, Date fechaDesde, Date fechaHasta) throws UserException;
+  public List<Map<String, Object>> consultarReservasVigentesPorTokenYAgendaTramiteDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite) throws UserException;
+  
   public boolean validarTokenEmpresa(String token, Integer idEmpresa);
   public Map<String, Object> consultarRecursosPorAgenda(Integer idEmpresa, Integer idAgenda, String idioma) throws UserException;
 	public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;
