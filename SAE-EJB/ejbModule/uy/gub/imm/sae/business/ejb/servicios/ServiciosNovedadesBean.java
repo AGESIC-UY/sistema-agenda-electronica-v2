@@ -84,7 +84,7 @@ import uy.gub.imm.sae.entity.global.Novedad;
  */
 @Stateless
 public class ServiciosNovedadesBean {
-
+ 
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 

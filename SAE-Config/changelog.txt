@@ -214,3 +214,8 @@ Versión 2.0.8.R1 (2018-06-22)
 * Se corrigió un bug por el cual el servicio web de confirmación de reservas devolvía el texto a mostrar sin remplazar las metavariables.
 * Se añadió el servicio web "Reservas vigentes por documento".
 * Se añadió el servicio web "Cancelación de reserva".
+
+Versión 2.1.0 (2018-09-12)
+* Se añadió la funcionalidad de reservas múltiples.
+* Se añadió la posibilidad de modificar reservas confirmadas (solo día y hora).
+* Se corrigió un problema por el cual no se estaba pasando el código del trámite seleccionado a las acciones y validaciones personalizadas.

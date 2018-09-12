@@ -409,7 +409,7 @@ public class AtencionPresencialMBean extends BaseMBean {
 			if(reserva == null) {
   			Recurso recurso = sessionMBean.getRecursoMarcado();
   			Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sessionMBean.getTimeZone());
-  			reserva = agendarReservasEJB.marcarReserva(disponibilidad);
+  			reserva = agendarReservasEJB.marcarReserva(disponibilidad, null);
 			}
 			reserva.setDatosReserva(datos);
 			

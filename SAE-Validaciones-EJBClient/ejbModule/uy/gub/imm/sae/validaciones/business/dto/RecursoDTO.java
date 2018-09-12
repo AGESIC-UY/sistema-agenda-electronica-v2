@@ -52,6 +52,7 @@ public class RecursoDTO implements Serializable {
   private Boolean presencialViernes;
   private Boolean presencialSabado;
   private Boolean presencialDomingo;
+  private Boolean multipleAdmite;
 
 	public RecursoDTO () {
 	}
@@ -255,6 +256,13 @@ public class RecursoDTO implements Serializable {
   public void setPresencialDomingo(Boolean presencialDomingo) {
     this.presencialDomingo = presencialDomingo;
   }
-	
+
+  public Boolean getMultipleAdmite() {
+    return multipleAdmite;
+  }
+
+  public void setMultipleAdmite(Boolean multipleAdmite) {
+    this.multipleAdmite = multipleAdmite;
+  }
 	
 }

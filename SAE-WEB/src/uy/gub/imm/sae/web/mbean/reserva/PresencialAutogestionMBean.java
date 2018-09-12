@@ -398,7 +398,7 @@ public class PresencialAutogestionMBean extends BaseMBean {
       Recurso recurso = sesionMBean.getRecurso();
       //Obtener una reserva presencial (lanza UserException si ya no quedan)
       Disponibilidad disponibilidad = disponibilidadesEJB.obtenerDisponibilidadPresencial(recurso, sesionMBean.getTimeZone());
-      Reserva reserva = agendarReservasEJB.marcarReserva(disponibilidad);
+      Reserva reserva = agendarReservasEJB.marcarReserva(disponibilidad, null);
       //Completar los datos de la reserva
       Set<DatoReserva> datosReserva = new HashSet<DatoReserva>();
       if(datosSolicitar!=null) {

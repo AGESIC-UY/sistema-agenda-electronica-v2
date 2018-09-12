@@ -115,6 +115,8 @@ public class Recurso implements Serializable {
   private Boolean presencialSabado;
   private Boolean presencialDomingo;
   
+  //Datos de reserva múltiple
+  private Boolean multipleAdmite;
 	
 	public Recurso () {
 		visibleInternet = false;
@@ -140,6 +142,8 @@ public class Recurso implements Serializable {
 		presencialViernes = false;
 		presencialSabado = false;
     presencialDomingo = false;
+    
+    multipleAdmite = false;
 	}
 	
 	/**
@@ -206,6 +210,7 @@ public class Recurso implements Serializable {
     this.presencialSabado = r.presencialSabado;
     this.presencialDomingo = r.presencialDomingo;
 		
+    this.multipleAdmite = r.multipleAdmite;
 	}
 
 	
@@ -325,14 +330,6 @@ public class Recurso implements Serializable {
 	}
 	public void setLargoListaEspera(Integer largoListaEspera) {
 		this.largoListaEspera = largoListaEspera;
-	}
-	@Column (name="reserva_multiple", nullable = false)
-	public Boolean getReservaMultiple() {
-		//Se eliminó el atributo reservaMultiple;
-		return false;
-	}
-	public void setReservaMultiple(Boolean reservaMultiple) {
-		//Nada para hacer, se eliminó el atributo reservaMultiple
 	}
 
 	@Column (name = "fecha_baja")
@@ -660,6 +657,15 @@ public class Recurso implements Serializable {
 
   public void setPresencialDomingo(Boolean presencialDomingo) {
     this.presencialDomingo = presencialDomingo;
+  }
+
+  @Column (name = "multiple_admite", nullable = false)
+  public Boolean getMultipleAdmite() {
+    return multipleAdmite;
+  }
+
+  public void setMultipleAdmite(Boolean multipleAdmite) {
+    this.multipleAdmite = multipleAdmite;
   }
 
   @Column (name = "fuente_ticket", nullable = false)

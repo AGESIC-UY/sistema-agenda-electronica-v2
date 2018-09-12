@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -39,6 +40,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -82,6 +84,8 @@ public class Reserva implements Serializable {
 	private List<Disponibilidad> disponibilidades; //Es una lista pero solo debería haber una
 	private Set<DatoReserva> datosReserva;
 	private List<Atencion> atenciones;
+	
+	private TokenReserva token;
 	
 	public Reserva () {
 		estado = Estado.P;
@@ -153,6 +157,7 @@ public class Reserva implements Serializable {
 	public List<Disponibilidad> getDisponibilidades() {
 		return disponibilidades;
 	}
+	
 	public void setDisponibilidades(List<Disponibilidad> disponibilidades) {
 		this.disponibilidades = disponibilidades;
 	}
@@ -301,6 +306,16 @@ public class Reserva implements Serializable {
     this.fcancela = fcancela;
   }
 
+  @ManyToOne (optional = true, cascade={CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinColumn (name = "aetr_id", nullable = true)
+  public TokenReserva getToken() {
+    return token;
+  }
+
+  public void setToken(TokenReserva token) {
+    this.token = token;
+  }
+
   @Transient
   public String getEstadoDescripcion(){
     return getEstadoDescripcion(estado);
@@ -336,7 +351,30 @@ public class Reserva implements Serializable {
   }
 
   @Transient
+  public String getDocumento() {
+    String tipoDocumento = null;
+    String numeroDocumento = null;
+    for(DatoReserva dato : datosReserva) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if("TipoDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        tipoDocumento = dato.getValor();
+      }
+      if("NroDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        numeroDocumento = dato.getValor();
+      }
+    }
+    return (tipoDocumento!=null?tipoDocumento+" ":"")+(numeroDocumento!=null?numeroDocumento:"Sin documento");
+  }
+  
+  @Transient
 	public Boolean getPresencial() {
 	  return(disponibilidades.isEmpty()? null : disponibilidades.get(0).getPresencial());
 	}
+  
+  @Transient
+  public Date getFechaHora() {
+    return (disponibilidades.isEmpty()? null : disponibilidades.get(0).getHoraInicio());
+  }
+  
+  
 }

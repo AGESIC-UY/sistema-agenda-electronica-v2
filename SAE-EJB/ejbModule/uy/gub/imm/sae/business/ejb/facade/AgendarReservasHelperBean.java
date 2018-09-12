@@ -61,6 +61,7 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioAutocompletarPorDato;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
+import uy.gub.imm.sae.entity.TokenReserva;
 import uy.gub.imm.sae.entity.Validacion;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
@@ -343,17 +344,22 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * Crea la reserva como pendiente, realiza todo en una transaccion independiente
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public Reserva crearReservaPendiente(Disponibilidad disp) {
+	public Reserva crearReservaPendiente(Disponibilidad disp, TokenReserva token) {
 	  disp = entityManager.find(Disponibilidad.class, disp.getId());
-		//Creo y seteo atributos
+	  if(token!=null) {
+	    token = entityManager.find(TokenReserva.class, token.getId());
+	    token.setUltimaReserva(new Date());
+	  }
+	  //Creo y seteo atributos
 		Reserva reserva = new Reserva();
 		reserva.setEstado(Estado.P);
 		reserva.getDisponibilidades().add(disp);
 		reserva.setFechaCreacion(new Date());
+		reserva.setToken(token);
 		entityManager.persist(reserva);
 		return reserva;
 	}
-	
+
 	/**
 	 * Verifica que existan cupos disponibles para la reserva.
 	 * Si el parámetro reservaTomada es true asume que pueden quedar 0 reservas porque el llamador ya tomó la reserva (la última)
@@ -508,14 +514,11 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}
 	}
 
-	//El parametro reservaNueva es opcional, si se pasa null la consulta de reservas existentes se haria partir 
-	//de ahora en lugar de tomar la fecha de creacion de la reserva.
-	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Reserva reservaNueva, 
-	    List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException {
+	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Disponibilidad disponibilidad, 
+	    List<DatoASolicitar> campos, Map<String, DatoReserva> valores, String codigoTramite) {
   	//Se supone que si un campo es clave tiene que ser requerido.
   	//Si cambia este supuesto, se deberá revisar este procedimiento.
   	List<Reserva> listaReserva = new ArrayList<Reserva>();
-  	List<DatoReserva> datoReservaLista = new ArrayList<DatoReserva>();
   	Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
   	for (DatoASolicitar datoASolicitar : campos) {
   		camposMap.put(datoASolicitar.getNombre(), datoASolicitar);
@@ -529,17 +532,18 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   		}
   	}
   	//Se controla si existen campos clave
-  	if (camposClave.size() > 0) {
+  	if (!camposClave.isEmpty()) {
   		//Se controla que no exista en la base otra reserva con la misma clave.
-  		Iterator<DatoASolicitar> iCampo = camposClave.iterator();
+      List<DatoReserva> datoReservaLista = new ArrayList<DatoReserva>();
+  	  Iterator<DatoASolicitar> iCampo = camposClave.iterator();
   		while (iCampo.hasNext()){
   			DatoASolicitar datoASolicitar = iCampo.next();
   			DatoReserva datoReserva = valores.get(datoASolicitar.getNombre());
   			datoReservaLista.add(datoReserva);
   		}
-  		Date fecha = reservaNueva.getDisponibilidades().get(0).getFecha();
+  		Date fecha = disponibilidad.getFecha();
   		// consulto las reservas por dato de reserva (solo para los campos clave)
-  		listaReserva = consultaEJB.consultarReservaDatosFecha(datoReservaLista, recurso, fecha, reservaNueva.getTramiteCodigo());
+  		listaReserva = consultaEJB.consultarReservaDatosFecha(datoReservaLista, recurso, fecha, codigoTramite);
   	}
 		return listaReserva;
 	}
@@ -645,7 +649,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		recursoDTO.setFechaInicio(recurso.getFechaInicio());
 		recursoDTO.setFechaInicioDisp(recurso.getFechaInicioDisp());
 		recursoDTO.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
-		recursoDTO.setReservaMultiple(recurso.getReservaMultiple());
 		recursoDTO.setVentanaCuposMinimos(recurso.getVentanaCuposMinimos());
 		recursoDTO.setDiasInicioVentanaIntranet(recurso.getDiasInicioVentanaIntranet());
 		recursoDTO.setDiasVentanaIntranet(recurso.getDiasVentanaIntranet());
@@ -659,6 +662,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		recursoDTO.setPresencialJueves(recurso.getPresencialJueves());
 		recursoDTO.setPresencialViernes(recurso.getPresencialViernes());
 		recursoDTO.setPresencialSabado(recurso.getPresencialSabado());
+    recursoDTO.setMultipleAdmite(recurso.getMultipleAdmite());
 		return recursoDTO;
 	}
 	

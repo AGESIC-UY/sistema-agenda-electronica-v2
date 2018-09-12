@@ -31,6 +31,7 @@ import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
+import uy.gub.imm.sae.entity.TokenReserva;
 import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.AccesoMultipleException;
@@ -45,6 +46,7 @@ public interface AgendarReservas {
 	public Agenda consultarAgendaPorId(Integer id) throws ApplicationException, BusinessException;
 	public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException;
 	public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException;
+  public TramiteAgenda consultarTramitePorCodigo(Agenda a, String codigo) throws ApplicationException;
 	public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException;
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException;
 	
@@ -52,12 +54,19 @@ public interface AgendarReservas {
 	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws UserException;
 	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
 	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
-	public Reserva marcarReserva(Disponibilidad d) throws UserException;
+  /**
+   * Crea una nueva reserva en estado pendiente, controla que aun exista cupo.
+   */
+	public Reserva marcarReserva(Disponibilidad d, TokenReserva token) throws UserException;
+  /**
+   * Crea una nueva reserva en estado pendiente, controla que aun exista cupo y que no exista otra reserva diferente con los mismos datos clave.
+   */
+	public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token) throws UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;
 	public void validarDatosReserva(Empresa e, Reserva r) throws BusinessException, ValidacionException, ApplicationException;
 	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
-	public Reserva consultarReservaPorId(Integer idRecurso, Integer idReserva) throws UserException;
+	public Reserva consultarReservaPorId(Integer idReserva) throws UserException;
   public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException;
 	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws UserException;
 	
@@ -77,14 +86,13 @@ public interface AgendarReservas {
 	 * 	de que un proceso externo los tome y marque como procesadas. 
 	 * Para poder enviar un SMS es necesario que exista un campo llamado "TelefonoMovil" dentro de la agrupacion "DatosPersonales".
 	 * Para poder enviar un TAV es necesario que exista un campo llamado "TelefonoFijo" dentro de la agrupacion "DatosPersonales".
-	 * @param urlBase
-	 * @param reserva
-	 * @param formatoFecha
-	 * @param formatoHora
-	 * @throws ApplicationException
 	 */
-	public void enviarComunicacionesConfirmacion(String urlBase, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException;
+	public void enviarComunicacionesConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException;
 	public void enviarComunicacionesCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException,UserException;
+	/**
+	 * Este método es similares a enviarComunicacionesConfirmacion pero aplica a un TokenReserva que contenga múltiples reservas en lugar de a una sola de ellas.
+	 */
+  public void enviarComunicacionesConfirmacion(String templateLinkCancelacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException;
 	
 	public void limpiarTrazas();
 
@@ -100,5 +108,46 @@ public interface AgendarReservas {
 	 * @throws UserException
 	 */
 	public Reserva generarYConfirmarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos, 
-	    String idTransaccionPadre, String pasoTransaccionPadre, String idioma) throws UserException;
+	    String idTransaccionPadre, String pasoTransaccionPadre, TokenReserva tokenReserva, String idioma) throws UserException;
+	
+  /**
+   * Este método es utilizado para modificar una reserva. Solo se permite modificar la disponibilidad, no el recurso
+   * porque los datos a solicitar podrían ser diferentes ni los datos ingresados porque podrían ser de otra persona. 
+   * Está pensado para ser invocado mediante el servicio web REST modificarrReserva.
+   * @return
+   * @throws UserException
+   */
+  public Reserva modificarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva, Integer idDisponibilidad, 
+      TokenReserva tokenReserva, String idioma) throws UserException;
+  
+  /**
+   * Este método es utilizado para modificar una reserva. Solo se permite modificar la disponibilidad, no el recurso
+   * porque los datos a solicitar podrían ser diferentes ni los datos ingresados porque podrían ser de otra persona. 
+   * La reserva original mantiene todos los datos, excepto la disponibilidad a la cual apunta, que cambia por la
+   * disponibilidad de la reserva nueva. Si se puede guardar la reserva original se elimina de la base de datos la
+   * reserva nueva.
+   * Está pensado para ser invocado desde la interfaz web.
+   * @return
+   * @throws UserException
+   */
+  public Reserva modificarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReservaOriginal, Integer idReservaNueva, 
+      String idioma) throws UserException;
+  
+	//Para las reservas múltiples
+	
+	public TokenReserva generarTokenReserva(Integer idRecurso, String cedula, String nombre, String correoe, String codigoTramite) throws UserException;
+  public TokenReserva obtenerTokenReserva(String token);
+	public TokenReserva guardarTokenReserva(TokenReserva token);
+  public List<Reserva> obtenerReservasMultiples(Integer tokenId, boolean incluirIncompletas);
+  public TokenReserva confirmarReservasMultiples(Integer empresaId, Integer tokenId, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws UserException;
+  /**
+   * Elimina una reservas asociada al token indicado.
+   * Solo puede ser invocado si el token está pendiente de confirmación; una vez confirmado no se puede cancelar ninguna reserva
+   */
+  public TokenReserva cancelarReservaMultiple(Integer tokenId, Integer reservaId) throws UserException;
+  /**
+   * Elimina todas las reservas asociadas al token y marca a éste como cancelado.
+   * Solo puede ser invocado si el token está pendiente de confirmación; una vez confirmado no se puede cancelar
+   */
+  public TokenReserva cancelarReservasMultiples(Integer tokenId) throws UserException;
 }

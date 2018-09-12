@@ -150,7 +150,7 @@ public class ReservaMBean extends BaseMBean {
   			addErrorMessage(sessionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), FORM_ID+":codSeg");
   		}
   		if (!huboError) {
-  		  List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
+  		  List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaModificarCancelar(datos, sessionMBean.getRecursoMarcado(), 
   					sessionMBean.getCodigoSeguridadReserva(), sessionMBean.getTimeZone());
   			this.reservaSessionMBean.setListaReservas(reservas);
   			if (reservas.isEmpty()) {
@@ -199,7 +199,7 @@ public class ReservaMBean extends BaseMBean {
         }
 				//Recargar la lista de reservas
 				ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sessionMBean.getRecursoMarcado(), 
+				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaModificarCancelar(datos, sessionMBean.getRecursoMarcado(), 
 						sessionMBean.getCodigoSeguridadReserva(), sessionMBean.getTimeZone());
 				this.reservaSessionMBean.setListaReservas(reservas);
 				addInfoMessage(sessionMBean.getTextos().get("reserva_cancelada"), MSG_ID);

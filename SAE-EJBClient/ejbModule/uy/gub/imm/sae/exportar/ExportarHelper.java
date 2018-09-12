@@ -64,6 +64,8 @@ public class ExportarHelper {
     recursoExportar.setPresencialSabado(recurso.getPresencialSabado());
     recursoExportar.setPresencialDomingo(recurso.getPresencialDomingo());
 
+    recursoExportar.setMultipleAdmite(recurso.getMultipleAdmite());
+    
 		for (AgrupacionDato agrupacionDato : recurso.getAgrupacionDatos()) {
 			if (agrupacionDato.getFechaBaja() == null) {
 				AgrupacionDatoExport age = exportarAgrupacionDato(agrupacionDato);
@@ -201,6 +203,7 @@ public class ExportarHelper {
 		recurso.setPresencialViernes(recursoExportar.getPresencialViernes());
 		recurso.setPresencialSabado(recursoExportar.getPresencialSabado());
 		recurso.setPresencialDomingo(recursoExportar.getPresencialDomingo());
+    recurso.setMultipleAdmite(recursoExportar.getMultipleAdmite());
 
 		return recurso;
 	}

@@ -59,6 +59,7 @@ import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
+import uy.gub.imm.sae.entity.global.Configuracion;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Token;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -303,7 +304,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 	 * No toma en cuenta las reservas correspondientes a atenciones presenciales.
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva, TimeZone timezone){
+	public List<Reserva> consultarReservasParaModificarCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva, TimeZone timezone){
 		String selectStr = "SELECT DISTINCT(reserva) " ;
 		String fromStr = " FROM Reserva reserva " +
 						         " JOIN reserva.disponibilidades disp " +
@@ -1262,6 +1263,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
           rec.put("telefono", recurso.getTelefonos());
           rec.put("latitud", recurso.getLatitud()!=null?recurso.getLatitud().toString():"");
           rec.put("longitud", recurso.getLongitud().toString()!=null?recurso.getLongitud().toString():"");
+          rec.put("multiple", recurso.getMultipleAdmite()!=null && recurso.getMultipleAdmite()?"1":"0");
           recs.add(rec);
         }
       }
@@ -1387,5 +1389,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
     }catch(Exception ex) {
       return null;   
     }
+  }
+  
+  public String consultarConfiguracion(String clave) {
+    Configuracion conf = globalEntityManager.find(Configuracion.class, clave);
+    return (conf==null?null:conf.getValor());
   }
 }

@@ -610,6 +610,107 @@
     </managed-property>
   </managed-bean>
 
+  <managed-bean>
+    <managed-bean-name>multiplePaso1MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.MultiplePaso1MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>multiplePaso2MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.MultiplePaso2MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>multiplePaso3MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.MultiplePaso3MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>multiplePaso4MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.MultiplePaso4MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>datosReservaMBean</property-name>
+      <property-class>java.util.Map</property-class>
+      <value>#{datosReservaMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>multiplePasoFinalMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.MultiplePasoFinalMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
+
+  <managed-bean>
+    <managed-bean-name>modificarPaso1MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.ModificarPaso1MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+    <managed-property>
+      <property-name>datosFiltroReservaMBean</property-name>
+      <property-class>java.util.Map</property-class>
+      <value>#{datosFiltroReservaMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>modificarPaso2MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.ModificarPaso2MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>modificarPaso3MBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.ModificarPaso3MBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
+  <managed-bean>
+    <managed-bean-name>modificarPasoFinalMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.reserva.ModificarPasoFinalMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sesionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.reserva.SesionMBean</property-class>
+      <value>#{sesionMBean}</value>
+    </managed-property>
+  </managed-bean>
 
 	<navigation-rule>
 		<from-view-id>*</from-view-id>
@@ -956,6 +1057,138 @@
       <redirect />
 		</navigation-case>
 	</navigation-rule>
+
+
+  <navigation-rule>
+    <from-view-id>/reservaMultiple/Paso1.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>siguientePaso</from-outcome>
+      <to-view-id>/reservaMultiple/Paso2.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>confirmarReservas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>reservasCanceladas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <from-view-id>/reservaMultiple/Paso2.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>siguientePaso</from-outcome>
+      <to-view-id>/reservaMultiple/Paso3.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>confirmarReservas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>reservasCanceladas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <from-view-id>/reservaMultiple/Paso3.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>siguientePaso</from-outcome>
+      <to-view-id>/reservaMultiple/Paso4.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>confirmarReservas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>pasoAnterior</from-outcome>
+      <to-view-id>/reservaMultiple/Paso2.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>reservasCanceladas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  
+  <navigation-rule>
+    <from-view-id>/reservaMultiple/Paso4.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>pasoAnterior</from-outcome>
+      <to-view-id>/reservaMultiple/Paso3.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>confirmarReservas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>reservasCanceladas</from-outcome>
+      <to-view-id>/reservaMultiple/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/reservaMultiple/PasoFinal.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>otraReserva</from-outcome>
+      <to-view-id>/reservaMultiple/Paso3.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
+  <navigation-rule>
+    <from-view-id>/modificarReserva/Paso1.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>pasoAnterior</from-outcome>
+      <to-view-id>/modificarReserva/Paso1.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>siguientePaso</from-outcome>
+      <to-view-id>/modificarReserva/Paso2.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  <navigation-rule>
+    <from-view-id>/modificarReserva/Paso2.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>siguientePaso</from-outcome>
+      <to-view-id>/modificarReserva/Paso3.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>pasoAnterior</from-outcome>
+      <to-view-id>/modificarReserva/Paso1.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+  <navigation-rule>
+    <from-view-id>/modificarReserva/Paso3.xhtml</from-view-id>
+    <navigation-case>
+      <from-outcome>pasoAnterior</from-outcome>
+      <to-view-id>/modificarReserva/Paso2.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+    <navigation-case>
+      <from-outcome>reservaConfirmada</from-outcome>
+      <to-view-id>/modificarReserva/PasoFinal.xhtml</to-view-id>
+      <redirect />
+    </navigation-case>
+  </navigation-rule>
+
 
 	<validator>
 		<validator-id>xmlValidator</validator-id>

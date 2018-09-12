@@ -393,7 +393,7 @@ public class CancelarReservaPublicMBean extends BaseMBean {
   			return;
   		}
   		
-  		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos, sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+  		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaModificarCancelar(datos, sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
   		if (reservas.isEmpty()) {
   			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
   			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
@@ -494,7 +494,7 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 
 				//Recargar el resto de las reservas
 				ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos,	sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaModificarCancelar(datos,	sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
 				this.sesionMBean.setListaReservas(reservas);
 
 				//Quitar los datos de la reserva cancelada (por si acaso)

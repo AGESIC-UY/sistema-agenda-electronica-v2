@@ -4,10 +4,8 @@
   xmlns:ui="http://java.sun.com/jsf/facelets"
   xmlns:f="http://java.sun.com/jsf/core"
   xmlns:h="http://java.sun.com/jsf/html">
-	<ui:param name="soloCuerpo" value="#{paso1MBean.soloCuerpo}" />
 	<ui:param name="parametroBean" value="#{paso1MBean}" />
 	<ui:param name="agenda_nombre" value="#{paso1MBean.agendaNombre}" />
-	<ui:param name="bodyId" value="paso1" />
 	<ui:param name="paso_numero" value="1" />
 	<ui:param name="paso_texto" value="#{sesionMBean.textos['seleccione_ubicacion']}" />
 	<ui:param name="hay_error" value="#{paso1MBean.errorInit}" />
@@ -43,6 +41,7 @@
 			</h:panelGroup>
 		</h:panelGroup>
 	</ui:define>
+	
 	<ui:define name="contenido">
 		<h:inputHidden id="e" value="#{sesionMBean.empresaActual.id}" />
 		<h:inputHidden id="a" value="#{sesionMBean.agenda.id}" />

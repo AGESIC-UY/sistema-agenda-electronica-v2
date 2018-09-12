@@ -165,7 +165,6 @@ public class AccionesHelperBean implements AccionesHelperLocal{
 		recursoDTO.setFechaInicio(recurso.getFechaInicio());
 		recursoDTO.setFechaInicioDisp(recurso.getFechaInicioDisp());
 		recursoDTO.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
-		recursoDTO.setReservaMultiple(recurso.getReservaMultiple());
 		recursoDTO.setVentanaCuposMinimos(recurso.getVentanaCuposMinimos());
 		recursoDTO.setDiasInicioVentanaIntranet(recurso.getDiasInicioVentanaIntranet());
 		recursoDTO.setDiasVentanaIntranet(recurso.getDiasVentanaIntranet());

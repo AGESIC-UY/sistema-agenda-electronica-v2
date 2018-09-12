@@ -1285,7 +1285,20 @@ clic en la segunda mitad: https://github.com/primefaces/primefaces/issues/878
 .ui-datalist-content {
   border:none;
 }
-
+.reserva-multiple .ui-datalist-content {
+  border:1px solid #ccc;
+  border-top: none;
+  border-bottom-left-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+.reserva-multiple.ui-datalist .ui-datalist-header{
+	border-color: #ccc;
+	
+}
+.reserva-multiple .ui-datalist-data{
+	padding-left: 24px;
+	padding-top: 10px;
+}
 pre {
 	font-family: Arial,sans-serif;
 	background-color:transparent;

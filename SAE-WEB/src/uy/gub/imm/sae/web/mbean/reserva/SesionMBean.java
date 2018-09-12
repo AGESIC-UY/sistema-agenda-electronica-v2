@@ -55,6 +55,7 @@ import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
+import uy.gub.imm.sae.entity.TokenReserva;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
@@ -68,7 +69,6 @@ public class SesionMBean	extends BaseMBean {
 	private static Logger LOGGER = Logger.getLogger(SesionMBean.class);
 	
 	private String paginaDeRetorno;
-	private Boolean soloCuerpo = false;
 	
 	private Agenda agenda;
 	private Recurso recurso;
@@ -86,7 +86,13 @@ public class SesionMBean	extends BaseMBean {
 	private Disponibilidad disponibilidad;
 	private Reserva reserva;
 	private Reserva reservaConfirmada;
-	
+  private Reserva reservaCancelar;
+
+  
+  private Reserva reservaModificar1; //Reserva que se desea modificar
+  private Reserva reservaModificar2; //Reserva nueva elegida por el ciudadano
+  
+  
 	private String urlPaso1Reserva;
 	private String urlTramite;
 	private String parmsDatosCiudadano;
@@ -107,6 +113,9 @@ public class SesionMBean	extends BaseMBean {
   private Configuracion configuracionEJB;
 	
   private String googleAnalytics;
+  
+  //Para la reserva múltiple
+  private TokenReserva tokenReserva;
   
   @PostConstruct
   public void init() {
@@ -236,14 +245,6 @@ public class SesionMBean	extends BaseMBean {
 		this.paginaDeRetorno = paginaDeRetorno;
 	}
 	
-	public Boolean getSoloCuerpo() {
-		return soloCuerpo;
-	}
-
-	public void setSoloCuerpo(Boolean soloCuerpo) {
-		this.soloCuerpo = soloCuerpo;
-	}
-
 	public Agenda getAgenda() {
 		return agenda;
 	}
@@ -320,7 +321,15 @@ public class SesionMBean	extends BaseMBean {
 		this.reservaConfirmada = reservaConfirmada;
 	}
 
-	/**
+	public Reserva getReservaCancelar() {
+    return reservaCancelar;
+  }
+
+  public void setReservaCancelar(Reserva reservaCancelar) {
+    this.reservaCancelar = reservaCancelar;
+  }
+
+  /**
 	 * El calendario usa este atributo para saber que en mes posicionarse, 
 	 * inicialmente se posiciona en el mes correspondiente a la fecha inicial de la
 	 * la ventana del calendario de la agenda, pero luego mediante el setCurrentDate
@@ -697,7 +706,33 @@ public class SesionMBean	extends BaseMBean {
       LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
     }
   }
+
+  public TokenReserva getTokenReserva() {
+    return tokenReserva;
+  }
+
+  public void setTokenReserva(TokenReserva tokenReserva) {
+    this.tokenReserva = tokenReserva;
+  }
+
+  public Reserva getReservaModificar1() {
+    return reservaModificar1;
+  }
+
+  public void setReservaModificar1(Reserva reservaModificar1) {
+    this.reservaModificar1 = reservaModificar1;
+  }
+
+  public Reserva getReservaModificar2() {
+    return reservaModificar2;
+  }
+
+  public void setReservaModificar2(Reserva reservaModificar2) {
+    this.reservaModificar2 = reservaModificar2;
+  }
 	
+  
+  
 }
 
 

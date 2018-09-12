@@ -1,9 +1,3 @@
---
--- PostgreSQL database dump
---
-
--- Dumped from database version 9.5.4
--- Dumped by pg_dump version 9.5.4
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -13,12 +7,7 @@ SET check_function_bodies = false;
 SET client_min_messages = warning;
 SET row_security = off;
 
---
--- Name: global; Type: SCHEMA; Schema: -; Owner: sae
---
-
 CREATE SCHEMA global;
-
 
 ALTER SCHEMA global OWNER TO sae;
 
@@ -29,32 +18,20 @@ SET default_tablespace = '';
 SET default_with_oids = false;
 
 --
--- Name: ae_captchas; Type: TABLE; Schema: global; Owner: sae
+-- TABLAS
 --
 
 CREATE TABLE ae_captchas (
     clave character varying(100) NOT NULL,
     fase character varying(1024)
 );
-
-
 ALTER TABLE ae_captchas OWNER TO sae;
-
---
--- Name: ae_configuracion; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_configuracion (
     clave character varying(100) NOT NULL,
     valor character varying(1024)
 );
-
-
 ALTER TABLE ae_configuracion OWNER TO sae;
-
---
--- Name: ae_empresas; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_empresas (
     id integer NOT NULL,
@@ -78,13 +55,7 @@ CREATE TABLE ae_empresas (
     oid character varying(50),
     pie_publico text
 );
-
-
 ALTER TABLE ae_empresas OWNER TO sae;
-
---
--- Name: ae_novedades; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_novedades (
     fecha_creacion timestamp with time zone NOT NULL,
@@ -96,13 +67,7 @@ CREATE TABLE ae_novedades (
     reserva_id integer,
     empresa_id integer
 );
-
-
 ALTER TABLE ae_novedades OWNER TO sae;
-
---
--- Name: ae_oficinas; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_oficinas (
     id character varying(25) NOT NULL,
@@ -115,63 +80,33 @@ CREATE TABLE ae_oficinas (
     horarios character varying(100),
     comentarios character varying(1000)
 );
-
-
 ALTER TABLE ae_oficinas OWNER TO sae;
-
---
--- Name: ae_organismos; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_organismos (
     id integer NOT NULL,
     codigo character varying(25) NOT NULL,
     nombre character varying(100) NOT NULL
 );
-
-
 ALTER TABLE ae_organismos OWNER TO sae;
-
---
--- Name: ae_rel_usuarios_empresas; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_rel_usuarios_empresas (
     usuario_id integer NOT NULL,
     empresa_id integer NOT NULL
 );
-
-
 ALTER TABLE ae_rel_usuarios_empresas OWNER TO sae;
-
---
--- Name: ae_rel_usuarios_roles; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_rel_usuarios_roles (
     usuario_id integer NOT NULL,
     empresa_id integer NOT NULL,
     rol_nombre character varying NOT NULL
 );
-
-
 ALTER TABLE ae_rel_usuarios_roles OWNER TO sae;
-
---
--- Name: ae_textos; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_textos (
     codigo character varying(100) NOT NULL,
     texto character varying(4096) NOT NULL
 );
-
-
 ALTER TABLE ae_textos OWNER TO sae;
-
---
--- Name: ae_tokens; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_tokens (
     token character varying(25) NOT NULL,
@@ -180,13 +115,7 @@ CREATE TABLE ae_tokens (
     email character varying(100) NOT NULL,
     fecha timestamp without time zone NOT NULL
 );
-
-
 ALTER TABLE ae_tokens OWNER TO sae;
-
---
--- Name: ae_tramites; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_tramites (
     id character varying(25) NOT NULL,
@@ -196,13 +125,7 @@ CREATE TABLE ae_tramites (
     temas character varying(1000) NOT NULL,
     online boolean NOT NULL
 );
-
-
 ALTER TABLE ae_tramites OWNER TO sae;
-
---
--- Name: ae_trazabilidad; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_trazabilidad (
     transaccion_id character varying(100) NOT NULL,
@@ -217,26 +140,14 @@ CREATE TABLE ae_trazabilidad (
     empresa_id integer,
     es_final boolean DEFAULT false
 );
-
-
 ALTER TABLE ae_trazabilidad OWNER TO sae;
-
---
--- Name: ae_unidadesejecutoras; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_unidadesejecutoras (
     id integer NOT NULL,
     codigo character varying(25) NOT NULL,
     nombre character varying(100) NOT NULL
 );
-
-
 ALTER TABLE ae_unidadesejecutoras OWNER TO sae;
-
---
--- Name: ae_usuarios; Type: TABLE; Schema: global; Owner: sae
---
 
 CREATE TABLE ae_usuarios (
     id integer NOT NULL,
@@ -247,74 +158,26 @@ CREATE TABLE ae_usuarios (
     correoe character varying(100),
     superadmin boolean
 );
-
-
 ALTER TABLE ae_usuarios OWNER TO sae;
 
 --
--- Name: s_ae_empresa; Type: SEQUENCE; Schema: global; Owner: sae
+-- SECUENCIAS
 --
 
-CREATE SEQUENCE s_ae_empresa
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
+CREATE SEQUENCE s_ae_empresa START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE s_ae_empresa OWNER TO sae;
 
---
--- Name: s_ae_novedades; Type: SEQUENCE; Schema: global; Owner: sae
---
-
-CREATE SEQUENCE s_ae_novedades
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
+CREATE SEQUENCE s_ae_novedades START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE s_ae_novedades OWNER TO sae;
 
---
--- Name: s_ae_trazabilidad; Type: SEQUENCE; Schema: global; Owner: sae
---
-
-CREATE SEQUENCE s_ae_trazabilidad
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
+CREATE SEQUENCE s_ae_trazabilidad START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE s_ae_trazabilidad OWNER TO sae;
 
---
--- Name: s_ae_usuario; Type: SEQUENCE; Schema: global; Owner: sae
---
-
-CREATE SEQUENCE s_ae_usuario
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
+CREATE SEQUENCE s_ae_usuario START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE s_ae_usuario OWNER TO sae;
 
 --
--- Data for Name: ae_captchas; Type: TABLE DATA; Schema: global; Owner: sae
---
-
-
-
---
--- Data for Name: ae_configuracion; Type: TABLE DATA; Schema: global; Owner: sae
+-- DATOS
 --
 
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_WSATO_LINEA', '');
@@ -365,35 +228,8 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_LOCATION_GUIA', 
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_LOCATION_INFO', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('GOOGLE_ANALYTICS', '');
-
-
---
--- Data for Name: ae_empresas; Type: TABLE DATA; Schema: global; Owner: sae
---
-
---
--- Data for Name: ae_novedades; Type: TABLE DATA; Schema: global; Owner: sae
---
-
---
--- Data for Name: ae_oficinas; Type: TABLE DATA; Schema: global; Owner: sae
---
-
---
--- Data for Name: ae_organismos; Type: TABLE DATA; Schema: global; Owner: sae
---
-
---
--- Data for Name: ae_rel_usuarios_empresas; Type: TABLE DATA; Schema: global; Owner: sae
---
-
---
--- Data for Name: ae_rel_usuarios_roles; Type: TABLE DATA; Schema: global; Owner: sae
---
-
---
--- Data for Name: ae_textos; Type: TABLE DATA; Schema: global; Owner: sae
---
+INSERT INTO ae_configuracion (clave, valor) VALUES ('RESERVA_PENDIENTE_TIEMPO_MAXIMO', '10');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('RESERVA_MULTIPLE_PENDIENTE_TIEMPO_MAXIMO', '2880');
 
 INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_al_sistema', 'Ingrese al Sistema de Agenda electrónica');
 INSERT INTO ae_textos (codigo, texto) VALUES ('string', 'Texto');
@@ -445,16 +281,16 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('continuar', 'Continuar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('su_reserva', 'Su reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_empresa', 'Debe especificar la empresa');
 INSERT INTO ae_textos (codigo, texto) VALUES ('dias_con_turnos_disponibles', 'Los días marcados en color verde tienen turnos disponibles');
-INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad', 'Código de cancelación');
-INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad_de_la_reserva', 'Código de cancelación de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad', 'Código de seguridad');
+INSERT INTO ae_textos (codigo, texto) VALUES ('codigo_de_seguridad_de_la_reserva', 'Código de seguridad de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_combinacion_de_parametros_especificada_no_es_valida', 'La combinación de parámetros especificada no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_registrar_un_usuario_anonimo', 'No se pudo registrar un usuario anónimo para permitir esta invocación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_empresa_especificada_no_es_valida', 'La empresa especificada no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_agenda_especificada_no_es_valida', 'La agenda especificada no es válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_reserva_o_ya_fue_cancelada', 'No se encuentra la reserva o la misma ya fue cancelada');
-INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_el_codigo_de_seguridad', 'Ingrese el código de cancelación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_el_codigo_de_seguridad', 'Ingrese el código de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_especificado_no_es_valido', 'El recurso especificado no es válido');
-INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_codigo_de_seguridad', 'Debe ingresar el código de cancelación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_codigo_de_seguridad', 'Debe ingresar el código de seguridad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_al_menos_dos_de_los_datos_solicitados', 'Debe ingresar al menos dos de los datos solicitados en la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_agenda', 'Debe especificar la agenda.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_recurso', 'Debe especificar el recurso');
@@ -893,7 +729,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('existe_una_empresa_eliminada_con_
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_debe_ser_posterior_a_la_fecha_fdesde', 'La fecha de fin debe ser posterior a la fecha de inicio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas', 'No se puede eliminar la empresa porque hay reservas vivas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mail_no_valido', 'La dirección de correo electrónica no es válida');
-INSERT INTO ae_textos (codigo, texto) VALUES ('continuar_tramite', 'Contrinuar con el trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('continuar_tramite', 'Continuar con el trámite');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_warn', 'Hay {count} advertencias a las cuales debe prestar atención');
 INSERT INTO ae_textos (codigo, texto) VALUES ('mensajes_en_el_formulario_info', 'Ejecución exitosa');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_orden_de_la_agrupacion_es_obligatorio', 'El órden de la agrupación es obligatorio');
@@ -964,8 +800,8 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('largo_de_la_lista_de_espera', 'N�
 INSERT INTO ae_textos (codigo, texto) VALUES ('con_trazabilidad', 'Integrar con trazabilidad');
 INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_para_internet', 'Configuración para internet');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_reserva_por_periodo_y_estado', 'Reporte de reserva por período y estado');
-INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_de_seguridad_es_obligatorio', 'El código de cancelación es obligatorio');
-INSERT INTO ae_textos (codigo, texto) VALUES ('no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva', 'No olvide comunicarle al ciudadano el código de cancelación de la reserva, ya que lo necesitará en caso de que decida cancelarla.');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_codigo_de_seguridad_es_obligatorio', 'El código de seguridad es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_olvide_comunicarle_al_ciudadano_el_codigo_de_seguridad_de_la_reserva', 'No olvide comunicarle al ciudadano el código de seguridad de la reserva, ya que lo necesitará en caso de que decida cancelarla o modificarla.');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_reservas_periodo', 'Reporte de reservas por período');
 INSERT INTO ae_textos (codigo, texto) VALUES ('ninguna', 'Ninguna');
 INSERT INTO ae_textos (codigo, texto) VALUES ('ninguno', 'Ninguno');
@@ -1234,7 +1070,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_debe_ser_anter
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_realizar_la_importacion', 'No se pudo realizar la importación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_es_invalida', 'La fecha de inicio es inválida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_es_invalida', 'La fecha de fin es inválida');
-INSERT INTO ae_textos (codigo, texto) VALUES ('el_campo_campo_no_tiene_una_fecha_válida', 'El valor del campo {campo} no es una fecha válida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_campo_campo_no_tiene_una_fecha_valida', 'El valor del campo {campo} no es una fecha válida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_vigencia_es_invalida', 'La fecha de inicio de vigencia es inválida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_fin_de_vigencia_es_invalida', 'La fecha de fin de vigencia es inválida');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_de_inicio_de_disponibilidad_es_invalida', 'La fecha de inicio de atención al público es inválida');
@@ -1266,200 +1102,71 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('debe_ingresar_el_numero_de_docume
 INSERT INTO ae_textos (codigo, texto) VALUES ('solicitud_confirmada', 'Solicitud confirmada');
 INSERT INTO ae_textos (codigo, texto) VALUES ('sera_llamado_por_documento', 'Será llamado por su número de documento');
 INSERT INTO ae_textos (codigo, texto) VALUES ('solicitud_de_atencion', 'Solicitud de atención');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_tiene_acceso_al_recurso_o_no_existe', 'No tiene acceso al recurso solicitado o éste no existe');
+INSERT INTO ae_textos (codigo, texto) VALUES ('si_error_contacte_al_administrador', 'Si cree que es un error contacte al administrador');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_de_reserva_multiple', 'Configuración de reserva múltiple');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_multiple', 'Reserva múltiple');
+INSERT INTO ae_textos (codigo, texto) VALUES ('admite_reserva_multiple', 'Admite reserva múltiple');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reservas_incluidas', 'Reservas incluidas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_es_posible_cambiar_de', 'No es posible cambiar de');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ya_hay_una_reserva', 'Ya hay una reserva añadida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('confirmar_reservas', 'Confirmar reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('confirmacion_de_reservas', 'Confirmación de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reservas_confirmadas', 'Todas las reservas están confirmadas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_y_hora', 'Fecha y hora');
+INSERT INTO ae_textos (codigo, texto) VALUES ('seleccionar_recurso', 'Seleccionar recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('otra_reserva', 'Otra reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_cedula_es_obligatoria', 'La cédula de identidad es requerida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('identificacion', 'Identificación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cancelar_reservas', 'Cancelar reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_token_esta_cancelado', 'Las reservas ya están canceladas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_token_esta_confirmado', 'Las reservas ya están confirmadas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_es_posible_cambiar_de_recurso', 'No es posible cambiar de recurso');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_el_token', 'No se encuentra el token especificado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_token_ha_expirado', 'El token especificado ha expirado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_es_posible_cambiar_de_tramite', 'No es posible cambiar de trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('confirma_cancelar_las_reservas', '¿Confirma la cancelación de todas las reservas?');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_no_admite_reservas_multiples', 'El recurso indicado no admite reservas múltiples');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_token_de_reservas', 'Debe especificar el token de reservas múltiples');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_no_corresponde_al_token', 'La reserva no corresponde al token');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_original', 'Reserva original');
+INSERT INTO ae_textos (codigo, texto) VALUES ('seleccionar_reserva', 'Seleccionar reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_nueva', 'Reserva nueva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('modificar_reserva', 'Modificar reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_los_datos_personales', 'Debe especificar los datos personales');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_tramite', 'Debe especificar el trámite');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_el_token_de_reservas_especificado', 'No se encuentra el token de reservas especificado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_token', 'Debe especificar el token');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_esta_utilizada', 'La reserva está utilizada');
 
 --
--- Data for Name: ae_tokens; Type: TABLE DATA; Schema: global; Owner: sae
+-- CLAVES PRIMARIAS
 --
 
---
--- Data for Name: ae_tramites; Type: TABLE DATA; Schema: global; Owner: sae
---
+ALTER TABLE ONLY ae_captchas ADD CONSTRAINT ae_captchas_pk PRIMARY KEY (clave);
+ALTER TABLE ONLY ae_configuracion ADD CONSTRAINT ae_configuracion_pk PRIMARY KEY (clave);
+ALTER TABLE ONLY ae_empresas ADD CONSTRAINT ae_empresas_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ae_novedades ADD CONSTRAINT ae_novedades_pk PRIMARY KEY (id);
+ALTER TABLE ONLY ae_oficinas ADD CONSTRAINT ae_oficinas_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ae_organismos ADD CONSTRAINT ae_organismos_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ae_rel_usuarios_empresas ADD CONSTRAINT ae_rel_usuarios_empresas_pkey PRIMARY KEY (usuario_id, empresa_id);
+ALTER TABLE ONLY ae_rel_usuarios_roles ADD CONSTRAINT ae_rel_usuarios_roles_pkey PRIMARY KEY (usuario_id, empresa_id, rol_nombre);
+ALTER TABLE ONLY ae_textos ADD CONSTRAINT ae_textos_pk PRIMARY KEY (codigo);
+ALTER TABLE ONLY ae_tokens ADD CONSTRAINT ae_tokens_pkey PRIMARY KEY (token);
+ALTER TABLE ONLY ae_tramites ADD CONSTRAINT ae_tramites_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ae_trazabilidad ADD CONSTRAINT ae_trazabilidad_pk PRIMARY KEY (id);
+ALTER TABLE ONLY ae_unidadesejecutoras ADD CONSTRAINT ae_unidadesejecutoras_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY ae_usuarios ADD CONSTRAINT ae_usuarios_pkey PRIMARY KEY (id);
 
 --
--- Data for Name: ae_trazabilidad; Type: TABLE DATA; Schema: global; Owner: sae
+--  CLAVES UNICAS
 --
 
---
--- Data for Name: ae_unidadesejecutoras; Type: TABLE DATA; Schema: global; Owner: sae
---
+ALTER TABLE ONLY ae_oficinas ADD CONSTRAINT ae_oficinas_un1 UNIQUE (tramite_id, nombre);
+ALTER TABLE ONLY ae_organismos ADD CONSTRAINT ae_organismos_un1 UNIQUE (codigo);
+ALTER TABLE ONLY ae_unidadesejecutoras ADD CONSTRAINT ae_unidadesejecutoras_un1 UNIQUE (codigo);
+ALTER TABLE ONLY ae_usuarios ADD CONSTRAINT ae_usuarios_un1 UNIQUE (codigo);
 
 --
--- Data for Name: ae_usuarios; Type: TABLE DATA; Schema: global; Owner: sae
+-- FIN
 --
-
---
--- Name: s_ae_empresa; Type: SEQUENCE SET; Schema: global; Owner: sae
---
-
-SELECT pg_catalog.setval('s_ae_empresa', 1, true);
-
-
---
--- Name: s_ae_novedades; Type: SEQUENCE SET; Schema: global; Owner: sae
---
-
-SELECT pg_catalog.setval('s_ae_novedades', 1, true);
-
-
---
--- Name: s_ae_trazabilidad; Type: SEQUENCE SET; Schema: global; Owner: sae
---
-
-SELECT pg_catalog.setval('s_ae_trazabilidad', 1, true);
-
-
---
--- Name: s_ae_usuario; Type: SEQUENCE SET; Schema: global; Owner: sae
---
-
-SELECT pg_catalog.setval('s_ae_usuario', 1, true);
-
-
---
--- Name: ae_captchas_pk; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_captchas
-    ADD CONSTRAINT ae_captchas_pk PRIMARY KEY (clave);
-
-
---
--- Name: ae_configuracion_pk; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_configuracion
-    ADD CONSTRAINT ae_configuracion_pk PRIMARY KEY (clave);
-
-
---
--- Name: ae_empresas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_empresas
-    ADD CONSTRAINT ae_empresas_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_novedades_pk; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_novedades
-    ADD CONSTRAINT ae_novedades_pk PRIMARY KEY (id);
-
-
---
--- Name: ae_oficinas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_oficinas
-    ADD CONSTRAINT ae_oficinas_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_oficinas_un1; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_oficinas
-    ADD CONSTRAINT ae_oficinas_un1 UNIQUE (tramite_id, nombre);
-
-
---
--- Name: ae_organismos_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_organismos
-    ADD CONSTRAINT ae_organismos_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_organismos_un1; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_organismos
-    ADD CONSTRAINT ae_organismos_un1 UNIQUE (codigo);
-
-
---
--- Name: ae_rel_usuarios_empresas_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_rel_usuarios_empresas
-    ADD CONSTRAINT ae_rel_usuarios_empresas_pkey PRIMARY KEY (usuario_id, empresa_id);
-
-
---
--- Name: ae_rel_usuarios_roles_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_rel_usuarios_roles
-    ADD CONSTRAINT ae_rel_usuarios_roles_pkey PRIMARY KEY (usuario_id, empresa_id, rol_nombre);
-
-
---
--- Name: ae_textos_pk; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_textos
-    ADD CONSTRAINT ae_textos_pk PRIMARY KEY (codigo);
-
-
---
--- Name: ae_tokens_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_tokens
-    ADD CONSTRAINT ae_tokens_pkey PRIMARY KEY (token);
-
-
---
--- Name: ae_tramites_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_tramites
-    ADD CONSTRAINT ae_tramites_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_trazabilidad_pk; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_trazabilidad
-    ADD CONSTRAINT ae_trazabilidad_pk PRIMARY KEY (id);
-
-
---
--- Name: ae_unidadesejecutoras_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_unidadesejecutoras
-    ADD CONSTRAINT ae_unidadesejecutoras_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_unidadesejecutoras_un1; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_unidadesejecutoras
-    ADD CONSTRAINT ae_unidadesejecutoras_un1 UNIQUE (codigo);
-
-
---
--- Name: ae_usuarios_pkey; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_usuarios
-    ADD CONSTRAINT ae_usuarios_pkey PRIMARY KEY (id);
-
-
---
--- Name: ae_usuarios_un1; Type: CONSTRAINT; Schema: global; Owner: sae
---
-
-ALTER TABLE ONLY ae_usuarios
-    ADD CONSTRAINT ae_usuarios_un1 UNIQUE (codigo);
-
-
---
--- PostgreSQL database dump complete
---
-

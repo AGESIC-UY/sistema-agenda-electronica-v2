@@ -67,6 +67,8 @@ public class RecursoExportar {
   private Boolean presencialSabado;
   private Boolean presencialDomingo;
 
+  private Boolean multipleAdmite;
+  
 	@XmlElement(name = "agrupaciones")
 	private List<AgrupacionDatoExport> agrupaciones = new ArrayList<AgrupacionDatoExport>();
 
@@ -450,6 +452,14 @@ public class RecursoExportar {
 
   public void setTamanioFuenteChica(Integer tamanioFuenteChica) {
     this.tamanioFuenteChica = tamanioFuenteChica;
+  }
+
+  public Boolean getMultipleAdmite() {
+    return multipleAdmite;
+  }
+
+  public void setMultipleAdmite(Boolean multipleAdmite) {
+    this.multipleAdmite = multipleAdmite;
   }
 
 }

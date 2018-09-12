@@ -181,7 +181,7 @@ public class Paso2AdminMBean extends BaseMBean {
 	}
 	
 	private void marcarReserva(Disponibilidad disponibilidad) throws RolException, BusinessException, UserException {
-		Reserva r = agendarReservasEJB.marcarReserva(disponibilidad);
+		Reserva r = agendarReservasEJB.marcarReserva(disponibilidad, null);
 		sessionMBean.setReserva(r);
 		sessionMBean.setDisponibilidad(disponibilidad);
 	}

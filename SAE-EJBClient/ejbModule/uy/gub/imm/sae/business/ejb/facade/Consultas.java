@@ -47,7 +47,7 @@ public interface Consultas {
 	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso);
 	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos, Recurso recurso, Date fecha, String codigoTramite);	
 	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo, Boolean atencionPresencial) throws UserException;
-	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos ,Recurso recurso,String codigoSeguridadReserva, TimeZone timezone);
+	public List<Reserva> consultarReservasParaModificarCancelar(List<DatoReserva> datos ,Recurso recurso,String codigoSeguridadReserva, TimeZone timezone);
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta);
   public List<AtencionLLamadaReporteDT> consultarAtencionesPresencialesRecursoPeriodo(Recurso recurso, Date fechaDesde, Date fechaHasta);
@@ -61,4 +61,6 @@ public interface Consultas {
 	public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;
 	
 	public Map<String, Object> consultarDatosEmpresa(Integer idEmpresa);
+	
+	public String consultarConfiguracion(String clave);
 }

@@ -240,12 +240,10 @@ public class Paso1MBean extends BaseMBean {
 			}
 			recursosItems = new ArrayList<SelectItem>();
 			String paginaDeRetorno = request.getParameter("pagina_retorno");
-			boolean soloCuerpo = Boolean.parseBoolean(request.getParameter("solo_cuerpo"));
 			if (empresaId != null && agendaId != null) {
 				try {
 					sesionMBean.seleccionarAgenda(agendaId);
 					sesionMBean.setPaginaDeRetorno(paginaDeRetorno);
-					sesionMBean.setSoloCuerpo(soloCuerpo);
 				} catch (Exception  ae) {
 					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 					errorInit = true;
@@ -334,17 +332,6 @@ public class Paso1MBean extends BaseMBean {
 
 	public void setMensajeError(String mensajeError) {
 		this.mensajeError = mensajeError;
-	}
-
-	/**
-	 * Es necesario pues debo forzar a que desde cada paso que se ejecute el init
-	 * de este managed bean, pues es en el donde se analizan los parametros del
-	 * request de donde se saca el solo_cuerpo
-	 * 
-	 * @return
-	 */
-	public Boolean getSoloCuerpo() {
-		return sesionMBean.getSoloCuerpo();
 	}
 
 	public String getAgendaNombre() {

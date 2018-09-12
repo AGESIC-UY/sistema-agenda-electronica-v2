@@ -217,16 +217,16 @@ public class RecursoMBean extends BaseMBean{
 		
 		limpiarMensajesError();
 		
+    Recurso recurso = getRecursoNuevo();
 		boolean hayErrores = false;
-		if(getRecursoNuevo().getNombre() == null || getRecursoNuevo().getNombre().equals("")){
+		if(recurso.getNombre() == null || recurso.getNombre().equals("")){
 			addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_recurso_es_obligatorio"), FORM_ID+":nombre");
       hayErrores = true;
 		}
-		if(getRecursoNuevo().getDescripcion() == null || getRecursoNuevo().getDescripcion().equals("")){
+		if(recurso.getDescripcion() == null || recurso.getDescripcion().equals("")){
 			addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
       hayErrores = true;
 		}
-		Recurso recurso = getRecursoNuevo();
 		recurso.setVentanaCuposMinimos(0);
 		//Fechas de vigencia
 		if (recurso.getFechaInicio() == null){
@@ -710,53 +710,6 @@ public class RecursoMBean extends BaseMBean{
 	public void cancelarAgregarDato(ActionEvent event) {
 		sessionMBean.setMostrarAgregarDato(false);
 		sessionMBean.cargarDatosDelRecurso();
-	}
-	
-	public String cancelarRecurso() {
-		
-		Recurso recurso = sessionMBean.getRecursoSeleccionado();
-		
-		Recurso recursoBase;
-		try {
-			recursoBase = recursosEJB.consultarRecurso(recurso);
-			recurso.setAgenda(recursoBase.getAgenda());
-			recurso.setCantDiasAGenerar(recursoBase.getCantDiasAGenerar());
-			recurso.setDepartamento(recursoBase.getDepartamento());
-			recurso.setDescripcion(recursoBase.getDescripcion());
-			recurso.setDiasInicioVentanaInternet(recursoBase.getDiasInicioVentanaInternet());
-			recurso.setDiasInicioVentanaIntranet(recursoBase.getDiasInicioVentanaIntranet());
-			recurso.setDiasVentanaInternet(recursoBase.getDiasVentanaInternet());
-			recurso.setDiasVentanaIntranet(recursoBase.getDiasVentanaIntranet());
-			recurso.setDireccion(recursoBase.getDireccion());
-			recurso.setFechaFin(recursoBase.getFechaFin());
-			recurso.setFechaFinDisp(recursoBase.getFechaFinDisp());
-			recurso.setFechaInicio(recursoBase.getFechaInicio());
-			recurso.setFechaInicioDisp(recursoBase.getFechaInicioDisp());
-			recurso.setHorarios(recursoBase.getHorarios());
-			recurso.setLargoListaEspera(recursoBase.getLargoListaEspera());
-			recurso.setLatitud(recursoBase.getLatitud());
-			recurso.setLocalidad(recursoBase.getLocalidad());
-			recurso.setLongitud(recursoBase.getLongitud());
-			recurso.setMostrarNumeroEnLlamador(recursoBase.getMostrarNumeroEnLlamador());
-      recurso.setMostrarIdEnTicket(recursoBase.getMostrarIdEnTicket());
-			recurso.setMostrarNumeroEnTicket(recursoBase.getMostrarNumeroEnTicket());
-			recurso.setFuenteTicket(recursoBase.getFuenteTicket());
-			recurso.setTamanioFuenteChica(recursoBase.getTamanioFuenteChica());
-			recurso.setTamanioFuenteNormal(recursoBase.getTamanioFuenteNormal());
-			recurso.setTamanioFuenteGrande(recursoBase.getTamanioFuenteGrande());
-			recurso.setNombre(recursoBase.getNombre());
-			recurso.setReservaMultiple(recursoBase.getReservaMultiple());
-			recurso.setSabadoEsHabil(recursoBase.getSabadoEsHabil());
-      recurso.setDomingoEsHabil(recursoBase.getDomingoEsHabil());
-			recurso.setSerie(recursoBase.getSerie());
-			recurso.setTelefonos(recursoBase.getTelefonos());
-			recurso.setVentanaCuposMinimos(recursoBase.getVentanaCuposMinimos());
-			recurso.setVisibleInternet(recursoBase.getVisibleInternet());
-		} catch (UserException e) {
-			e.printStackTrace();
-		}
-		
-		return "cancelar";
 	}
 	
 	@SuppressWarnings("unchecked")

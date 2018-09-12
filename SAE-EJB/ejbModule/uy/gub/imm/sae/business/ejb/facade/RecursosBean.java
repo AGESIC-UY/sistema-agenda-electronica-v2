@@ -113,8 +113,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		// vivos (fechaBaja == null)
 		// para la misma agenda.
 		if (existeRecursoPorNombre(r)) {
-			throw new UserException(
-					"ya_existe_un_recurso_con_el_nombre_especificado");
+			throw new UserException("ya_existe_un_recurso_con_el_nombre_especificado");
 		}
 		// fechaInicio <> NULL
 		if (r.getFechaInicio() == null) {
@@ -129,8 +128,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		// fechaInicio <= fechaFin o fechaFin == NULL
 		if ((r.getFechaFin() != null)
 				&& (r.getFechaInicio().compareTo(r.getFechaFin()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		// fechaInicioDisp <> NULL
 		if (r.getFechaInicioDisp() == null) {
@@ -642,7 +640,6 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		recursoActual.setLargoListaEspera(r.getLargoListaEspera());
 		recursoActual.setSerie(r.getSerie());
 		recursoActual.setVisibleInternet(r.getVisibleInternet());
-		recursoActual.setReservaMultiple(r.getReservaMultiple());
 		recursoActual.setMostrarNumeroEnLlamador(r.getMostrarNumeroEnLlamador());
     recursoActual.setMostrarIdEnTicket(r.getMostrarIdEnTicket());
 		recursoActual.setMostrarNumeroEnTicket(r.getMostrarNumeroEnTicket());
@@ -669,7 +666,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
     recursoActual.setPresencialJueves(r.getPresencialJueves());
     recursoActual.setPresencialViernes(r.getPresencialViernes());
     recursoActual.setPresencialSabado(r.getPresencialSabado());
-		
+
+    recursoActual.setMultipleAdmite(r.getMultipleAdmite());
+    
 		for (TextoRecurso viejo : recursoActual.getTextosRecurso().values()) {
 			entityManager.remove(viejo);
 		}
@@ -1562,7 +1561,6 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	private Boolean existeAgrupacionPorNombre(AgrupacionDato a) throws ApplicationException {
 		try {
-
 			Long cant = (Long) entityManager
 					.createQuery("SELECT COUNT(a) FROM AgrupacionDato a "
 									+ "WHERE a.nombre = :nombre "

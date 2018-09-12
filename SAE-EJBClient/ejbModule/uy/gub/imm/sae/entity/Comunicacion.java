@@ -39,7 +39,7 @@ import javax.persistence.Table;
 public class Comunicacion implements Serializable {
 
 	public enum Tipo1 {EMAIL, SMS, TEXTOAVOZ}
-	public enum Tipo2 {RESERVA, CANCELA}
+	public enum Tipo2 {RESERVA, CANCELA, RESERVAMULTIPLE, CANCELAMULTIPLE}
 	
 	private static final long serialVersionUID = 3500715468120358550L;
 
@@ -52,8 +52,8 @@ public class Comunicacion implements Serializable {
 	private String mensaje;
 	
 	private Recurso recurso;
-	
 	private Reserva reserva;
+  private TokenReserva tokenReserva;
 	
 	private Boolean procesado;
 	
@@ -70,6 +70,17 @@ public class Comunicacion implements Serializable {
 		this.procesado = false;
 		this.mensaje = mensaje;
 	}
+
+  public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, TokenReserva tokenReserva, String mensaje) {
+    super();
+    this.tipo1 = tipo1;
+    this.tipo2 = tipo2;
+    this.destino = destino;
+    this.recurso = recurso;
+    this.tokenReserva = tokenReserva;
+    this.procesado = false;
+    this.mensaje = mensaje;
+  }
 
 	@Id
 	@GeneratedValue (strategy = GenerationType.SEQUENCE, generator="seq_comunicacion")
@@ -120,7 +131,7 @@ public class Comunicacion implements Serializable {
 		this.recurso = recurso;
 	}
 
-	@ManyToOne (optional = false)
+	@ManyToOne
 	@JoinColumn (name = "reserva_id", nullable = false)
 	public Reserva getReserva() {
 		return reserva;
@@ -151,5 +162,15 @@ public class Comunicacion implements Serializable {
     this.mensaje = mensaje;
   }
 	
+  @ManyToOne
+  @JoinColumn (name = "token_id", nullable = false)
+  public TokenReserva getTokenReserva() {
+    return tokenReserva;
+  }
+
+  public void setTokenReserva(TokenReserva tokenReserva) {
+    this.tokenReserva = tokenReserva;
+  }
+
 	
 }
