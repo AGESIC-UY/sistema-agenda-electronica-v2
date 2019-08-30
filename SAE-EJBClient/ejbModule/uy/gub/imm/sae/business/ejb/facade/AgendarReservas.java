@@ -87,12 +87,12 @@ public interface AgendarReservas {
 	 * Para poder enviar un SMS es necesario que exista un campo llamado "TelefonoMovil" dentro de la agrupacion "DatosPersonales".
 	 * Para poder enviar un TAV es necesario que exista un campo llamado "TelefonoFijo" dentro de la agrupacion "DatosPersonales".
 	 */
-	public void enviarComunicacionesConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException;
+	public void enviarComunicacionesConfirmacion(String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException;
 	public void enviarComunicacionesCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException,UserException;
 	/**
 	 * Este método es similares a enviarComunicacionesConfirmacion pero aplica a un TokenReserva que contenga múltiples reservas en lugar de a una sola de ellas.
 	 */
-  public void enviarComunicacionesConfirmacion(String templateLinkCancelacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException;
+  public void enviarComunicacionesConfirmacion(String templateLinkCancelacion, String templateLinkModificacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException;
 	
 	public void limpiarTrazas();
 

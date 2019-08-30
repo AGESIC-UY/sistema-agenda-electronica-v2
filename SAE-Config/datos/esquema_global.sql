@@ -1138,6 +1138,18 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_tramite', 'De
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_el_token_de_reservas_especificado', 'No se encuentra el token de reservas especificado');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_token', 'Debe especificar el token');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_esta_utilizada', 'La reserva está utilizada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_de_cambios_de_reservas', 'Configuración de cambios de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cambios_reserva', 'Cambios de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('admite_cambios_reserva', 'Admite cambios de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('tiempo_previo', 'Tiempo previo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('tiempo_unidad', 'Unidad de tiempo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias', 'Días');
+INSERT INTO ae_textos (codigo, texto) VALUES ('horas', 'Horas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_tiempo_previo_para_cambios_es_requerido', 'El tiempo previo para cambios es requerido');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_tiempo_previo_para_cambios_debe_ser_mayor_a_cero', 'El tiempo previo para cambios debe ser mayor a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('enlace_a_la_pagina_de_modificacion', 'Enlace a la página de modificación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_no_admite_cambios_de_reservas', 'El recurso no admite cambios de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_especificada_ya_no_admite_cambios', 'La reserva ya no admite cambios');
 
 --
 -- CLAVES PRIMARIAS

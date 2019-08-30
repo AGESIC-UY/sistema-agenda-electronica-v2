@@ -53,6 +53,9 @@ public class RecursoDTO implements Serializable {
   private Boolean presencialSabado;
   private Boolean presencialDomingo;
   private Boolean multipleAdmite;
+  private Boolean cambiosAdmite;
+  private Integer cambiosTiempo;
+  private Integer cambiosUnidad;
 
 	public RecursoDTO () {
 	}
@@ -263,6 +266,30 @@ public class RecursoDTO implements Serializable {
 
   public void setMultipleAdmite(Boolean multipleAdmite) {
     this.multipleAdmite = multipleAdmite;
+  }
+
+  public Boolean getCambiosAdmite() {
+    return cambiosAdmite;
+  }
+
+  public void setCambiosAdmite(Boolean cambiosAdmite) {
+    this.cambiosAdmite = cambiosAdmite;
+  }
+
+  public Integer getCambiosTiempo() {
+    return cambiosTiempo;
+  }
+
+  public void setCambiosTiempo(Integer cambiosTiempo) {
+    this.cambiosTiempo = cambiosTiempo;
+  }
+
+  public Integer getCambiosUnidad() {
+    return cambiosUnidad;
+  }
+
+  public void setCambiosUnidad(Integer cambiosUnidad) {
+    this.cambiosUnidad = cambiosUnidad;
   }
 	
 }

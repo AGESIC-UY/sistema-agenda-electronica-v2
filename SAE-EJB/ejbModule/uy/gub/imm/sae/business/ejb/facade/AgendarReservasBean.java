@@ -919,14 +919,14 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		}
 	}
 
-	public void enviarComunicacionesConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException {
+	public void enviarComunicacionesConfirmacion(String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException {
 		//Enviar mail
-		enviarMailConfirmacion(linkCancelacion, reserva, idioma, formatoFecha, formatoHora);
+		enviarMailConfirmacion(linkCancelacion, linkModificacion, reserva, idioma, formatoFecha, formatoHora);
 		//Almacenar datos para SMS y TextoAVoz, si corresponde
 		almacenarSmsYTav(Comunicacion.Tipo2.RESERVA, reserva, formatoFecha, formatoHora);
 	}
 	
-  public void enviarComunicacionesConfirmacion(String templateLinkCancelacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
+  public void enviarComunicacionesConfirmacion(String templateLinkCancelacion, String templateLinkModificacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
     List<Reserva> reservas = obtenerReservasMultiples(tokenReserva.getId(), false);
     StringBuilder cuerpos = new StringBuilder();
     //Para cada reserva enviar la comunicación y añadir el cuerpo al texto que se enviará a la persona que realiza las reservas
@@ -934,9 +934,10 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       if(reserva.getEstado().equals(Estado.R)) {
         //Enviar mail
         String linkCancelacion = templateLinkCancelacion.replace("{idReserva}", reserva.getId().toString());
+        String linkModificacion = templateLinkModificacion.replace("{idReserva}", reserva.getId().toString());
         String cuerpo;
         try {
-          cuerpo = enviarMailConfirmacion(linkCancelacion, reserva, idioma, formatoFecha, formatoHora);
+          cuerpo = enviarMailConfirmacion(linkCancelacion, linkModificacion, reserva, idioma, formatoFecha, formatoHora);
         }catch(Exception ex) {
           cuerpo = null;
         }
@@ -977,7 +978,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
 	}
 	
-	private String enviarMailConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException {
+	private String enviarMailConfirmacion(String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException {
 		//Se envía el mail obligatorio al usuario
 		Recurso recurso = null;
 		String email = null;
@@ -1002,7 +1003,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			String cuerpo = null;
       cuerpo = textoAgenda.getTextoCorreoConf();
       if(cuerpo != null && !cuerpo.isEmpty()) {
-        cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion);
+        cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion, linkModificacion);
   			for(DatoReserva dato : reserva.getDatosReserva()) {
   				DatoASolicitar datoSol = dato.getDatoASolicitar();
   				if("Mail".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
@@ -1068,7 +1069,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			}
 			if(emailTo != null) {
         if(cuerpo != null && !cuerpo.isEmpty()) {
-          cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, "");
+          cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, "", "");
           MailUtiles.enviarMail(emailTo, asunto, cuerpo, MailUtiles.CONTENT_TYPE_HTML);
         }
         Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, emailTo, recurso, reserva, asunto+"/"+cuerpo);
@@ -1400,6 +1401,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
     //Obtener la disponibilidad
     Disponibilidad disponibilidad = (Disponibilidad) entityManager.find(Disponibilidad.class, idDisponibilidad);
+    if(disponibilidad==null || !disponibilidad.getRecurso().getId().equals(idRecurso)) {
+      throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
+    }
     //Marcar la reserva
     reserva = marcarReserva(disponibilidad, tokenReserva);
     //Cargar las agrupaciones
@@ -1817,7 +1821,17 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     if(!reservaOriginal.getEstado().toString().equals("R")) {
       throw new UserException("no_se_encuentra_la_reserva_especificada");
     }
-    //Determinar si la reserva está vigente
+    Recurso recurso = reservaOriginal.getDisponibilidades().get(0).getRecurso();
+    if(recurso.getCambiosAdmite()==null || !recurso.getCambiosAdmite().booleanValue()) {
+      throw new UserException("el_recurso_no_admite_cambios_de_reservas");
+    }
+    //Obtener la disponibilidad nueva
+    Disponibilidad disponibilidad = (Disponibilidad) entityManager.find(Disponibilidad.class, idDisponibilidad);
+    if(disponibilidad==null || !disponibilidad.getRecurso().getId().equals(recurso.getId())) {
+      throw new UserException("no_se_encuentra_la_disponibilidad");
+    }
+
+    //Determinar si la reserva está dentro del plazo de modificación
     TimeZone timezone = TimeZone.getDefault();
     if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
       timezone = TimeZone.getTimeZone(agenda.getTimezone());
@@ -1830,12 +1844,15 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     calAhora.add(Calendar.MILLISECOND, timezone.getOffset(calAhora.getTimeInMillis()));
     Calendar calReserva = new GregorianCalendar();
     calReserva.setTime(reservaOriginal.getDisponibilidades().get(0).getHoraInicio());
+    //Restar el tiempo configurado
+    if(recurso.getCambiosTiempo()!=null && recurso.getCambiosUnidad()!=null) {
+      calReserva.add(recurso.getCambiosUnidad(), recurso.getCambiosTiempo() * -1);
+    }
     if(calReserva.before(calAhora)) {
-      throw new UserException("no_se_encuentra_la_reserva_especificada");
+      throw new UserException("la_reserva_especificada_ya_no_admite_cambios");
     }
     //Obtener la disponibilidad nueva
-    Disponibilidad disponibilidad = (Disponibilidad) entityManager.find(Disponibilidad.class, idDisponibilidad);
-    if(disponibilidad==null || disponibilidad.getHoraInicio().before(calAhora.getTime())) {
+    if(disponibilidad.getHoraInicio().before(calAhora.getTime())) {
       throw new UserException("no_se_encuentra_la_disponibilidad");
     }
     //Marcar la reserva

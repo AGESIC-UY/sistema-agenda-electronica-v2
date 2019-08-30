@@ -36,6 +36,7 @@ import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.login.Utilidades;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
@@ -217,6 +218,15 @@ public class ModificarPaso1MBean extends BaseMBean {
 				}
 				sesionMBean.setRecurso(recurso);
 				recursoId = recurso.getId();
+				
+		    if(recurso.getCambiosAdmite()==null || !recurso.getCambiosAdmite().booleanValue()) {
+          addErrorMessage(sesionMBean.getTextos().get("el_recurso_no_admite_cambios_de_reservas"));
+          limpiarSession();
+          errorInit = true;
+          return;
+		    }
+				
+				
 				//Obtener la reserva
 				Reserva reserva = consultaEJB.consultarReservaId(reservaId, recurso.getId());
 				
@@ -240,6 +250,16 @@ public class ModificarPaso1MBean extends BaseMBean {
   			    calReserva.setTime(reserva.getDisponibilidades().get(0).getHoraInicio());
   			    if(calReserva.before(calAhora)) {
               addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_especificada"));
+              limpiarSession();
+              errorInit = true;
+              return;
+  			    }
+  			    
+  			    if(recurso.getCambiosTiempo()!=null && recurso.getCambiosUnidad()!=null) {
+  			      calReserva.add(recurso.getCambiosUnidad(), recurso.getCambiosTiempo() * -1);
+  			    }
+  			    if(calReserva.before(calAhora)) {
+              addErrorMessage(sesionMBean.getTextos().get("la_reserva_especificada_ya_no_admite_cambios"));
               limpiarSession();
               errorInit = true;
               return;

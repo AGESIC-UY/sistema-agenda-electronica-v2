@@ -1264,6 +1264,24 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
           rec.put("latitud", recurso.getLatitud()!=null?recurso.getLatitud().toString():"");
           rec.put("longitud", recurso.getLongitud().toString()!=null?recurso.getLongitud().toString():"");
           rec.put("multiple", recurso.getMultipleAdmite()!=null && recurso.getMultipleAdmite()?"1":"0");
+          rec.put("cambios", recurso.getCambiosAdmite()!=null && recurso.getCambiosAdmite()?"1":"0");
+          if(recurso.getCambiosAdmite()!=null && recurso.getCambiosAdmite() && recurso.getCambiosTiempo()!=null && recurso.getCambiosUnidad()!=null) {
+            String cambiosLimite = recurso.getCambiosTiempo().toString();
+            switch(recurso.getCambiosUnidad())  {
+              case Calendar.DATE:
+                cambiosLimite = cambiosLimite + " dias";
+                break;
+              case Calendar.HOUR:
+                cambiosLimite = cambiosLimite + " horas";
+                break;
+              case Calendar.MINUTE:
+                cambiosLimite = cambiosLimite + " minutos";
+                break;
+            }
+            rec.put("cambios_limite", cambiosLimite);
+          }
+          
+          
           recs.add(rec);
         }
       }

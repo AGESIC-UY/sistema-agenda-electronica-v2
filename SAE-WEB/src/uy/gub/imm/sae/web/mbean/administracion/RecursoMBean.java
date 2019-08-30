@@ -97,6 +97,8 @@ public class RecursoMBean extends BaseMBean{
 
   List<SelectItem> nombresFuentes = null;
   List<SelectItem> tamaniosFuentes = null;
+  
+  List<SelectItem> cambiosUnidades = null;
 	
   
   @PostConstruct
@@ -126,6 +128,11 @@ public class RecursoMBean extends BaseMBean{
     for(int i=4; i<20; i++) {
       tamaniosFuentes.add(new SelectItem(i, ""+i));
     }
+    
+    cambiosUnidades = new ArrayList<SelectItem>();
+    cambiosUnidades.add(new SelectItem(Calendar.DATE, sessionMBean.getTextos().get("dias")));
+    cambiosUnidades.add(new SelectItem(Calendar.HOUR, sessionMBean.getTextos().get("horas")));
+    cambiosUnidades.add(new SelectItem(Calendar.MINUTE, sessionMBean.getTextos().get("minutos")));
     
   }
 
@@ -606,6 +613,15 @@ public class RecursoMBean extends BaseMBean{
             hayErrores = true;
  		      }
  		    }
+        if(recurso.getCambiosAdmite()!=null && recurso.getCambiosAdmite().booleanValue()) {
+          if(recurso.getCambiosTiempo() == null) {
+            addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cambios_es_requerido"), FORM_ID+":cambiosTiempo");
+            hayErrores = true;
+          }else if(recurso.getCambiosTiempo().intValue() <= 0 ) {
+            addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cambios_debe_ser_mayor_a_cero"), FORM_ID+":cambiosTiempo");
+            hayErrores = true;
+          }
+        }
  				recurso.setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
  				recurso.setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
  				try {
@@ -954,9 +970,12 @@ public class RecursoMBean extends BaseMBean{
 	  return tamaniosFuentes;
 	}
 
-
   public List<SelectItem> getNombresFuentes() {
     return nombresFuentes;
+  }
+  
+  public List<SelectItem> getcambiosUnidades() {
+    return cambiosUnidades;
   }
   
   /**

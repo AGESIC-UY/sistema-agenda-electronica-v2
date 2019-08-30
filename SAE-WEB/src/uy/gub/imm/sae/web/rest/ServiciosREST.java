@@ -366,6 +366,10 @@ public class ServiciosREST {
         jRecurso.addProperty("latitud", (String)recurso.get("latitud"));
         jRecurso.addProperty("longitud", (String)recurso.get("longitud"));
         jRecurso.addProperty("multiple", (String)recurso.get("multiple"));
+        jRecurso.addProperty("cambios", (String)recurso.get("cambios"));
+        if(recurso.containsKey("cambios_limite")) {
+          jRecurso.addProperty("cambios_limite", (String)recurso.get("cambios_limite"));
+        }
         jRecursos.add(jRecurso);
       }
       jAgenda.add("recursos", jRecursos);
@@ -532,16 +536,18 @@ public class ServiciosREST {
       Reserva reserva = agendarReservas.generarYConfirmarReserva(input.getIdEmpresa(), input.getIdAgenda(), input.getIdRecurso(), input.getIdDisponibilidad(),
           input.getDatosReserva(), input.getIdTransaccionPadre(), input.getPasoTransaccionPadre(), null, input.getIdioma());
       Agenda agenda = agendarReservas.consultarAgendaPorId(input.getIdAgenda());
+      Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
       //Enviar el mail de confirmacion
-      String linkCancelacion = httpRequest.getScheme()+"://"+httpRequest.getServerName();
+      String linkBase = httpRequest.getScheme()+"://"+httpRequest.getServerName();
       if("http".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=80 || "https".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=443) {
-        linkCancelacion = linkCancelacion + ":" + httpRequest.getServerPort();
+        linkBase = linkBase + ":" + httpRequest.getServerPort();
       }
-      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+      String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+agenda.getId()+"&r="+recurso.getId()+"&ri="+reserva.getId();
       Map<String, Object> datosEmpresa = consultas.consultarDatosEmpresa(input.getIdEmpresa());
       String formatoFecha = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_FECHA")?(String)datosEmpresa.get("FORMATO_FECHA"):"dd/MM/yyyy";
       String formatoHora = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_HORA")?(String)datosEmpresa.get("FORMATO_HORA"):"HH:mm";
-      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, reserva, input.getIdioma(), formatoFecha, formatoHora);
+      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, reserva, input.getIdioma(), formatoFecha, formatoHora);
       //Enviar la respuesta
       JsonObject jReserva = new JsonObject();
       jReserva.addProperty("resultado", "1");
@@ -564,7 +570,7 @@ public class ServiciosREST {
         }
       }
       if(textoTicket != null) {
-        jReserva.addProperty("textoTicket", Metavariables.remplazarMetavariables(textoTicket, reserva, formatoFecha, formatoHora, linkCancelacion));
+        jReserva.addProperty("textoTicket", Metavariables.remplazarMetavariables(textoTicket, reserva, formatoFecha, formatoHora, linkCancelacion, linkModificacion));
       }
       
       return jReserva.toString();
@@ -1126,16 +1132,18 @@ public class ServiciosREST {
         }
       }
       //Armar el texto del link de cancelación (template)
-      String linkCancelacion = httpRequest.getScheme()+"://"+httpRequest.getServerName();
+      String linkBase = httpRequest.getScheme()+"://"+httpRequest.getServerName();
       if("http".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=80 || "https".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=443) {
-        linkCancelacion = linkCancelacion + ":" + httpRequest.getServerPort();
+        linkBase = linkBase + ":" + httpRequest.getServerPort();
       }
-      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+agenda.getId()+"&ri={idReserva}";
+      String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+agenda.getId()+"&ri={idReserva}";
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+input.getIdAgenda()+"&r="+input.getIdRecurso()+"&ri={idReserva}";
+      
       Map<String, Object> datosEmpresa = consultas.consultarDatosEmpresa(input.getIdEmpresa());
       String formatoFecha = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_FECHA")?(String)datosEmpresa.get("FORMATO_FECHA"):"dd/MM/yyyy";
       String formatoHora = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_HORA")?(String)datosEmpresa.get("FORMATO_HORA"):"HH:mm";
       //Enviar las comunicaciones
-      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, tokenReserva, input.getIdioma(), formatoFecha, formatoHora);
+      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, tokenReserva, input.getIdioma(), formatoFecha, formatoHora);
       //Armar la respuesta
       JsonArray jReservas = new JsonArray();
       List<Reserva> reservas = agendarReservas.obtenerReservasMultiples(tokenReserva.getId(), false);
@@ -1147,12 +1155,13 @@ public class ServiciosREST {
           jReserva.addProperty("codigoCancelacion", reserva.getCodigoSeguridad());
           jReserva.addProperty("codigoTrazabilidad", reserva.getTrazabilidadGuid());
           String linkCancelacionReserva = linkCancelacion.replace("{idReserva}", reserva.getId().toString());
+          String linkModificacionReserva = linkModificacion.replace("{idReserva}", reserva.getId().toString());
           jReserva.addProperty("linkCancelacion", linkCancelacionReserva);
           Disponibilidad disp = reserva.getDisponibilidades().get(0); 
           jReserva.addProperty("fechaHora", FORMATOFECHA_SINHORA.format(disp.getFecha())+FORMATOFECHA_HORA.format(disp.getHoraInicio()));
           jReservas.add(jReserva);
           if(textoTicket != null) {
-            jReserva.addProperty("textoTicket", Metavariables.remplazarMetavariables(textoTicket, reserva, formatoFecha, formatoHora, linkCancelacionReserva));
+            jReserva.addProperty("textoTicket", Metavariables.remplazarMetavariables(textoTicket, reserva, formatoFecha, formatoHora, linkCancelacionReserva, linkModificacionReserva));
           }
         }
       }
@@ -1458,6 +1467,10 @@ public class ServiciosREST {
       if(!input.getCodigoSeguridad().equals(reservaOriginal.getCodigoSeguridad())) {
         return jError("los_datos_ingresados_no_son_correctos");
       }
+      Recurso recurso = reservaOriginal.getDisponibilidades().get(0).getRecurso();
+      if(recurso.getCambiosAdmite()==null || !recurso.getCambiosAdmite().booleanValue()) {
+        return jError("el_recurso_no_admite_cambios_de_reservas");
+      }
       //Modificar la reserva
       Reserva reservaNueva = agendarReservas.modificarReserva(input.getIdEmpresa(), input.getIdAgenda(), input.getIdRecurso(), input.getIdReserva(), 
           input.getIdDisponibilidad(), null, input.getIdioma());
@@ -1466,12 +1479,13 @@ public class ServiciosREST {
       String formatoFecha = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_FECHA")?(String)datosEmpresa.get("FORMATO_FECHA"):"dd/MM/yyyy";
       String formatoHora = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_HORA")?(String)datosEmpresa.get("FORMATO_HORA"):"HH:mm";
       agendarReservas.enviarComunicacionesCancelacion(reservaOriginal, input.getIdioma(), formatoFecha, formatoHora);
-      String linkCancelacion = httpRequest.getScheme()+"://"+httpRequest.getServerName();
+      String linkBase = httpRequest.getScheme()+"://"+httpRequest.getServerName();
       if("http".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=80 || "https".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=443) {
-        linkCancelacion = linkCancelacion + ":" + httpRequest.getServerPort();
+        linkBase = linkBase + ":" + httpRequest.getServerPort();
       }
-      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+input.getIdAgenda()+"&ri="+reservaNueva.getId();
-      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, reservaNueva, input.getIdioma(), formatoFecha, formatoHora);
+      String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+input.getIdAgenda()+"&ri="+reservaNueva.getId();
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+input.getIdEmpresa()+"&a="+input.getIdAgenda()+"&r="+input.getIdRecurso()+"&ri="+reservaNueva.getId();
+      agendarReservas.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, reservaNueva, input.getIdioma(), formatoFecha, formatoHora);
       //Enviar la respuesta
       JsonObject jReserva = new JsonObject();
       jReserva.addProperty("resultado", "1");
@@ -1492,7 +1506,7 @@ public class ServiciosREST {
         }
       }
       if(textoTicket != null) {
-        jReserva.addProperty("textoTicket", Metavariables.remplazarMetavariables(textoTicket, reservaNueva, formatoFecha, formatoHora, linkCancelacion));
+        jReserva.addProperty("textoTicket", Metavariables.remplazarMetavariables(textoTicket, reservaNueva, formatoFecha, formatoHora, linkCancelacion, linkModificacion));
       }
       return jReserva.toString();
     }catch(UserException uEx) {

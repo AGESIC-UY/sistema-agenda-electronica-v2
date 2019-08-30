@@ -663,6 +663,9 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		recursoDTO.setPresencialViernes(recurso.getPresencialViernes());
 		recursoDTO.setPresencialSabado(recurso.getPresencialSabado());
     recursoDTO.setMultipleAdmite(recurso.getMultipleAdmite());
+    recursoDTO.setCambiosAdmite(recurso.getCambiosAdmite());
+    recursoDTO.setCambiosTiempo(recurso.getCambiosTiempo()); 
+    recursoDTO.setCambiosUnidad(recurso.getCambiosUnidad()); 
 		return recursoDTO;
 	}
 	

@@ -389,13 +389,15 @@ public class Paso3MBean extends BaseMBean {
 			}
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-      Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-			String linkCancelacion = request.getScheme()+"://"+request.getServerName();
+      Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso(); 
+			Agenda agenda = recurso.getAgenda();
+			String linkBase = request.getScheme()+"://"+request.getServerName();
 			if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-				linkCancelacion = linkCancelacion + ":" + request.getServerPort();
+			  linkBase = linkBase + ":" + request.getServerPort();
 			}
-			linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
-			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, reserva, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
+			String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&r="+recurso.getId()+"&ri="+reserva.getId();
+			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, reserva, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
 			//La reserva se confirmo, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
 			sesionMBean.setReservaConfirmada(reserva);
 			sesionMBean.setReserva(null);

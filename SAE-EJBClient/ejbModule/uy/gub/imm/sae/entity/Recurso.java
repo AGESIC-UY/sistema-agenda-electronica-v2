@@ -117,6 +117,10 @@ public class Recurso implements Serializable {
   
   //Datos de reserva múltiple
   private Boolean multipleAdmite;
+  //Datos de cambios de reserva
+  private Boolean cambiosAdmite;
+  private Integer cambiosTiempo;
+  private Integer cambiosUnidad; //Calendar.DATE, Calendar.HOUR, Calendar.MINUTE
 	
 	public Recurso () {
 		visibleInternet = false;
@@ -144,6 +148,9 @@ public class Recurso implements Serializable {
     presencialDomingo = false;
     
     multipleAdmite = false;
+    cambiosAdmite = false;
+    cambiosTiempo = null;
+    cambiosUnidad = null;
 	}
 	
 	/**
@@ -211,6 +218,10 @@ public class Recurso implements Serializable {
     this.presencialDomingo = r.presencialDomingo;
 		
     this.multipleAdmite = r.multipleAdmite;
+    
+    this.cambiosAdmite = r.cambiosAdmite;
+    this.cambiosTiempo = r.cambiosTiempo;
+    this.cambiosUnidad = r.cambiosUnidad;
 	}
 
 	
@@ -666,6 +677,33 @@ public class Recurso implements Serializable {
 
   public void setMultipleAdmite(Boolean multipleAdmite) {
     this.multipleAdmite = multipleAdmite;
+  }
+
+  @Column (name = "cambios_admite", nullable = false)
+  public Boolean getCambiosAdmite() {
+    return cambiosAdmite;
+  }
+
+  public void setCambiosAdmite(Boolean cambiosAdmite) {
+    this.cambiosAdmite = cambiosAdmite;
+  }
+
+  @Column (name = "cambios_tiempo", nullable = false)
+  public Integer getCambiosTiempo() {
+    return cambiosTiempo;
+  }
+
+  public void setCambiosTiempo(Integer cambiosTiempo) {
+    this.cambiosTiempo = cambiosTiempo;
+  }
+
+  @Column (name = "cambios_unidad", nullable = false)
+  public Integer getCambiosUnidad() {
+    return cambiosUnidad;
+  }
+
+  public void setCambiosUnidad(Integer cambiosUnidad) {
+    this.cambiosUnidad = cambiosUnidad;
   }
 
   @Column (name = "fuente_ticket", nullable = false)

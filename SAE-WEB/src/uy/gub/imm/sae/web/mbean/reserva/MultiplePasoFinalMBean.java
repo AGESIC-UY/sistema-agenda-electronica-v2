@@ -288,13 +288,14 @@ public class MultiplePasoFinalMBean extends BaseMBean {
       }
       //Armar el texto del link de cancelación (template)
       HttpServletRequest httpRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-      String linkCancelacion = httpRequest.getScheme()+"://"+httpRequest.getServerName();
+      String linkBase = httpRequest.getScheme()+"://"+httpRequest.getServerName();
       if("http".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=80 || "https".equals(httpRequest.getScheme()) && httpRequest.getServerPort()!=443) {
-        linkCancelacion = linkCancelacion + ":" + httpRequest.getServerPort();
+        linkBase = linkBase + ":" + httpRequest.getServerPort();
       }
-      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri={idReserva}";
+      String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri={idReserva}";
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&r="+tokenReserva.getRecurso().getId()+"&ri={idReserva}";
       //Enviar las comunicaciones
-      agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, tokenReserva, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
+      agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, tokenReserva, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
       //La reserva se confirmo, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
       sesionMBean.setReserva(null);
       sesionMBean.setTokenReserva(tokenReserva);

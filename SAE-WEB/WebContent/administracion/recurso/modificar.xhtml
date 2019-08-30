@@ -323,7 +323,7 @@
               </p:outputPanel>
             </p:outputPanel>
             <p:outputPanel styleClass="form-group">
-              <p:outputLabel value="#{sessionMBean.textos['cupos_por_dia']}" styleClass="col-sm-3 control-label label" for="idSerie" />
+              <p:outputLabel value="#{sessionMBean.textos['cupos_por_dia']}" styleClass="col-sm-3 control-label label" for="cuposPresencial" />
               <p:outputPanel styleClass="col-sm-9">
                 <h:inputText id="cuposPresencial" value="#{recursoMBean.recursoSeleccionado.presencialCupos}" maxlength="3" 
                   styleClass="form-control textoCorto" converter="integerConverter" disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}"  />
@@ -364,6 +364,43 @@
                 <h:inputHidden id="diaAplicarHidden" />
                 <p:message for="diaAplicarHidden" />
               </p:outputPanel>
+            </p:outputPanel>
+          </p:outputPanel>
+        </fieldset>
+        
+        <fieldset>
+          <legend>
+            <h:outputText value="#{sessionMBean.textos['configuracion_de_cambios_de_reservas']}" />
+          </legend>
+          <p:outputPanel styleClass="form-horizontal" id="configuracionCambiosReserva">
+            <p:outputPanel styleClass="form-group">
+              <h:outputText value="#{sessionMBean.textos['cambios_reserva']}" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox value="#{recursoMBean.recursoSeleccionado.cambiosAdmite}" id="admiteCambios" >
+                    <p:ajax update="configuracionCambiosReserva" />
+                  </p:selectBooleanCheckbox>
+                  <p:outputLabel value="#{sessionMBean.textos['admite_cambios_reserva']}" for="admiteCambios" />
+                </p:outputPanel>
+              </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['tiempo_previo']}" styleClass="col-sm-3 control-label label" for="cambiosTiempo" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="cambiosTiempo" value="#{recursoMBean.recursoSeleccionado.cambiosTiempo}" maxlength="3" 
+                  styleClass="form-control textoCorto" converter="integerConverter" disabled="#{!recursoMBean.recursoSeleccionado.cambiosAdmite}"  />
+                <p:message for="cambiosTiempo" />
+              </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <h:outputLabel value="#{sessionMBean.textos['tiempo_unidad']}" for="cambiosUnidad" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:selectOneMenu id="cambiosUnidad" value="#{recursoMBean.recursoSeleccionado.cambiosUnidad}" styleClass="form-control"
+                   disabled="#{!recursoMBean.recursoSeleccionado.cambiosAdmite}">
+                  <f:selectItems value="#{recursoMBean.cambiosUnidades}" />
+                </h:selectOneMenu>
+                <p:message for="cambiosUnidad" />
+              </p:outputPanel>
+            </p:outputPanel>
             </p:outputPanel>
           </p:outputPanel>
         </fieldset>

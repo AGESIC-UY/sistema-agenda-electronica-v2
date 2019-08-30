@@ -310,7 +310,10 @@ CREATE TABLE ae_recursos (
     tamanio_fuente_normal integer DEFAULT 10 NOT NULL,
     tamanio_fuente_chica integer DEFAULT 8 NOT NULL,
     fuente_ticket character varying(100) DEFAULT 'Helvetica-Bold'::character varying NOT NULL,
-    multiple_admite boolean NOT NULL DEFAULT false
+    multiple_admite boolean NOT NULL DEFAULT false,
+    cambios_admite boolean NOT NULL DEFAULT false,
+    cambios_tiempo integer DEFAULT null,
+    cambios_unidad integer DEFAULT null
 );
 ALTER TABLE ae_recursos OWNER TO sae;
 
@@ -414,18 +417,18 @@ CREATE TABLE ae_textos_recurso (
 ALTER TABLE ae_textos_recurso OWNER TO sae;
 
 CREATE TABLE ae_tokens_reservas (
-  id int4 NOT NULL,
-  token varchar(50) NOT NULL,
-  aere_id int4 NULL,
-  fecha_inicio timestamp NOT NULL,
-  ultima_reserva timestamp NULL,
-  estado varchar(1) NOT NULL,
-  cedula varchar(50) NOT NULL,
-  nombre varchar(100) NOT NULL,
-  correoe varchar(100) NOT NULL,
-  tramite varchar(10) NULL,
-  notas varchar(4000) NULL,
-  "version" int4 NOT NULL
+	id int4 NOT NULL,
+	token varchar(50) NOT NULL,
+	aere_id int4 NULL,
+	fecha_inicio timestamp NOT NULL,
+	ultima_reserva timestamp NULL,
+	estado varchar(1) NOT NULL,
+	cedula varchar(50) NOT NULL,
+	nombre varchar(100) NOT NULL,
+	correoe varchar(100) NOT NULL,
+	tramite varchar(10) NULL,
+	notas varchar(4000) NULL,
+	"version" int4 NOT NULL
 ) ;
 ALTER TABLE ae_tokens_reservas OWNER TO sae;
 

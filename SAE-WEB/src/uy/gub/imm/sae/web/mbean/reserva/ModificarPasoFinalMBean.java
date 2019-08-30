@@ -174,13 +174,15 @@ public class ModificarPasoFinalMBean extends BaseMBean {
 			if(str!=null) {
         Agenda agenda = sesionMBean.getAgenda();
 			  HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        String linkCancelacion = request.getScheme()+"://"+request.getServerName();
+        String linkBase = request.getScheme()+"://"+request.getServerName();
 	      if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-	        linkCancelacion = linkCancelacion + ":" + request.getServerPort();
+	        linkBase = linkBase + ":" + request.getServerPort();
 	      }
 	      Reserva reserva = sesionMBean.getReservaConfirmada();
-	      linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
-			  str = Metavariables.remplazarMetavariables(str, reserva, sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora(), linkCancelacion);
+	      Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+	      String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
+	      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&r="+recurso.getId()+"&ri="+reserva.getId();
+			  str = Metavariables.remplazarMetavariables(str, reserva, sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora(), linkCancelacion, linkModificacion);
 				return str;
 			}	else {
 				return "";

@@ -381,13 +381,15 @@ public class Paso3AdminMBean extends BaseMBean {
 			}
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-			String linkCancelacion = request.getScheme()+"://"+request.getServerName();
-			if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-				linkCancelacion = linkCancelacion + ":" + request.getServerPort();
-			}
-			Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-			linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
-			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, reserva, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
+			String linkBase = request.getScheme()+"://"+request.getServerName();
+      if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
+        linkBase = linkBase + ":" + request.getServerPort();
+      }
+			Integer recursoId = reserva.getDisponibilidades().get(0).getRecurso().getId();
+			Integer agendaId = reserva.getDisponibilidades().get(0).getRecurso().getAgenda().getId();
+			String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&ri="+reserva.getId();
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&r="+recursoId+"&ri="+reserva.getId();
+			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, reserva, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
 			//La reserva se confirmó, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
 			sessionMBean.setReservaConfirmada(reserva);
 			sessionMBean.setReserva(null);

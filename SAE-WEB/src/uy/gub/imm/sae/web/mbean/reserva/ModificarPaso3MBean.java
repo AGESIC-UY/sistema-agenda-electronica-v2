@@ -35,6 +35,7 @@ import org.apache.log4j.Logger;
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
 import uy.gub.imm.sae.entity.Agenda;
+import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoRecurso;
@@ -233,13 +234,15 @@ public class ModificarPaso3MBean extends BaseMBean {
             sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
   			//Enviar el mail de confirmacion de la reserva nueva
   			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-        Agenda agenda = rConfirmada.getDisponibilidades().get(0).getRecurso().getAgenda();
-  			String linkCancelacion = request.getScheme()+"://"+request.getServerName();
+        Recurso recurso = rConfirmada.getDisponibilidades().get(0).getRecurso(); 
+  			Agenda agenda = recurso.getAgenda();
+  			String linkBase = request.getScheme()+"://"+request.getServerName();
   			if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-  				linkCancelacion = linkCancelacion + ":" + request.getServerPort();
+  			  linkBase = linkBase + ":" + request.getServerPort();
   			}
-  			linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+rConfirmada.getId();
-  			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, rConfirmada, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
+  			String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+rConfirmada.getId();
+  			String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&r="+recurso.getId()+"&ri="+rConfirmada.getId();
+  			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, linkModificacion, rConfirmada, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
       }catch(UserException ex) {
         addAdvertenciaMessage(sesionMBean.getTextos().get(ex.getCodigoError()));
       }

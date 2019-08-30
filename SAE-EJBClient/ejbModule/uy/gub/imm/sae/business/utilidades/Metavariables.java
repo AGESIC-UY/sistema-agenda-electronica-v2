@@ -7,7 +7,7 @@ import uy.gub.imm.sae.entity.Reserva;
 
 public class Metavariables {
   
-  public static String remplazarMetavariables(String texto, Reserva reserva, String formatoFecha, String formatoHora, String linkCancelacion) {
+  public static String remplazarMetavariables(String texto, Reserva reserva, String formatoFecha, String formatoHora, String linkCancelacion, String linkModificacion) {
     
     if(texto==null) {
       return null;
@@ -38,6 +38,11 @@ public class Metavariables {
     texto = texto.replace("{{CODIGOSEGURIDAD}}", reserva.getCodigoSeguridad());
     texto = texto.replace("{{CODIGOTRAZABILIDAD}}", reserva.getTrazabilidadGuid()!=null?reserva.getTrazabilidadGuid():"---");
     texto = texto.replace("{{CANCELACION}}", linkCancelacion);
+    if(recurso.getCambiosAdmite()!=null && recurso.getCambiosAdmite().booleanValue()) {
+      texto = texto.replace("{{MODIFICACION}}", linkModificacion);
+    }else {
+      texto = texto.replace("{{MODIFICACION}}", "");
+    }
     texto = texto.replace("{{IDRESERVA}}", reserva.getId().toString());
     
     return texto;
