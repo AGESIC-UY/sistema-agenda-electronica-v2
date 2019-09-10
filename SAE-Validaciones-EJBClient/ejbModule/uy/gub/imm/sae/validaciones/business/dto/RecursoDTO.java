@@ -56,7 +56,16 @@ public class RecursoDTO implements Serializable {
   private Boolean cambiosAdmite;
   private Integer cambiosTiempo;
   private Integer cambiosUnidad;
+  private Integer periodoValidacion;
+  private Boolean validarPorIP;
+  private Integer cantidadPorIP;
+  private Integer periodoPorIP;
+  private String ipsSinValidacion;
 
+  private Integer cancelacionTiempo;
+  private Integer cancelacionUnidad;
+  private String cancelacionTipo;
+  
 	public RecursoDTO () {
 	}
 
@@ -290,6 +299,70 @@ public class RecursoDTO implements Serializable {
 
   public void setCambiosUnidad(Integer cambiosUnidad) {
     this.cambiosUnidad = cambiosUnidad;
+  }
+
+  public Integer getPeriodoValidacion() {
+    return periodoValidacion;
+  }
+
+  public void setPeriodoValidacion(Integer periodoValidacion) {
+    this.periodoValidacion = periodoValidacion;
+  }
+
+  public Boolean getValidarPorIP() {
+    return validarPorIP;
+  }
+
+  public void setValidarPorIP(Boolean validarPorIP) {
+    this.validarPorIP = validarPorIP;
+  }
+
+  public Integer getCantidadPorIP() {
+    return cantidadPorIP;
+  }
+
+  public void setCantidadPorIP(Integer cantidadPorIP) {
+    this.cantidadPorIP = cantidadPorIP;
+  }
+
+  public Integer getPeriodoPorIP() {
+    return periodoPorIP;
+  }
+
+  public void setPeriodoPorIP(Integer periodoPorIP) {
+    this.periodoPorIP = periodoPorIP;
+  }
+
+  public String getIpsSinValidacion() {
+    return ipsSinValidacion;
+  }
+
+  public void setIpsSinValidacion(String ipsSinValidacion) {
+    this.ipsSinValidacion = ipsSinValidacion;
+  }
+
+  public Integer getCancelacionTiempo() {
+    return cancelacionTiempo;
+  }
+
+  public void setCancelacionTiempo(Integer cancelacionTiempo) {
+    this.cancelacionTiempo = cancelacionTiempo;
+  }
+
+  public Integer getCancelacionUnidad() {
+    return cancelacionUnidad;
+  }
+
+  public void setCancelacionUnidad(Integer cancelacionUnidad) {
+    this.cancelacionUnidad = cancelacionUnidad;
+  }
+
+  public String getCancelacionTipo() {
+    return cancelacionTipo;
+  }
+
+  public void setCancelacionTipo(String cancelacionTipo) {
+    this.cancelacionTipo = cancelacionTipo;
   }
 	
 }

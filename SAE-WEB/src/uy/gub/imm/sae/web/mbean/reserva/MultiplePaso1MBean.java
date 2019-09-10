@@ -60,6 +60,7 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.login.Utilidades;
 import uy.gub.imm.sae.web.common.BaseMBean;
+import uy.gub.imm.sae.web.common.SofisJSFUtils;
 
 /*
  * Invocación desde un sistema externo:
@@ -533,7 +534,8 @@ public class MultiplePaso1MBean extends BaseMBean {
     }
     try {
       //Se genera el token sin el recurso
-      token = agendarReservasEJB.generarTokenReserva(null, cedula, nombre, correoe, tramiteCodigo);
+      String ipOrigen = SofisJSFUtils.obtenerDireccionIPCliente(FacesContext.getCurrentInstance());
+      token = agendarReservasEJB.generarTokenReserva(null, cedula, nombre, correoe, tramiteCodigo, ipOrigen);
       //Se almacena el token en la sesión
       sesionMBean.setTokenReserva(token);
       //Ir al siguiente paso

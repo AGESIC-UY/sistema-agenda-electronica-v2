@@ -42,6 +42,7 @@ import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
@@ -243,9 +244,8 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	}
 
 	/**
-	 * Obtiene los cupos consumidos, es decir la suma de las reservas no canceladas
-	 * dentro de la ventana indicada. Para el rango de la ventana que caiga en el pasado o fuera 
-	 * del inicio de disponibilidad indicado en el recurso, no se devuelve cupos.
+	 * Obtiene los cupos consumidos, es decir la suma de las reservas no canceladas dentro de la ventana indicada. 
+	 * Para el rango de la ventana que caiga en el pasado o fuera del inicio de disponibilidad indicado en el recurso, no se devuelve cupos.
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Object[]> obtenerCuposConsumidos(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) {
@@ -264,24 +264,26 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}
 		//Cupos consumidos, es decir, cantidad de reservas por dia no canceladas.
 		//No se debe considerar las disponibilidades presenciales
+		//Si la reserva está cancelada hay que tomar en cuenta el campo fechaLiberacion
 		List<Object[]> cuposConsumidos = entityManager.createQuery(
-			"SELECT d.fecha, COUNT(reserva) " + 
+			"SELECT d.fecha, COUNT(r) " + 
 			"FROM Disponibilidad d " +
-			"LEFT JOIN d.reservas reserva " +
-			"WHERE d.recurso = :rec " +
+			"LEFT JOIN d.reservas r " +
+			"WHERE d.recurso = :recurso " +
       "  AND d.presencial = false " +
 			"  AND d.fechaBaja is null " +
-			"  AND d.fecha BETWEEN :fi AND :ff " +
+			"  AND d.fecha BETWEEN :finicio AND :ffin " +
     	"  AND (d.fecha <> :hoy OR d.horaInicio >= :ahora) " +
-			"  AND (reserva is null OR reserva.estado <> :cancelado) " +
+			"  AND (r is null OR r.estado <> :cancelado OR r.fechaLiberacion>=:ahora) " +
 			"GROUP BY d.fecha " +
 			"ORDER BY d.fecha asc ")
-			.setParameter("rec", recurso)
-			.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-			.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
+			.setParameter("recurso", recurso)
+			.setParameter("finicio", ventana.getFechaInicial(), TemporalType.DATE)
+			.setParameter("ffin", ventana.getFechaFinal(), TemporalType.DATE)
 			.setParameter("hoy", ahora, TemporalType.DATE)
 			.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
 			.setParameter("cancelado", Estado.C)
+      .setParameter("ahora", new Date())
 			.getResultList();
 		return cuposConsumidos;
 	}
@@ -344,11 +346,12 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * Crea la reserva como pendiente, realiza todo en una transaccion independiente
 	 */
 	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
-	public Reserva crearReservaPendiente(Disponibilidad disp, TokenReserva token) {
+	public Reserva crearReservaPendiente(Disponibilidad disp, TokenReserva token, String ipOrigen) {
 	  disp = entityManager.find(Disponibilidad.class, disp.getId());
 	  if(token!=null) {
 	    token = entityManager.find(TokenReserva.class, token.getId());
 	    token.setUltimaReserva(new Date());
+	    token.setIpOrigen(ipOrigen);
 	  }
 	  //Creo y seteo atributos
 		Reserva reserva = new Reserva();
@@ -356,6 +359,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		reserva.getDisponibilidades().add(disp);
 		reserva.setFechaCreacion(new Date());
 		reserva.setToken(token);
+		reserva.setIpOrigen(ipOrigen);
 		entityManager.persist(reserva);
 		return reserva;
 	}
@@ -364,15 +368,15 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	 * Verifica que existan cupos disponibles para la reserva.
 	 * Si el parámetro reservaTomada es true asume que pueden quedar 0 reservas porque el llamador ya tomó la reserva (la última)
 	 * Si el parámetro reservaTomada es false deben quedar al menos 1 cupo para que el llamador pueda tomarlo
+	 * Si la reserva está cancelada hay que tomar en cuenta si ya se liberó el cupo
 	 */
 	public boolean chequeoCupoDisponible (Disponibilidad disponibilidad, boolean reservaTomada) {
 		int cantReservas = ((Long) entityManager.createQuery(
-  		"SELECT COUNT(*) " +
-  		"FROM Disponibilidad d JOIN d.reservas r " +
-  		"WHERE d = :d " +
-  		"  AND r.estado <> :cancelado")
-		.setParameter("d", disponibilidad)
+  		"SELECT COUNT(*) FROM Disponibilidad d JOIN d.reservas r " +
+  		"WHERE d = :disp AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora)")
+		.setParameter("disp", disponibilidad)
 		.setParameter("cancelado", Estado.C)
+    .setParameter("ahora", new Date())
 		.getSingleResult()).intValue();
 		int minimo = reservaTomada?0:1;
 		return (disponibilidad.getCupo() - cantReservas) < minimo;
@@ -541,9 +545,23 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   			DatoReserva datoReserva = valores.get(datoASolicitar.getNombre());
   			datoReservaLista.add(datoReserva);
   		}
+  		//Determinar el período en el cual no pueden haber otras reservas (por defecto es solo la misma fecha)
   		Date fecha = disponibilidad.getFecha();
-  		// consulto las reservas por dato de reserva (solo para los campos clave)
-  		listaReserva = consultaEJB.consultarReservaDatosFecha(datoReservaLista, recurso, fecha, codigoTramite);
+  		Date fechaDesde = fecha;
+  		Date fechaHasta = fecha;
+  		Integer periodoValidacion = recurso.getPeriodoValidacion();
+  		if(periodoValidacion==null) {
+  		  periodoValidacion=0;
+  		}
+		  Calendar cal = new GregorianCalendar();
+		  cal.setTime(fecha);
+		  cal.add(Calendar.DATE, -1*periodoValidacion);
+		  fechaDesde = Utiles.time2InicioDelDia(cal.getTime());
+		  cal.setTime(fecha);
+		  cal.add(Calendar.DATE, 1*periodoValidacion);
+		  fechaHasta = Utiles.time2FinDelDia(cal.getTime());
+  		//Consultar las reservas por dato de reserva (solo para los campos clave)
+  		listaReserva = consultaEJB.consultarReservaDatosPeriodo(datoReservaLista, recurso, fechaDesde, fechaHasta, codigoTramite);
   	}
 		return listaReserva;
 	}
@@ -637,6 +655,40 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}
 	}
 	
+	public int cantidadReservasPorIp(Recurso recurso, String ipOrigen, Integer reservaId) {
+	  
+    Date fecha = new Date();
+    Date fechaDesde = fecha;
+    Date fechaHasta = fecha;
+    Integer periodoValidacion = recurso.getPeriodoPorIP();
+    if(periodoValidacion==null) {
+      periodoValidacion=0;
+    }
+    Calendar cal = new GregorianCalendar();
+    cal.setTime(fecha);
+    cal.add(Calendar.DATE, -1*periodoValidacion);
+    fechaDesde = Utiles.time2InicioDelDia(cal.getTime());
+    cal.setTime(fecha);
+    cal.add(Calendar.DATE, 1*periodoValidacion);
+    fechaHasta = Utiles.time2FinDelDia(cal.getTime());
+    //Solo se consideran las reservas simples, no las reservas múltiples
+    String eql = "SELECT COUNT(*) FROM Reserva r WHERE r.estado<>:cancelado AND r.token IS NULL AND "
+        + "r.ipOrigen=:ipOrigen AND r.fechaCreacion>=:fechaDesde AND r.fechaCreacion<=:fechaHasta";
+    if(reservaId!=null) {
+      eql = eql + " AND r.id<>:reservaId";
+    }
+    Query query = entityManager.createQuery(eql);
+    query.setParameter("cancelado", Estado.C);
+    query.setParameter("ipOrigen", ipOrigen);
+    query.setParameter("fechaDesde", fechaDesde);
+    query.setParameter("fechaHasta", fechaHasta);
+    if(reservaId!=null) {
+      query.setParameter("reservaId", reservaId);
+    }
+	  int cantReservasIP = ((Long) query.getSingleResult()).intValue();
+	  return cantReservasIP;
+	}
+	
 	private RecursoDTO copiarRecurso(Recurso recurso) {
 		RecursoDTO recursoDTO = new RecursoDTO();
 		recursoDTO.setId(recurso.getId());
@@ -665,8 +717,17 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
     recursoDTO.setMultipleAdmite(recurso.getMultipleAdmite());
     recursoDTO.setCambiosAdmite(recurso.getCambiosAdmite());
     recursoDTO.setCambiosTiempo(recurso.getCambiosTiempo()); 
-    recursoDTO.setCambiosUnidad(recurso.getCambiosUnidad()); 
-		return recursoDTO;
+    recursoDTO.setCambiosUnidad(recurso.getCambiosUnidad());
+    recursoDTO.setPeriodoValidacion(recurso.getPeriodoValidacion()); 
+    recursoDTO.setValidarPorIP(recurso.getValidarPorIP()); 
+    recursoDTO.setCantidadPorIP(recurso.getCantidadPorIP()); 
+    recursoDTO.setPeriodoPorIP(recurso.getPeriodoPorIP()); 
+    recursoDTO.setIpsSinValidacion(recurso.getIpsSinValidacion()); 
+    recursoDTO.setCancelacionTiempo(recurso.getCancelacionTiempo()); 
+    recursoDTO.setCancelacionUnidad(recurso.getCancelacionUnidad()); 
+    recursoDTO.setCancelacionTipo(recurso.getCancelacionTipo()!=null?recurso.getCancelacionTipo().name(): null); 
+    
+    return recursoDTO;
 	}
 	
 	private Map<String,String> copiarDatos(Map<String, DatoReserva> valores, Recurso rec){
@@ -802,7 +863,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}
 		return autocompletador;
 	}
-	
 	
 }
 

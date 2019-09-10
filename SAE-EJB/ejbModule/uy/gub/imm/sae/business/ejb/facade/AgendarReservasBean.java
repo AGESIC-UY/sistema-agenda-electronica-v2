@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Resource;
 import javax.annotation.security.RolesAllowed;
@@ -59,6 +60,7 @@ import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Evento;
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Comunicacion;
@@ -88,6 +90,7 @@ import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
+import uy.gub.imm.sae.exception.ValidacionIPException;
 
 @Stateless
 public class AgendarReservasBean implements AgendarReservasLocal, AgendarReservasRemote{
@@ -119,7 +122,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   @EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
   private UsuariosEmpresas empresasEJB;
   
-	
 	static Logger logger = Logger.getLogger(AgendarReservasBean.class);
 	
 	/**
@@ -329,6 +331,26 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (r == null) {
 			throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
 		}
+		//Determinar el timezone de la reserva
+    TimeZone timezone = TimeZone.getDefault();
+    if(recurso.getAgenda().getTimezone()!=null && !recurso.getAgenda().getTimezone().isEmpty()) {
+      timezone = TimeZone.getTimeZone(recurso.getAgenda().getTimezone());
+    }else {
+      if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(empresa.getTimezone());
+      }
+    }
+		//Determinar si aún se está a tiempo de cancelar la reserva (no aplica si es masiva)
+		if(!masiva) {
+		  Calendar horaLimiteTimezone = new GregorianCalendar();
+      horaLimiteTimezone.setTime(reserva.getFechaHora());
+      horaLimiteTimezone.add(recurso.getCancelacionUnidad(), -1*recurso.getCancelacionTiempo());
+      Calendar horaActualTimezone = new GregorianCalendar();
+      horaActualTimezone.add(Calendar.MILLISECOND, timezone.getOffset(horaActualTimezone.getTime().getTime()));
+      if(!horaActualTimezone.before(horaLimiteTimezone)) {
+        throw new UserException("ha_expirado_el_plazo_de_cancelacion");
+      }
+		}	
 		ReservaDTO reservaDTO = new ReservaDTO();
 		reservaDTO.setEstado(r.getEstado().toString());
 		reservaDTO.setFecha(r.getDisponibilidades().get(0).getFecha());
@@ -354,11 +376,43 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }catch (Exception ex){
       throw new UserException(ex.getMessage());
     }
-		r.setEstado(Estado.C);
+    r.setEstado(Estado.C);
 		r.setObservaciones(reserva.getObservaciones());
 		r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
 		r.setTcancela(masiva?TipoCancelacion.M:TipoCancelacion.I);
 		r.setFcancela(reservaDTO.getFcancela());
+    //Determinar la fecha de liberación según la cancelación sea inmediata o diferida
+    if(recurso.getCancelacionTipo()==null || FormaCancelacion.I.equals(recurso.getCancelacionTipo())) {
+      //Es inmediata, el cupo se libera al instante
+      r.setFechaLiberacion(r.getFcancela());
+    }else {
+      //Es diferida, se selecciona una fecha aleatoria
+      Date fechaHoraAtencion = r.getDisponibilidades().get(0).getHoraInicio();
+      
+      
+      //Determinar la fecha actual según el timezone de la reserva
+      Calendar fechaHoraActual = new GregorianCalendar();
+      fechaHoraActual.add(Calendar.MILLISECOND, timezone.getOffset(fechaHoraActual.getTime().getTime()));
+      
+      //Determinar la diferencia entre la fecha actual y la fecha de atención
+      long difMilisegundos = fechaHoraAtencion.getTime() - fechaHoraActual.getTime().getTime();
+      if(difMilisegundos<0) {
+        //No debería pasar
+        difMilisegundos = 0;
+      }
+      
+      //Elegir un desplazamiento aleatorio
+      long valorMinimo = Math.round(difMilisegundos * 0.1);
+      long valorMaximo = Math.round(difMilisegundos * 0.8);
+      long milisegundosAleatorios = ThreadLocalRandom.current().nextLong(valorMinimo, valorMaximo);
+      if(milisegundosAleatorios>Integer.MAX_VALUE) {
+        milisegundosAleatorios = Integer.MAX_VALUE;
+      }
+      //Calcular la fecha y hora de liberación como la hora actual más el desplazamiento
+      Calendar fechaHoraLiberacion = new GregorianCalendar();
+      fechaHoraLiberacion.add(Calendar.MILLISECOND, (int)milisegundosAleatorios);
+      r.setFechaLiberacion(fechaHoraLiberacion.getTime());
+    }
 		//Registrar la cancelacion en el sistema de trazas del PEU
 		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), r.getTramiteCodigo(), r.getId());
 		if(transaccionId != null) {
@@ -368,6 +422,40 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
 	}
 
+	/**
+	 * Libera el cupo de una reserva cancelada pero no liberada aún
+	 */
+  public void liberarReserva(Integer idEmpresa, Integer idReserva) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la reserva
+    Reserva reserva = (Reserva) entityManager.find(Reserva.class, idReserva);
+    if(reserva==null || !Estado.C.equals(reserva.getEstado())) {
+      throw new UserException("no_se_encuentra_la_reserva_o_no_esta_cancelada");
+    }
+    if(reserva.getFechaLiberacion()==null || reserva.getFechaLiberacion().before(new Date())) {
+      //Ya está liberada, no hay nada para hacer
+      return;
+    }
+    reserva.setFechaLiberacion(new Date());
+    entityManager.merge(reserva);
+  }
+	
+	
   /**
    * Consulta una reserva por numero y para un recurso.
    * En caso contrario simplemente se busca la reserva por id y se la retorna (sin validar nada)
@@ -389,7 +477,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @throws BusinessException 
 	 * @throws UserException 
 	 */
-	public Reserva marcarReserva(Disponibilidad disponibilidad, TokenReserva token) throws UserException {
+	public Reserva marcarReserva(Disponibilidad disponibilidad, TokenReserva token, String ipOrigen) throws UserException {
 		if (disponibilidad == null) {
 			throw new UserException("debe_especificar_la_disponibilidad");
 		}
@@ -398,7 +486,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
 		}		
 		//Se crea la reserva en una transaccion independiente
-    Reserva reserva = helper.crearReservaPendiente(disponibilidad, token);
+    Reserva reserva = helper.crearReservaPendiente(disponibilidad, token, ipOrigen);
 		//Chequeo que el cupo real no de negativo
 		//Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
 		//De lo contrario la reserva se ha marcado con exito
@@ -411,7 +499,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		return reserva;
 	}
 		
-  public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token) throws UserException {
+  public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token, String ipOrigen) throws UserException {
     if (disponibilidad == null) {
       throw new UserException("debe_especificar_la_disponibilidad");
     }
@@ -426,9 +514,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     for (DatoReserva valor : reserva.getDatosReserva()) {
       valores.put(valor.getDatoASolicitar().getNombre(), valor);
     }
-
     //Se crea la reserva nueva en una transaccion independiente
-    Reserva reservaNueva = helper.crearReservaPendiente(disponibilidad, token);
+    Reserva reservaNueva = helper.crearReservaPendiente(disponibilidad, token, ipOrigen);
     List<Reserva> reservasPrevias = helper.validarDatosReservaPorClave(recurso, disponibilidad, campos, valores, reserva.getTramiteCodigo());
     //Si hay reservas repetidas y no son la misma que la pasada por parámetro se lanza una excepcion.
     if (!reservasPrevias.isEmpty()) {
@@ -448,9 +535,29 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         }
       }
     }
-    //Chequeo que el cupo real no de negativo
-    //Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
-    //De lo contrario la reserva se ha marcado con exito
+    //Validaciones por IP (si el recurso lo exige y la reserva incluye la IP; no incluye la IP si es desde el backend o autogestión)
+    if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true && ipOrigen!=null) {
+      //Determinar si la ip es una de las excluidas de la validación
+      boolean validar = true;
+      if(recurso.getIpsSinValidacion()!=null) {
+        String ips[] = recurso.getIpsSinValidacion().split(";");
+        for(String ip : ips) {
+          if(ip.trim().equals(reserva.getIpOrigen())) {
+            validar = false;
+            break;
+          }
+        }
+      }
+      if(validar) {
+        int cantidadReservasIP = helper.cantidadReservasPorIp(recurso, ipOrigen, reserva.getId());
+        if(cantidadReservasIP >= recurso.getCantidadPorIP()) {
+          throw new ValidacionIPException("limite_de_reservas_para_la_direccion_ip_alcanzado");
+        }
+      }
+    }
+    //Chequear que el cupo real no de negativo
+    //Si el cupo real da negativo, se elimina la reserva pendiente y cancela la operación
+    //De lo contrario la reserva se ha marcado con éxito
     if (helper.chequeoCupoDisponible(disponibilidad, true)) {
       reservaNueva = entityManager.find(Reserva.class, reservaNueva.getId());
       entityManager.remove(reservaNueva);
@@ -504,9 +611,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		helper.validarDatosReservaBasico(campos, valores);
     //Validacion por campos clave: no puede haber otra reserva con los mismos datos
     List<Reserva> reservasPrevias = helper.validarDatosReservaPorClave(recurso, disponibilidad, campos, valores, reserva.getTramiteCodigo());
-    //Si Hay reservas repetidas lanzo una excepcion.
     if (!reservasPrevias.isEmpty()) {
-      //Se carga lista de camposClave
       List<String> nombreCamposClave = new ArrayList<String>();
       for (DatoASolicitar campo : campos) {
         if (campo.getEsClave() ) {
@@ -514,6 +619,26 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         }
       }
       throw new ValidacionClaveUnicaException("no_es_posible_confirmar_su_reserva", nombreCamposClave);     
+    }
+    //Validaciones por IP (si el recurso lo exige y la reserva incluye la IP; no incluye la IP si es desde el backend o autogestión)
+    if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true && reserva.getIpOrigen()!=null) {
+      //Determinar si la ip es una de las excluidas de la validación
+      boolean validar = true;
+      if(recurso.getIpsSinValidacion()!=null) {
+        String ips[] = recurso.getIpsSinValidacion().split(";");
+        for(String ip : ips) {
+          if(ip.trim().equals(reserva.getIpOrigen())) {
+            validar = false;
+            break;
+          }
+        }
+      }
+      if(validar) {
+        int cantidadReservasIP = helper.cantidadReservasPorIp(recurso, reserva.getIpOrigen(), reserva.getId());
+        if(cantidadReservasIP >= recurso.getCantidadPorIP()) {
+          throw new ValidacionIPException("limite_de_reservas_para_la_direccion_ip_alcanzado");
+        }
+      }
     }
 		//Validaciones extendidas: definidas por el usuario
 		List<ValidacionPorRecurso> validaciones = helper.obtenerValidacionesPorRecurso(recurso);
@@ -736,23 +861,25 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		.getResultList();
 		//Determinar las reservas vivas
 		//No se debe considerar las disponibilidades presenciales
-		String cons = "SELECT d.id, d.fecha, d.horaInicio, COUNT(reserva) " +
+		//Para las reservas canceladas hay que ver si ya se liberó el cupo o aún no
+		String cons = "SELECT d.id, d.fecha, d.horaInicio, COUNT(r) " +
 				"FROM Disponibilidad d " +
-				"JOIN d.reservas reserva " +
+				"JOIN d.reservas r " +
 				"WHERE d.recurso IS NOT NULL " +
-				"  AND d.recurso = :r " +
+				"  AND d.recurso = :recurso " +
 				"  AND d.fechaBaja IS NULL " +
-				"  AND d.fecha BETWEEN :fi AND :ff " +
-		    "  AND (d.fecha <> :fi OR d.horaInicio >= :fiCompleta) " +
-				"  AND (reserva.estado <> :cancelado) " +
+				"  AND d.fecha BETWEEN :finicio AND :ffin " +
+		    "  AND (d.fecha <> :finicio OR d.horaInicio >= :fiCompleta) " +
+				"  AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora) " +
 				"GROUP BY d.id, d.fecha, d.horaInicio " +
 				"ORDER BY d.fecha asc, d.horaInicio ASC ";
 		List<Object[]> cantReservasVivas =  entityManager.createQuery(cons)
-		.setParameter("r", recurso)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-		.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
+		.setParameter("recurso", recurso)
+		.setParameter("finicio", ventana.getFechaInicial(), TemporalType.DATE)
+		.setParameter("ffin", ventana.getFechaFinal(), TemporalType.DATE)
 		.setParameter("fiCompleta", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
 		.setParameter("cancelado", Estado.C)
+    .setParameter("ahora", new Date(), TemporalType.TIMESTAMP)
 		.getResultList();
 		//Quitar de las disponibilidades las reservas vivas
 		Map<Integer, Integer> cantResVivasPorDispon = new HashMap<Integer, Integer>();
@@ -873,7 +1000,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
 		//Obtener los cupos para cada dia y hora
 		List<Object[]> cuposAsignados  = helper.obtenerCuposAsignados(recurso, ventana, timezone);
-		//Obtengo las reservas hechas para cada día y hora
+		//Obtengo las reservas vivas para cada día y hora
 		List<Object[]> cuposConsumidos = helper.obtenerCuposConsumidos(recurso,ventana, timezone);
 		//Armar la lista de resultados indicando los cupos para todos los dias solicitados en la ventana
 		List<Integer> cuposXdia = helper.obtenerCuposXDia(ventana, cuposAsignados, cuposConsumidos);
@@ -1405,7 +1532,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
     }
     //Marcar la reserva
-    reserva = marcarReserva(disponibilidad, tokenReserva);
+    reserva = marcarReserva(disponibilidad, tokenReserva, null);
     //Cargar las agrupaciones
     List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(disponibilidad.getRecurso(), timezone);
     //Cargar los datos en la reserva; la respuesta puede contener datos que no están dentro de los datos a solicitar del recurso
@@ -1530,7 +1657,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   }
   
   
-  public TokenReserva generarTokenReserva(Integer idRecurso, String cedula, String nombre, String correoe, String codigoTramite) {
+  public TokenReserva generarTokenReserva(Integer idRecurso, String cedula, String nombre, String correoe, String codigoTramite, String ipOrigen) {
     
     TokenReserva token = new TokenReserva();
 
@@ -1547,6 +1674,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     token.setRecurso(recurso);
     token.setToken(UUID.randomUUID().toString());
     token.setTramite(codigoTramite);
+    token.setIpOrigen(ipOrigen);
     
     entityManager.persist(token);
     entityManager.flush();
@@ -1707,68 +1835,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     return token;
   }
   
-  
-  /*
-  public void enviarComunicacionesConfirmacionReservaMultiple(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException {
-    //Enviar mail
-    enviarMailConfirmacion(linkCancelacion, reserva, idioma, formatoFecha, formatoHora);
-    //Almacenar datos para SMS y TextoAVoz, si corresponde
-    almacenarSmsYTav(Comunicacion.Tipo2.RESERVAMULTIPLE, reserva, formatoFecha, formatoHora);
-  }
-  
-  private void enviarMailConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException {
-    //Se envía el mail obligatorio al usuario
-    Recurso recurso = null;
-    String email = null;
-    try {
-      recurso = reserva.getDisponibilidades().get(0).getRecurso();
-      Agenda agenda = recurso.getAgenda();
-      TextoAgenda textoAgenda = null;
-      if(agenda.getTextosAgenda()!=null) {
-        textoAgenda = agenda.getTextosAgenda().get(idioma);
-      }
-      if(textoAgenda == null) {
-        for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
-          if(ta.isPorDefecto()) {
-            textoAgenda = ta;
-          }
-        }
-      }
-      if(textoAgenda == null) {
-        textoAgenda = new TextoAgenda();
-      }
-      //Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
-      for(DatoReserva dato : reserva.getDatosReserva()) {
-        DatoASolicitar datoSol = dato.getDatoASolicitar();
-        if("Mail".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-          email = dato.getValor();
-          String cuerpo = textoAgenda.getTextoCorreoConf();
-          if(cuerpo != null && !cuerpo.isEmpty()) {
-            cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion);
-            MailUtiles.enviarMail(email, "Confirmación de reserva", cuerpo, MailUtiles.CONTENT_TYPE_HTML);
-          }
-          Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, cuerpo);
-          comunicacion.setProcesado(true);
-          entityManager.persist(comunicacion);
-        }
-      }
-    }catch(MessagingException mEx) {
-      try {
-        if(recurso != null) {
-          if(email == null) {
-            email = "***";
-          }
-          Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, null);
-          entityManager.persist(comunicacion);
-        }
-      }catch(Exception ex) {
-        ex.printStackTrace();
-      }
-      throw new ApplicationException("no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva", mEx);
-    }
-  }
-  */
-  
   /**
    * Este método es utilizado para modificar una reserva. Solo se permite modificar la disponibilidad, no el recurso
    * porque los datos a solicitar podrían ser diferentes ni los datos ingresados porque podrían ser de otra persona. 
@@ -1777,7 +1843,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
    * @throws UserException
    */
   public Reserva modificarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva, Integer idDisponibilidad, 
-      TokenReserva tokenReserva, String idioma) throws UserException {
+      TokenReserva tokenReserva, String idioma, String ipOrigen) throws UserException {
     if(idEmpresa==null) {
       throw new UserException("debe_especificar_la_empresa");
     }
@@ -1856,7 +1922,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       throw new UserException("no_se_encuentra_la_disponibilidad");
     }
     //Marcar la reserva
-    Reserva reservaNueva = marcarReservaValidandoDatos(disponibilidad, reservaOriginal, null);
+    Reserva reservaNueva = marcarReservaValidandoDatos(disponibilidad, reservaOriginal, null, ipOrigen);
     //Si pudo hacer eso, la disponibilidad tiene cupo, se puede apuntar la reserva existente a ella y eliminar la reserva dummy
     reservaOriginal.getDisponibilidades().clear();
     reservaOriginal.getDisponibilidades().add(reservaNueva.getDisponibilidades().get(0));
@@ -1993,7 +2059,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       throw new UserException("error_no_solucionable");
     }
   }
-  
   
   private Reserva actualizarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
         throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {    

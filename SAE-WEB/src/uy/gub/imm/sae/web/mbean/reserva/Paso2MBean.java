@@ -31,6 +31,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.model.SelectItem;
@@ -54,6 +55,7 @@ import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
+import uy.gub.imm.sae.web.common.SofisJSFUtils;
 
 public class Paso2MBean extends BaseMBean {
 
@@ -197,7 +199,8 @@ public class Paso2MBean extends BaseMBean {
 	}
 
 	private void marcarReserva(Disponibilidad disponibilidad) throws RolException, BusinessException, UserException {
-		Reserva reserva = agendarReservasEJB.marcarReserva(disponibilidad, null);
+		String ipOrigen = SofisJSFUtils.obtenerDireccionIPCliente(FacesContext.getCurrentInstance());
+	  Reserva reserva = agendarReservasEJB.marcarReserva(disponibilidad, null, ipOrigen);
 		sesionMBean.setReserva(reserva);
 		sesionMBean.setDisponibilidad(disponibilidad);
 	}

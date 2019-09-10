@@ -29,6 +29,8 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -43,6 +45,8 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlTransient;
+
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 
 @Entity
 @Table (name = "ae_recursos")
@@ -121,7 +125,20 @@ public class Recurso implements Serializable {
   private Boolean cambiosAdmite;
   private Integer cambiosTiempo;
   private Integer cambiosUnidad; //Calendar.DATE, Calendar.HOUR, Calendar.MINUTE
-	
+  
+  private Integer periodoValidacion;
+  
+  //Validación por IP
+  private Boolean validarPorIP;
+  private Integer cantidadPorIP;
+  private Integer periodoPorIP;
+  private String ipsSinValidacion;
+
+  //Datos de cancelaciones de reserva
+  private Integer cancelacionTiempo;
+  private Integer cancelacionUnidad; //Calendar.DATE, Calendar.HOUR, Calendar.MINUTE
+  private FormaCancelacion cancelacionTipo; //I=Inmediata, D=Diferida
+  
 	public Recurso () {
 		visibleInternet = false;
 		plantillas = new ArrayList<Plantilla>();
@@ -151,6 +168,17 @@ public class Recurso implements Serializable {
     cambiosAdmite = false;
     cambiosTiempo = null;
     cambiosUnidad = null;
+    
+    periodoValidacion = null;
+    
+    validarPorIP = null;
+    cantidadPorIP = null;
+    periodoPorIP = null;
+    ipsSinValidacion = null;
+    
+    cancelacionTiempo = null;
+    cancelacionUnidad = null;
+    cancelacionTipo = null;
 	}
 	
 	/**
@@ -195,7 +223,6 @@ public class Recurso implements Serializable {
 		
 		agenda = new Agenda(r.getAgenda());
 		
-		
 		this.oficinaId = r.oficinaId;
 		this.direccion = r.direccion;
 		this.localidad = r.localidad;
@@ -222,6 +249,18 @@ public class Recurso implements Serializable {
     this.cambiosAdmite = r.cambiosAdmite;
     this.cambiosTiempo = r.cambiosTiempo;
     this.cambiosUnidad = r.cambiosUnidad;
+    
+    this.periodoValidacion = r.periodoValidacion;
+    
+    this.validarPorIP = r.validarPorIP;
+    this.cantidadPorIP = r.cantidadPorIP;
+    this.periodoPorIP = r.periodoPorIP;
+    this.ipsSinValidacion = r.ipsSinValidacion;
+    
+    this.cancelacionTiempo = r.cancelacionTiempo;
+    this.cancelacionUnidad = r.cancelacionUnidad;
+    this.cancelacionTipo = r.cancelacionTipo;
+    
 	}
 
 	
@@ -740,6 +779,79 @@ public class Recurso implements Serializable {
 
   public void setTamanioFuenteChica(Integer tamanioFuenteChica) {
     this.tamanioFuenteChica = tamanioFuenteChica;
+  }
+  
+  @Column (name = "periodo_validacion", nullable = false)
+  public Integer getPeriodoValidacion() {
+    return periodoValidacion;
+  }
+
+  public void setPeriodoValidacion(Integer periodoValidacion) {
+    this.periodoValidacion = periodoValidacion;
+  }
+
+  @Column (name = "validar_por_ip", nullable = false)
+  public Boolean getValidarPorIP() {
+    return validarPorIP;
+  }
+
+  public void setValidarPorIP(Boolean validarPorIP) {
+    this.validarPorIP = validarPorIP;
+  }
+
+  @Column (name = "cantidad_por_ip", nullable = false)
+  public Integer getCantidadPorIP() {
+    return cantidadPorIP;
+  }
+
+  public void setCantidadPorIP(Integer cantidadPorIP) {
+    this.cantidadPorIP = cantidadPorIP;
+  }
+
+  @Column (name = "periodo_por_ip", nullable = false)
+  public Integer getPeriodoPorIP() {
+    return periodoPorIP;
+  }
+
+  public void setPeriodoPorIP(Integer periodoPorIP) {
+    this.periodoPorIP = periodoPorIP;
+  }
+
+  @Column (name = "ips_sin_validacion", nullable = false)
+  public String getIpsSinValidacion() {
+    return ipsSinValidacion;
+  }
+
+  public void setIpsSinValidacion(String ipsSinValidacion) {
+    this.ipsSinValidacion = ipsSinValidacion;
+  }
+
+  @Column (name = "cancela_tiempo", nullable = false)
+  public Integer getCancelacionTiempo() {
+    return cancelacionTiempo;
+  }
+
+  public void setCancelacionTiempo(Integer cancelacionTiempo) {
+    this.cancelacionTiempo = cancelacionTiempo;
+  }
+
+  @Column (name = "cancela_unidad", nullable = false)
+  public Integer getCancelacionUnidad() {
+    return cancelacionUnidad;
+  }
+
+  public void setCancelacionUnidad(Integer cancelacionUnidad) {
+    this.cancelacionUnidad = cancelacionUnidad;
+  }
+
+  @Column (name = "cancela_tipo", nullable = false)
+  @Enumerated (EnumType.STRING)
+  public FormaCancelacion getCancelacionTipo() {
+    return cancelacionTipo;
+  }
+
+  public void setCancelacionTipo(FormaCancelacion cancelacionTipo) {
+    this.cancelacionTipo = cancelacionTipo;
   }
 
   

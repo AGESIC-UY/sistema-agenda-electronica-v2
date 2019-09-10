@@ -57,11 +57,11 @@ public interface AgendarReservas {
   /**
    * Crea una nueva reserva en estado pendiente, controla que aun exista cupo.
    */
-	public Reserva marcarReserva(Disponibilidad d, TokenReserva token) throws UserException;
+	public Reserva marcarReserva(Disponibilidad d, TokenReserva token, String ipOrigen) throws UserException;
   /**
    * Crea una nueva reserva en estado pendiente, controla que aun exista cupo y que no exista otra reserva diferente con los mismos datos clave.
    */
-	public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token) throws UserException;
+	public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token, String ipOrigen) throws UserException;
 	public void desmarcarReserva(Reserva r) throws BusinessException;
 	public void validarDatosReserva(Empresa e, Reserva r) throws BusinessException, ValidacionException, ApplicationException;
 	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
@@ -69,6 +69,8 @@ public interface AgendarReservas {
 	public Reserva consultarReservaPorId(Integer idReserva) throws UserException;
   public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException;
 	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws UserException;
+  public void liberarReserva(Integer idEmpresa, Integer idReserva) throws UserException;
+	
 	
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, AutocompletarException, UserException;
 	
@@ -113,12 +115,12 @@ public interface AgendarReservas {
   /**
    * Este método es utilizado para modificar una reserva. Solo se permite modificar la disponibilidad, no el recurso
    * porque los datos a solicitar podrían ser diferentes ni los datos ingresados porque podrían ser de otra persona. 
-   * Está pensado para ser invocado mediante el servicio web REST modificarrReserva.
+   * Está pensado para ser invocado mediante el servicio web REST modificarReserva.
    * @return
    * @throws UserException
    */
   public Reserva modificarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva, Integer idDisponibilidad, 
-      TokenReserva tokenReserva, String idioma) throws UserException;
+      TokenReserva tokenReserva, String idioma, String ipOrigen) throws UserException;
   
   /**
    * Este método es utilizado para modificar una reserva. Solo se permite modificar la disponibilidad, no el recurso
@@ -135,7 +137,7 @@ public interface AgendarReservas {
   
 	//Para las reservas múltiples
 	
-	public TokenReserva generarTokenReserva(Integer idRecurso, String cedula, String nombre, String correoe, String codigoTramite) throws UserException;
+	public TokenReserva generarTokenReserva(Integer idRecurso, String cedula, String nombre, String correoe, String codigoTramite, String ipOrigen) throws UserException;
   public TokenReserva obtenerTokenReserva(String token);
 	public TokenReserva guardarTokenReserva(TokenReserva token);
   public List<Reserva> obtenerReservasMultiples(Integer tokenId, boolean incluirIncompletas);

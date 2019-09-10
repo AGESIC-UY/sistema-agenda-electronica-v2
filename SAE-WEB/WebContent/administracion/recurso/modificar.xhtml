@@ -175,6 +175,13 @@
 								<p:message for="vDiasGen" errorClass="mensajeError"	infoClass="mensajeInfo" />
 							</p:outputPanel>
 						</p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['periodo_validacion']} (#{sessionMBean.textos['dias']})" for="vPeriodoValidacion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="vPeriodoValidacion" value="#{recursoMBean.recursoSeleccionado.periodoValidacion}" maxlength="3" styleClass="form-control textoCorto" />
+                <p:message for="vPeriodoValidacion" errorClass="mensajeError" infoClass="mensajeInfo" />
+              </p:outputPanel>
+            </p:outputPanel>
 					</p:outputPanel>
 				</fieldset>
 				<fieldset>
@@ -404,6 +411,41 @@
             </p:outputPanel>
           </p:outputPanel>
         </fieldset>
+
+        <fieldset>
+          <legend>
+            <h:outputText value="#{sessionMBean.textos['configuracion_de_cancelaciones_de_reservas']}" />
+          </legend>
+          <p:outputPanel styleClass="form-horizontal" id="configuracionCancelacionesReserva">
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['tiempo_previo']}" styleClass="col-sm-3 control-label label" for="cancelacionTiempo" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="cancelacionTiempo" value="#{recursoMBean.recursoSeleccionado.cancelacionTiempo}" maxlength="3" 
+                  styleClass="form-control textoCorto" converter="integerConverter"  />
+                <p:message for="cancelacionTiempo" />
+              </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <h:outputLabel value="#{sessionMBean.textos['tiempo_unidad']}" for="cancelacionesUnidad" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:selectOneMenu id="cancelacionUnidad" value="#{recursoMBean.recursoSeleccionado.cancelacionUnidad}" styleClass="form-control">
+                  <f:selectItems value="#{recursoMBean.cancelacionUnidades}" />
+                </h:selectOneMenu>
+                <p:message for="cancelacionUnidad" />
+              </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <h:outputLabel value="#{sessionMBean.textos['tipo_liberacion_cupo']}" for="cancelacionTipo" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <p:selectOneRadio id="cancelacionTipo" value="#{recursoMBean.recursoSeleccionado.cancelacionTipo}" layout="responsive" columns="1">
+                  <f:selectItem itemLabel="#{sessionMBean.textos['inmediata']}" itemValue="I" />
+                  <f:selectItem itemLabel="#{sessionMBean.textos['diferida']}" itemValue="D" />
+                </p:selectOneRadio>
+                <p:message for="cancelacionTipo" />
+              </p:outputPanel>
+            </p:outputPanel>
+          </p:outputPanel>
+        </fieldset>
         
         <fieldset>
           <legend>
@@ -417,6 +459,49 @@
                   <p:selectBooleanCheckbox value="#{recursoMBean.recursoSeleccionado.multipleAdmite}" id="admiteMultiple" />
                   <p:outputLabel value="#{sessionMBean.textos['admite_reserva_multiple']}" for="admiteMultiple" />
                 </p:outputPanel>
+              </p:outputPanel>
+            </p:outputPanel>
+          </p:outputPanel>
+        </fieldset>
+        
+        <fieldset>
+          <legend>
+            <h:outputText value="#{sessionMBean.textos['configuracion_de_validacion_por_ip']}" />
+          </legend>
+          <p:outputPanel styleClass="form-horizontal" id="configuracionValidarPorIP">
+            <p:outputPanel styleClass="form-group">
+              <h:outputText value="#{sessionMBean.textos['validar_por_ip']}" styleClass="col-sm-3 control-label label" />
+              <p:outputPanel styleClass="col-sm-9">
+                <p:outputPanel>
+                  <p:selectBooleanCheckbox value="#{recursoMBean.recursoSeleccionado.validarPorIP}" id="validarPorIP" >
+                    <p:ajax update="configuracionValidarPorIP" />
+                  </p:selectBooleanCheckbox>
+                  <p:outputLabel value="#{sessionMBean.textos['validar_por_ip']}" for="validarPorIP" />
+                </p:outputPanel>
+              </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['cantidad_reservas_por_ip']}" styleClass="col-sm-3 control-label label" for="cantidadPorIP" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="cantidadPorIP" value="#{recursoMBean.recursoSeleccionado.cantidadPorIP}" maxlength="5" 
+                  styleClass="form-control textoCorto" converter="integerConverter" disabled="#{!recursoMBean.recursoSeleccionado.validarPorIP}"  />
+                <p:message for="cantidadPorIP" />
+              </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['periodo_validacion_por_ip']} (#{sessionMBean.textos['dias']})" styleClass="col-sm-3 control-label label" for="periodoPorIP" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="periodoPorIP" value="#{recursoMBean.recursoSeleccionado.periodoPorIP}" maxlength="3" 
+                  styleClass="form-control textoCorto" converter="integerConverter" disabled="#{!recursoMBean.recursoSeleccionado.validarPorIP}"  />
+                <p:message for="periodoPorIP" />
+              </p:outputPanel>
+            </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+              <p:outputLabel value="#{sessionMBean.textos['direcciones_ip_sin_validacion']}" styleClass="col-sm-3 control-label label" for="ipsSinValidacion" />
+              <p:outputPanel styleClass="col-sm-9">
+                <h:inputText id="ipsSinValidacion" value="#{recursoMBean.recursoSeleccionado.ipsSinValidacion}" maxlength="4000" 
+                  styleClass="form-control textoLargo" disabled="#{!recursoMBean.recursoSeleccionado.validarPorIP}"  />
+                <p:message for="ipsSinValidacion" />
               </p:outputPanel>
             </p:outputPanel>
           </p:outputPanel>

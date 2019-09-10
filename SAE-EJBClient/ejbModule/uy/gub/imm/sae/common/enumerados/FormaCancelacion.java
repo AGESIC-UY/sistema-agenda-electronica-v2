@@ -17,22 +17,15 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 package uy.gub.imm.sae.common.enumerados;
 
-public enum Estado {
-  /* Aún no se confirmó */
-	P("pendiente"), 
-	/* Está confirmada pero no utilizada */
-	R("reservada"), 
-	/* Está cancelada definitivamente */
-	C("cancelada"),
-	/* Está usada (fue llamada por un funcionario )*/
-	U("usada");
+public enum FormaCancelacion {
+	D("diferida"), 
+	I("inmediata");
 	
 	private final String descripcion;
 	
-	private Estado(String descripcion) {
+	private FormaCancelacion(String descripcion) {
 		this.descripcion = descripcion;
 	}
 	

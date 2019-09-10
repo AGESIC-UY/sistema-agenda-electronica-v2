@@ -3,9 +3,20 @@ package uy.gub.imm.sae.web.common;
 import java.util.List;
 
 import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 
 public class SofisJSFUtils {
 
+  public static String obtenerDireccionIPCliente(FacesContext cxt) {
+    HttpServletRequest request = (HttpServletRequest) cxt.getExternalContext().getRequest();
+    String dirIp = request.getHeader("X-FORWARDED-FOR");
+    if (dirIp == null) {
+      dirIp = request.getRemoteAddr();
+    }
+    return dirIp;
+  }
+  
   public static void printComponentTree(UIComponent comp){
     printComponentTree(comp, 0);
   }
@@ -43,5 +54,7 @@ public class SofisJSFUtils {
       for (int j=0;j<2; j++)  
         System.out.print(" ");          
   } 
+  
+  
   
 }

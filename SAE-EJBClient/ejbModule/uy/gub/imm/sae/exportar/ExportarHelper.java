@@ -68,6 +68,16 @@ public class ExportarHelper {
     recursoExportar.setCambiosAdmite(recurso.getCambiosAdmite());
     recursoExportar.setCambiosTiempo(recurso.getCambiosTiempo());
     recursoExportar.setCambiosUnidad(recurso.getCambiosUnidad());
+    recursoExportar.setPeriodoValidacion(recurso.getPeriodoValidacion());
+
+    recursoExportar.setValidarPorIP(recurso.getValidarPorIP());
+    recursoExportar.setCantidadPorIP(recurso.getCantidadPorIP());
+    recursoExportar.setPeriodoPorIP(recurso.getPeriodoPorIP());
+    recursoExportar.setIpsSinValidacion(recurso.getIpsSinValidacion());
+    
+    recursoExportar.setCancelacionTiempo(recurso.getCancelacionTiempo()); 
+    recursoExportar.setCancelacionUnidad(recurso.getCancelacionUnidad()); 
+    recursoExportar.setCancelacionTipo(recurso.getCancelacionTipo()); 
     
 		for (AgrupacionDato agrupacionDato : recurso.getAgrupacionDatos()) {
 			if (agrupacionDato.getFechaBaja() == null) {
@@ -210,7 +220,17 @@ public class ExportarHelper {
     recurso.setCambiosAdmite(recursoExportar.getCambiosAdmite());
     recurso.setCambiosTiempo(recursoExportar.getCambiosTiempo());
     recurso.setCambiosUnidad(recursoExportar.getCambiosUnidad());
+    recurso.setPeriodoValidacion(recursoExportar.getPeriodoValidacion());
 
+    recurso.setValidarPorIP(recursoExportar.getValidarPorIP());
+    recurso.setCantidadPorIP(recursoExportar.getCantidadPorIP());
+    recurso.setPeriodoPorIP(recursoExportar.getPeriodoPorIP());
+    recurso.setIpsSinValidacion(recursoExportar.getIpsSinValidacion());
+    
+    recurso.setCancelacionTiempo(recursoExportar.getCancelacionTiempo()); 
+    recurso.setCancelacionUnidad(recursoExportar.getCancelacionUnidad()); 
+    recurso.setCancelacionTipo(recursoExportar.getCancelacionTipo()); 
+    
 		return recurso;
 	}
 

@@ -671,6 +671,16 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
     recursoActual.setCambiosAdmite(r.getCambiosAdmite());
     recursoActual.setCambiosTiempo(r.getCambiosTiempo());
     recursoActual.setCambiosUnidad(r.getCambiosUnidad());
+    recursoActual.setPeriodoValidacion(r.getPeriodoValidacion());
+    
+    recursoActual.setValidarPorIP(r.getValidarPorIP());
+    recursoActual.setCantidadPorIP(r.getCantidadPorIP());
+    recursoActual.setPeriodoPorIP(r.getPeriodoPorIP());
+    recursoActual.setIpsSinValidacion(r.getIpsSinValidacion());
+    
+    recursoActual.setCancelacionTiempo(r.getCancelacionTiempo()); 
+    recursoActual.setCancelacionUnidad(r.getCancelacionUnidad()); 
+    recursoActual.setCancelacionTipo(r.getCancelacionTipo()); 
     
 		for (TextoRecurso viejo : recursoActual.getTextosRecurso().values()) {
 			entityManager.remove(viejo);

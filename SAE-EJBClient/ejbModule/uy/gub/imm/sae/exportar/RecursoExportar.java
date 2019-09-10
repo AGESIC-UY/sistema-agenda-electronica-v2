@@ -12,6 +12,8 @@ import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlElement;
 
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
+
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 public class RecursoExportar {
@@ -71,6 +73,17 @@ public class RecursoExportar {
   private Boolean cambiosAdmite;
   private Integer cambiosTiempo;
   private Integer cambiosUnidad;
+  
+  private Integer periodoValidacion;
+  
+  private Boolean validarPorIP;
+  private Integer cantidadPorIP;
+  private Integer periodoPorIP;
+  private String ipsSinValidacion;
+  
+  private Integer cancelacionTiempo;
+  private Integer cancelacionUnidad;
+  private FormaCancelacion cancelacionTipo;
   
 	@XmlElement(name = "agrupaciones")
 	private List<AgrupacionDatoExport> agrupaciones = new ArrayList<AgrupacionDatoExport>();
@@ -487,6 +500,70 @@ public class RecursoExportar {
 
   public void setCambiosUnidad(Integer cambiosUnidad) {
     this.cambiosUnidad = cambiosUnidad;
+  }
+
+  public Integer getPeriodoValidacion() {
+    return periodoValidacion;
+  }
+
+  public void setPeriodoValidacion(Integer periodoValidacion) {
+    this.periodoValidacion = periodoValidacion;
+  }
+
+  public Boolean getValidarPorIP() {
+    return validarPorIP;
+  }
+
+  public void setValidarPorIP(Boolean validarPorIP) {
+    this.validarPorIP = validarPorIP;
+  }
+
+  public Integer getCantidadPorIP() {
+    return cantidadPorIP;
+  }
+
+  public void setCantidadPorIP(Integer cantidadPorIP) {
+    this.cantidadPorIP = cantidadPorIP;
+  }
+
+  public Integer getPeriodoPorIP() {
+    return periodoPorIP;
+  }
+
+  public void setPeriodoPorIP(Integer periodoPorIP) {
+    this.periodoPorIP = periodoPorIP;
+  }
+
+  public String getIpsSinValidacion() {
+    return ipsSinValidacion;
+  }
+
+  public void setIpsSinValidacion(String ipsSinValidacion) {
+    this.ipsSinValidacion = ipsSinValidacion;
+  }
+
+  public Integer getCancelacionTiempo() {
+    return cancelacionTiempo;
+  }
+
+  public void setCancelacionTiempo(Integer cancelacionTiempo) {
+    this.cancelacionTiempo = cancelacionTiempo;
+  }
+
+  public Integer getCancelacionUnidad() {
+    return cancelacionUnidad;
+  }
+
+  public void setCancelacionUnidad(Integer cancelacionUnidad) {
+    this.cancelacionUnidad = cancelacionUnidad;
+  }
+
+  public FormaCancelacion getCancelacionTipo() {
+    return cancelacionTipo;
+  }
+
+  public void setCancelacionTipo(FormaCancelacion cancelacionTipo) {
+    this.cancelacionTipo = cancelacionTipo;
   }
 
 }

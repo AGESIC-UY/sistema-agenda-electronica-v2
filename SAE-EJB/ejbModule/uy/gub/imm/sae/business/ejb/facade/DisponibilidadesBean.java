@@ -367,7 +367,8 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	
 	/**
 	 * Obtiene información sobre las disponibilidades y las reservas para cada día de la ventana especificada para el recurso indicado.
-	 * No considera las disponibilidades presenciales
+	 * No considera las disponibilidades presenciales.
+	 * Para las reservas canceladas toma en cuenta la fechaLiberacion
 	 */
 	@SuppressWarnings("unchecked")
 	public List<DisponibilidadReserva> obtenerDisponibilidadesReservas(Recurso recurso, VentanaDeTiempo ventana) throws UserException, RolException {
@@ -384,43 +385,42 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
 			ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		}
-		
 		//Determinar las disponibilidades para el período
 		//No considerar las disponibilidades presenciales
     List<Disponibilidad> disponibilidades =  entityManager.createQuery(
     "SELECT d " +
     "FROM Disponibilidad d " +
     "WHERE d.recurso IS NOT NULL " +
-    "  AND d.recurso = :r " +
+    "  AND d.recurso = :recurso " +
     "  AND d.presencial = false " +
     "  AND d.fechaBaja IS NULL " +
-    "  AND d.fecha BETWEEN :fi AND :ff " +
+    "  AND d.fecha BETWEEN :finicio AND :ffin " +
     "ORDER BY d.fecha ASC, d.horaInicio ")
-    .setParameter("r", recurso)
-    .setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-    .setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
+    .setParameter("recurso", recurso)
+    .setParameter("finicio", ventana.getFechaInicial(), TemporalType.DATE)
+    .setParameter("ffin", ventana.getFechaFinal(), TemporalType.DATE)
     .getResultList();   
-    
     //Determinar las reservas vivas para el período
     //No considerar las disponibilidades presenciales
+    //Si la reserva está cancelada hay que tomar en cuenta el campo fechaLiberacion
 		List<Object[]> cantReservasVivas =  entityManager.createQuery(
-  		"SELECT d.id, d.fecha, d.horaInicio, COUNT(reserva) " +
+  		"SELECT d.id, d.fecha, d.horaInicio, COUNT(r) " +
   		"FROM Disponibilidad d " + 
-  		"JOIN d.reservas reserva " +
+  		"JOIN d.reservas r " +
   		"WHERE d.recurso IS NOT NULL " +
-  		"  AND d.recurso = :r " +
+  		"  AND d.recurso = :recurso " +
       "  AND d.presencial = false " +
   		"  AND d.fechaBaja IS NULL " +
-  		"  AND d.fecha BETWEEN :fi AND :ff " +
-  		"  AND reserva.estado <> :cancelado " +
+  		"  AND d.fecha BETWEEN :finicio AND :ffin " +
+  		"  AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora) " +
   		"GROUP BY d.id, d.fecha, d.horaInicio " +
   		"ORDER BY d.fecha ASC, d.horaInicio ASC ")
-		.setParameter("r", recurso)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
-		.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
+		.setParameter("recurso", recurso)
+		.setParameter("finicio", ventana.getFechaInicial(), TemporalType.DATE)
+		.setParameter("ffin", ventana.getFechaFinal(), TemporalType.DATE)
 		.setParameter("cancelado", Estado.C)
+    .setParameter("ahora", new Date())
 		.getResultList();		
-
 		//Calcular las disponibilidades para cada día
 		List<DisponibilidadReserva> listadreserva = new ArrayList<DisponibilidadReserva>();
 		Iterator<Object[]> cantReservasVivasIter = cantReservasVivas.iterator();
@@ -450,7 +450,6 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 		return listadreserva;
 	}
 
-
 	/**
 	 * Devuelve true si pudo hacer la modificación solicitada, o false en otro caso (por ejemplo, si 
 	 * el nuevo cupo es menor que la cantidad de reservas ya hechas, se pone como cupo este último valor y no
@@ -479,6 +478,7 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
 	/**
 	 * Determina la cantidad de reservas existentes para la disponibilidad indicada
 	 * La disponibilidad puede o no ser presencial
+	 * Esta operación NO toma en cuenta la fecha de liberación
 	 * @param disponibilidad
 	 * @return
 	 */
@@ -489,11 +489,10 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
   		"SELECT d.fecha, COUNT(r) " +
   		"FROM Disponibilidad d " +
   		"LEFT JOIN d.reservas r " +
-  		"WHERE d = :d " +
-  		"  AND (r IS NULL OR r.estado <> :cancelado) " +
+  		"WHERE d = :disp AND (r IS NULL OR r.estado <> :cancelado) " +
   		"GROUP BY d.fecha " +
   		"ORDER BY d.fecha ASC")
-		.setParameter("d", disponibilidad)
+		.setParameter("disp", disponibilidad)
 		.setParameter("cancelado", Estado.C)
 		.getResultList();
 		int cuposDisp = 0;

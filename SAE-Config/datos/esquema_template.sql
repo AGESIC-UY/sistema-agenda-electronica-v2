@@ -313,7 +313,12 @@ CREATE TABLE ae_recursos (
     multiple_admite boolean NOT NULL DEFAULT false,
     cambios_admite boolean NOT NULL DEFAULT false,
     cambios_tiempo integer DEFAULT null,
-    cambios_unidad integer DEFAULT null
+    cambios_unidad integer DEFAULT null,
+    periodo_validacion integer NOT NULL DEFAULT 0,
+    validar_por_ip boolean NOT NULL DEFAULT false,
+    cantidad_por_ip integer DEFAULT null,
+    periodo_por_ip integer DEFAULT null,
+    ips_sin_validacion varchar(4000) DEFAULT NULL
 );
 ALTER TABLE ae_recursos OWNER TO sae;
 
@@ -335,7 +340,8 @@ CREATE TABLE ae_reservas (
     serie character varying(3),
     tcancela character varying(1),
     fcancela timestamp without time zone,
-    aetr_id int4 NULL DEFAULT NULL
+    aetr_id int4 NULL DEFAULT NULL,
+    ip_origen varchar(16) DEFAULT NULL
 );
 ALTER TABLE ae_reservas OWNER TO sae;
 
@@ -428,8 +434,10 @@ CREATE TABLE ae_tokens_reservas (
 	correoe varchar(100) NOT NULL,
 	tramite varchar(10) NULL,
 	notas varchar(4000) NULL,
-	"version" int4 NOT NULL
+	"version" int4 NOT NULL,
+	ip_origen varchar(16) DEFAULT NULL
 ) ;
+
 ALTER TABLE ae_tokens_reservas OWNER TO sae;
 
 CREATE TABLE ae_tramites_agendas (

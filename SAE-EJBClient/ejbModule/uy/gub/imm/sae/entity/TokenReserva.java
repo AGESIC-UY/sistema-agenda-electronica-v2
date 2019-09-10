@@ -56,7 +56,7 @@ public class TokenReserva implements Serializable {
   private String nombre;
   private String correoe;
   private String tramite; //Código del trámite (TramiteAgenda.tramiteCodigo)
-
+  private String ipOrigen;
 	private String notas;
 
 	private Integer version;
@@ -170,6 +170,15 @@ public class TokenReserva implements Serializable {
     this.tramite = tramite;
   }
   
+  @Column (name = "ip_origen")
+  public String getIpOrigen() {
+    return ipOrigen;
+  }
+
+  public void setIpOrigen(String ipOrigen) {
+    this.ipOrigen = ipOrigen;
+  }
+
 	@Version
 	@Column(name="version", nullable=false)
 	public Integer getVersion() {

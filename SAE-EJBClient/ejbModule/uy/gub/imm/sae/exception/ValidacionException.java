@@ -33,12 +33,16 @@ public class ValidacionException extends UserException {
 
 	private List<String> nombreCampos;
 	private List<String> mensajes;
+
+  public ValidacionException (String codigoError) {
+    this(codigoError, null, null);
+  }
 	
 	public ValidacionException (String codigoError, List<String> nombreCampos, List<String> mensajes) {
 		super(codigoError);
 	
-		if (nombreCampos == null ||	nombreCampos.size() == 0) {
-			throw new RuntimeException("Una ValidacionException debe tener al menos un nombre de campo.");
+		if (nombreCampos == null) {
+		  nombreCampos = new ArrayList<String>();
 		}
 		
 		this.nombreCampos = nombreCampos;

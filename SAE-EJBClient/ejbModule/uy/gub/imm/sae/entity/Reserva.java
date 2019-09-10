@@ -63,17 +63,18 @@ public class Reserva implements Serializable {
 	private Integer id;
 	private String serie;
 	private Integer numero;
-	private Estado estado;
+	private Estado estado; //Si está cancelada (C) hay que tomar en cuenta el campo fechaLiberacion
 	private String observaciones;
-	private Date fechaCreacion;
-	private Date fechaActualizacion;
+	private Date fechaCreacion; //En GMT
+	private Date fechaActualizacion; //En GMT
 	private Integer version;
 	private Llamada llamada;
 	private String origen;
 	private String ucrea;
-	private Date fcancela;
+	private Date fcancela; //En GMT
 	private String ucancela;
 	private TipoCancelacion tcancela;
+	private Date fechaLiberacion; //Cuándo se libera el cupo, en GMT
 	
 	private String codigoSeguridad; //Código utilizado para la cencelación
 	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
@@ -86,6 +87,8 @@ public class Reserva implements Serializable {
 	private List<Atencion> atenciones;
 	
 	private TokenReserva token;
+	
+	private String ipOrigen;
 	
 	public Reserva () {
 		estado = Estado.P;
@@ -314,6 +317,24 @@ public class Reserva implements Serializable {
 
   public void setToken(TokenReserva token) {
     this.token = token;
+  }
+
+  @Column (name = "ip_origen")
+  public String getIpOrigen() {
+    return ipOrigen;
+  }
+
+  public void setIpOrigen(String ipOrigen) {
+    this.ipOrigen = ipOrigen;
+  }
+
+  @Column (name = "flibera")
+  public Date getFechaLiberacion() {
+    return fechaLiberacion;
+  }
+
+  public void setFechaLiberacion(Date fechaLiberacion) {
+    this.fechaLiberacion = fechaLiberacion;
   }
 
   @Transient

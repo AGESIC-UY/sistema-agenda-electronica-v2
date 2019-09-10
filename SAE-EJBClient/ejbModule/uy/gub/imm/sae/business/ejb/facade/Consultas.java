@@ -45,9 +45,13 @@ public interface Consultas {
 	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, Boolean atencionPresencial, TimeZone timezone) throws UserException;
 	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, Boolean atencionPresencial, TimeZone timezone) throws UserException;
 	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso);
-	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos, Recurso recurso, Date fecha, String codigoTramite);	
+	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos, Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite);	
 	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo, Boolean atencionPresencial) throws UserException;
-	public List<Reserva> consultarReservasParaModificarCancelar(List<DatoReserva> datos ,Recurso recurso,String codigoSeguridadReserva, TimeZone timezone);
+	public List<Reserva> consultarReservasParaModificarCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva, TimeZone timezone);
+	
+	public List<ReservaDTO> consultarReservasCanceladas(Recurso recurso, String codigoTramite, Date reservaFechaDesde, Date reservaFechaHasta, 
+      Date creacionFechaDesde, Date creacionFechaHasta, Date cancelacionFechaDesde, Date cancelacionFechaHasta);
+	
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta);
   public List<AtencionLLamadaReporteDT> consultarAtencionesPresencialesRecursoPeriodo(Recurso recurso, Date fechaDesde, Date fechaHasta);

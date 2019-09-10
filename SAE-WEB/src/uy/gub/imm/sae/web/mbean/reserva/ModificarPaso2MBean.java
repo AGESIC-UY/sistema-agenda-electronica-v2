@@ -11,6 +11,7 @@ import java.util.List;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.model.SelectItem;
 
@@ -31,9 +32,11 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
+import uy.gub.imm.sae.exception.ValidacionIPException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
+import uy.gub.imm.sae.web.common.SofisJSFUtils;
 
 public class ModificarPaso2MBean extends BaseMBean {
 
@@ -73,206 +76,8 @@ public class ModificarPaso2MBean extends BaseMBean {
 	      addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 	      errorInit = true;
 	    }
-		  
       configurarCalendario();
       configurarDisponibilidadesDelDia();
-	    
-	    
-		  
-/*		  
-			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-			
-      LOGGER.debug("Parámetros GET: ");
-      LOGGER.debug("              : e=["+request.getParameter("e")+"]");
-      LOGGER.debug("              : a=["+request.getParameter("a")+"]");
-      LOGGER.debug("              : r=["+request.getParameter("r")+"]");
-      LOGGER.debug("              : i=["+request.getParameter("i")+"]");
-      LOGGER.debug("              : u=["+request.getParameter("u")+"]");
-      LOGGER.debug("              : t=["+request.getParameter("t")+"]");
-
-      String sEmpresaId = request.getParameter("e"); //Id de la empresa
-      String sAgendaId = request.getParameter("a"); //Id de la agenda
-      String sRecursoId = request.getParameter("r"); //Id del recurso
-      String sReservaId = request.getParameter("ri"); //Id de la reserva
-      
-      String sIdioma = request.getParameter("i"); //Idioma (es,en,...)
-      String sUrl = request.getParameter("u"); //URL de retorno al confirmar (URL encoded)
-      String sTraza = request.getParameter("t"); //Código de trazabilidad y paso padre (<trazguid>-<paso>)
-
-			if(sEmpresaId!=null && sAgendaId!=null && sRecursoId!=null && sReservaId!=null) {
-				try{
-					empresaId = Integer.valueOf(sEmpresaId);
-					agendaId = Integer.valueOf(sAgendaId);
-					reservaId = Integer.valueOf(sReservaId);
-					recursoId = Integer.valueOf(sRecursoId);
-					
-					limpiarSession();
-					
-					sesionMBean.setEmpresaId(empresaId);
-					sesionMBean.setAgendaId(agendaId);
-					sesionMBean.setRecursoId(recursoId);
-					sesionMBean.setReservaId(reservaId);
-	        sesionMBean.setUrlTramite(sUrl);
-		      if(sIdioma!=null) {
-		        sesionMBean.setIdiomaActual(sIdioma);
-		      }else {
-		        if(request.getLocale()!=null) {
-		          sesionMBean.setIdiomaActual(request.getLocale().getLanguage());
-		        }else {
-		          sesionMBean.setIdiomaActual(Locale.getDefault().getLanguage());
-		        }
-		      }
-				}catch(Exception ex) {
-					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-					limpiarSession();
-					errorInit = true;
-					return;
-				}
-			}else {
-				//No hay parámetros, pueden estar ya en la sesion
-				empresaId = sesionMBean.getEmpresaId();
-				agendaId = sesionMBean.getAgendaId();
-				reservaId = sesionMBean.getReservaId();
-				recursoId = sesionMBean.getRecursoId();
-				
-				if(empresaId==null || agendaId==null || reservaId==null || recursoId==null) {
-					//Tampoco están en sesión
-					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
-					limpiarSession();
-					errorInit = true;
-					return;
-				}
-			}
-			
-			//Poner en sesion los datos de la empresa  y la agenda para la válvula de CDA 
-			//(necesita estos datos para determinar si la agenda particular requiere o no CDA)
-			HttpSession httpSession = (HttpSession) FacesContext.getCurrentInstance().getExternalContext().getSession(true);
-			httpSession.setAttribute("e", empresaId.toString());
-			httpSession.setAttribute("a", agendaId.toString());
-			
-			String remoteUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-
-			try {
-				// Crear un usuario falso temporal
-				String falsoUsuario = null;
-				if(remoteUser == null) {
-					//No hay usuario, se crea uno
-					sesionMBean.setUsuarioCda(null);
-					falsoUsuario = "sae" + empresaId;
-				}else {
-					//Hay usuario, dos alternativas: es de cda o es local de otra empresa
-					if(!remoteUser.startsWith("sae")) {
-						//Es un usuario de CDA
-						falsoUsuario = remoteUser;
-						sesionMBean.setUsuarioCda(remoteUser);
-					}else  {
-						//Es un usuario de otra empresa
-						falsoUsuario = "sae" + empresaId;
-						sesionMBean.setUsuarioCda(null);
-					}
-					//Desloguear al usuario actual (inválido)
-					try {
-						request.logout();
-					}catch(Exception ex) {
-						ex.printStackTrace();
-					}
-				}
-				Random random = new Random();
-				if(falsoUsuario.startsWith("sae")) {
-					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
-				}
-				falsoUsuario = falsoUsuario+ "/" + empresaId;
-				// Autenticarlo
-				String password = Utilidades.encriptarPassword(falsoUsuario);
-				request.login(falsoUsuario, password);
-			} catch (Exception ex) {
-				ex.printStackTrace();
-				throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
-			}
-			
-			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
-			consultaEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getConsultas();
-			
-			// Guardar la empresa en la sesion
-			try {
-				Empresa empresa = agendarReservasEJB.obtenerEmpresaPorId(empresaId);
-				sesionMBean.setEmpresaActual(empresa);
-				if (empresa==null) {
-					addErrorMessage(sesionMBean.getTextos().get("la_empresa_especificada_no_es_valida"));
-					limpiarSession();
-					errorInit = true;
-					return;
-				}
-			} catch (Exception e) {
-				addErrorMessage(sesionMBean.getTextos().get("la_empresa_especificada_no_es_valida"));
-				limpiarSession();
-				errorInit = true;
-				return;
-			}
-			
-			//Guardar la agenda
-			try {
-				sesionMBean.seleccionarAgenda(agendaId);
-			} catch (Exception  ae) {
-				addErrorMessage(sesionMBean.getTextos().get("la_agenda_especificada_no_es_valida"));
-				limpiarSession();
-				errorInit = true;
-				return;
-			}
-
-			//Si hay recurso obtenerlo
-			Recurso recurso = null;
-			try {
-				recurso = agendarReservasEJB.consultarRecursoPorReservaId(reservaId);
-			}catch(Exception ex) {
-				recurso = null;
-				ex.printStackTrace();
-			}
-			if (recurso==null || !sesionMBean.getAgenda().getId().equals(recurso.getAgenda().getId())) {
-				addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva"));
-				limpiarSession();
-				errorInit = true;
-				return;
-			}
-			sesionMBean.setRecurso(recurso);
-
-			//Obtener la reserva
-			Reserva reserva = consultaEJB.consultarReservaId(reservaId, recurso.getId());
-			if(reserva == null) {
-        addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva"));
-        limpiarSession();
-        errorInit = true;
-        return;
-			}else {
-        if(!reserva.getEstado().toString().equals("R")) {
-          //Determinar si la reserva está en estado Reservada
-          addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva"));
-          limpiarSession();
-          errorInit = true;
-          return;
-        }else {
-				  //Determinar si la reserva está vigente
-			    Calendar calAhora = new GregorianCalendar();
-			    calAhora.add(Calendar.MILLISECOND, sesionMBean.getTimeZone().getOffset(calAhora.getTimeInMillis()));
-			    Calendar calReserva = new GregorianCalendar();
-			    calReserva.setTime(reserva.getDisponibilidades().get(0).getHoraInicio());
-			    if(calReserva.before(calAhora)) {
-            addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva"));
-            limpiarSession();
-            errorInit = true;
-            return;
-			    }
-        }
-				
-				this.sesionMBean.setReservaModificar1(reserva);
-				this.sesionMBean.setCodigoSeguridadReserva("");
-				this.sesionMBean.setRenderedVolverBotom(false);
-			}
-			
-      configurarCalendario();
-      configurarDisponibilidadesDelDia();
-*/			
-
 		} catch (Exception e) {
 		  LOGGER.error(e);
 			redirect(ERROR_PAGE_OUTCOME);
@@ -529,12 +334,39 @@ public class ModificarPaso2MBean extends BaseMBean {
       try {
         //Intentar marcar la reserva para el día seleccionado, validando que no exista otra reserva para los mismos datos,
         //teniendo en cuenta que si es el mismo día que la reserva original sí va a existir y hay que ignorarla
-        Reserva reserva = agendarReservasEJB.marcarReservaValidandoDatos(row.getData(), sesionMBean.getReservaModificar1(), null);
+        String ipOrigen = SofisJSFUtils.obtenerDireccionIPCliente(FacesContext.getCurrentInstance());
+        Reserva reserva = agendarReservasEJB.marcarReservaValidandoDatos(row.getData(), sesionMBean.getReservaModificar1(), null, ipOrigen);
         sesionMBean.setReservaModificar2(reserva);
         return "siguientePaso";
       } catch (ValidacionClaveUnicaException vcuEx) {
         //Ya hay otra reserva con el mismo valor en todos los campos clave
-        addErrorMessage("ya_tiene_una_reserva_para_el_dia_seleccionado");
+        String mensajeReservaPrevia = "ya_tiene_una_reserva_para_el_dia_seleccionado";
+        Recurso recurso = sesionMBean.getRecurso();
+        if(recurso.getPeriodoValidacion()!=null && recurso.getPeriodoValidacion()>0) {
+          Date fecha = row.getData().getFecha();
+          Date fechaDesde = fecha;
+          Date fechaHasta = fecha;
+          Integer periodoValidacion = recurso.getPeriodoValidacion();
+          if(periodoValidacion==null) {
+            periodoValidacion=0;
+          }
+          Calendar cal = new GregorianCalendar();
+          cal.setTime(fecha);
+          cal.add(Calendar.DATE, -1*periodoValidacion);
+          fechaDesde = Utiles.time2InicioDelDia(cal.getTime());
+          cal.setTime(fecha);
+          cal.add(Calendar.DATE, 1*periodoValidacion);
+          fechaHasta = Utiles.time2FinDelDia(cal.getTime());
+          DateFormat df = new SimpleDateFormat(sesionMBean.getFormatoFecha());
+          String periodo = df.format(fechaDesde) + " - " + df.format(fechaHasta);
+          mensajeReservaPrevia = sesionMBean.getTextos().get("ya_tiene_una_reserva_para_el_periodo").replace("{periodo}", periodo);;
+        }
+        addErrorMessage(mensajeReservaPrevia);
+        return null;
+      }catch(ValidacionIPException vipEx) {
+        Recurso recurso = sesionMBean.getRecurso();
+        int cantReservas = (recurso.getCantidadPorIP()==null?0:recurso.getCantidadPorIP());
+        addErrorMessage(sesionMBean.getTextos().get("limite_de_reservas_para_la_direccion_ip_alcanzado").replace("{cantidad}", ""+cantReservas));
         return null;
       } catch (Exception ex) {
         addErrorMessage(ex);
@@ -575,15 +407,12 @@ public class ModificarPaso2MBean extends BaseMBean {
     return selectItemsDispVespertina;
   }
 
-  public void setSelectItemsDispVespertina(
-      List<SelectItem> selectItemsDispVespertina) {
+  public void setSelectItemsDispVespertina(List<SelectItem> selectItemsDispVespertina) {
     this.selectItemsDispVespertina = selectItemsDispVespertina;
   }
 
   public List<SelectItem> getSelectItemsDispMatutina() {
-
     return selectItemsDispMatutina;
-
   }
 
   public void setSelectItemsDispMatutina(
@@ -629,7 +458,6 @@ public class ModificarPaso2MBean extends BaseMBean {
   }
 
   private String deduccionMes(int i) {
-    
     String nombreMes = null;
     switch (i) {
     case Calendar.JANUARY:

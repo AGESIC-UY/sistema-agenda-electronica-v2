@@ -154,7 +154,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos , Recurso recurso, Date fecha, String codigoTramite){
+	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos , Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite){
 		String selectStr =	" SELECT DISTINCT(reserva) " ;
 		String fromStr =   	" FROM Reserva reserva " +
 						   					"	JOIN reserva.disponibilidades disp " +
@@ -164,8 +164,9 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 		                    "   AND disp.recurso = :recurso " +
                         "   AND disp.presencial = false " + 
 						  					" 	AND disp.fechaBaja IS NULL " + 
-					  						"   AND disp.fecha = :fecha " +
-				  							"   AND reserva.estado NOT IN ('U','C') ";
+					  						"   AND disp.fecha >= :fechaDesde " +
+                        "   AND disp.fecha <= :fechaHasta " +
+				  							"   AND reserva.estado NOT IN (:usada,:cancelada) ";
 		boolean hayCamposClaveNulos = false;
 		if (! datos.isEmpty()) {
 			whereStr = whereStr + "    AND (" ;
@@ -193,11 +194,15 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 			}
 			whereStr = whereStr + ")" ;
 		}
+		
 		String consulta = selectStr + fromStr + whereStr  + " ORDER BY reserva.id ";
 		List<Reserva> reservas = (List<Reserva>)entityManager.createQuery(consulta)
       .setParameter("tramiteCodigo", codigoTramite)
 			.setParameter("recurso", recurso)
-			.setParameter("fecha", fecha, TemporalType.DATE)
+			.setParameter("fechaDesde", fechaDesde, TemporalType.DATE)
+      .setParameter("fechaHasta", fechaHasta, TemporalType.DATE)
+      .setParameter("usada", Estado.U)
+      .setParameter("cancelada", Estado.C)
 			.getResultList();
 		
 		/* 12/03/2010 - Corrige que al traer reservas con la misma clave que se ingreso, 
@@ -1412,5 +1417,112 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
   public String consultarConfiguracion(String clave) {
     Configuracion conf = globalEntityManager.find(Configuracion.class, clave);
     return (conf==null?null:conf.getValor());
+  }
+  
+  /**
+   * Devuelve la lista de reservas canceladas según los parámetros indicados.
+   * No toma en cuenta el campo fechaLiberacion
+   */
+  public List<ReservaDTO> consultarReservasCanceladas(Recurso recurso, String codigoTramite, Date reservaFechaDesde, Date reservaFechaHasta, 
+      Date creacionFechaDesde, Date creacionFechaHasta, Date cancelacionFechaDesde, Date cancelacionFechaHasta) {
+    
+    String consulta = "SELECT r.id, r.serie, r.numero, r.origen, r.ipOrigen, d.fecha, d.horaInicio," +
+        " r.tramiteCodigo, r.tramiteNombre, r.fechaCreacion, r.ucrea, r.fcancela, r.ucancela, r.fechaLiberacion " +
+        " FROM Reserva r " +
+        " JOIN r.disponibilidades d " +
+        " WHERE r.estado = :cancelada ";
+    if(recurso!=null ) {
+      consulta = consulta + " AND d.recurso = :recurso";
+    }
+    if(codigoTramite!=null && !codigoTramite.trim().isEmpty()) {
+      consulta = consulta + " AND r.tramiteCodigo = :tramiteCodigo";
+    }
+    if(reservaFechaDesde!=null) {
+      consulta = consulta + " AND d.fecha >= :reservaFechaDesde";
+    }
+    if(reservaFechaHasta!=null) {
+      consulta = consulta + " AND d.fecha <= :reservaFechaHasta";
+    }
+    if(creacionFechaDesde!=null) {
+      consulta = consulta + " AND d.fechaCreacion >= :creacionFechaDesde";
+    }
+    if(creacionFechaHasta!=null) {
+      consulta = consulta + " AND d.fechaCreacion <= :creacionFechaHasta";
+    }
+    if(cancelacionFechaDesde!=null) {
+      consulta = consulta + " AND d.fcancela >= :cancelacionFechaDesde";
+    }
+    if(cancelacionFechaHasta!=null) {
+      consulta = consulta + " AND d.fcancela <= :cancelacionFechaHasta";
+    }
+    consulta = consulta + " ORDER BY r.id DESC";
+    Query query = entityManager.createQuery(consulta).setParameter("cancelada", Estado.C);
+    if(recurso!=null ) {
+      query.setParameter("recurso", recurso);
+    }
+    if(codigoTramite!=null && !codigoTramite.trim().isEmpty()) {
+      query.setParameter("tramiteCodigo", codigoTramite);
+    }
+    if(reservaFechaDesde!=null) {
+      query.setParameter("reservaFechaDesde", reservaFechaDesde, TemporalType.DATE);
+    }
+    if(reservaFechaHasta!=null) {
+      query.setParameter("reservaFechaHasta", reservaFechaHasta, TemporalType.DATE);
+    }
+
+    if(creacionFechaDesde!=null) {
+      query.setParameter("creacionFechaDesde", creacionFechaDesde, TemporalType.DATE);
+    }
+    if(creacionFechaHasta!=null) {
+      query.setParameter("creacionFechaHasta", creacionFechaHasta, TemporalType.DATE);
+    }
+    if(cancelacionFechaDesde!=null) {
+      query.setParameter("cancelacionFechaDesde", cancelacionFechaDesde, TemporalType.DATE);
+    }
+    if(cancelacionFechaHasta!=null) {
+      query.setParameter("cancelacionFechaHasta", cancelacionFechaHasta, TemporalType.DATE);
+    }
+    @SuppressWarnings("unchecked")
+    List<Object[]> resultados = query.getResultList();
+    List<ReservaDTO> reservas = new ArrayList<>();
+    ReservaDTO reservaDTO = null;
+    Iterator<Object[]> iterator = resultados.iterator();
+    while (iterator.hasNext()) {
+      Object[] rowReserva = iterator.next();
+      Integer reservaId        = (Integer)rowReserva[0];
+      String reservaSerie    = (String)rowReserva[1];
+      Integer reservaNumero    = (Integer)rowReserva[2];
+      String reservaOrigen    = (String) rowReserva[3];
+      String ipOrigen    = (String) rowReserva[4];
+      Date dispFecha        = (Date) rowReserva[5];
+      Date dispHoraInicio   = (Date) rowReserva[6];
+      String tramiteCodigo    = (String) rowReserva[7];
+      String tramiteNombre    = (String) rowReserva[8];
+      Date fcrea           = (Date) rowReserva[9];
+      String ucrea         = (String) rowReserva[10];
+      Date fcancela           = (Date) rowReserva[11];
+      String ucancela         = (String) rowReserva[12];
+      Date flibera           = (Date) rowReserva[13];
+      
+      reservaDTO = new ReservaDTO();
+      reservaDTO.setId(reservaId);
+      reservaDTO.setSerie(reservaSerie);
+      reservaDTO.setNumero(reservaNumero);
+      reservaDTO.setOrigen(reservaOrigen);
+      reservaDTO.setIpOrigen(ipOrigen);
+      reservaDTO.setFecha(dispFecha);
+      reservaDTO.setHoraInicio(dispHoraInicio);
+      reservaDTO.setTramiteCodigo(tramiteCodigo);
+      reservaDTO.setTramiteNombre(tramiteNombre);
+      reservaDTO.setUcrea(ucrea);
+      reservaDTO.setFcrea(fcrea);
+      reservaDTO.setUcancela(ucancela);
+      reservaDTO.setFcancela(fcancela);
+      reservaDTO.setFlibera(flibera);
+      
+      reservas.add(reservaDTO);
+    }
+    
+    return reservas;
   }
 }

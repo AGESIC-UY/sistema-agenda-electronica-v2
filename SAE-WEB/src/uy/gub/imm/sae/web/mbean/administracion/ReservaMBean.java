@@ -203,14 +203,17 @@ public class ReservaMBean extends BaseMBean {
 						sessionMBean.getCodigoSeguridadReserva(), sessionMBean.getTimeZone());
 				this.reservaSessionMBean.setListaReservas(reservas);
 				addInfoMessage(sessionMBean.getTextos().get("reserva_cancelada"), MSG_ID);
-			} catch (Exception e) {
-				addErrorMessage(e, MSG_ID);
+			} catch (Exception ex) {
+				addErrorMessage(ex, MSG_ID);
+				ex.printStackTrace();
 			}
 		}
 	}
 
 	public Boolean getConfirmarDeshabilitado() {
-		if (reservaSessionMBean.getReservaDatos() == null	|| reservaSessionMBean.getReservaDatos().getEstado() == Estado.C || reservaSessionMBean.getReservaDatos().getEstado() == Estado.U) {
+		if (reservaSessionMBean.getReservaDatos() == null	
+		    || reservaSessionMBean.getReservaDatos().getEstado() == Estado.C 
+		    || reservaSessionMBean.getReservaDatos().getEstado() == Estado.U) {
 			return true;
 		} else {
 			return false;

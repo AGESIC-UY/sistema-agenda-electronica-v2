@@ -185,6 +185,16 @@ public class ConsultaMBean extends SessionCleanerMBean {
 		}
 	}
 
+  public void beforePhaseConsultarCancelaciones(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_cancelaciones"));
+    }
+  }
+	
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
@@ -412,7 +422,5 @@ public class ConsultaMBean extends SessionCleanerMBean {
 			minutos.add(s);
 		}
 	}
-	
-	
 	
 }

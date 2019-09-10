@@ -47,9 +47,9 @@ public class Disponibilidad implements Serializable {
 	private static final long serialVersionUID = -598747846987644476L;
 	
 	private Integer id;
-	private Date fecha;
-	private Date horaInicio;
-	private Date horaFin;
+	private Date fecha; //Fecha de la ventana, en el timezone de la agenda correspondiente
+	private Date horaInicio; //Hora de inicio de la vemtana, en el timezone de la agenda correspondiente
+	private Date horaFin; //Hora de fin de la ventana, en el timezone de la agenda correspondiente
 	private Integer cupo;
 	private Date fechaBaja;
 	private Integer numerador;

@@ -83,7 +83,7 @@
             <ul>
               <li>
                 <span class="ui-messages-warn-summary">
-                    <h:outputText value="#{sesionMBean.textos['solo_se_permite_una_reserva_diaria']}" />
+                    <h:outputText value="#{sesionMBean.mensajeReservaExistente}" />
                 </span>
                 <span class="ui-messages-warn-summary">
                     <h:commandLink value="#{sesionMBean.textos['volver_al_paso_anterior_para_seleccionar_otro_dia']}" action="pasoAnterior" />

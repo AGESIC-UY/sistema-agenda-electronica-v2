@@ -486,7 +486,7 @@ public class CancelarReservaPublicMBean extends BaseMBean {
 				List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean,	datosASolicitar);
 				
 				try {
-				//Enviar el mail de confirmacion
+				  //Enviar el mail de confirmacion
 				  agendarReservasEJB.enviarComunicacionesCancelacion(r, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
 				}catch(UserException ex) {
 	        addAdvertenciaMessage(sesionMBean.getTextos().get(ex.getCodigoError()));

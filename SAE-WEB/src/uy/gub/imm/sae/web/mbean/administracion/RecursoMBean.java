@@ -99,7 +99,7 @@ public class RecursoMBean extends BaseMBean{
   List<SelectItem> tamaniosFuentes = null;
   
   List<SelectItem> cambiosUnidades = null;
-	
+  List<SelectItem> cancelacionUnidades = null;
   
   @PostConstruct
   public void initRecurso(){
@@ -134,6 +134,10 @@ public class RecursoMBean extends BaseMBean{
     cambiosUnidades.add(new SelectItem(Calendar.HOUR, sessionMBean.getTextos().get("horas")));
     cambiosUnidades.add(new SelectItem(Calendar.MINUTE, sessionMBean.getTextos().get("minutos")));
     
+    cancelacionUnidades = new ArrayList<SelectItem>();
+    cancelacionUnidades.add(new SelectItem(Calendar.DATE, sessionMBean.getTextos().get("dias")));
+    cancelacionUnidades.add(new SelectItem(Calendar.HOUR, sessionMBean.getTextos().get("horas")));
+    cancelacionUnidades.add(new SelectItem(Calendar.MINUTE, sessionMBean.getTextos().get("minutos")));
   }
 
 	/**************************************************************************/
@@ -166,7 +170,6 @@ public class RecursoMBean extends BaseMBean{
 	public Recurso getRecursoSeleccionado() {
 		return sessionMBean.getRecursoSeleccionado();
 	}
-
 
 	public DataTable getRecursosDataTableModificar() {
 		return recursosDataTableModificar;
@@ -384,6 +387,41 @@ public class RecursoMBean extends BaseMBean{
 		}catch (ApplicationException e1) {
 			addErrorMessage(e1, MSG_ID);
 		}
+    if(recurso.getPeriodoValidacion()==null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_es_obligatorio"), FORM_ID+":PeriodoValidacion");
+      hayErrores = true;
+    }else if(recurso.getPeriodoValidacion()<0){
+      addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":PeriodoValidacion");
+      hayErrores = true;
+    }
+    if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true) {
+      if(recurso.getCantidadPorIP()==null) {
+        addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_es_obligatoria"), FORM_ID+":cantidadPorIP");
+        hayErrores = true;
+      }else if(recurso.getCantidadPorIP()<=0){
+        addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_debe_ser_mayor_a_cero"), FORM_ID+":cantidadPorIP");
+        hayErrores = true;
+      }
+      if(recurso.getPeriodoPorIP()==null) {
+        addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_es_obligatorio"), FORM_ID+":periodoPorIP");
+        hayErrores = true;
+      }else if(recurso.getPeriodoPorIP()<0){
+        addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":periodoPorIP");
+        hayErrores = true;
+      }
+    }
+    
+    if(recurso.getCancelacionTiempo() == null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_es_requerido"), FORM_ID+":cancelacionTiempo");
+      hayErrores = true;
+    }else if(recurso.getCancelacionTiempo().intValue() < 0 ) {
+      addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":cancelacionTiempo");
+      hayErrores = true;
+    }
+    if(recurso.getCancelacionTipo()==null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_tipo_de_cancelacion_es_obligatorio"), FORM_ID+":cancelacionTipo");
+      hayErrores = true;
+    }
 		if(hayErrores) {
 		  return;
 		}
@@ -635,8 +673,45 @@ public class RecursoMBean extends BaseMBean{
  				}catch (ApplicationException e1) {
  					addErrorMessage(e1, MSG_ID);
  				}
+ 				if(recurso.getPeriodoValidacion()==null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_es_obligatorio"), FORM_ID+":vPeriodoValidacion");
+          hayErrores = true;
+ 				}else if(recurso.getPeriodoValidacion()<0){
+          addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":vPeriodoValidacion");
+          hayErrores = true;
+ 				}
+        if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true) {
+          if(recurso.getCantidadPorIP()==null) {
+            addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_es_obligatoria"), FORM_ID+":cantidadPorIP");
+            hayErrores = true;
+          }else if(recurso.getCantidadPorIP()<=0){
+            addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_debe_ser_mayor_a_cero"), FORM_ID+":cantidadPorIP");
+            hayErrores = true;
+          }
+          if(recurso.getPeriodoPorIP()==null) {
+            addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_es_obligatorio"), FORM_ID+":periodoPorIP");
+            hayErrores = true;
+          }else if(recurso.getPeriodoPorIP()<0){
+            addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":periodoPorIP");
+            hayErrores = true;
+          }
+        }
+        if(recurso.getCancelacionTiempo() == null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_es_requerido"), FORM_ID+":cancelacionTiempo");
+          hayErrores = true;
+        }else if(recurso.getCancelacionTiempo().intValue() < 0 ) {
+          addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":cancelacionTiempo");
+          hayErrores = true;
+        }
+        if(recurso.getCancelacionTipo()==null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_tipo_de_cancelacion_es_obligatorio"), FORM_ID+":cancelacionTipo");
+          hayErrores = true;
+        }
  				if(hayErrores) {
  					return null;
+ 				}
+ 				if(recurso.getIpsSinValidacion()!=null) {
+ 				  recurso.setIpsSinValidacion(recurso.getIpsSinValidacion().replace(" ", ";").replace(",", ";").replace("-", ";"));
  				}
  				recursosEJB.modificarRecurso(sessionMBean.getRecursoSeleccionado());
  				addInfoMessage(sessionMBean.getTextos().get("recurso_modificado"), MSG_ID); 				
@@ -978,6 +1053,10 @@ public class RecursoMBean extends BaseMBean{
     return cambiosUnidades;
   }
   
+  public List<SelectItem> getCancelacionUnidades() {
+    return cancelacionUnidades;
+  }
+
   /**
    * Método que genera un ticket dummy con una reserva falsa, utilizado para probar cómo queda luego de cambiar la fuente
    * @return

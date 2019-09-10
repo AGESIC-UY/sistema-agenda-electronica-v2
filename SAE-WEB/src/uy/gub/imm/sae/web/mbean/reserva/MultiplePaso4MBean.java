@@ -22,7 +22,9 @@ package uy.gub.imm.sae.web.mbean.reserva;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -579,16 +581,46 @@ public class MultiplePaso4MBean extends BaseMBean {
       }catch (ValidacionClaveUnicaException vcuEx) {
         //Ya hay otra reserva con el mismo valor en todos los campos clave
         yaExisteReservaCamposClave = true;
+        
+        
+        //Ya hay otra reserva con el mismo valor en todos los campos clave
+        String mensajeReservaPrevia = "ya_tiene_una_reserva_para_el_dia_seleccionado";
+        Recurso recurso = sesionMBean.getRecurso();
+        if(recurso.getPeriodoValidacion()!=null && recurso.getPeriodoValidacion()>0) {
+          Reserva reserva = sesionMBean.getReserva();
+          Date fecha = reserva.getDisponibilidades().get(0).getFecha();
+          Date fechaDesde = fecha;
+          Date fechaHasta = fecha;
+          Integer periodoValidacion = recurso.getPeriodoValidacion();
+          if(periodoValidacion==null) {
+            periodoValidacion=0;
+          }
+          Calendar cal = new GregorianCalendar();
+          cal.setTime(fecha);
+          cal.add(Calendar.DATE, -1*periodoValidacion);
+          cal.set(Calendar.HOUR_OF_DAY, 0);
+          cal.set(Calendar.MINUTE, 0);
+          cal.set(Calendar.SECOND, 0);
+          cal.set(Calendar.MILLISECOND, 0);
+          fechaDesde = cal.getTime();
+          cal.setTime(fecha);
+          cal.add(Calendar.DATE, 1*periodoValidacion);
+          cal.set(Calendar.HOUR_OF_DAY, 23);
+          cal.set(Calendar.MINUTE, 59);
+          cal.set(Calendar.SECOND, 59);
+          cal.set(Calendar.MILLISECOND, 999);
+          fechaHasta = cal.getTime();
+          DateFormat df = new SimpleDateFormat(sesionMBean.getFormatoFecha());
+          String periodo = df.format(fechaDesde) + " - " + df.format(fechaHasta);
+          mensajeReservaPrevia = sesionMBean.getTextos().get("ya_tiene_una_reserva_para_el_periodo").replace("{periodo}", periodo);;
+        }
         List<String> idComponentesError = new ArrayList<String>();
         for(int i = 0; i < vcuEx.getCantCampos(); i++) {
           idComponentesError.add(vcuEx.getNombreCampo(i));
-          addErrorMessage("ya_tiene_una_reserva_para_el_dia_seleccionado", "form:"+vcuEx.getNombreCampo(i));
+          addErrorMessage(mensajeReservaPrevia, "form:"+vcuEx.getNombreCampo(i));
         }
-        //Si hay más de un trámite también forma parte de la clave
-//        if(tramites.size()>1) {
-          idComponentesError.add("tramite");
-          addErrorMessage("ya_tiene_una_reserva_para_el_dia_seleccionado", "form:tramite");
-//        }
+        idComponentesError.add("tramite");
+        addErrorMessage(mensajeReservaPrevia, "form:tramite");
         FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
         return false;
       }catch (ValidacionException e) {

@@ -759,7 +759,7 @@ public class ReporteMBean extends BaseMBean {
 			}else {
 	      filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
 			}
-			filaDatos.add(new TableCellValue(reserva.getNumero()));
+			filaDatos.add(new TableCellValue(reserva.getNumero()!=null?reserva.getNumero():0));
 			for(AgrupacionDato grupo: agrupaciones) {
 				for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
 					if (campo.getIncluirEnReporte()) {

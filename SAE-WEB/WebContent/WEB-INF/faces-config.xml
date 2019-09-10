@@ -712,6 +712,17 @@
     </managed-property>
   </managed-bean>
 
+  <managed-bean>
+    <managed-bean-name>consultaCancelacionesMBean</managed-bean-name>
+    <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.ConsultaCancelacionesMBean</managed-bean-class>
+    <managed-bean-scope>view</managed-bean-scope>
+    <managed-property>
+      <property-name>sessionMBean</property-name>
+      <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+      <value>#{sessionMBean}</value>
+    </managed-property>
+  </managed-bean>
+
 	<navigation-rule>
 		<from-view-id>*</from-view-id>
 		<navigation-case>

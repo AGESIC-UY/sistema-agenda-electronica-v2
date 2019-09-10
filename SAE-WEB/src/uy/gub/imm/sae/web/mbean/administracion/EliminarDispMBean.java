@@ -41,7 +41,6 @@ import uy.gub.imm.sae.business.ejb.facade.Disponibilidades;
 import uy.gub.imm.sae.common.DisponibilidadReserva;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
-import uy.gub.imm.sae.common.enumerados.Dia;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.CeldaDia;
 import uy.gub.imm.sae.web.common.RowList;
@@ -147,14 +146,6 @@ public class EliminarDispMBean extends BaseMBean {
 	
 	public List<List<Object>> getHorariosSemanales() {
 		return horariosSemanales;
-	}
-	
-	public List<Dia> getDiasDeLaSemana() {
-		List<Dia> dias = new ArrayList<Dia>();
-		for (Dia d : Dia.values()) {
-			dias.add(d);
-		}
-		return dias;
 	}
 	
 	public void eliminar(ActionEvent event) {

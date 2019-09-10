@@ -508,7 +508,6 @@ public class Paso1MBean extends BaseMBean {
 				int i = 0;
 				Date inicio_disp = ventanaCalendario.getFechaInicial();
 				Date fin_disp = ventanaCalendario.getFechaFinal();
-				//boolean tieneDiponibilidad = false; 
 				recursoTieneDisponibilidad = false;
         while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && !recursoTieneDisponibilidad) {
 					if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {

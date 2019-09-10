@@ -18,25 +18,24 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package uy.gub.imm.sae.common.enumerados;
+package uy.gub.imm.sae.exception;
 
-public enum Estado {
-  /* Aún no se confirmó */
-	P("pendiente"), 
-	/* Está confirmada pero no utilizada */
-	R("reservada"), 
-	/* Está cancelada definitivamente */
-	C("cancelada"),
-	/* Está usada (fue llamada por un funcionario )*/
-	U("usada");
-	
-	private final String descripcion;
-	
-	private Estado(String descripcion) {
-		this.descripcion = descripcion;
+import javax.ejb.ApplicationException;
+
+@ApplicationException(rollback=true)
+public class ValidacionIPException extends ValidacionException {
+
+
+	private static final long serialVersionUID = -4552643840211960000L;
+
+	/**
+	 * La lista debe tener tamaño > 0.
+	 * @param codigoError
+	 * @param nombreCampos es el nombre de los campos que incurren en la violacion de clave unica
+	 * @param mensaje      es el mensaje de error conrespondiente.
+	 */
+	public ValidacionIPException(String codigoError) {
+		super(codigoError);
 	}
-	
-	public String getDescripcion() {
-		return descripcion;
-	}
+
 }

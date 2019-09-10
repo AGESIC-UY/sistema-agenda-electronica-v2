@@ -786,7 +786,8 @@ public class ServiciosREST {
         return jError("el_recurso_no_admite_reservas_multiples");
       }
       //Generar un token de reserva
-      TokenReserva tokenReserva = agendarReservas.generarTokenReserva(input.getIdRecurso(), input.getDocumento(), input.getNombre(), input.getEmail(), input.getCodigoTramite());
+      TokenReserva tokenReserva = agendarReservas.generarTokenReserva(input.getIdRecurso(), input.getDocumento(), input.getNombre(), input.getEmail(), 
+          input.getCodigoTramite(), null);
       //Enviar la respuesta
       JsonObject jRespuesta = new JsonObject();
       jRespuesta.addProperty("resultado", "1");
@@ -1473,7 +1474,7 @@ public class ServiciosREST {
       }
       //Modificar la reserva
       Reserva reservaNueva = agendarReservas.modificarReserva(input.getIdEmpresa(), input.getIdAgenda(), input.getIdRecurso(), input.getIdReserva(), 
-          input.getIdDisponibilidad(), null, input.getIdioma());
+          input.getIdDisponibilidad(), null, input.getIdioma(), null);
       //Enviar las comunicaciones (cancelación de la original y confirmación de la nueva)
       Map<String, Object> datosEmpresa = consultas.consultarDatosEmpresa(input.getIdEmpresa());
       String formatoFecha = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_FECHA")?(String)datosEmpresa.get("FORMATO_FECHA"):"dd/MM/yyyy";

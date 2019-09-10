@@ -1150,6 +1150,21 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('el_tiempo_previo_para_cambios_deb
 INSERT INTO ae_textos (codigo, texto) VALUES ('enlace_a_la_pagina_de_modificacion', 'Enlace a la página de modificación');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_recurso_no_admite_cambios_de_reservas', 'El recurso no admite cambios de reservas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_especificada_ya_no_admite_cambios', 'La reserva ya no admite cambios');
+INSERT INTO ae_textos (codigo, texto) VALUES ('periodo_validacion', 'Período de validación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ya_tiene_una_reserva_para_el_periodo', 'Ya tiene una reserva para el período {periodo}');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_de_validacion_es_obligatorio', 'El período de validación es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_de_validacion_debe_ser_mayor_o_igual_a_cero', 'El período de validación debe ser mayor o igual a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('solo_se_permite_una_reserva_en_un_periodo_de_dias', 'Solo se permite una reserva en un período de {dias} días');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_de_validacion_por_ip', 'Configuración de validación por dirección IP');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validar_por_ip', 'Validar por dirección IP');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cantidad_reservas_por_ip', 'Cantidad de reservas por dirección IP');
+INSERT INTO ae_textos (codigo, texto) VALUES ('periodo_validacion_por_ip', 'Período de validación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('direcciones_ip_sin_validacion', 'Direcciones IP sin validación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_cantidad_de_reservas_por_ip_es_obligatoria', 'La cantidad de reservas por IP es obligatoria');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_cantidad_de_reservas_por_ip_debe_ser_mayor_a_cero', 'La cantidad de reservas por IP debe ser mayor a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_de_validacion_por_ip_es_obligatorio', 'El período de validación por IP es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_de_validacion_por_ip_debe_ser_mayor_o_igual_a_cero', 'El período de validación por IP debe ser mayor o igual a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('limite_de_reservas_para_la_direccion_ip_alcanzado', 'No se admiten más de {cantidad} reservas desde una misma dirección IP');
 
 --
 -- CLAVES PRIMARIAS

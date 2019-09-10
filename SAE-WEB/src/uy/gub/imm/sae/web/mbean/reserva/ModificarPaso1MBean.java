@@ -36,7 +36,6 @@ import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
-import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.login.Utilidades;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;

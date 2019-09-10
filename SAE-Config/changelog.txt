@@ -224,3 +224,11 @@ Versión 2.1.1 (2018-09-21)
 * Se añadió la posibilidad de configurar si el recurso admite cambios en las reservas y los plazos.
 * Se añadió la posibilidad de incluir el link de modificación en la confirmación de reservas.
 * Se añadió el control de admisión de cambios en las reservas previo a la confirmación.
+
+Versión 2.2.0 (2019-09-10)
+* Se añadió la posibilidad de configurar un período de existencia de otra validación en lugar de hacerlo día a día.
+* Se añadió la posibilidad de limitar la cantidad de reservas que se realizan desde una misma IP en un período de tiempo.
+* Se añadió la consulta de reservas canceladas para una agenda.
+* Se añadió la posibilidad de configurar los recursos para que la liberación de cupos de reservas canceladas sea diferida.
+* Se añadió la posibilidad de liberar cupos de reservas canceladas en forma diferida.
+* Se corrigió un problema en la generación del reporte de reservas por datos, con el estado "Cancelada".

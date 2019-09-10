@@ -1210,5 +1210,15 @@ public class SessionMBean extends SessionCleanerMBean {
     }
     return false;
   }
+  
+  public String getMensajeReservaExistente() {
+    if(this.recurso==null || this.recurso.getId()==null) {
+      return "";
+    }
+    if(this.recurso.getPeriodoValidacion()==null || this.getRecurso().getPeriodoValidacion()==0) {
+      return textos.get("solo_se_permite_una_reserva_diaria");
+    }
+    return textos.get("solo_se_permite_una_reserva_en_un_periodo_de_dias").replace("{dias}", ""+(this.recurso.getPeriodoValidacion()*2));
+  }
 	
 }
