@@ -672,16 +672,18 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
     cal.add(Calendar.DATE, 1*periodoValidacion);
     fechaHasta = Utiles.time2FinDelDia(cal.getTime());
     //Solo se consideran las reservas simples, no las reservas múltiples
-    String eql = "SELECT COUNT(*) FROM Reserva r WHERE r.estado<>:cancelado AND r.token IS NULL AND "
+    String eql = "SELECT COUNT(*) FROM Reserva r JOIN r.disponibilidades d WHERE d.recurso.id=:idRecurso AND r.estado NOT IN (:cancelada,:pendiente) AND r.token IS NULL AND "
         + "r.ipOrigen=:ipOrigen AND r.fechaCreacion>=:fechaDesde AND r.fechaCreacion<=:fechaHasta";
     if(reservaId!=null) {
       eql = eql + " AND r.id<>:reservaId";
     }
     Query query = entityManager.createQuery(eql);
-    query.setParameter("cancelado", Estado.C);
+    query.setParameter("cancelada", Estado.C);
+    query.setParameter("pendiente", Estado.P);
     query.setParameter("ipOrigen", ipOrigen);
     query.setParameter("fechaDesde", fechaDesde);
     query.setParameter("fechaHasta", fechaHasta);
+    query.setParameter("idRecurso", recurso.getId());
     if(reservaId!=null) {
       query.setParameter("reservaId", reservaId);
     }

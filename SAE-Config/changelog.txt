@@ -232,3 +232,6 @@ Versión 2.2.0 (2019-09-10)
 * Se añadió la posibilidad de configurar los recursos para que la liberación de cupos de reservas canceladas sea diferida.
 * Se añadió la posibilidad de liberar cupos de reservas canceladas en forma diferida.
 * Se corrigió un problema en la generación del reporte de reservas por datos, con el estado "Cancelada".
+
+Versión 2.2.1 (2019-09-26)
+* Se corrigió un problema con la validación de reservas desde la misma IP (no tomaba en cuenta el recurso).
