@@ -75,5 +75,11 @@
 			<local-jndi-name>@SAE_EJB_JNDI_BASE@/DepurarReservasBean/local</local-jndi-name>
 		</session>
 		
+    <session>
+      <ejb-name>ComunicacionesBean</ejb-name>
+      <jndi-name>@SAE_EJB_JNDI_BASE@/ComunicacionesBean/remote</jndi-name>
+      <local-jndi-name>@SAE_EJB_JNDI_BASE@/ComunicacionesBean/local</local-jndi-name>
+    </session>
+    
 	</enterprise-beans>
 </jboss>

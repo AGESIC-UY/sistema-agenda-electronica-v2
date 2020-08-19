@@ -1,70 +1,63 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view
-			beforePhase="#{consultaReservaDatosMBean.beforePhaseConsultarReservaDatos}" >
+		<f:view beforePhase="#{consultaReservaDatosMBean.beforePhaseConsultarReservaDatos}" >
 
-			<p:outputPanel
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="form" class="cancelarReserva">
           <p:outputPanel styleClass="form-required">
             <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
           </p:outputPanel>
-					<h:panelGroup id="camposFiltro"
-						binding="#{consultaReservaDatosMBean.filtroConsulta}"
-						layout="block">
+					<h:panelGroup id="camposFiltro" binding="#{consultaReservaDatosMBean.filtroConsulta}" layout="block">
 					</h:panelGroup>
 					<ul class="form-action-buttons">
-						<li class="action-buttons-primary"><p:commandButton
-								value="#{sessionMBean.textos['consultar']}"
-								actionListener="#{consultaReservaDatosMBean.buscarReservaDatos}"
-								update="resultadosBusqueda" styleClass="btn-lg btn-primario" /></li>
+						<li class="action-buttons-primary">
+						  <p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{consultaReservaDatosMBean.buscarReservaDatos}" 
+						    update="resultadosBusqueda" styleClass="btn-lg btn-primario" />
+					  </li>
 					</ul>
 
 					<p:outputPanel id="resultadosBusqueda">
-						<p:dataTable
-							value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.listaReservas}"
-							binding="#{consultaReservaDatosMBean.reservasDataTable}"
-							var="reserva" id="resultadoBusqueda"
-							rendered="#{not empty consReservaDatosSessionMBean.listaReservas}"
-							caption="Reservas" paginator="true" rows="10"
-							paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}">
+						<p:dataTable value="#{consultaReservaDatosMBean.consReservaDatosSessionMBean.listaReservas}" binding="#{consultaReservaDatosMBean.reservasDataTable}"
+							var="reserva" id="resultadoBusqueda" rendered="#{not empty consReservaDatosSessionMBean.listaReservas}" caption="Reservas" 
+              paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+              paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+              paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+              paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+              paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+              paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+						>
 							<p:column headerText="#{sessionMBean.textos['id']}">
-								<h:outputText value="#{reserva.id}"></h:outputText>
+								<h:outputText value="#{reserva.id}" />
 							</p:column>
+              <p:column headerText="#{sessionMBean.textos['serie']}">
+                <h:outputText value="#{reserva.serie}" />
+              </p:column>
 							<p:column headerText="#{sessionMBean.textos['numero']}">
-								<h:outputText value="#{reserva.numero}"></h:outputText>
+								<h:outputText value="#{reserva.numero}" />
 							</p:column>
 							<p:column headerText="#{sessionMBean.textos['fecha_creacion']}">
 								<h:outputText value="#{reserva.fechaCreacion}">
-									<f:convertDateTime type="date"
-										pattern="#{sessionMBean.formatoFecha} #{sessionMBean.formatoHora}"
-										timeZone="GMT" locale="es" />
+									<f:convertDateTime type="date" pattern="#{sessionMBean.formatoFecha} #{sessionMBean.formatoHora}" timeZone="GMT" locale="es" />
 								</h:outputText>
 							</p:column>
 							<p:column headerText="#{sessionMBean.textos['estado']}">
-								<h:outputText value="#{reserva.estadoDescripcion}"></h:outputText>
+								<h:outputText value="#{reserva.estadoDescripcion}" />
 							</p:column>
 							<p:column headerText="#{sessionMBean.textos['usuario_creacion']}">
-								<h:outputText value="#{reserva.ucrea}"></h:outputText>
+								<h:outputText value="#{reserva.ucrea}" />
 							</p:column>
 							<p:column headerText="#{sessionMBean.textos['origen']}">
-								<h:outputText value="#{reserva.origen}"></h:outputText>
+								<h:outputText value="#{reserva.origen}" />
 							</p:column>
 							<p:column headerText="#{sessionMBean.textos['accion']}">
-								<p:commandButton id="consultarButtom"
-									action="#{consultaReservaDatosMBean.verDetalleReserva}"
-									icon="ui-icon-search" title="#{sessionMBean.textos['ver_detalle']}">
-								</p:commandButton>
+								<p:commandButton id="consultarButtom" action="#{consultaReservaDatosMBean.verDetalleReserva}" icon="ui-icon-search" title="#{sessionMBean.textos['ver_detalle']}" />
 							</p:column>
-
 						</p:dataTable>
 					</p:outputPanel>
 
@@ -73,4 +66,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

@@ -53,6 +53,7 @@ import org.primefaces.component.fieldset.Fieldset;
 import org.primefaces.component.message.Message;
 
 import uy.gub.imm.sae.common.SAEProfile;
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
@@ -106,25 +107,23 @@ public class FormularioDinamicoReserva {
 	/*
 	 * Crea un formulario editable de un tipo (consulta o edicion)
 	 */	
-	public FormularioDinamicoReserva(String managedBeanName, String nombreFormulario, TipoFormulario tipo, String formatoFecha) {
+	public FormularioDinamicoReserva(String managedBeanName, String nombreFormulario, TipoFormulario tipo, Map<String, Object> valores, String formatoFecha) {
 		this.managedBean = managedBeanName;
 		this.nombreFormulario = nombreFormulario;
 		this.app = FacesContext.getCurrentInstance().getApplication();
-	
 		this.tipoFormulario = tipo;
 		this.soloLectura = (tipo == TipoFormulario.LECTURA);
-
+		if(valores != null) {
+		  this.valores = new HashMap<String, Object>(valores);
+		}
 		configurarFormatoFecha(formatoFecha);
 	}
 	
 	public FormularioDinamicoReserva(Map<String, Object> valores, String formatoFecha) {
-		
 		this.valores = new HashMap<String, Object>(valores);
 		this.app = FacesContext.getCurrentInstance().getApplication();
-
 		this.tipoFormulario = TipoFormulario.LECTURA;
 		this.soloLectura = true;
-		
 		configurarFormatoFecha(formatoFecha);
 	}
 
@@ -144,25 +143,25 @@ public class FormularioDinamicoReserva {
 	public static void marcarCamposError(List<String> idComponentes, UIComponent formulario) {
 		for (String id : idComponentes) {
 			UIComponent comp = formulario.findComponent(id);
-			if (comp instanceof HtmlInputText) {
-				HtmlInputText input = (HtmlInputText) comp;
-				input.setStyleClass(STYLE_CLASS_CAMPO_CON_ERROR);
-			}
-			if (comp instanceof HtmlSelectOneMenu) {
-				HtmlSelectOneMenu input = (HtmlSelectOneMenu) comp;
-				input.setStyleClass(STYLE_CLASS_CAMPO_CON_ERROR);
-			}
-			
-			//Intentar marcar tambien al contenedor
-			comp =  comp.getParent();
 			if(comp != null) {
-				comp = comp.getParent();
+  			if (comp instanceof HtmlInputText) {
+  				HtmlInputText input = (HtmlInputText) comp;
+  				input.setStyleClass(STYLE_CLASS_CAMPO_CON_ERROR);
+  			}
+  			if (comp instanceof HtmlSelectOneMenu) {
+  				HtmlSelectOneMenu input = (HtmlSelectOneMenu) comp;
+  				input.setStyleClass(STYLE_CLASS_CAMPO_CON_ERROR);
+  			}
+  			//Intentar marcar tambien al contenedor
+  			comp =  comp.getParent();
+  			if(comp != null) {
+  				comp = comp.getParent();
+  			}
+  			if(comp instanceof HtmlPanelGroup) {
+  				HtmlPanelGroup panel = (HtmlPanelGroup)comp;
+  				panel.setStyleClass(panel.getStyleClass()+" "+STYLE_CLASS_DATO_CON_ERROR);
+  			}
 			}
-			if(comp instanceof HtmlPanelGroup) {
-				HtmlPanelGroup panel = (HtmlPanelGroup)comp;
-				panel.setStyleClass(panel.getStyleClass()+" "+STYLE_CLASS_DATO_CON_ERROR);
-			}
-			
 		}
 	}
 
@@ -192,91 +191,70 @@ public class FormularioDinamicoReserva {
   				}
   			}
 			}
-			
 		}
 	}
 	
 	public void armarFormulario(List<AgrupacionDato> agrupaciones, HashMap<Integer,HashMap<Integer,ServicioPorRecurso>> serviciosAutocompletar) {
-
 		if (!(tipoFormulario == TipoFormulario.LECTURA)) {
 			//Seccion de mensajes de error
 			mensajesGrilla = (HtmlPanelGroup) app.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 			//Mensaje generico
 			mensajesGrilla.getChildren().add(armarMensajeValidacion(nombreFormulario));
 		}
-		
 		formularioGrilla = (HtmlPanelGroup) app.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		formularioGrilla.setId(nombreFormulario);
 		formularioGrilla.setLayout("block");
-		
 		for (AgrupacionDato agrupacionDato : agrupaciones) {
 			UIComponent agrupacion = armarAgrupacion(agrupacionDato, serviciosAutocompletar);
 			formularioGrilla.getChildren().add(agrupacion);
 		}
-		
 	}
 	
 	private UIComponent armarAgrupacion(AgrupacionDato agrupacionDato, HashMap<Integer,HashMap<Integer,ServicioPorRecurso>> serviciosAutocompletar) {
 		Fieldset panel = new Fieldset();
-		panel.setLegend(agrupacionDato.getNombre());
-		
+		panel.setLegend(agrupacionDato.getEtiqueta());
 		HtmlPanelGroup grid = (HtmlPanelGroup) app.createComponent(HtmlPanelGroup.COMPONENT_TYPE);
 		grid.setLayout("block");
 		grid.setStyleClass(STYLE_CLASS_FORMULARIO);
 		panel.getChildren().add(grid);
-		
 		//Los datos deberían estar ordenados por fila,columna.
 		//y la numeracion comienza en (1,1)
 		List<DatoASolicitar> datos = new ArrayList<DatoASolicitar>(agrupacionDato.getDatosASolicitar());
-
 		for (DatoASolicitar datoASolicitar : datos) {
-
 			UIComponent campo [] = armarCampo(datoASolicitar);
-			
 			HtmlPanelGroup inputs = new HtmlPanelGroup();
 			inputs.setLayout("block");
 			inputs.setStyleClass("form-group");
-			
 			grid.getChildren().add(inputs);   //agrupo las entradas para el caso de campos relacionados ej: dir, apto, bloque.
 			inputs.getChildren().add(campo[0]); //Etiqueta
-			
 			HtmlPanelGroup inputValor = new HtmlPanelGroup();
 			inputValor.setLayout("block");
 			inputValor.setStyleClass("col-sm-9");
 			inputValor.getChildren().add(campo[1]);
-			
 			inputs.getChildren().add(inputValor); //Input
-			
 			if (tipoFormulario == TipoFormulario.EDICION){
-				
 				inputValor.getChildren().add(campo[2]); //Ayuda
-				
 				if (serviciosAutocompletar != null){
-					
 					HashMap<Integer,ServicioPorRecurso> servicios = serviciosAutocompletar.get(datoASolicitar.getId());
 					if (servicios != null){
 						String claves = "";
 						for (Integer keyServicio : servicios.keySet()){
 							claves += servicios.get(keyServicio).getId().toString() + "|";
 						}
-						
 						UIParameter parameter = new UIParameter();
 						parameter.setName("paramIdsServicio");
 						parameter.setValue(claves);
-						
 						CommandButton btn = new CommandButton();
 						MethodExpression me = app.getExpressionFactory().createMethodExpression(FacesContext.getCurrentInstance().getELContext(),"#{paso3MBean.autocompletarCampo}",String.class, new Class<?>[0]);
 						btn.setActionExpression(me);
 						btn.setValue("completar");
 						btn.setStyleClass("arriba");
 						btn.getChildren().add(parameter);
-						
 						inputValor.getChildren().add(btn); //Boton
 					}
 				}
 			}
 		}
-		
 		return panel;
 	}
 	
@@ -303,9 +281,7 @@ public class FormularioDinamicoReserva {
 		if (dato.getRequerido() && ! soloLectura && ! (tipoFormulario == TipoFormulario.CONSULTA)) {
 			etiqueta.setStyleClass(etiqueta.getStyleClass()+" "+STYLE_CLASS_REQUERIDO);
 		}
-			
 		UIComponent input;
-		
 		switch (dato.getTipo()) {
 		case STRING:
 			input = armarCampoString(dato);
@@ -323,37 +299,26 @@ public class FormularioDinamicoReserva {
 			input = armarCampoString(dato);
 			break;
 		}
-		
 		input.setId(dato.getNombre());
-		
 		//Para el caso de las fechas, el componente arma un span que tiene el id dado, y deja el input dentro con el mismo id seguido de "_input"
 		if(soloLectura || !dato.getTipo().equals(Tipo.DATE)) {
 			etiqueta.setFor(input.getId());
 		}else {
 			etiqueta.setFor(input.getId()+"_input");
 		}
-
 		HtmlOutputFormat imgAyuda = new HtmlOutputFormat();
 		imgAyuda.setValue("<img alt='información' src='"+SAEProfile.getInstance().getProperties().getProperty(SAEProfile.PROFILE_UI_RESOURCE_BASE_URL_KEY)+"/recursos/images/info.png' TITLE='" + dato.getTextoAyuda() + "'/>");
 		imgAyuda.setEscape(false);
-		
 		Message mensaje = armarMensajeValidacion(dato.getNombre());
-		
 		UIComponent campo [] = new UIComponent[4];
 		campo[0] = etiqueta;
 		campo[1] = input;
-		
 		if (dato.getTextoAyuda() != null && ! dato.getTextoAyuda().equals("")) {
 			campo[2] = imgAyuda;
 			campo[3] = mensaje;
 		}else {
 			campo[2] = mensaje;
 		}
-		
-//		if (!soloLectura) {
-//			mensajesGrilla.getChildren().add(armarMensajeValidacion(dato.getNombre()));
-//		}
-			
 		return campo;
 	}
 	
@@ -361,7 +326,6 @@ public class FormularioDinamicoReserva {
 	 * Un campo de tipo string consiste en un campo editable.
 	 */
 	private UIComponent armarCampoString (DatoASolicitar dato) {
-		
 		HtmlInputText input = (HtmlInputText) app.createComponent(HtmlInputText.COMPONENT_TYPE);
 		input.setMaxlength(dato.getLargo());
 		input.setSize(dato.getLargo());
@@ -375,6 +339,13 @@ public class FormularioDinamicoReserva {
 			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), String.class);
 			input.setValueExpression("value", ve);
+	    //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+	    if(dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+	      if(this.valores!=null && this.valores.get(dato.getNombre())!=null) {
+	        input.setReadonly(true);
+	        input.setDisabled(true);
+	      }
+	    }
 		}
 		return input;
 	}
@@ -383,17 +354,14 @@ public class FormularioDinamicoReserva {
 	 * Un campo de tipo date consiste en un calendario
 	 */
 	private UIComponent armarCampoDate (DatoASolicitar dato) {
-
 		UIComponent campo = null;
-		
 		if (soloLectura) {
 			HtmlInputText input = (HtmlInputText) app.createComponent(HtmlInputText.COMPONENT_TYPE);
       String sFecha="";           
       try {
-        SimpleDateFormat parserFecha = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", getLocale());
         String fecha = (String)this.valores.get(dato.getNombre());
         if(fecha != null) {
-        	sFecha = formateadorFecha.format(parserFecha.parse(fecha));
+          sFecha = formateadorFecha.format(Utiles.stringToDate(fecha));
         }
       } catch (ParseException ex) {
         sFecha = (String)this.valores.get(dato.getNombre());
@@ -411,32 +379,35 @@ public class FormularioDinamicoReserva {
 			calendario.setLang(getLocale().getLanguage());
 			calendario.setNavigator(true);
 			calendario.setYearRange("1900:c+10");
-			
+			calendario.getAttributes().put("pattern", formatoFecha);
+      calendario.getAttributes().put("onError", "zero");
+			calendario.setConverter(new DateConverter());
 			//Le configuro el managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), Date.class);
 			calendario.setValueExpression("value", ve);
-			
 	    calendario.setPattern(formatoFecha);
-
+      //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+      if(dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+        if(this.valores!=null && this.valores.get(dato.getNombre())!=null) {
+          calendario.setReadonly(true);
+          calendario.setDisabled(true);
+        }
+      }
 			campo = calendario;
 		}
-		
 		return campo;
 	}
-	
 	
 	/**
 	 * Un campo de tipo List consiste de una etiqueta y una lista de valores desplegable
 	 */
 	private UIComponent armarCampoList (DatoASolicitar dato) {
 		UIComponent campo = null;
-		
-		if (soloLectura) {
+		if(soloLectura) {
 			HtmlInputText input = (HtmlInputText) app.createComponent(HtmlInputText.COMPONENT_TYPE);
 			input.setStyleClass(STYLE_CLASS_CAMPO);
 			input.setReadonly(true);
 			input.setDisabled(true);
-			
 			//Busco la etiqueta del valor posible:
 			Iterator<ValorPosible> iter = dato.getValoresPosibles().iterator();
 			String etiqueta = null;
@@ -446,15 +417,14 @@ public class FormularioDinamicoReserva {
 					etiqueta = vp.getEtiqueta();
 				}
 			}
-			if (etiqueta != null) {
+			if(etiqueta != null) {
 				input.setValue(etiqueta);
-			} else {
+			}else {
 				//Por precaución, aunque siempre debería poder obtener la etiqueta del valor.
 				input.setValue(this.valores.get(dato.getNombre()));
 			}
 			campo = input;
-		}
-		else {
+		}else {
 			HtmlSelectOneMenu lista = (HtmlSelectOneMenu) app.createComponent(HtmlSelectOneMenu.COMPONENT_TYPE);
 			lista.setStyleClass(STYLE_CLASS_CAMPO + " " + STYLE_CLASS_CAMPO_SIN_ERROR);
 	
@@ -462,25 +432,26 @@ public class FormularioDinamicoReserva {
 			for (UISelectItem item: items) {
 				lista.getChildren().add(item);
 			}
-
 			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), String.class);
 			lista.setValueExpression("value", ve);
-			
+      //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+      if(dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+        if(this.valores!=null && this.valores.get(dato.getNombre())!=null) {
+          lista.setReadonly(true);
+          lista.setDisabled(true);
+        }
+      }
 			campo = lista;
 		}
-			
 		return campo;
 	}
 	
-
 	/**
 	 * Una lista de SelectItem done cada elemento tiene la etiqueta y el valor que se mostrara en la lista desplegable.
 	 */
 	private List<UISelectItem> armarListaDeValores (DatoASolicitar dato) {
-		
 		List<UISelectItem> items = new ArrayList<UISelectItem>();
-		
 		// Agrego el resto de las opciones
 		for (ValorPosible valor: dato.getValoresPosibles()) {
 			UISelectItem item = new UISelectItem();
@@ -488,7 +459,6 @@ public class FormularioDinamicoReserva {
 			item.setItemValue(valor.getValor());
 			items.add(item);
 		}
-
 		return items;
 	}
 	
@@ -496,38 +466,39 @@ public class FormularioDinamicoReserva {
 	 * Un campo de tipo boolean consiste en un campo editable.
 	 */
 	private UIComponent armarCampoBoolean (DatoASolicitar dato) {
-
 		UIComponent campo = null;
-		
-		if (soloLectura) {
+		if(soloLectura) {
 			HtmlSelectBooleanCheckbox input = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);
-			input.setValue(Boolean.valueOf(this.valores.get(dato.getNombre()).toString()));
+      if(this.valores.get(dato.getNombre())!=null) {
+        input.setValue(Boolean.valueOf(this.valores.get(dato.getNombre()).toString()));
+      }else {
+        input.setValue(null);
+      }
 			input.setDisabled(true);
 			campo = input;
-		}
-		else {
-			HtmlSelectBooleanCheckbox input = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);			
-
+		}else {
+			HtmlSelectBooleanCheckbox checkbox = (HtmlSelectBooleanCheckbox) app.createComponent(HtmlSelectBooleanCheckbox.COMPONENT_TYPE);			
 			//Le configuro le managed bean donde debe almacenar el valor que ingrese el usuario.
 			ValueExpression ve = armarExpresion(dato.getNombre(), Boolean.class);
-			input.setValueExpression("value", ve);
-			
-			campo = input;
+			checkbox.setValueExpression("value", ve);
+      //Si el campo es de solo lectura y hay un valor para él, entonces se hace readonly
+      if(this.valores!=null && dato.getSoloLectura()!=null && dato.getSoloLectura().booleanValue()) {
+        if(this.valores.get(dato.getNombre())!=null) {
+          checkbox.setReadonly(true);
+          checkbox.setDisabled(true);
+        }
+      }
+			campo = checkbox;
 		}
-		
 		return campo;
 	}
-
 	
 	private ValueExpression armarExpresion(String nombre, Class<?> clazz) { 
-	
-		//Armo la EL que liga el valor del campo editable a un managed bean generico (Map) que recolectará los datos del formulario
+		//Armar la EL que liga el valor del campo editable a un managed bean generico (Map) que recolectará los datos del formulario
 		ELContext elContext = FacesContext.getCurrentInstance().getELContext();
 		ExpressionFactory expFactory = FacesContext.getCurrentInstance().getApplication().getExpressionFactory();
-		//TODO sacar el managed bean a atributo de la clase.
 		String el = "#{"+managedBean+"."+nombre+"}"; 
 		ValueExpression ve = expFactory.createValueExpression(elContext, el, clazz);
-
 		return ve;
 	}
 
@@ -538,23 +509,17 @@ public class FormularioDinamicoReserva {
 		return mensaje;
 	}
 	
-	
 	public static Map<String, DatoASolicitar> obtenerCampos(List<AgrupacionDato> agrupaciones) {
-		
 		Map<String, DatoASolicitar> camposXnombre = new HashMap<String, DatoASolicitar>();
-		
 		for (AgrupacionDato agrupacion : agrupaciones) {
 			for (DatoASolicitar dato : agrupacion.getDatosASolicitar()) {
 				camposXnombre.put(dato.getNombre(), dato);
 			}
 		}
-		
 		return camposXnombre;
 	}
 	
-	
 	private Locale getLocale() {
-		
 		Locale locale = null;
 		FacesContext context = FacesContext.getCurrentInstance();
 		try {
@@ -571,14 +536,10 @@ public class FormularioDinamicoReserva {
 				locale = null;
 			}
 		}
-		
 		if(locale == null) {
 			locale = Locale.getDefault();
 		}
 		return locale;
-		
-			
 	}
-	
 
 }

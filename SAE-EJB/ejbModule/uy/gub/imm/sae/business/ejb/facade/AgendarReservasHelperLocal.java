@@ -34,6 +34,7 @@ import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
+import uy.gub.imm.sae.entity.TokenReserva;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
@@ -50,12 +51,16 @@ public interface AgendarReservasHelperLocal {
 	public List<Object[]> obtenerCuposAsignados(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
 	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
 	public List<Integer> obtenerCuposXDia(VentanaDeTiempo ventana, List<Object[]> cuposAsignados, List<Object[]> cuposConsumidos);
-	public Reserva crearReservaPendiente(Disponibilidad d);
-	public boolean chequeoCupoNegativo (Disponibilidad d);
+	public Reserva crearReservaPendiente(Disponibilidad d, TokenReserva token, String ipOrigen);
+	public boolean chequeoCupoDisponible(Disponibilidad d, boolean reservaTomada);
 	public List<DatoASolicitar> obtenerDatosASolicitar(Recurso r);
 	public List<ValidacionPorRecurso> obtenerValidacionesPorRecurso(Recurso r);
 	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws ValidacionException;
 	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, ReservaDTO reservaDTO) throws ApplicationException, BusinessException, ErrorValidacionException, ErrorValidacionCommitException;
-	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Reserva reserva, List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws BusinessException;
+	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Disponibilidad disponibilidad, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, String tramite);
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, ErrorAutocompletarException, WarningAutocompletarException;
+	//Cuenta las reservas existentes para la IP dada, en el período considerado por el recurso (hoy +- intervalo)
+	//Si se pasa un id de reserva la excluye de la cuenta
+	public int cantidadReservasPorIp(Recurso recurso, String ipOrigen, Integer reservaId);
+	
 }

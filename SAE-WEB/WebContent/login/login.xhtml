@@ -54,8 +54,12 @@
 			<h1>
 				<h:outputText value="#{sessionMBean.textos['ingrese_al_sistema']}" />
 			</h1>
-			<p:messages id="messages" showDetail="true" showSummary="false" autoUpdate="true"
-					styleClass="msg errorGrande" errorTitle="#{sessionMBean.textos['mensajes_login_error']}" />
+      <p:messages id="messages" showDetail="true" showSummary="false" autoUpdate="true" styleClass="msg errorGrande"
+        infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+        singleInfoTitle="#{sessionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
+        singleWarnTitle="#{sessionMBean.textos['mensajes_login_error']}" multiWarnTitle="#{sessionMBean.textos['mensajes_login_error']}" 
+        singleErrorTitle="#{sessionMBean.textos['mensajes_login_error']}" multiErrorTitle="#{sessionMBean.textos['mensajes_login_error']}"
+      />
 					
 			<p:outputPanel styleClass="form-required">
         <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
@@ -71,7 +75,7 @@
 						<h:outputLabel value="#{sessionMBean.textos['codigo_de_usuario']}"
 							for="username" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 						<div class="col-sm-9">
-							<h:inputText id="username" required="true" styleClass="form-control" />
+							<h:inputText id="username" required="true" styleClass="form-control" autocomplete="off" />
 						</div>
 					</div>
 					<div class="form-group">

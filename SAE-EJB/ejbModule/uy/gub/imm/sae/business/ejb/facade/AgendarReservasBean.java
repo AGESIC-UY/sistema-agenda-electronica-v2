@@ -21,24 +21,25 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 import javax.annotation.Resource;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJB;
 import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
-import javax.mail.MessagingException;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -52,15 +53,14 @@ import uy.gub.agesic.novedades.Acciones;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosNovedadesBean;
 import uy.gub.imm.sae.business.ejb.servicios.ServiciosTrazabilidadBean;
-import uy.gub.imm.sae.business.utilidades.MailUtiles;
 import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Evento;
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
+import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 import uy.gub.imm.sae.entity.Agenda;
-import uy.gub.imm.sae.entity.Comunicacion;
-import uy.gub.imm.sae.entity.Comunicacion.Tipo1;
-import uy.gub.imm.sae.entity.Comunicacion.Tipo2;
+import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Disponibilidad;
@@ -68,8 +68,8 @@ import uy.gub.imm.sae.entity.PreguntaCaptcha;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
-import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TextoTenant;
+import uy.gub.imm.sae.entity.TokenReserva;
 import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
 import uy.gub.imm.sae.entity.global.Empresa;
@@ -80,14 +80,13 @@ import uy.gub.imm.sae.exception.AutocompletarException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAccionException;
 import uy.gub.imm.sae.exception.RolException;
-import uy.gub.imm.sae.exception.UserCommitException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
+import uy.gub.imm.sae.exception.ValidacionIPException;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FCALL_CENTER","RA_AE_FATENCION", "RA_AE_ANONIMO", "RA_AE_LLAMADOR"})
-public class AgendarReservasBean implements AgendarReservasLocal, AgendarReservasRemote{
+public class AgendarReservasBean implements AgendarReservasLocal, AgendarReservasRemote {
 	
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
@@ -107,9 +106,18 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   @EJB
   private AccionesHelperLocal helperAccion;
 	
-	@Resource
+  @Resource
 	private SessionContext ctx;
 	
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
+  private Recursos recursosEJB;
+  
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
+  private UsuariosEmpresas empresasEJB;
+
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/ComunicacionesBean!uy.gub.imm.sae.business.ejb.facade.ComunicacionesRemote")
+  private Comunicaciones comunicacionesBean;
+  
 	static Logger logger = Logger.getLogger(AgendarReservasBean.class);
 	
 	/**
@@ -149,9 +157,10 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		}
 		Recurso recurso = null;
 		try {
-			recurso = (Recurso) entityManager.createQuery("select distinct d.recurso from Reserva r join r.disponibilidades d where r.id=:reservaId and r.estado ='R'")
-					.setParameter("reservaId", reservId)
-					.getSingleResult();
+			recurso = (Recurso) entityManager
+  	    .createQuery("select distinct d.recurso from Reserva r join r.disponibilidades d where r.id=:reservaId and r.estado ='R'")
+  			.setParameter("reservaId", reservId)
+  			.getSingleResult();
 			return recurso;
 		}catch(NonUniqueResultException nurEx) {
 			throw new ApplicationException("no_se_encuentra_el_recurso_especificado");
@@ -170,7 +179,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @throws ParametroIncorrectoException 
 	 */
 	public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException  {
-
 		if (a == null || id == null) {
 			throw new BusinessException("-1","Parametros nulos");
 		}
@@ -180,20 +188,15 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		}
 		Recurso recurso = null;
 		try {
-			recurso = (Recurso) entityManager.createQuery("from Recurso r where r.id = :id "+
-											   "and r.fechaBaja is null "+
-											   "and r.agenda = :a")
-								  .setParameter("id", id)
-								  .setParameter("a", a)
-								  .getSingleResult();
-			
-		} catch (NoResultException e) {
+			recurso = (Recurso) entityManager.createQuery("from Recurso r where r.id = :id and r.fechaBaja is null and r.agenda = :a")
+			  .setParameter("id", id)
+			  .setParameter("a", a)
+			  .getSingleResult();
+		}catch (NoResultException e) {
 			throw new BusinessException("-1", "No se encuentra el recurso de id "+id);
-		} catch (Exception e) {
+		}catch (Exception e) {
 			throw new ApplicationException(e);
 		}
-		
-		
 		return recurso;		
 	}
 	
@@ -209,27 +212,21 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException {
-
-		//TODO chequear permisos
-		
 		List<Agenda> agendas = null;
 		try {
 			agendas = (List<Agenda>) entityManager.createQuery("from Agenda a where a.fechaBaja is null order by a.nombre")
 					.getResultList();
-		} catch (Exception e) {
+		}catch (Exception e) {
 			throw new ApplicationException(e);
 		}
-		
 		List<Agenda> agendasValidas = new ArrayList<Agenda>();
 		for (Agenda agenda : agendas) {
 			if (consultarRecursos(agenda).size() != 0) {
 				agendasValidas.add(agenda);
 			}
 		}
-
 		return agendasValidas;
 	}
-
 
 	/**
 	 * Retorna una lista de recursos vivos (fechaBaja == null) ordenados por nombre
@@ -242,69 +239,114 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 */
 	@SuppressWarnings("unchecked")
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException {
-
 		if (a == null) {
 			throw new BusinessException("-1", "Parametro nulo");
 		}
-		
 		a = entityManager.find(Agenda.class, a.getId());
 		if (a == null) {
 			throw new BusinessException("-1", "No se encuentra la agenda indicada");
 		}
-		
-		//chequearPermiso(a);
-
 		List<Recurso> recursos = null;
 		Date ahora = new Date();
 		try {
 			recursos = (List<Recurso>)entityManager.createQuery(
-						"from Recurso r where " +
-						"r.agenda = :a and " +
-						"r.fechaBaja is null and  " +
-						"r.fechaInicio <= :ahora and " +
-						"(r.fechaFin is null or r.fechaFin >= :ahora)" +
-						"order by r.descripcion")
-						.setParameter("a", a)
-						.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-						.getResultList();
+				"from Recurso r where " +
+				"r.agenda = :a and " +
+				"r.fechaBaja is null and  " +
+				"r.fechaInicio <= :ahora and " +
+				"(r.fechaFin is null or r.fechaFin >= :ahora)" +
+				"order by r.descripcion")
+				.setParameter("a", a)
+				.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
+				.getResultList();
 		}catch (Exception e) {
 			throw new ApplicationException(e);
 		}
 		return recursos;
 	}
 
-	public Boolean agendaActiva(Agenda a) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws BusinessException, ApplicationException {
-		
+  public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
+    cancelarReserva(empresa, recurso, reserva, false);
+  }
+	
+  public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    //Obtener la reserva
+    Reserva reserva = (Reserva) entityManager.find(Reserva.class, idReserva);
+    if(reserva==null) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    if(!Estado.R.equals(reserva.getEstado())) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    //Obtener el recurso
+    Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+    //Cancelar la reserva
+    cancelarReserva(empresa, recurso, reserva, false);
+  }
+  
+	private void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva, boolean masiva) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-
 		if (reserva == null) {
-			throw new BusinessException("AE20085", "La reserva no puede ser nula");
+			throw new UserException("debe_especificar_la_reserva");
 		}
-
-		
 		Reserva r = entityManager.find(Reserva.class, reserva.getId());
-		
 		if (r == null) {
-			throw new BusinessException("AE10086", "No se encontro la reserva indicada");
+			throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
 		}
-		if (r.getEstado() != Estado.R) {
-			throw new BusinessException("AE10087", "Solo se pueden cancelar reservas en estado Reservada");
-		}
-		
-		Integer id = reserva.getDisponibilidades().get(0).getRecurso().getId();
-		if (recurso.getId().intValue() != id.intValue()) {
-			throw new BusinessException("AE10088", "El recurso asociado a la reserva no se corresponde con el recurso indicado");			
-		}
-		
-		//chequearPermiso(recurso.getAgenda());
-		
+		//Determinar el timezone de la reserva
+    TimeZone timezone = TimeZone.getDefault();
+    if(recurso.getAgenda().getTimezone()!=null && !recurso.getAgenda().getTimezone().isEmpty()) {
+      timezone = TimeZone.getTimeZone(recurso.getAgenda().getTimezone());
+    }else {
+      if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(empresa.getTimezone());
+      }
+    }
+		//Determinar si aún se está a tiempo de cancelar la reserva (no aplica si es masiva)
+		if(!masiva) {
+		  Calendar horaLimiteTimezone = new GregorianCalendar();
+      horaLimiteTimezone.setTime(reserva.getFechaHora());
+      horaLimiteTimezone.add(recurso.getCancelacionUnidad(), -1*recurso.getCancelacionTiempo());
+      Calendar horaActualTimezone = new GregorianCalendar();
+      horaActualTimezone.add(Calendar.MILLISECOND, timezone.getOffset(horaActualTimezone.getTime().getTime()));
+      if(!horaActualTimezone.before(horaLimiteTimezone)) {
+        throw new UserException("ha_expirado_el_plazo_de_cancelacion");
+      }
+		}	
 		ReservaDTO reservaDTO = new ReservaDTO();
 		reservaDTO.setEstado(r.getEstado().toString());
 		reservaDTO.setFecha(r.getDisponibilidades().get(0).getFecha());
@@ -315,10 +357,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		reservaDTO.setTramiteCodigo(r.getTramiteCodigo());
 		reservaDTO.setTramiteNombre(r.getTramiteNombre());
 		reservaDTO.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase()); //el usuario de sesion es el que esta cancelando la reserva anterior y ese dato lo enviamos hacia GAP
+		reservaDTO.setTcancela(masiva?TipoCancelacion.M.toString():TipoCancelacion.I.toString());
+		reservaDTO.setFcancela(new Date());
 		if (r.getLlamada() != null) {
 			reservaDTO.setPuestoLlamada(r.getLlamada().getPuesto());
 		}
-		
     //Ejecuto acciones asociadas al evento cancelar
     Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
     for (DatoReserva valor : reserva.getDatosReserva()) {
@@ -326,74 +369,111 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
     try{
       helperAccion.ejecutarAccionesPorEvento(valores, reservaDTO, recurso, Evento.C);
-    }catch (ErrorAccionException e){
-      throw new BusinessException(e.getCodigoError(), e.getMessage());
+    }catch (Exception ex){
+      throw new UserException(ex.getMessage());
     }
-		
-		//Cancelo la reserva, paso el estado a Cancelada.
-		r.setEstado(Estado.C);
+    r.setEstado(Estado.C);
 		r.setObservaciones(reserva.getObservaciones());
-		r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase()); //se guarda en SAE el usuario que cancela la reserva anterior 
-
+		r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+		r.setTcancela(masiva?TipoCancelacion.M:TipoCancelacion.I);
+		r.setFcancela(reservaDTO.getFcancela());
+    //Determinar la fecha de liberación según la cancelación sea inmediata o diferida
+    if(recurso.getCancelacionTipo()==null || FormaCancelacion.I.equals(recurso.getCancelacionTipo())) {
+      //Es inmediata, el cupo se libera al instante
+      r.setFechaLiberacion(r.getFcancela());
+    }else {
+      //Es diferida, se selecciona una fecha aleatoria
+      Date fechaHoraAtencion = r.getDisponibilidades().get(0).getHoraInicio();
+      
+      
+      //Determinar la fecha actual según el timezone de la reserva
+      Calendar fechaHoraActual = new GregorianCalendar();
+      fechaHoraActual.add(Calendar.MILLISECOND, timezone.getOffset(fechaHoraActual.getTime().getTime()));
+      
+      //Determinar la diferencia entre la fecha actual y la fecha de atención
+      long difMilisegundos = fechaHoraAtencion.getTime() - fechaHoraActual.getTime().getTime();
+      if(difMilisegundos<0) {
+        //No debería pasar
+        difMilisegundos = 0;
+      }
+      
+      //Elegir un desplazamiento aleatorio
+      long valorMinimo = Math.round(difMilisegundos * 0.1);
+      long valorMaximo = Math.round(difMilisegundos * 0.8);
+      long milisegundosAleatorios = ThreadLocalRandom.current().nextLong(valorMinimo, valorMaximo);
+      if(milisegundosAleatorios>Integer.MAX_VALUE) {
+        milisegundosAleatorios = Integer.MAX_VALUE;
+      }
+      //Calcular la fecha y hora de liberación como la hora actual más el desplazamiento
+      Calendar fechaHoraLiberacion = new GregorianCalendar();
+      fechaHoraLiberacion.add(Calendar.MILLISECOND, (int)milisegundosAleatorios);
+      r.setFechaLiberacion(fechaHoraLiberacion.getTime());
+    }
 		//Registrar la cancelacion en el sistema de trazas del PEU
 		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), r.getTramiteCodigo(), r.getId());
 		if(transaccionId != null) {
 			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.CANCELACION);
 		}
-		
 		//Publicar la novedad
 		novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
-		
 	}
 
 	/**
-	 * Consulta una reserva por numero y para un recurso.
-	 * Si se pasa el recurso, se valida que la reserva con <b>numero</b> corresponda al recurso indicado.
-	 * En caso contrario simplemente se busca la reserva por id y se la retorna (sin validar nada)
+	 * Libera el cupo de una reserva cancelada pero no liberada aún
 	 */
-	public Reserva consultarReservaPorNumero(Recurso r, Integer numero) throws BusinessException {
-		
-		Reserva reserva = entityManager.find(Reserva.class, numero);
-		if (reserva == null) {
-			throw new BusinessException("-1", "No se encuentra la reserva indicada");
-		}
-		
-		if(r!=null){
-			boolean esReservaDeRecurso = false;
-			
-			for (Iterator<Disponibilidad> iterator = reserva.getDisponibilidades().iterator(); iterator.hasNext() && !esReservaDeRecurso;) {
-				Disponibilidad disp = iterator.next();
-				
-				if(disp.getRecurso().getId()==r.getId()){
-					esReservaDeRecurso = true;
-				}
-			}
-			
-			if(esReservaDeRecurso){
-				throw new BusinessException("-1", "El numero de reserva no se corresponde con el recurso indicado");
-			}
-		}
-		
-		return reserva;
-	}
-
-	public List<Reserva> consultarReservasEnPeriodo(Recurso r, VentanaDeTiempo v) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
+  public void liberarReserva(Integer idEmpresa, Integer idReserva) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la reserva
+    Reserva reserva = (Reserva) entityManager.find(Reserva.class, idReserva);
+    if(reserva==null || !Estado.C.equals(reserva.getEstado())) {
+      throw new UserException("no_se_encuentra_la_reserva_o_no_esta_cancelada");
+    }
+    if(reserva.getFechaLiberacion()==null || reserva.getFechaLiberacion().before(new Date())) {
+      //Ya está liberada, no hay nada para hacer
+      return;
+    }
+    reserva.setFechaLiberacion(new Date());
+    entityManager.merge(reserva);
+  }
+	
+	
+  /**
+   * Consulta una reserva por numero y para un recurso.
+   * En caso contrario simplemente se busca la reserva por id y se la retorna (sin validar nada)
+   */
+  public Reserva consultarReservaPorId(Integer idReserva) throws UserException {
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    Reserva reserva = entityManager.find(Reserva.class, idReserva);
+    if (reserva==null) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    return reserva;
+  }
 
 	/**
-	 * Crea una nueva reserva en estado pendiente, controla que aun exista cupo.
-	 * 
-	 * Para controlar la existencia de cupo sin necesidad de utilizar bloqueo
-	 * persiste la reserva y luego chequea que el cupo real no sea negativo, si esto
-	 * sucede, elimina fisicamente la reserva y cancela la operacion.
+	 * Para controlar la existencia de cupo sin necesidad de utilizar bloqueo persiste la reserva y luego chequea que el cupo real no sea negativo, 
+	 * si esto sucede, elimina fisicamente la reserva y cancela la operacion.
 	 * @throws BusinessException 
 	 * @throws UserException 
 	 */
-	public Reserva marcarReserva(Disponibilidad disponibilidad) throws BusinessException, UserException {
-		
+	public Reserva marcarReserva(Disponibilidad disponibilidad, TokenReserva token, String ipOrigen) throws UserException {
 		if (disponibilidad == null) {
 			throw new UserException("debe_especificar_la_disponibilidad");
 		}
@@ -401,27 +481,92 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (disponibilidad == null) {
 			throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
 		}		
-		
 		//Se crea la reserva en una transaccion independiente
-		Reserva reserva = helper.crearReservaPendiente(disponibilidad);
+    Reserva reserva = helper.crearReservaPendiente(disponibilidad, token, ipOrigen);
 		//Chequeo que el cupo real no de negativo
 		//Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
 		//De lo contrario la reserva se ha marcado con exito
-		if (helper.chequeoCupoNegativo(disponibilidad)) {
+		if (helper.chequeoCupoDisponible(disponibilidad, true)) {
 			reserva = entityManager.find(Reserva.class, reserva.getId());
 			entityManager.remove(reserva);
 			entityManager.flush();
-			throw new UserCommitException("el_horario_acaba_de_quedar_sin_cupos");
+			throw new UserException("el_horario_acaba_de_quedar_sin_cupos");
 		}
 		return reserva;
 	}
-
+		
+  public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token, String ipOrigen) throws UserException {
+    if (disponibilidad == null) {
+      throw new UserException("debe_especificar_la_disponibilidad");
+    }
+    disponibilidad = entityManager.find(Disponibilidad.class, disponibilidad.getId());
+    if (disponibilidad == null) {
+      throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
+    }
+    
+    Recurso recurso = disponibilidad.getRecurso();
+    List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
+    Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
+    for (DatoReserva valor : reserva.getDatosReserva()) {
+      valores.put(valor.getDatoASolicitar().getNombre(), valor);
+    }
+    //Se crea la reserva nueva en una transaccion independiente
+    Reserva reservaNueva = helper.crearReservaPendiente(disponibilidad, token, ipOrigen);
+    List<Reserva> reservasPrevias = helper.validarDatosReservaPorClave(recurso, disponibilidad, campos, valores, reserva.getTramiteCodigo());
+    //Si hay reservas repetidas y no son la misma que la pasada por parámetro se lanza una excepcion.
+    if (!reservasPrevias.isEmpty()) {
+      for(Reserva reservaPrevia : reservasPrevias) {
+        if(!reservaPrevia.getId().equals(reserva.getId())) {
+          //Son dos reservas que coinciden en los datos obligatorios pero no son la misma
+          List<String> nombreCamposClave = new ArrayList<String>();
+          for (DatoASolicitar campo : campos) {
+            if (campo.getEsClave() ) {
+              nombreCamposClave.add(campo.getNombre());
+            }
+          }
+          reservaNueva = entityManager.find(Reserva.class, reservaNueva.getId()); 
+          entityManager.remove(reservaNueva);
+          entityManager.flush();
+          throw new ValidacionClaveUnicaException("no_es_posible_confirmar_su_reserva", nombreCamposClave);
+        }
+      }
+    }
+    //Validaciones por IP (si el recurso lo exige y la reserva incluye la IP; no incluye la IP si es desde el backend o autogestión)
+    if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true && ipOrigen!=null) {
+      //Determinar si la ip es una de las excluidas de la validación
+      boolean validar = true;
+      if(recurso.getIpsSinValidacion()!=null) {
+        String ips[] = recurso.getIpsSinValidacion().split(";");
+        for(String ip : ips) {
+          if(ip.trim().equals(reserva.getIpOrigen())) {
+            validar = false;
+            break;
+          }
+        }
+      }
+      if(validar) {
+        int cantidadReservasIP = helper.cantidadReservasPorIp(recurso, ipOrigen, reserva.getId());
+        if(cantidadReservasIP >= recurso.getCantidadPorIP()) {
+          throw new ValidacionIPException("limite_de_reservas_para_la_direccion_ip_alcanzado");
+        }
+      }
+    }
+    //Chequear que el cupo real no de negativo
+    //Si el cupo real da negativo, se elimina la reserva pendiente y cancela la operación
+    //De lo contrario la reserva se ha marcado con éxito
+    if (helper.chequeoCupoDisponible(disponibilidad, true)) {
+      reservaNueva = entityManager.find(Reserva.class, reservaNueva.getId());
+      entityManager.remove(reservaNueva);
+      entityManager.flush();
+      throw new UserException("el_horario_acaba_de_quedar_sin_cupos");
+    }
+    return reservaNueva;
+  }
 	
 	/**
 	 * Elimina fisicamente una reserva marcada como pendiente.
 	 */
 	public void desmarcarReserva(Reserva r) throws BusinessException {
-
 		if (r == null) {
 			throw new BusinessException("-1", "Parametro nulo");
 		}
@@ -429,25 +574,18 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (r == null) {
 			throw new BusinessException("-1", "No se encuentra la reserva indicada");
 		}		
-		
 		if (r.getEstado() != Estado.P) {
 			throw new BusinessException("-1", "Solo se puede desmarcar reservas en estado pendiente");
 		}
 		entityManager.remove(r);
 	}
 	
-	
-	public void validarDatosReserva(Empresa empresa, Reserva reserva) 
-		throws BusinessException, ValidacionException, ApplicationException {
-		
+	public void validarDatosReserva(Empresa empresa, Reserva reserva) throws BusinessException, ValidacionException, ApplicationException {
 		if (reserva == null || reserva.getDatosReserva()==null) {
       throw new BusinessException("debe_especificar_la_reserva");
 		}
-		
 		Set<DatoReserva> datosNuevos = reserva.getDatosReserva();
-		
 		reserva = entityManager.find(Reserva.class, reserva.getId());
-		
 		if (reserva == null) {
 			throw new BusinessException("no_se_encuentra_la_reserva_especificada");
 		}
@@ -457,37 +595,49 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (reserva.getEstado() != Estado.P) {
 			throw new BusinessException("no_es_posible_confirmar_su_reserva");
 		}
-		
 		//Armo las estructuras de Map necesarias para poder ejecutar las validaciones sobre los datos de la reserva
-		Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+		Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
+		Recurso recurso = disponibilidad.getRecurso();
 		List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
-		
 		Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
 		for (DatoReserva valor : datosNuevos) {
 			valores.put(valor.getDatoASolicitar().getNombre(), valor);
 		}
-		
 		//Validacion basica: campos obligatorios y formato
 		helper.validarDatosReservaBasico(campos, valores);
-
     //Validacion por campos clave: no puede haber otra reserva con los mismos datos
-    List<Reserva> reservasPrevias = helper.validarDatosReservaPorClave(recurso, reserva, campos, valores);
-    //Si Hay reservas repetidas lanzo una excepcion.
+    List<Reserva> reservasPrevias = helper.validarDatosReservaPorClave(recurso, disponibilidad, campos, valores, reserva.getTramiteCodigo());
     if (!reservasPrevias.isEmpty()) {
-      //Se carga lista de camposClave
       List<String> nombreCamposClave = new ArrayList<String>();
       for (DatoASolicitar campo : campos) {
         if (campo.getEsClave() ) {
           nombreCamposClave.add(campo.getNombre());
         }
       }
-      
       throw new ValidacionClaveUnicaException("no_es_posible_confirmar_su_reserva", nombreCamposClave);     
     }
-		
+    //Validaciones por IP (si el recurso lo exige y la reserva incluye la IP; no incluye la IP si es desde el backend o autogestión)
+    if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true && reserva.getIpOrigen()!=null) {
+      //Determinar si la ip es una de las excluidas de la validación
+      boolean validar = true;
+      if(recurso.getIpsSinValidacion()!=null) {
+        String ips[] = recurso.getIpsSinValidacion().split(";");
+        for(String ip : ips) {
+          if(ip.trim().equals(reserva.getIpOrigen())) {
+            validar = false;
+            break;
+          }
+        }
+      }
+      if(validar) {
+        int cantidadReservasIP = helper.cantidadReservasPorIp(recurso, reserva.getIpOrigen(), reserva.getId());
+        if(cantidadReservasIP >= recurso.getCantidadPorIP()) {
+          throw new ValidacionIPException("limite_de_reservas_para_la_direccion_ip_alcanzado");
+        }
+      }
+    }
 		//Validaciones extendidas: definidas por el usuario
 		List<ValidacionPorRecurso> validaciones = helper.obtenerValidacionesPorRecurso(recurso);
-
 		ReservaDTO reservaDTO = new ReservaDTO();
 		reservaDTO.setEstado(reserva.getEstado().toString());
 		reservaDTO.setFecha(reserva.getDisponibilidades().get(0).getFecha());
@@ -507,15 +657,16 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		if (reserva.getLlamada() != null) {
 			reservaDTO.setPuestoLlamada(reserva.getLlamada().getPuesto());
 		}
-
 		//Ejecucion de los validadores personalizados.
 		helper.validarDatosReservaExtendido(validaciones, campos, valores, reservaDTO);
 	}
 
-	
 	/**
 	 * Confirma la reserva.
+	 * Solo aplica si la reserva existe y está en el estado P (Pendiente).
 	 * Si la reserva debe tener datos, estos son exigidos y validados en este metodo, incluyendo la verificacion de clave unica
+	 * Si se trata de una reserva individual (el token es nulo) queda en estado Reservada (confirmada); si se trata de una reserva 
+	 *   perteneciente a un bloque de reservas múltiples permanece en estado pendiente
 	 * @throws ApplicationException 
 	 * @throws BusinessException
 	 * @return Reserva: Devuelve la reserva pues se le ha asignado un numero unico de reserva dentro de la hora a la que pertenece. 
@@ -524,40 +675,56 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 */
 	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
 		throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
-		
 		if (reserva == null || reserva.getDatosReserva()==null) {
       throw new BusinessException("debe_especificar_la_reserva");
 		}
-		
 		//Esto se lee antes de recuperar la reserva de la base porque puede haber cambiado
     Set<DatoReserva> datosNuevos = reserva.getDatosReserva();
     String tramiteCodigo = reserva.getTramiteCodigo();
     String tramiteNombre = reserva.getTramiteNombre();
-    
+    //Si no se cargó el nombre se busca ahora
+    if(tramiteNombre == null && tramiteCodigo!=null) {
+      TramiteAgenda tramite = consultarTramitePorCodigo(reserva.getDisponibilidades().get(0).getRecurso().getAgenda(), tramiteCodigo);
+      if(tramite != null) {
+        tramiteNombre = tramite.getTramiteNombre();
+      }
+    }
+    //Volver a cargar la reserva para evitar conflicto de versiones
 		reserva = entityManager.find(Reserva.class, reserva.getId());
-		
 		if (reserva == null) {
 			throw new UserException("no_se_encuentra_la_reserva_especificada");
-		}
-		if (reserva.getEstado() == Estado.U) {
-			throw new UserException("no_es_posible_confirmar_su_reserva");
 		}
 		if (reserva.getEstado() != Estado.P) {
 			throw new UserException("no_es_posible_confirmar_su_reserva");
 		}
-
 		//Pisar estos datos con lo que vino de la interfaz
 		for(DatoReserva dato : datosNuevos) {
 		  reserva.getDatosReserva().add(dato);
 		}
-		reserva.setTramiteCodigo(tramiteCodigo);
-		reserva.setTramiteNombre(tramiteNombre);
-		
+    reserva.setTramiteCodigo(tramiteCodigo);
+    reserva.setTramiteNombre(tramiteNombre);
+		//Ajustar el número de documento si es una cédula (dejar solo dígitos)
+		String tipoDocumento = null;
+		String numeroDocumento = null;
+		for(DatoReserva datoReserva : reserva.getDatosReserva()) {
+		  if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+		    numeroDocumento = datoReserva.getValor();
+		  }
+      if(DatoASolicitar.TIPO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+        tipoDocumento = datoReserva.getValor();
+      }
+		}
+		if("CI".equalsIgnoreCase(tipoDocumento) && numeroDocumento!=null) {
+		  numeroDocumento = numeroDocumento.replaceAll("[.-]", "");
+		  for(DatoReserva datoReserva : reserva.getDatosReserva()) {
+	      if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+	        datoReserva.setValor(numeroDocumento);
+	      }
+		  }
+		}
 		//Validar los datos de la reserva: campos obligatorios, campos clave duplicados, validaciones extendidas 
     validarDatosReserva(empresa, reserva);
-
     //Pasó las validaciones
-    
 		Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
 		List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
 		Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
@@ -568,7 +735,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		for (DatoReserva valor : datosNuevos) {
 			valores.put(valor.getDatoASolicitar().getNombre(), valor);
 		}
-		
 		for (DatoReserva dato: valores.values()) {
 			DatoASolicitar campo = camposMap.get(dato.getDatoASolicitar().getNombre());
 			DatoReserva datoNuevo = new DatoReserva();
@@ -578,8 +744,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			entityManager.persist(datoNuevo);
 			reserva.getDatosReserva().add(datoNuevo);
 		}
-		
-		//Confirmo la reserva, paso el estado a Reservada y le asigno el numero de reserva dentro de la disponibilidad.
+		//Confirmo la reserva, paso el estado a Reservada (si no es múltiple) y le asigno el numero de reserva dentro de la disponibilidad.
 		//Con mutua exclusion en el acceso al numerador de la disponibilidad
 		Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
 		try {
@@ -588,7 +753,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		} catch(OptimisticLockException olEx){
 			throw new AccesoMultipleException("error_de_acceso_concurrente");
 		}
-		
 		String origen;
     if (ctx.isCallerInRole("RA_AE_FCALL_CENTER")){
       origen = "C"; //Call Center
@@ -597,8 +761,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }else{
       origen = "I"; //Otro
     }
-		
-    //Ejecuto acciones asociadas al evento reservar
+    //Ejecutar las acciones asociadas al evento reservar
     try{
       ReservaDTO reservaDTO = new ReservaDTO();
       reservaDTO.setEstado(reserva.getEstado().toString());
@@ -608,6 +771,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       reservaDTO.setOrigen(origen);
       reservaDTO.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
       reservaDTO.setNumero(reserva.getDisponibilidades().get(0).getNumerador() + 1);
+      reservaDTO.setTramiteCodigo(reserva.getTramiteCodigo());
+      reservaDTO.setTramiteNombre(reserva.getTramiteNombre());
       if (reserva.getLlamada() != null) {
         reservaDTO.setPuestoLlamada(reserva.getLlamada().getPuesto());
       }
@@ -615,118 +780,114 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }catch (ErrorAccionException eaEx){
       throw new BusinessException(eaEx.getCodigoError(), eaEx.getMensajes().toString());
     }
-		
-		reserva.setEstado(Estado.R);
+    if(reserva.getToken() == null) {
+      reserva.setEstado(Estado.R);
+    }
+		reserva.setSerie(recurso.getSerie());
 		reserva.setNumero(disponibilidad.getNumerador());
 		reserva.setOrigen(origen);
 		reserva.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
-		
-		//Asigno un codigo de seguridad
+		//Asignar un codigo de seguridad
 		String codigoSeguridad = ""+(new Date()).getTime();
 		if(codigoSeguridad.length()>5) {
 			codigoSeguridad = codigoSeguridad.substring(codigoSeguridad.length()-5);
 		}
 		reserva.setCodigoSeguridad(codigoSeguridad);
-		
-		//Registro en el sistema de trazas
-		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
-    
-		if(empresa.getOid() != null && transaccionId != null) {
-
-			//Registrar el cabezal en el sistema de trazabilidad del PEU
-			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, reserva.getTramiteCodigo(), 
-					inicioAsistido, transaccionPadreId, pasoPadre);
-			if(trazaGuid != null) {
-				reserva.setTrazabilidadGuid(trazaGuid);
-			}else {
-				reserva.setTrazabilidadGuid("---");
-			}
-
-			//Registrar la primera linea en el sistema de trazabilidad del PEU
-			//ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
-			//en la base de datos para futuros intentos
-			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
-			
-			//Publicar la novedad
-			novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
+		//Si no es parte de una reserva múltiple se registra en el sistema de trazabilidad y en el de novedades
+		if(reserva.getToken() == null) {
+  		//Registrar en el sistema de trazas
+  		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
+  		if(empresa.getOid() != null && transaccionId != null) {
+  			//Registrar el cabezal en el sistema de trazabilidad del PEU
+  			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, reserva.getTramiteCodigo(), inicioAsistido, transaccionPadreId, pasoPadre);
+  			if(trazaGuid != null) {
+  				reserva.setTrazabilidadGuid(trazaGuid);
+  			}else {
+  				reserva.setTrazabilidadGuid("---");
+  			}
+  			//Registrar la primera linea en el sistema de trazabilidad del PEU
+  			//ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
+  			//en la base de datos para futuros intentos
+  			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
+  			//Publicar la novedad
+  			novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
+  		}
 		}
-		
 		return reserva;
 	}
 
 	@SuppressWarnings("unchecked")
-	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws BusinessException {
-		
-		
-		if (r == null || v == null) {
-			throw new BusinessException("-1", "Parametro nulo");
+	public List<Disponibilidad> obtenerDisponibilidades(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws UserException {
+		if (recurso == null) {
+			throw new UserException("debe_especificar_el_recurso");
 		}
-		
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
-		}		
+    if (ventana == null) {
+      throw new UserException("debe_especificar_la ventana");
+    }
+		recurso = entityManager.find(Recurso.class, recurso.getId());
+		if (recurso == null) {
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
+		}
+		//Ajustar la hora segun el timezone
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTime().getTime()));
 		Date ahora = cal.getTime();
-		
-		if (v.getFechaInicial().before(ahora)) {
-			v.setFechaInicial(ahora);
+		if (ventana.getFechaInicial().before(ahora)) {
+			ventana.setFechaInicial(ahora);
 		}
-		if (v.getFechaInicial().before(r.getFechaInicioDisp())) {
-			v.setFechaInicial(r.getFechaInicioDisp());
+		if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
+			ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		}
-
-		
-		String eql = "select d " +
-				"from  Disponibilidad d " +
-				"where d.recurso is not null and " +
-				"      d.recurso = :r and " +
-				"      d.fechaBaja is null and " +
-				"      d.fecha between :fi and :ff and " +
-		    	"      (d.fecha <> :fi or d.horaInicio >= :fiCompleta) " +
-				"order by d.fecha asc, d.horaInicio ";
-		
+		//Determinar todas las disponibilidades
+		//No se debe considerar las disponibilidades presenciales
+		String eql = "SELECT d " +
+				"FROM Disponibilidad d " +
+				"WHERE d.recurso IS NOT NULL " +
+				"  AND d.presencial = false " +
+				"  AND d.recurso = :r " +
+				"  AND d.fechaBaja IS NULL " +
+				"  AND d.fecha between :fi AND :ff " +
+		    "  AND (d.fecha <> :fi OR d.horaInicio >= :fiCompleta) " +
+				"ORDER BY d.fecha ASC, d.horaInicio ";
 		List<Disponibilidad> disponibilidades =  entityManager.createQuery(eql)
-		.setParameter("r", r)
-		.setParameter("fi", v.getFechaInicial(), TemporalType.DATE)
-		.setParameter("ff", v.getFechaFinal(), TemporalType.DATE)
-		.setParameter("fiCompleta", v.getFechaInicial(), TemporalType.TIMESTAMP)
+		.setParameter("r", recurso)
+		.setParameter("fi", ventana.getFechaInicial(), TemporalType.DATE)
+		.setParameter("ff", ventana.getFechaFinal(), TemporalType.DATE)
+		.setParameter("fiCompleta", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
 		.getResultList();
-
-		String cons = "select d.id, d.fecha, d.horaInicio, count(reserva) " +
-				"from  Disponibilidad d JOIN d.reservas reserva " +
-				"where d.recurso is not null and " +
-				"      d.recurso = :r and " +
-				"      d.fechaBaja is null and " +
-				"      d.fecha between :fi and :ff and " +
-		    	"      (d.fecha <> :fi or d.horaInicio >= :fiCompleta) and " +
-				"      (reserva.estado <> :cancelado) " +
-				"group by d.id, d.fecha, d.horaInicio " +
-				"order by d.fecha asc, d.horaInicio asc ";
-		
+		//Determinar las reservas vivas
+		//No se debe considerar las disponibilidades presenciales
+		//Para las reservas canceladas hay que ver si ya se liberó el cupo o aún no
+		String cons = "SELECT d.id, d.fecha, d.horaInicio, COUNT(r) " +
+				"FROM Disponibilidad d " +
+				"JOIN d.reservas r " +
+				"WHERE d.recurso IS NOT NULL " +
+				"  AND d.recurso = :recurso " +
+				"  AND d.fechaBaja IS NULL " +
+				"  AND d.fecha BETWEEN :finicio AND :ffin " +
+		    "  AND (d.fecha <> :finicio OR d.horaInicio >= :fiCompleta) " +
+				"  AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora) " +
+				"GROUP BY d.id, d.fecha, d.horaInicio " +
+				"ORDER BY d.fecha asc, d.horaInicio ASC ";
 		List<Object[]> cantReservasVivas =  entityManager.createQuery(cons)
-		.setParameter("r", r)
-		.setParameter("fi", v.getFechaInicial(), TemporalType.DATE)
-		.setParameter("ff", v.getFechaFinal(), TemporalType.DATE)
-		.setParameter("fiCompleta", v.getFechaInicial(), TemporalType.TIMESTAMP)
+		.setParameter("recurso", recurso)
+		.setParameter("finicio", ventana.getFechaInicial(), TemporalType.DATE)
+		.setParameter("ffin", ventana.getFechaFinal(), TemporalType.DATE)
+		.setParameter("fiCompleta", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
 		.setParameter("cancelado", Estado.C)
+    .setParameter("ahora", new Date(), TemporalType.TIMESTAMP)
 		.getResultList();
-		
+		//Quitar de las disponibilidades las reservas vivas
 		Map<Integer, Integer> cantResVivasPorDispon = new HashMap<Integer, Integer>();
 		for(Object[] oo : cantReservasVivas) {
 			cantResVivasPorDispon.put((Integer)oo[0], ((Long)oo[3]).intValue());
 		}
-		
-		
 		List<Disponibilidad> disp = new ArrayList<Disponibilidad>();
 		for (Disponibilidad d : disponibilidades) {
-			
 			Integer cant =  cantResVivasPorDispon.get(d.getId());
 			if(cant == null) {
 				cant = 0;
 			}
-			
 			Disponibilidad dto = new Disponibilidad();
 			dto.setId(d.getId());
 			dto.setFecha(d.getFecha());
@@ -734,15 +895,11 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			dto.setHoraFin(dto.getHoraFin());
 			dto.setRecurso(null);
 			dto.setCupo(d.getCupo() - cant);
-			
 			disp.add(dto);
 		}
-		
 		return disp;
 	}
-	
-	
-	
+
 	/**
 	 * Devuelve las fechas limites para las cuales se tienen disponibilidades, 
 	 * cumpliendo con los periodos para realizar reservas indicado en el recurso, es decir:
@@ -765,19 +922,15 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @throws BusinessException 
 	 * @throws RolException 
 	 */
-	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso r) throws BusinessException {
-
-		if (r == null) {
-			throw new BusinessException("-1", "Parametro nulo");
-		}
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
-		}
-
-		//1- Tamaño estatico: Es una ventana futura o comienza hoy.
-		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaIntranet(r);
-		
+	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso recurso) throws UserException {
+    if (recurso == null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    recurso = entityManager.find(Recurso.class, recurso.getId());
+    if (recurso == null) {
+      throw new UserException("no_se_encuentra_el_recurso_especificado");
+    }
+		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaIntranet(recurso);
 		return ventanaEstatica;
 	}
 
@@ -803,19 +956,15 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @throws BusinessException 
 	 * @throws RolException 
 	 */
-	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws BusinessException {
-
-		if (r == null) {
-			throw new BusinessException("-1", "Parametro nulo");
+	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso recurso) throws UserException {
+		if (recurso == null) {
+			throw new UserException("debe_especificar_el_recurso");
 		}
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
+		recurso = entityManager.find(Recurso.class, recurso.getId());
+		if (recurso == null) {
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
-
-		//1- Tamaño estatico: Es una ventana futura o comienza hoy.
-		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaInternet(r);
-		
+		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaInternet(recurso);
 		return ventanaEstatica;
 	}
 
@@ -834,39 +983,24 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 * @return 
 	 */
 	@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_FCALL_CENTER", "RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_ANONIMO"})
-	public List<Integer> obtenerCuposPorDia(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws BusinessException {
-		
-		if (recurso == null || ventana == null) {
-			throw new BusinessException("-1", "Parametro nulo");
-		}
-		recurso = entityManager.find(Recurso.class, recurso.getId());
-		if (recurso == null) {
-			throw new BusinessException("-1", "No se encuentra el recurso indicado");
-		}
-		
-		//Obtengo la suma de cupos asignados por dia
+	public List<Integer> obtenerCuposPorDia(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws UserException {
+    if (recurso == null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if (ventana == null) {
+      throw new UserException("debe_especificar_la ventana");
+    }
+    recurso = entityManager.find(Recurso.class, recurso.getId());
+    if (recurso == null) {
+      throw new UserException("no_se_encuentra_el_recurso_especificado");
+    }
+		//Obtener los cupos para cada dia y hora
 		List<Object[]> cuposAsignados  = helper.obtenerCuposAsignados(recurso, ventana, timezone);
-		//Obtengo la suma de cupos consumidos (reservas) por dia
+		//Obtengo las reservas vivas para cada día y hora
 		List<Object[]> cuposConsumidos = helper.obtenerCuposConsumidos(recurso,ventana, timezone);
-		//Armo la lista de resultados, indicando los cupos para todos los dias solicitados en la ventana
+		//Armar la lista de resultados indicando los cupos para todos los dias solicitados en la ventana
 		List<Integer> cuposXdia = helper.obtenerCuposXDia(ventana, cuposAsignados, cuposConsumidos);
-
 		return cuposXdia;
-	}
-	
-	public List<Reserva> consultarReservaPorDatos(Recurso r, Map<DatoASolicitar, DatoReserva> datos) {
-		return null;
-	}
-
-	public Reserva consultarReservaPorDatosClave(Recurso r,	Map<DatoASolicitar, DatoReserva> datos) {
-		return null;
-	}
-
-	public Reserva marcarReserva(List<Disponibilidad> disps) {
-		return null;
-	}
-
-	public void reagendarReservas(List<Reserva> reservas, Date fechaHora) {
 	}
 	
 	/**
@@ -880,22 +1014,16 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	 */
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) 
 		throws ApplicationException, BusinessException, AutocompletarException, UserException {
-		
 		if (s == null) {
 			throw new BusinessException("-1", "Parametro nulo");
 		}
-		
 		s = entityManager.find(ServicioPorRecurso.class, s.getId());
-		
 		if (s == null) {
 			throw new BusinessException("-1", "No se encuentra el servicio indicado");
 		}
-		
 		s.getAutocompletadosPorDato().size();
 		s.getAutocompletado().getParametrosAutocompletados().size();
-
 		Map<String, Object> campos = helper.autocompletarCampo(s,datosParam);
-
 		return campos;
 	}
 
@@ -914,28 +1042,101 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		}
 	}
 
-	public void enviarComunicacionesConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException {
+/*	
+	public void enviarComunicacionesConfirmacion(Empresa empresa, String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
 		//Enviar mail
-		enviarMailConfirmacion(linkCancelacion, reserva, idioma, formatoFecha, formatoHora);
+		String cuerpo = enviarMailConfirmacion(linkCancelacion, linkModificacion, reserva, idioma, formatoFecha, formatoHora);
+		boolean mailOk = (cuerpo!=null);
 		//Almacenar datos para SMS y TextoAVoz, si corresponde
 		almacenarSmsYTav(Comunicacion.Tipo2.RESERVA, reserva, formatoFecha, formatoHora);
+		//Enviar aviso a MiPerfil
+		boolean mipOk = enviarAvisoMiPerfil(empresa, reserva, Comunicacion.Tipo2.RESERVA);
+    if(!mailOk && !mipOk) {
+      throw new UserException("no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva");
+    }
 	}
+*/	
+  /**
+   * Este método es similares a enviarComunicacionesConfirmacion pero aplica a un TokenReserva que contenga múltiples reservas en lugar de a una sola.
+   */
+/*	
+  public void enviarComunicacionesConfirmacion(Empresa empresa, String templateLinkCancelacion, String templateLinkModificacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
+    List<Reserva> reservas = obtenerReservasMultiples(tokenReserva.getId(), false);
+    StringBuilder cuerpos = new StringBuilder();
+    //Para cada reserva enviar la comunicación y añadir el cuerpo al texto que se enviará a la persona que realiza las reservas
+    for(Reserva reserva : reservas) {
+      if(reserva.getEstado().equals(Estado.R)) {
+        //Enviar mail
+        String linkCancelacion = templateLinkCancelacion.replace("{idReserva}", reserva.getId().toString());
+        String linkModificacion = templateLinkModificacion.replace("{idReserva}", reserva.getId().toString());
+        String cuerpo;
+        try {
+          cuerpo = enviarMailConfirmacion(linkCancelacion, linkModificacion, reserva, idioma, formatoFecha, formatoHora);
+        }catch(Exception ex) {
+          cuerpo = null;
+        }
+        if(cuerpo == null) {
+          cuerpo = "Reserva id {idReserva} confirmada.".replace("{idReserva}", reserva.getId().toString());
+        }
+        cuerpos.append("<br />Documento: "+reserva.getTipoDocumento()+" "+reserva.getNumeroDocumento()+"<br /><br />" + cuerpo);
+        cuerpos.append("<br />*************************<br />");
+        //Almacenar datos para SMS y TextoAVoz, si corresponde
+        almacenarSmsYTav(Comunicacion.Tipo2.RESERVA, reserva, formatoFecha, formatoHora);
+        //Enviar aviso a MiPerfil
+        enviarAvisoMiPerfil(empresa, reserva, Comunicacion.Tipo2.RESERVA);
+      }
+    }
+    //Enviar las comunicaciones a la persona que realiza las reservas
+    if(tokenReserva.getCorreoe()!=null) {
+      try {
+        String cuerpo = cuerpos.toString();
+        MailUtiles.enviarMail(tokenReserva.getCorreoe(), "Confirmación de reserva múltiple", cuerpo, MailUtiles.CONTENT_TYPE_HTML);
+        //No se guarda el cuerpo porque podría ser muy grande si hay muchas reservas, y puede verse en el envío de cada reserva individual
+        Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVAMULTIPLE, tokenReserva.getCorreoe(), tokenReserva.getRecurso(), tokenReserva, "");
+        comunicacion.setProcesado(true);
+        entityManager.persist(comunicacion);
+      }catch(MessagingException mEx) {
+        try {
+          Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVAMULTIPLE, tokenReserva.getCorreoe(), tokenReserva.getRecurso(), tokenReserva, "");
+          entityManager.persist(comunicacion);
+        }catch(Exception ex) {
+          logger.error("No se pudo enviar una comunicación por confirmación de reserva múltiple", ex);
+          ex.printStackTrace();
+        }
+      }
+    }
+  }
+*/
 	
-	public void enviarComunicacionesCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException, UserException {
-		//Enviar mail
-		enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora);
-		//Almacenar datos para SMS y TextoAVoz, si corresponde
-		almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
+/*	
+	public void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
+	  enviarComunicacionesCancelacion(empresa, reserva, idioma, formatoFecha, formatoHora, null, null);
 	}
+*/
 	
-	private void enviarMailConfirmacion(String linkCancelacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException {
+/*	
+  private void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
+    //Enviar mail
+    boolean mailOk = enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora, asunto, cuerpo);
+    //Almacenar datos para SMS y TextoAVoz, si corresponde
+    almacenarSmsYTav(Comunicacion.Tipo2.CANCELA, reserva, formatoFecha, formatoHora);
+    //Enviar aviso a MiPerfil
+    boolean mipOk = enviarAvisoMiPerfil(empresa, reserva, Comunicacion.Tipo2.CANCELA);
+    //Si no se pudo enviar mail ni aviso a mi perfil lanzar una excepción
+    if(!mailOk && !mipOk) {
+      throw new UserException("no_se_pudo_enviar_notificacion_de_cancelacion");
+    }
+  }
+*/
+	
+/*	
+	private String enviarMailConfirmacion(String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) {
 		//Se envía el mail obligatorio al usuario
 		Recurso recurso = null;
 		String email = null;
 		try {
 			recurso = reserva.getDisponibilidades().get(0).getRecurso();
 			Agenda agenda = recurso.getAgenda();
-			//TextoAgenda textoAgenda = agenda.getTextoAgenda();
 			TextoAgenda textoAgenda = null;
 			if(agenda.getTextosAgenda()!=null) {
 				textoAgenda = agenda.getTextosAgenda().get(idioma);
@@ -950,163 +1151,135 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			if(textoAgenda == null) {
 				textoAgenda = new TextoAgenda();
 			}
-			
-			
 			//Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
-			for(DatoReserva dato : reserva.getDatosReserva()) {
-				DatoASolicitar datoSol = dato.getDatoASolicitar();
-				if("Mail".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-					email = dato.getValor();
-
-					SimpleDateFormat sdfFecha = new SimpleDateFormat (formatoFecha);
-					SimpleDateFormat sdfHora = new SimpleDateFormat (formatoHora);
-					
-					String texto = textoAgenda.getTextoCorreoConf();
-					
-					if(texto != null && !texto.isEmpty())
-					{
-						texto = texto.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
-						texto = texto.replace("{{RECURSO}}", recurso.getNombre());
-            texto = texto.replace("{{TRAMITE}}", reserva.getTramiteNombre());
-						texto = texto.replace("{{DIRECCION}}", recurso.getDireccion());
-						texto = texto.replace("{{FECHA}}", sdfFecha.format(reserva.getDisponibilidades().get(0).getFecha()));
-						texto = texto.replace("{{HORA}}", sdfHora.format(reserva.getDisponibilidades().get(0).getHoraInicio()));
-						texto = texto.replace("{{SERIE}}", recurso.getSerie()!=null?recurso.getSerie():"---");
-						texto = texto.replace("{{NUMERO}}", reserva.getNumero()!=null?reserva.getNumero().toString():"---");
-						texto = texto.replace("{{CODIGOSEGURIDAD}}", reserva.getCodigoSeguridad());
-						texto = texto.replace("{{CODIGOTRAZABILIDAD}}", reserva.getTrazabilidadGuid()!=null?reserva.getTrazabilidadGuid():"---");
-						texto = texto.replace("{{CANCELACION}}", linkCancelacion);
-						texto = texto.replace("{{IDRESERVA}}", reserva.getId().toString());
-
-						//MailUtiles.enviarMail(mailSession, email, "Confirmación de reserva", texto, MailUtiles.CONTENT_TYPE_HTML);
-						MailUtiles.enviarMail(email, "Confirmación de reserva", texto, MailUtiles.CONTENT_TYPE_HTML);
-					}
-					
-					
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva);
-					comunicacion.setProcesado(true);
-					entityManager.persist(comunicacion);
-					
-				}
-			}
+			String cuerpo = null;
+      cuerpo = textoAgenda.getTextoCorreoConf();
+      if(cuerpo != null && !cuerpo.isEmpty()) {
+        cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion, linkModificacion);
+  			for(DatoReserva dato : reserva.getDatosReserva()) {
+  				DatoASolicitar datoSol = dato.getDatoASolicitar();
+  				if(DatoASolicitar.CORREO_ELECTRONICO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+  					email = dato.getValor();
+						MailUtiles.enviarMail(email, "Confirmación de reserva", cuerpo, MailUtiles.CONTENT_TYPE_HTML);
+  					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, cuerpo);
+  					comunicacion.setProcesado(true);
+  					entityManager.persist(comunicacion);
+  				}
+  			}
+        return cuerpo;
+      }else {
+        //Indicar que no se pudo enviar el mail
+        return null;
+      }
 		}catch(MessagingException mEx) {
+		  logger.warn("No se pudo enviar el mail de confirmación", mEx);
 			try {
 				if(recurso != null) {
 					if(email == null) {
 						email = "***";
 					}
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, null);
 					entityManager.persist(comunicacion);
 				}
 			}catch(Exception ex) {
-				ex.printStackTrace();
+				//
 			}
-			
-			throw new ApplicationException("no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva", mEx);
+      //Indicar que no se pudo enviar el mail
+			return null;
 		}
-		
 	}
-
-
-	private void enviarMailCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws ApplicationException {
+*/
+	
+/*	
+	private boolean enviarMailCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) {
 		//Se envía el mail obligatorio al usuario
-		String email = null;
 		Recurso recurso = null;
 		try {
 			recurso = reserva.getDisponibilidades().get(0).getRecurso();
-			Agenda agenda = recurso.getAgenda();
-			//TextoAgenda textoAgenda = agenda.getTextoAgenda();
-			TextoAgenda textoAgenda = null;
-			if(agenda.getTextosAgenda()!=null) {
-				textoAgenda = agenda.getTextosAgenda().get(idioma);
+			if(cuerpo == null) {
+  			Agenda agenda = recurso.getAgenda();
+  			TextoAgenda textoAgenda = null;
+  			if(agenda.getTextosAgenda()!=null) {
+  				textoAgenda = agenda.getTextosAgenda().get(idioma);
+  			}
+  			if(textoAgenda == null) {
+  				for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
+  					if(ta.isPorDefecto()) {
+  						textoAgenda = ta;
+  					}
+  				}
+  			}
+  			if(textoAgenda != null) {
+  				cuerpo = textoAgenda.getTextoCorreoCanc();
+  			}
 			}
-			if(textoAgenda == null) {
-				for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
-					if(ta.isPorDefecto()) {
-						textoAgenda = ta;
-					}
-				}
+			if(asunto == null) {
+			  asunto = "Cancelación de reserva";
 			}
-			if(textoAgenda == null) {
-				textoAgenda = new TextoAgenda();
-			}
-			
 			//Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
+	    String emailTo = null;
 			for(DatoReserva dato : reserva.getDatosReserva()) {
 				DatoASolicitar datoSol = dato.getDatoASolicitar();
-				if("Mail".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-					email = dato.getValor();
-
-					SimpleDateFormat sdfFecha = new SimpleDateFormat(formatoFecha);
-					SimpleDateFormat sdfHora = new SimpleDateFormat(formatoHora);
-					
-					String texto = textoAgenda.getTextoCorreoCanc();
-					
-					if(texto != null && !texto.isEmpty())
-					{
-						texto = texto.replace("{{AGENDA}}", recurso.getAgenda().getNombre());
-						texto = texto.replace("{{RECURSO}}", recurso.getNombre());
-            texto = texto.replace("{{TRAMITE}}", reserva.getTramiteNombre());
-						texto = texto.replace("{{DIRECCION}}", recurso.getDireccion());
-						texto = texto.replace("{{FECHA}}", sdfFecha.format(reserva.getDisponibilidades().get(0).getFecha()));
-						texto = texto.replace("{{HORA}}", sdfHora.format(reserva.getDisponibilidades().get(0).getHoraInicio()));
-						texto = texto.replace("{{SERIE}}", recurso.getSerie()!=null?recurso.getSerie():"---");
-						texto = texto.replace("{{NUMERO}}", reserva.getNumero()!=null?reserva.getNumero().toString():"---");
-            texto = texto.replace("{{IDRESERVA}}", reserva.getId().toString());
-
-						MailUtiles.enviarMail(email, "Cancelación de reserva", texto, MailUtiles.CONTENT_TYPE_HTML);
-					}
-						
-					
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, email, recurso, reserva);
-					comunicacion.setProcesado(true);
-					entityManager.persist(comunicacion);
+				if(DatoASolicitar.CORREO_ELECTRONICO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+				  emailTo = dato.getValor();
 				}
 			}
+			if(emailTo != null) {
+        if(cuerpo != null && !cuerpo.isEmpty()) {
+          cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, "", "");
+          MailUtiles.enviarMail(emailTo, asunto, cuerpo, MailUtiles.CONTENT_TYPE_HTML);
+        }
+        Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, emailTo, recurso, reserva, asunto+"/"+cuerpo);
+        comunicacion.setProcesado(true);
+        entityManager.persist(comunicacion);
+			}else {
+        //Indicar que no se pudo enviar el mail
+	      return false;
+			}
+      //Indicar que se pudo enviar el mail
+			return true;
 		}catch(MessagingException mEx) {
-			try {
-				if(recurso != null) {
-					if(email == null) {
-						email = "***";
-					}
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, email, recurso, reserva);
-					entityManager.persist(comunicacion);
-				}
-			}catch(Exception ex) {
-				ex.printStackTrace();
-			}
-			
-			throw new ApplicationException("no_se_pudo_enviar_el_correo_electronico_de_confirmacion_tome_nota_de_los_datos_de_la_reserva", mEx);
+      //Indicar que no se pudo enviar el mail
+		  logger.warn("No se pudo enviar el mail de cancelación", mEx);
+			return false;
 		}
-		
 	}
+*/
 	
-	private void almacenarSmsYTav(Comunicacion.Tipo2 tipo2, Reserva reserva, String formatoFecha, String formatoHora) throws UserException {
+/*	
+	private boolean almacenarSmsYTav(Comunicacion.Tipo2 tipo2, Reserva reserva, String formatoFecha, String formatoHora) {
 		//Se envía el mail obligatorio al usuario
 		try {
 			Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
-			//Obtener los numeros de telefono del usuario, que son los datos a solicitar llamados "TelefonoMovil" 
-			//y "TelefonoFijo" en la agrupacion que no se puede borrar
+			//Obtener los numeros de telefono del usuario, que son los datos a solicitar llamados "TelefonoMovil"  y "TelefonoFijo" en la agrupacion que no se puede borrar
 			for(DatoReserva dato : reserva.getDatosReserva()) {
 				DatoASolicitar datoSol = dato.getDatoASolicitar();
 				if("TelefonoMovil".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
 					//Tiene telefono movil, se envia SMS
 					String telefonoMovil = dato.getValor();
-					Comunicacion comunicacion = new Comunicacion(Tipo1.SMS, tipo2, telefonoMovil, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.SMS, tipo2, telefonoMovil, recurso, reserva, null);
 					entityManager.persist(comunicacion);
 				}
 				if("TelefonoFijo".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
 					//Tiene telefono movil, se envia SMS
 					String telefonoFijo = dato.getValor();
-					Comunicacion comunicacion = new Comunicacion(Tipo1.TEXTOAVOZ, tipo2, telefonoFijo, recurso, reserva);
+					Comunicacion comunicacion = new Comunicacion(Tipo1.TEXTOAVOZ, tipo2, telefonoFijo, recurso, reserva, null);
 					entityManager.persist(comunicacion);
 				}
 			}
+			return true;
 		}catch(Exception ex) {
-			throw new UserException("no_se_pudo_generar_las_comunicaciones");
+			return false;
 		}
 	}
-
+*/
+	
+/*	
+	private boolean enviarAvisoMiPerfil(Empresa empresa, Reserva reserva, Comunicacion.Tipo2 tipoAviso) {
+    return miPerfilBean.enviarAviso(empresa, reserva, tipoAviso);
+	}
+*/
+	
 	@SuppressWarnings("unchecked")
 	public Map<String, String> consultarTextos(String idioma) throws ApplicationException {
 	  Map<String, String> textos = new SofisHashMap();
@@ -1122,7 +1295,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			//No se pudieron cargar los textos globales, no se puede continuar
 			throw new ApplicationException(e);
 		}
-			
 		//Luego se cargan los textos sobreescritos por el tenant pudiendo pisar textos cargados antes
 		//Atención: es probable que no haya aún un tennant configurado y por tanto no se puede hacer esta parte
 		//(pero no hay forma de determinarlo)
@@ -1136,10 +1308,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				}
 			}
 		}catch(Exception pEx) {
-			//pEx.printStackTrace();
 			//Nada que hacer, se usan solo los textos globales
 		}
-		
 		return textos;		
 	}
 	
@@ -1166,19 +1336,866 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	}
 	
   @SuppressWarnings("unchecked")
-  public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException {
+  public List<TramiteAgenda> consultarTramites(Agenda agenda) throws ApplicationException {
     try{
       List<TramiteAgenda> tramites = (List<TramiteAgenda>) entityManager
-                  .createQuery("SELECT t from TramiteAgenda t " +
-                      "WHERE t.agenda = :a " +
-                      "ORDER BY t.tramiteNombre")
-                  .setParameter("a", a)
-                  .getResultList();
+        .createQuery("SELECT t from TramiteAgenda t " +
+            "WHERE t.agenda = :agenda " +
+            "ORDER BY t.tramiteNombre")
+        .setParameter("agenda", agenda)
+        .getResultList();
       return tramites;
       } catch (Exception e){
         throw new ApplicationException(e);
       }
   }
+
+  @SuppressWarnings("unchecked")
+  /**
+   * Busca un trámite correspondiente a la agenda indicada con el código dado. No debería pasar que haya más de uno,
+   * pero si lo hay devuelve el más nuevo (mayor id).
+   * @param agenda
+   * @param codigo
+   * @return
+   * @throws ApplicationException
+   */
+  public TramiteAgenda consultarTramitePorCodigo(Agenda agenda, String codigo) throws ApplicationException {
+    try{
+      List<TramiteAgenda> tramites = (List<TramiteAgenda>) entityManager.createQuery("SELECT t from TramiteAgenda t " +
+            "WHERE t.agenda = :agenda AND t.tramiteCodigo=:codigo ORDER BY t.id DESC")
+        .setParameter("agenda", agenda).setParameter("codigo", codigo).getResultList();
+      if(tramites.isEmpty()) {
+        return null;
+      }
+      return tramites.get(0);
+    } catch (Exception e){
+      throw new ApplicationException(e);
+    }
+  }
+  
+  public boolean hayCupoPresencial(Disponibilidad disponibilidad) {
+    return !helper.chequeoCupoDisponible(disponibilidad, false);
+  }
+  
+  /**
+   * Confirma la reserva.
+   * Si la reserva debe tener datos, estos son exigidos y validados en este metodo, incluyendo la verificacion de clave unica
+   * @throws ApplicationException 
+   * @throws BusinessException
+   * @return Reserva: Devuelve la reserva pues se le ha asignado un numero unico de reserva dentro de la hora a la que pertenece. 
+   * @throws UserException
+   * @throws ValidacionException 
+   */
+  public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva) 
+    throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
+    if (reserva == null || reserva.getDatosReserva()==null) {
+      throw new BusinessException("debe_especificar_la_reserva");
+    }
+    //Esto se lee antes de recuperar la reserva de la base porque puede haber cambiado
+    Set<DatoReserva> datosNuevos = reserva.getDatosReserva();
+    String tramiteCodigo = reserva.getTramiteCodigo();
+    String tramiteNombre = reserva.getTramiteNombre();
+    reserva = entityManager.find(Reserva.class, reserva.getId());
+    if (reserva == null) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    if (reserva.getEstado() == Estado.U) {
+      throw new UserException("no_es_posible_confirmar_su_reserva");
+    }
+    if (reserva.getEstado() != Estado.P) {
+      throw new UserException("no_es_posible_confirmar_su_reserva");
+    }
+    //Pisar estos datos con lo que vino de la interfaz
+    for(DatoReserva dato : datosNuevos) {
+      reserva.getDatosReserva().add(dato);
+    }
+    reserva.setTramiteCodigo(tramiteCodigo);
+    reserva.setTramiteNombre(tramiteNombre);
+    //Validar los datos de la reserva: campos obligatorios, campos clave duplicados, validaciones extendidas 
+    validarDatosReserva(empresa, reserva);
+    //Pasó las validaciones
+    Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+    List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
+    Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
+    for (DatoASolicitar datoASolicitar : campos) {
+      camposMap.put(datoASolicitar.getNombre(), datoASolicitar);
+    }
+    Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
+    for (DatoReserva valor : datosNuevos) {
+      valores.put(valor.getDatoASolicitar().getNombre(), valor);
+    }
+    for (DatoReserva dato: valores.values()) {
+      DatoASolicitar campo = camposMap.get(dato.getDatoASolicitar().getNombre());
+      DatoReserva datoNuevo = new DatoReserva();
+      datoNuevo.setValor(dato.getValor());
+      datoNuevo.setReserva(reserva);
+      datoNuevo.setDatoASolicitar(campo);
+      entityManager.persist(datoNuevo);
+      reserva.getDatosReserva().add(datoNuevo);
+    }
+    //Confirmo la reserva, paso el estado a Reservada y le asigno el numero de reserva dentro de la disponibilidad.
+    //Con mutua exclusion en el acceso al numerador de la disponibilidad
+    Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
+    try {
+      disponibilidad.setNumerador(disponibilidad.getNumerador()+1);
+      entityManager.flush();
+    } catch(OptimisticLockException olEx){
+      throw new AccesoMultipleException("error_de_acceso_concurrente");
+    }
+    //Ejecuto acciones asociadas al evento reservar
+    try{
+      ReservaDTO reservaDTO = new ReservaDTO();
+      reservaDTO.setEstado(reserva.getEstado().toString());
+      reservaDTO.setFecha(reserva.getDisponibilidades().get(0).getFecha());
+      reservaDTO.setHoraInicio(reserva.getDisponibilidades().get(0).getHoraInicio());
+      reservaDTO.setId(reserva.getId());
+      reservaDTO.setOrigen("P");
+      reservaDTO.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
+      reservaDTO.setNumero(reserva.getDisponibilidades().get(0).getNumerador() + 1);
+      reservaDTO.setTramiteCodigo(reserva.getTramiteCodigo());
+      reservaDTO.setTramiteNombre(reserva.getTramiteNombre());
+      if (reserva.getLlamada() != null) {
+        reservaDTO.setPuestoLlamada(reserva.getLlamada().getPuesto());
+      }
+      helperAccion.ejecutarAccionesPorEvento(valores, reservaDTO, recurso, Evento.R);
+    }catch (ErrorAccionException eaEx){
+      throw new BusinessException(eaEx.getCodigoError(), eaEx.getMensajes().toString());
+    }
+    reserva.setEstado(Estado.R);
+    reserva.setSerie("AP");
+    reserva.setNumero(disponibilidad.getNumerador());
+    reserva.setOrigen("P");
+    reserva.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
+    //Asigno un codigo de seguridad
+    reserva.setCodigoSeguridad("-");
+    //Registro en el sistema de trazas
+    String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
+    if(empresa.getOid() != null && transaccionId != null) {
+      //Registrar el cabezal en el sistema de trazabilidad del PEU
+      String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, reserva.getTramiteCodigo(), true, null, null);
+      if(trazaGuid != null) {
+        reserva.setTrazabilidadGuid(trazaGuid);
+      }else {
+        reserva.setTrazabilidadGuid("---");
+      }
+      //Registrar la primera linea en el sistema de trazabilidad del PEU
+      //ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
+      //en la base de datos para futuros intentos
+      trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
+      //Publicar la novedad
+      novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
+    }
+    return reserva;
+  }  
 	
-	
+  @SuppressWarnings("unchecked")
+  public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
+    //Obtener las reservas en estado Pendiente, Reservado o Usado para el período indicado
+    List<Reserva> reservas = entityManager.createQuery("SELECT r FROM Reserva r " +
+      "JOIN r.disponibilidades d " +
+      "WHERE d.recurso.id = :recursoId " +
+      "  AND r.estado IN ('P', 'R', 'U') " +
+      "  AND d.fecha BETWEEN :fi AND :ff " +
+      "  AND d.presencial = false ")
+      .setParameter("recursoId", recurso.getId())
+      .setParameter("fi", ventana.getFechaInicial())
+      .setParameter("ff", ventana.getFechaFinal())
+      .getResultList();
+    List<Integer> reservasSinEnviarComunicacion = new ArrayList<Integer>();
+    //Para cada reserva encontrada, cancelarla, enviando las comunicaciones correspondientes
+    for(Reserva reserva : reservas) {
+      Estado estadoReserva = reserva.getEstado();
+      cancelarReserva(empresa, recurso, reserva, true);
+      //Enviar mail (si no estaba pendiente)
+      if(!estadoReserva.equals(Estado.P)) {
+        try {
+          comunicacionesBean.enviarComunicacionesCancelacion(empresa, reserva, idioma, formatoFecha, formatoHora, asunto, cuerpo);
+        }catch(Exception ex) {
+          reservasSinEnviarComunicacion.add(reserva.getId());
+        }
+      }
+    }
+    return reservasSinEnviarComunicacion;
+  }
+  
+  /**
+   * Este método es utilizado para marcar la reserva y confirmarla en un solo paso.
+   * Está pensado para ser invocado mediante el servicio web REST confirmarReserva.
+   * @return
+   * @throws UserException
+   */
+  public Reserva generarYConfirmarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos, 
+      String idTransaccionPadre, String pasoTransaccionPadre, TokenReserva tokenReserva, String idioma) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(idDisponibilidad==null) {
+      throw new UserException("debe_especificar_la_disponibilidad");
+    }
+    Reserva reserva = null;
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    //Determinar el timezone según la agenda o la empresa
+    TimeZone timezone = TimeZone.getDefault();
+    if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
+      timezone = TimeZone.getTimeZone(agenda.getTimezone());
+    }else {
+      if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(empresa.getTimezone());
+      }
+    }
+    //Obtener la disponibilidad
+    Disponibilidad disponibilidad = (Disponibilidad) entityManager.find(Disponibilidad.class, idDisponibilidad);
+    if(disponibilidad==null || !disponibilidad.getRecurso().getId().equals(idRecurso)) {
+      throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
+    }
+    //Marcar la reserva
+    reserva = marcarReserva(disponibilidad, tokenReserva, null);
+    //Cargar las agrupaciones
+    List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(disponibilidad.getRecurso(), timezone);
+    //Cargar los datos en la reserva; la respuesta puede contener datos que no están dentro de los datos a solicitar del recurso
+    Map<String, String> datosAdicionales = cargarDatosReserva(reserva, agrupaciones, valoresCampos);
+    //Cargar los datos de trazabilidad
+    Long pasoPadre = null;
+    if(pasoTransaccionPadre != null) {
+      try {
+        pasoPadre = Long.valueOf(pasoTransaccionPadre);
+      }catch(Exception ex) {
+        throw new UserException("error_no_solucionable");
+      }
+    }
+    //Cargar los datos del trámite si fueron incluidos (deben tener como clave tramite.codigo y opcionalmente tramite.nombre)
+    if(tokenReserva!=null) {
+      datosAdicionales.put("tramite.codigo", tokenReserva.getTramite());
+      datosAdicionales.put("tramite.nombre", null);
+    }
+    String tramiteCodigo = datosAdicionales.get("tramite.codigo");
+    if(tramiteCodigo==null || tramiteCodigo.trim().isEmpty()) {
+      throw new UserException("el_codigo_del_tramite_es_obligatorio");
+    }
+    String tramiteNombre = datosAdicionales.get("tramite.nombre");
+    //Si no se especifica el nombre del trámite se busca uno asociado a la agenda
+    if(tramiteNombre==null || tramiteNombre.trim().isEmpty()) {
+      tramiteNombre = "---";
+      for(TramiteAgenda tramite : agenda.getTramites()) {
+        if(tramiteCodigo.equals(tramite.getTramiteCodigo())) {
+          tramiteNombre = tramite.getTramiteNombre();
+        }
+      }
+    }
+    reserva.setTramiteCodigo(tramiteCodigo);
+    reserva.setTramiteNombre(tramiteNombre);
+    boolean confirmada = false;
+    try {
+      while (!confirmada) {
+        try {
+          Reserva rConfirmada = confirmarReserva(empresa, reserva, idTransaccionPadre, pasoPadre, false);
+          reserva.setSerie(rConfirmada.getSerie());
+          reserva.setNumero(rConfirmada.getNumero());
+          reserva.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
+          reserva.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());
+          confirmada = true;
+        } catch (AccesoMultipleException e){
+          //Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
+        }
+      }
+      return reserva;
+    }catch(Exception ex) {
+      if(ex instanceof UserException) {
+        throw (UserException)ex;
+      }
+      logger.error("No se pudo generar y confirmar la reserva", ex);
+      throw new UserException("error_no_solucionable");
+    }
+  }
+  
+  /**
+   * Carga los datos de la reserva obtenidos por parámetro en la reserva.
+   * Los datos deben estar en el mismo formato en el que son pasados por GET como valores por defecto para los campos, es decir
+   * [agrupacion.campo.valor;]*.
+   * Los datos son cargados directamente en la reserva, excepto en los casos en que la clave agrupacion.campo no se encuentre en
+   * la lista de datos a solicitar del recurso, en cuyo caso se devuelven en el resultado.
+   * @param reserva
+   * @param agrupaciones
+   * @param valoresCampos
+   * @return
+   */
+  private Map<String, String> cargarDatosReserva(Reserva reserva, List<AgrupacionDato> agrupaciones, String valoresCampos) {
+    //Lista de datos obtenidos por parámetro que no están dentro de los datos a solicitar del recurso
+    //(Por ejemplo, el código y nombre del trámite (tramite.codigo y tramite.nombre)
+    Map<String, String> datosAdicionales = new HashMap<String, String>();
+    //Map<String, Object> datosReserva = new HashMap<String, Object>();
+    //Armar dos mapas con los datos a solicitar, uno por ids y otro por nombre para accederlos más rápido
+    Map<String, DatoASolicitar> porId = new HashMap<String, DatoASolicitar>();
+    Map<String, DatoASolicitar> porNombre = new HashMap<String, DatoASolicitar>();
+    for(AgrupacionDato agrupacion : agrupaciones) {
+      for(DatoASolicitar datoSolicitar : agrupacion.getDatosASolicitar()) {
+        porId.put(agrupacion.getId().toString()+"."+datoSolicitar.getId().toString(), datoSolicitar);
+        porNombre.put(agrupacion.getNombre()+"."+datoSolicitar.getNombre(), datoSolicitar);
+      }
+    }
+    //Obtener cada uno de los campos cortando el string por los punto y coma
+    String parametros[] = valoresCampos.split("\\;");
+    //Procesar cada uno de los parámetros, que deberían ser de la forma <agrupacion>.<dato>.<valor>
+    for (String parm : parametros) {
+      //Obtener las tres partes (agrupación, dato, valor)
+      String agrupCampoValor[] = parm.split("\\.", 3);
+      String sAgrupacion = null;
+      String sDatoSol = null;
+      String sValor = null;
+      if(agrupCampoValor.length==3) {
+        sAgrupacion = agrupCampoValor[0];
+        sDatoSol = agrupCampoValor[1];
+        sValor = agrupCampoValor[2];
+        //Determinar el dato a solicitar indicado por la agrupación y el dato
+        //Si tanto la agrupacion como el dato son numéricos se asume que son los ids, sino se asume que son los nombres
+        DatoASolicitar datoASolicitar = null;
+        try {
+          Integer.valueOf(sAgrupacion);
+          Integer.valueOf(sDatoSol);
+          //Son identificadores, buscar el dato a solicitar correspondiente
+          datoASolicitar = porId.get(sAgrupacion+"."+sDatoSol);
+        }catch(NumberFormatException nfEx) {
+          //No son identificadores, son nombres
+          datoASolicitar = porNombre.get(sAgrupacion+"."+sDatoSol);
+        }
+        //Si se encontró un dato a solicitar poner el valor apropiado
+        if(datoASolicitar != null) {
+          DatoReserva datoReserva = new DatoReserva();
+          datoReserva.setReserva(reserva);
+          datoReserva.setValor(sValor);
+          datoReserva.setDatoASolicitar(datoASolicitar);
+          reserva.getDatosReserva().add(datoReserva);
+        }else {
+          datosAdicionales.put(sAgrupacion+"."+sDatoSol, sValor);
+        }
+      }
+    }
+    return datosAdicionales;
+  }
+  
+  
+  public TokenReserva generarTokenReserva(Integer idRecurso, String cedula, String nombre, String correoe, String codigoTramite, String ipOrigen) {
+    
+    TokenReserva token = new TokenReserva();
+
+    Recurso recurso = null;
+    if(idRecurso!=null) {
+      recurso = entityManager.find(Recurso.class, idRecurso);
+    }
+    
+    token.setCedula(cedula);
+    token.setNombre(nombre);
+    token.setCorreoe(correoe);
+    token.setEstado(Estado.P);
+    token.setFechaInicio(new Date());
+    token.setRecurso(recurso);
+    token.setToken(UUID.randomUUID().toString());
+    token.setTramite(codigoTramite);
+    token.setIpOrigen(ipOrigen);
+    
+    entityManager.persist(token);
+    entityManager.flush();
+    entityManager.refresh(token);
+    
+    return token;
+  }
+  
+  @SuppressWarnings("unchecked")
+  public TokenReserva obtenerTokenReserva(String token) {
+    //Solo debería haber uno, pero por las dudas se ordena por id y se queda con el último
+    String eql = "SELECT t FROM TokenReserva t WHERE t.token=:token ORDER BY t.id DESC";
+    List<TokenReserva> tokens = (List<TokenReserva>) entityManager.createQuery(eql).setParameter("token", token).getResultList();
+    if(!tokens.isEmpty()) {
+      return tokens.get(0);
+    }
+    return null;
+  }
+  
+  public TokenReserva guardarTokenReserva(TokenReserva token) {
+    token = entityManager.merge(token);
+    return token;
+  }
+  
+  /**
+   * Devuelve todas las reservas asociadas al token indicado.
+   * Si el parámetro incluirIncompletas es false solo incluye las que tengan al menos los datos obligatorios completos.
+   */
+  @SuppressWarnings("unchecked")
+  public List<Reserva> obtenerReservasMultiples(Integer tokenId, boolean incluirIncompletas) {
+    String eql = "SELECT r FROM Reserva r WHERE r.token.id=:tokenId" + (incluirIncompletas?"":" AND r.datosReserva IS NOT EMPTY")+" ORDER BY r.id";
+    return (List<Reserva>) entityManager.createQuery(eql).setParameter("tokenId", tokenId).getResultList();
+  }
+  
+  /**
+   * Confirma todas las reservas asociadas al token que tengan al menos los datos obligatorios completos.
+   * Las reservas que no tienen los datos obligatorios completos son eliminadas.
+   */
+  @SuppressWarnings("unchecked")
+  @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+  public TokenReserva confirmarReservasMultiples(Integer empresaId, Integer tokenId, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws UserException {
+    if (tokenId == null) {
+      throw new UserException("debe_especificar_el_token");
+    }
+    TokenReserva token = entityManager.find(TokenReserva.class, tokenId);
+    if(token == null) {
+      throw new UserException("no_se_encuentra_el_token");
+    }
+    String eql = "SELECT r FROM Reserva r WHERE r.token.id=:tokenId ORDER BY r.id";
+    List<Reserva> reservas = (List<Reserva>) entityManager.createQuery(eql).setParameter("tokenId", tokenId).getResultList();
+    for(Reserva reserva : reservas) {
+      //Si la reserva tiene datos se confirma; si no tiene datos (quedó incompleta: eligió fecha y hora pero no completó datos) se borra
+      if(!reserva.getDatosReserva().isEmpty()) {
+        //Cambiar el estado de la reserva
+        reserva.setEstado(Estado.R);
+        //Si no se cargó el nombre del trámite se busca ahora
+        if(reserva.getTramiteNombre() == null && reserva.getTramiteCodigo()!=null) {
+          try {
+            TramiteAgenda tramite = consultarTramitePorCodigo(reserva.getDisponibilidades().get(0).getRecurso().getAgenda(), reserva.getTramiteCodigo());
+            if(tramite != null) {
+              reserva.setTramiteNombre(tramite.getTramiteNombre());
+            }
+          }catch(Exception ex) {
+            //Nada para hacer, se queda sin nombre el trámite
+          }
+        }
+        //Registrar en el sistema de trazas
+        Empresa empresa = globalEntityManager.find(Empresa.class, empresaId);
+        String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
+        if(empresa.getOid() != null && transaccionId != null) {
+          //Registrar el cabezal en el sistema de trazabilidad del PEU
+          String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, reserva.getTramiteCodigo(), inicioAsistido, transaccionPadreId, pasoPadre);
+          if(trazaGuid != null) {
+            reserva.setTrazabilidadGuid(trazaGuid);
+          }else {
+            reserva.setTrazabilidadGuid("---");
+          }
+          //Registrar la primera linea en el sistema de trazabilidad del PEU
+          //ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
+          //en la base de datos para futuros intentos
+          trazaBean.registrarLinea(empresa, reserva, transaccionId, reserva.getDisponibilidades().get(0).getRecurso().getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
+          //Publicar la novedad
+          novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
+        }
+      }else {
+        entityManager.remove(reserva);
+      }
+    }
+    token.setEstado(Estado.R);
+    return token;
+  }
+  
+  @SuppressWarnings("unchecked")
+  @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+  public TokenReserva cancelarReservasMultiples(Integer tokenId) throws UserException {
+    if (tokenId == null) {
+      throw new UserException("debe_especificar_el_token");
+    }
+    TokenReserva token = entityManager.find(TokenReserva.class, tokenId);
+    if(token == null) {
+      throw new UserException("no_se_encuentra_el_token");
+    }
+    //Recuperar todas las reservas del token
+    String eql = "SELECT r FROM Reserva r WHERE r.token.id=:tokenId ORDER BY r.id";
+    List<Reserva> reservas = (List<Reserva>) entityManager.createQuery(eql).setParameter("tokenId", tokenId).getResultList();
+    //Para cada reserva eliminar primero sus datos y luego la propia reserva
+    for(Reserva reserva : reservas) {
+      for(DatoReserva dato : reserva.getDatosReserva()) {
+        entityManager.remove(dato);
+      }
+      entityManager.remove(reserva);
+    }
+    //Marcar el token como cancelado
+    token.setEstado(Estado.C);
+    return token;
+  }
+  
+  /**
+   * Elimina una reserva.
+   */
+  @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+  public TokenReserva cancelarReservaMultiple(Integer tokenId, Integer reservaId) throws UserException {
+    if (reservaId == null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    if (tokenId == null) {
+      throw new UserException("debe_especificar_el_token");
+    }
+    TokenReserva tokenReserva = entityManager.find(TokenReserva.class, tokenId);
+    if (tokenReserva == null) {
+      throw new UserException("no_se_encuentra_el_token_especificado");
+    }
+    if(tokenReserva.getEstado() == Estado.R) {
+      throw new UserException("el_token_esta_confirmado");
+    }
+    if(tokenReserva.getEstado() == Estado.C) {
+      throw new UserException("el_token_esta_cancelado");
+    }
+    Reserva reserva = entityManager.find(Reserva.class, reservaId);
+    if (reserva == null || reserva.getToken()==null || !reserva.getToken().getToken().equals(tokenReserva.getToken())) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    //Verificar el estado de la reserva
+    if(tokenReserva.getEstado() == Estado.C) {
+      throw new UserException("el_token_esta_cancelado");
+    }
+    if(reserva.getEstado() == Estado.U) {
+      throw new UserException("la_reserva_esta_utilizada");
+    }
+    //Eliminar los datos de la reserva y la propia reserva 
+    for(DatoReserva dato : reserva.getDatosReserva()) {
+      entityManager.remove(dato);
+    }
+    entityManager.remove(reserva);
+    //Actualizar el token
+    TokenReserva token = reserva.getToken();
+    token.setUltimaReserva(new Date());
+    return token;
+  }
+  
+  /**
+   * Este método es utilizado para modificar una reserva. Solo se permite modificar la disponibilidad, no el recurso
+   * porque los datos a solicitar podrían ser diferentes ni los datos ingresados porque podrían ser de otra persona. 
+   * Está pensado para ser invocado mediante el servicio web REST modificarReserva.
+   * @return
+   * @throws UserException
+   */
+  public Reserva modificarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva, Integer idDisponibilidad, 
+      TokenReserva tokenReserva, String idioma, String ipOrigen) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(idReserva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    if(idDisponibilidad==null) {
+      throw new UserException("debe_especificar_la_disponibilidad");
+    }
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    //Obtener la reserva
+    Reserva reservaOriginal = (Reserva) entityManager.find(Reserva.class, idReserva);
+    if(reservaOriginal==null) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    if(!reservaOriginal.getEstado().toString().equals("R")) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    Recurso recurso = reservaOriginal.getDisponibilidades().get(0).getRecurso();
+    if(recurso.getCambiosAdmite()==null || !recurso.getCambiosAdmite().booleanValue()) {
+      throw new UserException("el_recurso_no_admite_cambios_de_reservas");
+    }
+    //Obtener la disponibilidad nueva
+    Disponibilidad disponibilidad = (Disponibilidad) entityManager.find(Disponibilidad.class, idDisponibilidad);
+    if(disponibilidad==null || !disponibilidad.getRecurso().getId().equals(recurso.getId())) {
+      throw new UserException("no_se_encuentra_la_disponibilidad");
+    }
+
+    //Determinar si la reserva está dentro del plazo de modificación
+    TimeZone timezone = TimeZone.getDefault();
+    if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
+      timezone = TimeZone.getTimeZone(agenda.getTimezone());
+    }else {
+      if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(empresa.getTimezone());
+      }
+    }
+    Calendar calAhora = new GregorianCalendar();
+    calAhora.add(Calendar.MILLISECOND, timezone.getOffset(calAhora.getTimeInMillis()));
+    Calendar calReserva = new GregorianCalendar();
+    calReserva.setTime(reservaOriginal.getDisponibilidades().get(0).getHoraInicio());
+    //Restar el tiempo configurado
+    if(recurso.getCambiosTiempo()!=null && recurso.getCambiosUnidad()!=null) {
+      calReserva.add(recurso.getCambiosUnidad(), recurso.getCambiosTiempo() * -1);
+    }
+    if(calReserva.before(calAhora)) {
+      throw new UserException("la_reserva_especificada_ya_no_admite_cambios");
+    }
+    //Obtener la disponibilidad nueva
+    if(disponibilidad.getHoraInicio().before(calAhora.getTime())) {
+      throw new UserException("no_se_encuentra_la_disponibilidad");
+    }
+    //Marcar la reserva
+    Reserva reservaNueva = marcarReservaValidandoDatos(disponibilidad, reservaOriginal, null, ipOrigen);
+    //Si pudo hacer eso, la disponibilidad tiene cupo, se puede apuntar la reserva existente a ella y eliminar la reserva dummy
+    reservaOriginal.getDisponibilidades().clear();
+    reservaOriginal.getDisponibilidades().add(reservaNueva.getDisponibilidades().get(0));
+    reservaNueva.getDisponibilidades().clear();
+    reservaNueva = entityManager.merge(reservaNueva);
+    entityManager.remove(reservaNueva);
+    //Confirmar la reserva
+    boolean confirmada = false;
+    try {
+      while (!confirmada) {
+        try {
+          Reserva rConfirmada = actualizarReserva(empresa, reservaOriginal, null, null, false);
+          reservaOriginal.setSerie(rConfirmada.getSerie());
+          reservaOriginal.setNumero(rConfirmada.getNumero());
+          reservaOriginal.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
+          reservaOriginal.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());
+          confirmada = true;
+        } catch (AccesoMultipleException e){
+          //Reintentar hasta tener exito, en algun momento no va a dar acceso multiple.
+        }
+      }
+      return reservaOriginal;
+    }catch(Exception ex) {
+      if(ex instanceof UserException) {
+        throw (UserException)ex;
+      }
+      logger.error("No se pudo modificar la reserva", ex);
+      throw new UserException("error_no_solucionable");
+    }
+  }
+  
+  public Reserva modificarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReservaOriginal, Integer idReservaNueva, String idioma) 
+      throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(idReservaOriginal==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    if(idReservaNueva==null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    //Obtener la reserva original, debe estar en estado reservada
+    Reserva reservaOriginal = (Reserva) entityManager.find(Reserva.class, idReservaOriginal);
+    if(reservaOriginal==null) {
+      throw new UserException("no_se_encuentra_la_reserva");
+    }
+    if(!Estado.R.equals(reservaOriginal.getEstado())) {
+      throw new UserException("no_se_encuentra_la_reserva");
+    }
+    
+    //Determinar si la reserva está vigente
+    TimeZone timezone = TimeZone.getDefault();
+    if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
+      timezone = TimeZone.getTimeZone(agenda.getTimezone());
+    }else {
+      if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(empresa.getTimezone());
+      }
+    }
+    Calendar calAhora = new GregorianCalendar();
+    calAhora.add(Calendar.MILLISECOND, timezone.getOffset(calAhora.getTimeInMillis()));
+    Calendar calReserva = new GregorianCalendar();
+    calReserva.setTime(reservaOriginal.getDisponibilidades().get(0).getHoraInicio());
+    if(calReserva.before(calAhora)) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    
+    //Obtener la reserva nueva, debe estar en estado pendiente
+    Reserva reservaNueva = (Reserva) entityManager.find(Reserva.class, idReservaNueva);
+    if(reservaNueva==null) {
+      throw new UserException("no_se_encuentra_la_disponibilidad");
+    }
+    if(!Estado.P.equals(reservaNueva.getEstado())) {
+      throw new UserException("no_se_encuentra_la_disponibilidad");
+    }
+    
+    Disponibilidad disponibilidad = reservaOriginal.getDisponibilidades().get(0);
+    if(disponibilidad.getHoraInicio().before(calAhora.getTime())) {
+      throw new UserException("no_se_encuentra_la_disponibilidad");
+    }
+    
+    reservaOriginal.getDisponibilidades().clear();
+    reservaOriginal.getDisponibilidades().add(reservaNueva.getDisponibilidades().get(0));
+    
+    //Eliminar la reserva nueva
+    reservaNueva.getDisponibilidades().clear();
+    entityManager.remove(reservaNueva);
+    
+    //Confirmar la reserva
+    boolean confirmada = false;
+    try {
+      while (!confirmada) {
+        try {
+          reservaOriginal = actualizarReserva(empresa, reservaOriginal, null, null, false);
+          confirmada = true;
+        } catch (AccesoMultipleException e){
+          //Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
+        }
+      }
+      return reservaOriginal;
+    }catch(Exception ex) {
+      if(ex instanceof UserException) {
+        throw (UserException)ex;
+      }
+      logger.error("No se pudo generar y confirmar la reserva", ex);
+      throw new UserException("error_no_solucionable");
+    }
+  }
+  
+  private Reserva actualizarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
+        throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {    
+    //Confirmo la reserva, paso el estado a Reservada (si no es múltiple) y le asigno el numero de reserva dentro de la disponibilidad.
+    //Con mutua exclusion en el acceso al numerador de la disponibilidad
+    Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
+    try {
+      disponibilidad.setNumerador(disponibilidad.getNumerador()+1);
+      entityManager.flush();
+    } catch(OptimisticLockException olEx){
+      throw new AccesoMultipleException("error_de_acceso_concurrente");
+    }
+    String origen;
+    if (ctx.isCallerInRole("RA_AE_FCALL_CENTER")){
+      origen = "C"; //Call Center
+    }else if (ctx.isCallerInRole("RA_AE_ANONIMO")){
+      origen = "W"; //Web
+    }else{
+      origen = "I"; //Otro
+    }
+    Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+    //Ejecutar las acciones asociadas al evento reservar
+    try{
+      ReservaDTO reservaDTO = new ReservaDTO();
+      reservaDTO.setEstado(reserva.getEstado().toString());
+      reservaDTO.setFecha(reserva.getDisponibilidades().get(0).getFecha());
+      reservaDTO.setHoraInicio(reserva.getDisponibilidades().get(0).getHoraInicio());
+      reservaDTO.setId(reserva.getId());
+      reservaDTO.setOrigen(origen);
+      reservaDTO.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
+      reservaDTO.setNumero(reserva.getDisponibilidades().get(0).getNumerador() + 1);
+      reservaDTO.setTramiteCodigo(reserva.getTramiteCodigo());
+      reservaDTO.setTramiteNombre(reserva.getTramiteNombre());
+      if (reserva.getLlamada() != null) {
+        reservaDTO.setPuestoLlamada(reserva.getLlamada().getPuesto());
+      }
+      Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
+      for (DatoReserva valor : reserva.getDatosReserva()) {
+        valores.put(valor.getDatoASolicitar().getNombre(), valor);
+      }
+      helperAccion.ejecutarAccionesPorEvento(valores, reservaDTO, recurso, Evento.C);
+      helperAccion.ejecutarAccionesPorEvento(valores, reservaDTO, recurso, Evento.R);
+    }catch (ErrorAccionException eaEx){
+      throw new BusinessException(eaEx.getCodigoError(), eaEx.getMensajes().toString());
+    }
+    if(reserva.getToken() == null) {
+      reserva.setEstado(Estado.R);
+    }
+    reserva.setSerie(recurso.getSerie());
+    reserva.setNumero(disponibilidad.getNumerador());
+    reserva.setOrigen(origen);
+    reserva.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
+
+    //Registrar en el sistema de trazas una línea para la cancelación de la vieja y otra para la confirmación de la nueva
+    String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
+    if(empresa.getOid() != null && transaccionId != null) {
+      trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.CANCELACION);
+      trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
+      //Publicar la novedad
+      novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
+      novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
+    }
+
+    return reserva;
+  }
+  
+  
+  public Reserva modificarReservaNotificar(Integer idReserva, Boolean notificar) throws UserException {
+	  //Obtener la reserva
+	  Reserva reservaOriginal = (Reserva) entityManager.find(Reserva.class, idReserva);
+	  if(reservaOriginal==null) {
+	    throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+	  }
+	  //modifico el valor "notificar" de la reserva
+	  reservaOriginal.setNotificar(notificar);
+	  reservaOriginal = entityManager.merge(reservaOriginal);
+      return reservaOriginal;
+  }
+  
+  public void modificarReservaMultipleNotificar(TokenReserva tokenReserva, Boolean notificar) throws UserException {
+	  //Obtener las reservas asociadas al token
+	  String eql = "SELECT r FROM Reserva r WHERE r.token.id=:tokenId AND r.datosReserva IS NOT EMPTY ORDER BY r.id";
+	  @SuppressWarnings("unchecked")
+	  List<Reserva> reservas = ( List<Reserva>)entityManager.createQuery(eql).setParameter("tokenId", tokenReserva.getId()).getResultList();
+	  //Procesar cada reserva e ir setteandole la propiedad "notificar"
+	  for(Reserva reserva : reservas) {
+		  try{
+			  modificarReservaNotificar(reserva.getId(),notificar);
+		  }catch(Exception ex) {
+		      if(ex instanceof UserException) {
+		        throw (UserException)ex;
+		      }  
+		  }
+	  }  
+  }
+  
+  
 }

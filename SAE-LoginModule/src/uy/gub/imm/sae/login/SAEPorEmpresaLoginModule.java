@@ -43,14 +43,11 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 	private Principal identity = null;
 	
 	public SAEPorEmpresaLoginModule() {
-		
 	}
 
 	@Override
 	public boolean login() throws LoginException {
-		
 		loginOk = false;
-		
 		if (callbackHandler == null) {
 			throw new LoginException("No hay registrado un callback handler");
 		}
@@ -62,14 +59,10 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 		} catch (Exception e) {
 			throw new LoginException("Error en la invocación al callback handler");
 		}
-
 		NameCallback nameCallback = (NameCallback) callbacks[0];
 		PasswordCallback passwordCallback = (PasswordCallback) callbacks[1];
-
 		String username = nameCallback.getName();
-		
 		String partes[] = username.split("/", 2);
-		
 		//Separar el codigo de usuario en sus dos partes: usuario/empresa
 		if(partes.length == 1) {
 			codigo = username;
@@ -78,23 +71,20 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 			codigo = partes[0];
 			empresa = Integer.valueOf(partes[1]);
 		}
-		
 		password = new String(passwordCallback.getPassword());
-		
 		if(codigo==null || codigo.trim().isEmpty() || password==null || password.trim().isEmpty()) {
 		 loginOk = false;
 		}else {
-			
-			//validar los datos
+			//Validar los datos
 			String dsJndiName = (String) options.get("dsJndiName");
-			
 			Connection conn = null;
 			try {
 				Context initContext = new InitialContext();
 				DataSource ds = (DataSource)initContext.lookup(dsJndiName);
 				conn = ds.getConnection();
-				PreparedStatement st = conn.prepareStatement("select password, superadmin from global.ae_usuarios "
-						+ "where codigo=? and fecha_baja is null");
+				//El usuario no debe estar eliminado y debe ser superadmin o tener asociada al menos una empresa
+				PreparedStatement st = conn.prepareStatement("SELECT password, superadmin FROM global.ae_usuarios u WHERE u.codigo=? AND u.fecha_baja IS NULL AND"
+				    + " (u.superadmin=true OR EXISTS (SELECT 1 FROM global.ae_rel_usuarios_empresas ue WHERE ue.usuario_id=u.id))");
 				st.setString(1, codigo);
 				st.executeQuery();
 				ResultSet rs = st.getResultSet();
@@ -106,13 +96,11 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 				if(password0==null || password1==null || !password0.equals(password1)) {
 					throw new FailedLoginException("Código de usuario o contraseña no válidos");
 				}
-				
 				try {
 					superadmin = rs.getBoolean(2);
 				}catch(Exception ex) {
 					superadmin = false;
 				}
-				
 				String tenant = "default";
 				if(empresa != null) {
 					st = conn.prepareStatement("select datasource from global.ae_empresas where id=?");
@@ -158,40 +146,36 @@ public class SAEPorEmpresaLoginModule extends AbstractServerLoginModule {
 			rolesGroup.addMember(new SimpleGroup("RA_AE_FCALL_CENTER"));
 			rolesGroup.addMember(new SimpleGroup("RA_AE_LLAMADOR"));
 		}else if(empresa != null) {
-		
 			//Obtener los roles para el usuario en la empresa dada
 			String dsJndiName = (String) options.get("dsJndiName");
 			Connection conn = null;
 			try {
-	
 				//Si es superadministrador tiene todos los roles
-					Context initContext = new InitialContext();
-					DataSource ds = (DataSource)initContext.lookup(dsJndiName);
-					conn = ds.getConnection();
-					PreparedStatement st = conn.prepareStatement("select rol_nombre from global.ae_rel_usuarios_roles ur "
-							+ "join global.ae_usuarios u on u.id=ur.usuario_id join global.ae_empresas e on e.id=ur.empresa_id "
-							+ "where u.codigo=? and e.id=?");
-					st.setString(1, codigo);
-					st.setInt(2, empresa);
-					ResultSet rs = st.executeQuery();
-					while(rs.next()) {
-						String rolNombre = rs.getString(1);
-			  		rolesGroup.addMember(new SimpleGroup(rolNombre));
-					}
+				Context initContext = new InitialContext();
+				DataSource ds = (DataSource)initContext.lookup(dsJndiName);
+				conn = ds.getConnection();
+				PreparedStatement st = conn.prepareStatement("select rol_nombre from global.ae_rel_usuarios_roles ur "
+						+ "join global.ae_usuarios u on u.id=ur.usuario_id join global.ae_empresas e on e.id=ur.empresa_id "
+						+ "where u.codigo=? and e.id=?");
+				st.setString(1, codigo);
+				st.setInt(2, empresa);
+				ResultSet rs = st.executeQuery();
+				while(rs.next()) {
+					String rolNombre = rs.getString(1);
+		  		rolesGroup.addMember(new SimpleGroup(rolNombre));
+				}
+			}catch(Exception ex) {
+				throw new FailedLoginException("No se pudo obtener los roles: "+ex.getMessage());
+			}finally {
+				try {
+					conn.close();
 				}catch(Exception ex) {
-					throw new FailedLoginException("No se pudo obtener los roles: "+ex.getMessage());
-				}finally {
-					try {
-						conn.close();
-					}catch(Exception ex) {
-						//
-					}
-				}		
-			}
-		
-			Group[] roles = new Group[1];
-			roles[0] = rolesGroup;
-			return roles;
+					//
+				}
+			}		
 		}
-	
+		Group[] roles = new Group[1];
+		roles[0] = rolesGroup;
+		return roles;
 	}
+}

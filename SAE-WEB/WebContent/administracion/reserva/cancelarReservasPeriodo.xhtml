@@ -1,0 +1,166 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{reservaMBean.beforePhaseCancelarReservasPeriodo}" >
+
+      <p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="wCancelarReservasPeriodo" zindex="2000" modal="true" focus="fCancelarReservaPeriodo:btnConfirmar">
+        <f:facet name="header">
+          <h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+        </f:facet>
+        <h:form id="fCancelarReservaPeriodo">
+          <h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_cancelar_las_reservas']}" />
+          <p:outputPanel styleClass="row panelBotonesPopUp">
+            <p:outputPanel styleClass="col-sm-7">
+              <p:commandButton id="btnConfirmar" update="form:panelForm" actionListener="#{reservaMBean.cancelarReservasPeriodo}" value="#{sessionMBean.textos['si']}" 
+                onclick="PF('wCancelarReservasPeriodo').hide();" styleClass="btn-primario btn-100 btn">
+              </p:commandButton>
+            </p:outputPanel>
+            <p:outputPanel styleClass="col-sm-5">
+              <p:commandButton onclick="PF('wCancelarReservasPeriodo').hide();" value="#{sessionMBean.textos['no']}" styleClass="btn-link btn-100 btn" />
+            </p:outputPanel>
+          </p:outputPanel>
+        </h:form>
+      </p:dialog>
+
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<h:form id="form">
+          <p:outputPanel id="panelForm">
+			      <p:outputPanel styleClass="form-required">
+			        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+			      </p:outputPanel>
+						<fieldset>
+							<legend>
+								<h:outputText value="#{sessionMBean.textos['periodo_a_consultar']}" />
+							</legend>
+							<p:outputPanel styleClass="form-horizontal">
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['desde']}" for="Fdesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText id="Fdesde" value="#{reservaMBean.fechaDesde}" styleClass="datepicker" converter="dateConverter">
+	                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+	                    <f:attribute name="onError" value="zero"/>
+										</h:inputText>
+                    <p:message for="Fdesde" />
+									</p:outputPanel>
+								</p:outputPanel>
+	
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="Fhasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText id="Fhasta" value="#{reservaMBean.fechaHasta}" styleClass="datepicker" converter="dateConverter">
+	                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+	                    <f:attribute name="onError" value="zero"/>
+										</h:inputText>
+                    <p:message for="Fhasta" />
+									</p:outputPanel>
+								</p:outputPanel>
+	
+								<p:outputPanel styleClass="form-group">
+									<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+										<p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{reservaMBean.obtenerReservasPeriodo}" 
+										  update="form:panelForm" styleClass="btn btn-secundario" />
+									</p:outputPanel>
+								</p:outputPanel>
+							</p:outputPanel>
+						</fieldset>
+						
+						<p:outputPanel id="pnlReservasPeriodo">
+							<p:dataTable id="tablaCupos" value="#{reservaMBean.cuposPorDia}" var="row" align="center" 
+								caption="#{sessionMBean.textos['disponibilidades_en_periodo_consultado']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+	              paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+	              paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+	              paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+	              paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_siguiente']}"
+	              paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+	              paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+							>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['fecha']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{row.data.fecha}">
+										<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									</h:outputText>
+									<h:outputText value=" " />
+                  <h:outputText value="#{row.data.horaInicio}">
+                    <f:convertDateTime type="both" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+                  </h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cupos_disponibles']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{row.data.cupo}"></h:outputText>
+								</p:column>
+                <p:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+                  </f:facet>
+                  <h:outputText value="#{row.data.cantReservas}"></h:outputText>
+                </p:column>
+	
+							</p:dataTable>
+							
+	            <fieldset>
+	              <legend>
+	                <h:outputText value="#{sessionMBean.textos['comunicacion_a_enviar']}" />
+	              </legend>
+							  <p:outputPanel styleClass="col-sm-8">
+	                <p:outputPanel styleClass="form-horizontal">
+	                  <p:outputPanel styleClass="form-group">
+	                    <p:outputLabel value="#{sessionMBean.textos['asunto_del_mensaje']}" for="txtAsunto" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+	                    <p:outputPanel styleClass="col-sm-9">
+	                      <h:inputText id="txtAsunto" value="#{reservaMBean.asuntoMensaje}" maxlength="100" size="40" styleClass="form-control" />
+	                      <p:message for="txtAsunto" />
+	                    </p:outputPanel>
+	                  </p:outputPanel>
+			              <p:outputPanel styleClass="form-group">
+			                <h:outputLabel value="#{sessionMBean.textos['cuerpo_del_mensaje']}" for="txtCuerpo" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+			                <p:outputPanel styleClass="col-sm-9">
+			                  <h:inputTextarea id="txtCuerpo" value="#{reservaMBean.cuerpoMensaje}" styleClass="form-control texto100" rows="10" maxlength="1000"  />
+	                      <p:message for="txtCuerpo" />
+	                      <h:outputText value="#{sessionMBean.textos['puede_ingresar_codigo_html']}" />
+			                </p:outputPanel>
+			              </p:outputPanel>
+			            </p:outputPanel>
+		            </p:outputPanel>
+	              <p:outputPanel styleClass="col-sm-4">
+	                <h:outputText value="#{sessionMBean.textos['puede_usar_las_siguientes_metavariables']}:" />
+	                <ul class="tips pasoTexto">
+	                  <li><h:outputText value="{{AGENDA}}: #{sessionMBean.textos['nombre_de_la_agenda']}" /></li>
+	                  <li><h:outputText value="{{RECURSO}}: #{sessionMBean.textos['nombre_del_recurso']}" /></li>
+	                  <li><h:outputText value="{{TRAMITE}}: #{sessionMBean.textos['nombre_del_tramite']}" /></li>
+	                  <li><h:outputText value="{{DIRECCION}}: #{sessionMBean.textos['direccion_fisica_donde_debe_concurrir']}" /></li>
+	                  <li><h:outputText value="{{FECHA}}: #{sessionMBean.textos['fecha_cuando_debe_concurrir']}" /></li>
+	                  <li><h:outputText value="{{HORA}}: #{sessionMBean.textos['hora_cuando_debe_concurrir']}" /></li>
+	                  <li><h:outputText value="{{SERIE}}: #{sessionMBean.textos['serie_asociada_al_recurso']}" /></li>
+	                  <li><h:outputText value="{{NUMERO}}: #{sessionMBean.textos['numero_de_la_reserva']}" /></li>
+	                  <li><h:outputText value="{{IDRESERVA}}: #{sessionMBean.textos['identificador_de_la_reserva']}" /></li>
+	                </ul>
+	              </p:outputPanel>
+	            </fieldset>
+							
+		          <ul class="form-action-buttons">
+		            <li class="action-buttons-primary">
+		              <ul>
+		                <li>
+		                  <p:commandButton value="#{sessionMBean.textos['cancelar_las_reservas_de_todo_el_periodo']}" oncomplete="PF('wCancelarReservasPeriodo').show();" 
+		                    styleClass="btn-lg btn-primario" />
+		                </li>
+		              </ul>
+		            </li>
+		            <li class="action-buttons-second"></li>
+		          </ul>
+							
+						</p:outputPanel>
+          </p:outputPanel>
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>

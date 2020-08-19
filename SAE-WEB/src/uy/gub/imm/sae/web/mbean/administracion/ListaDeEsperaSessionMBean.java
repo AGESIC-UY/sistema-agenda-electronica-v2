@@ -2,6 +2,8 @@ package uy.gub.imm.sae.web.mbean.administracion;
 
 import java.util.List;
 
+import javax.faces.component.UIComponent;
+
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.Reserva;
@@ -12,28 +14,28 @@ import uy.gub.imm.sae.web.mbean.administracion.ListaDeEsperaMBean.Horario;
 public class ListaDeEsperaSessionMBean extends SessionCleanerMBean implements RemovableFromSession {
 
 	private List<Estado> estadosSeleccionado;
-	private Boolean refrescarListaDeEspera = true;
 	
 	private List<AgrupacionDato> agrupaciones;
 	
 	private List<Horario> horarios;
 	
+  private String puesto = "";
+
 	private Boolean mostrarDatosSiguiente;
 	
 	private Reserva siguienteReserva;
 	
+  private UIComponent camposSiguienteReserva;
+  
+  private Boolean atencionPresencial;
+  
 	public List<Estado> getEstadosSeleccionado() {
 		return estadosSeleccionado;
 	}
 	public void setEstadosSeleccionado(List<Estado> estadosSeleccionado) {
 		this.estadosSeleccionado = estadosSeleccionado;
 	}
-	public Boolean getRefrescarListaDeEspera() {
-		return refrescarListaDeEspera;
-	}
-	public void setRefrescarListaDeEspera(Boolean refrescarListaDeEspera) {
-		this.refrescarListaDeEspera = refrescarListaDeEspera;
-	}
+	
 	public List<AgrupacionDato> getAgrupaciones() {
 		return agrupaciones;
 	}
@@ -59,5 +61,33 @@ public class ListaDeEsperaSessionMBean extends SessionCleanerMBean implements Re
 	public void setSiguienteReserva(Reserva siguienteReserva) {
 		this.siguienteReserva = siguienteReserva;
 	}
+	
+  public Boolean getAtencionPresencial() {
+    if(atencionPresencial == null) {
+      return false;
+    }
+    return atencionPresencial;
+  }
+
+  public void setAtencionPresencial(Boolean atencionPresencial) {
+    this.atencionPresencial = atencionPresencial;
+  }
+
+  public UIComponent getCamposSiguienteReserva() {
+    return camposSiguienteReserva;
+  }
+  
+  public void setCamposSiguienteReserva(UIComponent camposSiguienteReserva) {
+    this.camposSiguienteReserva = camposSiguienteReserva;
+  }
+
+  public String getPuesto() {
+    return puesto;
+  }
+
+  public void setPuesto(String puesto) {
+    this.puesto = puesto;
+  }
+
 	
 }

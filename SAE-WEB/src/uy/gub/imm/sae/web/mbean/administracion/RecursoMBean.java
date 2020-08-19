@@ -23,6 +23,8 @@ package uy.gub.imm.sae.web.mbean.administracion;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -46,9 +48,12 @@ import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.common.Utiles;
+import uy.gub.imm.sae.entity.AccionMiPerfil;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
+import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.TramiteAgenda;
 import uy.gub.imm.sae.entity.global.Oficina;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -56,6 +61,7 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
+import uy.gub.imm.sae.web.common.TicketUtiles;
 
 public class RecursoMBean extends BaseMBean{
 
@@ -89,22 +95,103 @@ public class RecursoMBean extends BaseMBean{
 	private List<SelectItem> oficinas = new ArrayList<SelectItem>(0);
 
 	private UploadedFile archivo;
+
+  List<SelectItem> nombresFuentes = null;
+  List<SelectItem> tamaniosFuentes = null;
+  
+  List<SelectItem> cambiosUnidades = null;
+  List<SelectItem> cancelacionUnidades = null;
+  
+  @PostConstruct
+  public void initRecurso(){
+    limpiarMensajesError();
+    
+    Agenda agenda = sessionMBean.getAgendaMarcada();
+    //Se controla que se haya Marcado una agenda para trabajar con los recursos
+    if (agenda == null){
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+    }
+    
+    try {
+      List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, false);
+      setOficinas(oficinas);
+    }catch(ApplicationException aEx) {
+      addErrorMessage(aEx.getMessage());
+      aEx.printStackTrace();
+    }
+
+    TicketUtiles ticketUtiles = new TicketUtiles();
+    nombresFuentes = new ArrayList<SelectItem>();
+    for(String fuente : ticketUtiles.obtenerFuentesDisponibles()) {
+      nombresFuentes.add(new SelectItem(fuente, fuente));
+    }
+    tamaniosFuentes = new ArrayList<SelectItem>();
+    for(int i=4; i<20; i++) {
+      tamaniosFuentes.add(new SelectItem(i, ""+i));
+    }
+    
+    cambiosUnidades = new ArrayList<SelectItem>();
+    cambiosUnidades.add(new SelectItem(Calendar.DATE, sessionMBean.getTextos().get("dias")));
+    cambiosUnidades.add(new SelectItem(Calendar.HOUR, sessionMBean.getTextos().get("horas")));
+    cambiosUnidades.add(new SelectItem(Calendar.MINUTE, sessionMBean.getTextos().get("minutos")));
+    
+    cancelacionUnidades = new ArrayList<SelectItem>();
+    cancelacionUnidades.add(new SelectItem(Calendar.DATE, sessionMBean.getTextos().get("dias")));
+    cancelacionUnidades.add(new SelectItem(Calendar.HOUR, sessionMBean.getTextos().get("horas")));
+    cancelacionUnidades.add(new SelectItem(Calendar.MINUTE, sessionMBean.getTextos().get("minutos")));
+    
+  }
+
 	/**************************************************************************/
 	/*                           Getters y Setters                            */	
 	/**************************************************************************/	
+  
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
-	
+
 	public void setSessionMBean(SessionMBean sessionMBean) {
 		this.sessionMBean = sessionMBean;
 	}
 	
-
 	public Recurso getRecursoNuevo() {
-
 		if (recursoNuevo == null) {
 			recursoNuevo = new Recurso();
+			recursoNuevo.setFuenteTicket("helvetica");
+			recursoNuevo.setTamanioFuenteChica(6);
+      recursoNuevo.setTamanioFuenteNormal(10);
+      recursoNuevo.setTamanioFuenteGrande(12);
+      
+//      //Creo la accion con valores por defecto y se la setteo al recursoNuevo
+//      AccionMiPerfil accionMiPerfil = recursosEJB.obtenerAccionMiPerfilPorDefecto(recursoNuevo);
+//      recursoNuevo.setAccionMiPerfil(accionMiPerfil);
+          
+      //Creo la accion con valores por defecto y se la setteo al recursoNuevo
+      AccionMiPerfil accionMiPerfil = new AccionMiPerfil();
+      
+      accionMiPerfil.setRecurso(recursoNuevo);
+      
+      accionMiPerfil.setDestacada_con_1(true);
+      accionMiPerfil.setTitulo_con_1("Ir a ubicacion");
+      accionMiPerfil.setUrl_con_1("https://www.google.com.uy/maps/@{latitud},{longitud},15z");
+      
+      accionMiPerfil.setTitulo_con_2("Cancelar reserva");
+      accionMiPerfil.setUrl_con_2("{linkBase}/sae/cancelarReserva/Paso1.xhtml?e={empresa}&a={agenda}&ri={reserva}");
+      
+      accionMiPerfil.setDestacada_can_1(true);
+      accionMiPerfil.setTitulo_can_1("Ir a ubicacion");
+      accionMiPerfil.setUrl_can_1("https://www.google.com.uy/maps/@{latitud},{longitud},15z");
+      
+      accionMiPerfil.setDestacada_rec_1(true);
+      accionMiPerfil.setTitulo_rec_1("Ir a ubicacion");
+      accionMiPerfil.setUrl_rec_1("https://www.google.com.uy/maps/@{latitud},{longitud},15z");
+      
+      accionMiPerfil.setTitulo_rec_2("Cancelar reserva");
+      accionMiPerfil.setUrl_rec_2("{linkBase}/sae/cancelarReserva/Paso1.xhtml?e={empresa}&a={agenda}&ri={reserva}");
+      
+      recursoNuevo.setAccionMiPerfil(accionMiPerfil);
+        
+      
 		}
 		return recursoNuevo;
 	}
@@ -113,12 +200,10 @@ public class RecursoMBean extends BaseMBean{
 		recursoNuevo = r;
 	}
 	
-
 	//Recurso seleccionado para eliminacion/modificacion
 	public Recurso getRecursoSeleccionado() {
 		return sessionMBean.getRecursoSeleccionado();
 	}
-
 
 	public DataTable getRecursosDataTableModificar() {
 		return recursosDataTableModificar;
@@ -154,42 +239,18 @@ public class RecursoMBean extends BaseMBean{
 	}
 
 	public DatoDelRecurso getDatoDelRecursoNuevo() {
-
 		if (datoDelRecursoNuevo == null) {
 			datoDelRecursoNuevo = new DatoDelRecurso();
-			
 		}
 		return datoDelRecursoNuevo;
 	}
 
-	
-	
 	public UploadedFile getArchivo() {
 		return archivo;
 	}
 
 	public void setArchivo(UploadedFile archivo) {
 		this.archivo = archivo;
-	}
-
-	@PostConstruct
-	public void initRecurso(){
-		limpiarMensajesError();
-		
-		Agenda agenda = sessionMBean.getAgendaMarcada();
-		//Se controla que se haya Marcado una agenda para trabajar con los recursos
-		if (agenda == null){
-			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
-		}
-		
-		try {
-		  List<Oficina> oficinas = cargarOficinasTramitesAgenda(agenda, false);
-		  setOficinas(oficinas);
-		}catch(ApplicationException aEx) {
-			addErrorMessage(aEx.getMessage());
-			aEx.printStackTrace();
-		}
-		
 	}
 
 	/**************************************************************************/
@@ -200,216 +261,280 @@ public class RecursoMBean extends BaseMBean{
 		
 		limpiarMensajesError();
 		
-		boolean error = false;
-		if(getRecursoNuevo().getNombre() == null || getRecursoNuevo().getNombre().equals("")){
-			error = true;
+    Recurso recurso = getRecursoNuevo();
+		boolean hayErrores = false;
+		if(recurso.getNombre() == null || recurso.getNombre().equals("")){
 			addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_recurso_es_obligatorio"), FORM_ID+":nombre");
+      hayErrores = true;
 		}
-		if(getRecursoNuevo().getDescripcion() == null || getRecursoNuevo().getDescripcion().equals("")){
-			error = true;
+		if(recurso.getDescripcion() == null || recurso.getDescripcion().equals("")){
 			addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
+      hayErrores = true;
 		}
-		Recurso r = getRecursoNuevo();
-		r.setVentanaCuposMinimos(0);
+		recurso.setVentanaCuposMinimos(0);
 		//Fechas de vigencia
-		if (r.getFechaInicio() == null){
-			error = true;
+		if (recurso.getFechaInicio() == null){
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
-		}else {
-			r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaInicio())) {
+      addErrorMessage("la_fecha_de_inicio_de_vigencia_es_invalida", FORM_ID+":fechaInicio");
+      hayErrores = true;
+    }else {
+			recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
 		}
-		if(r.getFechaFin() == null) {
-			error = true;
+		if(recurso.getFechaFin() == null) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_obligatoria"), FORM_ID+":fechaFin");
-		} else {
-			r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaFin())) {
+      addErrorMessage("la_fecha_de_fin_de_vigencia_es_invalida", FORM_ID+":fechaFin");
+      hayErrores = true;
+    }else {
+			recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
 		}
-		if(r.getFechaInicio() != null && r.getFechaFin() != null && r.getFechaInicio().compareTo(r.getFechaFin()) > 0) {
-			error = true;
+		if(recurso.getFechaInicio() != null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+		    recurso.getFechaFin() != null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
+      hayErrores = true;
 		}
     //Fechas de disponibilidad
-		if(r.getFechaInicioDisp() == null) {
-			error = true;
+		if(recurso.getFechaInicioDisp() == null) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaIniDispon");
-		}else {
-			r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaInicioDisp())) {
+      addErrorMessage("la_fecha_de_inicio_de_disponibilidad_es_invalida", FORM_ID+":fechaIniDispon");
+      hayErrores = true;
+    }else {
+			recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
 		}
-		if (r.getFechaFinDisp() == null){
-			error = true;
+		if(recurso.getFechaFinDisp() == null){
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaFinDispon");
-		} else {
-			r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));	
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(recurso.getFechaFinDisp())) {
+      addErrorMessage("la_fecha_de_fin_de_disponibilidad_es_invalida", FORM_ID+":fechaFinDispon");
+      hayErrores = true;
+    }else {
+			recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));	
 		}
-		if (r.getFechaInicioDisp() != null && r.getFechaFinDisp() != null && r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0){
-			error = true;
+		if (recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) &&
+		    recurso.getFechaFinDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) && 
+		    recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0){
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaIniDispon");
+      hayErrores = true;
 		}
 		//Relaciones entre fechas de vigencia y disponibilidad
-		if (r.getFechaInicioDisp() != null && r.getFechaInicio()!= null && r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
-			error = true;
+		if (recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) && 
+		    recurso.getFechaInicio()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+		    recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaInicio",FORM_ID+":fechaIniDispon");
+      hayErrores = true;
 		}
-		if (r.getFechaFinDisp() != null && r.getFechaFin()!= null && r.getFechaFinDisp().compareTo(r.getFechaFin()) > 0) {
-			error = true;
+		if (recurso.getFechaFinDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) && 
+		    recurso.getFechaFin()!=null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && 
+		    recurso.getFechaFinDisp().compareTo(recurso.getFechaFin()) > 0) {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
+      hayErrores = true;
 		}
-		if (r.getDiasInicioVentanaIntranet() == null){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasVIntranet");
+		if (recurso.getDiasInicioVentanaIntranet() == null){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasInicioVIntranet");
+      hayErrores = true;
+		}else if (recurso.getDiasInicioVentanaIntranet().intValue() < 0){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":DiasInicioVIntranet");
+      hayErrores = true;
 		}
-		if (r.getDiasInicioVentanaIntranet() != null && r.getDiasInicioVentanaIntranet() < 0){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":diasVIntranet");
-		}
-		if (r.getDiasVentanaIntranet() == null){
-			error = true;
+		if (recurso.getDiasVentanaIntranet() == null){
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasVIntranet");
-		}
-		if (r.getDiasVentanaIntranet() != null && r.getDiasVentanaIntranet() <= 0){
-			error = true;
+      hayErrores = true;
+		}else if (recurso.getDiasVentanaIntranet().intValue() <= 0){
 			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVIntranet");
+      hayErrores = true;
 		}
-		if (r.getDiasInicioVentanaInternet() == null){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasInicioVInternet");
+		if(recurso.getVisibleInternet()!=null && recurso.getVisibleInternet().booleanValue()) {
+	    if (recurso.getDiasInicioVentanaInternet() == null){
+	      addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasInicioVInternet");
+        hayErrores = true;
+	    }else if (recurso.getDiasInicioVentanaInternet().intValue() < 0){
+	      addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":DiasInicioVInternet");
+        hayErrores = true;
+	    }
+  		if (recurso.getDiasVentanaInternet() == null){
+  			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasVInternet");
+        hayErrores = true;
+  		}else if (recurso.getDiasVentanaInternet().intValue() <= 0){
+  			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVInternet");
+        hayErrores = true;
+  		}
 		}
-		if (r.getDiasInicioVentanaInternet()!=null && r.getDiasInicioVentanaInternet() < 0){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasInicioVInternet");
-		}
-		if (r.getDiasVentanaInternet() == null){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasVInternet");
-		}
-		if (r.getDiasVentanaInternet()!=null && r.getDiasVentanaInternet() <= 0){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVInternet");
-		}
-		if (r.getVentanaCuposMinimos() == null){
-			error = true;
-			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposM");
-		}
-		if (r.getVentanaCuposMinimos()!=null && r.getVentanaCuposMinimos() < 0 ){
-			error = true;
+    if (recurso.getVentanaCuposMinimos() == null){
+      addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposM");
+      hayErrores = true;
+    }
+		if (recurso.getVentanaCuposMinimos()!=null && recurso.getVentanaCuposMinimos().intValue() < 0 ){
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":VCuposM");
+      hayErrores = true;
 		}
-		if (r.getCantDiasAGenerar() == null){
-			error = true;
+		if (recurso.getCantDiasAGenerar() == null){
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_es_obligatoria"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
-		if (r.getCantDiasAGenerar()!=null && r.getCantDiasAGenerar() <= 0 ){
-			error = true;
+		if (recurso.getCantDiasAGenerar()!=null && recurso.getCantDiasAGenerar().intValue() <= 0 ){
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
-		if (r.getCantDiasAGenerar().compareTo(r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0 ){
-			error = true;
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0 ){
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
-		if (r.getCantDiasAGenerar().compareTo(r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0 ){
-			error = true;
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0 ){
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet"), FORM_ID+":CantDias");
+      hayErrores = true;
 		}
-		if ((r.getLargoListaEspera() != null) && (r.getLargoListaEspera() <= 0 )){
-			error = true;
+		if (recurso.getLargoListaEspera() != null && recurso.getLargoListaEspera().intValue() <= 0 ){
 			addErrorMessage(sessionMBean.getTextos().get("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero"), FORM_ID+":largoLista");
+      hayErrores = true;
 		}
-		r.setNombre(getRecursoNuevo().getNombre().trim());
-		r.setDescripcion(getRecursoNuevo().getDescripcion().trim());
-		
+    if(recurso.getPresencialAdmite()!=null && recurso.getPresencialAdmite().booleanValue()) {
+  		if(recurso.getPresencialCupos() != null && recurso.getPresencialCupos().intValue() <= 0 ) {
+        addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero"), FORM_ID+":cuposPresencial");
+        hayErrores = true;
+  		}
+      if((recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue()) && 
+          (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue()) && 
+          (recurso.getPresencialMiercoles()==null || !recurso.getPresencialMiercoles().booleanValue()) &&
+          (recurso.getPresencialJueves()==null || !recurso.getPresencialJueves().booleanValue()) &&
+          (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue()) &&
+          (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue()) &&
+          (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue())) {
+        addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_dia"), FORM_ID+":diaAplicarHidden");
+        hayErrores = true;
+      }
+    }
+		recurso.setNombre(getRecursoNuevo().getNombre().trim());
+		recurso.setDescripcion(getRecursoNuevo().getDescripcion().trim());
 		try {
-			
-			if(r.getAgenda()==null) {
-				r.setAgenda(sessionMBean.getAgendaMarcada());
+			if(recurso.getAgenda()==null) {
+				recurso.setAgenda(sessionMBean.getAgendaMarcada());
 			}
-			if(recursosEJB.existeRecursoPorNombre(r)) {
-				error = true;
+			if(recursosEJB.existeRecursoPorNombre(recurso)) {
+				hayErrores = true;
 				addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_recurso_con_el_nombre_especificado"), FORM_ID+":nombre");
 			}
-		} catch (ApplicationException e1) {
+		}catch (ApplicationException e1) {
 			addErrorMessage(e1, MSG_ID);
 		}
-		
-		if(!error) {
-			try {
-				recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), r);
-				sessionMBean.cargarRecursos();
-				sessionMBean.desmarcarRecurso();
-				//Se blanquea la info en la página
-				this.setRecursoNuevo(null);
-				addInfoMessage(sessionMBean.getTextos().get("recurso_creado"), MSG_ID);
+    if(recurso.getPeriodoValidacion()==null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_es_obligatorio"), FORM_ID+":PeriodoValidacion");
+      hayErrores = true;
+    }else if(recurso.getPeriodoValidacion()<0){
+      addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":PeriodoValidacion");
+      hayErrores = true;
+    }
+    if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true) {
+      if(recurso.getCantidadPorIP()==null) {
+        addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_es_obligatoria"), FORM_ID+":cantidadPorIP");
+        hayErrores = true;
+      }else if(recurso.getCantidadPorIP()<=0){
+        addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_debe_ser_mayor_a_cero"), FORM_ID+":cantidadPorIP");
+        hayErrores = true;
+      }
+      if(recurso.getPeriodoPorIP()==null) {
+        addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_es_obligatorio"), FORM_ID+":periodoPorIP");
+        hayErrores = true;
+      }else if(recurso.getPeriodoPorIP()<0){
+        addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":periodoPorIP");
+        hayErrores = true;
+      }
+    }
+    
+    if(recurso.getCancelacionTiempo() == null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_es_requerido"), FORM_ID+":cancelacionTiempo");
+      hayErrores = true;
+    }else if(recurso.getCancelacionTiempo().intValue() < 0 ) {
+      addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":cancelacionTiempo");
+      hayErrores = true;
+    }
+    if(recurso.getCancelacionTipo()==null) {
+      addErrorMessage(sessionMBean.getTextos().get("el_tipo_de_cancelacion_es_obligatorio"), FORM_ID+":cancelacionTipo");
+      hayErrores = true;
+    }
+		if(hayErrores) {
+		  return;
+		}
+		try {
 			
 			
-			} catch (Exception ex) {
-				addErrorMessage(ex, MSG_ID);
-			}
+			recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), recurso);
+			sessionMBean.cargarRecursos();
+			sessionMBean.desmarcarRecurso();
+			//Se blanquea la info en la página
+			this.setRecursoNuevo(null);
+			addInfoMessage(sessionMBean.getTextos().get("recurso_creado"), MSG_ID);
+		} catch (Exception ex) {
+			addErrorMessage(ex, MSG_ID);
 		}
 	}
-	
 	
 	@SuppressWarnings("unchecked")
 	public void selecRecursoEliminar(ActionEvent e){
 		sessionMBean.setRecursoSeleccionado(((Row<Recurso>)this.getRecursosDataTableConsultar().getRowData()).getData());
 	}
 	
-	
 	public void eliminar(ActionEvent ev) {
 		limpiarMensajesError();
 		
-		Recurso r = this.sessionMBean.getRecursoSeleccionado();
-		if ( r != null) {
+		Recurso recurso = this.sessionMBean.getRecursoSeleccionado();
+		if (recurso != null) {
  			try {
- 				if(sessionMBean.getRecursoMarcado()!=null && sessionMBean.getRecursoMarcado().getId().equals(r.getId())) {
+ 				if(sessionMBean.getRecursoMarcado()!=null && sessionMBean.getRecursoMarcado().getId().equals(recurso.getId())) {
  					sessionMBean.desseleccionarRecurso();
  				}
- 				
- 				recursosEJB.eliminarRecurso(r);
+ 				recursosEJB.eliminarRecurso(recurso, sessionMBean.getTimeZone());
  				sessionMBean.cargarRecursos();
  				sessionMBean.desmarcarRecurso();
-
  				addInfoMessage(sessionMBean.getTextos().get("recurso_eliminado"), MSG_ID);
  			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
  			} finally {
  				this.sessionMBean.setRecursoSeleccionado(null);
  			}
- 		}
-		else {
+ 		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
 	}
 
-	/**************************************************************************/
-	/*                       Action  de Recurso  (navegación)                 */	
-	/**************************************************************************/	
-	
 	@SuppressWarnings("unchecked")
 	public String modificar() {
-
     Recurso recurso1 = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
-		
 		if (recurso1 != null) {
 			recursoNuevo = new Recurso(recurso1);
-
 			sessionMBean.setRecursoSeleccionado(recursoNuevo);
 			//Se agrega para que si cambiamos de recurso no queden cargados los datos viejos 
 			sessionMBean.setDatoDelRecursoSeleccionado(null);
 			sessionMBean.setMostrarAgregarDato(false);
+			
+			//Cargo la accionMiPerfil, que contiene la info de todas las acciones del recurso
+		    AccionMiPerfil accionMiPerfil = recursosEJB.obtenerAccionMiPerfilDeRecurso(recursoNuevo.getId());
+		    //Le setteo la accion al recurso (transient)
+		    sessionMBean.getRecursoSeleccionado().setAccionMiPerfil(accionMiPerfil);
+		    
 			return "modificar";
 		} else {
 			sessionMBean.setRecursoSeleccionado(null);
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 			return null;
 		}
-		
 	}
 
 	@SuppressWarnings("unchecked")
 	public void copiar(ActionEvent event) {
-    Recurso r = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
-		if (r != null) {
+    Recurso recurso = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
+		if (recurso != null) {
 			try {
-				recursosEJB.copiarRecurso(r);
+				//Cargo la accionMiPerfil, que contiene la info de todas las acciones del recurso
+			    AccionMiPerfil accionMiPerfil = recursosEJB.obtenerAccionMiPerfilDeRecurso(recurso.getId());
+			    //Le setteo la accion al recurso (transient)
+			    recurso.setAccionMiPerfil(accionMiPerfil);
+			    
+				recursosEJB.copiarRecurso(recurso);
 				sessionMBean.cargarRecursos();
 				sessionMBean.desmarcarRecurso();
 				addInfoMessage(sessionMBean.getTextos().get("recurso_copiado"), MSG_ID);
@@ -419,142 +544,222 @@ public class RecursoMBean extends BaseMBean{
 		}
 	}
 
-	
 	public String guardar() {
 		limpiarMensajesError();
-		
 		if (sessionMBean.getRecursoSeleccionado() != null) {
  			try {
- 				boolean error = false;
+ 				boolean hayErrores = false;
  				sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(0);
  				sessionMBean.getRecursoSeleccionado().setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
  				sessionMBean.getRecursoSeleccionado().setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
- 				Recurso r = sessionMBean.getRecursoSeleccionado();
- 				if(r.getNombre() == null || r.getNombre().equals("")){
- 					error = true;
+ 				Recurso recurso = sessionMBean.getRecursoSeleccionado();
+ 				if(recurso.getNombre() == null || recurso.getNombre().equals("")){
  					addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_recurso_es_obligatorio"), FORM_ID+":nombre");
+          hayErrores = true;
  				}
- 				if(r.getDescripcion() == null || r.getDescripcion().equals("")){
- 					error = true;
+ 				if(recurso.getDescripcion() == null || recurso.getDescripcion().equals("")){
  					addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
+          hayErrores = true;
  				}
-
         //Fechas de vigencia
- 				if (r.getFechaInicio() == null){
- 					error = true;
+ 				if (recurso.getFechaInicio()==null){
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaInicio())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_invalida"), FORM_ID+":fechaInicio");
+          hayErrores = true;
  				}else {
- 					r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
+ 					recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
  				}
- 				if(r.getFechaFin()==null) {
- 					error = true;
+ 				if(recurso.getFechaFin()==null) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_obligatoria"), FORM_ID+":fechaFin");
- 				} else {
- 					r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaFin())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_es_invalida"), FORM_ID+":fechaFin");
+          hayErrores = true;
+        }else {
+ 					recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
  				}
- 				if(r.getFechaInicio() != null && r.getFechaFin() != null && r.getFechaInicio().compareTo(r.getFechaFin()) > 0 ) {
- 					error = true;
+ 				if(recurso.getFechaInicio()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+ 				    recurso.getFechaFin()!= null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && 
+ 				    recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0 ) {
+ 					hayErrores = true;
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_vigencia_debe_ser_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaInicio");
  				}
  				//Fechas de disponibilidad
- 				if(r.getFechaInicioDisp() == null) {
- 					error = true;
+ 				if(recurso.getFechaInicioDisp() == null) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaInicioDispon");
- 				}else {
- 					r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaInicioDisp())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_es_invalida"), FORM_ID+":fechaInicioDispon");
+          hayErrores = true;
+        }else {
+ 					recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
  				}
- 				if(r.getFechaFinDisp() == null) {
- 					error = true;
+ 				if(recurso.getFechaFinDisp() == null) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_obligatoria"), FORM_ID+":fechaFinDispon");
- 				}else {
- 					r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));	
+          hayErrores = true;
+ 				}else if(Utiles.esFechaInvalida(recurso.getFechaFinDisp())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_es_invalida"), FORM_ID+":fechaFinDispon");
+          hayErrores = true;
+        }else {
+ 					recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));	
  				}
- 				if(r.getFechaInicioDisp()!=null && r.getFechaFinDisp() != null && r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0 ){
- 					error = true;
+ 				if(recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) &&
+ 				    recurso.getFechaFinDisp() != null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) &&
+ 				    recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp())>0){
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_disponibilidad_de_vigencia"), FORM_ID+":fechaFinDispon",FORM_ID+":fechaInicioDispon");
+          hayErrores = true;
  				}
  				//Relaciones entre fechas de vigencia y disponibilidad
- 				if (r.getFechaInicioDisp() != null && r.getFechaInicio()!= null && r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
- 					error = true;
+ 				if (recurso.getFechaInicioDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicioDisp()) && 
+ 				    recurso.getFechaInicio()!=null && !Utiles.esFechaInvalida(recurso.getFechaInicio()) && 
+ 				    recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_disponibilidad_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_vigencia"), FORM_ID+":fechaInicio",FORM_ID+":fechaInicioDispon");
+          hayErrores = true;
  				}
- 				if (r.getFechaFinDisp() != null && r.getFechaFin()!= null && r.getFechaFinDisp().compareTo(r.getFechaFin()) > 0) {
- 					error = true;
+ 				if (recurso.getFechaFinDisp()!=null && !Utiles.esFechaInvalida(recurso.getFechaFinDisp()) && 
+ 				    recurso.getFechaFin()!=null && !Utiles.esFechaInvalida(recurso.getFechaFin()) && 
+ 				    recurso.getFechaFinDisp().compareTo(recurso.getFechaFin())>0) {
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_de_disponibilidad_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_vigencia"), FORM_ID+":fechaFin",FORM_ID+":fechaFinDispon");
+          hayErrores = true;
  				}
- 				
- 				if (r.getDiasInicioVentanaIntranet() == null){
- 					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasVIntranet");
+        if (recurso.getDiasInicioVentanaIntranet() == null){
+          addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasIVIntranet");
+          hayErrores = true;
+        }else if (recurso.getDiasInicioVentanaIntranet().intValue() < 0){
+          addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":diasIVIntranet");
+          hayErrores = true;
+        }
+ 				if (recurso.getDiasVentanaIntranet() == null){
+ 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasVIntranet");
+          hayErrores = true;
+ 				}else if (recurso.getDiasVentanaIntranet().intValue() <= 0){
+ 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":diasVIntranet");
+          hayErrores = true;
  				}
- 				if (r.getDiasInicioVentanaIntranet()!=null && r.getDiasInicioVentanaIntranet() < 0){
- 					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":diasVIntranet");
- 				}
- 				if (r.getDiasVentanaInternet() == null){
- 					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasVInternet");
- 				}
- 				if (r.getDiasVentanaInternet() != null && r.getDiasVentanaInternet() <= 0){
- 					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVInternet");
- 				}
- 				if (r.getDiasInicioVentanaInternet() == null){
- 					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":diasIVInternet");
- 				}
- 				if (r.getDiasInicioVentanaInternet() != null && r.getDiasInicioVentanaInternet() < 0){
- 					error = true;
- 					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":diasIVInternet");
- 				}
- 				if (r.getVentanaCuposMinimos() == null){
- 					error = true;
+ 		    if(recurso.getVisibleInternet()!=null && recurso.getVisibleInternet().booleanValue()) {
+   				if (recurso.getDiasInicioVentanaInternet() == null){
+   					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":diasIVInternet");
+            hayErrores = true;
+   				}else if (recurso.getDiasInicioVentanaInternet().intValue() < 0){
+   					addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":diasIVInternet");
+            hayErrores = true;
+   				}
+          if (recurso.getDiasVentanaInternet() == null){
+            addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":diasVInternet");
+            hayErrores = true;
+          }else if (recurso.getDiasVentanaInternet().intValue() <= 0){
+            addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":diasVInternet");
+            hayErrores = true;
+          }
+        }
+ 				if (recurso.getVentanaCuposMinimos() == null){
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposMin");
+          hayErrores = true;
  				}
- 				if (r.getVentanaCuposMinimos()!=null && r.getVentanaCuposMinimos() < 0 ){
- 					error = true;
+ 				if (recurso.getVentanaCuposMinimos()!=null && recurso.getVentanaCuposMinimos().intValue() < 0 ){
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":VCuposMin");
+          hayErrores = true;
  				}
- 				if (r.getCantDiasAGenerar() == null){
- 					error = true;
+ 				if (recurso.getCantDiasAGenerar() == null){
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_es_obligatoria"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
- 				if (r.getCantDiasAGenerar()!=null && r.getCantDiasAGenerar() <= 0 ){
- 					error = true;
+ 				if (recurso.getCantDiasAGenerar()!=null && recurso.getCantDiasAGenerar().intValue() <= 0 ){
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
- 				if (r.getCantDiasAGenerar().compareTo(r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0 ){
- 					error = true;
+ 				if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0 ){
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
- 				if (r.getCantDiasAGenerar().compareTo(r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0 ){
- 					error = true;
+ 				if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0 ){
  					addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet"), FORM_ID+":vDiasGen");
+          hayErrores = true;
  				}
- 				if ((r.getLargoListaEspera() != null) && (r.getLargoListaEspera() <= 0 )){
- 					error = true;
+ 				if ((recurso.getLargoListaEspera() != null) && (recurso.getLargoListaEspera().intValue() <= 0 )){
  					addErrorMessage(sessionMBean.getTextos().get("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero"), FORM_ID+":largoListaEspera");
+          hayErrores = true;
  				}
- 				r.setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
- 				r.setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
- 				
+ 		    if(recurso.getPresencialAdmite()!=null && recurso.getPresencialAdmite().booleanValue()) {
+ 		      if(recurso.getPresencialCupos() != null && recurso.getPresencialCupos().intValue() <= 0 ) {
+ 	          addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_por_dia_debe_ser_mayor_a_cero"), FORM_ID+":cuposPresencial");
+            hayErrores = true;
+ 		      }
+ 		      if((recurso.getPresencialLunes()==null || !recurso.getPresencialLunes().booleanValue()) && 
+ 		          (recurso.getPresencialMartes()==null || !recurso.getPresencialMartes().booleanValue()) && 
+ 		          (recurso.getPresencialMiercoles()==null || !recurso.getPresencialMiercoles().booleanValue()) &&
+ 		          (recurso.getPresencialJueves()==null || !recurso.getPresencialJueves().booleanValue()) &&
+ 		          (recurso.getPresencialViernes()==null || !recurso.getPresencialViernes().booleanValue()) &&
+ 		          (recurso.getPresencialSabado()==null || !recurso.getPresencialSabado().booleanValue()) &&
+ 		          (recurso.getPresencialDomingo()==null || !recurso.getPresencialDomingo().booleanValue())) {
+            addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_al_menos_un_dia"), FORM_ID+":diaAplicarHidden");
+            hayErrores = true;
+ 		      }
+ 		    }
+        if(recurso.getCambiosAdmite()!=null && recurso.getCambiosAdmite().booleanValue()) {
+          if(recurso.getCambiosTiempo() == null) {
+            addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cambios_es_requerido"), FORM_ID+":cambiosTiempo");
+            hayErrores = true;
+          }else if(recurso.getCambiosTiempo().intValue() <= 0 ) {
+            addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cambios_debe_ser_mayor_a_cero"), FORM_ID+":cambiosTiempo");
+            hayErrores = true;
+          }
+        }
+ 				recurso.setNombre(sessionMBean.getRecursoSeleccionado().getNombre().trim());
+ 				recurso.setDescripcion(sessionMBean.getRecursoSeleccionado().getDescripcion().trim());
  				try {
- 					
- 					if(r.getAgenda()==null) {
- 						r.setAgenda(sessionMBean.getAgendaMarcada());
+ 					if(recurso.getAgenda()==null) {
+ 						recurso.setAgenda(sessionMBean.getAgendaMarcada());
  					}
- 					if(recursosEJB.existeRecursoPorNombre(r)) {
- 						error = true;
+ 					if(recursosEJB.existeRecursoPorNombre(recurso)) {
  						addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_recurso_con_el_nombre_especificado"), FORM_ID+":nombre");
+            hayErrores = true;
  					}
- 				} catch (ApplicationException e1) {
+ 				}catch (ApplicationException e1) {
  					addErrorMessage(e1, MSG_ID);
  				}
- 				
- 				if(error) {
+ 				if(recurso.getPeriodoValidacion()==null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_es_obligatorio"), FORM_ID+":vPeriodoValidacion");
+          hayErrores = true;
+ 				}else if(recurso.getPeriodoValidacion()<0){
+          addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":vPeriodoValidacion");
+          hayErrores = true;
+ 				}
+        if(recurso.getValidarPorIP()!=null && recurso.getValidarPorIP()==true) {
+          if(recurso.getCantidadPorIP()==null) {
+            addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_es_obligatoria"), FORM_ID+":cantidadPorIP");
+            hayErrores = true;
+          }else if(recurso.getCantidadPorIP()<=0){
+            addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_reservas_por_ip_debe_ser_mayor_a_cero"), FORM_ID+":cantidadPorIP");
+            hayErrores = true;
+          }
+          if(recurso.getPeriodoPorIP()==null) {
+            addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_es_obligatorio"), FORM_ID+":periodoPorIP");
+            hayErrores = true;
+          }else if(recurso.getPeriodoPorIP()<0){
+            addErrorMessage(sessionMBean.getTextos().get("el_periodo_de_validacion_por_ip_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":periodoPorIP");
+            hayErrores = true;
+          }
+        }
+        if(recurso.getCancelacionTiempo() == null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_es_requerido"), FORM_ID+":cancelacionTiempo");
+          hayErrores = true;
+        }else if(recurso.getCancelacionTiempo().intValue() < 0 ) {
+          addErrorMessage(sessionMBean.getTextos().get("el_tiempo_previo_para_cancelaciones_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":cancelacionTiempo");
+          hayErrores = true;
+        }
+        if(recurso.getCancelacionTipo()==null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_tipo_de_cancelacion_es_obligatorio"), FORM_ID+":cancelacionTipo");
+          hayErrores = true;
+        }
+ 				if(hayErrores) {
  					return null;
  				}
- 				
+ 				if(recurso.getIpsSinValidacion()!=null) {
+ 				  recurso.setIpsSinValidacion(recurso.getIpsSinValidacion().replace(" ", ";").replace(",", ";").replace("-", ";"));
+ 				}
  				recursosEJB.modificarRecurso(sessionMBean.getRecursoSeleccionado());
  				addInfoMessage(sessionMBean.getTextos().get("recurso_modificado"), MSG_ID); 				
 				sessionMBean.cargarRecursos();
@@ -643,51 +848,6 @@ public class RecursoMBean extends BaseMBean{
 	public void cancelarAgregarDato(ActionEvent event) {
 		sessionMBean.setMostrarAgregarDato(false);
 		sessionMBean.cargarDatosDelRecurso();
-	}
-	
-	public String cancelarRecurso() {
-		
-		Recurso recurso = sessionMBean.getRecursoSeleccionado();
-		
-		Recurso recursoBase;
-		try {
-			recursoBase = recursosEJB.consultarRecurso(recurso);
-			sessionMBean.getRecursoSeleccionado().setAgenda(recursoBase.getAgenda());
-			sessionMBean.getRecursoSeleccionado().setCantDiasAGenerar(recursoBase.getCantDiasAGenerar());
-			sessionMBean.getRecursoSeleccionado().setDepartamento(recursoBase.getDepartamento());
-			sessionMBean.getRecursoSeleccionado().setDescripcion(recursoBase.getDescripcion());
-			sessionMBean.getRecursoSeleccionado().setDiasInicioVentanaInternet(recursoBase.getDiasInicioVentanaInternet());
-			sessionMBean.getRecursoSeleccionado().setDiasInicioVentanaIntranet(recursoBase.getDiasInicioVentanaIntranet());
-			sessionMBean.getRecursoSeleccionado().setDiasVentanaInternet(recursoBase.getDiasVentanaInternet());
-			sessionMBean.getRecursoSeleccionado().setDiasVentanaIntranet(recursoBase.getDiasVentanaIntranet());
-			sessionMBean.getRecursoSeleccionado().setDireccion(recursoBase.getDireccion());
-			
-			
-			sessionMBean.getRecursoSeleccionado().setFechaFin(recursoBase.getFechaFin());
-			sessionMBean.getRecursoSeleccionado().setFechaFinDisp(recursoBase.getFechaFinDisp());
-			sessionMBean.getRecursoSeleccionado().setFechaInicio(recursoBase.getFechaInicio());
-			sessionMBean.getRecursoSeleccionado().setFechaInicioDisp(recursoBase.getFechaInicioDisp());
-			sessionMBean.getRecursoSeleccionado().setHorarios(recursoBase.getHorarios());
-			sessionMBean.getRecursoSeleccionado().setLargoListaEspera(recursoBase.getLargoListaEspera());
-			sessionMBean.getRecursoSeleccionado().setLatitud(recursoBase.getLatitud());
-			sessionMBean.getRecursoSeleccionado().setLocalidad(recursoBase.getLocalidad());
-			sessionMBean.getRecursoSeleccionado().setLongitud(recursoBase.getLongitud());
-			sessionMBean.getRecursoSeleccionado().setMostrarNumeroEnLlamador(recursoBase.getMostrarNumeroEnLlamador());
-			sessionMBean.getRecursoSeleccionado().setMostrarNumeroEnTicket(recursoBase.getMostrarNumeroEnTicket());
-			sessionMBean.getRecursoSeleccionado().setMostrarIdEnTicket(recursoBase.getMostrarIdEnTicket());
-			sessionMBean.getRecursoSeleccionado().setNombre(recursoBase.getNombre());
-			sessionMBean.getRecursoSeleccionado().setReservaMultiple(recursoBase.getReservaMultiple());
-			sessionMBean.getRecursoSeleccionado().setSabadoEsHabil(recursoBase.getSabadoEsHabil());
-      sessionMBean.getRecursoSeleccionado().setDomingoEsHabil(recursoBase.getDomingoEsHabil());
-			sessionMBean.getRecursoSeleccionado().setSerie(recursoBase.getSerie());
-			sessionMBean.getRecursoSeleccionado().setTelefonos(recursoBase.getTelefonos());
-			sessionMBean.getRecursoSeleccionado().setVentanaCuposMinimos(recursoBase.getVentanaCuposMinimos());
-			sessionMBean.getRecursoSeleccionado().setVisibleInternet(recursoBase.getVisibleInternet());
-		} catch (UserException e) {
-			e.printStackTrace();
-		}
-		
-		return "cancelar";
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -870,7 +1030,7 @@ public class RecursoMBean extends BaseMBean{
     Recurso recurso = ((Row<Recurso>) this.getRecursosDataTableConsultar().getRowData()).getData();
 		if (recurso != null) {
 			try {
-				byte[] bytes = recursosEJB.exportarRecurso(recurso);
+				byte[] bytes = recursosEJB.exportarRecurso(recurso, sessionMBean.getVersion());
 				
 				FacesContext fc = FacesContext.getCurrentInstance();
 		    ExternalContext ec = fc.getExternalContext();
@@ -906,7 +1066,7 @@ public class RecursoMBean extends BaseMBean{
 		
 		try {
 			byte[] bytes = IOUtils.toByteArray(archivo.getInputstream());
-			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes);
+			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes, sessionMBean.getVersion());
 			if(recurso != null) {
 				sessionMBean.cargarRecursos();
 				addInfoMessage(sessionMBean.getTextos().get("recurso_importado_exitosamente"), MSG_ID);
@@ -926,5 +1086,48 @@ public class RecursoMBean extends BaseMBean{
     }
     return oficinas;
 	}
+	
+	
+	public List<SelectItem> getTamaniosFuentes() {
+	  return tamaniosFuentes;
+	}
+
+  public List<SelectItem> getNombresFuentes() {
+    return nombresFuentes;
+  }
+  
+  public List<SelectItem> getcambiosUnidades() {
+    return cambiosUnidades;
+  }
+  
+  public List<SelectItem> getCancelacionUnidades() {
+    return cancelacionUnidades;
+  }
+
+  /**
+   * Método que genera un ticket dummy con una reserva falsa, utilizado para probar cómo queda luego de cambiar la fuente
+   * @return
+   */
+  public String generarTicket(Recurso recurso) {
+    
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(cal.getTimeInMillis()));
+    Reserva reserva = new Reserva();
+    reserva.setCodigoSeguridad("00000");
+    reserva.setNumero(0);
+    reserva.setTrazabilidadGuid("XXXXXXXXX");
+    reserva.setId(0);
+    Disponibilidad disp = new Disponibilidad();
+    disp.setFecha(cal.getTime());
+    disp.setHoraInicio(cal.getTime());
+    reserva.getDisponibilidades().add(disp);
+    
+    TicketUtiles ticketUtiles = new TicketUtiles();
+    ticketUtiles.generarTicket(sessionMBean.getEmpresaActual(), sessionMBean.getAgendaMarcada(), recurso, sessionMBean.getTimeZone(), 
+        reserva, sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), sessionMBean.getTextos(), false);
+    
+    return null;
+  }
+
 	
 }

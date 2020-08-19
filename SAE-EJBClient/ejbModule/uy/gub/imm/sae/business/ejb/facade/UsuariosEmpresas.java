@@ -22,6 +22,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 
 import java.util.List;
+import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.dto.UsuarioEmpresaRoles;
 import uy.gub.imm.sae.entity.global.Empresa;
@@ -40,18 +41,17 @@ public interface UsuariosEmpresas {
 	public List<Usuario> consultarUsuarios() throws ApplicationException;
 	public List<Usuario> consultarUsuariosEmpresa(Integer empresaId) throws ApplicationException;
 	public Usuario guardarUsuario(Usuario usuario) throws ApplicationException; 
-	public void eliminarUsuario(Usuario usuario) throws ApplicationException;
 	public Usuario generarYEnviarPassword(Usuario usuarioEditar) throws ApplicationException;
 	
 	public Empresa obtenerEmpresaPorId(Integer empresaId) throws ApplicationException;
 	public Empresa obtenerEmpresaPorNombre(String nombre) throws ApplicationException;
 	public List<Empresa> consultarEmpresas() throws ApplicationException;
 	public Empresa guardarEmpresa(Empresa empresa) throws ApplicationException, UserException; 
-	public void eliminarEmpresa(Empresa empresa) throws ApplicationException, UserException;
+	public void eliminarEmpresa(Empresa empresa, TimeZone timezone) throws ApplicationException, UserException;
 
 	public List<String> obtenerRolesUsuarioEmpresa(Integer usuarioId, Integer empresaId) throws ApplicationException;
 	public void guardarRolesUsuarioEmpresa(UsuarioEmpresaRoles roles) throws ApplicationException;
-
+	
 	/**
 	 * Devuelve la lista de organismos. Si el parámetro actualizar es false devuelve lo que tiene en la
 	 * base de datos, si es true vacía la base de datos, consulta al servicio web, almacena los resultados

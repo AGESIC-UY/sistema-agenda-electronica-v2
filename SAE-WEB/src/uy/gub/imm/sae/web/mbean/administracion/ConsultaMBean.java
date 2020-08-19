@@ -39,10 +39,9 @@ import javax.servlet.http.HttpServletRequest;
 
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.ApplicationException;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
 import uy.gub.imm.sae.web.common.SessionCleanerMBean;
 
@@ -61,7 +60,6 @@ public class ConsultaMBean extends SessionCleanerMBean {
 	
 	
 	private SessionMBean sessionMBean;
-	private ConsultaSessionMBean consultaSessionMBean;
 	private String idReserva;
 	private Integer dataScrollerPage;
 	
@@ -76,12 +74,85 @@ public class ConsultaMBean extends SessionCleanerMBean {
 	private String numeroReserva;
 	private Reserva reservaConsultada;
 	
-	
 	public ConsultaMBean(){
-		
 	}
 	
-	
+  public void beforePhaseConsultarReservaId(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_id"));
+    }
+  }
+
+  public void beforePhaseConsultarReservaNumero(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_numero"));
+    }
+  }
+
+  public void beforePhaseConsultarReservaPeriodo(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_reservas"));
+    }
+  }
+
+  public void beforePhaseConsultarAsistenciaPeriodo(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_asistencias"));
+    }
+  }
+
+  public void beforePhaseConsultarAtencionFuncionario(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_atencion_funcionario"));
+    }
+  }
+  
+  public void beforePhaseConsultarTiempoAtencionFuncionario(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_tiempo_atencion_funcionario"));
+    }
+  }
+  
+  public void beforePhaseConsultarAtencionPresencialPeriodo(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (sessionMBean.getAgendaMarcada() == null){
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+    }
+    if (sessionMBean.getRecursoMarcado() == null){
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_atencion_presencial"));
+    }
+  }
+  
 	@PostConstruct
 	public void initAgendaRecurso(){
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
@@ -106,85 +177,31 @@ public class ConsultaMBean extends SessionCleanerMBean {
 			//En estos casos se permite no tener seleccionado un recurso o agenda porque el reporte se hace para todos
 			if (sessionMBean.getRecursoMarcado() == null){
 				if (sessionMBean.getAgendaMarcada() == null){
-					addAdvertenciaMessage("No tiene un recurso ni agenda seleccionada, el reporte se genera contemplando a todos los recursos y agendas");
+					addAdvertenciaMessage(sessionMBean.getTextos().get("reporte_para_todas_las_agendas_y_recursos"));
 				}else {
-					addAdvertenciaMessage("No tiene un recurso seleccionado, el reporte se genera contemplando a todos los recursos de la agenda seleccionada");
+					addAdvertenciaMessage(sessionMBean.getTextos().get("reporte_para_todos_los_recursos"));
 				}
 			}
 		}
-		
-	}
-	
-	public void buscarReservaId(ActionEvent event){
-		
-		limpiarMensajesError();
-		
-		boolean huboError=false;
-		Reserva reservaAux ;
-		
-		campos.getChildren().clear();
-		// limpio campos en los que guardo mis datos de Session
-		consultaSessionMBean.setReserva(null);
-		consultaSessionMBean.setDisponibilidad(null);
-		
-		if (sessionMBean.getAgendaMarcada() == null && !huboError){
-			huboError = true;
-			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
-		}
-		
-		if (sessionMBean.getRecursoMarcado() == null && !huboError){
-			huboError = true;
-			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
-		}
-
-		Integer iIdReserva = null; 
-		if (idReserva==null || idReserva.trim().isEmpty()){
-			huboError = true;
-			addErrorMessage(sessionMBean.getTextos().get("el_identificador_de_la_reserva_es_obligatorio"), "form:VNroReserva");
-		}else {
-			try {
-				iIdReserva = Integer.valueOf(idReserva);
-			}catch(Exception ex) {
-				huboError = true;
-				addErrorMessage(sessionMBean.getTextos().get("el_identificador_de_la_reserva_debe_ser_numerico"), "form:VNroReserva");
-			}
-		}
-		
-		
-		if (!huboError){
-					
-			// Voy a negocio a buscar la reserva
-			try {
-				reservaAux = consultaEJB.consultarReservaId(iIdReserva, sessionMBean.getRecursoMarcado().getId());
-				if (reservaAux== null){
-					addErrorMessage(sessionMBean.getTextos().get("no_se_encuentra_la_reserva_especificada"), MSG_ID);
-				} else {
-					this.consultaSessionMBean.setReserva(reservaAux);
-					this.consultaSessionMBean.setDisponibilidad(reservaAux.getDisponibilidades().get(0));
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
-					FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), this.consultaSessionMBean.getReserva(), this.campos, agrupaciones, sessionMBean.getFormatoFecha());
-				}	
-			
-			} catch (ApplicationException ae) {
-				addErrorMessage(ae.getMessage(), MSG_ID);
-			} catch (BusinessException be) {
-				addErrorMessage(be.getMessage(), MSG_ID);
-			} catch (Exception e) {
-				addErrorMessage(e, MSG_ID);
-			}
-	
-		}	
 	}
 
+  public void beforePhaseConsultarCancelaciones(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_cancelaciones"));
+    }
+  }
 	
-		public SessionMBean getSessionMBean() {
+	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
 
 	public void setSessionMBean(SessionMBean sessionMBean) {
 		this.sessionMBean = sessionMBean;
 	}
-
 	
 	public String getIdReserva() {
 		return idReserva;
@@ -202,138 +219,129 @@ public class ConsultaMBean extends SessionCleanerMBean {
 		this.dataScrollerPage = dataScrollerPage;
 	}
 
-	public ConsultaSessionMBean getConsultaSessionMBean() {
-		return consultaSessionMBean;
-	}
-
-	public void setConsultaSessionMBean(ConsultaSessionMBean consultaSessionMBean) {
-		this.consultaSessionMBean = consultaSessionMBean;
-	}
-
-	public void beforePhaseConsultarReservaId(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_id"));
-		}
-	}
-
-	public void beforePhaseConsultarReservaNumero(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_numero"));
-		}
-	}
-
-	public void beforePhaseConsultarReservaPeriodo(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_reservas"));
-		}
-	}
-
-	public void beforePhaseConsultarAsistenciaPeriodo(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_asistencias"));
-		}
-	}
-
-	public void beforePhaseConsultarTiempoAtencion(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("gestionar_tokens"));
-		}
-	}
-	
-	public void beforePhaseConsultarAtencionFuncionario(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_atencion_funcionario"));
-		}
-	}
-	
-	public void beforePhaseConsultarTiempoAtencionFuncionario(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reporte_tiempo_atencion_funcionario"));
-		}
-	}
-	
 	public UIComponent getCampos() {
 		return campos;
 	}
-
 
 	public void setCampos(UIComponent campos) {
 		this.campos = campos;
 	}
 	
-	
-	/**
-	 * Pagina de consulta por Numero
-	 *  
-	 */
-
 	public Date getFechaHoraReserva() {
 		return fechaHoraReserva;
 	}
-
 
 	public void setFechaHoraReserva(Date fechaHoraReserva) {
 		this.fechaHoraReserva = fechaHoraReserva;
 	}
 
-
 	public String getNumeroReserva() {
 		return numeroReserva;
 	}
-
 
 	public void setNumeroReserva(String numeroReserva) {
 		this.numeroReserva = numeroReserva;
 	}
 
-
 	public Reserva getReservaConsultada() {
 		return reservaConsultada;
 	}
-
 	
+  /**
+   * Realiza la búsqueda de una reserva por su identificador.
+   * No excluye a las reservas correspondientes a disponibilidades presenciales.
+   * @param event
+   */
+  public void buscarReservaId(ActionEvent event){
+    
+    limpiarMensajesError();
+    
+    boolean huboError=false;
+    
+    campos.getChildren().clear();
+    
+    if (sessionMBean.getAgendaMarcada() == null && !huboError){
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
+    }
+    
+    if (sessionMBean.getRecursoMarcado() == null && !huboError){
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+    }
+
+    Integer iIdReserva = null; 
+    if (idReserva==null || idReserva.trim().isEmpty()){
+      huboError = true;
+      addErrorMessage(sessionMBean.getTextos().get("el_identificador_de_la_reserva_es_obligatorio"), "form:VNroReserva");
+    }else {
+      try {
+        iIdReserva = Integer.valueOf(idReserva);
+      }catch(Exception ex) {
+        huboError = true;
+        addErrorMessage(sessionMBean.getTextos().get("el_identificador_de_la_reserva_debe_ser_numerico"), "form:VNroReserva");
+      }
+    }
+    
+    if (!huboError){
+      try {
+        reservaConsultada = consultaEJB.consultarReservaId(iIdReserva, sessionMBean.getRecursoMarcado().getId());
+        if (reservaConsultada == null){
+          addErrorMessage(sessionMBean.getTextos().get("no_se_encuentra_la_reserva_especificada"), MSG_ID);
+        } else {
+          List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
+          FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), reservaConsultada, this.campos, agrupaciones, sessionMBean.getFormatoFecha());
+        }
+      } catch (Exception ex) {
+        addErrorMessage(ex, MSG_ID);
+      }
+    } 
+  }
+	
+  /**
+   * Realiza la búsqueda de una reserva por la combinación de fecha/hora/número.
+   * No considera a las reservas correspondientes a disponibilidades presenciales.
+   * @param event
+   */
 	public void buscarReservaPorNumero(ActionEvent event){
-		
 		limpiarMensajesError();
-		
-		boolean huboError=false;
-		
+		reservaConsultada = null;
+		boolean hayErrores=false;
 		campos.getChildren().clear();
 		if (sessionMBean.getAgendaMarcada() == null){
-			huboError = true;
 			addErrorMessage("debe_haber_una_agenda_seleccionada");
+      hayErrores = true;
 		}
-		
 		if (sessionMBean.getRecursoMarcado() == null){
-			huboError = true;
 			addErrorMessage("debe_haber_un_recurso_seleccionado");
+      hayErrores = true;
 		}
-		
 		Integer iNumeroReserva = null;
-		if (fechaHoraReserva == null){
-			huboError = true;
+		if(fechaHoraReserva == null){
 			addErrorMessage("el_dia_y_la_hora_son_obligatorios", "form:fechaHoraReserva");
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaHoraReserva)) {
+      addErrorMessage("la_fecha_es_invalida", "form:fechaHoraReserva");
+      hayErrores = true;
 		}
 		if (numeroReserva == null || numeroReserva.trim().isEmpty()){
-			huboError = true;
 			addErrorMessage("el_numero_es_obligatorio", "form:nroRes");
+      hayErrores = true;
 		}else {
 			try {
 				iNumeroReserva = Integer.valueOf(numeroReserva);
 			}catch(NumberFormatException nfEx) {
-				huboError = true;
 				addErrorMessage("el_numero_ingresado_no_es_valido", "form:nroRes");
+        hayErrores = true;
 			}
 		}
 		
-		if (!huboError){
+		if (!hayErrores){
 			Calendar c = new GregorianCalendar();
 			c.setTime(fechaHoraReserva); //Debe estar en GMT0	
 			c.set(Calendar.HOUR_OF_DAY, hora);
 			c.set(Calendar.MINUTE, min);
 			c.set(Calendar.SECOND, 0);
-			
-			// Voy a negocio a buscar la reserva
 			try {
 				reservaConsultada = consultaEJB.consultarReservaPorNumero(sessionMBean.getRecursoMarcado(), c.getTime(), iNumeroReserva);
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
@@ -414,7 +422,5 @@ public class ConsultaMBean extends SessionCleanerMBean {
 			minutos.add(s);
 		}
 	}
-	
-	
 	
 }

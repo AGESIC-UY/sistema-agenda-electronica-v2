@@ -133,8 +133,6 @@ public class LlamadasHelperBean implements LlamadasHelperLocal {
 		}
 	}
 	
-	
-	
 	@SuppressWarnings("unchecked")
 	private Llamada buildLlamada(Recurso recurso, Reserva reserva, Integer puesto) {
 	
@@ -145,43 +143,33 @@ public class LlamadasHelperBean implements LlamadasHelperLocal {
 		ll.setHora(new Date());
 		ll.setNumero(reserva.getNumero());
 		ll.setPuesto(puesto);
-
-		
-		
-		//Obtengo los datos solicitados para la reserva que deben desplegarse en la pantalla llamadora
-		List<Object[]> datos = (List<Object[]>) em.createQuery(
-									"select dr.datoASolicitar.incluirEnLlamador, dr.datoASolicitar.largoEnLlamador, dr.valor " +
-									"from DatoReserva dr " +
-									"where dr.reserva = :reserva " +
-									"order by dr.datoASolicitar.ordenEnLlamador ")
-									.setParameter("reserva", reserva)
-									.getResultList();
-		
+		//ObtenER los datos solicitados para la reserva que deben desplegarse en la pantalla llamadora
+		List<Object[]> datos = (List<Object[]>) em.createQuery("SELECT dr.datoASolicitar.incluirEnLlamador, dr.datoASolicitar.largoEnLlamador, dr.valor " +
+			"FROM DatoReserva dr " +
+			"WHERE dr.reserva = :reserva " +
+			"ORDER BY dr.datoASolicitar.ordenEnLlamador ")
+			.setParameter("reserva", reserva)
+			.getResultList();
 		String etiqueta = "";
 		for (Object[] row : datos) {
 			Boolean incluir = (Boolean)row[0];
 			Integer largo = (Integer)row[1];
 			String valor = (String)row[2];
-			
 			if (incluir) {
 				if (valor.length() <= largo) {
 					etiqueta += valor;
 					etiqueta += " ";
-				}
-				else {
+				} else {
 					etiqueta += valor.substring(0,largo);
 					etiqueta += ". ";
 				}
 			}
 		}
-		
 		if (etiqueta.equals("")) {
 			ll.setEtiqueta("---");
-		}
-		else {
+		} else {
 			ll.setEtiqueta(etiqueta);
 		}
-		
 		return ll;
 	}
 	

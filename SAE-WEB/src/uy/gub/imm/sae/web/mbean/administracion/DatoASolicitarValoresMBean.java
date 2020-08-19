@@ -26,7 +26,6 @@ import javax.ejb.EJB;
 import javax.faces.event.ActionEvent;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
-import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.web.common.BaseMBean;
@@ -61,12 +60,11 @@ public class DatoASolicitarValoresMBean extends BaseMBean {
 			datoASSessionMBean.setMostrarAgregarValor(false);
 		}
 	}
-
 	
 	public void modificarValor(ActionEvent event) {
 		
 		ValorPosible vp = datoASSessionMBean.getValorDelDatoSeleccionado();
-		if (vp != null) {	
+		if (vp != null) {
 			boolean hayError = false;
 			if(vp.getEtiqueta() == null || vp.getEtiqueta().trim().isEmpty()){
 				addErrorMessage(sessionMBean.getTextos().get("la_etiqueta_del_dato_es_obligatoria"), "formModif2:modEtiqueta");
@@ -87,44 +85,40 @@ public class DatoASolicitarValoresMBean extends BaseMBean {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "formModif2:fechaDesde");
 				hayError = true;
 			} else if ((vp.getFechaHasta() != null) && (vp.getFechaDesde().compareTo(vp.getFechaHasta()) > 0 )){
-				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formModif2:fechaDesde", "formModif2:fechaHasta");
+	      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_anterior_a_la_fecha_de_fin"), "formModif2:fechaDesde");
+	      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formModif2:fechaHasta");
 				hayError = true;
+			}
+			if(!validarCampoLista(vp, "formModif2:modValor")) {
+			  //El mensaje lo pone la validación
+        hayError = true;
 			}
 			if(hayError) {
 				return;
 			}
-			
 			try {
 				DatoASolicitar datoSel = datoASSessionMBean.getDatoSeleccionado();
 				vp.setDato(datoSel);
 				if (recursosEJB.existeValorPosiblePeriodo(vp)) {
 					addErrorMessage(sessionMBean.getTextos().get("ya_existe_otro_valor_con_la_misma_etiqueta_y_valor"), "formModif2:modEtiqueta", "formModif2:modValor", "formModif2:fechaDesde", "formModif2:fechaHasta");
-				} else {
-					boolean error = false;
-					if(datoSel.getTipo() == Tipo.LIST) 	{
-						error = ValidacionCampoLista(vp);
+				}else {
+					try {
+						recursosEJB.modificarValorPosible(vp);
+						addInfoMessage(sessionMBean.getTextos().get("valor_modificado"), MSG_ID); 				
+					}catch (Exception e) {
+						addErrorMessage(e, MSG_ID);
 					}
-					if(!error) {
-						try {
-							recursosEJB.modificarValorPosible(vp);
-							addInfoMessage(sessionMBean.getTextos().get("valor_modificado"), MSG_ID); 				
-						} catch (Exception e) {
-							addErrorMessage(e, MSG_ID);
-						}
-						datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(null);
-						List<ValorPosible> valoresFromDB = recursosEJB.consultarValoresPosibles(datoASSessionMBean.getDatoSeleccionado());
-						datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(valoresFromDB);					
-					}
+					datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(null);
+					List<ValorPosible> valoresFromDB = recursosEJB.consultarValoresPosibles(datoASSessionMBean.getDatoSeleccionado());
+					datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(valoresFromDB);					
 				}
-			} catch (Exception e) {
+			}catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
 			}
-		}
-		else {
+		}else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_un_valor"), MSG_ID);
 		}
 	}
-	
 	
 	public void cancelarModificarValor(ActionEvent event) {
 		datoASSessionMBean.setValorDelDatoSeleccionado(null);
@@ -138,51 +132,32 @@ public class DatoASolicitarValoresMBean extends BaseMBean {
 		datoASSessionMBean.setMostrarModifValor(false);
 	}
 
-	
 	public void eliminarValor(ActionEvent event) {
-		
 		ValorPosible v = datoASSessionMBean.getValorDelDatoSeleccionado();
-		
 		if (v != null && v.getBorrarFlag()) {
 			try {
 				recursosEJB.eliminarValorPosible(v);
-
 				addInfoMessage(sessionMBean.getTextos().get("valor_eliminado"), MSG_ID);
-			} catch (Exception e) {
+			}catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
 			}
-		
 			try {
 				datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(null);
 				List<ValorPosible> valoresFromDB = recursosEJB.consultarValoresPosibles(datoASSessionMBean.getDatoSeleccionado());
 				datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(valoresFromDB);					
-				
-			} catch (Exception e1) {
+			}catch (Exception e1) {
 				addErrorMessage(e1, MSG_ID);
 			}
 
-		}
-		else {
-			if(!v.getBorrarFlag())
-			{
+		}else {
+			if(!v.getBorrarFlag()) {
 				addErrorMessage(sessionMBean.getTextos().get("no_se_permite_eliminar_este_valor"), MSG_ID);
-			}else
-			{
+			}else {
 				addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_un_valor"), MSG_ID);
 			}
-			
 		}
 	}
 
-
-
-	
-	
-	/*
-	 * CREACION DE VALOR POSIBLE
-	 * 
-	 */
-	
 	public void mostrarCrearValor(ActionEvent e) {
 		datoASSessionMBean.setValorDelDatoSeleccionado(new ValorPosible());
 		datoASSessionMBean.setMostrarAgregarValor(true);
@@ -212,68 +187,63 @@ public class DatoASolicitarValoresMBean extends BaseMBean {
 			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "formModif2:CfechaDesde");
 			hayError = true;
 		} else if ((vp.getFechaHasta() != null) && (vp.getFechaDesde().compareTo(vp.getFechaHasta()) > 0 )){
-			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formModif2:CfechaDesde", "formModif2:CfechaHasta");
+			addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_anterior_a_la_fecha_de_fin"), "formModif2:CfechaDesde");
+      addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formModif2:CfechaHasta");
 			hayError = true;
 		}
+    if(!validarCampoLista(vp, "formModif2:crearValor")) {
+      //El mensaje lo pone la validación
+      hayError = true;
+    }
 		if(hayError) {
 			return;
 		}
-		
 		try {
 			DatoASolicitar datoSel = datoASSessionMBean.getDatoSeleccionado();
 			vp.setDato(datoSel);
 			if (recursosEJB.existeValorPosiblePeriodo(vp)) {
 				addErrorMessage(sessionMBean.getTextos().get("ya_existe_otro_valor_con_la_misma_etiqueta_y_valor"), "formModif2:crearEti", "formModif2:crearValor", "formModif2:CfechaDesde", "formModif2:CfechaHasta");
-			} else {
-				boolean error = false;
-				if(datoSel.getTipo() == Tipo.LIST) {
-					error = ValidacionCampoLista(vp);
+			}else {
+				recursosEJB.agregarValorPosible(datoASSessionMBean.getDatoSeleccionado(), vp);
+				addInfoMessage(sessionMBean.getTextos().get("valor_creado"), MSG_ID);
+				//Se blanquea la info en la página
+				datoASSessionMBean.setValorDelDatoSeleccionado(new ValorPosible());
+				try {
+					datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(null);
+					List<ValorPosible> valoresFromDB = recursosEJB.consultarValoresPosibles(datoASSessionMBean.getDatoSeleccionado());
+					datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(valoresFromDB);					
+				} catch (Exception e1) {
+					addErrorMessage(e1, MSG_ID);
 				}
-				if (!error) {
-					recursosEJB.agregarValorPosible(datoASSessionMBean.getDatoSeleccionado(), vp);
-					addInfoMessage(sessionMBean.getTextos().get("valor_creado"), MSG_ID);
-					//Se blanquea la info en la página
-					datoASSessionMBean.setValorDelDatoSeleccionado(new ValorPosible());
-					try {
-						datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(null);
-						List<ValorPosible> valoresFromDB = recursosEJB.consultarValoresPosibles(datoASSessionMBean.getDatoSeleccionado());
-						datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(valoresFromDB);					
-					} catch (Exception e1) {
-						addErrorMessage(e1, MSG_ID);
-					}
-				}	
 			}
 		} catch (Exception ex) {
 			addErrorMessage(ex, MSG_ID);
 			ex.printStackTrace();
 		}
-		
 	}
 
-	
 	public void cancelarCrearValor(ActionEvent event) {
 		limpiarMensajesError();
 		datoASSessionMBean.setValorDelDatoSeleccionado(null);
 		datoASSessionMBean.setMostrarAgregarValor(false);
 	}
 	
-	public boolean ValidacionCampoLista(ValorPosible vp)
-	{
-		boolean error = false;
-		if (!vp.getValor().matches("([a-z]|[A-Z]|[0-9]|\\s)+"))
-		{
-			addErrorMessage(sessionMBean.getTextos().get("solo_se_permiten_letras_y_numeros"), MSG_ID);
-			error = true;
-		}else if (vp.getValor().length()>5)
-		{
-			addErrorMessage(sessionMBean.getTextos().get("solo_se_permiten_hasta_5_caracteres"), MSG_ID);
-			error = true;
+	public boolean validarCampoLista(ValorPosible vp, String compId) {
+		boolean ok = true;
+		if (!vp.getValor().matches("([a-z]|[A-Z]|[0-9]|\\s)+")) {
+			addErrorMessage(sessionMBean.getTextos().get("solo_se_permiten_letras_y_numeros"), compId);
+			ok = false;
+		}else if (vp.getValor().length()>5) {
+			addErrorMessage(sessionMBean.getTextos().get("solo_se_permiten_hasta_5_caracteres"), compId);
+			ok = false;
 		}
-		return error;
+		return ok;
 	}
+	
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
+	
 	public void setSessionMBean(SessionMBean sessionMBean) {
 		this.sessionMBean = sessionMBean;
 	}

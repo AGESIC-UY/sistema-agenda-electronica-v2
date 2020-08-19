@@ -13,20 +13,15 @@
 				</h1>
 			</div>
 			<div class="form-horizontal empresa">
-				<div class="form-group">
-					<p:outputLabel for="empresa"
-						value="#{sessionMBean.textos['empresa']}"
-						styleClass="col-sm-4 control-label" />
+				<h:panelGroup class="form-group" rendered="#{fn:length(sessionMBean.empresasUsuario) > 1}">
+					<p:outputLabel for="empresa" value="#{sessionMBean.textos['empresa']}" styleClass="col-sm-4 control-label" />
 					<div class="col-sm-8">
-						<h:selectOneMenu id="empresa"
-							value="#{sessionMBean.empresaActualId}"
-							valueChangeListener="#{sessionMBean.cambioEmpresa}"
-							styleClass="form-control">
+						<h:selectOneMenu id="empresa" value="#{sessionMBean.empresaActualId}" valueChangeListener="#{sessionMBean.cambioEmpresa}" styleClass="form-control">
 							<p:ajax update="@all" process="@this" />
 							<f:selectItems value="#{sessionMBean.empresasUsuario}" />
 						</h:selectOneMenu>
 					</div>
-				</div>
+				</h:panelGroup>
 			</div>
 			<div class="ui-helper-hidden-accessible">
 				<h2>
@@ -34,145 +29,81 @@
 				</h2>
 			</div>
 			<p:panelMenu id="menuLateral" aria-level="1" >
-				<p:submenu id="submenuEmpresas" label="#{sessionMBean.textos['empresas']}" aria-level="2"
-					rendered="#{sessionMBean.usuarioActual.superadmin}">
-					<p:menuitem value="#{sessionMBean.textos['crear_empresa']}"
-						icon="ui-icon-plus" url="/administracion/empresa/editar.xhtml?n=t" />
-					<p:menuitem value="#{sessionMBean.textos['consultar_empresas']}"
-						icon="ui-icon-search"
-						url="/administracion/empresa/consultar.xhtml" />
-				</p:submenu>
-				<p:submenu id="submenuUsuarios" label="#{sessionMBean.textos['usuarios']}" aria-level="2"
-					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
-					<p:menuitem value="#{sessionMBean.textos['crear_usuario']}"
-						icon="ui-icon-plus" url="/administracion/usuario/editar.xhtml?n=t" />
-					<p:menuitem value="#{sessionMBean.textos['consultar_usuarios']}"
-						icon="ui-icon-search"
-						url="/administracion/usuario/consultar.xhtml" />
-          <p:menuitem value="#{sessionMBean.textos['gestionar_tokens']}"
-            icon="ui-icon-search"
-            url="/administracion/usuario/tokens.xhtml" />
-				</p:submenu>
-				<p:submenu id="submenuAgendas" label="#{sessionMBean.textos['agendas']}" aria-level="2"
-					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
-					<p:menuitem value="#{sessionMBean.textos['crear_agenda']}"
-						icon="ui-icon-plus" url="/administracion/agenda/crear.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['consultar_agendas']}"
-						icon="ui-icon-search"
-						url="/administracion/agenda/modificarConsultar.xhtml" />
-					<p:menuitem
-						value="#{sessionMBean.textos['modificar_textos_de_agendas']}"
-						icon="ui-icon-pencil"
-						url="/administracion/agenda/modificarTextos.xhtml" />
-				</p:submenu>
-				<p:submenu id="submenuRecursos" label="#{sessionMBean.textos['recursos']}" aria-level="2"
-					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
-					<p:menuitem value="#{sessionMBean.textos['crear_recurso']}"
-						icon="ui-icon-plus" url="/administracion/recurso/crear.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['consultar_recursos']}"
-						icon="ui-icon-search" url="/administracion/recurso/modificarConsultar.xhtml" />
-					<p:menuitem
-						value="#{sessionMBean.textos['modificar_textos_de_recursos']}"
-						icon="ui-icon-pencil" url="/administracion/recurso/modificarTextos.xhtml" />
-          <p:menuitem
-            value="#{sessionMBean.textos['importar_recurso']}"
-            icon="ui-icon-arrowthickstop-1-n" url="/administracion/recurso/importar.xhtml" />
-				</p:submenu>
-				<p:submenu id="submenuDatosASolicitar" label="#{sessionMBean.textos['datos_a_solicitar']}" aria-level="2"
-					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
-					<p:menuitem value="#{sessionMBean.textos['agrupaciones']}"
-						icon="ui-icon-radio-on"
-						url="/administracion/datoASolicitar/modificarAgrupaciones.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['crear_dato']}"
-						icon="ui-icon-plus"
-						url="/administracion/datoASolicitar/crear.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['consultar_datos']}"
-						icon="ui-icon-search"
-						url="/administracion/datoASolicitar/modificarConsultar.xhtml" />
-				</p:submenu>
-        <p:submenu id="submenuValidaciones" label="#{sessionMBean.textos['validaciones']}" aria-level="2"
-          rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
-          <p:menuitem value="#{sessionMBean.textos['definir']}"
-            icon="ui-icon-pencil"
-            url="/administracion/validaciones/mantenimiento.xhtml" />
-          <p:menuitem value="#{sessionMBean.textos['asociar']}"
-            icon="ui-icon-pencil"
-            url="/administracion/validaciones/asociacion.xhtml" />
+        <p:submenu id="submenuConfiguracion" label="#{sessionMBean.textos['configuracion']}" aria-level="2" rendered="#{sessionMBean.usuarioActual.superadmin}">
+          <p:menuitem value="#{sessionMBean.textos['configuracion_global']}" icon="ui-icon-pencil" url="/administracion/configuracion/configuracion.xhtml" />
         </p:submenu>
-        <p:submenu id="submenuAcciones" label="#{sessionMBean.textos['acciones']}" aria-level="2"
-          rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
-          <p:menuitem value="#{sessionMBean.textos['definir']}"
-            icon="ui-icon-pencil"
-            url="/administracion/acciones/mantenimiento.xhtml" />
-          <p:menuitem value="#{sessionMBean.textos['asociar']}"
-            icon="ui-icon-pencil"
-            url="/administracion/acciones/asociacion.xhtml" />
+				<p:submenu id="submenuEmpresas" label="#{sessionMBean.textos['empresas']}" aria-level="2" rendered="#{sessionMBean.usuarioActual.superadmin}">
+					<p:menuitem value="#{sessionMBean.textos['crear_empresa']}" icon="ui-icon-plus" url="/administracion/empresa/editar.xhtml?n=t" />
+					<p:menuitem value="#{sessionMBean.textos['consultar_empresas']}" icon="ui-icon-search" url="/administracion/empresa/consultar.xhtml" />
+				</p:submenu>
+				<p:submenu id="submenuUsuarios" label="#{sessionMBean.textos['usuarios']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+					<p:menuitem value="#{sessionMBean.textos['crear_usuario']}" icon="ui-icon-plus" url="/administracion/usuario/editar.xhtml?n=t" />
+					<p:menuitem value="#{sessionMBean.textos['consultar_usuarios']}" icon="ui-icon-search" url="/administracion/usuario/consultar.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['gestionar_tokens']}" icon="ui-icon-search" url="/administracion/usuario/tokens.xhtml" />
+				</p:submenu>
+				<p:submenu id="submenuAgendas" label="#{sessionMBean.textos['agendas']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+					<p:menuitem value="#{sessionMBean.textos['crear_agenda']}" icon="ui-icon-plus" url="/administracion/agenda/crear.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['consultar_agendas']}" icon="ui-icon-search" url="/administracion/agenda/modificarConsultar.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['modificar_textos_de_agendas']}" icon="ui-icon-pencil" url="/administracion/agenda/modificarTextos.xhtml" />
+				</p:submenu>
+				<p:submenu id="submenuRecursos" label="#{sessionMBean.textos['recursos']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+					<p:menuitem value="#{sessionMBean.textos['crear_recurso']}" icon="ui-icon-plus" url="/administracion/recurso/crear.xhtml" /> 
+					<p:menuitem value="#{sessionMBean.textos['consultar_recursos']}" icon="ui-icon-search" url="/administracion/recurso/modificarConsultar.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['modificar_textos_de_recursos']}" icon="ui-icon-pencil" url="/administracion/recurso/modificarTextos.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['importar_recurso']}" icon="ui-icon-arrowthickstop-1-n" url="/administracion/recurso/importar.xhtml" />
+				</p:submenu>
+				<p:submenu id="submenuDatosASolicitar" label="#{sessionMBean.textos['datos_a_solicitar']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+					<p:menuitem value="#{sessionMBean.textos['agrupaciones']}" icon="ui-icon-radio-on" url="/administracion/datoASolicitar/modificarAgrupaciones.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['crear_dato']}" icon="ui-icon-plus" url="/administracion/datoASolicitar/crear.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['consultar_datos']}" icon="ui-icon-search" url="/administracion/datoASolicitar/modificarConsultar.xhtml" />
+				</p:submenu>
+        <p:submenu id="submenuValidaciones" label="#{sessionMBean.textos['validaciones']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+          <p:menuitem value="#{sessionMBean.textos['definir']}" icon="ui-icon-plus" url="/administracion/validaciones/mantenimiento.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['asociar']}" icon="ui-icon-pencil" url="/administracion/validaciones/asociacion.xhtml" />
         </p:submenu>
-				<p:submenu id="submenuDisponibilidades" label="#{sessionMBean.textos['disponibilidades']}" aria-level="2"
-					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_PLANIFICADOR')}">
-					<p:menuitem
-						value="#{sessionMBean.textos['consultar_disponibilidades']}"
-						icon="ui-icon-search"
-						url="/administracion/disponibilidad/consultarDisponibilidades.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['generar_un_dia']}"
-						icon="ui-icon-plus"
-						url="/administracion/disponibilidad/crearDisponibilidades.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['copiar_dia']}"
-						icon="ui-icon-copy"
-						url="/administracion/disponibilidad/generarPatronDia.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['modificar_cupos']}"
-						icon="ui-icon-copy"
-						url="/administracion/disponibilidad/modificarCupo.xhtml" />
-					<p:menuitem
-						value="#{sessionMBean.textos['eliminar_disponibilidades']}"
-						icon="ui-icon-copy"
-						url="/administracion/disponibilidad/eliminarDisponibilidades.xhtml" />
+        <p:submenu id="submenuAcciones" label="#{sessionMBean.textos['acciones']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
+          <p:menuitem value="#{sessionMBean.textos['definir']}" icon="ui-icon-plus" url="/administracion/acciones/mantenimiento.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['asociar']}" icon="ui-icon-pencil" url="/administracion/acciones/asociacion.xhtml" />
+        </p:submenu>
+        <p:submenu id="submenuDisponibilidades" label="#{sessionMBean.textos['disponibilidades']}" aria-level="2" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR') or sessionMBean.tieneRol('RA_AE_PLANIFICADOR') or sessionMBean.tieneRol('RA_AE_PLANIFICADOR_X_RECURSO')}">
+					<p:menuitem value="#{sessionMBean.textos['consultar_disponibilidades']}" icon="ui-icon-search" url="/administracion/disponibilidad/consultarDisponibilidades.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['generar_un_dia']}" icon="ui-icon-plus" url="/administracion/disponibilidad/crearDisponibilidades.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['copiar_dia']}" icon="ui-icon-copy" url="/administracion/disponibilidad/generarPatronDia.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['modificar_cupos']}" icon="ui-icon-pencil" url="/administracion/disponibilidad/modificarCupo.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['eliminar_semana']}" icon="ui-icon-close" url="/administracion/disponibilidad/eliminarDisponibilidadesSemana.xhtml" rendered="false" />
+          <p:menuitem value="#{sessionMBean.textos['eliminar_periodo']}" icon="ui-icon-close" url="/administracion/disponibilidad/eliminarDisponibilidadesPeriodo.xhtml" />
+				</p:submenu> 
+				<p:submenu id="submenuReservas" label="#{sessionMBean.textos['reservas']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_FCALL_CENTER')}">
+					<p:menuitem value="#{sessionMBean.textos['reservar']}" icon="ui-icon-calendar" url="/administracion/reserva/Paso1.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['cancelar_reserva']}" icon="ui-icon-close" url="/administracion/reserva/cancelarReserva.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['atencion_presencial']}" icon="ui-icon-person" url="/administracion/reserva/atencionPresencial.xhtml" />
+          <p:menuitem value="#{sessionMBean.textos['cancelar_reserva_por_periodo']}" icon="ui-icon-close" url="/administracion/reserva/cancelarReservasPeriodo.xhtml" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}" />
+          <p:menuitem value="#{sessionMBean.textos['reservas_canceladas']}" icon="ui-icon-search" url="/administracion/consulta/consultarCancelaciones.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}"/>
 				</p:submenu>
-				<p:submenu id="submenuReservas" label="#{sessionMBean.textos['reservas']}" aria-level="2"
-					rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_FCALL_CENTER')}">
-					<p:menuitem value="#{sessionMBean.textos['reservar']}"
-						icon="ui-icon-calendar" url="/administracion/reserva/Paso1.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['cancelar_reserva']}"
-						icon="ui-icon-close" url="/administracion/reserva/cancelarReserva.xhtml" />
-				</p:submenu>
-				<p:submenu id="submenuLlamador" label="#{sessionMBean.textos['llamador']}" aria-level="2"
-					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}">
-					<p:menuitem value="#{sessionMBean.textos['lista_de_espera']}"
-						icon="ui-icon-clock"
-						url="/administracion/llamador/listaDeEspera.xhtml?l=1"
+				<p:submenu id="submenuLlamador" label="#{sessionMBean.textos['llamador']}" aria-level="2" rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}">
+					<p:menuitem value="#{sessionMBean.textos['lista_de_espera']}" icon="ui-icon-clock" url="/administracion/llamador/listaDeEspera.xhtml"
 						rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or facesContext.externalContext.isUserInRole('RA_AE_FATENCION')}" />
-					<p:menuitem value="#{sessionMBean.textos['abrir_llamador']}"
-						icon="ui-icon-volume-on"
-						url="/administracion/llamador/configurarLlamador.xhtml"
+					<p:menuitem value="#{sessionMBean.textos['abrir_llamador']}" icon="ui-icon-volume-on" url="/administracion/llamador/configurarLlamador.xhtml"
 						rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR') or request.isUserInRole('RA_AE_LLAMADOR')}" />
 				</p:submenu>
-				<p:submenu id="submenuConsultas" label="#{sessionMBean.textos['consultas']}" aria-level="2"
-					rendered="#{request.isUserInRole('RA_AE_ADMINISTRADOR')}">
-					<p:menuitem value="#{sessionMBean.textos['reserva_por_id']}" icon="ui-icon-search"
-						url="/administracion/consulta/consultarReservaId.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['reserva_por_numero']}" icon="ui-icon-search"
-						url="/administracion/consulta/consultarReservaNumero.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['reserva_por_datos']}" icon="ui-icon-search"
-						url="/administracion/consulta/consultarReservaDatos.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['reporte_reservas']}" icon="ui-icon-search"
-						url="/administracion/consulta/consultarReservaPeriodo.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['reporte_asistencias']}" icon="ui-icon-search"
-						url="/administracion/consulta/consultarAsistenciaPeriodo.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['reporte_atencion_funcionario']}"
-						icon="ui-icon-search"
-						url="/administracion/consulta/consultarAtencionFuncPeriodo.xhtml" />
-					<p:menuitem value="#{sessionMBean.textos['reporte_tiempo_atencion_funcionario']}"
-						icon="ui-icon-search"
-						url="/administracion/consulta/consultarTiempoAtencionFun.xhtml" />
+				<p:submenu id="submenuConsultas" label="#{sessionMBean.textos['consultas']}" aria-level="2" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR') or sessionMBean.tieneRol('RA_AE_FCALL_CENTER') or sessionMBean.tieneRol('AE_R_GENERADORREPORTES_X_RECURSO')}">
+					<p:menuitem value="#{sessionMBean.textos['reserva_por_id']}" icon="ui-icon-search" url="/administracion/consulta/consultarReservaId.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['reserva_por_numero']}" icon="ui-icon-search" url="/administracion/consulta/consultarReservaNumero.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['reserva_por_datos']}" icon="ui-icon-search" url="/administracion/consulta/consultarReservaDatos.xhtml" />
+        </p:submenu>
+        <p:submenu id="submenuReportes" label="#{sessionMBean.textos['reportes']}" aria-level="2" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR') or sessionMBean.tieneRol('AE_R_GENERADORREPORTES_X_RECURSO')}">
+					<p:menuitem value="#{sessionMBean.textos['reporte_reservas']}" icon="ui-icon-search" url="/administracion/consulta/consultarReservaPeriodo.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['reporte_asistencias']}" icon="ui-icon-search" url="/administracion/consulta/consultarAsistenciaPeriodo.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['reporte_atencion_funcionario']}" icon="ui-icon-search" url="/administracion/consulta/consultarAtencionFuncPeriodo.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}" />
+					<p:menuitem value="#{sessionMBean.textos['reporte_tiempo_atencion_funcionario']}" icon="ui-icon-search" url="/administracion/consulta/consultarTiempoAtencionFun.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}" />
+          <p:menuitem value="#{sessionMBean.textos['reporte_atencion_presencial']}" icon="ui-icon-search" url="/administracion/consulta/consultarAtencionPresencialPeriodo.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR') or sessionMBean.tieneRol('AE_R_GENERADORREPORTES_X_RECURSO')}" />
 				</p:submenu>
 			</p:panelMenu>
-
       <div class="version">
         <h:outputText value="#{sessionMBean.textos['version']} #{sessionMBean.version}"></h:outputText>
       </div>
-
 			<div class="ui-helper-hidden-accessible">
-				<h:commandButton value="dummy"></h:commandButton>
+				<h:commandButton value="dummy" tabindex="-1" />
 			</div>
 		</h:form>
 	</ui:composition>

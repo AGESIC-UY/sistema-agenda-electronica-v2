@@ -23,6 +23,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -34,6 +35,7 @@ import java.util.TimeZone;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
@@ -44,12 +46,15 @@ import javax.xml.bind.Unmarshaller;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Tipo;
+import uy.gub.imm.sae.entity.AccionMiPerfil;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
+import uy.gub.imm.sae.entity.RolesUsuarioRecursoId;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
 import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
@@ -65,8 +70,7 @@ import uy.gub.imm.sae.exportar.RecursoExportar;
 import uy.gub.imm.sae.exportar.ValorPosibleExport;
 
 @Stateless
-@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO",
-		"RA_AE_LLAMADOR" })
+@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_LLAMADOR" })
 public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	@PersistenceContext(unitName = "SAE-EJB")
@@ -110,8 +114,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		// vivos (fechaBaja == null)
 		// para la misma agenda.
 		if (existeRecursoPorNombre(r)) {
-			throw new UserException(
-					"ya_existe_un_recurso_con_el_nombre_especificado");
+			throw new UserException("ya_existe_un_recurso_con_el_nombre_especificado");
 		}
 		// fechaInicio <> NULL
 		if (r.getFechaInicio() == null) {
@@ -126,8 +129,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		// fechaInicio <= fechaFin o fechaFin == NULL
 		if ((r.getFechaFin() != null)
 				&& (r.getFechaInicio().compareTo(r.getFechaFin()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		// fechaInicioDisp <> NULL
 		if (r.getFechaInicioDisp() == null) {
@@ -163,8 +165,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
 		if (r.getDiasInicioVentanaIntranet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaIntranet > 0
 		if (r.getDiasVentanaIntranet() == null) {
@@ -181,8 +182,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
 		if (r.getDiasInicioVentanaInternet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaInternet > 0
 		if (r.getDiasVentanaInternet() == null) {
@@ -232,17 +232,42 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (r.getUsarLlamador() == null) {
 			r.setUsarLlamador(true);
 		}
+		
+		
+		//Controles de la acción MiPerfil
+		//--------------------------------
+		if (r.getAccionMiPerfil() != null) {
+			
+			//Controlo que haya una sola accion de confirmacion destacada
+			if (getCantAccionMiPerfilDestacadasConfirmacion(r.getAccionMiPerfil()) != 1) {
+				throw new UserException("debe_haber_una_unica_accion_de_confirmacion_destacada");
+			}
+			
+			//Controlo que haya una sola accion de cancelacion destacada
+			if (getCantAccionMiPerfilDestacadasCancelacion(r.getAccionMiPerfil()) != 1) {
+				throw new UserException("debe_haber_una_unica_accion_de_cancelacion_destacada");
+			}
+			
+			//Controlo que haya una sola accion de recordatorio destacada
+			if (getCantAccionMiPerfilDestacadasRecordatorio(r.getAccionMiPerfil()) != 1) {
+				throw new UserException("debe_haber_una_unica_accion_de_recordatorio_destacada");
+			}
+		
+		}
+		
+		
 		entityManager.persist(r);
 		// paso a agregar agrupacion
 		AgrupacionDato agrupDato = new AgrupacionDato();
-		agrupDato.setNombre("Datos Personales");
+		agrupDato.setNombre("datos_personales");
+		agrupDato.setEtiqueta("Datos personales");
 		agrupDato.setOrden(1);
 		agrupDato.setBorrarFlag(false);
 		agregarAgrupacionDato(r, agrupDato);
 
 		// agrego datos a solicitar tipo documento
 		DatoASolicitar d1 = new DatoASolicitar();
-		d1.setNombre("TipoDocumento");
+		d1.setNombre(DatoASolicitar.TIPO_DOCUMENTO);
 		d1.setRequerido(true);
 		d1.setFila(1);
 		d1.setColumna(1);
@@ -250,6 +275,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		d1.setAgrupacionDato(agrupDato);
 		d1.setAnchoDespliegue(100);
 		d1.setEsClave(true);
+    d1.setSoloLectura(false);
 		d1.setEtiqueta("Tipo de documento");
 		d1.setIncluirEnLlamador(true);
 		d1.setLargo(20);
@@ -297,7 +323,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		// agrego datos a solicitar Nro. documento
 		DatoASolicitar d2 = new DatoASolicitar();
-		d2.setNombre("NroDocumento");
+		d2.setNombre(DatoASolicitar.NUMERO_DOCUMENTO);
 		d2.setRequerido(true);
 		d2.setFila(2);
 		d2.setColumna(1);
@@ -319,7 +345,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		// agrego datos a solicitar Correo electrónico
 		DatoASolicitar d3 = new DatoASolicitar();
-		d3.setNombre("Mail");
+		d3.setNombre(DatoASolicitar.CORREO_ELECTRONICO);
 		d3.setRequerido(true);
 		d3.setFila(3);
 		d3.setColumna(1);
@@ -338,17 +364,27 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		d3.setBorrarFlag(false);
 		// persisto dato a solicitar
 		agregarDatoASolicitar(r, agrupDato, d3);
+		
+		
+		//Si el recurso tiene una accion, debo guardarla (crearla)
+		if (r.getAccionMiPerfil() != null) {
+		
+			//Creo la acción
+			AccionMiPerfil nuevaAccion = r.getAccionMiPerfil(); 
+			entityManager.persist(nuevaAccion);
+		}
 
+		
 		return r;
 
 	}
 
-	public Recurso crearRecursoImportado(Agenda a, Recurso r) throws UserException,
+	public Recurso crearRecursoImportado(Agenda agenda, Recurso recurso) throws UserException,
 			ApplicationException, BusinessException {
-		if (a == null) {
+		if (agenda == null) {
 			throw new UserException("debe_haber_una_agenda_seleccionada");
 		}
-		Agenda aManejada = (Agenda) entityManager.find(Agenda.class, a.getId());
+		Agenda aManejada = (Agenda) entityManager.find(Agenda.class, agenda.getId());
 		if (aManejada == null) {
 			throw new UserException("no_se_encuentra_la_agenda_especificada");
 		}
@@ -356,138 +392,124 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (aManejada.getFechaBaja() != null) {
 			throw new UserException("la_agenda_especificada_no_es_valida");
 		}
-		a = aManejada;
-		aManejada = null; // De aquí en mas utilizo "a".
-		r.setAgenda(a);
+		agenda = aManejada;
+		aManejada = null;
+		recurso.setAgenda(agenda);
 
 		// Controla la unicidad del nombre del recurso entre todos los recursos
 		// vivos (fechaBaja == null)
 		// para la misma agenda.
-		if (existeRecursoPorNombre(r)) {
-			throw new UserException(
-					"ya_existe_un_recurso_con_el_nombre_especificado");
+		if (existeRecursoPorNombre(recurso)) {
+			throw new UserException("ya_existe_un_recurso_con_el_nombre_especificado");
 		}
 		// fechaInicio <> NULL
-		if (r.getFechaInicio() == null) {
+		if (recurso.getFechaInicio() == null) {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
 		// Se setea hora en fecha de inicio 00:00:00
-		r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
+		recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
 		// Si la fecha de Fin no es nula, se setea la hora al final del Día.
-		if (r.getFechaFin() != null) {
-			r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
+		if (recurso.getFechaFin() != null) {
+		  recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
 		}
 		// fechaInicio <= fechaFin o fechaFin == NULL
-		if ((r.getFechaFin() != null)
-				&& (r.getFechaInicio().compareTo(r.getFechaFin()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if ((recurso.getFechaFin() != null) && (recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0)) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		// fechaInicioDisp <> NULL
-		if (r.getFechaInicioDisp() == null) {
+		if (recurso.getFechaInicioDisp() == null) {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
-		if (r.getSabadoEsHabil() == null) {
-			r.setSabadoEsHabil(false);
+		if (recurso.getSabadoEsHabil() == null) {
+		  recurso.setSabadoEsHabil(false);
 		}
-    if (r.getDomingoEsHabil() == null) {
-      r.setDomingoEsHabil(false);
+    if (recurso.getDomingoEsHabil() == null) {
+      recurso.setDomingoEsHabil(false);
     }
 		// Se setea hora en fecha de inicio disp. 00:00:00
-		r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
+    recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
 		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
 		// final del Día.
-		if (r.getFechaFinDisp() != null) {
-			r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));
+		if (recurso.getFechaFinDisp() != null) {
+		  recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));
 		}
 		// fechaInicioDisp <= fechaFinDisp o fechaFinDisp == NULL
-		if ((r.getFechaFinDisp() != null)
-				&& (r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if ((recurso.getFechaFinDisp() != null)	&& (recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0)) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		// fechaInicio <= fechaInicioDisp
-		if (r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
-			throw new UserException(
-					"la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso");
+		if (recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
+			throw new UserException("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso");
 		}
 		// diasInicioVentanaIntranet >= 0
-		if (r.getDiasInicioVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasInicioVentanaIntranet() == null) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasInicioVentanaIntranet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasInicioVentanaIntranet() < 0) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaIntranet > 0
-		if (r.getDiasVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasVentanaIntranet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasVentanaIntranet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasVentanaIntranet() <= 0) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 		// diasInicioVentanaInternet >= 0
-		if (r.getDiasInicioVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasInicioVentanaInternet() == null) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasInicioVentanaInternet() < 0) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasInicioVentanaInternet() < 0) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero");
 		}
 		// diasVentanaInternet > 0
-		if (r.getDiasVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_es_obligatorio");
+		if (recurso.getDiasVentanaInternet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_es_obligatorio");
 		}
-		if (r.getDiasVentanaInternet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasVentanaInternet() <= 0) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
 		}
 		// ventanaCuposMinimos >= 0
-		if (r.getVentanaCuposMinimos() == null) {
-			throw new UserException(
-					"la_cantidad_de_cupos_minimos_es_obligatoria");
+		if (recurso.getVentanaCuposMinimos() == null) {
+			throw new UserException("la_cantidad_de_cupos_minimos_es_obligatoria");
 		}
-		if (r.getVentanaCuposMinimos() < 0) {
-			throw new UserException(
-					"la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
+		if (recurso.getVentanaCuposMinimos() < 0) {
+			throw new UserException("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
 		}
 		// cantDiasAGenerar > 0
-		if (r.getCantDiasAGenerar() == null) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_es_obligatoria");
+		if (recurso.getCantDiasAGenerar() == null) {
+			throw new UserException("la_cantidad_de_dias_a_generar_es_obligatoria");
 		}
-		if (r.getCantDiasAGenerar() <= 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
+		if (recurso.getCantDiasAGenerar() <= 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
 		}
 		// cantDiasAGenerar >= diasInicioVentanaIntranet + diasVentanaIntranet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
 		}
 		// cantDiasAGenerar >= diasInicioVentanaInternet + diasVentanaInternet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
 		}
 		// largoListaEspera > 0
-		if ((r.getLargoListaEspera() != null) && (r.getLargoListaEspera() <= 0)) {
-			throw new UserException(
-					"el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
+		if ((recurso.getLargoListaEspera() != null) && (recurso.getLargoListaEspera() <= 0)) {
+			throw new UserException("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
 		}
 		// se controla que el campo "usaLlamador" no sea null
-		if (r.getUsarLlamador() == null) {
-			r.setUsarLlamador(true);
+		if (recurso.getUsarLlamador() == null) {
+		  recurso.setUsarLlamador(true);
 		}
-		entityManager.persist(r);
-		return r;
+		entityManager.persist(recurso);
+		
+		
+		//Creo una accionMiPerfil por defecto para el recurso importado. Esto es para evitar errores, ya que al importar 
+		//no se tienen en cuenta las acciones de MiPerfil (si algún dia se agrega lo de acciones MiPerfil al importar/exportar, esto se saca)
+		AccionMiPerfil accionMiPerfil = obtenerAccionMiPerfilPorDefecto(recurso);
+		entityManager.persist(accionMiPerfil);
+		
+		
+		return recurso;	
+
 	}
 
 	/**
@@ -511,245 +533,254 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 * @throws ApplicationException
 	 */
-	public void modificarRecurso(Recurso r) throws UserException,
+	public void modificarRecurso(Recurso recurso) throws UserException,
 			BusinessException, ApplicationException {
 
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	recurso.getId());
 
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
-		// No se puede modificar un recurso con fecha de baja
-		if (recursoActual.getFechaBaja() != null) {
-			throw new BusinessException("AE10024",
-					"No se puede modificar un recurso con fecha de baja");
-		}
-
 		// Controla la unicidad del nombre del recurso entre todos los recursos
 		// vivos (fechaBaja == null)
 		// para la misma agenda.
-		if (existeRecursoPorNombre(r)) {
-			throw new UserException(
-					"ya_existe_un_recurso_con_el_nombre_especificado");
-		}
-
-		// Se controla que el recurso no tenga fecha de baja
-		if (r.getFechaBaja() != null) {
-			throw new BusinessException("AE10023",
-					"No se puede modificar la fecha de baja" + r.getNombre());
+		if (existeRecursoPorNombre(recurso)) {
+			throw new UserException("ya_existe_un_recurso_con_el_nombre_especificado");
 		}
 
 		// fechaInicio <> NULL
-		if (r.getFechaInicio() == null) {
+		if (recurso.getFechaInicio() == null) {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
 
 		// Se setea hora en fecha de inicio 00:00:00
-		r.setFechaInicio(Utiles.time2InicioDelDia(r.getFechaInicio()));
+		recurso.setFechaInicio(Utiles.time2InicioDelDia(recurso.getFechaInicio()));
 
 		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
 		// final del Día.
-		if (r.getFechaFin() != null) {
-			r.setFechaFin(Utiles.time2FinDelDia(r.getFechaFin()));
+		if (recurso.getFechaFin() != null) {
+			recurso.setFechaFin(Utiles.time2FinDelDia(recurso.getFechaFin()));
 		}
 
 		// fechaInicio <= fechaFin o fechaFin == NULL
-		if (r.getFechaFin() == null) {
+		if (recurso.getFechaFin() == null) {
 			throw new UserException("la_fecha_de_fin_es_obligatoria");
 		}
-		if (r.getFechaInicio().compareTo(r.getFechaFin()) > 0) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if (recurso.getFechaInicio().compareTo(recurso.getFechaFin()) > 0) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 
 		// fechaInicioDisp <> NULL
-		if (r.getFechaInicioDisp() == null) {
+		if (recurso.getFechaInicioDisp() == null) {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
 
 		// Se setea hora en fecha de inicio disp. 00:00:00
-		r.setFechaInicioDisp(Utiles.time2InicioDelDia(r.getFechaInicioDisp()));
-		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al
-		// final del Día.
-		if (r.getFechaFinDisp() != null) {
-			r.setFechaFinDisp(Utiles.time2FinDelDia(r.getFechaFinDisp()));
+		recurso.setFechaInicioDisp(Utiles.time2InicioDelDia(recurso.getFechaInicioDisp()));
+		// Si la fecha de Fin de disponibilidad no es nula, se setea la hora al final del Día.
+		if (recurso.getFechaFinDisp() != null) {
+			recurso.setFechaFinDisp(Utiles.time2FinDelDia(recurso.getFechaFinDisp()));
 		}
 
 		// fechaInicioDisp <= fechaFinDisp o fechaFinDisp == NULL
-		if (r.getFechaFinDisp() == null) {
+		if (recurso.getFechaFinDisp() == null) {
 			throw new UserException("la_fecha_de_fin_es_obligatoria");
 		}
-		if (r.getFechaInicioDisp().compareTo(r.getFechaFinDisp()) > 0) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if (recurso.getFechaInicioDisp().compareTo(recurso.getFechaFinDisp()) > 0) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 
 		// fechaInicio <= fechaInicioDisp
-		if (r.getFechaInicio().compareTo(r.getFechaInicioDisp()) > 0) {
-			throw new UserException(
-					"la_fecha_de_inicio_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_inicio");
+		if (recurso.getFechaInicio().compareTo(recurso.getFechaInicioDisp()) > 0) {
+			throw new UserException("la_fecha_de_inicio_de_disponibilidad_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 
 		// diasInicioVentanaIntranet >= 0
-		if (r.getDiasInicioVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasInicioVentanaIntranet() == null) {
+			throw new UserException("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasInicioVentanaIntranet() < 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasInicioVentanaIntranet() < 0) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 
 		// diasVentanaIntranet > 0
-		if (r.getDiasVentanaIntranet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_es_obligatorio");
+		if (recurso.getDiasVentanaIntranet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_es_obligatorio");
 		}
-		if (r.getDiasVentanaIntranet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasVentanaIntranet() <= 0) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 
 		// diasInicioVentanaInternet >= 0
-		if (r.getDiasInicioVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_es_obligatorio");
+		if (recurso.getDiasInicioVentanaInternet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_es_obligatorio");
 		}
-		if (r.getDiasInicioVentanaInternet() < 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasInicioVentanaInternet() < 0) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero");
 		}
 
 		// diasVentanaInternet > 0
-		if (r.getDiasVentanaInternet() == null) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_internet_es_obligatorio");
+		if (recurso.getDiasVentanaInternet() == null) {
+			throw new UserException("los_dias_de_la_ventana_de_internet_es_obligatorio");
 		}
-		if (r.getDiasVentanaInternet() <= 0) {
-			throw new UserException(
-					"los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
+		if (recurso.getDiasVentanaInternet() <= 0) {
+			throw new UserException("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero");
 		}
 
 		// ventanaCuposMinimos >= 0
-		if ((r.getVentanaCuposMinimos() == null)
-				|| (r.getVentanaCuposMinimos() < 0)) {
-			throw new UserException(
-					"la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
+		if ((recurso.getVentanaCuposMinimos() == null)
+				|| (recurso.getVentanaCuposMinimos() < 0)) {
+			throw new UserException("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero");
 		}
 
 		// cantDiasAGenerar > 0
-		if ((r.getCantDiasAGenerar() == null) || (r.getCantDiasAGenerar() <= 0)) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
+		if ((recurso.getCantDiasAGenerar() == null) || (recurso.getCantDiasAGenerar() <= 0)) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_a_cero");
 		}
 
 		// cantDiasAGenerar >= diasInicioVentanaIntranet + diasVentanaIntranet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaIntranet() + r.getDiasVentanaIntranet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaIntranet() + recurso.getDiasVentanaIntranet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_intranet");
 		}
 
 		// cantDiasAGenerar >= diasInicioVentanaInternet + diasVentanaInternet
-		if (r.getCantDiasAGenerar().compareTo(
-				r.getDiasInicioVentanaInternet() + r.getDiasVentanaInternet()) < 0) {
-			throw new UserException(
-					"la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
+		if (recurso.getCantDiasAGenerar().compareTo(recurso.getDiasInicioVentanaInternet() + recurso.getDiasVentanaInternet()) < 0) {
+			throw new UserException("la_cantidad_de_dias_a_generar_debe_ser_mayor_o_igual_que_la_suma_internet");
 		}
 
 		// largoListaEspera > 0
-		if ((r.getLargoListaEspera() != null) && (r.getLargoListaEspera() <= 0)) {
-			throw new UserException(
-					"el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
+		if ((recurso.getLargoListaEspera() != null) && (recurso.getLargoListaEspera() <= 0)) {
+			throw new UserException("el_largo_de_la_lista_de_espera_debe_ser_mayor_que_cero");
 		}
 
-		// Si reservaMultiple = True => se podrá cambiar su valor a
-		// reservaMultiple = FALSE
-		// solo si no existe reserva viva con más de una disponibilidad para ese
-		// recurso.
-		if ((recursoActual.getReservaMultiple() != r.getReservaMultiple())
-				&& (r.getReservaMultiple() == false)) {
-			// no existe reserva viva con más de una disponibilidad para ese
-			// recurso.
-			if (existeReservaVivaMultiple(r)) {
-				throw new UserException("AE10025",
-						"No se puede desactivar reservaMultiple si existen reservas multiples vivas");
-			}
+		// No pueden quedar disponibilidades vivas fuera del período fechaInicioDisp y fechaFinDisp.
+		if (hayDisponibilidadesVivasFueraDelPeriodo(recurso.getId(), recurso.getFechaInicioDisp(),	recurso.getFechaFinDisp())) {
+			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_disponibilidades_fuera_del_periodo_especificado");
 		}
 
-		// No pueden quedar disponibilidades vivas fuera del período
-		// fechaInicioDisp y fechaFinDisp.
-		if (hayDispVivasPorFecha(r.getId(), r.getFechaInicioDisp(),
-				r.getFechaFinDisp())) {
-			throw new UserException(
-					"no_se_puede_modificar_las_fechas_porque_quedarian_disponibilidades_fuera_del_periodo_especificado");
-		}
-
-		// No pueden quedar reservas vivas fuera del período fechaInicioDisp y
-		// fechaFinDisp.
-		if (hayReservasVivasPorFecha(r.getId(), r.getFechaInicioDisp(),
-				r.getFechaFinDisp())) {
-			throw new UserException(
-					"no_se_puede_modificar_las_fechas_porque_quedarian_reservas_vivas_fuera_del_periodo_especificado");
+		// No pueden quedar reservas vivas fuera del período fechaInicioDisp y fechaFinDisp.
+		if (hayReservasVivasFueraDelPeriodo(recurso.getId(), recurso.getFechaInicioDisp(),	recurso.getFechaFinDisp())) {
+			throw new UserException("no_se_puede_modificar_las_fechas_porque_quedarian_reservas_fuera_del_periodo_especificado");
 		}
 
 		// Se controla que la serie no tenga largo mayor a 3
-		if ((r.getSerie() != null) && (r.getSerie().length() > 3)) {
-			throw new UserException("AE10028",
-					"El largo del campo serie no puede ser mayor a 3");
+		if ((recurso.getSerie() != null) && (recurso.getSerie().length() > 3)) {
+			throw new UserException("AE10028", "El largo del campo serie no puede ser mayor a 3");
 		}
+		
+		//Controles de la acción MiPerfil
+		//--------------------------------
+		if (recurso.getAccionMiPerfil() != null) {
+			
+			//Controlo que haya una sola accion de confirmacion destacada
+			if (getCantAccionMiPerfilDestacadasConfirmacion(recurso.getAccionMiPerfil()) != 1) {
+				throw new UserException("debe_haber_una_unica_accion_de_confirmacion_destacada");
+			}
+			
+			//Controlo que haya una sola accion de cancelacion destacada
+			if (getCantAccionMiPerfilDestacadasCancelacion(recurso.getAccionMiPerfil()) != 1) {
+				throw new UserException("debe_haber_una_unica_accion_de_cancelacion_destacada");
+			}
+			
+			//Controlo que haya una sola accion de recordatorio destacada
+			if (getCantAccionMiPerfilDestacadasRecordatorio(recurso.getAccionMiPerfil()) != 1) {
+				throw new UserException("debe_haber_una_unica_accion_de_recordatorio_destacada");
+			}
+		
+		}
+		
 
-		recursoActual.setNombre(r.getNombre());
-		recursoActual.setDescripcion(r.getDescripcion());
-		recursoActual.setFechaInicio(r.getFechaInicio());
-		recursoActual.setFechaFin(r.getFechaFin());
-		recursoActual.setFechaInicioDisp(r.getFechaInicioDisp());
-		recursoActual.setFechaFinDisp(r.getFechaFinDisp());
-		recursoActual.setDiasInicioVentanaIntranet(r
-				.getDiasInicioVentanaIntranet());
-		recursoActual.setDiasVentanaIntranet(r.getDiasVentanaIntranet());
-		recursoActual.setDiasInicioVentanaInternet(r
-				.getDiasInicioVentanaInternet());
-		recursoActual.setDiasVentanaInternet(r.getDiasVentanaInternet());
-		recursoActual.setVentanaCuposMinimos(r.getVentanaCuposMinimos());
-		recursoActual.setCantDiasAGenerar(r.getCantDiasAGenerar());
-		recursoActual.setLargoListaEspera(r.getLargoListaEspera());
-		recursoActual.setSerie(r.getSerie());
-		recursoActual.setVisibleInternet(r.getVisibleInternet());
-		recursoActual.setReservaMultiple(r.getReservaMultiple());
-		recursoActual.setMostrarNumeroEnLlamador(r.getMostrarNumeroEnLlamador());
-		recursoActual.setMostrarNumeroEnTicket(r.getMostrarNumeroEnTicket());
-		recursoActual.setMostrarIdEnTicket(r.getMostrarIdEnTicket());
-		recursoActual.setSabadoEsHabil(r.getSabadoEsHabil());
-    recursoActual.setDomingoEsHabil(r.getDomingoEsHabil());
+		recursoActual.setNombre(recurso.getNombre());
+		recursoActual.setDescripcion(recurso.getDescripcion());
+		recursoActual.setFechaInicio(recurso.getFechaInicio());
+		recursoActual.setFechaFin(recurso.getFechaFin());
+		recursoActual.setFechaInicioDisp(recurso.getFechaInicioDisp());
+		recursoActual.setFechaFinDisp(recurso.getFechaFinDisp());
+		recursoActual.setDiasInicioVentanaIntranet(recurso.getDiasInicioVentanaIntranet());
+		recursoActual.setDiasVentanaIntranet(recurso.getDiasVentanaIntranet());
+		recursoActual.setDiasInicioVentanaInternet(recurso.getDiasInicioVentanaInternet());
+		recursoActual.setDiasVentanaInternet(recurso.getDiasVentanaInternet());
+		recursoActual.setVentanaCuposMinimos(recurso.getVentanaCuposMinimos());
+		recursoActual.setCantDiasAGenerar(recurso.getCantDiasAGenerar());
+		recursoActual.setLargoListaEspera(recurso.getLargoListaEspera());
+		recursoActual.setSerie(recurso.getSerie());
+		recursoActual.setVisibleInternet(recurso.getVisibleInternet());
+		recursoActual.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
+    recursoActual.setMostrarIdEnTicket(recurso.getMostrarIdEnTicket());
+		recursoActual.setMostrarNumeroEnTicket(recurso.getMostrarNumeroEnTicket());
+		recursoActual.setFuenteTicket(recurso.getFuenteTicket());
+		recursoActual.setTamanioFuenteChica(recurso.getTamanioFuenteChica());
+    recursoActual.setTamanioFuenteNormal(recurso.getTamanioFuenteNormal());
+    recursoActual.setTamanioFuenteGrande(recurso.getTamanioFuenteGrande());
+		recursoActual.setSabadoEsHabil(recurso.getSabadoEsHabil());
+    recursoActual.setDomingoEsHabil(recurso.getDomingoEsHabil());
 
-		recursoActual.setLocalidad(r.getLocalidad());
-		recursoActual.setDepartamento(r.getDepartamento());
-		recursoActual.setDireccion(r.getDireccion());
-		recursoActual.setTelefonos(r.getTelefonos());
-		recursoActual.setHorarios(r.getHorarios());
-		recursoActual.setLatitud(r.getLatitud());
-		recursoActual.setLongitud(r.getLongitud());
+		recursoActual.setLocalidad(recurso.getLocalidad());
+		recursoActual.setDepartamento(recurso.getDepartamento());
+		recursoActual.setDireccion(recurso.getDireccion());
+		recursoActual.setTelefonos(recurso.getTelefonos());
+		recursoActual.setHorarios(recurso.getHorarios());
+		recursoActual.setLatitud(recurso.getLatitud());
+		recursoActual.setLongitud(recurso.getLongitud());
+		
+		recursoActual.setPresencialAdmite(recurso.getPresencialAdmite());
+    recursoActual.setPresencialCupos(recurso.getPresencialCupos());
+    recursoActual.setPresencialLunes(recurso.getPresencialLunes());
+    recursoActual.setPresencialMartes(recurso.getPresencialMartes());
+    recursoActual.setPresencialMiercoles(recurso.getPresencialMiercoles());
+    recursoActual.setPresencialJueves(recurso.getPresencialJueves());
+    recursoActual.setPresencialViernes(recurso.getPresencialViernes());
+    recursoActual.setPresencialSabado(recurso.getPresencialSabado());
 
+    recursoActual.setMultipleAdmite(recurso.getMultipleAdmite());
+    recursoActual.setCambiosAdmite(recurso.getCambiosAdmite());
+    recursoActual.setCambiosTiempo(recurso.getCambiosTiempo());
+    recursoActual.setCambiosUnidad(recurso.getCambiosUnidad());
+    recursoActual.setPeriodoValidacion(recurso.getPeriodoValidacion());
+    
+    recursoActual.setValidarPorIP(recurso.getValidarPorIP());
+    recursoActual.setCantidadPorIP(recurso.getCantidadPorIP());
+    recursoActual.setPeriodoPorIP(recurso.getPeriodoPorIP());
+    recursoActual.setIpsSinValidacion(recurso.getIpsSinValidacion());
+    
+    recursoActual.setCancelacionTiempo(recurso.getCancelacionTiempo()); 
+    recursoActual.setCancelacionUnidad(recurso.getCancelacionUnidad()); 
+    recursoActual.setCancelacionTipo(recurso.getCancelacionTipo()); 
+    
+    recursoActual.setMiPerfilConHab(recurso.getMiPerfilConHab());
+    recursoActual.setMiPerfilConTitulo(recurso.getMiPerfilConTitulo());
+    recursoActual.setMiPerfilConCorto(recurso.getMiPerfilConCorto());
+    recursoActual.setMiPerfilConLargo(recurso.getMiPerfilConLargo());
+    recursoActual.setMiPerfilConVencim(recurso.getMiPerfilConVencim());
+    recursoActual.setMiPerfilCanHab(recurso.getMiPerfilCanHab());
+    recursoActual.setMiPerfilCanTitulo(recurso.getMiPerfilCanTitulo());
+    recursoActual.setMiPerfilCanCorto(recurso.getMiPerfilCanCorto());
+    recursoActual.setMiPerfilCanLargo(recurso.getMiPerfilCanLargo());
+    recursoActual.setMiPerfilCanVencim(recurso.getMiPerfilCanVencim());
+    recursoActual.setMiPerfilRecHab(recurso.getMiPerfilRecHab());
+    recursoActual.setMiPerfilRecTitulo(recurso.getMiPerfilRecTitulo());
+    recursoActual.setMiPerfilRecCorto(recurso.getMiPerfilRecCorto());
+    recursoActual.setMiPerfilRecLargo(recurso.getMiPerfilRecLargo());
+    recursoActual.setMiPerfilRecVencim(recurso.getMiPerfilRecVencim());
+    recursoActual.setMiPerfilRecHora(recurso.getMiPerfilRecHora());
+    recursoActual.setMiPerfilRecDias(recurso.getMiPerfilRecDias());
+    
 		for (TextoRecurso viejo : recursoActual.getTextosRecurso().values()) {
 			entityManager.remove(viejo);
 		}
 		recursoActual.setTextosRecurso(new HashMap<String, TextoRecurso>());
-		if (r.getTextosRecurso() != null) {
-			for (String idioma : r.getTextosRecurso().keySet()) {
-				TextoRecurso viejo = r.getTextosRecurso().get(idioma);
+		if (recurso.getTextosRecurso() != null) {
+			for (String idioma : recurso.getTextosRecurso().keySet()) {
+				TextoRecurso viejo = recurso.getTextosRecurso().get(idioma);
 				TextoRecurso nuevo = new TextoRecurso();
 
 				nuevo.setRecurso(viejo.getRecurso());
 				nuevo.setIdioma(viejo.getIdioma());
 				nuevo.setTextoPaso2(viejo.getTextoPaso2());
 				nuevo.setTextoPaso3(viejo.getTextoPaso3());
-				nuevo.setTituloCiudadanoEnLlamador(viejo
-						.getTituloCiudadanoEnLlamador());
-				nuevo.setTituloPuestoEnLlamador(viejo
-						.getTituloPuestoEnLlamador());
+				nuevo.setTituloCiudadanoEnLlamador(viejo.getTituloCiudadanoEnLlamador());
+				nuevo.setTituloPuestoEnLlamador(viejo.getTituloPuestoEnLlamador());
 				nuevo.setTicketEtiquetaUno(viejo.getTicketEtiquetaUno());
 				nuevo.setTicketEtiquetaDos(viejo.getTicketEtiquetaDos());
 				nuevo.setValorEtiquetaUno(viejo.getValorEtiquetaUno());
@@ -760,6 +791,69 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 
 		entityManager.merge(recursoActual);
+		
+		
+		//Si el recurso tiene una accion, debo guardarla
+		if (recurso.getAccionMiPerfil() != null) {
+		AccionMiPerfil accionActual = (AccionMiPerfil) entityManager.find(AccionMiPerfil.class,	recurso.getAccionMiPerfil().getId());
+
+			if (accionActual == null) {
+				//Creo la acción 
+				accionActual = new AccionMiPerfil(); 
+			}
+		
+			//Actualizo la acción
+			accionActual.setDestacada_con_1(recurso.getAccionMiPerfil().getDestacada_con_1());
+			accionActual.setDestacada_con_2(recurso.getAccionMiPerfil().getDestacada_con_2());
+			accionActual.setDestacada_con_3(recurso.getAccionMiPerfil().getDestacada_con_3());
+			accionActual.setDestacada_con_4(recurso.getAccionMiPerfil().getDestacada_con_4());
+			accionActual.setDestacada_con_5(recurso.getAccionMiPerfil().getDestacada_con_5());
+			accionActual.setDestacada_can_1(recurso.getAccionMiPerfil().getDestacada_can_1());
+			accionActual.setDestacada_can_2(recurso.getAccionMiPerfil().getDestacada_can_2());
+			accionActual.setDestacada_can_3(recurso.getAccionMiPerfil().getDestacada_can_3());
+			accionActual.setDestacada_can_4(recurso.getAccionMiPerfil().getDestacada_can_4());
+			accionActual.setDestacada_can_5(recurso.getAccionMiPerfil().getDestacada_can_5());
+			accionActual.setDestacada_rec_1(recurso.getAccionMiPerfil().getDestacada_rec_1());
+			accionActual.setDestacada_rec_2(recurso.getAccionMiPerfil().getDestacada_rec_2());
+			accionActual.setDestacada_rec_3(recurso.getAccionMiPerfil().getDestacada_rec_3());
+			accionActual.setDestacada_rec_4(recurso.getAccionMiPerfil().getDestacada_rec_4());
+			accionActual.setDestacada_rec_5(recurso.getAccionMiPerfil().getDestacada_rec_5());
+			
+			accionActual.setTitulo_con_1(recurso.getAccionMiPerfil().getTitulo_con_1());
+			accionActual.setTitulo_con_2(recurso.getAccionMiPerfil().getTitulo_con_2());
+			accionActual.setTitulo_con_3(recurso.getAccionMiPerfil().getTitulo_con_3());
+			accionActual.setTitulo_con_4(recurso.getAccionMiPerfil().getTitulo_con_4());
+			accionActual.setTitulo_con_5(recurso.getAccionMiPerfil().getTitulo_con_5());
+			accionActual.setTitulo_can_1(recurso.getAccionMiPerfil().getTitulo_can_1());
+			accionActual.setTitulo_can_2(recurso.getAccionMiPerfil().getTitulo_can_2());
+			accionActual.setTitulo_can_3(recurso.getAccionMiPerfil().getTitulo_can_3());
+			accionActual.setTitulo_can_4(recurso.getAccionMiPerfil().getTitulo_can_4());
+			accionActual.setTitulo_can_5(recurso.getAccionMiPerfil().getTitulo_can_5());
+			accionActual.setTitulo_rec_1(recurso.getAccionMiPerfil().getTitulo_rec_1());
+			accionActual.setTitulo_rec_2(recurso.getAccionMiPerfil().getTitulo_rec_2());
+			accionActual.setTitulo_rec_3(recurso.getAccionMiPerfil().getTitulo_rec_3());
+			accionActual.setTitulo_rec_4(recurso.getAccionMiPerfil().getTitulo_rec_4());
+			accionActual.setTitulo_rec_5(recurso.getAccionMiPerfil().getTitulo_rec_5());
+			
+			accionActual.setUrl_con_1(recurso.getAccionMiPerfil().getUrl_con_1());
+			accionActual.setUrl_con_2(recurso.getAccionMiPerfil().getUrl_con_2());
+			accionActual.setUrl_con_3(recurso.getAccionMiPerfil().getUrl_con_3());
+			accionActual.setUrl_con_4(recurso.getAccionMiPerfil().getUrl_con_4());
+			accionActual.setUrl_con_5(recurso.getAccionMiPerfil().getUrl_con_5());
+			accionActual.setUrl_can_1(recurso.getAccionMiPerfil().getUrl_can_1());
+			accionActual.setUrl_can_2(recurso.getAccionMiPerfil().getUrl_can_2());
+			accionActual.setUrl_can_3(recurso.getAccionMiPerfil().getUrl_can_3());
+			accionActual.setUrl_can_4(recurso.getAccionMiPerfil().getUrl_can_4());
+			accionActual.setUrl_can_5(recurso.getAccionMiPerfil().getUrl_can_5());
+			accionActual.setUrl_rec_1(recurso.getAccionMiPerfil().getUrl_rec_1());
+			accionActual.setUrl_rec_2(recurso.getAccionMiPerfil().getUrl_rec_2());
+			accionActual.setUrl_rec_3(recurso.getAccionMiPerfil().getUrl_rec_3());
+			accionActual.setUrl_rec_4(recurso.getAccionMiPerfil().getUrl_rec_4());
+			accionActual.setUrl_rec_5(recurso.getAccionMiPerfil().getUrl_rec_5());
+				
+			entityManager.merge(accionActual);
+			
+		}
 
 	}
 
@@ -776,35 +870,29 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws ApplicationException
 	 */
 	@SuppressWarnings("unchecked")
-	public void eliminarRecurso(Recurso r) throws UserException,
-			ApplicationException {
-	  
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	r.getId());
-
+	public void eliminarRecurso(Recurso recurso, TimeZone timezone) throws UserException, ApplicationException {
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	recurso.getId());
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
-
 		//Se controla que no existan reservas vivas para el recurso.
-		if (hayReservasVivas(recursoActual)) {
+		if (hayReservasVivas(recursoActual, timezone)) {
 			throw new UserException("no_se_puede_eliminar_el_recurso_porque_hay_reservas_vivas");
 		}
-
 		//Se eliminan disponibilidades.
 		List<Disponibilidad> disponibilades = (List<Disponibilidad>) entityManager
-				.createQuery(
-						"SELECT d FROM Disponibilidad d "
-								+ "WHERE d.recurso = :recurso "
-								+ "  AND d.fecha >= :fecha"
-								+ "  AND d.horaFin >= :hora"
-								+ "  AND d.fechaBaja is null")
-				.setParameter("recurso", recursoActual)
-				.setParameter("fecha", new Date())
-				.setParameter("hora", new Date()).getResultList();
+			.createQuery(
+				"SELECT d FROM Disponibilidad d "
+						+ "WHERE d.recurso = :recurso "
+						+ "  AND d.fecha >= :fecha"
+						+ "  AND d.horaFin >= :hora"
+						+ "  AND d.fechaBaja is null")
+			.setParameter("recurso", recursoActual)
+			.setParameter("fecha", new Date())
+			.setParameter("hora", new Date()).getResultList();
 		for (Disponibilidad disponibilidad : disponibilades) {
 			disponibilidad.setFechaBaja(new Date());
 		}
-		
 		//Se eliminan agrupaciones de datos
 		List<AgrupacionDato> listaAgrupacion = (List<AgrupacionDato>) entityManager
 				.createQuery("SELECT ad FROM AgrupacionDato ad "
@@ -926,8 +1014,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * permitidos: Administrador, Planificador
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
 	public List<DatoDelRecurso> consultarDatosDelRecurso(Recurso r)
 			throws ApplicationException, BusinessException {
 
@@ -962,10 +1049,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 * @throws ApplicationException
 	 */
-	public AgrupacionDato agregarAgrupacionDato(Recurso r, AgrupacionDato a)
-			throws UserException, ApplicationException {
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+	public AgrupacionDato agregarAgrupacionDato(Recurso r, AgrupacionDato a) throws UserException, ApplicationException {
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class, r.getId());
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
@@ -973,28 +1058,28 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 		a.setRecurso(r);
-		if (existeAgrupacionPorNombre(a)) {
-			throw new UserException(
-					"ya_existe_una_agrupacion_con_el_nombre_especificado");
-		}
-		if (a.getNombre() == null) {
-			throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
-		}
+    if (a.getNombre() == null || a.getNombre().isEmpty()) {
+      throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
+    }else {
+  		if (existeAgrupacionPorNombre(a)) {
+  			throw new UserException("ya_existe_una_agrupacion_con_el_nombre_especificado");
+  		}
+    }
+    if(a.getEtiqueta() == null || a.getEtiqueta().isEmpty()) {
+      throw new UserException("la_etiqueta_de_la_agrupacion_es_obligatoria");
+    }
 		if (a.getOrden() == null) {
 			throw new UserException("el_orden_de_la_agrupacion_es_obligatorio");
 		} else {
 			if (a.getOrden() < 1) {
-				throw new UserException(
-						"el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
+				throw new UserException("el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
 			}
 		}
 		entityManager.persist(a);
 		return a;
 	}
 	
-	public AgrupacionDato agregarAgrupacionDatoImportar(Recurso recursoActual, AgrupacionDato a)
-			throws UserException, ApplicationException {
-		
+	public AgrupacionDato agregarAgrupacionDatoImportar(Recurso recursoActual, AgrupacionDato a) throws UserException, ApplicationException {
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
@@ -1002,13 +1087,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 		a.setRecurso(recursoActual);
-		if (existeAgrupacionPorNombre(a)) {
-			throw new UserException(
-					"ya_existe_una_agrupacion_con_el_nombre_especificado");
-		}
-		if (a.getNombre() == null) {
-			throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
-		}
+    if (a.getNombre() == null || a.getNombre().isEmpty()) {
+      throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
+    }else {
+  		if (existeAgrupacionPorNombre(a)) {
+  			throw new UserException("ya_existe_una_agrupacion_con_el_nombre_especificado");
+  		}
+    }
+    if(a.getEtiqueta() == null || a.getEtiqueta().isEmpty()) {
+      throw new UserException("la_etiqueta_de_la_agrupacion_es_obligatoria");
+    }
+		
 		if (a.getOrden() == null) {
 			throw new UserException("el_orden_de_la_agrupacion_es_obligatorio");
 		} else {
@@ -1028,34 +1117,38 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * 
 	 * @throws UserException
 	 */
-	public void modificarAgrupacionDato(AgrupacionDato a) throws UserException {
+	public void modificarAgrupacionDato(AgrupacionDato a) throws UserException, ApplicationException {
 
-		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(
-				AgrupacionDato.class, a.getId());
+		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(AgrupacionDato.class, a.getId());
 
 		if (agrupacionActual == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
 
-		if (a.getNombre() == "") {
+		if (a.getNombre() == null || a.getNombre().isEmpty()) {
 			throw new UserException("el_nombre_de_la_agrupacion_es_obligatorio");
+		}else {
+		  if(existeAgrupacionPorNombre(a)) {
+		    throw new UserException("ya_existe_una_agrupacion_con_el_nombre_especificado");
+		  }
 		}
+    if (a.getEtiqueta() == null || a.getEtiqueta().isEmpty()) {
+      throw new UserException("la_etiqueta_de_la_agrupacion_es_obligatoria");
+    }
 
 		if (a.getOrden() == null) {
 			throw new UserException("el_orden_de_la_agrupacion_es_obligatorio");
 		} else {
 			if (a.getOrden().intValue() < 0) {
-				throw new UserException(
-						"el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
+				throw new UserException("el_orden_de_la_agrupacion_debe_ser_mayor_a_cero");
 			}
 		}
 		if (agrupacionActual.getFechaBaja() != null) {
-			throw new UserException(
-					"no_se_puede_modifcar_una_agrupacion_eliminada");
+			throw new UserException("no_se_puede_modifcar_una_agrupacion_eliminada");
 		}
 
 		agrupacionActual.setNombre(a.getNombre());
+    agrupacionActual.setEtiqueta(a.getEtiqueta());
 		agrupacionActual.setOrden(a.getOrden());
 
 	}
@@ -1070,25 +1163,21 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	public void eliminarAgrupacionDato(AgrupacionDato a, boolean controlarDatos)
 			throws UserException, ApplicationException {
 
-		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(
-				AgrupacionDato.class, a.getId());
+		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(AgrupacionDato.class, a.getId());
 
 		if (agrupacionActual == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
 		if (agrupacionActual.getFechaBaja() != null) {
 			throw new UserException("la_agrupacion_ya_esta_eliminada");
 		}
 		if (controlarDatos) {
 			if (existeDatoASolicPorAgrupacion(a.getId())) {
-				throw new UserException(
-						"no_se_puede_eliminar_la_agrupación_porque_tiene_datos_asociados");
+				throw new UserException("no_se_puede_eliminar_la_agrupación_porque_tiene_datos_asociados");
 			}
 		} else {
 			if (agrupacionActual.getDatosASolicitar() != null) {
-				for (DatoASolicitar dato : agrupacionActual
-						.getDatosASolicitar()) {
+				for (DatoASolicitar dato : agrupacionActual.getDatosASolicitar()) {
 					eliminarDatoASolicitar(dato);
 				}
 			}
@@ -1109,13 +1198,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throws ApplicationException {
 		try {
 			List<AgrupacionDato> agrupacionDato = (List<AgrupacionDato>) entityManager
-					.createQuery(
-							"SELECT a from AgrupacionDato a "
-									+ "WHERE a.recurso = :r "
-									+ "AND a.fechaBaja is null "
-									+ "ORDER BY a.orden").setParameter("r", r)
-					// TODO CONTROLAR ROLES
-					.getResultList();
+				.createQuery("SELECT a from AgrupacionDato a "
+					+ "WHERE a.recurso = :r "
+					+ "AND a.fechaBaja is null "
+					+ "ORDER BY a.orden").setParameter("r", r)
+				.getResultList();
 			return agrupacionDato;
 		} catch (Exception e) {
 			throw new ApplicationException(e);
@@ -1136,30 +1223,24 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			DatoASolicitar d) throws UserException, ApplicationException,
 			BusinessException {
 
-		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,
-				r.getId());
+		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class, r.getId());
 
 		if (recursoActual == null) {
-			throw new BusinessException(
-					"no_se_encuentra_el_recurso_especificado");
+			throw new BusinessException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		recursoActual.getAgrupacionDatos().size();
 
 		if (a == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
-		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(
-				AgrupacionDato.class, a.getId());
+		AgrupacionDato agrupacionActual = (AgrupacionDato) entityManager.find(AgrupacionDato.class, a.getId());
 		if (agrupacionActual == null) {
-			throw new UserException(
-					"no_se_encuentra_la_agrupacion_especificada");
+			throw new UserException("no_se_encuentra_la_agrupacion_especificada");
 		}
 
 		if (agrupacionActual.getFechaBaja() != null) {
-			throw new UserException(
-					"no_se_puede_modifcar_una_agrupacion_eliminada");
+			throw new UserException("no_se_puede_modifcar_una_agrupacion_eliminada");
 		}
 
 		d.setRecurso(recursoActual);
@@ -1169,10 +1250,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("el_nombre_del_dato_es_obligatorio");
 		}
 
-		if (existeDatoASolicPorNombre(d.getNombre(), recursoActual.getId(),
-				null)) {
-			throw new UserException(
-					"Ya existe un dato con el nombre especificado");
+		if (existeDatoASolicPorNombre(d.getNombre(), recursoActual.getId(),	null)) {
+			throw new UserException("Ya existe un dato con el nombre especificado");
 		}
 
 		if (d.getEtiqueta() == null || d.getEtiqueta().equals("")) {
@@ -1203,10 +1282,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("el_ancho_de_despliegue_es_obligatorio");
 		}
 
-		if (d.getIncluirEnReporte() == true
-				&& d.getAnchoDespliegue().intValue() <= 0) {
-			throw new UserException(
-					"el_ancho_de_despliegue_debe_ser_mayor_a_cero");
+		if (d.getIncluirEnReporte() == true && d.getAnchoDespliegue().intValue() <= 0) {
+			throw new UserException("el_ancho_de_despliegue_debe_ser_mayor_a_cero");
 		}
 
 		if (d.getOrdenEnLlamador() == null && d.getIncluirEnReporte()) {
@@ -1325,95 +1402,44 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 * @throws ApplicationException
 	 */
-	public void modificarDatoASolicitar(DatoASolicitar d) throws UserException,
-			ApplicationException {
+	public void modificarDatoASolicitar(DatoASolicitar d) throws UserException, ApplicationException {
 
-		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(
-				DatoASolicitar.class, d.getId());
+		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(DatoASolicitar.class, d.getId());
 
 		if (datoActual == null) {
-			throw new UserException("AE10055",
-					"No existe el dato a Solicitar: " + d.getId().toString());
-		}
-
-		// No se puede modificar un dato con fecha de baja
-		if (datoActual.getFechaBaja() != null) {
-			throw new UserException("AE10056",
-					"No se puede modificar un dato con fecha de baja");
-		}
-
-		if (existeDatoASolicPorNombre(d.getNombre(), datoActual.getRecurso()
-				.getId(), d.getId())) {
-			throw new UserException("AE10054",
-					"Ya existe ese dato a solicitar para el recurso");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		if (d.getNombre() == null) {
-			throw new UserException("AE10045",
-					"El nombre del dato a solicitar no puede ser nulo");
+      throw new UserException("el_nombre_del_dato_es_obligatorio");
+    }
+
+		if (existeDatoASolicPorNombre(d.getNombre(), datoActual.getRecurso().getId(), d.getId())) {
+			throw new UserException("ya_existe_un_dato_con_el_nombre_especificado");
 		}
 
 		if (d.getEtiqueta() == null) {
-			throw new UserException("AE10046",
-					"La etiqueta del dato a solicitar no puede ser nula");
+			throw new UserException("la_etiqueta_del_dato_es_obligatoria");
 		}
 
 		if (d.getTipo() == null) {
-			throw new UserException("AE10047",
-					"El tipo del dato a solicitar no puede ser nulo");
-		}
-
-		if (d.getRequerido() == null) {
-			throw new UserException("AE10048",
-					"Se debe indicar si el dato a solicitar debe es requerido");
-		}
-
-		if (d.getEsClave() == null) {
-			throw new UserException("AE10049",
-					"Se debe indicar si el dato a solicitar debe es clave");
+			throw new UserException("el_tipo_del_dato_es_obligatorio");
 		}
 
 		if (d.getFila() == null) {
-			throw new UserException("AE10050", "La fila no puede ser nula");
+			throw new UserException("la_fila_del_dato_es_obligatoria");
 		}
 
 		if (d.getColumna() == null) {
-			throw new UserException("AE10051", "La columna no puede ser nula");
+			throw new UserException("la_columna_del_dato_es_obligatoria");
 		}
 
 		if (d.getLargo() == null) {
-			throw new UserException("AE10052", "El largo no puede ser nulo");
-		}
-
-		if (d.getIncluirEnReporte() == null) {
-			throw new UserException("AE10120",
-					"Incluir en Reporte no puede ser nulo");
+			throw new UserException("el_largo_del_dato_es_obligatorio");
 		}
 
 		if (d.getAnchoDespliegue() == null) {
-			throw new UserException("AE10121",
-					"El ancho de despliegue no puede ser nulo");
-		}
-
-		if (d.getIncluirEnReporte() == true
-				&& d.getAnchoDespliegue().intValue() <= 0) {
-			throw new UserException("AE10122",
-					"El ancho de despliegue debe ser mayor que cero");
-		}
-
-		if (d.getIncluirEnLlamador() == null) {
-			throw new UserException("-1",
-					"Incluir en llamador no puede ser nulo");
-		}
-
-		if (d.getOrdenEnLlamador() == null && d.getIncluirEnReporte()) {
-			throw new UserException(
-					"-1",
-					"Debe indicar el orden en el que se mostrará el dato en la pantalla del llamador");
-		}
-
-		else if (d.getOrdenEnLlamador() == null) {
-			d.setOrdenEnLlamador(1);
+			throw new UserException("el_ancho_de_despliegue_es_obligatorio");
 		}
 
 		if (d.getLargoEnLlamador() == null) {
@@ -1423,18 +1449,19 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		datoActual.setNombre(d.getNombre());
 		datoActual.setEtiqueta(d.getEtiqueta());
 		datoActual.setTipo(d.getTipo());
-		datoActual.setRequerido(d.getRequerido());
-		datoActual.setEsClave(d.getEsClave());
+		datoActual.setRequerido(d.getRequerido()!=null?d.getRequerido():false);
+		datoActual.setEsClave(d.getEsClave()!=null?d.getEsClave():false);
+    datoActual.setSoloLectura(d.getSoloLectura()!=null?d.getSoloLectura():false);
 		datoActual.setFila(d.getFila());
 		datoActual.setColumna(d.getColumna());
 		datoActual.setLargo(d.getLargo());
 		datoActual.setTextoAyuda(d.getTextoAyuda());
 		datoActual.setAgrupacionDato(d.getAgrupacionDato());
-		datoActual.setIncluirEnReporte(d.getIncluirEnReporte());
+		datoActual.setIncluirEnReporte(d.getIncluirEnReporte()!=null?d.getIncluirEnReporte():false);
 		datoActual.setAnchoDespliegue(d.getAnchoDespliegue());
-		datoActual.setIncluirEnLlamador(d.getIncluirEnLlamador());
-		datoActual.setLargoEnLlamador(d.getLargoEnLlamador());
-		datoActual.setOrdenEnLlamador(d.getOrdenEnLlamador());
+		datoActual.setIncluirEnLlamador(d.getIncluirEnLlamador()!=null?d.getIncluirEnLlamador():false);
+		datoActual.setLargoEnLlamador(d.getLargoEnLlamador()!=null?d.getLargoEnLlamador():d.getLargo());
+		datoActual.setOrdenEnLlamador(d.getOrdenEnLlamador()!=null?d.getOrdenEnLlamador():1);
 	}
 
 	/**
@@ -1445,9 +1472,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 */
 	public void eliminarDatoASolicitar(DatoASolicitar d) throws UserException {
-
-		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(
-				DatoASolicitar.class, d.getId());
+		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(DatoASolicitar.class, d.getId());
 		if (datoActual == null) {
 			throw new UserException("no_se_encuentra_el_dato_especificado");
 		}
@@ -1464,19 +1489,12 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws UserException
 	 * @throws ApplicationException
 	 */
-	public ValorPosible agregarValorPosible(DatoASolicitar d, ValorPosible vp)
-			throws UserException, ApplicationException {
+	public ValorPosible agregarValorPosible(DatoASolicitar d, ValorPosible vp) throws UserException, ApplicationException {
 
-		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(
-				DatoASolicitar.class, d.getId());
+		DatoASolicitar datoActual = (DatoASolicitar) entityManager.find(DatoASolicitar.class, d.getId());
 
 		if (datoActual == null) {
 			throw new UserException("no_se_encuentra_el_dato_especificado");
-		}
-
-		// No se puede modificar un dato con fecha de baja
-		if (datoActual.getFechaBaja() != null) {
-			throw new UserException("no_se_puede_modifcar_un_dato_eliminado");
 		}
 
 		vp.setDato(d);
@@ -1501,15 +1519,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			throw new UserException("la_fecha_de_inicio_es_obligatoria");
 		}
 
-		// fechaDesde <= fechaHasta o fechaHasta == NULL
-		if ((vp.getFechaHasta() != null)
-				&& (vp.getFechaDesde().compareTo(vp.getFechaHasta()) > 0)) {
-			throw new UserException(
-					"la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
+		if ((vp.getFechaHasta() != null) && (vp.getFechaDesde().compareTo(vp.getFechaHasta()) > 0)) {
+			throw new UserException("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio");
 		}
 		if (existeValorPosiblePeriodo(vp)) {
-			throw new UserException(
-					"ya_existe_otro_valor_con_la_misma_etiqueta_y_valor");
+			throw new UserException("ya_existe_otro_valor_con_la_misma_etiqueta_y_valor");
 		}
 
 		entityManager.persist(vp);
@@ -1519,15 +1533,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	public ValorPosible agregarValorPosibleImportar(DatoASolicitar datoActual, ValorPosible vp)
 			throws UserException, ApplicationException {
 
-		
-
 		if (datoActual == null) {
 			throw new UserException("no_se_encuentra_el_dato_especificado");
-		}
-
-		// No se puede modificar un dato con fecha de baja
-		if (datoActual.getFechaBaja() != null) {
-			throw new UserException("no_se_puede_modifcar_un_dato_eliminado");
 		}
 
 		vp.setDato(datoActual);
@@ -1655,8 +1662,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	}
 
-	public Boolean existeRecursoPorNombre(Recurso r)
-			throws ApplicationException {
+	public Boolean existeRecursoPorNombre(Recurso r) throws ApplicationException {
 		try {
 			Long cant = (Long) entityManager
 					.createQuery(
@@ -1675,79 +1681,48 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	}
 
-	private Boolean existeReservaVivaMultiple(Recurso r)
-			throws ApplicationException {
-		try {
-
-			Date ahora = new Date();
-
-			List<?> a = (List<?>) entityManager
-					.createQuery(
-							"SELECT r.id, count(d) FROM Disponibilidad d JOIN d.reservas r "
-									+ "WHERE d.recurso = :recurso "
-									+ "  AND d.fecha >= :fecha"
-									+ "  AND d.horaFin >= :hora_actual"
-									+ "  AND (r.estado = :reservado OR r.estado = :pendiente) "
-									+ "GROUP BY r.id " + "HAVING COUNT(d) > 1")
-					.setParameter("recurso", r)
-					.setParameter("fecha", ahora, TemporalType.DATE)
-					.setParameter("hora_actual", ahora, TemporalType.TIMESTAMP)
-					.setParameter("reservado", Estado.R)
-					.setParameter("pendiente", Estado.P).getResultList();
-
-			return (!a.isEmpty());
-		} catch (Exception e) {
-			throw new ApplicationException(e);
-		}
-	}
-
-	private Boolean hayReservasVivasPorFecha(Integer recursoId, Date desde,
-			Date hasta) throws ApplicationException {
+	private Boolean hayReservasVivasFueraDelPeriodo(Integer recursoId, Date desde, Date hasta) throws ApplicationException {
 		try {
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
-									+ "WHERE d.recurso.id = :recursoId "
-									+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )"
-									+ "  AND (r.estado = :reservado OR r.estado = :pendiente) ")
+					.createQuery("SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
+						+ "WHERE d.recurso.id = :recursoId "
+						+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )"
+            + "  AND d.presencial=false "
+						+ "  AND (r.estado = :reservado OR r.estado = :pendiente) ")
 					.setParameter("recursoId", recursoId)
 					.setParameter("fecha_desde", desde, TemporalType.DATE)
 					.setParameter("fecha_hasta", hasta, TemporalType.DATE)
 					.setParameter("reservado", Estado.R)
-					.setParameter("pendiente", Estado.P).getSingleResult();
-
+					.setParameter("pendiente", Estado.P)
+					.getSingleResult();
 			return (cant > 0);
 		} catch (Exception e) {
 			throw new ApplicationException(e);
 		}
 	}
 
-	private Boolean hayDispVivasPorFecha(Integer recursoId, Date desde,
-			Date hasta) throws ApplicationException {
+	private Boolean hayDisponibilidadesVivasFueraDelPeriodo(Integer recursoId, Date desde, Date hasta) throws ApplicationException {
 		try {
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(d) FROM Disponibilidad d "
-									+ "WHERE d.recurso.id = :recursoId "
-									+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta )"
-									+ "  AND d.fechaBaja IS NULL")
+					.createQuery("SELECT count(d) FROM Disponibilidad d "
+						+ "WHERE d.recurso.id = :recursoId "
+						+ "  AND (d.fecha < :fecha_desde OR d.fecha > :fecha_hasta)"
+						+ "  AND d.presencial=false "
+						+ "  AND d.fechaBaja IS NULL")
 					.setParameter("recursoId", recursoId)
-					.setParameter("fecha_desde", desde)
-					.setParameter("fecha_hasta", hasta).getSingleResult();
-
+					.setParameter("fecha_desde", desde, TemporalType.DATE)
+					.setParameter("fecha_hasta", hasta, TemporalType.DATE)
+					.getSingleResult();
 			return (cant > 0);
 		} catch (Exception e) {
 			throw new ApplicationException(e);
 		}
 	}
 
-	private Boolean existeAgrupacionPorNombre(AgrupacionDato a)
-			throws ApplicationException {
+	private Boolean existeAgrupacionPorNombre(AgrupacionDato a) throws ApplicationException {
 		try {
-
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(a) from AgrupacionDato a "
+					.createQuery("SELECT COUNT(a) FROM AgrupacionDato a "
 									+ "WHERE a.nombre = :nombre "
 									+ "AND (a.id <> :id OR :id is null)"
 									+ "AND  a.recurso = :recurso "
@@ -1900,42 +1875,30 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
-	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso,
-			TimeZone timezone) throws BusinessException {
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
+	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084",
-					"El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1",
-					"No se encuentra el recurso indicado");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
 		List<AgrupacionDato> agrupacionesDTO = new ArrayList<AgrupacionDato>();
-
-		// Obtengo las agrupaciones vivas del recurso
 		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager
-				.createQuery(
-						"from AgrupacionDato agrupacion "
-								+ "where agrupacion.recurso = :r and agrupacion.fechaBaja is null "
-								+ "order by agrupacion.orden ")
+				.createQuery("FROM AgrupacionDato a "
+					+ "WHERE a.recurso = :r "
+					+ "AND a.fechaBaja IS NULL "
+					+ "ORDER BY a.orden ")
 				.setParameter("r", recurso).getResultList();
-
-		// Para cada agrupacion obtengo los datos a solicitar de la misma.
+		//Para cada agrupacion obtener los datos a solicitar
 		for (AgrupacionDato agrupacion : agrupaciones) {
-
 			AgrupacionDato agrupacionDTO = new AgrupacionDato(agrupacion);
 			agrupacionDTO.setRecurso(recurso);
 			agrupacionesDTO.add(agrupacionDTO);
-
-			List<DatoASolicitar> datosDTO = obtenerDatosASolicitar(agrupacion,
-					timezone);
+			List<DatoASolicitar> datosDTO = obtenerDatosASolicitar(agrupacion, timezone);
 			agrupacionDTO.setDatosASolicitar(datosDTO);
-
 		}
 
 		return agrupacionesDTO;
@@ -1952,47 +1915,32 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
-	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso)
-			throws BusinessException {
+	public List<AgrupacionDato> consultarDefCamposTodos(Recurso recurso) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084",
-					"El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
-
 		recurso = entityManager.find(Recurso.class, recurso.getId());
 		if (recurso == null) {
-			throw new BusinessException("-1",
-					"No se encuentra el recurso indicado");
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
-
 		List<AgrupacionDato> agrupacionesDTO = new ArrayList<AgrupacionDato>();
-
-		// Obtengo las agrupaciones vivas del recurso
-		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager
-				.createQuery(
-						"from AgrupacionDato agrupacion "
-								+ "where agrupacion.recurso = :r and agrupacion.fechaBaja is null "
-								+ "order by agrupacion.orden ")
+		//Obtener las agrupaciones de datos
+		List<AgrupacionDato> agrupaciones = (List<AgrupacionDato>) entityManager.createQuery(
+				"FROM AgrupacionDato a "
+				+ "WHERE a.recurso = :r " 
+				+ "  AND a.fechaBaja IS NULL "
+				+ "ORDER BY a.orden")
 				.setParameter("r", recurso).getResultList();
-
-		// Para cada agrupacion obtengo los datos a solicitar de la misma.
+		//Para cada agrupación obtener sus datos
 		for (AgrupacionDato agrupacion : agrupaciones) {
-
 			AgrupacionDato agrupacionDTO = new AgrupacionDato(agrupacion);
 			agrupacionesDTO.add(agrupacionDTO);
-
 			List<DatoASolicitar> datosDTO = obtenerTodosDatosASolicitar(agrupacion);
 			agrupacionDTO.setDatosASolicitar(datosDTO);
-
 		}
-
 		return agrupacionesDTO;
 	}
 
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FATENCION" })
 	public Boolean mostrarDatosASolicitarEnLlamador(Recurso recurso)
 			throws BusinessException {
 
@@ -2019,32 +1967,20 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<DatoASolicitar> obtenerDatosASolicitar(
-			AgrupacionDato agrupacion, TimeZone timezone)
-			throws BusinessException {
-
+	private List<DatoASolicitar> obtenerDatosASolicitar(AgrupacionDato agrupacion, TimeZone timezone) {
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
-
-		// Obtengo los datos a solicitar vivos de la agrupacion
 		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager
-				.createQuery(
-						"from DatoASolicitar dato "
-								+ "where dato.agrupacionDato = :agrupacion and "
-								+ "      dato.fechaBaja is null "
-								+ "order by dato.fila, dato.columna ")
+				.createQuery("FROM DatoASolicitar d "
+					+ "WHERE d.agrupacionDato = :agrupacion "
+					+ "  AND d.fechaBaja IS NULL "
+					+ "ORDER BY d.fila, d.columna ")
 				.setParameter("agrupacion", agrupacion).getResultList();
-
-		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
-		// valores posibles.
+		//Para cada dato a solicitar que sea del tipo Lista obtener los valores posibles.
 		for (DatoASolicitar datoASolicitar : datos) {
-
-			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(
-					datoASolicitar);
+			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(datoASolicitar);
 			datosDTO.add(datoASolicitarDTO);
-
 			if (datoASolicitarDTO.getTipo() == Tipo.LIST) {
-				List<ValorPosible> valoresDTO = obtenerValoresPosibles(
-						datoASolicitar, timezone);
+				List<ValorPosible> valoresDTO = obtenerValoresPosibles(datoASolicitar, timezone);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
 		}
@@ -2064,58 +2000,41 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	private List<DatoASolicitar> obtenerTodosDatosASolicitar(
-			AgrupacionDato agrupacion) throws BusinessException {
-
+	private List<DatoASolicitar> obtenerTodosDatosASolicitar(AgrupacionDato agrupacion) {
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
-
-		// Obtengo los datos a solicitar vivos de la agrupacion
-		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager
-				.createQuery(
-						"from DatoASolicitar dato "
-								+ "where dato.agrupacionDato = :agrupacion and "
-								+ "      dato.fechaBaja is null "
-								+ "order by dato.fila, dato.columna ")
+		//Obtener los datos a solicitar de la agrupación
+		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager.createQuery(
+				  "FROM DatoASolicitar dato "
+				+ "WHERE dato.agrupacionDato = :agrupacion "
+				+ "  AND dato.fechaBaja IS NULL "
+				+ "ORDER BY dato.fila, dato.columna ")
 				.setParameter("agrupacion", agrupacion).getResultList();
-
-		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
-		// valores posibles.
+		//Para cada dato, si es de tipo lista obtener los valores posibles
 		for (DatoASolicitar datoASolicitar : datos) {
-
-			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(
-					datoASolicitar);
+			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(datoASolicitar);
 			datosDTO.add(datoASolicitarDTO);
-
 			if (datoASolicitarDTO.getTipo() == Tipo.LIST) {
 				List<ValorPosible> valoresDTO = obtenerTodosValoresPosibles(datoASolicitar);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
 		}
-
 		return datosDTO;
 	}
 
 	@SuppressWarnings("unchecked")
-	private List<ValorPosible> obtenerValoresPosibles(DatoASolicitar dato,
-			TimeZone timezone) {
-
+	private List<ValorPosible> obtenerValoresPosibles(DatoASolicitar dato, TimeZone timezone) {
 		List<ValorPosible> valoresDTO = new ArrayList<ValorPosible>();
-
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 		Date hoy = cal.getTime();
-
-		// Obtengo los valores posibles vivos del dato
 		List<ValorPosible> valores = (List<ValorPosible>) entityManager
-				.createQuery(
-						"from ValorPosible valor "
-								+ "where valor.dato = :dato and "
-								+ "      :hoy >= valor.fechaDesde and "
-								+ "      (valor.fechaHasta is null or :hoy <= valor.fechaHasta) "
-								+ "order by valor.orden ")
-				.setParameter("dato", dato)
-				.setParameter("hoy", hoy, TemporalType.DATE).getResultList();
-
+			.createQuery("FROM ValorPosible valor "
+				+ "WHERE valor.dato = :dato "
+				+ "  AND :hoy >= valor.fechaDesde "
+				+ "  AND (valor.fechaHasta IS NULL OR :hoy <= valor.fechaHasta) "
+				+ "ORDER BY valor.orden ")
+			.setParameter("dato", dato)
+			.setParameter("hoy", hoy, TemporalType.DATE).getResultList();
 		for (ValorPosible valorPosible : valores) {
 			valoresDTO.add(new ValorPosible(valorPosible));
 		}
@@ -2149,34 +2068,26 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	}
 
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
-	public List<DatoASolicitar> consultarDatosSolicitar(Recurso r)
-			throws ApplicationException {
+	public List<DatoASolicitar> consultarDatosSolicitar(Recurso recurso)  {
 
 		List<DatoASolicitar> datosDTO = new ArrayList<DatoASolicitar>();
 
-		// Obtengo los datos a solicitar vivos de la agrupacion
-		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager
-				.createQuery(
-						"from DatoASolicitar dato "
-								+ "where dato.recurso = :recurso and "
-								+ "      dato.fechaBaja is null "
-								+ "order by dato.agrupacionDato.orden, dato.fila, dato.nombre ")
-				.setParameter("recurso", r).getResultList();
+		//Obtener los datos a solicitar vivos de la agrupación
+		List<DatoASolicitar> datos = (List<DatoASolicitar>) entityManager.createQuery(
+		    "FROM DatoASolicitar dato "
+			+ "WHERE dato.recurso = :recurso "
+			+ "  AND dato.fechaBaja IS NULL "
+			+ "ORDER BY dato.agrupacionDato.orden, dato.fila, dato.nombre")
+		.setParameter("recurso", recurso).getResultList();
 
-		// Para cada dato a solicitar que sea del tipo Lista, obtengo los
-		// valores posibles.
+		//Para cada dato a solicitar que sea del tipo Lista, obtener los valores posibles.
 		for (DatoASolicitar datoASolicitar : datos) {
-
-			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(
-					datoASolicitar);
+			DatoASolicitar datoASolicitarDTO = new DatoASolicitar(datoASolicitar);
 			datosDTO.add(datoASolicitarDTO);
 			if (datoASolicitar.getTipo() == Tipo.LIST) {
 				List<ValorPosible> valoresDTO = obtenerTodosValoresPosibles(datoASolicitar);
 				datoASolicitarDTO.setValoresPosibles(valoresDTO);
 			}
-
 		}
 		return datosDTO;
 	}
@@ -2190,30 +2101,34 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		return this.obtenerTodosValoresPosibles(d);
 	}
 
-	private Boolean hayReservasVivas(Recurso r) throws ApplicationException {
+	private Boolean hayReservasVivas(Recurso recurso, TimeZone timezone) throws ApplicationException {
 		try {
+	    Calendar cal = new GregorianCalendar();
+	    cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 			Long cant = (Long) entityManager
-					.createQuery(
-							"SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
-									+ "WHERE d.recurso = :recurso "
-									+ "  AND d.fecha >= :fecha"
-									+ "  AND d.horaFin >= :hora"
-									+ "  AND r.estado IN ('R','P')")
-					.setParameter("recurso", r)
-					.setParameter("fecha", new Date())
-					.setParameter("hora", new Date()).getSingleResult();
-
+				.createQuery(
+  				"SELECT count(r) FROM Disponibilidad d JOIN d.reservas r "
+  						+ "WHERE d.recurso = :recurso "
+  						+ "  AND d.fecha >= :fecha"
+  						+ "  AND d.horaFin >= :hora"
+  						+ "  AND r.estado IN ('R','P')")
+				.setParameter("recurso", recurso)
+				.setParameter("fecha", cal.getTime())
+				.setParameter("hora", cal.getTime()).getSingleResult();
 			return (cant > 0);
 		} catch (Exception e) {
 			throw new ApplicationException(e);
 		}
 	}
 
-	public void copiarRecurso(Recurso r) throws BusinessException,
+	public void copiarRecurso(Recurso recurso) throws BusinessException,
 			ApplicationException, UserException {
 
-		r = entityManager.find(Recurso.class, r.getId());
-		if (r == null) {
+		//Antes de que haga el entityManager.find(recurso), me guardo la accionMiPerfil que viene en el recurso como transient para no perderla
+		AccionMiPerfil auxAccionMiPerfil = recurso.getAccionMiPerfil();
+		
+		recurso = entityManager.find(Recurso.class, recurso.getId());
+		if (recurso == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
 		}
 
@@ -2243,25 +2158,25 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		// ValidacionPorRecursoCopia>
 		// 6- Se copian disponibilidades
 
-		// 1
-		Recurso rCopia = new Recurso(r);
+		// 1 - Esto ya copia las propiedades básicas del recurso
+		Recurso rCopia = new Recurso(recurso);
 		rCopia.setId(null);
-		rCopia.setAgenda(r.getAgenda());
+		rCopia.setAgenda(recurso.getAgenda());
 
 		int contador = 0;
 		do {
 			contador++;
-			rCopia.setNombre("Copia " + contador + " de " + r.getNombre());
-			rCopia.setDescripcion("Copia " + contador + " de " + r.getDescripcion());
+			rCopia.setNombre("Copia " + contador + " de " + recurso.getNombre());
+			rCopia.setDescripcion("Copia " + contador + " de " + recurso.getDescripcion());
 		} while (existeRecursoPorNombre(rCopia));
 
 		entityManager.persist(rCopia);
 
 		// 2
 		rCopia.setTextosRecurso(new HashMap<String, TextoRecurso>());
-		if (r.getTextosRecurso() != null) {
-			for (String idioma : r.getTextosRecurso().keySet()) {
-				TextoRecurso viejo = r.getTextosRecurso().get(idioma);
+		if (recurso.getTextosRecurso() != null) {
+			for (String idioma : recurso.getTextosRecurso().keySet()) {
+				TextoRecurso viejo = recurso.getTextosRecurso().get(idioma);
 				TextoRecurso trCopia = new TextoRecurso();
 
 				trCopia.setRecurso(viejo.getRecurso());
@@ -2281,7 +2196,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		// 3
 		Map<ValidacionPorRecurso, ValidacionPorRecurso> validacionesDelRecurso = new HashMap<ValidacionPorRecurso, ValidacionPorRecurso>();
-		for (ValidacionPorRecurso vxr : r.getValidacionesPorRecurso()) {
+		for (ValidacionPorRecurso vxr : recurso.getValidacionesPorRecurso()) {
 			if (vxr.getFechaBaja() == null) {
 				ValidacionPorRecurso vxrCopia = new ValidacionPorRecurso();
 				vxrCopia.setId(null);
@@ -2294,7 +2209,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 
 		// 4
-		for (DatoDelRecurso ddr : r.getDatoDelRecurso()) {
+		for (DatoDelRecurso ddr : recurso.getDatoDelRecurso()) {
 
 			DatoDelRecurso ddrCopia = new DatoDelRecurso();
 			ddrCopia.setOrden(ddr.getOrden());
@@ -2306,7 +2221,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 
 		// 5
-		for (AgrupacionDato agrup : r.getAgrupacionDatos()) {
+		for (AgrupacionDato agrup : recurso.getAgrupacionDatos()) {
 
 			if (agrup.getFechaBaja() == null) {
 				AgrupacionDato agrupCopia = new AgrupacionDato(agrup);
@@ -2355,8 +2270,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			}
 
 		}// Fin 5
-			// 6
-		List<Disponibilidad> disponibilidades = r.getDisponibilidades();
+		// 6
+		List<Disponibilidad> disponibilidades = recurso.getDisponibilidades();
 		for (Disponibilidad disponibilidad : disponibilidades) {
 			Disponibilidad disponibilidadCopia = new Disponibilidad();
 			disponibilidadCopia.setCupo(disponibilidad.getCupo());
@@ -2371,6 +2286,15 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			disponibilidadCopia.setVersion(1);
 			entityManager.persist(disponibilidadCopia);
 		}
+		
+		// 7 (copio la accionMiPerfil del recurso, si es que tiene)
+		if (auxAccionMiPerfil != null){
+			//Hago la copia con un constructor hecho para eso
+			AccionMiPerfil aCopia = new AccionMiPerfil(auxAccionMiPerfil);
+			aCopia.setId(null);
+			aCopia.setRecurso(rCopia);
+			entityManager.persist(aCopia);
+		}
 	}
 
 	/**
@@ -2380,8 +2304,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR",
-			"RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
 	public List<ServicioPorRecurso> consultarServicioAutocompletar(Recurso r)
 			throws BusinessException {
 
@@ -2401,33 +2324,23 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		return servicios;
 	}
 
-	public byte[] exportarRecurso(Recurso r) throws UserException {
-		if (r == null) {
+	public byte[] exportarRecurso(Recurso recurso, String versionSAE) throws UserException {
+		if (recurso == null) {
 			return null;
 		}
 		byte[] bytes = null;
-
 		try {
-			Recurso rbd = (Recurso) entityManager
-					.createQuery(
-							"SELECT r FROM Recurso r WHERE r.id=:idRecurso")
-					.setParameter("idRecurso", r.getId()).getSingleResult();
-
-			for (AgrupacionDato agrupacion : rbd.getAgrupacionDatos()) {
-				for (DatoASolicitar datoAsolicitar : agrupacion
-						.getDatosASolicitar()) {
+		  Query query = entityManager.createQuery("SELECT r FROM Recurso r WHERE r.id=:idRecurso");
+		  query = query.setParameter("idRecurso", recurso.getId());
+		  recurso = (Recurso) query.getSingleResult();
+			for (AgrupacionDato agrupacion : recurso.getAgrupacionDatos()) {
+				for (DatoASolicitar datoAsolicitar : agrupacion.getDatosASolicitar()) {
 					datoAsolicitar.getValoresPosibles().isEmpty();
-
 				}
-
 			}
-
-			RecursoExportar recursoExp = ExportarHelper.exportarRecurso(rbd);
-
+			RecursoExportar recursoExp = ExportarHelper.exportarRecurso(recurso, versionSAE);
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
-
-			JAXBContext jaxbContext = JAXBContext
-					.newInstance(RecursoExportar.class);
+			JAXBContext jaxbContext = JAXBContext.newInstance(RecursoExportar.class);
 			Marshaller jaxbMarshaller = jaxbContext.createMarshaller();
 			jaxbMarshaller.setProperty(Marshaller.JAXB_FORMATTED_OUTPUT, true);
 			jaxbMarshaller.marshal(recursoExp, output);
@@ -2439,7 +2352,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 
-	public Recurso importarRecurso(Agenda a, byte[] b) throws UserException {
+	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE) throws UserException {
 		if (b == null) {
 			return null;
 		}
@@ -2448,7 +2361,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			Unmarshaller jaxbUnmarshaller = jaxbContext.createUnmarshaller();
 			ByteArrayInputStream input = new ByteArrayInputStream(b);
 			RecursoExportar recursoExp = (RecursoExportar) jaxbUnmarshaller.unmarshal(input);
-			Recurso recurso = ExportarHelper.importarRecurso(recursoExp);
+			Recurso recurso = ExportarHelper.importarRecurso(recursoExp, versionSAE);
 			recurso = crearRecursoImportado(a, recurso);
 			recurso.setAgrupacionDatos(new ArrayList<AgrupacionDato>());
 			for(AgrupacionDatoExport agdExp : recursoExp.getAgrupaciones()){
@@ -2482,10 +2395,165 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			}
 			return recurso;
 		} catch (UserException uEx) {
+      uEx.printStackTrace();
 			throw uEx;
 		} catch (Exception ex) {
+      ex.printStackTrace();
 			throw new UserException("no_se_pudo_realizar_la_importacion");
 		}
 	}
+	
+	public List<RolesUsuarioRecurso> asociarRolesUsuarioRecurso(Integer usuarioId, Map<Integer, String[]> rolesRecurso) {
+	  
+	  //Borrar las asociaciones actuales
+	  Query query = entityManager.createQuery("DELETE FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId");
+	  query = query.setParameter("usuarioId", usuarioId);
+	  query.executeUpdate();
+	  //Crear las nuevas asociaciones
+	  List<RolesUsuarioRecurso> ret = new ArrayList<RolesUsuarioRecurso>();
+	  for(Integer recursoId : rolesRecurso.keySet()) {
+	    String[] roles = rolesRecurso.get(recursoId);
+	    if(roles!=null && roles.length>0) {
+	      String sRoles = Arrays.toString(roles).replace("[", "").replace("]", "");
+        RolesUsuarioRecursoId rurId = new RolesUsuarioRecursoId();
+        rurId.setRecursoId(recursoId);
+        rurId.setUsuarioId(usuarioId);
+	      RolesUsuarioRecurso rur = new RolesUsuarioRecurso();
+	      rur.setId(rurId);
+	      rur.setRoles(sRoles);
+	      entityManager.persist(rur);
+	      ret.add(rur);
+	    }
+	  }
+	  return ret;
+	}
+	
+	public List<RolesUsuarioRecurso> getRolesUsuarioRecurso(Integer usuarioId) {
+    try {
+      Query query = entityManager.createQuery("SELECT r FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId");
+      query = query.setParameter("usuarioId", usuarioId);
+      @SuppressWarnings("unchecked")
+      List<RolesUsuarioRecurso> ret = query.getResultList();
+  	  return ret;
+    }catch(NoResultException nrEx) {
+      return new ArrayList<RolesUsuarioRecurso>();
+    }
+	}
+
+  public RolesUsuarioRecurso getRolesUsuarioRecurso(Integer usuarioId, Integer recursoId) {
+    try {
+      Query query = entityManager.createQuery("SELECT r FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId AND r.id.recursoId=:recursoId");
+      RolesUsuarioRecurso ret = (RolesUsuarioRecurso) query.setParameter("usuarioId", usuarioId).setParameter("recursoId", recursoId).getSingleResult();
+      return ret;
+    }catch(Exception ex) {
+      return null;
+    }
+  }
+  
+  public AccionMiPerfil obtenerAccionMiPerfilDeRecurso(Integer recursoId){
+	  try {
+	      Query query = entityManager.createQuery("SELECT a FROM AccionMiPerfil a WHERE a.recurso.id=:recursoId order by a.id desc");
+	      query.setMaxResults(1);
+	      AccionMiPerfil acc = (AccionMiPerfil) query.setParameter("recursoId", recursoId).getSingleResult();
+	      return acc;
+	    }catch(Exception ex) {
+	      ex.printStackTrace();
+	      return null;
+	    }
+  }
+  
+  public AccionMiPerfil obtenerAccionMiPerfilPorDefecto(Recurso recurso){
+	  
+	  //Creo la accion con valores por defecto
+      AccionMiPerfil accionMiPerfil = new AccionMiPerfil();
+      
+      accionMiPerfil.setRecurso(recurso);
+      
+      accionMiPerfil.setDestacada_con_1(true);
+      accionMiPerfil.setTitulo_con_1("Ir a ubicacion");
+      accionMiPerfil.setUrl_con_1("https://www.google.com.uy/maps/@{latitud},{longitud},15z");
+      
+      accionMiPerfil.setTitulo_con_2("Cancelar reserva");
+      accionMiPerfil.setUrl_con_2("{linkBase}/sae/cancelarReserva/Paso1.xhtml?e={empresa}&a={agenda}&ri={reserva}");
+      
+      accionMiPerfil.setDestacada_can_1(true);
+      accionMiPerfil.setTitulo_can_1("Ir a ubicacion");
+      accionMiPerfil.setUrl_can_1("https://www.google.com.uy/maps/@{latitud},{longitud},15z");
+      
+      accionMiPerfil.setDestacada_rec_1(true);
+      accionMiPerfil.setTitulo_rec_1("Ir a ubicacion");
+      accionMiPerfil.setUrl_rec_1("https://www.google.com.uy/maps/@{latitud},{longitud},15z");
+      
+      accionMiPerfil.setTitulo_rec_2("Cancelar reserva");
+      accionMiPerfil.setUrl_rec_2("{linkBase}/sae/cancelarReserva/Paso1.xhtml?e={empresa}&a={agenda}&ri={reserva}");
+       
+      return accionMiPerfil;
+  }
+  
+  public Integer getCantAccionMiPerfilDestacadasConfirmacion (AccionMiPerfil accionMiPerfil) {
+	  Integer Cant = 0;
+	  
+	  if ( accionMiPerfil.getDestacada_con_1() && !accionMiPerfil.getUrl_con_1().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_con_2() && !accionMiPerfil.getUrl_con_2().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_con_3() && !accionMiPerfil.getUrl_con_3().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_con_4() && !accionMiPerfil.getUrl_con_4().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_con_5() && !accionMiPerfil.getUrl_con_5().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  
+	  return Cant;
+  }
+  
+  public Integer getCantAccionMiPerfilDestacadasCancelacion (AccionMiPerfil accionMiPerfil) {
+	  Integer Cant = 0;
+	  
+	  if ( accionMiPerfil.getDestacada_can_1() && !accionMiPerfil.getUrl_can_1().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_can_2() && !accionMiPerfil.getUrl_can_2().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_can_3() && !accionMiPerfil.getUrl_can_3().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_can_4() && !accionMiPerfil.getUrl_can_4().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_can_5() && !accionMiPerfil.getUrl_can_5().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  
+	  return Cant;
+  }
+  
+  public Integer getCantAccionMiPerfilDestacadasRecordatorio (AccionMiPerfil accionMiPerfil) {
+	  Integer Cant = 0;
+	  
+	  if ( accionMiPerfil.getDestacada_rec_1() && !accionMiPerfil.getUrl_rec_1().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_rec_2() && !accionMiPerfil.getUrl_rec_2().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_rec_3() && !accionMiPerfil.getUrl_rec_3().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_rec_4() && !accionMiPerfil.getUrl_rec_4().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  if ( accionMiPerfil.getDestacada_rec_5() && !accionMiPerfil.getUrl_rec_5().isEmpty() ) {
+		  Cant += 1;
+	  }
+	  
+	  return Cant;
+  }
 
 }

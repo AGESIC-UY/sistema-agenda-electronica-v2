@@ -103,9 +103,20 @@
     <location>/error/recursoNoEncontrado.xhtml</location>
   </error-page>
 	<security-constraint>
-		<web-resource-collection>
+	  <!-- 
+	   Las páginas que estén dentro de este grupo no están protegidas (solo es necesario que el usuario este logueado).
+	   Sin embargo, es posible que cada una de ellas tenga un "<f:view beforePhase=..." donde se especifica un método
+	   que controle permisos de acceso de otra manera, de la forma siguiente:
+	    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+        FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(FacesContext.getCurrentInstance(), "", "noAutorizado");
+      }
+	   -->
+    <web-resource-collection>
 			<web-resource-name>Paginas no protegidas</web-resource-name>
 			<url-pattern>/administracion/inicio.xhtml</url-pattern>
+      <url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
+      <url-pattern>/administracion/disponibilidad/*</url-pattern>
+      <url-pattern>/administracion/consulta/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>RA_AE_ANONIMO</role-name>
@@ -120,9 +131,7 @@
 		<web-resource-collection>
 			<web-resource-name>Paginas protegidas 1</web-resource-name>
 			<url-pattern>/administracion/recurso/*</url-pattern>
-			<url-pattern>/administracion/disponibilidad/*</url-pattern>
 			<url-pattern>/administracion/datoASolicitar/*</url-pattern>
-			<url-pattern>/administracion/consulta/*</url-pattern>
 			<url-pattern>/administracion/reserva/*</url-pattern>
 			<url-pattern>/administracion/validaciones/*</url-pattern>
 			<url-pattern>/administracion/acciones/*</url-pattern>
@@ -130,6 +139,7 @@
 			<url-pattern>/administracion/agenda/*</url-pattern>
 			<url-pattern>/administracion/empresa/*</url-pattern>
 			<url-pattern>/administracion/usuario/*</url-pattern>
+      <url-pattern>/administracion/configuracion/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>RA_AE_ADMINISTRADOR</role-name>
@@ -143,12 +153,10 @@
 			<url-pattern>/administracion/recurso/modificar.xhtml</url-pattern>
 			<url-pattern>/administracion/recurso/modificarConsultar.xhtml</url-pattern>
 			<url-pattern>/administracion/recurso/modificarTextos.xhtml</url-pattern>
-			<url-pattern>/administracion/disponibilidad/*</url-pattern>
 			<url-pattern>/administracion/datoASolicitar/consultar.xhtml</url-pattern>
 			<url-pattern>/administracion/datoASolicitar/consultarDatos.xhtml</url-pattern>
 			<url-pattern>/administracion/datoASolicitar/modificar.xhtml</url-pattern>
 			<url-pattern>/administracion/datoASolicitar/modificarConsultar.xhtml</url-pattern>
-			<url-pattern>/administracion/consulta/*</url-pattern>
 			<url-pattern>/administracion/reserva/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
@@ -159,11 +167,9 @@
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Paginas protegidas 3</web-resource-name>
-			<url-pattern>/administracion/disponibilidad/consultar.xhtml</url-pattern>
 			<url-pattern>/administracion/disponibilidad/consultarPorDia.xhtml</url-pattern>
 			<url-pattern>/administracion/reserva/*</url-pattern>
 			<url-pattern>/administracion/llamador/*</url-pattern>
-			<url-pattern>/administracion/consulta/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>RA_AE_FATENCION</role-name>
@@ -173,7 +179,6 @@
 		<web-resource-collection>
 			<web-resource-name>Paginas protegidas 4</web-resource-name>
 			<url-pattern>/administracion/reserva/*</url-pattern>
-			<url-pattern>/administracion/consulta/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>RA_AE_FCALL_CENTER</role-name>
@@ -183,10 +188,8 @@
 		<web-resource-collection>
 			<web-resource-name>Paginas protegidas 5</web-resource-name>
 			<url-pattern>/agendarReserva/*</url-pattern>
-			<url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
 			<url-pattern>/administracion/reserva/*</url-pattern>
 			<url-pattern>/administracion/llamador/*</url-pattern>
-			<url-pattern>/administracion/consulta/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>RA_AE_ADMINISTRADOR</role-name>
@@ -198,7 +201,6 @@
 	<security-constraint>
 		<web-resource-collection>
 			<web-resource-name>Paginas protegidas 6</web-resource-name>
-			<url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
 			<url-pattern>/administracion/llamador/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>

@@ -42,9 +42,10 @@ public abstract class SessionCleanerMBean extends BaseMBean {
 				// si lo que encontramos es un bean de los removibles
 				if(entry.getValue() instanceof  RemovableFromSession){
 					// si no es la instancia actual
-					if(entry.getValue()!=this)
-					// se elimina de la session
-					sessionMap.remove(entry.getKey());
+					if(entry.getValue()!=this) {
+  					// se elimina de la session
+  					sessionMap.remove(entry.getKey());
+					}
 				}
 			}
 		}

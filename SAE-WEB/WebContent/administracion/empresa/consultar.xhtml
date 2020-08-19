@@ -1,82 +1,79 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{empresaMBean.beforePhaseConsultar}" >
-
-			<p:dialog closable="false" resizable="false" shadowOpacity="0.4" autosized="false"
-				widgetVar="eliminarEmpresa" zindex="2000" modal="true">
+			<p:dialog closable="false" resizable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarEmpresa" zindex="2000" modal="true" dynamic="true" 
+        focus="#{empresaMBean.ultimaEmpresaEliminar? 'elimRec:btn_eliminar' : 'elimRec:btn_cancelar'}">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
 				<h:form id="elimRec">
 					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_empresa']}" />
+					<p:outputPanel rendered="#{empresaMBean.ultimaEmpresaEliminar}">
+					  <div class="ui-messages-warn ui-corner-all">
+					    <span class="ui-messages-warn-icon" />
+					    <p class="ui-messages-warn-title"><h:outputText value="#{sessionMBean.textos['es_la_ultima_empresa']}" /></p>
+              <p class="ui-messages-warn-detail"><h:outputText value="#{sessionMBean.textos['debe_quedar_al_menos_una_empresa']}" /></p>
+				    </div>
+			    </p:outputPanel>
 					<p:outputPanel styleClass="row panelBotonesPopUp">
-						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton id="btn_eliminar" update="@all"
-								actionListener="#{empresaMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
-								onclick="PF('eliminarEmpresa').hide();"
-								styleClass="btn-primario btn-100 btn">
-							</p:commandButton>
+						<p:outputPanel styleClass="col-sm-6" rendered="#{not empresaMBean.ultimaEmpresaEliminar}">
+							<p:commandButton id="btn_eliminar" update="@all" actionListener="#{empresaMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarEmpresa').hide();" styleClass="btn-primario btn-100 btn" />
 						</p:outputPanel>
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton onclick="PF('eliminarEmpresa').hide();"
-								value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
-							</p:commandButton>
+							<p:commandButton id="btn_cancelar" onclick="PF('eliminarEmpresa').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
 						</p:outputPanel>
 					</p:outputPanel>
 				</h:form>
 			</p:dialog>
-
+			
 			<h:form id="form">
-				<p:dataTable value="#{empresaMBean.empresasSeleccion}" var="row"
-					id="tablaEmpresas" rows="25" paginator="true"
-					paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-					binding="#{empresaMBean.empresasDataTable}" caption="#{sessionMBean.textos['listado_de_empresas']}"
-					emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-
+        <p:dataTable id="tablaEmpresas" value="#{empresaMBean.empresasSeleccion}" var="row" binding="#{empresaMBean.empresasDataTable}" 
+          caption="#{sessionMBean.textos['listado_de_empresas']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+          paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}"
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+        >
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['identificador']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['identificador']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.id}"></h:outputText>
+						<h:outputText value="#{row.data.id}" />
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['nombre']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['nombre']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.nombre}"></h:outputText>
+						<h:outputText value="#{row.data.nombre}" />
 					</p:column>
 					<p:column>
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['origen_de_datos']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['origen_de_datos']}" />
 						</f:facet>
-						<h:outputText value="#{row.data.datasource}"></h:outputText>
+						<h:outputText value="#{row.data.datasource}" />
 					</p:column>
 					<p:column styleClass="alinCentro">
 						<f:facet name="header">
-							<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+							<h:outputText value="#{sessionMBean.textos['acciones']}" />
 						</f:facet>
-						<p:commandButton id="modificarEmpresa" value="#{sessionMBean.textos['modificar']}" 
-							action="#{empresaMBean.modificar}" update="tablaEmpresas" styleClass="ui-button-icon-only"
-							icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}" >
+						<p:commandButton id="modificarEmpresa" value="#{sessionMBean.textos['modificar']}" action="#{empresaMBean.modificar}" update="tablaEmpresas" 
+						  styleClass="ui-button-icon-only" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}" >
 						</p:commandButton>
-						<p:commandButton id="eliminarEmpresa" value="#{sessionMBean.textos['eliminar']}"
-							oncomplete="PF('eliminarEmpresa').show();" styleClass="ui-button-icon-only"
-							actionListener="#{empresaMBean.selecEmpresaEliminar}"
-							icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+						<p:commandButton id="eliminarEmpresa" value="#{sessionMBean.textos['eliminar']}" oncomplete="PF('eliminarEmpresa').show();" styleClass="ui-button-icon-only"
+							actionListener="#{empresaMBean.selecEmpresaEliminar}" icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
 						</p:commandButton>
 					</p:column>
 				</p:dataTable>
 			</h:form>
-
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

@@ -22,6 +22,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
@@ -32,26 +33,39 @@ import uy.gub.imm.sae.entity.Atencion;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.ApplicationException;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 public interface Consultas {
 
 	
-	public Reserva consultarReservaId(Integer id, Integer recId) throws ApplicationException, BusinessException;
-	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws BusinessException, UserException;
+	public Reserva consultarReservaId(Integer id, Integer recId) throws UserException;
+	public Reserva consultarReservaPorNumero(Recurso r, Date fechaHoraInicio, Integer numero) throws UserException;
 
-	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, Estado estado) throws BusinessException;
-	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados) throws BusinessException;
-	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, TimeZone timezone) throws BusinessException;
-	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, TimeZone timezone) throws BusinessException;
+	public List<ReservaDTO> consultarReservasPorPeriodoEstado(Recurso recurso, VentanaDeTiempo periodo, List<Estado> estados, Boolean atencionPresencial) throws UserException;
+	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, Boolean atencionPresencial, TimeZone timezone) throws UserException;
+	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, Boolean atencionPresencial, TimeZone timezone) throws UserException;
 	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso);
-	public List<Reserva> consultarReservaDatosFecha(List<DatoReserva> datos, Recurso recurso, Date fecha, String codigoTramite);	
-	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo) throws BusinessException;
-	public List<Reserva> consultarReservasParaCancelar(List<DatoReserva> datos ,Recurso recurso,String codigoSeguridadReserva, TimeZone timezone);
+	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos, Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite);	
+	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo, Boolean atencionPresencial) throws UserException;
+	public List<Reserva> consultarReservasParaModificarCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva, TimeZone timezone);
+	
+	public List<ReservaDTO> consultarReservasCanceladas(Recurso recurso, String codigoTramite, Date reservaFechaDesde, Date reservaFechaHasta, 
+      Date creacionFechaDesde, Date creacionFechaHasta, Date cancelacionFechaDesde, Date cancelacionFechaHasta);
+	
 	public List<Atencion> consultarTodasAtencionesPeriodo(Date fechaDesde,Date fechaHasta);
 	public List<AtencionLLamadaReporteDT> consultarLlamadasAtencionPeriodo(Date fechaDesde, Date fechaHasta);
+  public List<AtencionLLamadaReporteDT> consultarAtencionesPresencialesRecursoPeriodo(Recurso recurso, Date fechaDesde, Date fechaHasta);
 	
-	public List<Date> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc)throws BusinessException;
+  public List<Map<String, Object>> consultarReservasPorTokenYDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite) throws UserException;
+  public List<Map<String, Object>> consultarReservasPorTokenYAgendaTramiteDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite, Date fechaDesde, Date fechaHasta) throws UserException;
+  public List<Map<String, Object>> consultarReservasVigentesPorTokenYAgendaTramiteDocumento(String token, Integer idAgenda, Integer idRecurso, String tipoDoc, String numDoc, String codTramite) throws UserException;
+  public List<Map<String, Object>> consultarReservasVigentesPorTokenYEmpresaTramiteDocumento(String token, String idEmpresa, String codTramite, List<String[]> personas) throws UserException;
+  
+  public boolean validarTokenEmpresa(String token, Integer idEmpresa);
+  public Map<String, Object> consultarRecursosPorAgenda(Integer idEmpresa, Integer idAgenda, String idioma) throws UserException;
+	public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;
+	
+	public Map<String, Object> consultarDatosEmpresa(Integer idEmpresa);
+	
+	public String consultarConfiguracion(String clave);
 }

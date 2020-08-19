@@ -29,6 +29,7 @@ import javax.faces.event.PhaseId;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.web.common.BaseMBean;
+import uy.gub.imm.sae.web.common.Validadores;
 
 public class AgrupacionMBean extends BaseMBean {
 	public static final String MSG_ID = "pantalla";
@@ -78,6 +79,7 @@ public class AgrupacionMBean extends BaseMBean {
 	 */
 	
 	public void seleccionarAgrupacion(int rowIndex) {
+	  limpiarMensajesError();
 		AgrupacionDato a = datoASSessionMBean.getAgrupaciones().get(rowIndex);
 		if (a != null) {
 			datoASSessionMBean.setAgrupacionSeleccionada(a);
@@ -88,6 +90,8 @@ public class AgrupacionMBean extends BaseMBean {
 	}
 
 	public void modificarAgrupacion(ActionEvent event) {
+	  
+	  limpiarMensajesError();
 		
 		AgrupacionDato agrupacion = datoASSessionMBean.getAgrupacionSeleccionada();
 		if (agrupacion != null) {
@@ -95,7 +99,17 @@ public class AgrupacionMBean extends BaseMBean {
 			if (agrupacion.getNombre() == null || agrupacion.getNombre().trim().isEmpty()) {
 				addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agrupacion_es_obligatorio"), "formModificarAgrup:nombre");
 				huboError = true;
-			}
+			}else {
+	      boolean nombreValido = Validadores.validarNombreIdentificador(agrupacion.getNombre());
+	      if (!nombreValido) {
+	        addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agrupacion_no_es_valido"), "formModificarAgrup:nombre");
+	        huboError = true;
+	      }
+	    }
+      if (agrupacion.getEtiqueta() == null || agrupacion.getEtiqueta().trim().isEmpty()) {
+        addErrorMessage(sessionMBean.getTextos().get("la_etiqueta_de_la_agrupacion_es_obligatoria"), "formModificarAgrup:etiqueta");
+        huboError = true;
+      }
 			if (agrupacion.getOrden() == null) {
 				addErrorMessage(sessionMBean.getTextos().get("el_orden_de_la_agrupacion_es_obligatorio"), "formModificarAgrup:VOrdAgrup");
 				huboError = true;
@@ -130,6 +144,7 @@ public class AgrupacionMBean extends BaseMBean {
 	}
 	
 	public void seleccionarAgrupacionParaEliminar(int rowIndex) {
+	  limpiarMensajesError();
 		AgrupacionDato a = datoASSessionMBean.getAgrupaciones().get(rowIndex);
 		datoASSessionMBean.setAgrupacionSeleccionada(a);
 	}
@@ -152,14 +167,13 @@ public class AgrupacionMBean extends BaseMBean {
 				datoASSessionMBean.setAgrupacionSeleccionada(null);
 				setAgrupacionDatoNuevo(null);
 				addInfoMessage(sessionMBean.getTextos().get("agrupacion_eliminada"), MSG_ID);
-			} catch (Exception e) {
+			}catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
 			}
-			
 			datoASSessionMBean.cargarAgrupaciones();
-			
-		} else {
+		}else {
 			if (!agrupacion.getBorrarFlag()) {
+        datoASSessionMBean.setAgrupacionSeleccionada(null);
 				addErrorMessage(sessionMBean.getTextos().get("no_se_permite_eliminar_esta_agrupacion"),	MSG_ID);
 			}else {
 				addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agrupacion_seleccionada"),	MSG_ID);
@@ -174,6 +188,9 @@ public class AgrupacionMBean extends BaseMBean {
 	}
 
 	public void crearAgrupacion(ActionEvent e) {
+	  
+	  limpiarMensajesError();
+	  
 		boolean huboError = false;
 		if (sessionMBean.getAgendaMarcada() == null){
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
@@ -188,7 +205,17 @@ public class AgrupacionMBean extends BaseMBean {
 		if (agrupacion.getNombre() == null || agrupacion.getNombre().trim().isEmpty()) {
 			addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agrupacion_es_obligatorio"), "formModificarAgrup:cNombre");
 			huboError = true;
-		}
+		}else {
+      boolean nombreValido = Validadores.validarNombreIdentificador(agrupacion.getNombre());
+      if (!nombreValido) {
+        addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_agrupacion_no_es_valido"), "formModificarAgrup:cNombre");
+        huboError = true;
+      }
+    }
+    if (agrupacion.getEtiqueta() == null || agrupacion.getEtiqueta().trim().isEmpty()) {
+      addErrorMessage(sessionMBean.getTextos().get("la_etiqueta_de_la_agrupacion_es_obligatoria"), "formModificarAgrup:cEtiqueta");
+      huboError = true;
+    }
 		if (agrupacion.getOrden() == null) {
 			addErrorMessage(sessionMBean.getTextos().get("el_orden_de_la_agrupacion_es_obligatorio"), "formModificarAgrup:VOrdUpd");
 			huboError = true;

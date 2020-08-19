@@ -22,8 +22,9 @@ public class DatoASolicitarExportar {
 	private Integer largo;	
 	private Boolean requerido;
 	private Boolean esClave;
+  private Boolean soloLectura;
 	private Integer fila;
-	private Integer columna = 1; //Solo se admite 1 columna por fila
+	private Integer columna = 1;
 	private Date fechaBaja;
 	private Boolean incluirEnReporte;
 	private Integer anchoDespliegue;
@@ -138,8 +139,11 @@ public class DatoASolicitarExportar {
 	public void setOrdenEnLlamador(Integer ordenEnLlamador) {
 		this.ordenEnLlamador = ordenEnLlamador;
 	}
-	
-	
-	
+  public Boolean getSoloLectura() {
+    return soloLectura;
+  }
+  public void setSoloLectura(Boolean soloLectura) {
+    this.soloLectura = soloLectura;
+  }
 	
 }

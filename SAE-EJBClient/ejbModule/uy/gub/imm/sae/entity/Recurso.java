@@ -29,6 +29,8 @@ import java.util.Map;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -37,12 +39,16 @@ import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlTransient;
+
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 
 @Entity
 @Table (name = "ae_recursos")
@@ -67,13 +73,18 @@ public class Recurso implements Serializable {
 	private Date fechaBaja;
 	private Boolean mostrarNumeroEnLlamador = false;
 	private Boolean visibleInternet;
-	private Boolean mostrarNumeroEnTicket;
-	private Boolean mostrarIdEnTicket;
 	private Boolean usarLlamador;
 	private String serie;
 	private Boolean sabadoEsHabil;
   private Boolean domingoEsHabil;
-	
+
+  private Boolean mostrarNumeroEnTicket;
+  private Boolean mostrarIdEnTicket;
+  private String fuenteTicket;
+  private Integer tamanioFuenteGrande;
+  private Integer tamanioFuenteNormal;
+  private Integer tamanioFuenteChica;
+  
 	//Datos obtenidos a partir de TramitesUy
 	private String oficinaId; //Esto es inventado, las oficinas no tienen id en TramitesUy
 	private String direccion;
@@ -99,7 +110,60 @@ public class Recurso implements Serializable {
 
   private Map<String, TextoRecurso> textosRecurso;
 	
-	
+  //Datos de atención presencial
+  private Boolean presencialAdmite;
+  private Integer presencialCupos;
+  private Boolean presencialLunes;
+  private Boolean presencialMartes;
+  private Boolean presencialMiercoles;
+  private Boolean presencialJueves;
+  private Boolean presencialViernes;
+  private Boolean presencialSabado;
+  private Boolean presencialDomingo;
+  
+  //Datos de reserva múltiple
+  private Boolean multipleAdmite;
+  //Datos de cambios de reserva
+  private Boolean cambiosAdmite;
+  private Integer cambiosTiempo;
+  private Integer cambiosUnidad; //Calendar.DATE, Calendar.HOUR, Calendar.MINUTE
+  
+  private Integer periodoValidacion;
+  
+  //Validación por IP
+  private Boolean validarPorIP;
+  private Integer cantidadPorIP;
+  private Integer periodoPorIP;
+  private String ipsSinValidacion;
+
+  //Datos de cancelaciones de reserva
+  private Integer cancelacionTiempo;
+  private Integer cancelacionUnidad; //Calendar.DATE, Calendar.HOUR, Calendar.MINUTE
+  private FormaCancelacion cancelacionTipo; //I=Inmediata, D=Diferida
+  
+  //Datos de integración con MiPerfil
+  private Boolean miPerfilConHab;
+  private String miPerfilConTitulo;
+  private String miPerfilConCorto;
+  private String miPerfilConLargo;
+  private Integer miPerfilConVencim;
+
+  private Boolean miPerfilCanHab;
+  private String miPerfilCanTitulo;
+  private String miPerfilCanCorto;
+  private String miPerfilCanLargo;
+  private Integer miPerfilCanVencim;
+
+  private Boolean miPerfilRecHab;
+  private String miPerfilRecTitulo;
+  private String miPerfilRecCorto;
+  private String miPerfilRecLargo;
+  private Integer miPerfilRecVencim;
+  private Integer miPerfilRecHora;
+  private Integer miPerfilRecDias;
+  
+  private AccionMiPerfil accionMiPerfil;
+  
 	public Recurso () {
 		visibleInternet = false;
 		plantillas = new ArrayList<Plantilla>();
@@ -114,12 +178,57 @@ public class Recurso implements Serializable {
 		usarLlamador = true;
 		sabadoEsHabil = false;
 		domingoEsHabil = false;
+
+		presencialAdmite = false;
+		presencialCupos = 0;
+		presencialLunes = false;
+		presencialMartes = false;
+		presencialMiercoles = false;
+		presencialJueves = false;
+		presencialViernes = false;
+		presencialSabado = false;
+    presencialDomingo = false;
+    
+    multipleAdmite = false;
+    cambiosAdmite = false;
+    cambiosTiempo = null;
+    cambiosUnidad = null;
+    
+    periodoValidacion = null;
+    
+    validarPorIP = null;
+    cantidadPorIP = null;
+    periodoPorIP = null;
+    ipsSinValidacion = null;
+    
+    cancelacionTiempo = null;
+    cancelacionUnidad = null;
+    cancelacionTipo = null;
+    
+    miPerfilConHab = true;
+    miPerfilCanHab = true;
+    miPerfilRecHab = true;
+    miPerfilConTitulo="";
+    miPerfilConCorto="";
+    miPerfilConLargo="";
+    miPerfilConVencim=0;
+    miPerfilCanTitulo="";
+    miPerfilCanCorto="";
+    miPerfilCanLargo="";
+    miPerfilCanVencim=0;
+    miPerfilRecTitulo="";
+    miPerfilRecCorto="";
+    miPerfilRecLargo="";
+    miPerfilRecVencim=0;
+    miPerfilRecHora=0;
+    miPerfilRecDias=0;
+    
 	}
 	
 	/**
 	 * Constructor por copia no en profundidad.
 	 */
-	public Recurso (Recurso r) {
+	public Recurso (Recurso original) {
 		plantillas = new ArrayList<Plantilla>();
 		agrupacionDatos = new ArrayList<AgrupacionDato>();
 		disponibilidades = new ArrayList<Disponibilidad>();
@@ -128,43 +237,91 @@ public class Recurso implements Serializable {
 		validacionesPorRecurso = new ArrayList<ValidacionPorRecurso>();	
 		accionesPorRecurso = new ArrayList<AccionPorRecurso>();
 		
-		id = r.getId();
-		nombre = r.getNombre();
-		descripcion = r.getDescripcion();
-		fechaInicio = r.getFechaInicio();
-		fechaFin = r.getFechaFin();
-		fechaInicioDisp = r.getFechaInicioDisp();
-		fechaFinDisp = r.getFechaFinDisp();
-		diasInicioVentanaIntranet = r.getDiasInicioVentanaIntranet();
-		diasVentanaIntranet = r.getDiasVentanaIntranet();
-		diasInicioVentanaInternet = r.getDiasInicioVentanaInternet();
-		diasVentanaInternet = r.getDiasVentanaInternet();
-		ventanaCuposMinimos = r.getVentanaCuposMinimos();
-		cantDiasAGenerar = r.getCantDiasAGenerar();
-		largoListaEspera = r.getLargoListaEspera();
-		fechaBaja = r.getFechaBaja();
-		mostrarNumeroEnLlamador = r.getMostrarNumeroEnLlamador();
-		mostrarNumeroEnTicket = r.getMostrarNumeroEnTicket();
-		mostrarIdEnTicket = r.getMostrarIdEnTicket();
-		usarLlamador = r.getUsarLlamador();
-		serie = r.getSerie();
-		visibleInternet = r.getVisibleInternet();
-		sabadoEsHabil = r.getSabadoEsHabil();
-		domingoEsHabil = r.getDomingoEsHabil();
+		id = original.getId();
+		nombre = original.getNombre();
+		descripcion = original.getDescripcion();
+		fechaInicio = original.getFechaInicio();
+		fechaFin = original.getFechaFin();
+		fechaInicioDisp = original.getFechaInicioDisp();
+		fechaFinDisp = original.getFechaFinDisp();
+		diasInicioVentanaIntranet = original.getDiasInicioVentanaIntranet();
+		diasVentanaIntranet = original.getDiasVentanaIntranet();
+		diasInicioVentanaInternet = original.getDiasInicioVentanaInternet();
+		diasVentanaInternet = original.getDiasVentanaInternet();
+		ventanaCuposMinimos = original.getVentanaCuposMinimos();
+		cantDiasAGenerar = original.getCantDiasAGenerar();
+		largoListaEspera = original.getLargoListaEspera();
+		fechaBaja = original.getFechaBaja();
+		mostrarNumeroEnLlamador = original.getMostrarNumeroEnLlamador();
+		mostrarNumeroEnTicket = original.getMostrarNumeroEnTicket();
+		fuenteTicket = original.getFuenteTicket();
+		tamanioFuenteChica = original.getTamanioFuenteChica();
+    tamanioFuenteNormal = original.getTamanioFuenteNormal();
+    tamanioFuenteGrande = original.getTamanioFuenteGrande();
+    mostrarIdEnTicket = original.getMostrarIdEnTicket();
+		usarLlamador = original.getUsarLlamador();
+		serie = original.getSerie();
+		visibleInternet = original.getVisibleInternet();
+		sabadoEsHabil = original.getSabadoEsHabil();
+		domingoEsHabil = original.getDomingoEsHabil();
 		
-		agenda = new Agenda(r.getAgenda());
+		agenda = new Agenda(original.getAgenda());
 		
+		this.oficinaId = original.oficinaId;
+		this.direccion = original.direccion;
+		this.localidad = original.localidad;
+		this.departamento = original.departamento;
+		this.telefonos = original.telefonos;
+		this.horarios = original.horarios;
 		
-		this.oficinaId = r.oficinaId;
-		this.direccion = r.direccion;
-		this.localidad = r.localidad;
-		this.departamento = r.departamento;
-		this.telefonos = r.telefonos;
-		this.horarios = r.horarios;
+		this.latitud = original.latitud;
+		this.longitud = original.longitud;
+	
+    this.presencialAdmite = original.presencialAdmite;
+    this.presencialCupos = original.presencialCupos;
+    this.presencialLunes = original.presencialLunes;
+    this.presencialMartes = original.presencialMartes;
+    this.presencialMiercoles = original.presencialMiercoles;
+    this.presencialJueves = original.presencialJueves;
+    this.presencialViernes = original.presencialViernes;
+    this.presencialSabado = original.presencialSabado;
+    this.presencialDomingo = original.presencialDomingo;
 		
-		this.latitud = r.latitud;
-		this.longitud = r.longitud;
-		
+    this.multipleAdmite = original.multipleAdmite;
+    
+    this.cambiosAdmite = original.cambiosAdmite;
+    this.cambiosTiempo = original.cambiosTiempo;
+    this.cambiosUnidad = original.cambiosUnidad;
+    
+    this.periodoValidacion = original.periodoValidacion;
+    
+    this.validarPorIP = original.validarPorIP;
+    this.cantidadPorIP = original.cantidadPorIP;
+    this.periodoPorIP = original.periodoPorIP;
+    this.ipsSinValidacion = original.ipsSinValidacion;
+    
+    this.cancelacionTiempo = original.cancelacionTiempo;
+    this.cancelacionUnidad = original.cancelacionUnidad;
+    this.cancelacionTipo = original.cancelacionTipo;
+    
+    miPerfilConHab = original.miPerfilConHab;
+    miPerfilCanHab = original.miPerfilCanHab;
+    miPerfilRecHab = original.miPerfilRecHab;
+    miPerfilConTitulo = original.miPerfilConTitulo;
+    miPerfilConCorto = original.miPerfilConCorto;
+    miPerfilConLargo = original.miPerfilConLargo;
+    miPerfilConVencim = original.miPerfilConVencim;
+    miPerfilCanTitulo = original.miPerfilCanTitulo;
+    miPerfilCanCorto = original.miPerfilCanCorto;
+    miPerfilCanLargo = original.miPerfilCanLargo;
+    miPerfilCanVencim = original.miPerfilCanVencim;
+    miPerfilRecTitulo = original.miPerfilRecTitulo;
+    miPerfilRecCorto = original.miPerfilRecCorto;
+    miPerfilRecLargo = original.miPerfilRecLargo;
+    miPerfilRecVencim = original.miPerfilRecVencim;
+    miPerfilRecHora = original.miPerfilRecHora;
+    miPerfilRecDias = original.miPerfilRecDias;
+    
 	}
 
 	
@@ -190,10 +347,10 @@ public class Recurso implements Serializable {
 	public String getDescripcion() {
 		return descripcion;
 	}
+	
 	public void setDescripcion(String descripcion) {
 		this.descripcion = descripcion;
 	}
-	
 	
 	@Column (name = "fecha_inicio", nullable = false)
 	@Temporal(TemporalType.TIMESTAMP)
@@ -204,11 +361,13 @@ public class Recurso implements Serializable {
 	public void setFechaInicio(Date fechaInicio) {
 		this.fechaInicio = fechaInicio;
 	}
+	
 	@Column (name = "fecha_fin")
 	@Temporal(TemporalType.TIMESTAMP)
 	public Date getFechaFin() {
 		return fechaFin;
 	}
+	
 	public void setFechaFin(Date fechaFin) {
 		this.fechaFin = fechaFin;
 	}
@@ -218,6 +377,7 @@ public class Recurso implements Serializable {
 	public Date getFechaInicioDisp() {
 		return fechaInicioDisp;
 	}
+	
 	public void setFechaInicioDisp(Date fechaInicioDisp) {
 		this.fechaInicioDisp = fechaInicioDisp;
 	}
@@ -227,6 +387,7 @@ public class Recurso implements Serializable {
 	public Date getFechaFinDisp() {
 		return fechaFinDisp;
 	}
+	
 	public void setFechaFinDisp(Date fechaFinDisp) {
 		this.fechaFinDisp = fechaFinDisp;
 	}
@@ -243,6 +404,7 @@ public class Recurso implements Serializable {
 	public Integer getDiasVentanaIntranet() {
 		return diasVentanaIntranet;
 	}
+	
 	public void setDiasVentanaIntranet(Integer diasVentanaIntranet) {
 		this.diasVentanaIntranet = diasVentanaIntranet;
 	}
@@ -251,6 +413,7 @@ public class Recurso implements Serializable {
 	public Integer getDiasInicioVentanaInternet() {
 		return diasInicioVentanaInternet;
 	}
+	
 	public void setDiasInicioVentanaInternet(Integer diasInicioVentanaInternet) {
 		this.diasInicioVentanaInternet = diasInicioVentanaInternet;
 	}
@@ -268,30 +431,27 @@ public class Recurso implements Serializable {
 	public Integer getVentanaCuposMinimos() {
 		return ventanaCuposMinimos;
 	}
+	
 	public void setVentanaCuposMinimos(Integer ventanaCuposMinimos) {
 		this.ventanaCuposMinimos = ventanaCuposMinimos;
 	}
+	
 	@Column (name="cant_dias_a_generar", nullable = false)
 	public Integer getCantDiasAGenerar() {
 		return cantDiasAGenerar;
 	}
+	
 	public void setCantDiasAGenerar(Integer cantDiasAGenerar) {
 		this.cantDiasAGenerar = cantDiasAGenerar;
 	}
+	
 	@Column (name="largo_lista_espera", nullable = true)
 	public Integer getLargoListaEspera() {
 		return largoListaEspera;
 	}
+	
 	public void setLargoListaEspera(Integer largoListaEspera) {
 		this.largoListaEspera = largoListaEspera;
-	}
-	@Column (name="reserva_multiple", nullable = false)
-	public Boolean getReservaMultiple() {
-		//Se eliminó el atributo reservaMultiple;
-		return false;
-	}
-	public void setReservaMultiple(Boolean reservaMultiple) {
-		//Nada para hacer, se eliminó el atributo reservaMultiple
 	}
 
 	@Column (name = "fecha_baja")
@@ -307,6 +467,7 @@ public class Recurso implements Serializable {
 	public Boolean getMostrarNumeroEnLlamador() {
 		return mostrarNumeroEnLlamador;
 	}
+	
 	public void setMostrarNumeroEnLlamador(Boolean mostrarNumeroEnLlamador) {
 		this.mostrarNumeroEnLlamador = mostrarNumeroEnLlamador;
 	}
@@ -315,6 +476,7 @@ public class Recurso implements Serializable {
 	public Boolean getMostrarNumeroEnTicket() {
 		return mostrarNumeroEnTicket;
 	}
+	
 	public void setMostrarNumeroEnTicket(Boolean mostrarNumeroEnTicket) {
 		this.mostrarNumeroEnTicket = mostrarNumeroEnTicket;
 	}
@@ -341,6 +503,7 @@ public class Recurso implements Serializable {
 	public Boolean getVisibleInternet() {
 		return visibleInternet;
 	}
+	
 	public void setVisibleInternet(Boolean visibleInternet) {
 		this.visibleInternet = visibleInternet;
 	}
@@ -349,6 +512,7 @@ public class Recurso implements Serializable {
 	public Boolean getSabadoEsHabil() {
 		return sabadoEsHabil;
 	}
+	
 	public void setSabadoEsHabil(Boolean sabadoEsHabil) {
 		this.sabadoEsHabil = sabadoEsHabil;
 	}
@@ -367,6 +531,7 @@ public class Recurso implements Serializable {
 	public Agenda getAgenda() {
 		return agenda;
 	}
+	
 	public void setAgenda(Agenda agenda) {
 		this.agenda = agenda;
 	}
@@ -384,6 +549,7 @@ public class Recurso implements Serializable {
 	public List<AgrupacionDato> getAgrupacionDatos() {
 		return agrupacionDatos;
 	}
+	
 	public void setAgrupacionDatos(List<AgrupacionDato> agrupacionDatos) {
 		this.agrupacionDatos = agrupacionDatos;
 	}
@@ -392,6 +558,7 @@ public class Recurso implements Serializable {
 	public List<DatoDelRecurso> getDatoDelRecurso() {
 		return datoDelRecurso;
 	}
+	
 	public void setDatoDelRecurso(List<DatoDelRecurso> datoDelRecurso) {
 		this.datoDelRecurso = datoDelRecurso;
 	}
@@ -401,6 +568,7 @@ public class Recurso implements Serializable {
 	public List<Disponibilidad> getDisponibilidades() {
 		return disponibilidades;
 	}
+	
 	public void setDisponibilidades(List<Disponibilidad> disponibilidades) {
 		this.disponibilidades = disponibilidades;
 	}
@@ -409,6 +577,7 @@ public class Recurso implements Serializable {
 	public List<DatoASolicitar> getDatoASolicitar() {
 		return datosASolicitar;
 	}
+	
 	public void setDatoASolicitar(List<DatoASolicitar> datosASolicitar) {
 		this.datosASolicitar = datosASolicitar;
 	}
@@ -430,8 +599,7 @@ public class Recurso implements Serializable {
 		return accionesPorRecurso;
 	}
 
-	public void setAccionesPorRecurso(
-			List<AccionPorRecurso> accionesPorRecurso) {
+	public void setAccionesPorRecurso(List<AccionPorRecurso> accionesPorRecurso) {
 		this.accionesPorRecurso = accionesPorRecurso;
 	}
 
@@ -451,8 +619,7 @@ public class Recurso implements Serializable {
 		return autocompletadosPorRecurso;
 	}
 	
-	public void setAutocompletadosPorRecurso(
-			List<ServicioPorRecurso> autocompletadosPorRecurso) {
+	public void setAutocompletadosPorRecurso(List<ServicioPorRecurso> autocompletadosPorRecurso) {
 		this.autocompletadosPorRecurso = autocompletadosPorRecurso;
 	}
 
@@ -540,5 +707,394 @@ public class Recurso implements Serializable {
 		this.mostrarIdEnTicket = mostrarIdEnTicket;
 	}
 
-	
+  @Column (name = "presencial_admite", nullable = false)
+  public Boolean getPresencialAdmite() {
+    return presencialAdmite;
+  }
+
+  public void setPresencialAdmite(Boolean presencialAdmite) {
+    this.presencialAdmite = presencialAdmite;
+  }
+
+  @Column (name = "presencial_cupos", nullable = false)
+  public Integer getPresencialCupos() {
+    return presencialCupos;
+  }
+
+  public void setPresencialCupos(Integer presencialCupos) {
+    this.presencialCupos = presencialCupos;
+  }
+
+  @Column (name = "presencial_lunes", nullable = false)
+  public Boolean getPresencialLunes() {
+    return presencialLunes;
+  }
+
+  public void setPresencialLunes(Boolean presencialLunes) {
+    this.presencialLunes = presencialLunes;
+  }
+
+  @Column (name = "presencial_martes", nullable = false)
+  public Boolean getPresencialMartes() {
+    return presencialMartes;
+  }
+
+  public void setPresencialMartes(Boolean presencialMartes) {
+    this.presencialMartes = presencialMartes;
+  }
+
+  @Column (name = "presencial_miercoles", nullable = false)
+  public Boolean getPresencialMiercoles() {
+    return presencialMiercoles;
+  }
+
+  public void setPresencialMiercoles(Boolean presencialMiercoles) {
+    this.presencialMiercoles = presencialMiercoles;
+  }
+
+  @Column (name = "presencial_jueves", nullable = false)
+  public Boolean getPresencialJueves() {
+    return presencialJueves;
+  }
+
+  public void setPresencialJueves(Boolean presencialJueves) {
+    this.presencialJueves = presencialJueves;
+  }
+
+  @Column (name = "presencial_viernes", nullable = false)
+  public Boolean getPresencialViernes() {
+    return presencialViernes;
+  }
+
+  public void setPresencialViernes(Boolean presencialViernes) {
+    this.presencialViernes = presencialViernes;
+  }
+
+  @Column (name = "presencial_sabado", nullable = false)
+  public Boolean getPresencialSabado() {
+    return presencialSabado;
+  }
+
+  public void setPresencialSabado(Boolean presencialSabado) {
+    this.presencialSabado = presencialSabado;
+  }
+
+  @Column (name = "presencial_domingo", nullable = false)
+  public Boolean getPresencialDomingo() {
+    return presencialDomingo;
+  }
+
+  public void setPresencialDomingo(Boolean presencialDomingo) {
+    this.presencialDomingo = presencialDomingo;
+  }
+
+  @Column (name = "multiple_admite", nullable = false)
+  public Boolean getMultipleAdmite() {
+    return multipleAdmite;
+  }
+
+  public void setMultipleAdmite(Boolean multipleAdmite) {
+    this.multipleAdmite = multipleAdmite;
+  }
+
+  @Column (name = "cambios_admite", nullable = false)
+  public Boolean getCambiosAdmite() {
+    return cambiosAdmite;
+  }
+
+  public void setCambiosAdmite(Boolean cambiosAdmite) {
+    this.cambiosAdmite = cambiosAdmite;
+  }
+
+  @Column (name = "cambios_tiempo", nullable = false)
+  public Integer getCambiosTiempo() {
+    return cambiosTiempo;
+  }
+
+  public void setCambiosTiempo(Integer cambiosTiempo) {
+    this.cambiosTiempo = cambiosTiempo;
+  }
+
+  @Column (name = "cambios_unidad", nullable = false)
+  public Integer getCambiosUnidad() {
+    return cambiosUnidad;
+  }
+
+  public void setCambiosUnidad(Integer cambiosUnidad) {
+    this.cambiosUnidad = cambiosUnidad;
+  }
+
+  @Column (name = "fuente_ticket", nullable = false)
+  public String getFuenteTicket() {
+    return fuenteTicket;
+  }
+
+  public void setFuenteTicket(String fuenteTicket) {
+    this.fuenteTicket = fuenteTicket;
+  }
+
+  @Column (name = "tamanio_fuente_grande", nullable = false)
+  public Integer getTamanioFuenteGrande() {
+    return tamanioFuenteGrande;
+  }
+
+  public void setTamanioFuenteGrande(Integer tamanioFuenteGrande) {
+    this.tamanioFuenteGrande = tamanioFuenteGrande;
+  }
+
+  @Column (name = "tamanio_fuente_normal", nullable = false)
+  public Integer getTamanioFuenteNormal() {
+    return tamanioFuenteNormal;
+  }
+
+  public void setTamanioFuenteNormal(Integer tamanioFuenteNormal) {
+    this.tamanioFuenteNormal = tamanioFuenteNormal;
+  }
+
+  @Column (name = "tamanio_fuente_chica", nullable = false)
+  public Integer getTamanioFuenteChica() {
+    return tamanioFuenteChica;
+  }
+
+  public void setTamanioFuenteChica(Integer tamanioFuenteChica) {
+    this.tamanioFuenteChica = tamanioFuenteChica;
+  }
+  
+  @Column (name = "periodo_validacion", nullable = false)
+  public Integer getPeriodoValidacion() {
+    return periodoValidacion;
+  }
+
+  public void setPeriodoValidacion(Integer periodoValidacion) {
+    this.periodoValidacion = periodoValidacion;
+  }
+
+  @Column (name = "validar_por_ip", nullable = false)
+  public Boolean getValidarPorIP() {
+    return validarPorIP;
+  }
+
+  public void setValidarPorIP(Boolean validarPorIP) {
+    this.validarPorIP = validarPorIP;
+  }
+
+  @Column (name = "cantidad_por_ip", nullable = false)
+  public Integer getCantidadPorIP() {
+    return cantidadPorIP;
+  }
+
+  public void setCantidadPorIP(Integer cantidadPorIP) {
+    this.cantidadPorIP = cantidadPorIP;
+  }
+
+  @Column (name = "periodo_por_ip", nullable = false)
+  public Integer getPeriodoPorIP() {
+    return periodoPorIP;
+  }
+
+  public void setPeriodoPorIP(Integer periodoPorIP) {
+    this.periodoPorIP = periodoPorIP;
+  }
+
+  @Column (name = "ips_sin_validacion", nullable = false)
+  public String getIpsSinValidacion() {
+    return ipsSinValidacion;
+  }
+
+  public void setIpsSinValidacion(String ipsSinValidacion) {
+    this.ipsSinValidacion = ipsSinValidacion;
+  }
+
+  @Column (name = "cancela_tiempo", nullable = false)
+  public Integer getCancelacionTiempo() {
+    return cancelacionTiempo;
+  }
+
+  public void setCancelacionTiempo(Integer cancelacionTiempo) {
+    this.cancelacionTiempo = cancelacionTiempo;
+  }
+
+  @Column (name = "cancela_unidad", nullable = false)
+  public Integer getCancelacionUnidad() {
+    return cancelacionUnidad;
+  }
+
+  public void setCancelacionUnidad(Integer cancelacionUnidad) {
+    this.cancelacionUnidad = cancelacionUnidad;
+  }
+
+  @Column (name = "cancela_tipo", nullable = false)
+  @Enumerated (EnumType.STRING)
+  public FormaCancelacion getCancelacionTipo() {
+    return cancelacionTipo;
+  }
+
+  public void setCancelacionTipo(FormaCancelacion cancelacionTipo) {
+    this.cancelacionTipo = cancelacionTipo;
+  }
+
+  @Column (name = "mi_perfil_con_hab", nullable = false)
+  public Boolean getMiPerfilConHab() {
+    return miPerfilConHab;
+  }
+
+  public void setMiPerfilConHab(Boolean miPerfilConHab) {
+    this.miPerfilConHab = miPerfilConHab;
+  }
+
+  @Column (name = "mi_perfil_can_hab", nullable = false)
+  public Boolean getMiPerfilCanHab() {
+    return miPerfilCanHab;
+  }
+
+  public void setMiPerfilCanHab(Boolean miPerfilCanHab) {
+    this.miPerfilCanHab = miPerfilCanHab;
+  }
+
+  @Column (name = "mi_perfil_rec_hab", nullable = false)
+  public Boolean getMiPerfilRecHab() {
+    return miPerfilRecHab;
+  }
+
+  public void setMiPerfilRecHab(Boolean miPerfilRecHab) {
+    this.miPerfilRecHab = miPerfilRecHab;
+  }
+
+  @Column (name = "mi_perfil_con_tit", nullable = false)
+  public String getMiPerfilConTitulo() {
+    return miPerfilConTitulo;
+  }
+
+  public void setMiPerfilConTitulo(String miPerfilConTitulo) {
+    this.miPerfilConTitulo = miPerfilConTitulo;
+  }
+
+  @Column (name = "mi_perfil_con_cor", nullable = false)
+  public String getMiPerfilConCorto() {
+    return miPerfilConCorto;
+  }
+
+  public void setMiPerfilConCorto(String miPerfilConCorto) {
+    this.miPerfilConCorto = miPerfilConCorto;
+  }
+
+  @Column (name = "mi_perfil_con_lar", nullable = false)
+  public String getMiPerfilConLargo() {
+    return miPerfilConLargo;
+  }
+
+  public void setMiPerfilConLargo(String miPerfilConLargo) {
+    this.miPerfilConLargo = miPerfilConLargo;
+  }
+
+  @Column (name = "mi_perfil_con_ven", nullable = false)
+  public Integer getMiPerfilConVencim() {
+    return miPerfilConVencim;
+  }
+
+  public void setMiPerfilConVencim(Integer miPerfilConVencim) {
+    this.miPerfilConVencim = miPerfilConVencim;
+  }
+
+  @Column (name = "mi_perfil_can_tit", nullable = false)
+  public String getMiPerfilCanTitulo() {
+    return miPerfilCanTitulo;
+  }
+
+  public void setMiPerfilCanTitulo(String miPerfilCanTitulo) {
+    this.miPerfilCanTitulo = miPerfilCanTitulo;
+  }
+
+  @Column (name = "mi_perfil_can_cor", nullable = false)
+  public String getMiPerfilCanCorto() {
+    return miPerfilCanCorto;
+  }
+
+  public void setMiPerfilCanCorto(String miPerfilCanCorto) {
+    this.miPerfilCanCorto = miPerfilCanCorto;
+  }
+
+  @Column (name = "mi_perfil_can_lar", nullable = false)
+  public String getMiPerfilCanLargo() {
+    return miPerfilCanLargo;
+  }
+
+  public void setMiPerfilCanLargo(String miPerfilCanLargo) {
+    this.miPerfilCanLargo = miPerfilCanLargo;
+  }
+
+  @Column (name = "mi_perfil_can_ven", nullable = false)
+  public Integer getMiPerfilCanVencim() {
+    return miPerfilCanVencim;
+  }
+
+  public void setMiPerfilCanVencim(Integer miPerfilCanVencim) {
+    this.miPerfilCanVencim = miPerfilCanVencim;
+  }
+
+  @Column (name = "mi_perfil_rec_tit", nullable = false)
+  public String getMiPerfilRecTitulo() {
+    return miPerfilRecTitulo;
+  }
+
+  public void setMiPerfilRecTitulo(String miPerfilRecTitulo) {
+    this.miPerfilRecTitulo = miPerfilRecTitulo;
+  }
+
+  @Column (name = "mi_perfil_rec_cor", nullable = false)
+  public String getMiPerfilRecCorto() {
+    return miPerfilRecCorto;
+  }
+
+  public void setMiPerfilRecCorto(String miPerfilRecCorto) {
+    this.miPerfilRecCorto = miPerfilRecCorto;
+  }
+
+  @Column (name = "mi_perfil_rec_lar", nullable = false)
+  public String getMiPerfilRecLargo() {
+    return miPerfilRecLargo;
+  }
+
+  public void setMiPerfilRecLargo(String miPerfilRecLargo) {
+    this.miPerfilRecLargo = miPerfilRecLargo;
+  }
+
+  @Column (name = "mi_perfil_rec_ven", nullable = false)
+  public Integer getMiPerfilRecVencim() {
+    return miPerfilRecVencim;
+  }
+
+  public void setMiPerfilRecVencim(Integer miPerfilRecVencim) {
+    this.miPerfilRecVencim = miPerfilRecVencim;
+  }
+
+  @Column (name = "mi_perfil_rec_hora", nullable = false)
+  public Integer getMiPerfilRecHora() {
+    return miPerfilRecHora;
+  }
+
+  public void setMiPerfilRecHora(Integer miPerfilRecHora) {
+    this.miPerfilRecHora = miPerfilRecHora;
+  }
+
+  @Column (name = "mi_perfil_rec_dias", nullable = false)
+  public Integer getMiPerfilRecDias() {
+    return miPerfilRecDias;
+  }
+
+  public void setMiPerfilRecDias(Integer miPerfilRecDias) {
+    this.miPerfilRecDias = miPerfilRecDias;
+  }
+
+    @Transient
+    public AccionMiPerfil getAccionMiPerfil() {
+		return accionMiPerfil;
+	}
+    
+	public void setAccionMiPerfil(AccionMiPerfil accionMiPerfil) {
+		this.accionMiPerfil = accionMiPerfil;
+	}
+
+  
+  
 }

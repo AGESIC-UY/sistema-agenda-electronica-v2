@@ -16,19 +16,17 @@
 	<link href="/sae-admin/resources/css/llamador.css" rel="stylesheet" />
 </h:head>
 
-<f:view beforePhase="#{llamadorMBean.beforePhaseListaDeLlamadas}"
-	beforePhaseListener="#{llamadorMBean.beforePhaseListaDeLlamadas}">
+<f:view beforePhase="#{llamadorMBean.beforePhaseListaDeLlamadas}">
 
 	<h:body>
-		<p:dialog closable="false" widgetVar="llamadaDestacada" showEffect="puff"
-			hideEffect="clip" modal="true" resizable="false" draggable="false"
-			responsive="true" onShow="despliegaPopup();" onHide="ocultaPopup();"
-			styleClass="popUpLlamador">
+		<p:dialog closable="false" widgetVar="llamadaDestacada" showEffect="puff" hideEffect="clip" modal="true" resizable="false" draggable="false"
+			responsive="true" onShow="despliegaPopup();" onHide="ocultaPopup();" styleClass="popUpLlamador">
 			<table>
 				<thead>
 					<tr>
 						<th><span><h:outputText value="#{sessionMBean.textos['numero_de_puesto']}" /></span></th>
 						<th><span><h:outputText value="#{sessionMBean.textos['documento']}" /></span></th>
+            <th><span><h:outputText value="#{sessionMBean.textos['serie']}" /></span></th>
 						<th><span><h:outputText value="#{sessionMBean.textos['numero']}" /></span></th>
 					</tr>
 				</thead>
@@ -36,13 +34,13 @@
 					<tr>
 						<td><span id="varPuesto" class="bold"></span></td>
 						<td><span id="varDocumento"></span></td>
+            <td><span id="varSerie"></span></td>
 						<td><span class="comentario">Nº </span><span id="varNumero" class="bold"></span></td>
 					</tr>
 				</TBODY>
 			</table>
 
 		</p:dialog>
-
 
 		<script type="text/javascript">
 			var timer;
@@ -61,26 +59,23 @@
 		<div class="cabezalPrivado">
 			<div class="containerAdmin">
 				<div class="cabezalEmpresa">
-					<p:graphicImage id="logo" value="#{sessionMBean.empresaActualLogo}"
-						styleClass="logoEmpresa" alt="#{sessionMBean.empresaActualLogoTexto}" />
+					<p:graphicImage id="logo" value="#{sessionMBean.empresaActualLogo}" styleClass="logoEmpresa" alt="#{sessionMBean.empresaActualLogoTexto}" />
 					<p:clock styleClass="horaActual" pattern="#{sessionMBean.formatoHora}" />
 				</div>
 			</div>
 		</div>
 
-		<p:messages id="pantalla" showDetail="true" autoUpdate="true" closable="true" 
+    <p:messages id="pantalla" showDetail="true" autoUpdate="true" closable="true"
       infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
-      infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}" 
-      warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" 
-      errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" 
-		/>
+      singleInfoTitle="#{sessionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
+      singleWarnTitle="#{sessionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" 
+      singleErrorTitle="#{ssesionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}"
+    />
 
 		<div id="page-content-wrapper">
 
 			<h:form id="formPoll">
-				<p:poll id="poll" interval="5"
-					listener="#{llamadorMBean.refrescarLlamadas}" update="formllamadas"
-					stop="#{llamadorMBean.detenerPolling}" />
+				<p:poll id="poll" interval="5" listener="#{llamadorMBean.refrescarLlamadas}" update="formllamadas" stop="#{llamadorMBean.detenerPolling}" />
 			</h:form>
 
 			<h:form id="formllamadas">
@@ -91,22 +86,21 @@
 				<div class="contenedor-marco">
 
 					<h:panelGroup id="llamador">
-						<p:dataTable var="horario"
-							value="#{llamadorMBean.llamadasPorHorario}"
-							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+						<p:dataTable var="horario" value="#{llamadorMBean.llamadasPorHorario}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 							<p:columnGroup type="header">
 								<p:row>
 									<p:column headerText="#{sessionMBean.textos['numero_de_puesto']}" />
 									<p:column headerText="#{sessionMBean.textos['documento']}" />
+                  <p:column headerText="#{sessionMBean.textos['serie']}" />
 									<p:column headerText="#{sessionMBean.textos['numero']}" />
 								</p:row>
 							</p:columnGroup>
 
 							<p:subTable var="llamada" value="#{horario.llamadas}">
 								<f:facet name="header">
-									<h:outputText value="#{horario.hora}">
-										<f:convertDateTime type="time" dateStyle="medium"
-											pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+                  <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" rendered="#{horario.presencial}" />
+									<h:outputText value="#{horario.hora}" rendered="#{not horario.presencial}">
+										<f:convertDateTime type="time" dateStyle="medium" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</h:outputText>
 								</f:facet>
 								<p:column>
@@ -115,6 +109,9 @@
 								<p:column>
 									<h:outputText value="#{llamada.documento}" />
 								</p:column>
+                <p:column>
+                  <h:outputText value="#{llamada.serie}" styleClass="bold" />
+                </p:column>
 								<p:column>
 									<h:outputText value="Nº " styleClass="comentario" />
 									<h:outputText value="#{llamada.numero}" styleClass="bold" />

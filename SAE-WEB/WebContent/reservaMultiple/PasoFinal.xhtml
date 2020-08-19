@@ -1,0 +1,183 @@
+<ui:composition template="/reservaMultiple/Paso.template.xhtml" 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:p="http://primefaces.org/ui" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core" 
+	xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="parametroBean" value="#{multiplePasoFinalMBean}" />
+	<ui:param name="agenda_nombre" value="#{multiplePasoFinalMBean.agendaNombre}" />
+	<ui:param name="hay_error" value="#{multiplePasoFinalMBean.errorInit}" />
+	<ui:param name="paso_numero" value="5" />
+	<ui:param name="paso_texto" value="#{sesionMBean.textos['confirmacion_de_reservas']}" />
+	<ui:param name="yaExisteReservaCamposClave" value="false" />
+	<ui:param name="recursoSinDisponibilidad" value="false" />
+	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-12" />
+	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />
+
+	<ui:define name="descripcion">
+		<p:outputPanel rendered="#{!multiplePasoFinalMBean.errorInit}">
+			<div class="botonesConfirmacion">
+         <h:outputLink value="#{multiplePasoFinalMBean.urlTramite}" target="_blank" styleClass="btn btn-primario" 
+          rendered="#{multiplePasoFinalMBean.urlTramite != null and multiplePasoFinalMBean.tokenReserva.estado != 'P'}" >
+           <h:outputText value="#{sesionMBean.textos['continuar_tramite']}"/>
+         </h:outputLink>
+			</div>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="mensaje">
+		<p:outputPanel rendered="#{!multiplePasoFinalMBean.errorInit}">
+			<div class="box box-grey datosReservaConfirmada">
+				<p:dataTable id="tablaReservas" value="#{multiplePasoFinalMBean.reservas}" var="reserva" paginator="false" caption="#{sesionMBean.textos['listado_de_reservas']}"
+					emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}">
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sesionMBean.textos['identificador']}" />
+						</f:facet>
+						<h:outputText value="#{reserva.id}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sesionMBean.textos['documento']}" />
+						</f:facet>
+						<h:outputText value="#{reserva.tipoDocumento} #{reserva.numeroDocumento}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sesionMBean.textos['fecha_y_hora']}" />
+						</f:facet>
+						<h:outputText value="#{reserva.fechaHora}">
+							<f:convertDateTime pattern="#{sesionMBean.formatoFecha} #{sesionMBean.formatoHora}" timeZone="GMT" locale="#{sesionMBean.locale}" />
+						</h:outputText>
+					</p:column>
+          <p:column rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'P'}">
+            <f:facet name="header">
+              <h:outputText value="#{sesionMBean.textos['cancelar']}" />
+            </f:facet>
+            <p:commandButton styleClass="btn-link" actionListener="#{multiplePasoFinalMBean.marcarReservaCancelar(reserva)}"
+              value="#{sesionMBean.textos['cancelar_reserva']}" oncomplete="PF('cancelarReserva').show();" />
+          </p:column>
+          <p:column rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'R'}">
+            <f:facet name="header">
+              <h:outputText value="#{sesionMBean.textos['codigo_de_seguridad']}" />
+            </f:facet>
+            <h:outputText value="#{reserva.codigoSeguridad}" />
+          </p:column>
+				</p:dataTable>
+			</div>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="contenido">
+		<p:outputPanel rendered="#{!multiplePasoFinalMBean.errorInit}">
+
+			<p:outputPanel rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'P'}">
+				<fieldset>
+					<legend>
+						<h:outputText value="#{sesionMBean.textos['clausula_de_consentimiento_informado']}" />
+					</legend>
+					<div class="form-horizontal">
+						<div class="form-group">
+							<div class="col-sm-12">
+								<p class="cursiva">
+									<h:outputText value="#{multiplePasoFinalMBean.clausulaConsentimiento}" />
+								</p>
+							</div>
+						</div>
+						<h:panelGroup id="clausula" styleClass="form-group" layout="block">
+							<span class="col-sm-4 control-label label formularioCampoRequerido"> <h:outputText value="#{sesionMBean.textos['terminos_de_la_clausula']}" />
+							</span>
+							<p:outputPanel styleClass="col-sm-8">
+								<p:selectOneRadio id="condiciones" value="#{multiplePasoFinalMBean.aceptaCondiciones}" layout="responsive" columns="1">
+									<f:selectItem itemLabel="#{sesionMBean.textos['acepto_los_terminos']}" itemValue="SI" />
+									<f:selectItem itemLabel="#{sesionMBean.textos['no_acepto_los_terminos']}" itemValue="NO" />
+								</p:selectOneRadio>
+								<h:message id="mensajeCondiciones" for="condiciones" styleClass="mensajeError" />
+							</p:outputPanel>
+						</h:panelGroup>
+					</div>
+				</fieldset>
+
+				<h:panelGroup layout="block">
+					<fieldset>
+						<legend>
+							<h:outputText value="#{sesionMBean.textos['verificacion_de_seguridad']}" />
+						</legend>
+						<div class="form-horizontal">
+							<h:panelGroup id="captcha" styleClass="form-group" layout="block">
+								<h:outputLabel value="Comprobación de seguridad" for="secureText" styleClass="col-sm-4 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-8">
+									<h:outputText styleClass="textoCaptcha" value="#{multiplePasoFinalMBean.textoIndicativoCaptcha}" />
+									<h:inputText id="secureText" size="10" styleClass="form-control" value="#{multiplePasoFinalMBean.textoCaptchaUsuario}" />
+									<p:commandLink styleClass="recargarCaptcha" name="btnRecargarCaptcha" id="btnRecargarCaptcha" value="#{sesionMBean.textos['solicitar_otra_frase']}"
+										actionListener="#{multiplePasoFinalMBean.recargarCaptcha}" update="captcha" />
+									<h:message id="captchaErrorMessage" for="secureText" errorClass="mensajeError" warnClass="mensajeWarn" infoClass="mensajeInfo" />
+								</p:outputPanel>
+							</h:panelGroup>
+						</div>
+					</fieldset>
+				</h:panelGroup>
+			</p:outputPanel>
+
+			<p:outputPanel rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'R'}">
+				<p:outputPanel rendered="#{!multiplePasoFinalMBean.errorInit}">
+					<div class="box box-grey datosReservaConfirmada">
+						<div class="fechaHoraReserva">
+							<h:outputText value="#{sesionMBean.textos['reservas_confirmadas']}" />
+						</div>
+					</div>
+				</p:outputPanel>
+		  </p:outputPanel>
+
+      <p:outputPanel rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'C'}">
+        <p:outputPanel rendered="#{!multiplePasoFinalMBean.errorInit}">
+          <div class="box box-grey datosReservaCancelar">
+            <div class="fechaHoraReserva">
+              <h:outputText value="#{sesionMBean.textos['reservas_canceladas']}" />
+            </div>
+          </div>
+        </p:outputPanel>
+      </p:outputPanel>
+
+
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="botones">
+		<p:outputPanel rendered="#{!multiplePasoFinalMBean.errorInit}">
+		
+		  <p:outputPanel rendered="#{multiplePasoFinalMBean.tokenReserva.estado != 'R'}">
+				<ul class="form-action-buttons">
+					<li class="action-buttons-primary">
+						<ul>
+							<li>
+                <h:commandButton id="botonConfirmarReservas" styleClass="btn-lg btn-primario"
+                  rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'P' and not empty multiplePasoFinalMBean.reservas}"
+                  value="#{sesionMBean.textos['confirmar_reservas']} #{multiplePasoFinalMBean.simboloSiguiente}" action="#{multiplePasoFinalMBean.confirmarReservas}" />
+              </li>
+	            <li>
+	              <p:commandButton id="botonCancelarReservas" styleClass="btn-lg btn-link" 
+	                rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'P' and not empty multiplePasoFinalMBean.reservas}" 
+	                value="#{sesionMBean.textos['cancelar_reservas']}" oncomplete="PF('cancelarReservas').show();" />
+	             </li>
+						</ul>
+					</li>
+					<li class="action-buttons-second">
+						<ul>
+              <li class="float-left">
+                <h:commandButton id="botonInicio" styleClass="btn-lg btn-link"
+                  rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'P'}"
+                  value="#{multiplePasoFinalMBean.simboloAnterior}#{multiplePasoFinalMBean.simboloAnterior} #{sesionMBean.textos['inicio']}" action="#{multiplePasoFinalMBean.inicio}" /></li>
+							<li class="float-left">
+                <h:commandButton id="botonOtraReserva" styleClass="btn-lg btn-link"
+                  rendered="#{multiplePasoFinalMBean.tokenReserva.estado == 'P'}"
+								  value="#{multiplePasoFinalMBean.simboloAnterior} #{sesionMBean.textos['otra_reserva']}" action="#{multiplePasoFinalMBean.otraReserva}" /></li>
+            </ul>
+					</li>
+				</ul>
+      </p:outputPanel>
+			
+		</p:outputPanel>
+	</ui:define>
+
+</ui:composition>

@@ -21,7 +21,6 @@ public class MailUtiles {
 	public static final String CONTENT_TYPE_HTML = "text/html; charset=UTF-8";
 	
 	public static void enviarMail(final String to, final String subject, final String content, final String type) throws MessagingException {
-		
 		(new Thread() {
 			public void run() {
 				try {
@@ -35,7 +34,6 @@ public class MailUtiles {
           if(sFrom == null || sFrom.trim().isEmpty()) {
           	sFrom = saeProperties.getProperty(PROP_MAIL_FROM);
           }
-          
 					
 	        MimeMessage m = new MimeMessage(mailSession);
 	        Address from = new InternetAddress(sFrom);
@@ -46,16 +44,13 @@ public class MailUtiles {
 	        m.setSubject(subject);
 	        m.setSentDate(new java.util.Date());
 	        m.setContent(content.toString(),type);
+	        
 	        Transport.send(m);
 				}catch(Exception ex) {
 					ex.printStackTrace();
 				}
 			}
 		}).start();
-		
-		
-	
 	}
-
 	
 }

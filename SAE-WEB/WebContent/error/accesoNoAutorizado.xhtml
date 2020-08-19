@@ -31,17 +31,22 @@
 				<div class="col-sm-8 cabezalEmpresa">
 					<div id="logo">
 						<div>
-							<h:outputText styleClass="nombre-activo" value="#{sesionMBean.textos['nombre_aplicacion']}" />
+							<h:outputText styleClass="nombre-activo" value="#{sesionMBean.textos['nombre_aplicacion']}" rendered="#{not empty sesionMBean.textos}" />
+              <h:outputText styleClass="nombre-activo" value="#{sessionMBean.textos['nombre_aplicacion']}" rendered="#{empty sesionMBean.textos}" />
 						</div>
 					</div>
 				</div>
 				<div class="col-sm-4 cabezalTramites">
 					<div class="logosSecundarios">
 						<ul class="listaHorizontal">
-							<li><a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia"> <img
-									src="/sae-admin/resources/images/logoPresidencia.png" alt="Presidencia" /></a></li>
-							<li><a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital"> <img
-									src="/sae-admin/resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" /></a></li>
+							<li>
+							  <a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia">
+						      <img src="/sae-admin/resources/images/logoPresidencia.png" alt="Presidencia" /></a>
+				      </li>
+							<li>
+							  <a href="http://uruguaydigital.gub.uy/" title="Ir al sitio de Uruguay Digital"> 
+							    <img src="/sae-admin/resources/images/logo-uruguayDigital.png" alt="Uruguay Digital" /></a>
+					    </li>
 						</ul>
 					</div>
 				</div>
@@ -49,7 +54,7 @@
 		</div>
 	</div>
 
-  <div id="wrapper">
+  <p:outputPanel id="wrapper" rendered="#{sessionMBean.usuarioActual != null}">
     <div id="page-content-wrapper" tabindex="-1">
       <div class="datosCabezal">
         <div class="row">
@@ -57,10 +62,11 @@
             <div class="navbar-header">
               <h:form id="mostrarAgendaRecurso">
                 <ul>
-                  <li><h:outputText
-                      value="#{sessionMBean.textos['usuario']}: #{sessionMBean.usuarioActual.nombre}" /></li>
                   <li>
-                   <p:commandLink id="lnkCerrarSesion" value="#{sessionMBean.textos['cerrar_sesion']}"
+                    <h:outputText value="#{sessionMBean.textos['usuario']}: #{sessionMBean.usuarioActual.nombre}" />
+                  </li>
+                  <li>
+                    <p:commandLink id="lnkCerrarSesion" value="#{sessionMBean.textos['cerrar_sesion']}"
                       action="#{sessionMBean.cerrarSesion}" process="@this" update="@all" oncomplete="redirect()"
                       rendered="#{sessionMBean.tipoLogout == 'LOCAL'}" />
                     <h:outputLink value="/sae-admin/logoutcda" rendered="#{sessionMBean.tipoLogout == 'CDA'}">
@@ -68,9 +74,9 @@
                     </h:outputLink>
                   </li>
                 </ul>
-              <div class="ui-helper-hidden-accessible">
-                <h:commandButton value="dummy"></h:commandButton>
-                  </div>
+                <div class="ui-helper-hidden-accessible">
+                  <h:commandButton value="dummy" tabindex="-1" />
+                </div>
               </h:form>
             </div>
           </div>
@@ -79,22 +85,11 @@
       <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
         <h:outputText value="#{sessionMBean.textos['menu']}" />
       </a>
-
-
       <h1>
-        <h:outputText value="#{nombre_pagina}"></h:outputText>
+        <h:outputText value="#{nombre_pagina}" />
       </h1>
-      <p:messages id="pantalla" showDetail="false" autoUpdate="true"
-        infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"
-        infoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
-        warnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}"
-        errorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}" />
-      <ui:insert name="cuerpo">
-
-      </ui:insert>
     </div>
-  </div>
-
+  </p:outputPanel>
 
 	<h:form styleClass="sesion-expirada" id="formLogin">
 		<div class="container">
@@ -103,12 +98,17 @@
 					<span class="icn icn-warning-lg"></span>
 				</div>
 				<div class="dialog-data">
-					<span class="dialog-title"><h:outputText value="#{sesionMBean.textos['recurso_no_encontrado']}" /></span>
+					<span class="dialog-title">
+					  <h:outputText value="#{sesionMBean.textos['acceso_denegado']}" rendered="#{not empty sesionMBean.textos}" />
+            <h:outputText value="#{sessionMBean.textos['acceso_denegado']}" rendered="#{empty sesionMBean.textos}" />
+				  </span>
 					<p>
-						<h:outputText value="#{sesionMBean.textos['el_recurso_solicitado_no_existe']}" />
+						<h:outputText value="#{sesionMBean.textos['no_tiene_acceso_al_recurso_o_no_existe']}" rendered="#{not empty sesionMBean.textos}" />
+            <h:outputText value="#{sessionMBean.textos['no_tiene_acceso_al_recurso_o_no_existe']}" rendered="#{empty sesionMBean.textos}" />
 					</p>
 					<p>
-						<h:outputText value="#{sesionMBean.textos['verifique_la_direccion_especificada']}" />
+						<h:outputText value="#{sesionMBean.textos['si_error_contacte_al_administrador']}" rendered="#{not empty sesionMBean.textos}" />
+            <h:outputText value="#{sessionMBean.textos['si_error_contacte_al_administrador']}" rendered="#{empty sesionMBean.textos}" />
 					</p>
 				</div>
 			</div>

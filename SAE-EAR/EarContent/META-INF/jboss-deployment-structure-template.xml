@@ -15,6 +15,7 @@
           <module name="pge" export="true"/>
           <module name="org.jboss.ws.native.jbossws-native-core" export="true"/>
           <module name="org.apache.cxf" export="true"/>
+          <module name="org.joda.time" export="true"/>
         </dependencies>
      </deployment>
 </jboss-deployment-structure>

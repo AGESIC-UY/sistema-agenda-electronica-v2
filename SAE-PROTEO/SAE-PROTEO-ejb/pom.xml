@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <artifactId>SAE-PROTEO</artifactId>
+        <groupId>com.sofis.agesic.ursea</groupId>
+        <version>1.0</version>
+    </parent>
+
+    <groupId>com.sofis.agesic.ursea</groupId>
+    <artifactId>SAE-PROTEO-ejb</artifactId>
+    <version>1.0</version>
+    <packaging>ejb</packaging>
+
+    <name>SAE-PROTEO-ejb</name>
+
+    <properties>
+        <endorsed.dir>${project.build.directory}/endorsed</endorsed.dir>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+   
+   
+    <repositories>
+        <repository>
+            <id>central</id>
+            <url>http://central.maven.org/maven2/</url>
+        </repository>
+        <repository>
+            <id>cientoveintidos</id>
+            <name>cientoveintidos-releases</name>
+            <url>http://192.168.1.122:8080/artifactory/libs-sofis-release-local</url>
+        </repository>
+    </repositories>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.sofis.agesic.ursea</groupId>
+            <artifactId>SAE-PROTEO-ejb</artifactId>
+            <version>1.0</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.json</groupId>
+            <artifactId>json</artifactId>
+            <version>20180130</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>javax</groupId>
+            <artifactId>javaee-api</artifactId>
+            <version>6.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!--	  <dependency>
+               <groupId>org.apache.cxf</groupId>
+               <artifactId>cxf-common-utilities</artifactId>
+               <version>2.4.6</version>
+        </dependency>
+        <dependency>
+               <groupId>org.apache.cxf</groupId>
+               <artifactId>cxf-rt-core</artifactId>
+               <version>2.4.6</version>
+        </dependency>
+        <dependency>
+               <groupId>org.apache.cxf</groupId>
+               <artifactId>cxf-rt-frontend-simple</artifactId>
+               <version>2.4.6</version>
+        </dependency>
+        <dependency>
+               <groupId>org.apache.cxf</groupId>
+               <artifactId>cxf-rt-transports-http</artifactId>
+               <version>2.4.6</version>
+        </dependency>
+        <dependency>
+               <groupId>org.apache.cxf</groupId>
+               <artifactId>cxf-api</artifactId>
+               <version>2.4.6</version>
+        </dependency>-->
+        <dependency>
+            <groupId>com.sofis.imm</groupId>
+            <artifactId>sae-ejb-client</artifactId>
+            <version>1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sofis.imm</groupId>
+            <artifactId>sae-acciones-ejbclient</artifactId>
+            <version>1.0</version>
+        </dependency>
+        
+        
+
+    </dependencies>
+   
+    <build>
+        <resources>
+            <resource>
+                <targetPath>META-INF</targetPath>
+                <directory>src</directory>
+                <includes>
+                    <include>jax-ws-catalog.xml</include>
+                    <include>wsdl/**</include>
+                </includes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+            </resource>
+        </resources>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.1</version>
+                <configuration>
+                    <source>1.7</source>
+                    <target>1.7</target>
+                    <compilerArguments>
+                        <endorseddirs>${endorsed.dir}</endorseddirs>
+                    </compilerArguments>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-ejb-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <optimize>true</optimize>
+                    <ejbVersion>3.1</ejbVersion>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>2.6</version>
+                <executions>
+                    <execution>
+                        <phase>validate</phase>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${endorsed.dir}</outputDirectory>
+                            <silent>true</silent>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>javax</groupId>
+                                    <artifactId>javaee-endorsed-api</artifactId>
+                                    <version>6.0</version>
+                                    <type>jar</type>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+
+
+</project>

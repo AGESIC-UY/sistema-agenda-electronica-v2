@@ -1,18 +1,15 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{disponibilidadMBean.beforePhaseConsultar}" >
 
-			<p:outputPanel
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
-				<h:form>
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<h:form id="form">
 		      <p:outputPanel styleClass="form-required">
 		        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
 		      </p:outputPanel>
@@ -20,67 +17,61 @@
 						<legend>
 							<h:outputText value="#{sessionMBean.textos['periodo_a_consultar']}" />
 						</legend>
-						<p:outputPanel styleClass="form-horizontal row variasColumnas">
-							<p:outputPanel
-								styleClass="form-group col-sm-12 col-md-6 col-lg-4">
-								<h:outputLabel value="#{sessionMBean.textos['desde']}"
-									for="Fdesde"
-									styleClass="col-xs-5 col-sm-3 col-md-6 control-label label formularioCampoRequerido" />
-								<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
-									<h:inputText id="Fdesde" value="#{dispSessionMBean.fechaDesde}"
-										styleClass="datepicker">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
-											timeZone="GMT" />
+						<p:outputPanel styleClass="form-horizontal">
+						
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['desde']}" for="fDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="fDesde" value="#{dispSessionMBean.fechaDesde}" styleClass="datepicker" converter="dateConverter">
+										<f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
+                  <p:message for="fDesde" />
 								</p:outputPanel>
 							</p:outputPanel>
 
-							<p:outputPanel
-								styleClass="form-group col-sm-12 col-md-6 col-lg-4">
-								<h:outputLabel value="#{sessionMBean.textos['hasta']}"
-									for="Fhasta"
-									styleClass="col-xs-5 col-sm-3 col-md-6 control-label label" />
-								<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
-									<h:inputText id="Fhasta" value="#{dispSessionMBean.fechaHasta}"
-										styleClass="datepicker">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}"
-											timeZone="GMT" />
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="fHasta" styleClass="col-sm-3 control-label label" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="fHasta" value="#{dispSessionMBean.fechaHasta}" styleClass="datepicker" converter="dateConverter">
+										<f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
+                  <p:message for="fHasta" />
 								</p:outputPanel>
 							</p:outputPanel>
 
-							<p:outputPanel styleClass="form-group col-sm-12 col-md-12 col-lg-4">
-								<p:outputPanel styleClass="col-xs-7 col-xs-offset-5 col-sm-9 col-sm-offset-3 col-md-3 col-md-offset-9 col-lg-12 col-lg-offset-0">
-									<p:commandButton value="#{sessionMBean.textos['consultar']}"
-										actionListener="#{disponibilidadMBean.obtenerCuposCons}"
-										update="panelDisponibilidad" styleClass="btn btn-secundario" />
+							<p:outputPanel styleClass="form-group">
+								<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+									<p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{disponibilidadMBean.obtenerCuposCons}" 
+									  update="@form" styleClass="btn btn-secundario" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
 					</fieldset>
 					
 					<p:outputPanel id="panelDisponibilidad">
-						<p:dataTable value="#{dispSessionMBean.cuposPorDia}" var="row"
-							binding="#{disponibilidadMBean.cuposDataTable}" id="tablaCupos"
-							align="center" rows="25" paginator="true"
+						<p:dataTable id="tablaCupos" value="#{dispSessionMBean.cuposPorDia}" var="row" binding="#{disponibilidadMBean.cuposDataTable}" align="center" 
+							caption="#{sessionMBean.textos['disponibilidades_en_periodo_consultado']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+              paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
               paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
-							caption="#{sessionMBean.textos['disponibilidades_en_periodo_consultado']}"
-							emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+              paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+              paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+              paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+              paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+						>
 							<p:column>
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['fecha']}"></h:outputText>
 								</f:facet>
 								<h:outputText value="#{row.data.dia}">
-									<f:convertDateTime type="both"
-										pattern="#{sessionMBean.formatoFecha}"
-										timeZone="GMT" />
+									<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
 								</h:outputText>
 							</p:column>
 
 							<p:column>
 								<f:facet name="header">
-									<h:outputText
-										value="#{sessionMBean.textos['cupos_disponibles']}"></h:outputText>
+									<h:outputText value="#{sessionMBean.textos['cupos_disponibles']}"></h:outputText>
 								</f:facet>
 								<h:outputText value="#{row.data.cupoDisponible}"></h:outputText>
 							</p:column>
@@ -89,10 +80,8 @@
 								<f:facet name="header">
 									<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 								</f:facet>
-								<p:commandButton id="consultarLink" value="#{sessionMBean.textos['ver_detalles']}"
-									action="#{disponibilidadMBean.configurarDisponibilidadesDelDia}"
-									icon="ui-icon-search" styleClass="ui-button-icon-only"
-									title="#{sessionMBean.textos['ver_detalles']}">
+								<p:commandButton id="consultarLink" value="#{sessionMBean.textos['ver_detalles']}" action="#{disponibilidadMBean.configurarDisponibilidadesDelDia}"
+									icon="ui-icon-search" styleClass="ui-button-icon-only" title="#{sessionMBean.textos['ver_detalles']}">
 								</p:commandButton>
 							</p:column>
 						</p:dataTable>
@@ -103,4 +92,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

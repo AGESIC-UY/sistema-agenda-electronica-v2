@@ -30,6 +30,8 @@ import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.model.SelectItem;
@@ -50,10 +52,12 @@ import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
+import uy.gub.imm.sae.web.common.SofisJSFUtils;
 
-public class Paso2MBean extends PasoMBean {
+public class Paso2MBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso2MBean.class);
 
@@ -168,7 +172,7 @@ public class Paso2MBean extends PasoMBean {
 		if(sesionMBean.getDisponibilidadesDelDiaMatutina()==null) {
 			return false;
 		}
-		return sesionMBean.getDisponibilidadesDelDiaMatutina().size() != 0;
+		return !sesionMBean.getDisponibilidadesDelDiaMatutina().isEmpty();
 	}
 
 	public RowList<Disponibilidad> getDisponibilidadesMatutina() {
@@ -183,7 +187,7 @@ public class Paso2MBean extends PasoMBean {
 		if(sesionMBean.getDisponibilidadesDelDiaVespertina()==null) {
 			return false;
 		}
-		return sesionMBean.getDisponibilidadesDelDiaVespertina().size() != 0;
+		return !sesionMBean.getDisponibilidadesDelDiaVespertina().isEmpty();
 	}
 
 	public RowList<Disponibilidad> getDisponibilidadesVespertina() {
@@ -194,41 +198,34 @@ public class Paso2MBean extends PasoMBean {
 		return this.disponibilidadesVespertina;
 	}
 
-	private void marcarReserva(Disponibilidad d) throws RolException, BusinessException, UserException {
-		Reserva reserva = agendarReservasEJB.marcarReserva(d);
+	private void marcarReserva(Disponibilidad disponibilidad) throws RolException, BusinessException, UserException {
+		String ipOrigen = SofisJSFUtils.obtenerDireccionIPCliente(FacesContext.getCurrentInstance());
+	  Reserva reserva = agendarReservasEJB.marcarReserva(disponibilidad, null, ipOrigen);
 		sesionMBean.setReserva(reserva);
-		sesionMBean.setDisponibilidad(d);
+		sesionMBean.setDisponibilidad(disponibilidad);
 	}
 
 	private void configurarDisponibilidadesDelDia() {
 		List<Disponibilidad> dispMatutinas = new ArrayList<Disponibilidad>();
 		List<Disponibilidad> dispVespertinas = new ArrayList<Disponibilidad>();
-
 		if (sesionMBean.getDiaSeleccionado() != null) {
-
 			VentanaDeTiempo ventana = new VentanaDeTiempo();
 			ventana.setFechaInicial(Utiles.time2InicioDelDia(sesionMBean.getDiaSeleccionado()));
 			ventana.setFechaFinal(Utiles.time2FinDelDia(sesionMBean.getDiaSeleccionado()));
-
 			try {
 				List<Disponibilidad> lista = agendarReservasEJB.obtenerDisponibilidades(sesionMBean.getRecurso(),	ventana, sesionMBean.getTimeZone());
-
 				for (Disponibilidad d : lista) {
 					Calendar cal = Calendar.getInstance();
 					cal.setTime(d.getHoraInicio());
 					if(d.getCupo()<0) {
 					  d.setCupo(0);
 					}
-
 					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
-						// Matutino
 						dispMatutinas.add(d);
 					} else {
-						// Vespertino
 						dispVespertinas.add(d);
 					}
 				}
-
 			} catch (Exception e) {
 				addErrorMessage(e);
 			}
@@ -238,7 +235,7 @@ public class Paso2MBean extends PasoMBean {
 		sesionMBean.setDisponibilidadesDelDiaVespertina(new RowList<Disponibilidad>(dispVespertinas));
 	}
 
-	private void configurarCalendario() throws RolException, BusinessException {
+	private void configurarCalendario() throws RolException, UserException {
 
 		Recurso recurso = sesionMBean.getRecurso();
 
@@ -305,8 +302,6 @@ public class Paso2MBean extends PasoMBean {
 		Date date = null;
 		try {
 			date = format.parse(this.diaSeleccionadoStr);
-			
-			
 			//Verificar que la fecha esté en el rango permitido (que no la modifiquen en el medio)
 			Date inicio_disp = sesionMBean.getVentanaCalendario().getFechaInicial();
 			Date fin_disp = sesionMBean.getVentanaCalendario().getFechaFinal();
@@ -526,5 +521,46 @@ public class Paso2MBean extends PasoMBean {
 		return errorInit;
 	}
 	
+	public String claseSegunCupo(Disponibilidad disponibilidad) {
+	  if(disponibilidad.getCupo()==null || disponibilidad.getCupo()<1) {
+	    return "cupoNoSeleccionable";
+	  }
+	  return "";
+	}
+	
+  @PreDestroy
+  public void preDestroy() {
+    
+    try {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      
+      this.agendarReservasEJB = null;
+      if(this.disponibilidadesMatutina!=null) {
+        this.disponibilidadesMatutina.clear();
+      }
+      this.disponibilidadesMatutina = null;
+      if(this.disponibilidadesVespertina!=null) {
+        this.disponibilidadesVespertina.clear();
+      }
+      this.disponibilidadesVespertina = null;
+      this.jsonArrayFchDisp = null;
+      this.rowSelectMatutina = null;
+      this.rowSelectVespertina = null;
+      if(this.selectItemsDispMatutina!=null) {
+        this.selectItemsDispMatutina.clear();
+      }
+      this.selectItemsDispMatutina = null;
+      if(this.selectItemsDispVespertina!=null) {
+        this.selectItemsDispVespertina.clear();
+      }
+      this.selectItemsDispVespertina = null;
+      this.sesionMBean = null;
+      
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+      
+    }
+  }
 	
 }

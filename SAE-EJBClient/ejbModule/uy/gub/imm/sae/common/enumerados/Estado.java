@@ -20,16 +20,15 @@
 
 package uy.gub.imm.sae.common.enumerados;
 
-
-/**
- * Posibles estados de la reserva:
- *  P = Pendiente
- *  R = Reservada
- *  C = Cancelada
- *  U = Usada
- */
 public enum Estado {
-	P("Pendiente"), R("Reservada"), C("Cancelada"), U("Usada");
+  /* Aún no se confirmó */
+	P("pendiente"), 
+	/* Está confirmada pero no utilizada */
+	R("reservada"), 
+	/* Está cancelada definitivamente */
+	C("cancelada"),
+	/* Está usada (fue llamada por un funcionario )*/
+	U("usada");
 	
 	private final String descripcion;
 	

@@ -8,59 +8,108 @@ import uy.gub.imm.sae.entity.ValorPosible;
 
 public class ExportarHelper {
 
-	public static RecursoExportar exportarRecurso(Recurso r) {
+	public static RecursoExportar exportarRecurso(Recurso recurso, String versionSAE) {
 
-		if (r == null) {
+		if (recurso == null) {
 			return null;
 		}
 
-		RecursoExportar re = new RecursoExportar();
+		RecursoExportar recursoExportar = new RecursoExportar();
 
-		re.setNombre(r.getNombre());
-		re.setDescripcion(r.getDescripcion());
-		re.setFechaInicio(r.getFechaInicio());
-		re.setFechaFin(r.getFechaFin());
-		re.setFechaInicioDisp(r.getFechaInicioDisp());
-		re.setFechaFinDisp(r.getFechaFinDisp());
-		re.setDiasInicioVentanaIntranet(r.getDiasInicioVentanaIntranet());
-		re.setDiasVentanaIntranet(r.getDiasVentanaIntranet());
-		re.setDiasInicioVentanaInternet(r.getDiasInicioVentanaInternet());
-		re.setDiasVentanaInternet(r.getDiasVentanaInternet());
-		re.setVentanaCuposMinimos(r.getVentanaCuposMinimos());
-		re.setCantDiasAGenerar(r.getCantDiasAGenerar());
-		re.setLargoListaEspera(r.getLargoListaEspera());
-		re.setVersion(r.getVersion());
-		re.setFechaBaja(r.getFechaBaja());
-		re.setMostrarNumeroEnLlamador(r.getMostrarNumeroEnLlamador());
-		re.setVisibleInternet(r.getVisibleInternet());
-		re.setMostrarNumeroEnTicket(r.getMostrarNumeroEnTicket());
-		re.setMostrarIdEnTicket(r.getMostrarIdEnTicket());
-		re.setUsarLlamador(r.getUsarLlamador());
-		re.setSerie(r.getSerie());
-		re.setSabadoEsHabil(r.getSabadoEsHabil());
-    re.setDomingoEsHabil(r.getDomingoEsHabil());
-		re.setOficinaId(r.getOficinaId());
-		re.setDireccion(r.getDireccion());
-		re.setLocalidad(r.getLocalidad());
-		re.setDepartamento(r.getDepartamento());
-		re.setTelefonos(r.getTelefonos());
-		re.setHorarios(r.getHorarios());
-		re.setLatitud(r.getLatitud());
-		re.setLongitud(r.getLongitud());
+		recursoExportar.setVersionSAE(versionSAE);
+		
+		recursoExportar.setNombre(recurso.getNombre());
+		recursoExportar.setDescripcion(recurso.getDescripcion());
+		recursoExportar.setFechaInicio(recurso.getFechaInicio());
+		recursoExportar.setFechaFin(recurso.getFechaFin());
+		recursoExportar.setFechaInicioDisp(recurso.getFechaInicioDisp());
+		recursoExportar.setFechaFinDisp(recurso.getFechaFinDisp());
+		recursoExportar.setDiasInicioVentanaIntranet(recurso.getDiasInicioVentanaIntranet());
+		recursoExportar.setDiasVentanaIntranet(recurso.getDiasVentanaIntranet());
+		recursoExportar.setDiasInicioVentanaInternet(recurso.getDiasInicioVentanaInternet());
+		recursoExportar.setDiasVentanaInternet(recurso.getDiasVentanaInternet());
+		recursoExportar.setVentanaCuposMinimos(recurso.getVentanaCuposMinimos());
+		recursoExportar.setCantDiasAGenerar(recurso.getCantDiasAGenerar());
+		recursoExportar.setLargoListaEspera(recurso.getLargoListaEspera());
+		recursoExportar.setVersion(recurso.getVersion());
+		recursoExportar.setFechaBaja(recurso.getFechaBaja());
+		recursoExportar.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
+		recursoExportar.setVisibleInternet(recurso.getVisibleInternet());
+    recursoExportar.setMostrarIdEnTicket(recurso.getMostrarIdEnTicket());
+		recursoExportar.setMostrarNumeroEnTicket(recurso.getMostrarNumeroEnTicket());
+		recursoExportar.setFuenteTicket(recurso.getFuenteTicket());
+		recursoExportar.setTamanioFuenteChica(recurso.getTamanioFuenteChica());
+		recursoExportar.setTamanioFuenteNormal(recurso.getTamanioFuenteNormal());
+		recursoExportar.setTamanioFuenteGrande(recurso.getTamanioFuenteGrande());
+		recursoExportar.setUsarLlamador(recurso.getUsarLlamador());
+		recursoExportar.setSerie(recurso.getSerie());
+		recursoExportar.setSabadoEsHabil(recurso.getSabadoEsHabil());
+    recursoExportar.setDomingoEsHabil(recurso.getDomingoEsHabil());
+		recursoExportar.setOficinaId(recurso.getOficinaId());
+		recursoExportar.setDireccion(recurso.getDireccion());
+		recursoExportar.setLocalidad(recurso.getLocalidad());
+		recursoExportar.setDepartamento(recurso.getDepartamento());
+		recursoExportar.setTelefonos(recurso.getTelefonos());
+		recursoExportar.setHorarios(recurso.getHorarios());
+		recursoExportar.setLatitud(recurso.getLatitud());
+		recursoExportar.setLongitud(recurso.getLongitud());
+		
+		recursoExportar.setPresencialAdmite(recurso.getPresencialAdmite());
+    recursoExportar.setPresencialCupos(recurso.getPresencialCupos());
+    recursoExportar.setPresencialLunes(recurso.getPresencialLunes());
+    recursoExportar.setPresencialMartes(recurso.getPresencialMartes());
+    recursoExportar.setPresencialMiercoles(recurso.getPresencialMiercoles());
+    recursoExportar.setPresencialJueves(recurso.getPresencialJueves());
+    recursoExportar.setPresencialViernes(recurso.getPresencialViernes());
+    recursoExportar.setPresencialSabado(recurso.getPresencialSabado());
+    recursoExportar.setPresencialDomingo(recurso.getPresencialDomingo());
 
-		for (AgrupacionDato agrupacionDato : r.getAgrupacionDatos()) {
+    recursoExportar.setMultipleAdmite(recurso.getMultipleAdmite());
+    recursoExportar.setCambiosAdmite(recurso.getCambiosAdmite());
+    recursoExportar.setCambiosTiempo(recurso.getCambiosTiempo());
+    recursoExportar.setCambiosUnidad(recurso.getCambiosUnidad());
+    recursoExportar.setPeriodoValidacion(recurso.getPeriodoValidacion());
+
+    recursoExportar.setValidarPorIP(recurso.getValidarPorIP());
+    recursoExportar.setCantidadPorIP(recurso.getCantidadPorIP());
+    recursoExportar.setPeriodoPorIP(recurso.getPeriodoPorIP());
+    recursoExportar.setIpsSinValidacion(recurso.getIpsSinValidacion());
+    
+    recursoExportar.setCancelacionTiempo(recurso.getCancelacionTiempo()); 
+    recursoExportar.setCancelacionUnidad(recurso.getCancelacionUnidad()); 
+    recursoExportar.setCancelacionTipo(recurso.getCancelacionTipo()); 
+
+    recursoExportar.setMiPerfilConHab(recurso.getMiPerfilConHab());
+    recursoExportar.setMiPerfilConTitulo(recurso.getMiPerfilConTitulo());
+    recursoExportar.setMiPerfilConCorto(recurso.getMiPerfilConCorto());
+    recursoExportar.setMiPerfilConLargo(recurso.getMiPerfilConLargo());
+    recursoExportar.setMiPerfilConVencim(recurso.getMiPerfilConVencim());
+    recursoExportar.setMiPerfilCanHab(recurso.getMiPerfilCanHab());
+    recursoExportar.setMiPerfilCanTitulo(recurso.getMiPerfilCanTitulo());
+    recursoExportar.setMiPerfilCanCorto(recurso.getMiPerfilCanCorto());
+    recursoExportar.setMiPerfilCanLargo(recurso.getMiPerfilCanLargo());
+    recursoExportar.setMiPerfilCanVencim(recurso.getMiPerfilCanVencim());
+    recursoExportar.setMiPerfilRecHab(recurso.getMiPerfilRecHab());
+    recursoExportar.setMiPerfilRecTitulo(recurso.getMiPerfilRecTitulo());
+    recursoExportar.setMiPerfilRecCorto(recurso.getMiPerfilRecCorto());
+    recursoExportar.setMiPerfilRecLargo(recurso.getMiPerfilRecLargo());
+    recursoExportar.setMiPerfilRecVencim(recurso.getMiPerfilRecVencim());
+    recursoExportar.setMiPerfilRecHora(recurso.getMiPerfilRecHora());
+    recursoExportar.setMiPerfilRecDias(recurso.getMiPerfilRecDias());
+    
+		for (AgrupacionDato agrupacionDato : recurso.getAgrupacionDatos()) {
 			if (agrupacionDato.getFechaBaja() == null) {
 				AgrupacionDatoExport age = exportarAgrupacionDato(agrupacionDato);
-				re.getAgrupaciones().add(age);
+				recursoExportar.getAgrupaciones().add(age);
 			}
 		}
 		
-		for (String idioma : r.getTextosRecurso().keySet()) {
-			TextoRecursoExportar tre = exportarTextoRecurso(r.getTextosRecurso().get(idioma));
-			re.getTextosRecurso().put(idioma, tre);
+		for (String idioma : recurso.getTextosRecurso().keySet()) {
+			TextoRecursoExportar tre = exportarTextoRecurso(recurso.getTextosRecurso().get(idioma));
+			recursoExportar.getTextosRecurso().put(idioma, tre);
 		}
 
-		return re;
+		return recursoExportar;
 	}
 
 	public static AgrupacionDatoExport exportarAgrupacionDato(AgrupacionDato ag) {
@@ -72,6 +121,7 @@ public class ExportarHelper {
 		AgrupacionDatoExport age = new AgrupacionDatoExport();
 
 		age.setNombre(ag.getNombre());
+		age.setEtiqueta(ag.getEtiqueta());
 		age.setOrden(ag.getOrden());
 		age.setFechaBaja(ag.getFechaBaja());
 		age.setBorrarFlag(ag.getBorrarFlag());
@@ -82,6 +132,7 @@ public class ExportarHelper {
 				dsexp.setColumna(datoASolicitar.getColumna());
 				dsexp.setEsClave(datoASolicitar.getEsClave());
 				dsexp.setEtiqueta(datoASolicitar.getEtiqueta());
+        dsexp.setSoloLectura(datoASolicitar.getSoloLectura());
 				dsexp.setFechaBaja(datoASolicitar.getFechaBaja());
 				dsexp.setFila(datoASolicitar.getFila());
 				dsexp.setIncluirEnReporte(datoASolicitar.getIncluirEnReporte());
@@ -132,46 +183,93 @@ public class ExportarHelper {
 		return textoRecurso;
 	}
 	
-	public static Recurso importarRecurso(RecursoExportar re) {
+	public static Recurso importarRecurso(RecursoExportar recursoExportar, String versionSAE) {
 
-		if (re == null) {
+		if (recursoExportar == null) {
 			return null;
 		}
 
-		Recurso r = new Recurso();
+		Recurso recurso = new Recurso();
 
-		r.setNombre(re.getNombre());
-		r.setDescripcion(re.getDescripcion());
-		r.setFechaInicio(re.getFechaInicio());
-		r.setFechaFin(re.getFechaFin());
-		r.setFechaInicioDisp(re.getFechaInicioDisp());
-		r.setFechaFinDisp(re.getFechaFinDisp());
-		r.setDiasInicioVentanaIntranet(re.getDiasInicioVentanaIntranet());
-		r.setDiasVentanaIntranet(re.getDiasVentanaIntranet());
-		r.setDiasInicioVentanaInternet(re.getDiasInicioVentanaInternet());
-		r.setDiasVentanaInternet(re.getDiasVentanaInternet());
-		r.setVentanaCuposMinimos(re.getVentanaCuposMinimos());
-		r.setCantDiasAGenerar(re.getCantDiasAGenerar());
-		r.setLargoListaEspera(re.getLargoListaEspera());
-		r.setFechaBaja(re.getFechaBaja());
-		r.setMostrarNumeroEnLlamador(re.getMostrarNumeroEnLlamador());
-		r.setVisibleInternet(re.getVisibleInternet());
-		r.setMostrarNumeroEnTicket(re.getMostrarNumeroEnTicket());
-		r.setMostrarIdEnTicket(re.getMostrarIdEnTicket());
-		r.setUsarLlamador(re.getUsarLlamador());
-		r.setSerie(re.getSerie());
-		r.setSabadoEsHabil(re.getSabadoEsHabil());
-    r.setDomingoEsHabil(re.getDomingoEsHabil());
-		r.setOficinaId(re.getOficinaId());
-		r.setDireccion(re.getDireccion());
-		r.setLocalidad(re.getLocalidad());
-		r.setDepartamento(re.getDepartamento());
-		r.setTelefonos(re.getTelefonos());
-		r.setHorarios(re.getHorarios());
-		r.setLatitud(re.getLatitud());
-		r.setLongitud(re.getLongitud());
+		recurso.setNombre(recursoExportar.getNombre());
+		recurso.setDescripcion(recursoExportar.getDescripcion());
+		recurso.setFechaInicio(recursoExportar.getFechaInicio());
+		recurso.setFechaFin(recursoExportar.getFechaFin());
+		recurso.setFechaInicioDisp(recursoExportar.getFechaInicioDisp());
+		recurso.setFechaFinDisp(recursoExportar.getFechaFinDisp());
+		recurso.setDiasInicioVentanaIntranet(recursoExportar.getDiasInicioVentanaIntranet());
+		recurso.setDiasVentanaIntranet(recursoExportar.getDiasVentanaIntranet());
+		recurso.setDiasInicioVentanaInternet(recursoExportar.getDiasInicioVentanaInternet());
+		recurso.setDiasVentanaInternet(recursoExportar.getDiasVentanaInternet());
+		recurso.setVentanaCuposMinimos(recursoExportar.getVentanaCuposMinimos());
+		recurso.setCantDiasAGenerar(recursoExportar.getCantDiasAGenerar());
+		recurso.setLargoListaEspera(recursoExportar.getLargoListaEspera());
+		recurso.setFechaBaja(recursoExportar.getFechaBaja());
+		recurso.setMostrarNumeroEnLlamador(recursoExportar.getMostrarNumeroEnLlamador());
+		recurso.setVisibleInternet(recursoExportar.getVisibleInternet());
+    recurso.setMostrarIdEnTicket(recursoExportar.getMostrarIdEnTicket());
+		recurso.setMostrarNumeroEnTicket(recursoExportar.getMostrarNumeroEnTicket());
+		recurso.setFuenteTicket(recursoExportar.getFuenteTicket());
+		recurso.setTamanioFuenteChica(recursoExportar.getTamanioFuenteChica());
+		recurso.setTamanioFuenteNormal(recursoExportar.getTamanioFuenteNormal());
+		recurso.setTamanioFuenteGrande(recursoExportar.getTamanioFuenteGrande());
+		recurso.setUsarLlamador(recursoExportar.getUsarLlamador());
+		recurso.setSerie(recursoExportar.getSerie());
+		recurso.setSabadoEsHabil(recursoExportar.getSabadoEsHabil());
+    recurso.setDomingoEsHabil(recursoExportar.getDomingoEsHabil());
+		recurso.setOficinaId(recursoExportar.getOficinaId());
+		recurso.setDireccion(recursoExportar.getDireccion());
+		recurso.setLocalidad(recursoExportar.getLocalidad());
+		recurso.setDepartamento(recursoExportar.getDepartamento());
+		recurso.setTelefonos(recursoExportar.getTelefonos());
+		recurso.setHorarios(recursoExportar.getHorarios());
+		recurso.setLatitud(recursoExportar.getLatitud());
+		recurso.setLongitud(recursoExportar.getLongitud());
+		recurso.setPresencialAdmite(recursoExportar.getPresencialAdmite());
+		recurso.setPresencialCupos(recursoExportar.getPresencialCupos());
+		recurso.setPresencialLunes(recursoExportar.getPresencialLunes());
+		recurso.setPresencialMartes(recursoExportar.getPresencialMartes());
+		recurso.setPresencialMiercoles(recursoExportar.getPresencialMiercoles());
+		recurso.setPresencialJueves(recursoExportar.getPresencialJueves());
+		recurso.setPresencialViernes(recursoExportar.getPresencialViernes());
+		recurso.setPresencialSabado(recursoExportar.getPresencialSabado());
+		recurso.setPresencialDomingo(recursoExportar.getPresencialDomingo());
+    recurso.setMultipleAdmite(recursoExportar.getMultipleAdmite());
+    recurso.setCambiosAdmite(recursoExportar.getCambiosAdmite());
+    recurso.setCambiosTiempo(recursoExportar.getCambiosTiempo());
+    recurso.setCambiosUnidad(recursoExportar.getCambiosUnidad());
+    recurso.setPeriodoValidacion(recursoExportar.getPeriodoValidacion());
 
-		return r;
+    recurso.setValidarPorIP(recursoExportar.getValidarPorIP());
+    recurso.setCantidadPorIP(recursoExportar.getCantidadPorIP());
+    recurso.setPeriodoPorIP(recursoExportar.getPeriodoPorIP());
+    recurso.setIpsSinValidacion(recursoExportar.getIpsSinValidacion());
+    
+    recurso.setCancelacionTiempo(recursoExportar.getCancelacionTiempo()); 
+    recurso.setCancelacionUnidad(recursoExportar.getCancelacionUnidad()); 
+    recurso.setCancelacionTipo(recursoExportar.getCancelacionTipo()); 
+    
+    recurso.setMiPerfilConHab(recursoExportar.getMiPerfilConHab());
+    recurso.setMiPerfilConTitulo(recursoExportar.getMiPerfilConTitulo());
+    recurso.setMiPerfilConCorto(recursoExportar.getMiPerfilConCorto());
+    recurso.setMiPerfilConLargo(recursoExportar.getMiPerfilConLargo());
+    recurso.setMiPerfilConVencim(recursoExportar.getMiPerfilConVencim());
+    
+    recurso.setMiPerfilCanHab(recursoExportar.getMiPerfilCanHab());
+    recurso.setMiPerfilCanTitulo(recursoExportar.getMiPerfilCanTitulo());
+    recurso.setMiPerfilCanCorto(recursoExportar.getMiPerfilCanCorto());
+    recurso.setMiPerfilCanLargo(recursoExportar.getMiPerfilCanLargo());
+    recurso.setMiPerfilCanVencim(recursoExportar.getMiPerfilCanVencim());
+
+    recurso.setMiPerfilRecHab(recursoExportar.getMiPerfilRecHab());
+    recurso.setMiPerfilRecTitulo(recursoExportar.getMiPerfilRecTitulo());
+    recurso.setMiPerfilRecCorto(recursoExportar.getMiPerfilRecCorto());
+    recurso.setMiPerfilRecLargo(recursoExportar.getMiPerfilRecLargo());
+    recurso.setMiPerfilRecVencim(recursoExportar.getMiPerfilRecVencim());
+    recurso.setMiPerfilRecHora(recursoExportar.getMiPerfilRecHora());
+    recurso.setMiPerfilRecDias(recursoExportar.getMiPerfilRecDias());
+
+		return recurso;
 	}
 
 	public static AgrupacionDato importarAgrupacionDato(
@@ -186,6 +284,7 @@ public class ExportarHelper {
 		agd.setBorrarFlag(agexp.getBorrarFlag());
 		agd.setFechaBaja(agexp.getFechaBaja());
 		agd.setNombre(agexp.getNombre());
+    agd.setEtiqueta(agexp.getEtiqueta());
 		agd.setOrden(agexp.getOrden());
 
 		return agd;
@@ -220,6 +319,7 @@ public class ExportarHelper {
 		das.setBorrarFlag(dasExp.getBorrarFlag());
 		das.setColumna(dasExp.getColumna());
 		das.setEsClave(dasExp.getEsClave());
+    das.setSoloLectura(dasExp.getSoloLectura());
 		das.setEtiqueta(dasExp.getEtiqueta());
 		das.setFechaBaja(dasExp.getFechaBaja());
 		das.setFila(dasExp.getFila());

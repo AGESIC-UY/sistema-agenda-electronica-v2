@@ -20,50 +20,79 @@
 
 package uy.gub.imm.sae.common;
 
+import java.io.UnsupportedEncodingException;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-
+import java.util.GregorianCalendar;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class Utiles {
 
+  //Se inicializa en el bloque estático debajo
+  public static final Calendar FECHA_INVALIDA;
+
+  //Formato de la fecha generada por Date.toString() para poder volver a comvertirlo
+  private static final DateFormat FORMATEADOR_BASICO_FECHA = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
+  private static final DateFormat FORMATEADOR_BASICO_FECHA_INGLES = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+  
+  public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
+  
 	public static Integer DIA = 1;
 	public static Integer DIA_HORA = 2;
 	public static Integer HORA = 3;
 	public static Integer HORA_SEGUNDOS = 4;
 	public static Integer DIA_HORA_SEGUNDOS = 5;
 	
+  static{
+    Calendar gc = new GregorianCalendar();
+    gc.setTimeZone(TimeZone.getTimeZone("GMT"));
+    gc.set(Calendar.YEAR, 1);
+    gc.set(Calendar.DAY_OF_YEAR, 1);
+    gc.set(Calendar.HOUR_OF_DAY, 0);
+    gc.set(Calendar.MINUTE, 0);
+    gc.set(Calendar.SECOND, 0);
+    gc.set(Calendar.MILLISECOND, 0);
+    FECHA_INVALIDA = gc;
+  }
+  
 	public static Date time2InicioDelDia (Date fecha) {
-
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(fecha);
 		cal.set(Calendar.HOUR_OF_DAY, 0);
 		cal.set(Calendar.MINUTE, 0);
 		cal.set(Calendar.SECOND, 0);
 		cal.set(Calendar.MILLISECOND, 0);
-		
 		return cal.getTime();
 	}
 
 	public static void time2InicioDelDia (Calendar fecha) {
-
 		fecha.set(Calendar.HOUR_OF_DAY, 0);
 		fecha.set(Calendar.MINUTE, 0);
 		fecha.set(Calendar.SECOND, 0);
 		fecha.set(Calendar.MILLISECOND, 0);
-
 	}
 
 	public static Date time2FinDelDia (Date fecha) {
-		
 		Calendar cal = Calendar.getInstance();
 		cal.setTime(fecha);
 		cal.set(Calendar.HOUR_OF_DAY, 23);
 		cal.set(Calendar.MINUTE, 59);
 		cal.set(Calendar.SECOND, 59);
-		//Se comenta porque en la BD no se usa precision de milisegundos 
-		//cal.set(Calendar.MILLISECOND, 999);
-		
 		return cal.getTime();
+	}
+	
+	public static Date stringToDate(String sFecha) throws ParseException {
+	  try {
+	    //Se intenta parsear la fecha en el idioma por defecto de la instalación
+	    return FORMATEADOR_BASICO_FECHA.parse(sFecha);
+	  }catch(Exception ex) {
+	    //Si no se puede, se intenta parsearla en inglés (el calendar siempre la devuelve en inglés)
+	    return FORMATEADOR_BASICO_FECHA_INGLES.parse(sFecha);
+	  }
 	}
 	
 	public static String date2string(Date fecha, Integer formato) {
@@ -111,4 +140,74 @@ public class Utiles {
 		return resp;
 	}
 	
+	/**
+	 * Devuelve un objeto Date que representa una fecha inválida (con año = 1)
+	 * @return
+	 */
+  public static final Date getFechaInvalida() {
+    return FECHA_INVALIDA.getTime();
+  }
+  
+  /**
+   * Determina si la fecha indicada es inválida (por convención una fecha no nula pero inválida 
+   * se representa con año = 1)
+   * @param fecha
+   * @return
+   */
+  public static final boolean esFechaInvalida(Date fecha) {
+    if(fecha==null) {
+      return false;
+    }
+    Calendar cFecha = new GregorianCalendar();
+    cFecha.setTime(fecha);
+    return cFecha.get(Calendar.YEAR) == FECHA_INVALIDA.get(Calendar.YEAR);
+  }
+  
+  public static boolean validarDigitoVerificadorCI(String ciStr){
+    if(ciStr==null) {
+      return false;
+    }
+    ciStr = ciStr.trim();
+    //La cédula solo puede contener dígitos, puntos y guiones
+    if(!ciStr.equals(ciStr.replaceAll("[^\\d.-]", ""))) {
+      return false;
+    }
+    ciStr = ciStr.replaceAll("[^\\d]", "");
+    if(ciStr.length()<7) {
+      return false;
+    }
+    String digitoValidar = ciStr.substring(ciStr.length()-1);
+    ciStr = ciStr.substring(0, ciStr.length()-1);
+    final int[] numerosCi = {1, 1, 4, 3, 2, 9, 8, 7, 6, 3, 4};
+    final int cantNumerosCi = 11;
+    final int topeDigitos = 10;
+    int digitoCalculado = 0;
+    int iters = cantNumerosCi-ciStr.length();
+    int j = 0, suma = 0, digitoActual;
+    while(iters<cantNumerosCi){
+      digitoActual = Integer.valueOf(ciStr.substring(j, j+1)).intValue();
+      suma += digitoActual*numerosCi[iters];
+      iters++;
+      j++;
+    }
+    digitoCalculado = (topeDigitos - (suma%topeDigitos))%topeDigitos;
+    return digitoValidar.equals(""+digitoCalculado);
+  }
+
+  public static String convertirISO88591aUTF8(String texto) {
+    try {
+      return new String(texto.getBytes("ISO-8859-1"), "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      return texto;
+    }
+  }
+  
+  public static String convertirUTF8aISO88591(String texto) {
+    try {
+      return new String(texto.getBytes("UTF-8"), "ISO-8859-1");
+    } catch (UnsupportedEncodingException e) {
+      return texto;
+    }
+  }
+  
 }

@@ -21,6 +21,7 @@
 package uy.gub.imm.sae.common.factories;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Comunicaciones;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -30,5 +31,6 @@ public interface BusinessLocator {
 	public AgendarReservas getAgendarReservas() throws ApplicationException;
 	public Recursos getRecursos() throws ApplicationException;
 	public Consultas getConsultas() throws ApplicationException;
+  public Comunicaciones getComunicaciones() throws ApplicationException;
 	
 }

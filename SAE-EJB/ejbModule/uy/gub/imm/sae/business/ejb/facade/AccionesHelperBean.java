@@ -1,7 +1,5 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -15,6 +13,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import uy.gub.imm.sae.business.dto.ReservaDTO;
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.Evento;
 import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.Accion;
@@ -46,26 +45,23 @@ public class AccionesHelperBean implements AccionesHelperLocal{
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager em;
 	
+  @SuppressWarnings("unchecked")
 	public List<AccionPorRecurso> obtenerAccionesPorRecurso(Recurso r, Evento e) {
-		
-		@SuppressWarnings("unchecked")
 		List<AccionPorRecurso> acciones = (List<AccionPorRecurso>) em.createQuery(
-		"select axr " +
-		"from  AccionPorRecurso axr " +
-		"where axr.recurso = :r and " +
-		"	   axr.evento = :e and " +
-		"      axr.fechaBaja = null " +
-		"order by axr.ordenEjecucion asc "
-		)
+  		"SELECT axr " +
+  		"FROM  AccionPorRecurso axr " +
+  		"WHERE axr.recurso = :r " +
+  		"	 AND axr.evento = :e " +
+  		"  AND axr.fechaBaja = null " +
+  		"ORDER BY axr.ordenEjecucion ASC "
+  		)
 		.setParameter("r", r)
 		.setParameter("e", e)
 		.getResultList();
-
 		return acciones;
 	}
 
 	public void ejecutarAccionesPorEvento(Map<String, DatoReserva> valores, ReservaDTO reserva, Recurso recurso, Evento evento) throws ApplicationException, BusinessException, ErrorAccionException{
-		
 		List<AccionPorRecurso> acciones = this.obtenerAccionesPorRecurso(recurso, evento);
 		for(AccionPorRecurso aXr : acciones) {
 			Accion a = aXr.getAccion();
@@ -85,8 +81,7 @@ public class AccionesHelperBean implements AccionesHelperLocal{
 								parametros.put(nombreParametro, Boolean.valueOf(dato.getValor()));
 							} else if (campo.getTipo() == Tipo.DATE) {
 							  try {
-  						    DateFormat df = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy");
-  						    parametros.put(nombreParametro, df.parse(dato.getValor()));
+							    parametros.put(nombreParametro, Utiles.stringToDate(dato.getValor()));
 							  }catch(Exception ex) {
                   parametros.put(nombreParametro, dato.getValor());
 							  }
@@ -170,7 +165,6 @@ public class AccionesHelperBean implements AccionesHelperLocal{
 		recursoDTO.setFechaInicio(recurso.getFechaInicio());
 		recursoDTO.setFechaInicioDisp(recurso.getFechaInicioDisp());
 		recursoDTO.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
-		recursoDTO.setReservaMultiple(recurso.getReservaMultiple());
 		recursoDTO.setVentanaCuposMinimos(recurso.getVentanaCuposMinimos());
 		recursoDTO.setDiasInicioVentanaIntranet(recurso.getDiasInicioVentanaIntranet());
 		recursoDTO.setDiasVentanaIntranet(recurso.getDiasVentanaIntranet());

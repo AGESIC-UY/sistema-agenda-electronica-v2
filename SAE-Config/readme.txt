@@ -50,6 +50,13 @@ Se tocaron los siguientes archivos de Primefaces:
   /org/primefaces/component/selectonemenu/SelectOneMenuRenderer.java
   /org/primefaces/component/selectoneradio/SelectOneRadioRenderer.java
   /org/primefaces/component/tabview/TabViewRenderer.java
+  /org/primefaces/component/api/UIData.java
+  /org/primefaces/component/paginator/PageLinkRenderer.java
+  /org/primefaces/component/paginator/FirstPageLinkRenderer.java
+  /org/primefaces/component/paginator/PrevPageLinkRenderer.java
+  /org/primefaces/component/paginator/NextPageLinkRenderer.java
+  /org/primefaces/component/paginator/LastPageLinkRenderer.java
+  
 Cada vez que se modifica un archivo de Primefaces hay que compilarlo en un proyecto separado e incluirlo en el archivo primefaces-5.3-modificado.jar que está en /SAE-WEB/WebContent/WEB-INF/lib  
   
 SERVICIOS WEB  

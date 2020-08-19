@@ -29,15 +29,14 @@ import uy.gub.imm.sae.entity.Llamada;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.global.Empresa;
-import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 
 public interface Llamadas {
 	
-	public Reserva siguienteEnEspera(Recurso recurso, Integer puesto) throws BusinessException;
-	public Reserva volverALlamar(Recurso recurso, Integer puesto, Reserva reserva) throws BusinessException;
-
-	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, TimeZone timezone) throws BusinessException;
-	public List<Llamada> obtenerLlamadas(List<Recurso> recursos, Integer cantLlamadas) throws BusinessException;
-	public void marcarAsistencia(Empresa empresa, Recurso recursoMarcado, Reserva r) throws BusinessException;
-	public void marcarInasistencia(Empresa empresa, Recurso recursoMarcado, Reserva r) throws BusinessException;
+	public Reserva siguienteEnEspera(Recurso recurso, Integer puesto, boolean presencial) throws UserException;
+	public Reserva volverALlamar(Recurso recurso, Integer puesto, Reserva reserva) throws UserException;
+	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, boolean atencionPresencial, TimeZone timezone) throws UserException;
+	public List<Llamada> obtenerLlamadas(List<Recurso> recursos, Integer cantLlamadas) throws UserException;
+	public void marcarAsistencia(Empresa empresa, Recurso recursoMarcado, Reserva r) throws UserException;
+	public void marcarInasistencia(Empresa empresa, Recurso recursoMarcado, Reserva r) throws UserException;
 }

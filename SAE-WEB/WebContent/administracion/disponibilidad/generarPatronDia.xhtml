@@ -1,18 +1,14 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view
-			beforePhase="#{genDisponibilidadMBean.beforePhaseGenerarDisponibilidades}" >
+		<f:view beforePhase="#{genDisponibilidadMBean.beforePhaseGenerarDisponibilidades}" >
 
-			<p:outputPanel
-				rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
 				<h:form id="formGenerarPatronDia">
 				  <p:outputPanel id="panelGenerarPatronDia">
 		      <p:outputPanel styleClass="form-required">
@@ -20,27 +16,24 @@
 		      </p:outputPanel>
 					<fieldset>
 						<legend>
-							<h:outputText
-								value="#{sessionMBean.textos['seleccionar_la_fecha_modelo']}" />
+							<h:outputText value="#{sessionMBean.textos['seleccionar_la_fecha_modelo']}" />
 						</legend>
 						<p:outputPanel styleClass="form-horizontal">
 							<p:outputPanel styleClass="form-group">
-								<h:outputLabel value="#{sessionMBean.textos['fecha']}" for="fecha"
-									styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<h:outputLabel value="#{sessionMBean.textos['fecha']}" for="fecha" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-sm-9">
-									<h:inputText id="fecha" value="#{genDispSessionMBean.fechaModelo}" styleClass="datepicker">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									<h:inputText id="fecha" value="#{genDispSessionMBean.fechaModelo}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
 									<h:outputText styleClass="input-msg" value="#{genDisponibilidadMBean.mensajePeriodoDisponibilidad}" />
-									<p:message for="fecha"></p:message>
+									<p:message for="fecha" />
 								</p:outputPanel>
 							</p:outputPanel>
 							<p:outputPanel styleClass="form-group">
 								<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
-									<p:commandButton value="#{sessionMBean.textos['consultar_disponibilidades']}"
-										actionListener="#{genDisponibilidadMBean.obtenerCuposModelo}"
-										update="formGenerarPatronDia:panelGenerarPatronDia"
-										styleClass="btn btn-secundario" />
+									<p:commandButton value="#{sessionMBean.textos['consultar_disponibilidades']}" actionListener="#{genDisponibilidadMBean.obtenerCuposModelo}"
+										update="formGenerarPatronDia:panelGenerarPatronDia" styleClass="btn btn-secundario" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
@@ -48,93 +41,64 @@
 
 					<div class="row margen_inf">
 					  <p:outputPanel id="panelTablaMatutina" styleClass="col-sm-6"> 
-							<p:dataTable id="tablaMatutina"
-								value="#{genDispSessionMBean.disponibilidadesDelDiaMatutinaModif}"
-								var="rowMM"
-								caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}"
-								emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-
+							<p:dataTable id="tablaMatutina" value="#{genDispSessionMBean.disponibilidadesDelDiaMatutinaModif}" var="rowMM"
+								caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 								<f:facet name="header">
 									<h:panelGroup>
-										<h:outputText value="#{sessionMBean.textos['por_la_manana']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['por_la_manana']}" />
 									</h:panelGroup>
 								</f:facet>
-
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
 									</f:facet>
 									<h:outputText value="#{rowMM.data.horaInicio}">
-										<f:convertDateTime type="time"
-											pattern="#{sessionMBean.formatoHora}"
-											timeZone="GMT" />
+										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</h:outputText>
 								</p:column>
-
 								<p:column>
 									<f:facet name="header">
-										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}" />
 									</f:facet>
-									<h:outputText value="#{rowMM.data.cupo}"
-										rendered="#{(rowMM.data.cupo > 0 ? true  : false)}"
-										styleClass="verde"></h:outputText>
-									<h:outputText value="#{rowMM.data.cupo}"
-										rendered="#{(rowMM.data.cupo > 0 ? false  : true)}"
-										styleClass="rojo"></h:outputText>
+									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? true  : false)}" styleClass="verde" />
+									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? false  : true)}" styleClass="rojo" />
 								</p:column>
-
 								<p:column>
 									<f:facet name="header">
-										<h:outputText
-											value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+										<h:outputText	value="#{sessionMBean.textos['cantidad_de_reservas']}" />
 									</f:facet>
-									<h:outputText value="#{rowMM.data.cantReservas}"></h:outputText>
+									<h:outputText value="#{rowMM.data.cantReservas}" />
 								</p:column>
-
 							</p:dataTable>
 					  </p:outputPanel>
             <p:outputPanel id="panelTablaVespertina" styleClass="col-sm-6"> 
-							<p:dataTable id="tablaVespertina"
-								value="#{genDispSessionMBean.disponibilidadesDelDiaVespertinaModif}"
-								var="rowVM"
-								caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}"
-								emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-
+							<p:dataTable id="tablaVespertina" value="#{genDispSessionMBean.disponibilidadesDelDiaVespertinaModif}" var="rowVM"
+								caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 								<f:facet name="header">
 									<h:panelGroup>
-										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}" />
 									</h:panelGroup>
 								</f:facet>
-
 								<p:column>
 									<f:facet name="header">
 										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
 									</f:facet>
 									<h:outputText value="#{rowVM.data.horaInicio}">
-										<f:convertDateTime type="time"
-											pattern="#{sessionMBean.formatoHora}"
-											timeZone="GMT" />
+										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</h:outputText>
 								</p:column>
-
 								<p:column>
 									<f:facet name="header">
-										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}" />
 									</f:facet>
-									<h:outputText value="#{rowVM.data.cupo}"
-										rendered="#{(rowVM.data.cupoDisponible > 0 ? true  : false)}"
-										styleClass="verde"></h:outputText>
-									<h:outputText value="#{rowVM.data.cupo}"
-										rendered="#{(rowVM.data.cupoDisponible > 0 ? false  : true)}"
-										styleClass="rojo"></h:outputText>
+									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? true  : false)}" styleClass="verde" />
+									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? false  : true)}" styleClass="rojo" />
 								</p:column>
-
 								<p:column>
 									<f:facet name="header">
-										<h:outputText
-											value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}" />
 									</f:facet>
-									<h:outputText value="#{rowVM.data.cantReservas}"></h:outputText>
+									<h:outputText value="#{rowVM.data.cantReservas}" />
 								</p:column>
 							</p:dataTable>
 						</p:outputPanel>
@@ -151,66 +115,68 @@
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha_de_inicio']}" for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
-									<h:inputText id="fechaDesde" value="#{genDispSessionMBean.fechaInicial}" styleClass="datepicker">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									<h:inputText id="fechaDesde" value="#{genDispSessionMBean.fechaInicial}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
-									<p:message for="fechaDesde"></p:message>
+									<p:message for="fechaDesde" />
 								</p:outputPanel>
 							</p:outputPanel>
 							<p:outputPanel styleClass="form-group">
 								<h:outputLabel value="#{sessionMBean.textos['fecha_de_fin']}" for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 								<p:outputPanel styleClass="col-xs-7 col-sm-9 col-md-6">
-									<h:inputText id="fechaHasta" value="#{genDispSessionMBean.fechaFinal}" styleClass="datepicker">
-										<f:convertDateTime pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									<h:inputText id="fechaHasta" value="#{genDispSessionMBean.fechaFinal}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
 									</h:inputText>
-									<p:message for="fechaHasta"></p:message>
+									<p:message for="fechaHasta" />
 								</p:outputPanel>
 							</p:outputPanel>
               <p:outputPanel styleClass="form-group">
-                <h:outputText value="Días a los cuales aplicar" styleClass="col-sm-3 control-label label" />
+                <h:outputText value="#{sessionMBean.textos['dias_a_aplicar']}" styleClass="col-sm-3 control-label label" />
                 <p:outputPanel styleClass="col-sm-9">
                   <p:outputPanel>
 		                <p:selectBooleanCheckbox id="diaAplicarLu" value="#{genDispSessionMBean.diasAplicar[0]}"  />
-		                <p:outputLabel value="Lunes" for="diaAplicarLu" />
+		                <p:outputLabel value="#{sessionMBean.textos['lunes']}" for="diaAplicarLu" />
 		              </p:outputPanel>
                   <p:outputPanel>
   		              <p:selectBooleanCheckbox id="diaAplicarMa" value="#{genDispSessionMBean.diasAplicar[1]}"  />
-		                <p:outputLabel value="Martes" for="diaAplicarMa" />
+		                <p:outputLabel value="#{sessionMBean.textos['martes']}" for="diaAplicarMa" />
                   </p:outputPanel>
                   <p:outputPanel>
   		              <p:selectBooleanCheckbox id="diaAplicarMi" value="#{genDispSessionMBean.diasAplicar[2]}"  />
-		                <p:outputLabel value="Miércoles" for="diaAplicarMi" />
+		                <p:outputLabel value="#{sessionMBean.textos['miercoles']}" for="diaAplicarMi" />
                   </p:outputPanel>
                   <p:outputPanel>
   		              <p:selectBooleanCheckbox id="diaAplicarJu" value="#{genDispSessionMBean.diasAplicar[3]}"  />
-		                <p:outputLabel value="Jueves" for="diaAplicarJu" />
+		                <p:outputLabel value="#{sessionMBean.textos['jueves']}" for="diaAplicarJu" />
                   </p:outputPanel>
                   <p:outputPanel>
 		                <p:selectBooleanCheckbox id="diaAplicarVi" value="#{genDispSessionMBean.diasAplicar[4]}"  />
-		                <p:outputLabel value="Viernes" for="diaAplicarVi" />
+		                <p:outputLabel value="#{sessionMBean.textos['viernes']}" for="diaAplicarVi" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{sessionMBean.recursoMarcado.sabadoEsHabil}">
   		              <p:selectBooleanCheckbox id="diaAplicarSa" value="#{genDispSessionMBean.diasAplicar[5]}" />
-		                <p:outputLabel value="Sábado" for="diaAplicarSa" />
+		                <p:outputLabel value="#{sessionMBean.textos['sabado']}" for="diaAplicarSa" />
                   </p:outputPanel>
                   <p:outputPanel rendered="#{sessionMBean.recursoMarcado.domingoEsHabil}">
                     <p:selectBooleanCheckbox id="diaAplicarDo" value="#{genDispSessionMBean.diasAplicar[6]}" />
-                    <p:outputLabel value="Domingo" for="diaAplicarDo" />
+                    <p:outputLabel value="#{sessionMBean.textos['domingo']}" for="diaAplicarDo" />
                   </p:outputPanel>
 	              </p:outputPanel>
-	              </p:outputPanel>
+              </p:outputPanel>
             </p:outputPanel>
 					</fieldset>
 					<ul class="form-action-buttons">
 						<li class="action-buttons-primary">
 							<ul>
-								<li><p:commandButton
-										value="#{sessionMBean.textos['crear_disponibilidades']}"
-										actionListener="#{genDisponibilidadMBean.generarDisponibilidades}"
-										update="formGenerarPatronDia:panelGenerarPatronDia" styleClass="btn-lg btn-primario" /></li>
+								<li>
+								  <p:commandButton value="#{sessionMBean.textos['crear_disponibilidades']}" actionListener="#{genDisponibilidadMBean.generarDisponibilidades}"
+										update="formGenerarPatronDia:panelGenerarPatronDia" styleClass="btn-lg btn-primario" />
+								</li>
 							</ul>
 						</li>
-						<li class="action-buttons-second"></li>
+						<li class="action-buttons-second" />
 					</ul>
 					</p:outputPanel>
 				</h:form>
@@ -218,4 +184,3 @@
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

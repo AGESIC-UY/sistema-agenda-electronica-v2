@@ -34,7 +34,6 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	
 	public static final String MSG_ID = "pantalla";
 		
-	private CupoPorDia cupoPorDiaSeleccionado;
 	private RowList<CupoPorDia> cuposPorDia;
 	
 	private DisponibilidadReserva dispSeleccionado;
@@ -54,33 +53,27 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	private Boolean[] diasAplicar = new Boolean[]{true,true,true,true,true,true,true}; //Lunes, martes, ..., domingo
 	
 	private int pagCupo;
-	//private int pagDisp;
-
 	
 	public int getPagCupo() {
 		return pagCupo;
 	}
+	
 	public void setPagCupo(int pagCupo) {
 		this.pagCupo = pagCupo;
 	}
+	
 	public Date getFechaActual() {
 		return fechaActual;
 	}
+	
 	public void setFechaActual(Date fechaActual) {
 		this.fechaActual = fechaActual;
 	}
 
-
-	
-	public CupoPorDia getCupoPorDiaSeleccionado() {
-		return cupoPorDiaSeleccionado;
-	}
-	public void setCupoPorDiaSeleccionado(CupoPorDia cupoPorDiaSeleccionado) {
-		this.cupoPorDiaSeleccionado = cupoPorDiaSeleccionado;
-	}
 	public RowList<CupoPorDia> getCuposPorDia() {
 		return cuposPorDia;
 	}
+	
 	public void setCuposPorDia(RowList<CupoPorDia> cuposPorDia) {
 		this.cuposPorDia = cuposPorDia;
 	}
@@ -112,15 +105,16 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	public RowList<DisponibilidadReserva> getDisponibilidadesDelDiaMatutina() {
 		return disponibilidadesDelDiaMatutina;
 	}
-	public void setDisponibilidadesDelDiaMatutina(
-			RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutina) {
+	
+	public void setDisponibilidadesDelDiaMatutina(RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutina) {
 		this.disponibilidadesDelDiaMatutina = disponibilidadesDelDiaMatutina;
 	}
+	
 	public RowList<DisponibilidadReserva> getDisponibilidadesDelDiaVespertina() {
 		return disponibilidadesDelDiaVespertina;
 	}
-	public void setDisponibilidadesDelDiaVespertina(
-			RowList<DisponibilidadReserva> disponibilidadesDelDiaVespertina) {
+	
+	public void setDisponibilidadesDelDiaVespertina(RowList<DisponibilidadReserva> disponibilidadesDelDiaVespertina) {
 		this.disponibilidadesDelDiaVespertina = disponibilidadesDelDiaVespertina;
 	}
 	
@@ -135,55 +129,41 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	public DisponibilidadReserva getDispSeleccionado() {
 		return dispSeleccionado;
 	}
+	
 	public void setDispSeleccionado(DisponibilidadReserva dispSeleccionado) {
 		this.dispSeleccionado = dispSeleccionado;
 	}
 
 	public Boolean getMostrarDisponibilidad() {
-		
 		RowList<DisponibilidadReserva> listDispReservaVespertina = this.disponibilidadesDelDiaVespertinaModif;
 		RowList<DisponibilidadReserva> listDispReservaMatutina = this.disponibilidadesDelDiaMatutinaModif;
 		boolean mostrar = false;
-		if (listDispReservaMatutina != null)
-		{
+		if (listDispReservaMatutina != null) {
 			for (Row<DisponibilidadReserva> row : listDispReservaMatutina) {
-				if (row.getData().isSeleccionado())
-				{
+				if (row.getData().isSeleccionado()) {
 					mostrar = true;
 					break;
 				}
 			}
-			if(!mostrar && listDispReservaVespertina!=null)
-			{
+			if(!mostrar && listDispReservaVespertina!=null) {
 				for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-					if (row.getData().isSeleccionado())
-					{
+					if (row.getData().isSeleccionado()) {
 						mostrar = true;
 						break;
 					}
 				}
 			}
-		}else if(listDispReservaVespertina!=null)
-		{//listDispReservaMatutina == null
+		}else if(listDispReservaVespertina!=null) {//listDispReservaMatutina == null
 			for (Row<DisponibilidadReserva> row : listDispReservaVespertina) {
-				if (row.getData().isSeleccionado())
-				{
+				if (row.getData().isSeleccionado()) {
 					mostrar = true;
 					break;
 				}
 			}
 		}
-		
-		if(mostrar)
-		{
-			this.mostrarDisponibilidad = true;
-		}else {
-			this.mostrarDisponibilidad = false;
-		}
-		
+		this.mostrarDisponibilidad = mostrar;
 		return this.mostrarDisponibilidad;
 	}
-
 
 	public void setMostrarDisponibilidad(Boolean mostrarDisponibilidad) {
 		this.mostrarDisponibilidad = mostrarDisponibilidad;
@@ -192,13 +172,16 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	public RowList<DisponibilidadReserva> getDisponibilidadesDelDiaMatutinaModif() {
 		return disponibilidadesDelDiaMatutinaModif;
 	}
+	
 	public void setDisponibilidadesDelDiaMatutinaModif(
 			RowList<DisponibilidadReserva> disponibilidadesDelDiaMatutinaModif) {
 		this.disponibilidadesDelDiaMatutinaModif = disponibilidadesDelDiaMatutinaModif;
 	}
+	
 	public RowList<DisponibilidadReserva> getDisponibilidadesDelDiaVespertinaModif() {
 		return disponibilidadesDelDiaVespertinaModif;
 	}
+	
 	public void setDisponibilidadesDelDiaVespertinaModif(
 			RowList<DisponibilidadReserva> disponibilidadesDelDiaVespertinaModif) {
 		this.disponibilidadesDelDiaVespertinaModif = disponibilidadesDelDiaVespertinaModif;
@@ -207,6 +190,7 @@ public class DispSessionMBean extends SessionCleanerMBean implements RemovableFr
 	public Boolean[] getDiasAplicar() {
 		return diasAplicar;
 	}
+	
 	public void setDiasAplicar(Boolean[] diasAplicar) {
 		this.diasAplicar = diasAplicar;
 	}

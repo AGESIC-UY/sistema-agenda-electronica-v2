@@ -57,6 +57,7 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
 @RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_LLAMADOR"})
@@ -82,22 +83,19 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	
   static Logger logger = Logger.getLogger(LlamadasBean.class);
   
-	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, TimeZone timezone) throws BusinessException {
-
+	public List<ReservaDTO> obtenerReservasEnEspera(Recurso recurso, List<Estado> estados, boolean atencionPresencial, TimeZone timezone) throws UserException {
 		VentanaDeTiempo hoy = new VentanaDeTiempo();
 		Calendar cal = new GregorianCalendar();
 		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTimeInMillis()));
 		Date ahora = cal.getTime();
-		
 		hoy.setFechaInicial(Utiles.time2InicioDelDia(ahora));
 		hoy.setFechaFinal(Utiles.time2FinDelDia(ahora));
-		
 		if (estados.size() == 1 && estados.contains(Estado.R) ) {
-			return consultas.consultarReservasEnEspera(recurso, timezone);
+			return consultas.consultarReservasEnEspera(recurso, atencionPresencial, timezone);
 		} else if (estados.size() == 2 && estados.contains(Estado.R) && estados.contains(Estado.U)) {
-			return consultas.consultarReservasEnEsperaUtilizadas(recurso, timezone);
+			return consultas.consultarReservasEnEsperaUtilizadas(recurso, atencionPresencial, timezone);
 		} else {
-			return consultas.consultarReservasPorPeriodoEstado(recurso, hoy, estados);
+			return consultas.consultarReservasPorPeriodoEstado(recurso, hoy, estados, atencionPresencial);
 		}
 	
 	}	
@@ -114,68 +112,50 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	 * @throws BusinessException 
 	 */
 	@SuppressWarnings("unchecked")
-	public Reserva siguienteEnEspera(Recurso recurso, Integer puesto) throws BusinessException {
-
-		
+	public Reserva siguienteEnEspera(Recurso recurso, Integer puesto, boolean presencial) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
 		 
 		Reserva reserva = null;
 		Integer recursoId = recurso.getId();
 		
 		//Lista de espera 
-		Query query = em.createQuery(
-				"select r.id " +
-				"from   Reserva r " +
-				"       join r.disponibilidades d " +
-				"where   " +
-				"       d.recurso.id = :recurso and " +
-				"       r.estado = :estado and " +
-				"       d.fecha = :hoy " +
-				"order by d.fecha, d.horaInicio, r.id " 
-				)
-				.setParameter("recurso", recursoId)
-				.setParameter("estado", Estado.R)
-				.setParameter("hoy", new Date(), TemporalType.DATE);
-		
-		//List<Reserva> resultados = (List<Reserva>)query.getResultList();		
+		Query query = em.createQuery("SELECT r.id " +
+				"FROM Reserva r " +
+				"JOIN r.disponibilidades d " +
+				"WHERE d.recurso.id = :recurso " +
+        "  AND "+(presencial?"d.presencial=true":"d.presencial=false") + " " +
+				"  AND r.estado = :estado " +
+				"  AND d.fecha = :hoy " +
+				"ORDER BY d.fecha, d.horaInicio, r.id")
+  		.setParameter("recurso", recursoId)
+  		.setParameter("estado", Estado.R)
+  		.setParameter("hoy", new Date(), TemporalType.DATE);
 		List<Integer> resultados = (List<Integer>)query.getResultList();
-		
 		//Busco la siguiente reserva a ser llamada con mutua exlucion y lo logro al insertar la llamada, 
 		//con el uso de clave de unicidad en la tabla de llamadas por id de la reserva.
 		Boolean buscarSiguiente = true;
 		//Iterator<Reserva> iter = resultados.iterator();
 		Iterator<Integer> iter = resultados.iterator();
 		while (buscarSiguiente && iter.hasNext()) {
-		
 			Integer reservaId = iter.next();
-			//reserva = iter.next();
-			//Integer reservaId = reserva.getId();
-		
 			try {
 				reserva = helper.hacerLlamadaMutex(recursoId, reservaId, puesto);
 				if (reserva != null) {
 					buscarSiguiente = false;
 				}
 			} catch (EJBException e) {
-				if (e.getCausedByException() instanceof OptimisticLockException) {
-					logger.info("ACCESO MULTIPLE A RESERVA EN SIGUIETNE RESERVA (id = "+reservaId+") "+e.getMessage()+" "+e.getCause().getClass().toString());
-				}
-				else {
+				if (!(e.getCausedByException() instanceof OptimisticLockException)) {
 					throw e;
 				}
 			}
 		}
-		
 		if ( ! buscarSiguiente ) {
-			//Encontró
 			return reserva;	
-		}
-		else {
+		}	else {
 			return null;
 		}
-		
 	}
 	
 	/**
@@ -184,49 +164,40 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	 * generando una llamada con la reserva y el puesto.
 	 * @throws BusinessException 
 	 */
-	public Reserva volverALlamar(Recurso recurso, Integer puesto, Reserva reserva) throws BusinessException {
-
-		
-		if (recurso == null) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
-		}
-
+	public Reserva volverALlamar(Recurso recurso, Integer puesto, Reserva reserva) throws UserException {
+    if (recurso == null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
 
 		Integer reservaId = reserva.getId();
 		try {
 			reserva = helper.reintentarLlamadaMutex(recurso.getId(), reservaId, puesto);
 		} catch (EJBException e) {
 			if (e.getCausedByException() instanceof OptimisticLockException) {
-				logger.info("ACCESO MULTIPLE A RESERVA EN VOLVER A LLAMAR (id = "+reservaId+") "+e.getMessage()+" "+e.getCause().getClass().toString());
 				reserva = null;
-			}
-			else {
+			} else {
 				throw e;
 			}
 		}
-
 		return reserva;
 	}
 	
 	
 	@SuppressWarnings("unchecked")
-	public List<Llamada> obtenerLlamadas(List<Recurso> recursos, Integer cantLlamadas) throws BusinessException {
+	public List<Llamada> obtenerLlamadas(List<Recurso> recursos, Integer cantLlamadas) throws UserException {
 
 		List<Object[]> llamadas    = new ArrayList<Object[]>();
 		List<Llamada> llamadasDTO = new ArrayList<Llamada>();
 		
 		if (recursos == null || recursos.isEmpty()) {
-			throw new BusinessException("AE20084", "El recurso no puede ser nulo");
+			throw new UserException("debe_especificar_el_recurso");
 		}
 
-		Query query = em.createQuery(
-				"select ll.id, ll.etiqueta, ll.fecha, ll.hora, ll.numero, ll.puesto, ll.reserva " +
-				"from   Llamada ll " +
-				"where   " +
-				"       ll.recurso.id IN (:recursos) and " +
-				"       ll.fecha = :hoy " +				
-				"order by ll.id desc " 
-		);
+		Query query = em.createQuery("SELECT ll.id, ll.etiqueta, ll.fecha, ll.hora, ll.numero, ll.puesto, ll.reserva " +
+				"FROM Llamada ll " +
+				"WHERE ll.recurso.id IN (:recursos) " +
+				"  AND ll.fecha = :hoy " +				
+				"ORDER BY ll.hora DESC");
 		List<Integer> recursosIds = new ArrayList<Integer>();
 		for (Recurso recurso : recursos) {
 			recursosIds.add(recurso.getId());
@@ -246,16 +217,13 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 			dto.setFecha((Date)llamada[2]);
 			dto.setHora((Date)llamada[3]);
 			dto.setNumero((Integer)llamada[4]);
-			
 			if (puestos.containsKey(llamada[5])) {
 				dto.setPuesto(null);
 			} else {
 				dto.setPuesto((Integer)llamada[5]);
 				puestos.put((Integer)llamada[5], (Integer)llamada[5]);
 			}
-			
 			dto.setReserva((Reserva)llamada[6]);
-			
 			llamadasDTO.add(dto);
 		}
 		
@@ -266,12 +234,12 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	 * Deja constancia de que el ciudadano asistio a la cita reservada.
 	 * @throws BusinessException 
 	 */
-	public void marcarAsistencia(Empresa empresa, Recurso recurso, Reserva reserva) throws BusinessException {
+	public void marcarAsistencia(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("debe_especificar_el_recurso");
+			throw new UserException("debe_especificar_el_recurso");
 		}
 		if (reserva == null){
-			throw new BusinessException("debe_especificar_la_reserva");
+			throw new UserException("debe_especificar_la_reserva");
 		}
 		Atencion atencion = new Atencion();
 		atencion.setReserva(reserva);
@@ -293,12 +261,12 @@ public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 	 * Deja constancia de que el ciudadano asistio a la cita reservada
 	 * @throws BusinessException 
 	 */
-	public void marcarInasistencia(Empresa empresa, Recurso recurso, Reserva reserva) throws BusinessException {
+	public void marcarInasistencia(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
 		if (recurso == null) {
-			throw new BusinessException("debe_especificar_el_recurso");
+			throw new UserException("debe_especificar_el_recurso");
 		}
 		if (reserva == null){
-			throw new BusinessException("debe_especificar_la_reserva");
+			throw new UserException("debe_especificar_la_reserva");
 		}
 		Atencion atencion = new Atencion();
 		atencion.setReserva(reserva);

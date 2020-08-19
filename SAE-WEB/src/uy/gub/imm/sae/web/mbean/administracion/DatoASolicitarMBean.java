@@ -32,6 +32,7 @@ import javax.faces.event.PhaseId;
 import javax.faces.model.SelectItem;
 
 import uy.gub.imm.sae.web.common.BaseMBean;
+import uy.gub.imm.sae.web.common.Validadores;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.AgrupacionDato;
@@ -48,22 +49,11 @@ public class DatoASolicitarMBean extends BaseMBean {
 	public SessionMBean sessionMBean;
 	private DatoASSessionMBean datoASSessionMBean;
 
-	// Lista de agrupaciones para usar al crear o modificar
-	// un datoASolicitar.
 	private List<SelectItem> listaAgrupaciones = new ArrayList<SelectItem>();
-	// agrupacionDatoId es para cargar la agrupación seleccionada por el usuario
-	// en el selectOneListBox.
-	// Luego hay que buscar la agrupación con ese ID.
-	//private Integer agrupacionDatoId = null;
-	// Lista de tipos del dato a Solicitar al crear o modificar
 	private List<SelectItem> listaTipos = new ArrayList<SelectItem>();
 	private boolean visualizarLargoMax;
 	private boolean visualizarValoresPosibles;
 	
-	/*
-	 * private UIDataTable camposDataTableBorrar; private UIDataTable
-	 * camposDataTableConsultar; private UIDataTable camposDataTableModificar;
-	 */
 	private DatoASolicitar datoASolicitarNuevo;
 
 	public SessionMBean getSessionMBean() {
@@ -111,8 +101,6 @@ public class DatoASolicitarMBean extends BaseMBean {
 		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-
-		
 		datoASolicitarNuevo = new DatoASolicitar();
 		visualizarLargoMax = true;
 		visualizarValoresPosibles = false;
@@ -126,10 +114,6 @@ public class DatoASolicitarMBean extends BaseMBean {
 			}
 		}
 	}
-
-	/*
-	 * MODIFICACION
-	 */
 
 	public void seleccionarDato(int rowIndex) {
 		DatoASolicitar d = datoASSessionMBean.getDatosASolicitar().get(rowIndex);
@@ -164,8 +148,9 @@ public class DatoASolicitarMBean extends BaseMBean {
 					addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_dato_es_obligatorio"), "form:VName");
 					hayError = true;
 				}else {
-					boolean nombreValido = validarNombre(datoModificar.getNombre(),"form:VName");
+				  boolean nombreValido = Validadores.validarNombreIdentificador(datoModificar.getNombre());
 					if (!nombreValido) {
+	          addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_dato_no_es_valido"), "form:VName");
 						hayError = true;
 					}
 				}
@@ -185,27 +170,11 @@ public class DatoASolicitarMBean extends BaseMBean {
 					hayError = true;
 				}
 
-				if (datoModificar.getFila() == null) {
-					addErrorMessage(sessionMBean.getTextos().get("la_fila_del_dato_es_obligatoria"), "form:vFilaDS");
-					hayError = true;
-				} else if (datoModificar.getFila().intValue() < 1) {
-					addErrorMessage(sessionMBean.getTextos().get("la_fila_del_dato_debe_ser_mayor_a_cero"), "form:vFilaDS");
-					hayError = true;
-				}
-
 				if (this.visualizarLargoMax == true && datoModificar.getLargo() == null) {
 					addErrorMessage(sessionMBean.getTextos().get("el_largo_del_dato_es_obligatorio"),	"form:vLargoDS");
 					hayError = true;
 				} else if (this.visualizarLargoMax == true && datoModificar.getLargo().intValue() < 1) {
-					addErrorMessage(sessionMBean.getTextos().get("el_largo_del_dato_debe_ser_mayor_a_cero"),"form:vLargoDS");
-					hayError = true;
-				}
-				
-				if (datoModificar.getIncluirEnReporte() && datoModificar.getAnchoDespliegue() == null) {
-					addErrorMessage(sessionMBean.getTextos().get("el_ancho_de_despliegue_es_obligatorio"), "form:vAnchoDS");
-					hayError = true;
-				} else if (datoModificar.getIncluirEnReporte() && datoModificar.getAnchoDespliegue().intValue() < 1) {
-					addErrorMessage(sessionMBean.getTextos().get("el_ancho_de_despliegue_debe_ser_mayor_a_cero"), "form:vAnchoDS");
+					addErrorMessage(sessionMBean.getTextos().get("el_largo_del_dato_debe_ser_mayor_a_cero"), "form:vLargoDS");
 					hayError = true;
 				}
 				
@@ -225,6 +194,22 @@ public class DatoASolicitarMBean extends BaseMBean {
 					hayError = true;
 				}
 
+        if (datoModificar.getFila() == null) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fila_del_dato_es_obligatoria"), "form:vFilaDS");
+          hayError = true;
+        } else if (datoModificar.getFila().intValue() < 1) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fila_del_dato_debe_ser_mayor_a_cero"), "form:vFilaDS");
+          hayError = true;
+        }
+        
+        if (datoModificar.getIncluirEnReporte() && datoModificar.getAnchoDespliegue() == null) {
+          addErrorMessage(sessionMBean.getTextos().get("el_ancho_de_despliegue_es_obligatorio"), "form:vAnchoDS");
+          hayError = true;
+        } else if (datoModificar.getIncluirEnReporte() && datoModificar.getAnchoDespliegue().intValue() < 1) {
+          addErrorMessage(sessionMBean.getTextos().get("el_ancho_de_despliegue_debe_ser_mayor_a_cero"), "form:vAnchoDS");
+          hayError = true;
+        }
+        
 				if (hayError) {
 					return;
 				}
@@ -235,8 +220,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 				recursosEJB.modificarDatoASolicitar(datoASSessionMBean.getDatoSeleccionado());
 				datoASSessionMBean.clearDatosASolicitar();
 
-				// Hay que traer los valores posibles en caso que halla cambiado
-				// el tipo a LIST
+				// Hay que traer los valores posibles en caso que halla cambiado el tipo a LIST
 				List<ValorPosible> valoresP = recursosEJB.consultarValoresPosibles(datoASSessionMBean.getDatoSeleccionado());
 				datoASSessionMBean.getDatoSeleccionado().setValoresPosibles(valoresP);
 
@@ -267,9 +251,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 
 	public List<SelectItem> getListaAgrupaciones() {
 		if (this.listaAgrupaciones.isEmpty()) {
-			addErrorMessage(
-					sessionMBean.getTextos().get(
-							"debe_crear_al_menos_una_agrupacion"), MSG_ID);
+			addErrorMessage(sessionMBean.getTextos().get("debe_crear_al_menos_una_agrupacion"), MSG_ID);
 		}
 		return listaAgrupaciones;
 	}
@@ -279,9 +261,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 	}
 
 	private void cargarListaTipos() {
-
 		this.listaTipos = new ArrayList<SelectItem>();
-
 		for (Tipo t : Tipo.values()) {
 			SelectItem s = new SelectItem();
 			s.setValue(t);
@@ -291,20 +271,16 @@ public class DatoASolicitarMBean extends BaseMBean {
 	}
 
 	private void cargarListaAgrupaciones() {
-
-		// Si hay recurso selecciondada, se cargan las agrupaciones.
-		// En caso contrario se vacía la lista de agrupaciones
+		// Si hay recurso selecciondada, se cargan las agrupaciones, en caso contrario se vacía la lista de agrupaciones
 		if (sessionMBean.getRecursoMarcado() != null) {
 			try {
 				List<AgrupacionDato> entidades;
-				entidades = recursosEJB.consultarAgrupacionesDatos(sessionMBean
-						.getRecursoMarcado());
-
+				entidades = recursosEJB.consultarAgrupacionesDatos(sessionMBean.getRecursoMarcado());
 				listaAgrupaciones = new ArrayList<SelectItem>();
 				for (AgrupacionDato a : entidades) {
 					SelectItem s = new SelectItem();
 					s.setValue(a.getId());
-					s.setLabel(a.getNombre());
+					s.setLabel(a.getEtiqueta()+" ("+a.getNombre()+")");
 					listaAgrupaciones.add(s);
 				}
 			} catch (Exception e) {
@@ -313,26 +289,19 @@ public class DatoASolicitarMBean extends BaseMBean {
 		}
 	}
 
-	/*
-	 * ELIMINACION
-	 */
-
 	public void seleccionarDatoParaEliminar(int rowIndex) {
 		DatoASolicitar d = datoASSessionMBean.getDatosASolicitar().get(rowIndex);
 		datoASSessionMBean.setDatoSeleccionado(d);
 	}
 
 	public void eliminarDato() {
-
 		DatoASolicitar d = datoASSessionMBean.getDatoSeleccionado();
 		if (d != null && d.getBorrarFlag()) {
-
 			try {
 				recursosEJB.eliminarDatoASolicitar(d);
 				addInfoMessage(sessionMBean.getTextos().get("dato_eliminado"), MSG_ID);
 				datoASSessionMBean.setDatoSeleccionado(null);
 				datoASSessionMBean.clearDatosASolicitar();
-
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
 			} finally {
@@ -340,26 +309,15 @@ public class DatoASolicitarMBean extends BaseMBean {
 			}
 		} else {
 			if (!d.getBorrarFlag()) {
-				addErrorMessage(
-						sessionMBean.getTextos().get(
-								"no_se_permite_eliminar_este_dato"), MSG_ID);
+				addErrorMessage(sessionMBean.getTextos().get("no_se_permite_eliminar_este_dato"), MSG_ID);
 			} else {
-				addErrorMessage(
-						sessionMBean.getTextos().get(
-								"debe_haber_un_recurso_seleccionado"), MSG_ID);
+				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 			}
-
 		}
 	}
 
-	/*
-	 * CREACION
-	 */
-
 	public void crearDato(ActionEvent e) {
-
 		limpiarMensajesError();
-		
 		try {
 			boolean hayError = false;
 			DatoASolicitar datoNuevo = getDatoASolicitarNuevo();
@@ -368,14 +326,14 @@ public class DatoASolicitarMBean extends BaseMBean {
 				addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_dato_es_obligatorio"), "formCrear:VName");
 				hayError = true;
 			}else {
-				boolean nombreValido = validarNombre(datoNuevo.getNombre(),"formCrear:VName");
-				if (!nombreValido) {
-					hayError = true;
-				}
+        boolean nombreValido = Validadores.validarNombreIdentificador(datoNuevo.getNombre());
+        if (!nombreValido) {
+          addErrorMessage(sessionMBean.getTextos().get("el_nombre_del_dato_no_es_valido"), "formCrear:VName");
+          hayError = true;
+        }
 			}
 
-			if (recursosEJB.existeDatoASolicPorNombre(datoNuevo.getNombre(),
-					sessionMBean.getRecursoMarcado().getId(), null)) {
+			if (recursosEJB.existeDatoASolicPorNombre(datoNuevo.getNombre(), sessionMBean.getRecursoMarcado().getId(), null)) {
 				addErrorMessage(sessionMBean.getTextos().get("ya_existe_un_dato_con_el_nombre_especificado"), "formCrear:VName");
 				hayError = true;
 			}
@@ -450,16 +408,9 @@ public class DatoASolicitarMBean extends BaseMBean {
 			if (getDatoASolicitarNuevo().getOrdenEnLlamador() == null) {
 				getDatoASolicitarNuevo().setOrdenEnLlamador(0);
 			}
-
-			recursosEJB.agregarDatoASolicitar(sessionMBean.getRecursoMarcado(),
-					getDatoASolicitarNuevo().getAgrupacionDato(),
-					getDatoASolicitarNuevo());
-
+			recursosEJB.agregarDatoASolicitar(sessionMBean.getRecursoMarcado(), getDatoASolicitarNuevo().getAgrupacionDato(), getDatoASolicitarNuevo());
 			datoASSessionMBean.clearDatosASolicitar();
-
-			// Se blanquea la info en la página
-			datoASolicitarNuevo = new DatoASolicitar();
-
+			init();
 			addInfoMessage(sessionMBean.getTextos().get("dato_creado"), MSG_ID);
 		} catch (Exception ex) {
 			addErrorMessage(ex, MSG_ID);
@@ -478,14 +429,12 @@ public class DatoASolicitarMBean extends BaseMBean {
 		if (this.datoASolicitarNuevo.getIncluirEnReporte() == false) {
 			this.datoASolicitarNuevo.setAnchoDespliegue(0);
 		}
-
 	}
 	
 	public void limpiarAnchoDespliegueReporteSeleccionado() {
 		if (this.datoASSessionMBean.getDatoSeleccionado().getIncluirEnReporte() == false) {
 			this.datoASSessionMBean.getDatoSeleccionado().setAnchoDespliegue(0);
 		}
-
 	}
 
 	public void limpiarLargoOrdenLlamadorNuevo() {
@@ -493,7 +442,6 @@ public class DatoASolicitarMBean extends BaseMBean {
 			this.datoASolicitarNuevo.setLargoEnLlamador(0);
 			this.datoASolicitarNuevo.setOrdenEnLlamador(0);
 		}
-
 	}
 	
 	public void limpiarLargoOrdenLlamadorSeleccionado() {
@@ -501,12 +449,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 			this.datoASSessionMBean.getDatoSeleccionado().setLargoEnLlamador(0);
 			this.datoASSessionMBean.getDatoSeleccionado().setOrdenEnLlamador(0);
 		}
-
 	}
-
-	/*
-	 * CONSULTAR
-	 */
 
 	public String consultarDato(int rowIndex) throws ApplicationException {
 		DatoASolicitar d = datoASSessionMBean.getDatosASolicitar().get(rowIndex);
@@ -524,37 +467,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 		return "consultarDato";
 	}
 
-	public boolean validarNombre(String nombre,String componenteId) {
-
-		nombre = nombre.toUpperCase();
-		String caracValidos = "ABCDEFGHIJKLMNOPQRSTVUWXYZ0123456789_";
-		boolean nombreValido = true;
-		String NUMEROS="1234567890";
-		
-		for (int i = 0; (i < nombre.length() && nombreValido); i++) {
-			char caracter = nombre.charAt(i);
-
-			// Se chequea que el primer caracter no sea un numero
-			if (i == 0 && NUMEROS.indexOf(caracter) != -1) {
-				nombreValido = false;
-				addErrorMessage(sessionMBean.getTextos().get("el_campo_nombre_no_puede_comenzar_con_un_numero"),componenteId);
-				
-			}
-
-			// Se chequea si los caracterss son validos
-			if (caracValidos.indexOf(caracter) == -1) {
-				nombreValido = false;
-				addErrorMessage(sessionMBean.getTextos().get("el_campo_nombre_solo_puede_contener_letras_sin_tildes,_numeros_y__"), componenteId);
-				
-			}
-		}
-
-		return nombreValido;
-
-	}
-	
-	public void selectOneTipoDatoNuevo(AjaxBehaviorEvent e)
-	{
+	public void selectOneTipoDatoNuevo(AjaxBehaviorEvent e) {
 		Tipo tipo = datoASolicitarNuevo.getTipo();
 		if(tipo == null) {
 			visualizarLargoMax = false;
@@ -565,8 +478,7 @@ public class DatoASolicitarMBean extends BaseMBean {
 		}
 	}
 	
-	public void selectOneTipoDatoSeleccionado(AjaxBehaviorEvent e)
-	{
+	public void selectOneTipoDatoSeleccionado(AjaxBehaviorEvent e) {
 		Tipo tipo = datoASSessionMBean.getDatoSeleccionado().getTipo();
 		if(tipo == null) {
 			visualizarLargoMax = false;
@@ -578,7 +490,6 @@ public class DatoASolicitarMBean extends BaseMBean {
 	}
 
 	public boolean isVisualizarLargoMax() {
-		
 		return visualizarLargoMax;
 	}
 

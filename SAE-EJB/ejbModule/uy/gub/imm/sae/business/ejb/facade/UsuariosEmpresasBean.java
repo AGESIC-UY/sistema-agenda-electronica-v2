@@ -20,8 +20,6 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
-import java.io.StringReader;
-import java.net.URL;
 import java.security.MessageDigest;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
@@ -29,8 +27,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
+import java.util.TimeZone;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -39,35 +37,14 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.xml.ws.BindingProvider;
-import javax.xml.ws.handler.Handler;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.hibernate.internal.SessionImpl;
-import org.jdom.Document;
-import org.jdom.Element;
-import org.jdom.filter.ElementFilter;
-import org.jdom.filter.Filter;
-import org.jdom.input.SAXBuilder;
 import org.picketbox.commons.cipher.Base64;
-import org.xml.sax.InputSource;
 
 import uy.gub.imm.sae.business.dto.UsuarioEmpresaRoles;
+import uy.gub.imm.sae.business.ejb.servicios.ServiciosTramitesBean;
 import uy.gub.imm.sae.business.utilidades.MailUtiles;
-import uy.gub.imm.sae.business.ws.SoapHandler;
-import uy.gub.imm.sae.business.ws.guiatramites.ArrayOfOfNacionalDatos;
-import uy.gub.imm.sae.business.ws.guiatramites.ArrayOfResumenTramite;
-import uy.gub.imm.sae.business.ws.guiatramites.ArrayOfString;
-import uy.gub.imm.sae.business.ws.guiatramites.GuiaTramites;
-import uy.gub.imm.sae.business.ws.guiatramites.GuiaTramitesSoap;
-import uy.gub.imm.sae.business.ws.guiatramites.ObtTramitesEnOrdenAlfabeticoResponseType;
-import uy.gub.imm.sae.business.ws.guiatramites.ObtTramitesPorId;
-import uy.gub.imm.sae.business.ws.guiatramites.ObtTramitesPorIdResponse;
-import uy.gub.imm.sae.business.ws.guiatramites.ObtTramitesPorOrgEnOrdenAlfabeticoType;
-import uy.gub.imm.sae.business.ws.guiatramites.OfNacionalDatos;
-import uy.gub.imm.sae.business.ws.guiatramites.ResumenTramite;
-import uy.gub.imm.sae.business.ws.wstramite.WsTramite;
-import uy.gub.imm.sae.business.ws.wstramite.WsTramiteSoap;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Oficina;
@@ -85,11 +62,18 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")
 	private EntityManager globalEntityManager;
 	
+  @PersistenceContext(unitName = "SAE-EJB")
+  private EntityManager entityManager;
+	
   @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
 	private Configuracion confBean;
 	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendasBean!uy.gub.imm.sae.business.ejb.facade.AgendasLocal")
 	private Agendas agendasEJB;
+	
+  @EJB
+  private ServiciosTramitesBean tramitesBean;
+	
 	
 	@Override
 	public Empresa obtenerEmpresaPorId(Integer id) throws ApplicationException {
@@ -196,24 +180,9 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			//debo cargar las empresas que tienen correcto el esquema de base de datos
 			List<Empresa> empresasCorrectas = new ArrayList<Empresa>();
 			for (Empresa empresa : usu.getEmpresas()) {
-				if (esquemas.contains(empresa.getDatasource()))
-				{
+				if (esquemas.contains(empresa.getDatasource())) {
 					empresasCorrectas.add(empresa);
 				}
-				
-//				try {
-//					Query query = globalEntityManager.createNativeQuery("SELECT 1 from "+empresa.getDatasource() +".ae_agendas");
-//					query.getResultList();
-//					if(empresa.getFechaBaja()==null)
-//					{
-//						empresasCorrectas.add(empresa);
-//					}
-//				} catch(NoResultException nrEx) {
-//					empresasCorrectas.add(empresa);
-//				} catch (Exception e) {
-//					e.printStackTrace();
-//				}
-				
 			}
 			return empresasCorrectas;
 		} catch (Exception e){
@@ -228,7 +197,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		if(empresa == null) {
 			return null;
 		}
-		
 		//Verificar si ya está creado el esquema para la empresa (puede no contener tablas)
 		Connection connection = globalEntityManager.unwrap(SessionImpl.class).connection();
 		DatabaseMetaData metaData;
@@ -244,11 +212,9 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
 		if(!existeEsquema) {
 			throw new UserException("no_se_puede_guardar_la_empresa_porque_no_existe_el_esquema");
 		}
-
 		if(empresa.getId() == null) {
 			globalEntityManager.persist(empresa);
 			globalEntityManager.flush();
@@ -256,15 +222,13 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		}else {
 			empresa = globalEntityManager.merge(empresa);
 		}
-		
 		return empresa;
 	}
 	
-	public void eliminarEmpresa(Empresa empresa) throws ApplicationException, UserException {
+	public void eliminarEmpresa(Empresa empresa, TimeZone timezone) throws ApplicationException, UserException {
 		if(empresa==null || empresa.getId() == null) {
 			return;
 		}
-		
 		Connection connection = globalEntityManager.unwrap(SessionImpl.class).connection();
 		DatabaseMetaData metaData;
 		List<String> esquemas = null;
@@ -278,19 +242,24 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		} catch (SQLException e1) {
 			e1.printStackTrace();
 		}
-		
+
 		if (esquemas.contains(empresa.getDatasource())) {
 			List<Agenda> agendasEliminar = agendasEJB.consultarAgendas();
 			for (Agenda agenda : agendasEliminar) {
 				try {
-					agendasEJB.eliminarAgenda(agenda);
+					agendasEJB.eliminarAgenda(agenda, timezone);
 				} catch (UserException e) {
 					throw new UserException("no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas");
-					
 				}
 			}
 		}
 
+		//Desasociar a todos los usuarios de esta empresa
+		List<Usuario> usuarios = consultarUsuariosEmpresa(empresa.getId());
+		for(Usuario usuario : usuarios) {
+		  usuario.getEmpresas().remove(empresa);
+		}
+		
 		//Marcar la empresa recibida como eliminada (por si el invocante la sigue usando)
 		empresa.setFechaBaja(new Date());
 		//Recuperar la empresa por si está detached
@@ -300,7 +269,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		globalEntityManager.persist(empresa);
 		globalEntityManager.flush();
 	}
-	
 	
 	@Override
 	public List<Usuario> consultarUsuarios() throws ApplicationException {
@@ -342,14 +310,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		return usuario;
 	}
 	
-	public void eliminarUsuario(Usuario usuario) throws ApplicationException {
-		if(usuario==null || usuario.getId() == null) {
-			return;
-		}
-		usuario.setFechaBaja(new Date());
-		guardarUsuario(usuario);
-	}
-	
 	public void eliminarUsuarioEmpresa(Usuario usuario, Empresa emp) throws ApplicationException {
 		if(usuario==null || usuario.getId() == null) {
 			return;
@@ -358,6 +318,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			return;
 		}
 		if (usuario.getEmpresas().contains(emp)){
+      //Eliminar los roles globales
 			String schema = (String) globalEntityManager.getEntityManagerFactory().getProperties().get("hibernate.default_schema");
 			if(schema == null) {
 				schema = "public";
@@ -367,7 +328,16 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			query.setParameter(1, usuario.getId());
 			query.setParameter(2, emp.getId());
 			query.executeUpdate();
+			//Eliminar los roles por recurso
+	    query = entityManager.createQuery("DELETE FROM RolesUsuarioRecurso r WHERE r.id.usuarioId=:usuarioId");
+	    query = query.setParameter("usuarioId", usuario.getId());
+	    query.executeUpdate();
+			//Desasociar el usuario de la empresa
 			usuario.getEmpresas().remove(emp);
+			//Si no es superadministrador y no quedan empresas asociadas al usuario, se marca como eliminado
+			if(!usuario.isSuperadmin() && usuario.getEmpresas().isEmpty()) {
+			  usuario.setFechaBaja(new Date());
+			}
 		}else{
 			return;
 		}
@@ -470,57 +440,20 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 
 	//===========================================================================================
 	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked"})
 	public List<Organismo> obtenerOrganismos(boolean actualizar) throws ApplicationException {
 		if(actualizar) {
 			try {
-				URL urlWsdl = WsTramite.class.getResource("WsTramite.wsdl");
-				String wsUser = confBean.getString("WS_TRAMITE_USER");
-				String wsPass = confBean.getString("WS_TRAMITE_PASS");
-				
-				//Consultar el servicio web
-				WsTramite wsTramite = new WsTramite(urlWsdl);
-				WsTramiteSoap port = wsTramite.getWsTramiteSoap();
-	      List<Handler> customHandlerChain = new ArrayList<Handler>();
-	      customHandlerChain.add(new SoapHandler());
-	      BindingProvider bindingProvider = (BindingProvider) port;
-	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
-				String organismos = port.obtenerOrganismos(wsUser, wsPass);
-
-				//Parsear el string para obtener los organismos
-				InputSource is = new InputSource();
-				is.setCharacterStream(new StringReader(organismos));
-			  SAXBuilder builder = new SAXBuilder();
-			  Document document = builder.build(is);
-			  Element root = document.getRootElement();
-
-			  //Ver si la invocación no dio un error
-			  Filter erroresFilter = new ElementFilter("errores");
-			  if(erroresFilter!=null) {
-			  	Iterator<Element> erroresIter = (Iterator<Element>)root.getDescendants(erroresFilter);
-			  	if(erroresIter.hasNext()) {
-			  		return null;
-			  	}
-			  }
-			  
-			  //Se pudo invocar el servicio y parsear el resultado
-				//Vaciar la tabla de organismos
-			  Query trunc = globalEntityManager.createQuery("DELETE FROM Organismo o");
-			  trunc.executeUpdate();
-			  
-			  //insertar los organismos nuevos
-			  Filter filter = new ElementFilter("organismo");
-			  Iterator<Element> iter = (Iterator<Element>)root.getDescendants(filter);
-			  while(iter.hasNext()) {
-			  	Element element = (Element) iter.next();
-			  	Organismo organismo = new Organismo();
-			  	organismo.setId(Integer.valueOf(element.getAttributeValue("id")));
-			  	organismo.setCodigo(element.getChild("id").getValue());
-			  	organismo.setNombre(element.getChild("nombre").getValue());
-			  	globalEntityManager.persist(organismo);
-			  }
+			  List<Organismo> organismos = tramitesBean.obtenerOrganismos();
+        if(organismos != null) {
+          //Se pudo invocar el servicio y parsear el resultado
+          //Vaciar la tabla de organismos
+          Query trunc = globalEntityManager.createQuery("DELETE FROM Organismo o");
+          trunc.executeUpdate();
+          for(Organismo organismo : organismos) {
+            globalEntityManager.persist(organismo);
+          }
+        }
 			}	catch (Exception ex) {
 				ex.printStackTrace();
 			}
@@ -531,63 +464,23 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		return organismos;
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings({"unchecked"})
 	public List<UnidadEjecutora> obtenerUnidadesEjecutoras(boolean actualizar) throws ApplicationException {
 		if(actualizar) {
 			try {
-				URL urlWsdl = WsTramite.class.getResource("WsTramite.wsdl");
-
-				String wsUser = confBean.getString("WS_TRAMITE_USER");
-				String wsPass = confBean.getString("WS_TRAMITE_PASS");
-				
-				//Consultar el servicio web
-				WsTramite wsTramite = new WsTramite(urlWsdl);
-				WsTramiteSoap port = wsTramite.getWsTramiteSoap();
-				
-	      List<Handler> customHandlerChain = new ArrayList<Handler>();
-	      customHandlerChain.add(new SoapHandler());
-	      BindingProvider bindingProvider = (BindingProvider) port;
-	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 10000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 10000);
-	      
-	      String uEjecutoras = port.obtenerUnidadesEjecutoras(wsUser, wsPass);
-				
-				//Parsear el string para obtener los organismos
-				InputSource is = new InputSource();
-				is.setCharacterStream(new StringReader(uEjecutoras));
-			  SAXBuilder builder = new SAXBuilder();
-			  Document document = builder.build(is);
-			  Element root = document.getRootElement();
-
-			  Filter erroresFilter = new ElementFilter("errores");
-			  if(erroresFilter!=null) {
-			  	Iterator<Element> erroresIter = (Iterator<Element>)root.getDescendants(erroresFilter);
-			  	if(erroresIter.hasNext()) {
-			  		return null;
-			  	}
-			  }			  
-			  
-			  //Se pudo invocar el servicio y parsear el resultado
-				//Vaciar la tabla de organismos
-			  Query trunc = globalEntityManager.createQuery("DELETE FROM UnidadEjecutora u");
-			  trunc.executeUpdate();
-			  
-			  //insertar las unidades ejecutoras nuevas
-			  Filter filter = new ElementFilter("ue");
-			  Iterator iter = (Iterator<Element>)root.getDescendants(filter);
-			  while(iter.hasNext()) {
-			  	Element element = (Element) iter.next();
-			  	UnidadEjecutora uEjecutora = new UnidadEjecutora();
-			  	uEjecutora.setId(Integer.valueOf(element.getAttributeValue("id")));
-			  	uEjecutora.setCodigo(element.getChild("id").getValue());
-			  	uEjecutora.setNombre(element.getChild("nombre").getValue());
-			  	globalEntityManager.persist(uEjecutora);
+			  List<UnidadEjecutora> unidadesEjecutoras = tramitesBean.obtenerUnidadesEjecutoras();
+			  if(unidadesEjecutoras != null) {
+	        //Se pudo invocar el servicio y parsear el resultado 
+	        //Vaciar la tabla de organismos
+	        Query trunc = globalEntityManager.createQuery("DELETE FROM UnidadEjecutora u");
+	        trunc.executeUpdate();
+	        //Insertar las unidades ejecutoras nuevas
+	        for(UnidadEjecutora unidadEjecutora : unidadesEjecutoras) {
+	          globalEntityManager.persist(unidadEjecutora);
+	        }
 			  }
 			}	catch (Exception ex) {
 				ex.printStackTrace();
-				//throw new ApplicationException("no_se_pudo_consultar_el_servicio_web", ex);
 			}
 		}
 		//Devolver la lista de organismos
@@ -595,19 +488,15 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		List<UnidadEjecutora> uEjecutoras = (List<UnidadEjecutora>)query.getResultList();
 		return uEjecutoras;
 	}
-
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	
+	@SuppressWarnings({"unchecked"})
 	@Override
 	public List<Tramite> obtenerTramitesEmpresa(Integer empresaId, boolean actualizar) throws ApplicationException, UserException {
 		if(actualizar) {
-		
 			Empresa empresa = obtenerEmpresaPorId(empresaId);
-			
 			if(empresa == null) {
 				throw new UserException("no_se_encuentra_la_empresa_especificada");
 			}
-			
 		  Integer organismoCod = null;
 		  Integer unidadEjCod = null;
 		  try {
@@ -616,144 +505,50 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		  }catch(Exception ex) {
 		  	//Nada para hacer
 		  }
-		  
 			if(organismoCod==null || organismoCod.intValue()<1 || unidadEjCod==null || unidadEjCod.intValue()<1) {
 				throw new UserException("no_se_puede_obtener_los_tramites_porque_la_empresa_no_esta_asociada_a_ningun_organismo");
 			}
+			
+			List<Tramite> tramites = tramitesBean.obtenerTramitesOrganismoYUnidadEjecutora(empresaId, organismoCod, unidadEjCod);
 				
-			try {
-
-				//Consultar el servicio web
-				URL urlWsdl = GuiaTramites.class.getResource("GuiaTramites.wsdl");
-				GuiaTramites guiaTramites = new GuiaTramites(urlWsdl);
-				GuiaTramitesSoap port = guiaTramites.getGuiaTramitesSoap();
-				ObtTramitesPorOrgEnOrdenAlfabeticoType entrada = new ObtTramitesPorOrgEnOrdenAlfabeticoType();
-				entrada.setIdOrg(organismoCod);
-				entrada.setIdUE(unidadEjCod);
-				entrada.setPagina(0);
-				entrada.setCantidadEltos(100);
-				
-				String[] letras0 = {"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "Ñ", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
-				List<String> letrasDeshabilitadas = new ArrayList<String>();
-				
-				List<Tramite> tramitesAInsertar = new ArrayList();
-				
-				for(String letra : letras0) {
-					//Si es la primera letra hay que invocar si o si porque no se saben cuales estan deshabilitadas
-					if("A".equals(letra) || (!letrasDeshabilitadas.contains(letra) && !letrasDeshabilitadas.contains(letra.toLowerCase()))) {
-			      List<Handler> customHandlerChain = new ArrayList<Handler>();
-			      customHandlerChain.add(new SoapHandler());
-			      BindingProvider bindingProvider = (BindingProvider) port;
-			      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-						
-			      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 2000);
-			      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 2000);
-			      
-						entrada.setLetra(letra);
-						ObtTramitesEnOrdenAlfabeticoResponseType resp = port.obtTramitesPorOrgEnOrdenAlfabetico(entrada);
-						
-						if(resp.getTotalResultados()>0 && resp.getErrores().getMensaje().isEmpty()) {
-						  ArrayOfResumenTramite tramites = resp.getColTramites();
-						  //insertar los tramites nuevos
-						  for(ResumenTramite tram : tramites.getResumenTramite()) {
-						  	Tramite tramite = new Tramite();
-						  	tramite.setEmpresaId(empresaId);
-						  	tramite.setId(empresaId+"-"+tram.getId());
-						  	tramite.setNombre(recortarString(tram.getNombre(), 100));
-						  	tramite.setOnline(tram.isOnLine());
-						  	tramite.setQuees(recortarString(tram.getQueEs(), 1000));
-						  	tramite.setTemas(recortarString(tram.getTemas(), 1000));
-						  	//globalEntityManager.persist(tramite);
-						  	tramitesAInsertar.add(tramite);
-						  }
-						}
-					  
-					  if("A".equalsIgnoreCase(letra)) {
-					  	ArrayOfString letrasDes = resp.getLetrasDeshabilitadas();
-				  		letrasDeshabilitadas.addAll(letrasDes.getString());
-					  }
-					}
-				}
-				
-				//Si se procesaron todas las letras correctamente, se actualiza la base de datos
+			if(tramites != null) {
+				//Se procesaron todas las letras correctamente, se actualiza la base de datos
 			  Query trunc = globalEntityManager.createQuery("DELETE FROM Tramite t WHERE t.empresaId=:empresaId");
 			  trunc.setParameter("empresaId", empresaId);
 			  trunc.executeUpdate();
-			  for(Tramite tramite : tramitesAInsertar) {
+			  for(Tramite tramite : tramites) {
 			  	globalEntityManager.persist(tramite);
 			  }
-				
-				
-			}	catch (Exception ex) {
-				ex.printStackTrace();
 			}
 		}
 		//Devolver la lista de tramites
 		Query query = globalEntityManager.createQuery("SELECT t FROM Tramite t WHERE t.empresaId=:empresaId ORDER BY t.nombre");
 		query.setParameter("empresaId", empresaId);
 		List<Tramite> tramites = (List<Tramite>)query.getResultList();
+		
 		return tramites;
 	}
-	
-	
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+
+	@SuppressWarnings({"unchecked"})
 	public List<Oficina> obtenerOficinasTramite(String tramiteEmpresaId, boolean actualizar) throws ApplicationException {
 		if(tramiteEmpresaId == null) {
 			return new ArrayList<Oficina>(0);
 		}
-		
 		if(actualizar) {
 			try {
-				URL urlWsdl = GuiaTramites.class.getResource("GuiaTramites.wsdl");
 				Tramite tramite = globalEntityManager.find(Tramite.class, tramiteEmpresaId);
-				//Consultar el servicio web
-				GuiaTramites guiaTramites = new GuiaTramites(urlWsdl);
-				GuiaTramitesSoap port = guiaTramites.getGuiaTramitesSoap();
-				
-	      List<Handler> customHandlerChain = new ArrayList<Handler>();
-	      customHandlerChain.add(new SoapHandler());
-	      BindingProvider bindingProvider = (BindingProvider) port;
-	      bindingProvider.getBinding().setHandlerChain(customHandlerChain);
-				
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.connectionTimeout", 2000);
-	      bindingProvider.getRequestContext().put("javax.xml.ws.client.receiveTimeout", 2000);
-	      
-	      String tramiteId = null;
-	      if(tramiteEmpresaId.indexOf("-")>0) {
-	      	tramiteId = tramiteEmpresaId.substring(tramiteEmpresaId.indexOf("-")+1); 
-	      }else {
-		      tramiteId = tramiteEmpresaId;
-	      }
-	      
-				//La lista de oficinas viene en el detalle del tramite
-				ObtTramitesPorId entrada = new ObtTramitesPorId();
-				entrada.setId(tramiteId);
-				ObtTramitesPorIdResponse tramite0 = port.obtTramitePorId(entrada);
-				if(tramite0!=null && tramite0.getDatosTramite()!=null) {
-				  //Se pudo invocar el servicio y parsear el resultado
-					//Vaciar la tabla de oficinas para el tramite
-				  Query trunc = globalEntityManager.createQuery("DELETE FROM Oficina o WHERE o.tramite.id=:tramiteId");
-				  trunc.setParameter("tramiteId", tramiteEmpresaId);
-				  trunc.executeUpdate();
-				  
-				  //insertar los tramites nuevos
-				  ArrayOfOfNacionalDatos ofNacionales = tramite0.getDatosTramite().getOfNacionales();
-				  if(ofNacionales != null) {
-					  int cont = 0;
-					  for(OfNacionalDatos ofNacional : ofNacionales.getOfNacionalDatos()) {
-					  	Oficina oficina = new Oficina();
-					  	oficina.setComentarios(ofNacional.getComentarios());
-					  	oficina.setDepartamento(ofNacional.getDepartamento());
-					  	oficina.setDireccion(ofNacional.getDireccion());
-					  	oficina.setHorarios(ofNacional.getHorario());
-					  	oficina.setId(tramiteEmpresaId+"-"+(cont++)); //Las oficinas no tienen id, se genera uno
-					  	oficina.setLocalidad(ofNacional.getLocalidad());
-					  	oficina.setNombre(ofNacional.getDireccion()); //Las oficinas no tienen nombre, se usa la dirección
-					  	oficina.setTelefonos(ofNacional.getTelefonos());
-					  	oficina.setTramite(tramite);
-					  	globalEntityManager.persist(oficina);
-					  }
-				  }
+				if(tramite != null) {
+  				List<Oficina> oficinas = tramitesBean.obtenerOficinasTramite(tramite);
+  				if(oficinas != null) {
+  				  //Se pudo invocar el servicio y parsear el resultado
+  					//Vaciar la tabla de oficinas para el tramite
+  				  Query trunc = globalEntityManager.createQuery("DELETE FROM Oficina o WHERE o.tramite.id=:tramiteId");
+  				  trunc.setParameter("tramiteId", tramiteEmpresaId);
+  				  trunc.executeUpdate();
+  				  for(Oficina oficina : oficinas) {
+  				  	globalEntityManager.persist(oficina);
+  				  }
+  				}
 				}
 			}	catch (Exception ex) {
 				ex.printStackTrace();
@@ -765,18 +560,6 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		query.setParameter("tramiteId", tramiteEmpresaId);
 		List<Oficina> oficinas = (List<Oficina>)query.getResultList();
 		return oficinas;
-	}
-	
-	
-	private String recortarString(String str, int max) {
-		if(str == null) {
-			return null;
-		}
-		if(str.length()<=max) {
-			return str;
-		}
-		return str.substring(0,  max);
-		
 	}
 
 	@Override

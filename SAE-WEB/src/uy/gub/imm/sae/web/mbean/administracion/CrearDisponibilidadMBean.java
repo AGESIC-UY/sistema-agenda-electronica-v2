@@ -31,6 +31,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -81,45 +82,63 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void beforePhaseCrearDisponibilidades (PhaseEvent event) {
+    //Verificar que el usuario tiene permisos para acceder a esta página
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    //Establecer el título de la pantalla
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("generar_un_dia"));
 		}
 	}
 
-	
+  /**
+   * Este método es invocado desde la interfaz web para crear disponibilidades para un día seleccionado
+   * @param event
+   */
 	public void crearDisponibilidades(ActionEvent event){
 		limpiarMensajesError();
-		
-		boolean huboError = false;
-		
+		boolean hayError = false;
 		try{
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
-				huboError = true;
-			}else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
-				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
-				huboError = true;
-			}else {
-				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
-					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-					huboError = true;
-				}
-				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
-					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
-						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-						huboError = true;
-					}
-				}
+				hayError = true;
+			}else if (Utiles.esFechaInvalida(crearDispSessionMBean.getFechaCrear())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formCrearDisponibilidad:fecha");
+        hayError = true;
+      }else { 
+		    Calendar hoy = new GregorianCalendar();
+		    hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
+		    hoy.set(Calendar.HOUR_OF_DAY, 0);
+		    hoy.set(Calendar.MINUTE, 0);
+		    hoy.set(Calendar.SECOND, 0);
+		    hoy.set(Calendar.MILLISECOND, 0);
+		    if(crearDispSessionMBean.getFechaCrear().before(hoy.getTime())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_hoy"), "formCrearDisponibilidad:fecha");
+          hayError = true;
+		    }else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
+  				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
+  				hayError = true;
+  			}else {
+  				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
+  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
+  					hayError = true;
+  				}
+  				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
+  					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
+  						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
+  						hayError = true;
+  					}
+  				}
+  			}
 			}
-			
 			Date fecha = crearDispSessionMBean.getFechaCrear();
 			if(fecha==null) {
 				fecha = new Date();
 			}
-			
 			Calendar c0 = new GregorianCalendar();
 			c0.setTime(fecha); //Debe estar en GMT0
-			
 			Calendar c1 = new GregorianCalendar();
 			c1.set(Calendar.YEAR, c0.get(Calendar.YEAR));
 			c1.set(Calendar.MONTH, c0.get(Calendar.MONTH));
@@ -127,13 +146,11 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			c1.set(Calendar.HOUR_OF_DAY, crearDispSessionMBean.getHoraD());
 			c1.set(Calendar.MINUTE, crearDispSessionMBean.getMinD());
 			c1.set(Calendar.SECOND, 0);
-			
 			crearDispSessionMBean.setHoraDesde(c1.getTime());
 			if (crearDispSessionMBean.getHoraDesde() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_hora_de_inicio_es_obligatoria"), "formCrearDisponibilidad:seleccionHoraD");
-				huboError = true;
+				hayError = true;
 			}
-				
 			Calendar c2 = new GregorianCalendar();
 			c2.set(Calendar.YEAR, c0.get(Calendar.YEAR));
 			c2.set(Calendar.MONTH, c0.get(Calendar.MONTH));
@@ -141,42 +158,34 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			c2.set(Calendar.HOUR_OF_DAY, crearDispSessionMBean.getHoraH());
 			c2.set(Calendar.MINUTE, crearDispSessionMBean.getMinH());
 			c2.set(Calendar.SECOND, 0);
-			
 			crearDispSessionMBean.setHoraHasta(c2.getTime());
 			if (crearDispSessionMBean.getHoraHasta() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_hora_de_fin_es_obligatoria"), "formCrearDisponibilidad:seleccionHoraH");
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (crearDispSessionMBean.getHoraDesde().compareTo(crearDispSessionMBean.getHoraHasta()) >= 0){
 				addErrorMessage(sessionMBean.getTextos().get("la_hora_de_fin_debe_ser_posterior_a_la_hora_de_inicio"), "formCrearDisponibilidad:seleccionHoraD", "formCrearDisponibilidad:seleccionHoraH");
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (crearDispSessionMBean.getFrecuencia() == null){
 				addErrorMessage(sessionMBean.getTextos().get("la_frecuencia_es_obligatoria"), "formCrearDisponibilidad:frecuencia");
-				huboError = true;
+				hayError = true;
 			}else if (crearDispSessionMBean.getFrecuencia().intValue() < 1){
 				addErrorMessage(sessionMBean.getTextos().get("la_frecuencia_debe_ser_mayor_que_cero"), "formCrearDisponibilidad:frecuencia");
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (crearDispSessionMBean.getCupo() == null){
 				addErrorMessage(sessionMBean.getTextos().get("el_cupo_por_periodo_es_obligatorio"), "formCrearDisponibilidad:cupos");
-				huboError = true;
+				hayError = true;
 			}else if (crearDispSessionMBean.getCupo().intValue() < 1){
 				addErrorMessage(sessionMBean.getTextos().get("el_cupo_por_periodo_debe_ser_mayor_a_cero"), "formCrearDisponibilidad:cupos");
-				huboError = true;
+				hayError = true;
 			}
-			
-			if (huboError) {
+			if (hayError) {
 				return;
 			}
-		
 			List<Date> horasConflicto = disponibilidadesEJB.generarDisponibilidadesNuevas(sessionMBean.getRecursoMarcado(),crearDispSessionMBean.getFechaCrear(), 
-					crearDispSessionMBean.getHoraDesde(), crearDispSessionMBean.getHoraHasta(), 
-					crearDispSessionMBean.getFrecuencia(), crearDispSessionMBean.getCupo());
-			addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"), MSG_ID);
+					crearDispSessionMBean.getHoraDesde(), crearDispSessionMBean.getHoraHasta(), crearDispSessionMBean.getFrecuencia(), crearDispSessionMBean.getCupo());
 			if(!horasConflicto.isEmpty()) {
 			  String msg = sessionMBean.getTextos().get("no_se_generaron_disponibilidades_para_todos_los_horarios")+": ";
 			  StringBuilder sb = new StringBuilder();
@@ -189,6 +198,7 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 			  }
 			  addAdvertenciaMessage(msg+sb.toString(), MSG_ID);
 			}
+      addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"), MSG_ID);
 			this.configurarDisponibilidadesDelDia();
 		} catch (OptimisticLockException lockE){
 			addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"), MSG_ID);
@@ -215,10 +225,9 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 
 	private void cargarListaHoras(){
 		horas =  new ArrayList<SelectItem>();
-	    Integer h = 0;
-	    String labelH;
-	    
-	    while (h < 24){
+    Integer h = 0;
+    String labelH;
+    while (h < 24){
 			SelectItem s = new SelectItem();
 			s.setValue(h);
 			labelH = Integer.toString(h);
@@ -232,12 +241,10 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 
 	private void cargarListaMinutos(){
-
 		minutos =  new ArrayList<SelectItem>();
-	    Integer h = 0;
-	    String labelH;
-	    
-	    while (h < 60){
+    Integer h = 0;
+    String labelH;
+    while (h < 60){
 			SelectItem s = new SelectItem();
 			s.setValue(h);
 			labelH = Integer.toString(h);
@@ -267,75 +274,60 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void consultarDisponibilidadesDelDia(ActionEvent event) {
-		
 		limpiarMensajesError();
-		
 		try {
-			boolean huboError = false;
+			boolean hayError = false;
 			if (crearDispSessionMBean.getFechaCrear() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
-				huboError = true;
+				hayError = true;
+			}else if(Utiles.esFechaInvalida(crearDispSessionMBean.getFechaCrear())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formCrearDisponibilidad:fecha");
+        hayError = true;
 			}else if (!disponibilidadesEJB.esDiaHabil(crearDispSessionMBean.getFechaCrear(), sessionMBean.getRecursoMarcado())){
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formCrearDisponibilidad:fecha");
-				huboError = true;
+				hayError = true;
 			}else {
 				if (crearDispSessionMBean.getFechaCrear().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-					huboError = true;
+					hayError = true;
 				}
 				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
 					if (crearDispSessionMBean.getFechaCrear().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formCrearDisponibilidad:fecha");
-						huboError = true;
+						hayError = true;
 					}
 				}
 			}
-			
-			if(!huboError){
-				this.configurarDisponibilidadesDelDia();
+			if(!hayError){
+				configurarDisponibilidadesDelDia();
 			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
 	}
 	
-	
-	public void configurarDisponibilidadesDelDia() {
-
+	private void configurarDisponibilidadesDelDia() {
 		List<DisponibilidadReserva> dispMatutinas   = new ArrayList<DisponibilidadReserva>();
 		List<DisponibilidadReserva> dispVespertinas = new ArrayList<DisponibilidadReserva>();
-
+		//Armar la ventana con solo el día seleccionado
 		VentanaDeTiempo ventana = new VentanaDeTiempo();
-		
-	ventana.setFechaInicial(Utiles.time2InicioDelDia(crearDispSessionMBean.getFechaCrear()));
-	ventana.setFechaFinal(Utiles.time2FinDelDia(crearDispSessionMBean.getFechaCrear()));
-			
+  	ventana.setFechaInicial(Utiles.time2InicioDelDia(crearDispSessionMBean.getFechaCrear()));
+  	ventana.setFechaFinal(Utiles.time2FinDelDia(crearDispSessionMBean.getFechaCrear()));
 		try {
+		  //Obtener las disponibilidades para el día seleccionado
 			List<DisponibilidadReserva> lista = disponibilidadesEJB.obtenerDisponibilidadesReservas(sessionMBean.getRecursoMarcado(), ventana);
-				
 			for (DisponibilidadReserva d : lista) {
-					Calendar cal = Calendar.getInstance();
-					cal.setTime(d.getHoraInicio());
-					//cal.setTimeZone(sessionMBean.getTimeZone());
-					
-					if (cal.get(Calendar.AM_PM) == Calendar.AM) {
-						//Matutino
-						dispMatutinas.add(d);
-					}
-					else {
-						//Vespertino
-						dispVespertinas.add(d);
-					}
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(d.getHoraInicio());
+				if (cal.get(Calendar.AM_PM) == Calendar.AM) {
+					dispMatutinas.add(d);
+				}	else {
+					dispVespertinas.add(d);
+				}
 			}
-				
-				
 		} catch (Exception ex) {
-			
-			ex.printStackTrace();
-			
 			addErrorMessage(ex);
 		}
-
 		crearDispSessionMBean.setDisponibilidadesDelDiaMatutina(new RowList<DisponibilidadReserva>(dispMatutinas));
 		crearDispSessionMBean.setDisponibilidadesDelDiaVespertina(new RowList<DisponibilidadReserva>(dispVespertinas));
 	}
@@ -343,17 +335,14 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 	public String getMensajePeriodoDisponibilidad() {
 		if(sessionMBean.getRecursoMarcado() != null) {
 			DateFormat df = new SimpleDateFormat(sessionMBean.getFormatoFecha());
-			if (sessionMBean.getRecursoMarcado().getFechaFinDisp()!=null)
-			{
+			if (sessionMBean.getRecursoMarcado().getFechaFinDisp()!=null) {
 				return sessionMBean.getTextos().get("la_fecha_debe_estar_comprendida_en_el_periodo_fdesde_a_fhasta")
-						.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()))
-						.replace("{fhasta}", df.format(sessionMBean.getRecursoMarcado().getFechaFinDisp()));
-			}else
-			{
+  				.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()))
+  				.replace("{fhasta}", df.format(sessionMBean.getRecursoMarcado().getFechaFinDisp()));
+			}else {
 				return sessionMBean.getTextos().get("la_fecha_debe_ser_posterior_a_la_fecha_fdesde")
-						.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()));
+					.replace("{fdesde}", df.format(sessionMBean.getRecursoMarcado().getFechaInicioDisp()));
 			}
-			
 		}
 		return "";
 	}

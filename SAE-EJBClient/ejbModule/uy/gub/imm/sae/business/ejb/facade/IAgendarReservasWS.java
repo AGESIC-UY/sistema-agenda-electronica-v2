@@ -2,7 +2,6 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.TimeZone;
 
 import javax.jws.WebMethod;
@@ -12,8 +11,6 @@ import javax.jws.WebService;
 
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
-import uy.gub.imm.sae.entity.DatoASolicitar;
-import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
@@ -60,15 +57,6 @@ public interface IAgendarReservasWS {
 			ApplicationException, BusinessException;
 
 	@WebMethod
-	public @WebResult(name = "consultarReservaPorDatosClaveResult") Reserva consultarReservaPorDatosClave
-		(
-			@WebParam(name = "recurso") Recurso r, 
-			@WebParam(name = "datos") HashMap<DatoASolicitar, DatoReserva> datos
-		) 
-		throws 
-			ApplicationException;
-
-	@WebMethod
 	public void desmarcarReserva
 		(
 			@WebParam(name = "reserva") Reserva r
@@ -91,8 +79,7 @@ public interface IAgendarReservasWS {
 			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v,
       @WebParam(name = "timezone") TimeZone t
 		)
-		throws 
-			BusinessException;
+		throws UserException;
 
 	@WebMethod
 	public @WebResult(name = "obtenerDisponibilidadesResult") ArrayList<Disponibilidad> obtenerDisponibilidades
@@ -101,16 +88,10 @@ public interface IAgendarReservasWS {
 			@WebParam(name = "ventanaDeTiempo") VentanaDeTiempo v,
 			@WebParam(name = "timezone") String tz
 		)
-		throws 
-			BusinessException;
+		throws UserException;
 
 	@WebMethod
-	public @WebResult(name = "obtenerVentanaCalendarioInternetResult") VentanaDeTiempo obtenerVentanaCalendarioInternet
-		(
-			@WebParam(name = "recurso") Recurso r
-		)
-		throws 
-			BusinessException;
+	public @WebResult(name = "obtenerVentanaCalendarioInternetResult") VentanaDeTiempo obtenerVentanaCalendarioInternet(@WebParam(name = "recurso") Recurso r) throws	UserException;
 	
 	@WebMethod
 	public  @WebResult(name = "pingResult") String ping();

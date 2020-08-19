@@ -14,6 +14,7 @@ import javax.xml.bind.annotation.XmlElement;
 public class AgrupacionDatoExport {
 	
 	private String nombre;
+	private String etiqueta;
 	private Integer orden;
 	private Date fechaBaja;
 	private boolean borrarFlag;
@@ -57,5 +58,13 @@ public class AgrupacionDatoExport {
 	public void setDatosAsolicitar(List<DatoASolicitarExportar> datosAsolicitar) {
 		this.datosAsolicitar = datosAsolicitar;
 	}
+
+  public String getEtiqueta() {
+    return etiqueta;
+  }
+
+  public void setEtiqueta(String etiqueta) {
+    this.etiqueta = etiqueta;
+  }
 	
 }

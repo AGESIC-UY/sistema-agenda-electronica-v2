@@ -1,13 +1,16 @@
 package uy.gub.imm.sae.web.mbean.reserva;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.faces.component.UIComponent;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
@@ -20,6 +23,7 @@ import org.apache.log4j.Logger;
 import org.primefaces.component.datagrid.DataGrid;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Comunicaciones;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.common.enumerados.Estado;
@@ -33,16 +37,20 @@ import uy.gub.imm.sae.entity.ValorPosible;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.login.Utilidades;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
 
-public class CancelarReservaPublicMBean extends PasoMBean {
+public class CancelarReservaPublicMBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(CancelarReservaPublicMBean.class);
 
 	private AgendarReservas agendarReservasEJB;
 	private Consultas consultaEJB;
 	private Recursos recursosEJB;
+  private Comunicaciones comunicacionesEJB;
+	
 	private SesionMBean sesionMBean; 
 	private UIComponent filtroConsulta;
 	private UIComponent campos;
@@ -64,7 +72,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 	public void init() {
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-
 			//Estos dos son obligatorios
 			String sEmpresaId = request.getParameter("e");
 			String sAgendaId = request.getParameter("a");
@@ -116,10 +123,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 					limpiarSession();
 					hayErrorInit = true;
 					return;
-				}else {
-					
 				}
-				
 			}
 			
 			//Poner en sesion los datos de la empresa  y la agenda para la válvula de CDA 
@@ -130,50 +134,48 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 			
 			String remoteUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
 
-			if (remoteUser == null || !remoteUser.startsWith("sae" + empresaId)) {
-				//No hay usuario o hay un usuario que no es de esta empresa (puede ser de CDA u otra empresa)
-				try {
-					// Crear un usuario falso temporal
-					String falsoUsuario = null;
-					if(remoteUser == null) {
-						//No hay usuario, se crea uno
-						sesionMBean.setUsuarioCda(null);
+			try {
+				// Crear un usuario falso temporal
+				String falsoUsuario = null;
+				if(remoteUser == null) {
+					//No hay usuario, se crea uno
+					sesionMBean.setUsuarioCda(null);
+					falsoUsuario = "sae" + empresaId;
+				}else {
+					//Hay usuario, dos alternativas: es de cda o es local de otra empresa
+					if(!remoteUser.startsWith("sae")) {
+						//Es un usuario de CDA
+						falsoUsuario = remoteUser;
+						sesionMBean.setUsuarioCda(remoteUser);
+					}else  {
+						//Es un usuario de otra empresa
 						falsoUsuario = "sae" + empresaId;
-					}else {
-						//Hay usuario, dos alternativas: es de cda o es local de otra empresa
-						if(!remoteUser.startsWith("sae")) {
-							//Es un usuario de CDA
-							falsoUsuario = remoteUser;
-							sesionMBean.setUsuarioCda(remoteUser);
-						}else  {
-							//Es un usuario de otra empresa
-							falsoUsuario = "sae" + empresaId;
-							sesionMBean.setUsuarioCda(null);
-						}
-						//Desloguear al usuario actual (inválido)
-						try {
-							request.logout();
-						}catch(Exception ex) {
-							ex.printStackTrace();
-						}
+						sesionMBean.setUsuarioCda(null);
 					}
-					Random random = new Random();
-					if(falsoUsuario.startsWith("cda")) {
-						falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+					//Desloguear al usuario actual (inválido)
+					try {
+						request.logout();
+					}catch(Exception ex) {
+						ex.printStackTrace();
 					}
-					falsoUsuario = falsoUsuario+ "/" + empresaId;
-					// Autenticarlo
-					String password = Utilidades.encriptarPassword(falsoUsuario);
-					request.login(falsoUsuario, password);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 				}
+				Random random = new Random();
+				if(falsoUsuario.startsWith("sae")) {
+					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+				}
+				falsoUsuario = falsoUsuario+ "/" + empresaId;
+				// Autenticarlo
+				String password = Utilidades.encriptarPassword(falsoUsuario);
+				request.login(falsoUsuario, password);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 			}
 			
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
 			recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
 			consultaEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getConsultas();
+			comunicacionesEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getComunicaciones();
 			
 			// Guardar la empresa en la sesion
 			try {
@@ -223,12 +225,33 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				//Obtener la reserva
 				Reserva reserva = consultaEJB.consultarReservaId(reservaId, recurso.getId());
 				
-				if(reserva==null || !reserva.getEstado().toString().equals("R")) {
-					addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
-					limpiarSession();
-					hayErrorInit = true;
-					return;
+				if(reserva == null) {
+          addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
+          limpiarSession();
+          hayErrorInit = true;
+          return;
+				}else {
+	        if(!reserva.getEstado().toString().equals("R")) {
+	          //Determinar si la reserva está en estado Reservada
+	          addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
+	          limpiarSession();
+	          hayErrorInit = true;
+	          return;
+	        }else {
+  				  //Determinar si la reserva está vigente
+  			    Calendar calAhora = new GregorianCalendar();
+  			    calAhora.add(Calendar.MILLISECOND, sesionMBean.getTimeZone().getOffset(calAhora.getTimeInMillis()));
+  			    Calendar calReserva = new GregorianCalendar();
+  			    calReserva.setTime(reserva.getDisponibilidades().get(0).getHoraInicio());
+  			    if(calReserva.before(calAhora)) {
+              addErrorMessage(sesionMBean.getTextos().get("no_se_encuentra_la_reserva_o_ya_fue_cancelada"));
+              limpiarSession();
+              hayErrorInit = true;
+              return;
+  			    }
+	        }
 				}
+				
 				//this.sesionMBean.setReserva(reserva); //Para la cancelación se usa setReservaDatos
 				this.sesionMBean.setReservaDatos(reserva);
 				this.sesionMBean.setCodigoSeguridadReserva("");
@@ -268,14 +291,12 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 					datoSolicMap.put(dato.getNombre(), dato);
 				}
 				setDatosASolicitar(datoSolicMap);
-			} catch (ApplicationException ae) {
+			} catch (Exception ex) {
 				addErrorMessage(sesionMBean.getTextos().get("el_recurso_especificado_no_es_valido"));
 				limpiarSession();
-				ae.printStackTrace();
+				ex.printStackTrace();
 				return;
 			}
-				
-
 		} catch (Exception e) {
 			logger.error(e);
 			redirect(ERROR_PAGE_OUTCOME);
@@ -295,32 +316,27 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 	}
 
 	public void setFiltroConsulta(UIComponent filtroConsulta) {
-		
-		this.filtroConsulta = filtroConsulta;
-		
-		if(this.sesionMBean.getReserva()==null && this.sesionMBean.getRecurso()==null) {
+		if(hayErrorInit || (this.sesionMBean.getReserva()==null && this.sesionMBean.getRecurso()==null)) {
 			return;
 		}
-		
+    this.filtroConsulta = filtroConsulta;
 		try {
-			if (this.sesionMBean.getReservaId() !=null && this.sesionMBean.getEmpresaId() != null) {
+			if (this.sesionMBean.getReservaId()!=null && this.sesionMBean.getEmpresaId()!= null) {
 				if(this.sesionMBean.getReservaDatos() == null) {
 					Reserva reserva = consultaEJB.consultarReservaId(this.sesionMBean.getReservaId(), sesionMBean.getRecurso().getId());
 					sesionMBean.setReservaDatos(reserva);
 				}
-				
 				tiposDocumento = new ArrayList<SelectItem>();
 				List<DatoASolicitar> datos = recursosEJB.consultarDatosSolicitar(sesionMBean.getRecurso());
 				if(datos!=null) {
 					for(DatoASolicitar dato : datos) {
-						if(!dato.getAgrupacionDato().getBorrarFlag() && dato.getNombre().equals("TipoDocumento")) {
+						if(!dato.getAgrupacionDato().getBorrarFlag() && dato.getNombre().equals(DatoASolicitar.TIPO_DOCUMENTO)) {
 							for(ValorPosible valor : dato.getValoresPosibles()) {
 								tiposDocumento.add(new SelectItem(valor.getValor(), valor.getEtiqueta()));
 							}
 						}
 					}
 				}
-				
 				tipoDocumento = (String) tiposDocumento.get(0).getValue();
 				numeroDocumento = "";
 			}else {
@@ -334,16 +350,11 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				}
 				agrupaciones.clear();
 				agrupaciones.add(agrupacion);
-				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sesionMBean.getRecurso(), filtroConsulta, 
-						agrupaciones, sesionMBean.getFormatoFecha());
+				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sesionMBean.getRecurso(), filtroConsulta, agrupaciones, sesionMBean.getFormatoFecha());
 			}
-
-		} catch (BusinessException be) {
-			addErrorMessage(be);
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}
-
 	}
 
 	public void buscarReservaDatos(ActionEvent e) {
@@ -365,34 +376,37 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 			return;
 		}
 
-		List<DatoReserva> datos;
-		if (this.sesionMBean.getReservaId() != null && this.sesionMBean.getEmpresaId() != null) {
-			datos = new ArrayList<DatoReserva>();
-			datos.addAll(this.sesionMBean.getReservaDatos().getDatosReserva());
-		} else {
-			datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
-		}
-		if (datos.size() <= 1) {
-			huboError = true;
-			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_al_menos_dos_de_los_datos_solicitados"));
-		}
-		if (sesionMBean.getCodigoSeguridadReserva().trim().isEmpty()) {
-			huboError = true;
-			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), "formConBusqueda:codSeg");
-		}
-		
-		if(huboError) {
-			return;
-		}
-		
-		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos,
-						sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
-		if (reservas.isEmpty()) {
-			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
-			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
-		} else {
-			this.sesionMBean.setListaReservas(reservas);
-			mostrar = "LISTAR_RESERVAS";
+		try {
+  		List<DatoReserva> datos;
+  		if (this.sesionMBean.getReservaId() != null && this.sesionMBean.getEmpresaId() != null) {
+  			datos = new ArrayList<DatoReserva>();
+  			datos.addAll(this.sesionMBean.getReservaDatos().getDatosReserva());
+  		} else {
+  			datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
+  		}
+  		if (datos.size() <= 1) {
+  			huboError = true;
+  			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_al_menos_dos_de_los_datos_solicitados"));
+  		}
+  		if (sesionMBean.getCodigoSeguridadReserva().trim().isEmpty()) {
+  			huboError = true;
+  			addErrorMessage(sesionMBean.getTextos().get("debe_ingresar_codigo_de_seguridad"), "formConBusqueda:codSeg");
+  		}
+  		
+  		if(huboError) {
+  			return;
+  		}
+  		
+  		List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaModificarCancelar(datos, sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+  		if (reservas.isEmpty()) {
+  			this.sesionMBean.setListaReservas(new ArrayList<Reserva>());
+  			addErrorMessage(sesionMBean.getTextos().get("los_datos_ingresados_no_son_correctos"));
+  		} else {
+  			this.sesionMBean.setListaReservas(reservas);
+  			mostrar = "LISTAR_RESERVAS";
+  		}
+		}catch(Exception ex) {
+		  addErrorMessage(ex);
 		}
 
 	}
@@ -429,8 +443,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		this.campos = campos;
 		try {
 			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sesionMBean.getRecurso(), sesionMBean.getTimeZone());
-			FormularioDinReservaClient.armarFormularioLecturaDinamico(sesionMBean.getRecurso(),
-					this.sesionMBean.getReservaDatos(), this.campos, agrupaciones, sesionMBean.getFormatoFecha());
+			FormularioDinReservaClient.armarFormularioLecturaDinamico(sesionMBean.getRecurso(), this.sesionMBean.getReservaDatos(), this.campos, agrupaciones, sesionMBean.getFormatoFecha());
 		} catch (BusinessException be) {
 			addErrorMessage(be);
 		} catch (Exception e) {
@@ -476,13 +489,17 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				Reserva r = consultaEJB.consultarReservaPorNumero(sesionMBean.getRecurso(), sesionMBean.getDisponibilidadCancelarReserva().getHoraInicio(),sesionMBean.getReservaDatos().getNumero());
 				List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean,	datosASolicitar);
 				
-				//Enviar el mail de confirmacion
-				agendarReservasEJB.enviarComunicacionesCancelacion(r, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
+				try {
+				  //Enviar el mail de confirmacion
+				  comunicacionesEJB.enviarComunicacionesCancelacion(sesionMBean.getEmpresaActual(), r, sesionMBean.getIdiomaActual(), sesionMBean.getFormatoFecha(), 
+				      sesionMBean.getFormatoHora());
+				}catch(UserException ex) {
+	        addAdvertenciaMessage(sesionMBean.getTextos().get(ex.getCodigoError()));
+				}
 
 				//Recargar el resto de las reservas
 				ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaCancelar(datos,	sesionMBean.getRecurso(),	
-						sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
+				reservas = (ArrayList<Reserva>) consultaEJB.consultarReservasParaModificarCancelar(datos,	sesionMBean.getRecurso(), sesionMBean.getCodigoSeguridadReserva(), sesionMBean.getTimeZone());
 				this.sesionMBean.setListaReservas(reservas);
 
 				//Quitar los datos de la reserva cancelada (por si acaso)
@@ -493,7 +510,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 				
 			} catch (Exception ex) {
 				addErrorMessage(ex);
-				ex.printStackTrace();
 			}
 		}
 	}
@@ -522,8 +538,7 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		this.reservasDataTable = reservasDataTable;
 	}
 	
-	private void limpiarSession()
-	{
+	private void limpiarSession() {
 		sesionMBean.setAgenda(null);
 		sesionMBean.setListaReservas(null);
 		sesionMBean.setReservaDatos(null);
@@ -545,7 +560,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		this.hayErrorInit = hayErrorInit;
 	}
 
-	
 	public String getMostrar() {
 		return mostrar;
 	}
@@ -582,7 +596,6 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		this.numeroDocumento = numeroDocumento;
 	}
 	
-	
 	public void verificarDatos(ActionEvent event) {
 		
 		limpiarMensajesError();
@@ -618,9 +631,9 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		
 		for(DatoReserva dato : reserva.getDatosReserva()) {
 			if(!dato.getDatoASolicitar().getAgrupacionDato().getBorrarFlag()) {
-				if(dato.getDatoASolicitar().getNombre().equals("TipoDocumento")) {
+				if(dato.getDatoASolicitar().getNombre().equals(DatoASolicitar.TIPO_DOCUMENTO)) {
 					resTipoDocumento = dato.getValor();
-				}else if(dato.getDatoASolicitar().getNombre().equals("NroDocumento")) {
+				}else if(dato.getDatoASolicitar().getNombre().equals(DatoASolicitar.NUMERO_DOCUMENTO)) {
 					resNumDocumento = dato.getValor();
 				}
 			}
@@ -638,8 +651,35 @@ public class CancelarReservaPublicMBean extends PasoMBean {
 		reservas.add(reserva);
 		this.sesionMBean.setListaReservas(reservas);
 		mostrar = "LISTAR_RESERVAS";
-	
 	}
 	
+  @PreDestroy
+  public void preDestroy() {
+    try {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      this.agendarReservasEJB = null;
+      this.campos = null;
+      this.consultaEJB = null;
+      if(this.datosASolicitar!=null) {
+        this.datosASolicitar.clear();
+      }
+      this.datosASolicitar = null;
+      if(this.datosFiltroReservaMBean!=null) {
+        this.datosFiltroReservaMBean.clear();
+      }
+      this.datosFiltroReservaMBean = null;
+      this.filtroConsulta = null;
+      this.recursosEJB = null;
+      this.reservasDataTable = null;
+      this.sesionMBean = null;
+      if(this.tiposDocumento!=null) {
+        this.tiposDocumento.clear();
+      }
+      this.tiposDocumento = null;
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      logger.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+    }
+  }
 	
 }

@@ -20,6 +20,8 @@
 
 package uy.gub.imm.sae.web.mbean.administracion;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -51,6 +53,7 @@ import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
+import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.Atencion;
@@ -99,7 +102,6 @@ public class ReporteMBean extends BaseMBean {
 		cargarListaEstados();
 	}
 	
-	
 	private void cargarListaEstados(){
 		estadosReserva =  new ArrayList<SelectItem>();
 	  Reserva r = new Reserva();
@@ -107,153 +109,145 @@ public class ReporteMBean extends BaseMBean {
 			if (! e.equals(Estado.P)){
 				SelectItem s = new SelectItem();
 				s.setValue(e);
-				s.setLabel(r.getEstadoDescripcion(e));
+				s.setLabel(sessionMBean.getTextos().get(r.getEstadoDescripcion(e)));
 				estadosReserva.add(s);
 			}
 		}
-		
 	}
 
-	public String reporteReservaFecha() {
-		
+	public String reporteReservasFecha() {
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
+		boolean hayErrores = false;
 		Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
-		
-		if (fechaDesde == null){
-			error = true;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
 		}
-		
-		if (fechaHasta == null){
-			error = true;
+		if(fechaHasta == null){
+			hayErrores = true;
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
-		
-		if(fechaDesde!=null && fechaHasta!=null) {
+		}else if(Utiles.esFechaInvalida(fechaHasta)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+        hayErrores = true;
 			}
 		}
-		
 		if (estadoReservaSeleccionado == null){
-			error = true;
 			addErrorMessage("el_estado_es_obligatorio", "form:estado");
+      hayErrores = true;
 		}
-
-		if (!error){
-			VentanaDeTiempo periodo = new VentanaDeTiempo();
-			periodo.setFechaInicial(fechaDesde);
-			periodo.setFechaFinal(fechaHasta);
-			try {
-				List<Recurso> recursos = new ArrayList<Recurso>();
-				if(recursoMarcado != null) {
-					//Hay un recurso marcado, el reporte es para ese recurso
-					recursos.add(recursoMarcado);
-				}else if(agendaMarcada != null) {
-					//No hay un recurso marcado pero sí una agenda, se hace para todos los recursos de esa agenda
-				  recursos.addAll(generalEJB.consultarRecursos(agendaMarcada));
-				}else {
-					//Se hace para todos los recursos de todas las agendas de la empresa
-					List<Agenda> agendas = agendasEJB.consultarAgendas();
-					if(agendas != null) {
-						for(Agenda agenda : agendas) {
-						  recursos.addAll(generalEJB.consultarRecursos(agenda));
-						}
+		if (hayErrores){
+		  return null;
+		}
+		VentanaDeTiempo periodo = new VentanaDeTiempo();
+		periodo.setFechaInicial(fechaDesde);
+		periodo.setFechaFinal(fechaHasta);
+		try {
+			List<Recurso> recursos = new ArrayList<Recurso>();
+			if(recursoMarcado != null) {
+				//Hay un recurso marcado, el reporte es para ese recurso
+				recursos.add(recursoMarcado);
+			}else if(agendaMarcada != null) {
+				//No hay un recurso marcado pero sí una agenda, se hace para todos los recursos de esa agenda
+			  recursos.addAll(generalEJB.consultarRecursos(agendaMarcada));
+			}else {
+				//Se hace para todos los recursos de todas las agendas de la empresa
+				List<Agenda> agendas = agendasEJB.consultarAgendas();
+				if(agendas != null) {
+					for(Agenda agenda : agendas) {
+					  recursos.addAll(generalEJB.consultarRecursos(agenda));
 					}
 				}
-				
-				List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
-				for(Recurso recurso : recursos) {
-					//Definicion de los campos dinamicos del reporte
-					List<Columna> defColumnas = new ArrayList<Columna>();
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					for(AgrupacionDato grupo: agrupaciones) {
-						for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
-							if (campo.getIncluirEnReporte()) {
-								Columna col = new Columna();
-								col.setId(campo.getNombre());
-								col.setNombre(campo.getEtiqueta());
-								col.setClase(String.class);
-								col.setAncho(campo.getAnchoDespliegue());
-								defColumnas.add(col);
-							}
-						}
-					}
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estadoReservaSeleccionado);
-					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
-					contenido.addAll(contenido1);
-					
-				}
-				
-				String[] defColPlanilla = {};
-				LabelValue[] filtros = {
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
-						new CommonLabelValueImpl(sessionMBean.getTextos().get("estado")+": ", estadoReservaSeleccionado.getDescripcion() )
-				};
-				
-        StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
-        
-        String nombre = sessionMBean.getTextos().get("reporte_reservas");
-        nombre = nombre.replace(" ", "_");
-        
-        CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
-        printer.print(); 
-				
-			} catch (Exception e1) {
-				addErrorMessage(e1);
 			}
-
+			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
+			for(Recurso recurso : recursos) {
+				//Definicion de los campos dinamicos del reporte
+				List<Columna> defColumnas = new ArrayList<Columna>();
+				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
+				for(AgrupacionDato grupo: agrupaciones) {
+					for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
+						if (campo.getIncluirEnReporte()) {
+							Columna col = new Columna();
+							col.setId(campo.getNombre());
+							col.setNombre(campo.getEtiqueta());
+							col.setClase(String.class);
+							col.setAncho(campo.getAnchoDespliegue());
+							defColumnas.add(col);
+						}
+					}
+				}
+		    List<Estado> estados = new ArrayList<Estado>();
+		    estados.add(estadoReservaSeleccionado);
+				List<ReservaDTO> reservas = consultaEJB.consultarReservasPorPeriodoEstado(recurso, periodo, estados, null);
+				List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
+				contenido.addAll(contenido1);
+			}
+			String[] defColPlanilla = {};
+			LabelValue[] filtros = {
+					new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
+					new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
+					new CommonLabelValueImpl(sessionMBean.getTextos().get("estado")+": ", sessionMBean.getTextos().get(estadoReservaSeleccionado.getDescripcion()))
+			};
+      StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
+      String nombre = sessionMBean.getTextos().get("reporte_reservas");
+      nombre = nombre.replace(" ", "_");
+      CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
+      printer.print(); 
+		} catch (Exception e1) {
+			System.out.println("-------- Comienza problema -----------");
+			e1.printStackTrace();
+			addErrorMessage(e1);
 		}
 		return null;
 	}
 	
 	public void reporteAsistenciaFecha(ActionEvent e) {
-		
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
+		boolean hayErrores = false;
 		Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
 		Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
-		
-		if (fechaDesde == null){
-			error = true;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
-		}
-		
-		if (fechaHasta == null){
-			error = true;
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+		if(fechaHasta == null){
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
 		
-		if(fechaDesde!=null && fechaHasta!=null) {
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaDesde)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+        hayErrores = true;
 			}
 		}
-
 		estadoReservaSeleccionado=Estado.U;
-
-		if (!error){
+		if (!hayErrores){
 			VentanaDeTiempo periodo = new VentanaDeTiempo();
 			periodo.setFechaInicial(fechaDesde);
 			periodo.setFechaFinal(fechaHasta);
-			
 			try {
 				String[] defColPlanilla = {};
 				//Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
@@ -261,7 +255,6 @@ public class ReporteMBean extends BaseMBean {
 						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
 						new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA))
 				};
-
 				List<Recurso> recursos = new ArrayList<Recurso>();
 				if(recursoMarcado != null) {
 					//Hay un recurso marcado, el reporte es para ese recurso
@@ -280,17 +273,14 @@ public class ReporteMBean extends BaseMBean {
 				}
 				List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
 				for(Recurso recurso : recursos) {
-					List<ReservaDTO> reservas = consultaEJB.consultarReservasUsadasPeriodo(recurso, periodo);
+					List<ReservaDTO> reservas = consultaEJB.consultarReservasUsadasPeriodo(recurso, periodo, null);
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 					List<List<TableCellValue>> contenido1 = armarContenido(recurso, reservas, agrupaciones);
 					contenido.addAll(contenido1);
 				}
-				
         StandardCSVFile fileCSV = new StandardCSVFile(filtros, defColPlanilla, contenido); 
-        
         String nombre = sessionMBean.getTextos().get("reporte_asistencias");
         nombre = nombre.replace(" ", "_");
-        
         CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
         printer.print(); 
 			} catch (Exception e1) {
@@ -301,31 +291,32 @@ public class ReporteMBean extends BaseMBean {
 	
 	public void reporteAtencionPeriodo(ActionEvent e) {
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
-		if (fechaDesde == null){
-			error = true;
+		boolean hayErrores = false;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
-		}
-		
-		if (fechaHasta == null){
-			error = true;
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+		if(fechaHasta == null){
+		  hayErrores = true;
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
-	
-		if(fechaDesde!=null && fechaHasta!=null) {
+		}else if(Utiles.esFechaInvalida(fechaHasta)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
+			  hayErrores = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
 			}
 		}
-		
-		if(!error) {
+		if(!hayErrores) {
 			List<AtencionReporteDT> listAtencionReportDT = new ArrayList<AtencionReporteDT>();
 			if (this.todasLasEmpresas) {
 					Empresa empresaActual = sessionMBean.getEmpresaActual();
@@ -348,7 +339,6 @@ public class ReporteMBean extends BaseMBean {
 			}else {
 				listAtencionReportDT = obtenerDatosReporteAtencionPeriodo(this.fechaDesde, this.fechaHasta);
 			}
-			
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
 			for (AtencionReporteDT atencionReporteDT : listAtencionReportDT) {
 				List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
@@ -370,17 +360,16 @@ public class ReporteMBean extends BaseMBean {
 			};
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
-				String[]  cabezales = {"Empresa","Agenda","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
+				String[]  cabezales = {sessionMBean.getTextos().get("empresa"), sessionMBean.getTextos().get("agenda"), sessionMBean.getTextos().get("funcionario"),
+				    sessionMBean.getTextos().get("asistencias"), sessionMBean.getTextos().get("inasistencias"), sessionMBean.getTextos().get("atenciones")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}else {
-				String[]  cabezales = {"Agenda","Funcionario","Asistencias","Inasistencias","Total Atenciones"};
+				String[]  cabezales = {sessionMBean.getTextos().get("agenda"), sessionMBean.getTextos().get("funcionario"),
+				    sessionMBean.getTextos().get("asistencias"), sessionMBean.getTextos().get("inasistencias"), sessionMBean.getTextos().get("atenciones")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
-						
       String nombre = sessionMBean.getTextos().get("reporte_atencion_funcionario");
       nombre = nombre.replace(" ", "_");
-			
-			
 			CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
       printer.print(); 
 		}
@@ -441,52 +430,49 @@ public class ReporteMBean extends BaseMBean {
 	}
 	
 	public void reporteTiemposAtencion() 	{
-		
 		limpiarMensajesError();
-		
-		boolean error = false;
-		
-		if (fechaDesde == null){
-			error = true;
+		boolean hayErrores = false;
+		if(fechaDesde == null){
 			addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
-		}
-		
-		if (fechaHasta == null){
-			error = true;
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaDesde)){
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+		if(fechaHasta == null){
 			addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
-		}
-		
-		if(fechaDesde!=null && fechaHasta!=null) {
+      hayErrores = true;
+		}else if(Utiles.esFechaInvalida(fechaHasta)){
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+		if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde) && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
 			Calendar c1 =  new GregorianCalendar();
 			c1.setTime(fechaDesde);
 			Calendar c2 =  new GregorianCalendar();
 			c2.setTime(fechaHasta);
 			if(c1.after(c2)) {
-				error = true;
+				hayErrores = true;
 				addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
 			}
 		}
 		
-		if(!error)
-		{
-			
-			List<AtencionLLamadaReporteDT> listAtencionLLamadaReportDT = new ArrayList<AtencionLLamadaReporteDT>();
-			if (this.todasLasEmpresas)
-			{
+		if(!hayErrores){
+			List<AtencionLLamadaReporteDT> llamadas = new ArrayList<AtencionLLamadaReporteDT>();
+			if (this.todasLasEmpresas) {
 					Empresa empresaActual = sessionMBean.getEmpresaActual();
 					try {
-						for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas())
-						{
+						for (Empresa emp : usuariosEmpresasEJB.consultarEmpresas()) {
 							try {
 								sessionMBean.seleccionarEmpresa(emp.getId());
-								List<AtencionLLamadaReporteDT> listAtencionLlamada	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
-								Collections.sort(listAtencionLlamada, new AtencionLlamadaReporteComparator());
+								List<AtencionLLamadaReporteDT> llamada	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
+								Collections.sort(llamada, new AtencionLlamadaReporteComparator());
 								int i=0;
-								while (i<listAtencionLlamada.size()) {
-									listAtencionLlamada.get(i).setNombEmpresa(emp.getNombre());
+								while (i<llamada.size()) {
+									llamada.get(i).setNombEmpresa(emp.getNombre());
 									i++;
 								}
-								listAtencionLLamadaReportDT.addAll(listAtencionLlamada);
+								llamadas.addAll(llamada);
 							} catch (Exception e1) {
 								e1.printStackTrace();
 							}
@@ -497,12 +483,12 @@ public class ReporteMBean extends BaseMBean {
 						sessionMBean.seleccionarEmpresa(empresaActual.getId());
 					}
 			}else {
-				listAtencionLLamadaReportDT	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
-				Collections.sort(listAtencionLLamadaReportDT, new AtencionLlamadaReporteComparator());
+				llamadas	= consultaEJB.consultarLlamadasAtencionPeriodo(fechaDesde,fechaHasta);
+				Collections.sort(llamadas, new AtencionLlamadaReporteComparator());
 			}
 			
 			List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
-			for (AtencionLLamadaReporteDT atencionLlamadaReporteDT : listAtencionLLamadaReportDT) {
+			for (AtencionLLamadaReporteDT atencionLlamadaReporteDT : llamadas) {
 				List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
 				if(this.todasLasEmpresas) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getNombEmpresa()));
@@ -529,22 +515,27 @@ public class ReporteMBean extends BaseMBean {
 				if(atencionLlamadaReporteDT.getAtencion()!= null) {
 					filaDatos.add(new TableCellValue(atencionLlamadaReporteDT.getAtencion()));
 				}else {
-					filaDatos.add(new TableCellValue("No Marcado"));
+					filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("no_marcado")));
 				}
 				
 				contenido.add(filaDatos);
 			}
 			
 			LabelValue[] filtros = { 
-	          		   new CommonLabelValueImpl("Fecha desde: ",Utiles.date2string(fechaDesde, Utiles.DIA)),
-	          		   new CommonLabelValueImpl("Fecha hasta: ", Utiles.date2string(fechaHasta, Utiles.DIA))
+	          		   new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ",Utiles.date2string(fechaDesde, Utiles.DIA)),
+	          		   new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA))
 	             };
 			StandardCSVFile fileCSV ;
 			if (this.todasLasEmpresas) {
-				String[]  cabezales = {"Empresa","Tramite","Oficina","Id Reserva","Trámite","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+				String[]  cabezales = {sessionMBean.getTextos().get("empresa"), sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("oficina"),
+				    sessionMBean.getTextos().get("reserva"), sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("fecha"),
+				    sessionMBean.getTextos().get("puesto"), sessionMBean.getTextos().get("funcionario"), sessionMBean.getTextos().get("tiempo_en_minutos"),
+				    sessionMBean.getTextos().get("atencion")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}else {
-				String[]  cabezales = {"Tramite","Oficina","Id Reserva","Trámite","Fecha Reserva","Puesto","Funcionario","tiempo atención(min)","Atención"};
+				String[]  cabezales = {sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("oficina"), sessionMBean.getTextos().get("reserva"),
+				    sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("fecha"), sessionMBean.getTextos().get("puesto"), 
+				    sessionMBean.getTextos().get("funcionario"), sessionMBean.getTextos().get("tiempo_en_minutos"), sessionMBean.getTextos().get("atencion")};
 				fileCSV = new StandardCSVFile(filtros, cabezales, contenido); 
 			}
 			
@@ -558,6 +549,87 @@ public class ReporteMBean extends BaseMBean {
 		}
 	}
 	
+  public void reporteAtencionPresencialPeriodo(ActionEvent e) {
+    limpiarMensajesError();
+    boolean hayErrores = false;
+    Recurso recursoMarcado = sessionMBean.getRecursoMarcado();
+    if(recursoMarcado == null) {
+      addErrorMessage("debe_haber_un_recurso_seleccionado");
+      hayErrores = true;
+    }
+    if (fechaDesde == null){
+      addErrorMessage("la_fecha_de_inicio_es_obligatoria", "form:fechaDesde");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(fechaDesde)) {
+      addErrorMessage("la_fecha_de_inicio_es_invalida", "form:fechaDesde");
+      hayErrores = true;
+    }
+    if (fechaHasta == null){
+      addErrorMessage("la_fecha_de_fin_es_obligatoria", "form:fechaHasta");
+      hayErrores = true;
+    }else if(Utiles.esFechaInvalida(fechaHasta)) {
+      addErrorMessage("la_fecha_de_fin_es_invalida", "form:fechaHasta");
+      hayErrores = true;
+    }
+    if(fechaDesde!=null && !Utiles.esFechaInvalida(fechaDesde)  && fechaHasta!=null && !Utiles.esFechaInvalida(fechaHasta)) {
+      Calendar c1 =  new GregorianCalendar();
+      c1.setTime(fechaDesde);
+      Calendar c2 =  new GregorianCalendar();
+      c2.setTime(fechaHasta);
+      if(c1.after(c2)) {
+        addErrorMessage("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio", "form:fechaDesde", "form:fechaHasta");
+        hayErrores = true;
+      }
+    }
+    if (hayErrores){
+      return;
+    }
+    try {
+      //Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
+      LabelValue[] filtros = {
+          new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_hasta")+": ", Utiles.date2string(fechaHasta, Utiles.DIA)),
+          new CommonLabelValueImpl(sessionMBean.getTextos().get("fecha_desde")+": ", Utiles.date2string(fechaDesde, Utiles.DIA))
+      };
+
+      List<List<TableCellValue>> contenido = new ArrayList<List<TableCellValue>>();
+      List<AtencionLLamadaReporteDT> llamadas = consultaEJB.consultarAtencionesPresencialesRecursoPeriodo(recursoMarcado, fechaDesde, fechaHasta);
+      Collections.sort(llamadas, new AtencionLlamadaReporteComparator());
+      for (AtencionLLamadaReporteDT llamada : llamadas) {
+        List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
+        filaDatos.add(new TableCellValue(llamada.getReservaId()));
+        filaDatos.add(new TableCellValue(Utiles.date2string(llamada.getFechaHoraReserva(), Utiles.DIA)));
+        filaDatos.add(new TableCellValue(llamada.getNumero()));
+        filaDatos.add(new TableCellValue(llamada.getTramiteNombre()));
+        if(llamada.getFechaHoraAtencion()!=null) {
+          long tiempo = llamada.getFechaHoraAtencion().getTime() - llamada.getFechaHoraLlamada().getTime(); 
+          tiempo = Math.abs(tiempo/(1000 * 60));
+          filaDatos.add(new TableCellValue(String.valueOf(tiempo)));
+        }else {
+          filaDatos.add(new TableCellValue("---"));
+        }
+        if(llamada.getAtencion()!= null) {
+          filaDatos.add(new TableCellValue(llamada.getAtencion()));
+        }else {
+          filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("no_marcado")));
+        }
+        contenido.add(filaDatos);
+      }
+      
+      String[] cabezales = {sessionMBean.getTextos().get("reserva"), sessionMBean.getTextos().get("fecha"), sessionMBean.getTextos().get("numero"),
+          sessionMBean.getTextos().get("tramite"), sessionMBean.getTextos().get("tiempo_en_minutos"), sessionMBean.getTextos().get("atencion")};
+      StandardCSVFile fileCSV = new StandardCSVFile(filtros, cabezales, contenido);
+      
+      String nombre = sessionMBean.getTextos().get("reporte_atencion_presencial");
+      nombre = nombre.replace(" ", "_");
+            
+      CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
+      printer.print(); 
+
+    } catch (Exception e1) {
+      addErrorMessage(e1);
+    }
+  } 
+
 	public Date getFechaDesde() {
 		return fechaDesde;
 	}
@@ -583,7 +655,6 @@ public class ReporteMBean extends BaseMBean {
 		return estado;
 	}
 
-
 	public void setEstado(Estado estado) {
 		this.estado = estado;
 	}
@@ -595,11 +666,9 @@ public class ReporteMBean extends BaseMBean {
 		return unaPaginaPorHora;
 	}
 
-
 	public void setUnaPaginaPorHora(Boolean unaPaginaPorHora) {
 		this.unaPaginaPorHora = unaPaginaPorHora;
 	}
-
 
 	public void setEstadoDescripcion(String estadoDescripcion) {
 		this.estadoDescripcion = estadoDescripcion;
@@ -613,11 +682,9 @@ public class ReporteMBean extends BaseMBean {
 		this.estadosReserva = estadosReserva;
 	}
 
-
 	public Estado getEstadoReservaSeleccionado() {
 		return estadoReservaSeleccionado;
 	}
-
 
 	public void setEstadoReservaSeleccionado(Estado estadoReservaSeleccionado) {
 		this.estadoReservaSeleccionado = estadoReservaSeleccionado;
@@ -640,7 +707,7 @@ public class ReporteMBean extends BaseMBean {
 				}
 			}
 		}
-		String[] aux = new String[cabezales.length+3];
+		String[] aux = new String[cabezales.length+7];
 		int i=0;
 		for (i=0;i<cabezales.length; i++){
 			aux[i]=cabezales[i];
@@ -648,6 +715,11 @@ public class ReporteMBean extends BaseMBean {
 		aux[i]= sessionMBean.getTextos().get("numero_de_puesto");
 		aux[i+1]= sessionMBean.getTextos().get("asistio");
     aux[i+2]= sessionMBean.getTextos().get("tramite");
+    
+    aux[i+3]= sessionMBean.getTextos().get("estado");
+    aux[i+4]= sessionMBean.getTextos().get("fecha_de_cancelacion");
+    aux[i+5]= sessionMBean.getTextos().get("tipo_de_cancelacion");
+    aux[i+6]= sessionMBean.getTextos().get("usuario_de_cancelacion");
 		cabezales = aux;
 		return cabezales;
 	}
@@ -678,21 +750,26 @@ public class ReporteMBean extends BaseMBean {
 		}
 		resultado.add(filaCabezal);
 		
-		for (ReservaDTO reserva:reservas) {
+		DateFormat formatoFechaHora = new SimpleDateFormat(sessionMBean.getFormatoFecha()+" "+sessionMBean.getFormatoHora());
+		
+		for (ReservaDTO reserva : reservas) {
 			List<TableCellValue> filaDatos = new ArrayList<TableCellValue>();
 			filaDatos.add(new TableCellValue(reserva.getId().toString()));
-			filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getFecha(), Utiles.DIA)));
-			filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
-			filaDatos.add(new TableCellValue(reserva.getNumero()));
+      filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getFecha(), Utiles.DIA)));
+			if(reserva.getPresencial()!=null && reserva.getPresencial().booleanValue()) {
+        filaDatos.add(new TableCellValue(sessionMBean.getTextos().get("presencial")));
+			}else {
+	      filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
+			}
+			filaDatos.add(new TableCellValue(reserva.getNumero()!=null?reserva.getNumero():0));
 			for(AgrupacionDato grupo: agrupaciones) {
 				for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
 					if (campo.getIncluirEnReporte()) {
 						String clave = campo.getNombre();
 						TableCellValue valor;
-						if (reserva.getDatos().containsKey(clave)){
+						if(reserva.getDatos().get(clave)!=null){
 							valor = new TableCellValue(reserva.getDatos().get(clave).toString());
-						}
-						else {
+						} else {
 							valor = new TableCellValue("");
 						}
 						filaDatos.add(valor);
@@ -709,6 +786,23 @@ public class ReporteMBean extends BaseMBean {
 			}
 			
       filaDatos.add(new TableCellValue(reserva.getTramiteNombre()));
+      
+      filaDatos.add(new TableCellValue(sessionMBean.getTextos().get(Estado.valueOf(reserva.getEstado()).getDescripcion())));
+      if(reserva.getFcancela()==null) {
+        filaDatos.add(new TableCellValue(""));
+      }else {
+        filaDatos.add(new TableCellValue(formatoFechaHora.format(reserva.getFcancela())));
+      }
+      if(reserva.getTcancela()==null) {
+        filaDatos.add(new TableCellValue(""));
+      }else {
+        filaDatos.add(new TableCellValue(sessionMBean.getTextos().get(TipoCancelacion.valueOf(reserva.getTcancela()).getDescripcion())));
+      }
+      if(reserva.getUcancela()==null) {
+        filaDatos.add(new TableCellValue(""));
+      }else {
+        filaDatos.add(new TableCellValue(reserva.getUcancela()));
+      }
 			
 			resultado.add(filaDatos);
 		}
@@ -720,37 +814,28 @@ public class ReporteMBean extends BaseMBean {
 		return todasLasEmpresas;
 	}
 
-
 	public void setTodasLasEmpresas(Boolean todasLasEmpresas) {
 		this.todasLasEmpresas = todasLasEmpresas;
 	}
 
 	public class AtencionComparator implements Comparator<Atencion> {
-
 		@Override
 		public int compare(Atencion o1, Atencion o2) {
-		
 			Agenda a1 = o1.getReserva().getDisponibilidades().get(0).getRecurso().getAgenda();
 			Agenda a2 = o2.getReserva().getDisponibilidades().get(0).getRecurso().getAgenda();
 			String nomb1 = a1.getNombre();
 			String nomb2 = a2.getNombre();
-			if (nomb1.compareTo(nomb2)==0)
-			{
+			if (nomb1.compareTo(nomb2)==0) {
 				return o1.getFuncionario().compareTo(o2.getFuncionario());
 			}
-			
 			return nomb1.compareTo(nomb2);
 		}
 	}
 	
 	public class AtencionLlamadaReporteComparator implements Comparator<AtencionLLamadaReporteDT> {
-
 		@Override
 		public int compare(AtencionLLamadaReporteDT o1, AtencionLLamadaReporteDT o2) {
-		
-			return o1.getReservaId() < o2.getReservaId() ? -1
-			       : o1.getReservaId() > o2.getReservaId() ? 1
-			       : 0;
+			return o1.getReservaId() < o2.getReservaId() ? -1 : o1.getReservaId() > o2.getReservaId() ? 1 : 0;
 		}
 	}
 	

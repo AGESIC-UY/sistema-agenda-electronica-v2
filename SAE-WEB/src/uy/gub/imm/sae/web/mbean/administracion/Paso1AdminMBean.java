@@ -44,9 +44,9 @@ import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
-import uy.gub.imm.sae.web.common.SAECalendarioDataSource;
+import uy.gub.imm.sae.web.common.BaseMBean;
 
-public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioDataSource {
+public class Paso1AdminMBean extends BaseMBean {
 	
 	static Logger logger = Logger.getLogger(Paso1AdminMBean.class);
 	
@@ -59,7 +59,7 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	private SessionMBean sessionMBean;
 
 	/* Será utilizado solamente en casos extermos, como que no tenga permiso para acceder a la agenda, o la misma no sea valida, etc...*/
-	private String mensajeError = null;
+	private boolean errorInit = false;
 	
 	private List<Recurso> recursos;
 	private List<SelectItem> recursosItems;
@@ -68,6 +68,8 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	public static final String MSG_ID = "pantalla";
 	
 	private String urlMapa;
+	
+  private boolean recursoTieneDisponibilidad = true;
 
 	public void beforePhase (PhaseEvent phaseEvent) {
 		disableBrowserCache(phaseEvent);
@@ -80,38 +82,42 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	@PostConstruct
 	public void init() {
 		try {
+		  errorInit = false;
 			recursosItems = new ArrayList<SelectItem>();
-			Agenda a = sessionMBean.getAgendaMarcada();
+			Agenda agenda = sessionMBean.getAgendaMarcada();
+      if (agenda == null) {
+        addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
+        errorInit = true;
+        return;
+      }
 			Recurso recursoDefecto = sessionMBean.getRecursoMarcado();
-			mensajeError = null;
 			//Cargo los recursos
-			if (a != null) {
-				sessionMBean.setAgenda(a);
-				recursos = agendarReservasEJB.consultarRecursos(a);
-				for (Recurso recurso : recursos) {
-					SelectItem item = new SelectItem();
-					item.setLabel(recurso.getNombre());
-					item.setValue(recurso.getId());
-					recursosItems.add(item);
-				}
-				//Selecciono el recurso por defecto.
-				if (! recursos.isEmpty() ) {
-					if (recursoDefecto == null ){
-						//No se ingreso un recurso en la url, o no existe ese recurso vivo para la agenda.
-						//Si hay un recurso seleccionado, me quedo con ese, sino se carga el primero.
-						if (sessionMBean.getRecurso() == null){
-							sessionMBean.setRecurso(recursos.get(0));
-						}
-					} else {
-						//Se ingreso un recurso en la url y se encontro para la agenda.
-						sessionMBean.setRecurso(recursoDefecto);
-					}
-				} 
-			}else {
-				addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
-				mensajeError = sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada");
-				return;
+			sessionMBean.setAgenda(agenda);
+			recursos = agendarReservasEJB.consultarRecursos(agenda);
+			if(recursos.isEmpty()) {
+        addErrorMessage(sessionMBean.getTextos().get("no_hay_recursos_disponibles_para_la_agenda_seleccionada"));
+        errorInit = true;
+        return;
 			}
+			for (Recurso recurso : recursos) {
+				SelectItem item = new SelectItem();
+				item.setLabel(recurso.getNombre());
+				item.setValue(recurso.getId());
+				recursosItems.add(item);
+			}
+			//Selecciono el recurso por defecto.
+			if (! recursos.isEmpty() ) {
+				if (recursoDefecto == null ){
+					//No se ingreso un recurso en la url, o no existe ese recurso vivo para la agenda.
+					//Si hay un recurso seleccionado, me quedo con ese, sino se carga el primero.
+					if (sessionMBean.getRecurso() == null){
+						sessionMBean.setRecurso(recursos.get(0));
+					}
+				} else {
+					//Se ingreso un recurso en la url y se encontro para la agenda.
+					sessionMBean.setRecurso(recursoDefecto);
+				}
+			} 
 			mostrarMapa(sessionMBean.getRecurso());
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -119,17 +125,14 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 		}
 	}
 	
-	
-	public String getMensajeError() {
-		return mensajeError;
+	public boolean getErrorInit() {
+		return errorInit;
 	}
 
 	public String getAgendaNombre() {
-
-		if (sessionMBean.getAgenda() != null) {
+		if(sessionMBean.getAgenda() != null) {
 			return sessionMBean.getAgenda().getNombre();
-		}
-		else {
+		}else {
 			return null;
 		}
 	}
@@ -137,8 +140,7 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 	public String getRecursoId() {
 		if (sessionMBean.getRecurso() != null) {
 			return sessionMBean.getRecurso().getId().toString();
-		}
-		else {
+		}else {
 			return null;
 		}
 	}
@@ -156,23 +158,21 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 						encontre = true;
 					}
 				}
-			}
-			catch (Exception e) {
+			}catch (Exception e) {
 				addErrorMessage(e,MSG_ID);
 			}
 		}
 	}
 
 	public List<DatoDelRecurso> getInfoRecurso() {
-
-		if (infoRecurso == null) {
-			if (sessionMBean.getRecurso() != null) {
+		if(infoRecurso == null) {
+			if(sessionMBean.getRecurso() != null) {
 				try {
 					infoRecurso = recursosEJB.consultarDatosDelRecurso(sessionMBean.getRecurso());
 					if (infoRecurso.isEmpty()) {
 						infoRecurso = null;
 					}
-				} catch (Exception e) {
+				}catch (Exception e) {
 					addErrorMessage(e,MSG_ID);
 				}
 			}
@@ -227,41 +227,30 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 		return "";
 	}
 	
-
 	public String getDescripcion() {
-		if (getMensajeError() != null) return null;
-			Agenda a = sessionMBean.getAgenda();
-			
-			if (a != null)
-			{
-				//TextoAgenda ta = a.getTextoAgenda();
-				TextoAgenda ta = getTextoAgenda(a, sessionMBean.getIdiomaActual());
-				if (ta!=null)	{
-					String str = ta.getTextoPaso1();
-					if (str!=null) {
-						return str;
-					}	else {
-						return "";
-					}
-				}
-				else {
+		Agenda a = sessionMBean.getAgenda();
+		if (a != null) {
+			TextoAgenda ta = getTextoAgenda(a, sessionMBean.getIdiomaActual());
+			if (ta!=null)	{
+				String str = ta.getTextoPaso1();
+				if (str!=null) {
+					return str;
+				}	else {
 					return "";
 				}
-			}else{
+			} else {
 				return "";
 			}
-		
+		}else{
+			return "";
+		}
 	}
 
 	public String getEtiquetaSeleccionDelRecurso() {
-		if (getMensajeError() != null) return null;
 		Agenda a = sessionMBean.getAgenda();
-		if (a != null)
-		{
-			//TextoAgenda textoAgenda = a.getTextoAgenda();
+		if (a != null) {
 			TextoAgenda textoAgenda = getTextoAgenda(a, sessionMBean.getIdiomaActual());
-			if (textoAgenda!=null)
-			{
+			if (textoAgenda!=null) {
 				String str = textoAgenda.getTextoSelecRecurso();
 				if (str !=null) {
 					return str;
@@ -276,105 +265,47 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 		}
 	}
 	
-	
-	//Implementacion de la interfaz SAECalendarioDataSource
-	public List<Integer> obtenerCuposXDia(Date desde, Date hasta) {
-		if (getMensajeError() != null) return null;
-
-		//Si cambio el mes: actualizo.
-		if (! sessionMBean.getVentanaMesSeleccionado().getFechaInicial().equals(Utiles.time2InicioDelDia(desde)) ||
-			!sessionMBean.getVentanaMesSeleccionado().getFechaFinal().equals(Utiles.time2FinDelDia(hasta))) {
-			
-			sessionMBean.getVentanaMesSeleccionado().setFechaInicial(Utiles.time2InicioDelDia(desde));
-			sessionMBean.getVentanaMesSeleccionado().setFechaFinal(Utiles.time2FinDelDia(hasta));
-			
-			sessionMBean.setCuposXdiaMesSeleccionado(null);
-			
+	public String siguientePaso() {
+	  if(sessionMBean.getRecurso() != null) {
 			try {
-				cargarCuposADesplegar(sessionMBean.getRecurso(),	sessionMBean.getVentanaMesSeleccionado()	);
-				
-			} catch (Exception e) {
-				addErrorMessage(e,MSG_ID);
-			}
-		}
-
-		return sessionMBean.getCuposXdiaMesSeleccionado();
-	}	
-	
-	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado){
-		List<Integer> listaCupos=null;
-		try {
-			listaCupos= agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado, sessionMBean.getTimeZone());
-			//Se carga la fecha inicial 
-			Calendar cont = Calendar.getInstance();
-			cont.setTime(Utiles.time2InicioDelDia(sessionMBean.getVentanaMesSeleccionado().getFechaInicial()));
-			Integer i = 0;
-			Date inicio_disp = sessionMBean.getVentanaCalendario().getFechaInicial();
-			Date fin_disp = sessionMBean.getVentanaCalendario().getFechaFinal();
-			//Recorro la ventana dia a dia y voy generando la lista completa de cupos x dia con -1, 0, >0 según corresponda.
-			while (!cont.getTime().after(sessionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
-				if ( cont.getTime().before(inicio_disp ) || 
-					 cont.getTime().after(fin_disp) ) {
-					listaCupos.set(i, -1);
-				}
-				cont.add(Calendar.DAY_OF_MONTH, 1);
-				i++;
-			}
-			sessionMBean.setCuposXdiaMesSeleccionado( listaCupos	);
-		} catch (Exception e) {
-			addErrorMessage(e,MSG_ID);
-		}
-
-	}
-	 public String siguientePaso() {
-		 if (sessionMBean.getRecurso() != null)
-			{
-				Recurso recurso = sessionMBean.getRecurso();
-				try {
-					VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
-					
-					List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventanaCalendario, sessionMBean.getTimeZone());
-					// Se carga la fecha inicial
-					Calendar cont = Calendar.getInstance();
-          cont.setTime(Utiles.time2InicioDelDia(ventanaCalendario.getFechaInicial()));
-
-					Integer i = 0;
-
-					Date inicio_disp = ventanaCalendario.getFechaInicial();
-					Date fin_disp = ventanaCalendario.getFechaFinal();
-					boolean tieneDiponibilidad = false; 
-          while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && tieneDiponibilidad == false) {
-						if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
-							listaCupos.set(i, -1);
-						} else {
-							if (listaCupos.get(i) > 0) {
-								tieneDiponibilidad = true;
-							}
+	      Recurso recurso = sessionMBean.getRecurso();
+				VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
+				List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventanaCalendario, sessionMBean.getTimeZone());
+				Calendar cont = Calendar.getInstance();
+        cont.setTime(Utiles.time2InicioDelDia(ventanaCalendario.getFechaInicial()));
+				int i = 0;
+				Date inicio_disp = ventanaCalendario.getFechaInicial();
+				Date fin_disp = ventanaCalendario.getFechaFinal();
+				recursoTieneDisponibilidad = false; 
+        while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && !recursoTieneDisponibilidad) {
+					if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
+						listaCupos.set(i, -1);
+					}else {
+						if (listaCupos.get(i) > 0) {
+						  recursoTieneDisponibilidad = true;
 						}
-						cont.add(Calendar.DAY_OF_MONTH, 1);
-						i++;
 					}
-					if(tieneDiponibilidad)
-					{
-						return "siguientePaso";
-					}else
-					{
-						addErrorMessage(sessionMBean.getTextos().get("no_hay_disponibilidades_para_la_opcion_seleccionada"), MSG_ID);
-						mostrarMapa(recurso);
-						return null;
-					}
-					
-				} catch (Exception e) {
-					addErrorMessage(e, MSG_ID);
+					cont.add(Calendar.DAY_OF_MONTH, 1);
+					i++;
+				}
+				if(recursoTieneDisponibilidad) {
+					return "siguientePaso";
+				}else {
+					mostrarMapa(recurso);
 					return null;
 				}
-			}else {
-				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+			}catch (Exception e) {
+				addErrorMessage(e, MSG_ID);
 				return null;
-			}	
-	 }
+			}
+		}else {
+			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
+			return null;
+		}	
+	}
 
 	public void cambioRecurso(ValueChangeEvent event) {
+	  recursoTieneDisponibilidad = true;
 		String sRecursoId = (String) event.getNewValue();
 		Integer recursoId = Integer.valueOf(sRecursoId);
 		Boolean encontre = false;
@@ -391,7 +322,6 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 
 	public void mostrarMapa(Recurso recurso) {
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		
 		String schema = request.getScheme();
 		String host = request.getServerName();
 		String port = ""+request.getServerPort();
@@ -402,7 +332,6 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 		if(!domain.endsWith("/")) {
 			domain = domain + "/";
 		}
-	
 		urlMapa = schema+"://"+host+":"+port+domain+"mapa/mapa2.html?";
 		String lat = "";
 		String lon = "";
@@ -424,5 +353,8 @@ public class Paso1AdminMBean extends PasoAdminMBean implements SAECalendarioData
 		return urlMapa;
 	}
 	
+  public boolean isRecursoTieneDisponibilidad() {
+    return recursoTieneDisponibilidad;
+  }
+	
 }
-

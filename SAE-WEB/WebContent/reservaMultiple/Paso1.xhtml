@@ -1,0 +1,142 @@
+<ui:composition template="/reservaMultiple/Paso.template.xhtml" 
+  xmlns="http://www.w3.org/1999/xhtml" 
+  xmlns:p="http://primefaces.org/ui" 
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core" 
+	xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="parametroBean" value="#{multiplePaso1MBean}" />
+	<ui:param name="agenda_nombre" value="#{multiplePaso1MBean.agendaNombre}" />
+	<ui:param name="paso_numero" value="1" />
+	<ui:param name="paso_texto" value="#{sesionMBean.textos['datos_necesarios']}" />
+	<ui:param name="hay_error" value="#{multiplePaso1MBean.errorInit}" />
+	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-8" />
+	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
+	<ui:param name="recursoSinDisponibilidad" value="false" />
+
+	<ui:define name="descripcion">
+		<p:outputPanel rendered="#{!multiplePaso1MBean.errorInit}">
+			<ul class="tips pasoTexto">
+				<li><h:outputText value="#{sesionMBean.textos['datos_marcados_obligatorios']}." /></li>
+			</ul>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{multiplePaso1MBean.descripcion != null}">
+				<pre>
+				  <h:outputFormat escape="false" value="#{multiplePaso1MBean.descripcion}" />
+				</pre>
+			</p:outputPanel>
+      <p:outputPanel styleClass="descripcionAgenda">
+        <p:dataList styleClass="reserva-multiple" value="#{multiplePaso1MBean.reservas}" var="reserva" type="ordered" emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}">
+          <f:facet name="header">
+              <h:outputText value="#{sesionMBean.textos['reservas_incluidas']}: #{multiplePaso1MBean.reservas.size()}" />
+          </f:facet>
+          <h:outputText value="#{multiplePaso1MBean.describirReserva(reserva)}" />
+          <p:commandButton styleClass="btn-link" actionListener="#{multiplePaso1MBean.marcarReservaCancelar(reserva)}"
+            value="#{sesionMBean.textos['cancelar']}" oncomplete="PF('cancelarReserva').show();" />
+        </p:dataList>
+
+	      <ul class="form-action-buttons">
+	        <li class="action-buttons-primary">
+	          <ul>
+	            <li>
+	              <h:commandButton id="botonConfirmarReservas" styleClass="btn-lg btn-secundario"  
+	                rendered="#{multiplePaso1MBean.tokenReserva.estado == 'P' and not empty multiplePaso1MBean.reservas}"
+	                 value="#{sesionMBean.textos['confirmar_reservas']} #{multiplePaso1MBean.simboloSiguiente}" action="#{multiplePaso1MBean.confirmarReservas()}" />
+	             </li>
+              <li>
+                <p:commandButton id="botonCancelarReservas" styleClass="btn-lg btn-link" 
+                  rendered="#{multiplePaso1MBean.tokenReserva.estado == 'P' and not empty multiplePaso1MBean.reservas}" 
+                  value="#{sesionMBean.textos['cancelar_reservas']}" oncomplete="PF('cancelarReservas').show();" />
+               </li>
+	          </ul>
+	        </li>
+	      </ul>
+        
+        
+      </p:outputPanel>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="mensaje">
+		<p:outputPanel rendered="#{!multiplePaso1MBean.errorInit}">
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="contenido">
+		<p:outputPanel rendered="#{!multiplePaso1MBean.errorInit}">
+		
+      <p:outputPanel styleClass="form-horizontal" rendered="#{not empty multiplePaso1MBean.tramites}">
+       <fieldset>
+         <legend>
+           <h:outputText value="#{sesionMBean.textos['tramite']}" />
+         </legend>
+         <p:outputPanel styleClass="form-group">
+         
+	        <p:outputPanel rendered="#{not empty multiplePaso1MBean.reservas}">
+	          <div class="ui-messages-warn ui-corner-all">
+	            <span class="ui-messages-warn-icon"></span>
+	            <p class="ui-messages-warn-title">#{sesionMBean.textos['no_es_posible_cambiar_de_tramite']}</p>
+	            <ul><li><span class="ui-messages-warn-summary">#{sesionMBean.textos['ya_hay_una_reserva']}</span></li></ul>
+	          </div>
+	        </p:outputPanel>
+         
+           <h:outputLabel value="#{sesionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+           <p:outputPanel styleClass="col-sm-9">
+             <h:selectOneMenu id="tramite" value="#{multiplePaso1MBean.tramiteCodigo}" styleClass="form-control" disabled="#{not empty multiplePaso1MBean.reservas}">
+               <f:selectItems value="#{multiplePaso1MBean.tramites}" />
+             </h:selectOneMenu>
+              <h:message for="tramite" styleClass="mensajeError" />
+           </p:outputPanel>
+         </p:outputPanel>
+       </fieldset>
+      </p:outputPanel>
+		
+			<p:outputPanel id="formulario">
+				<fieldset>
+					<legend>
+						<h:outputText value="#{sesionMBean.textos['identificacion']}" />
+					</legend>
+
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sesionMBean.textos['cedula_de_identidad']}" for="cedula" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:inputText id="cedula" value="#{multiplePaso1MBean.cedula}" maxlength="25" styleClass="form-control textoMedio" />
+								<p:message for="cedula" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sesionMBean.textos['nombre_y_apellido']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" for="nombre" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="nombre" value="#{multiplePaso1MBean.nombre}" maxlength="100" styleClass="form-control" />
+								<p:message for="nombre" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sesionMBean.textos['correo_electronico']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" for="correoe" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="correoe" value="#{multiplePaso1MBean.correoe}" maxlength="100" styleClass="form-control textoLargo" />
+								<p:message for="correoe" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+
+				</fieldset>
+			</p:outputPanel>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="botones">
+		<p:outputPanel rendered="#{!multiplePaso1MBean.errorInit}">
+			<ul class="form-action-buttons">
+				<li class="action-buttons-primary">
+					<ul>
+						<li>
+						  <h:commandButton id="botonElegirRecurso" styleClass="btn-lg btn-primario"
+						    rendered="#{multiplePaso1MBean.tokenReserva == null or multiplePaso1MBean.tokenReserva.estado == 'P'}" 
+								value="#{sesionMBean.textos['seleccionar_recurso']} #{multiplePaso1MBean.simboloSiguiente}" action="#{multiplePaso1MBean.siguientePaso()}" />
+						</li>
+					</ul>
+				</li>
+			</ul>
+		</p:outputPanel>
+	</ui:define>
+</ui:composition>

@@ -22,7 +22,6 @@
 	</path>
 	
 	<target name="clean">
-
 		<sequential>
 			<mkdir dir="build" />
 			<delete quiet="true">
@@ -30,55 +29,40 @@
 					<include name="**/*" />
 				</fileset>
 			</delete>
-
 			<mkdir dir="build/classes" />
 			<mkdir dir="build/jar" />
-
 		</sequential>
 	</target>
 	
-
 	<target name="compile" depends="clean">
-
 		<manifest file="build/MANIFEST.MF">
 			<attribute name="Built-By" value="${user.name}" />
 			<attribute name="Built-Date" value="${TODAY}" />
 		</manifest>
-
 		<javac srcdir="${java.src}" destdir="build/classes" target="1.7" encoding="UTF-8" includeantruntime="false" debug="true">
 			<classpath>
 				<path refid="base.path" />
 			</classpath>
 		</javac>
-        <copy todir="build/classes">
-            <fileset dir="${java.src}" excludes="**/*.java,META-INF/*template*" />
-        </copy>
-		
+    <copy todir="build/classes">
+        <fileset dir="${java.src}" excludes="**/*.java,META-INF/*template*" />
+    </copy>
 	</target>	
 	
-	
-	
 	<target name="build" depends="compile,clean">
-
-		
 		<!-- Parametrizo el jboss.xml segun el tipo de build  -->
 		<copy todir="build/classes/META-INF" overwrite="true">
 			<fileset dir="${java.src}/META-INF">
 				<include name="jboss-template.xml" />
 			</fileset>
-
 			<mapper type="regexp" from="(.*)-template.*" to="\1.xml" />
-
 			<filterset>
 				<!-- ¿Que dominio de seguridad utiliza para asegurar los ejbs? -->
 				<filter token="SAE_SECURITY_DOMAIN" value="${build.security.domain.jndi}" />
 				<!-- ¿Cual es la ruta base de publicacion en el arbol jndi de los EJBs de SAE? -->
 				<filter token="SAE_EJB_JNDI_BASE" value="${build.sae.service.ejb.jndi_base}" />
 			</filterset>
-			
-		</copy>		
-		
-		
+		</copy>
 		<!-- Parametrizo el persistence.xml segun el tipo de build -->
 		<!-- ¿Creacion automatica del esquema? -->
 		<replaceregexp 
@@ -94,7 +78,6 @@
 			replace="&lt;jta-data-source&gt;java:/${build.sae.datasource}&lt;/jta-data-source&gt;"
 			flags="-s"
 		/>
-
 		<!-- ¿Nombre del ejb-client.jar? -->
 		<replaceregexp 
 			file="build/classes/META-INF/ejb-jar.xml"
@@ -102,19 +85,12 @@
 			replace="&lt;ejb-client-jar&gt;${build.sae.service.ejb.client}.jar&lt;/ejb-client-jar&gt;"
 			flags="-s"
 		/>
-
-		
-		<jar destfile="build/jar/${build.sae.service.ejb}.jar" 
-			 filesetmanifest="merge" manifest="build/MANIFEST.MF"
-			 duplicate="fail">
-			
+		<jar destfile="build/jar/${build.sae.service.ejb}.jar" filesetmanifest="merge" manifest="build/MANIFEST.MF" duplicate="fail">
 			<metainf dir="build/classes/META-INF"/>
-			
 			<fileset dir="build/classes">
 				<exclude name="META-INF/**"/>
 			</fileset>
 		</jar>
-		
 	</target>
 
 </project>

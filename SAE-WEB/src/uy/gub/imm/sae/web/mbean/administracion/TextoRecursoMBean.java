@@ -72,6 +72,11 @@ public class TextoRecursoMBean  extends BaseMBean {
 	public void setSessionMBean(SessionMBean sessionMBean) {
 		this.sessionMBean = sessionMBean;
 	}
+	
+	public Recurso getRecursoMarcado() {
+		return sessionMBean.getRecursoMarcado();
+	}
+	
 
 
 	@PostConstruct

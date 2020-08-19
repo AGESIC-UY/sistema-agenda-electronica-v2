@@ -214,7 +214,8 @@ button .icn {
 }
 .btn-secundario, a.btn-secundario, button.btn-secundario, button.btn-secundario.ui-state-default {
 	color: #FFF;
-	background-color: #4d7193;
+	/*background-color: #4d7193; Cambió el formulario tipo, 26/06/2017*/
+  background-color: #607a92;
 	box-shadow: 0 2px 0 #384450;
 	text-decoration: none;
 	border: 1px solid transparent;
@@ -796,7 +797,7 @@ form fieldset fieldset {
 	border: 1px solid #808184;
 }
 form fieldset, form fieldset fieldset, .ui-fieldset {
-	padding: 0px 32px 30px 32px ;
+	padding: 20px 32px 30px 32px ;
 	border-radius: 0;
 }
 fieldset .fieldset-description {
@@ -1945,9 +1946,6 @@ table input[type="text"], table select, table textarea {
 	}
 	legend {
 		font-weight: normal;
-	}
-	form .form-required {
-		display: none;
 	}
 	/* Recuadro gris */
 	.align-to-form  {

@@ -21,6 +21,7 @@
 package uy.gub.imm.sae.web.mbean.reserva;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Iterator;
@@ -29,7 +30,7 @@ import java.util.Locale;
 import java.util.Random;
 
 import javax.annotation.PostConstruct;
-import javax.ejb.EJBAccessException;
+import javax.annotation.PreDestroy;
 import javax.faces.context.FacesContext;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -39,7 +40,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
-import org.primefaces.json.JSONArray;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
@@ -53,20 +53,17 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
-import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.login.Utilidades;
-import uy.gub.imm.sae.web.common.SAECalendarioDataSource;
+import uy.gub.imm.sae.web.common.BaseMBean;
 
 /*
  * Invocación desde un sistema externo:
  * https://192.168.1.13:8443/sae/agendarReserva/Paso1.xhtml?e=1000001&a=29&u=http%3A%2F%2Fgoogle.com.uy&p=13.61.789456;13.60.CI;13.62.@@email
  * 
  */
+public class Paso1MBean extends BaseMBean {
 
-
-public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
-
-	static Logger logger = Logger.getLogger(Paso1MBean.class);
+	private static Logger LOGGER = Logger.getLogger(Paso1MBean.class);
 
 	private AgendarReservas agendarReservasEJB;
 
@@ -74,31 +71,19 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 
 	private SesionMBean sesionMBean;
 
-	/*
-	 * Será utilizado solamente en casos extermos, como que no tenga permiso para
-	 * acceder a la agenda, o la misma no sea valida, etc...
-	 */
 	private String mensajeError = null;
 
 	private List<Recurso> recursos;
 	private List<SelectItem> recursosItems;
 
 	private List<DatoDelRecurso> infoRecurso;
-	private JSONArray jsonArrayFchDisp;
 	private boolean errorInit;
 	private String urlMapa;
-
-	public JSONArray getJsonArrayFchDisp() {
-		return jsonArrayFchDisp;
-	}
-
-	public void setJsonArrayFchDisp(JSONArray jsonArrayFchDisp) {
-		this.jsonArrayFchDisp = jsonArrayFchDisp;
-	}
+	
+	private boolean recursoTieneDisponibilidad = true;
 
 	public void beforePhase(PhaseEvent phaseEvent) {
 		disableBrowserCache(phaseEvent);
-
 		if (phaseEvent.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sesionMBean.limpiarPaso2();
 		}
@@ -108,8 +93,17 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 	public void init() {
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+      LOGGER.debug("Parámetros GET: ");
+      LOGGER.debug("              : e=["+request.getParameter("e")+"]");
+      LOGGER.debug("              : a=["+request.getParameter("a")+"]");
+      LOGGER.debug("              : r=["+request.getParameter("r")+"]");
+      LOGGER.debug("              : i=["+request.getParameter("i")+"]");
+      LOGGER.debug("              : u=["+request.getParameter("u")+"]");
+      LOGGER.debug("              : p=["+request.getParameter("p")+"]");
+      LOGGER.debug("              : t=["+request.getParameter("t")+"]");
+      LOGGER.debug("              : q=["+request.getParameter("q")+"]");
 
-			String sEmpresaId = request.getParameter("e"); //Id de la empresa
+      String sEmpresaId = request.getParameter("e"); //Id de la empresa
 			String sAgendaId = request.getParameter("a"); //Id de la agenda
 			String sRecursoId = request.getParameter("r"); //Id del recurso
 			
@@ -155,7 +149,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			Integer agendaId = null;
 			Integer recursoId = null;
 			
-			if(sEmpresaId==null || sAgendaId ==null) {
+			if(sEmpresaId==null || sAgendaId==null) {
 				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 				errorInit = true;
 				return;
@@ -180,56 +174,53 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			
 			String remoteUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
 			
-			if (remoteUser == null || !remoteUser.startsWith("sae" + empresaId)) {
-				//No hay usuario o hay un usuario que no es de esta empresa (puede ser de CDA u otra empresa)
-				try {
-					// Crear un usuario falso temporal
-					String falsoUsuario = null;
-					if(remoteUser == null) {
-						//No hay usuario, se crea uno
-						sesionMBean.setUsuarioCda(null);
+			try {
+				// Crear un usuario falso temporal
+				String falsoUsuario = null;
+				if(remoteUser == null) {
+					//No hay usuario, se crea uno
+					sesionMBean.setUsuarioCda(null);
+					falsoUsuario = "sae" + empresaId;
+				}else {
+					//Hay usuario, dos alternativas: es de cda o es local de otra empresa
+					if(!remoteUser.startsWith("sae")) {
+						//Es un usuario de CDA
+						sesionMBean.setUsuarioCda(remoteUser);
+						falsoUsuario = remoteUser;
+					}else  {
+						//Ees un usuario de otra empresa
 						falsoUsuario = "sae" + empresaId;
-					}else {
-						//Hay usuario, dos alternativas: es de cda o es local de otra empresa
-						if(!remoteUser.startsWith("sae")) {
-							//Es un usuario de CDA
-							sesionMBean.setUsuarioCda(remoteUser);
-							//falsoUsuario = "sae"+remoteUser;
-							falsoUsuario = remoteUser;
-						}else  {
-							//Ees un usuario de otra empresa
-							falsoUsuario = "sae" + empresaId;;
-							sesionMBean.setUsuarioCda(null);
-						}
-						//Desloguear al usuario actual (inválido)
-						try {
-							request.logout();
-						}catch(Exception ex) {
-							ex.printStackTrace();
-						}
+						sesionMBean.setUsuarioCda(null);
 					}
-					Random random = new Random();
-					//Si no es un usuario de CDA se añade un número randómico para evitar conflictos con otros usuarios
-					if(falsoUsuario.startsWith("cda")) {
-						falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+					//Desloguear al usuario actual (inválido)
+					try {
+						request.logout();
+					}catch(Exception ex) {
+						ex.printStackTrace();
 					}
-					falsoUsuario = falsoUsuario+ "/" + empresaId;
-					// Autenticarlo
-					String password = Utilidades.encriptarPassword(falsoUsuario);
-					request.login(falsoUsuario, password);
-				} catch (Exception ex) {
-					ex.printStackTrace();
-					throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 				}
+				//Si no es un usuario de CDA se añade un número randómico para evitar conflictos con otros usuarios
+				if(falsoUsuario.startsWith("sae")) {
+	        Random random = new Random();
+					falsoUsuario = falsoUsuario + "-" + ((new Date()).getTime()+random.nextInt(1000));
+				}
+				falsoUsuario = falsoUsuario+ "/" + empresaId;
+				// Autenticarlo
+				String password = Utilidades.encriptarPassword(falsoUsuario);
+				request.login(falsoUsuario, password);
+			} catch (Exception ex) {
+				ex.printStackTrace();
+				throw new ApplicationException(sesionMBean.getTextos().get("no_se_pudo_registrar_un_usuario_anonimo"));
 			}
 			
 			//Cargar los textos dependientes del idioma
+			//Es necesario hacerlo de nuevo porque recién ahora se sabe a cuál esquema ir a buscarlos
+			//Es especialmente necesario para las pregunta de captcha ya que no tienen idioma por defecto
 			sesionMBean.cargarTextos();
-			//Restauar beans necesarios
 			
 			BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
 			agendarReservasEJB = bl.getAgendarReservas();
-			recursosEJB =bl.getRecursos();
+			recursosEJB = bl.getRecursos();
 			
 			// Guardar la empresa en la sesion
 			try {
@@ -249,18 +240,15 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 			}
 			recursosItems = new ArrayList<SelectItem>();
 			String paginaDeRetorno = request.getParameter("pagina_retorno");
-			boolean soloCuerpo = Boolean.parseBoolean(request.getParameter("solo_cuerpo"));
 			if (empresaId != null && agendaId != null) {
 				try {
 					sesionMBean.seleccionarAgenda(agendaId);
 					sesionMBean.setPaginaDeRetorno(paginaDeRetorno);
-					sesionMBean.setSoloCuerpo(soloCuerpo);
 				} catch (Exception  ae) {
 					addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 					errorInit = true;
 					return;
 				}
-
 				String url = "/agendarReserva/Paso1.xhtml?e=" + empresaId + "&a=" + agendaId;
 				if (recursoId != null) {
 					url = url + "&r=" + recursoId;
@@ -280,17 +268,15 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
         if(sTramite != null) {
           url = url + "&q=" + sTramite;
         }
-
 				sesionMBean.setUrlPaso1Reserva(url);
 			}
-
 			Recurso recursoDefecto = null;
 			// Cargo los recursos
 			if (sesionMBean.getAgenda() != null) {
 				try{
 					recursos = agendarReservasEJB.consultarRecursos(sesionMBean.getAgenda());
-					if(recursos.size()==0) {
-						addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
+					if(recursos.isEmpty()) {
+					  recursoTieneDisponibilidad = false;
 						errorInit = true;
 						return;
 					}
@@ -305,43 +291,38 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 						item.setLabel(recurso.getNombre());
 						item.setValue(recurso.getId());
 						recursosItems.add(item);
-
-						// Si es el recurso que se ingreso por parametro se guarda para
-						// seleccionarlo por defecto.
+						// Si es el recurso que se ingreso por parametro se guarda para seleccionarlo por defecto.
 						if (recursoId != null && recurso.getId().equals(recursoId)) {
 							recursoDefecto = recurso;
 						}
-					} else if (recursoId != null && recurso.getId().equals(recursoId)) {
-						throw new RolException(sesionMBean.getTextos().get("recurso_no_habilitado_para_ser_accedido_desde_internet"));
 					}
 				}
-
 				// Selecciono el recurso por defecto.
 				if (!recursos.isEmpty()) {
 					if (recursoDefecto == null) {
-						// No se ingreso un recurso en la url, o no existe ese recurso vivo
-						// para la agenda.
-						// Si hay un recurso seleccionado, me quedo con ese, sino se carga
-						// el primero.
+					  if(recursoId != null) {
+	            addAdvertenciaMessage(sesionMBean.getTextos().get("el_recurso_especificado_no_es_valido"));
+					  }
+						// No se ingreso un recurso en la url, o no existe ese recurso vivo para la agenda.
+						// Si hay un recurso seleccionado, me quedo con ese, sino se carga el primero.
 						if (sesionMBean.getRecurso() == null) {
 							sesionMBean.setRecurso(recursos.get(0));
 						}
-					} else {
+					}else {
 						// Se ingreso un recurso en la url y se encontro para la agenda.
 						sesionMBean.setRecurso(recursoDefecto);
 					}
 				}
+	      List<String> idiomasDisponibles = Arrays.asList(sesionMBean.getAgenda().getIdiomas().split(","));
+	      if(!idiomasDisponibles.contains(sesionMBean.getIdiomaActual()) && !idiomasDisponibles.isEmpty()) {
+	        LOGGER.debug("Cambiando el idioma porque el actual ("+sesionMBean.getIdiomaActual()+") no es un idioma soportado");
+	        sesionMBean.cambioIdiomaActual(idiomasDisponibles.get(0));
+	      }
 			}
-
 			mostrarMapa(sesionMBean.getRecurso());
-		} catch (RolException e1) {
-			// El usuario no tiene suficientes privilegios para acceder a la agenda
-			setMensajeError(sesionMBean.getTextos().get("acceso_denegado"));
-		} catch (EJBAccessException e2) {
-			// El usuario no tiene suficientes privilegios para acceder a la agenda
-			setMensajeError(sesionMBean.getTextos().get("acceso_denegado"));
 		} catch (Exception e) {
 			addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
+			errorInit = true;
 		}
 	}
 
@@ -353,19 +334,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 		this.mensajeError = mensajeError;
 	}
 
-	/**
-	 * Es necesario pues debo forzar a que desde cada paso que se ejecute el init
-	 * de este managed bean, pues es en el donde se analizan los parametros del
-	 * request de donde se saca el solo_cuerpo
-	 * 
-	 * @return
-	 */
-	public Boolean getSoloCuerpo() {
-		return sesionMBean.getSoloCuerpo();
-	}
-
 	public String getAgendaNombre() {
-
 		if (sesionMBean.getAgenda() != null) {
 			return sesionMBean.getAgenda().getNombre();
 		} else {
@@ -402,7 +371,6 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 	}
 
 	public List<DatoDelRecurso> getInfoRecurso() {
-
 		if (infoRecurso == null) {
 			if (sesionMBean.getRecurso() != null) {
 				try {
@@ -431,17 +399,9 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 	}
 
 	public Date getDiaSeleccionado() {
-
-		// Siempre retorno null, asi de esta forma ante una vuelta atras (del paso 2
-		// al 1) con el boton
-		// del browser, se redibuja el calendario sin tener dia marcado.
-		// Esto lo necesito pues solo se ejecuta el setDiaSeleccionado si se da el
-		// evento onchanged
-		// en las celdas del calendario.
-		// Por lo tanto si el dia estuviera marcado en una vuelta atrás, un click
-		// sobre la celda de este dia
-		// no daria el efecto deseado (ejecutar el submit ajax en el evento
-		// onchanged)
+		// Siempre retorna null para que ante una vuelta atrás (del paso 2 al 1) con el botón del browser se redibuje el calendario sin tener un día marcado.
+		// Esto es necesario pues solo se ejecuta el método setDiaSeleccionado si se da el evento onchanged en las celdas del calendario. Por lo tanto si el 
+	  // día estuviera marcado en una vuelta atrás un click sobre la celda de este día no daría el efecto deseado (ejecutar el submit ajax en el evento onchanged).
 		return null;
 	}
 
@@ -496,10 +456,9 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 		if (getMensajeError() != null) {
 			return null;
 		}
-		Agenda a = sesionMBean.getAgenda();
-		if (a != null) {
-			//TextoAgenda textoAgenda = a.getTextoAgenda();
-			TextoAgenda textoAgenda = getTextoAgenda(a, sesionMBean.getIdiomaActual());
+		Agenda agenda = sesionMBean.getAgenda();
+		if (agenda != null) {
+			TextoAgenda textoAgenda = getTextoAgenda(agenda, sesionMBean.getIdiomaActual());
 			if (textoAgenda != null) {
 				String str = textoAgenda.getTextoPaso1();
 				if (str != null) {
@@ -513,125 +472,57 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 		} else {
 			return "";
 		}
-
 	}
 
 	public String getEtiquetaSeleccionDelRecurso() {
-		if (getMensajeError() != null)
+		if (getMensajeError() != null) {
 			return null;
-		Agenda a = sesionMBean.getAgenda();
-		if (a != null) {
-			//TextoAgenda textoAgenda = a.getTextoAgenda();
-			TextoAgenda textoAgenda = getTextoAgenda(a, sesionMBean.getIdiomaActual());
+		}
+		Agenda agenda = sesionMBean.getAgenda();
+		if (agenda != null) {
+			TextoAgenda textoAgenda = getTextoAgenda(agenda, sesionMBean.getIdiomaActual());
 			if (textoAgenda != null) {
 				String str = textoAgenda.getTextoSelecRecurso();
 				if (str != null) {
 					return str;
-				} else {
+				}else {
 					return "";
 				}
-			} else {
+			}else {
 				return "";
 			}
-		} else {
+		}else {
 			return "";
 		}
 	}
 
-	// Implementacion de la interfaz SAECalendarioDataSource
-	public List<Integer> obtenerCuposXDia(Date desde, Date hasta) {
-		if (getMensajeError() != null)
-			return null;
-
-		// Si cambio el mes: actualizo.
-		if (!sesionMBean.getVentanaMesSeleccionado().getFechaInicial().equals(Utiles.time2InicioDelDia(desde))
-				|| !sesionMBean.getVentanaMesSeleccionado().getFechaFinal().equals(Utiles.time2FinDelDia(hasta))) {
-
-			sesionMBean.getVentanaMesSeleccionado().setFechaInicial(Utiles.time2InicioDelDia(desde));
-			sesionMBean.getVentanaMesSeleccionado().setFechaFinal(Utiles.time2FinDelDia(hasta));
-
-			sesionMBean.setCuposXdiaMesSeleccionado(null);
-
-			try {
-				cargarCuposADesplegar(sesionMBean.getRecurso(), sesionMBean.getVentanaMesSeleccionado());
-
-			} catch (Exception e) {
-				addErrorMessage(e);
-			}
-		}
-
-		return sesionMBean.getCuposXdiaMesSeleccionado();
-	}
-
-	private void cargarCuposADesplegar(Recurso r, VentanaDeTiempo ventanaMesSeleccionado) {
-
-		List<Integer> listaCupos = null;
-		try {
-			listaCupos = agendarReservasEJB.obtenerCuposPorDia(r, ventanaMesSeleccionado, sesionMBean.getTimeZone());
-			// Se carga la fecha inicial
-			Calendar cont = Calendar.getInstance();
-			cont.setTime(Utiles.time2InicioDelDia(sesionMBean.getVentanaMesSeleccionado().getFechaInicial()));
-
-			Integer i = 0;
-
-			Date inicio_disp = sesionMBean.getVentanaCalendario().getFechaInicial();
-			Date fin_disp = sesionMBean.getVentanaCalendario().getFechaFinal();
-
-			jsonArrayFchDisp = new JSONArray();
-			// Recorro la ventana dia a dia y voy generando la lista completa de cupos
-			// x dia con -1, 0, >0 según corresponda.
-			while (!cont.getTime().after(sesionMBean.getVentanaMesSeleccionado().getFechaFinal())) {
-				if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
-					listaCupos.set(i, -1);
-				} else {
-					if (listaCupos.get(i) > 0) {
-						String dateStr = String.valueOf(cont.get(Calendar.DAY_OF_MONTH)) + "/" + String.valueOf(cont.get(Calendar.MONTH) + 1) + "/"
-								+ String.valueOf(cont.get(Calendar.YEAR));
-						jsonArrayFchDisp.put(dateStr);
-					}
-				}
-				cont.add(Calendar.DAY_OF_MONTH, 1);
-				i++;
-			}
-			sesionMBean.setCuposXdiaMesSeleccionado(listaCupos);
-		} catch (Exception e) {
-			addErrorMessage(e);
-		}
-	}
-
 	public String siguientePaso() {
-		if (sesionMBean.getRecurso() != null)
-		{
-			Recurso recurso = sesionMBean.getRecurso();
+		if (sesionMBean.getRecurso() != null) {
 			try {
+	      Recurso recurso = sesionMBean.getRecurso();
 				VentanaDeTiempo ventanaCalendario = agendarReservasEJB.obtenerVentanaCalendarioInternet(recurso);
-				
         List<Integer> listaCupos = agendarReservasEJB.obtenerCuposPorDia(recurso, ventanaCalendario, sesionMBean.getTimeZone());
 				// Se carga la fecha inicial
 				Calendar cont = Calendar.getInstance();
         cont.setTime(Utiles.time2InicioDelDia(ventanaCalendario.getFechaInicial()));
-
-				Integer i = 0;
-
+				int i = 0;
 				Date inicio_disp = ventanaCalendario.getFechaInicial();
 				Date fin_disp = ventanaCalendario.getFechaFinal();
-				boolean tieneDiponibilidad = false; 
-				
-        while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && tieneDiponibilidad == false) {
+				recursoTieneDisponibilidad = false;
+        while (!cont.getTime().after(ventanaCalendario.getFechaFinal()) && !recursoTieneDisponibilidad) {
 					if (cont.getTime().before(inicio_disp) || cont.getTime().after(fin_disp)) {
 						listaCupos.set(i, -1);
 					} else {
 						if (listaCupos.get(i) > 0) {
-							tieneDiponibilidad = true;
+						  recursoTieneDisponibilidad = true;
 						}
 					}
 					cont.add(Calendar.DAY_OF_MONTH, 1);
 					i++;
 				}
-				if(tieneDiponibilidad) {
+				if(recursoTieneDisponibilidad) {
 					return "siguientePaso";
 				}else {
-					addErrorMessage(sesionMBean.getTextos().get("sin_disponibilidades"));
 					mostrarMapa(recurso);
 					return null;
 				}
@@ -647,6 +538,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 	}
 
 	public void cambioRecurso(ValueChangeEvent event) {
+	  recursoTieneDisponibilidad = true;
 		String sRecursoId = (String) event.getNewValue();
 		Integer recursoId = Integer.valueOf(sRecursoId);
 		Boolean encontre = false;
@@ -662,7 +554,6 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 
 	public void mostrarMapa(Recurso recurso) {
 		HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-		
 		String schema = request.getScheme();
 		String host = request.getServerName();
 		String port = ""+request.getServerPort();
@@ -673,7 +564,6 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 		if(!domain.endsWith("/")) {
 			domain = domain + "/";
 		}
-		
 		urlMapa = schema+"://"+host+":"+port+domain+"mapa/mapa2.html?";
 		String lat = "";
 		String lon = "";
@@ -685,7 +575,7 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 				lon = recurso.getLongitud().toString();
 			}
 		}
-		//lat=-34.868297562379980&lon=-55.275735855102540"
+		//Ejemplo: lat=-34.868297562379980&lon=-55.275735855102540"
 		urlMapa = urlMapa+"lat="+lat+"&lon="+lon;
 	}
 	
@@ -703,5 +593,34 @@ public class Paso1MBean extends PasoMBean implements SAECalendarioDataSource {
 	public void setErrorInit(boolean errorInit) {
 		this.errorInit = errorInit;
 	}
+	
+  public boolean isRecursoTieneDisponibilidad() {
+    return recursoTieneDisponibilidad;
+  }
 
+  @PreDestroy
+  public void preDestroy() {
+    try {
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", liberando objetos...");
+      this.agendarReservasEJB = null;
+      if(this.infoRecurso != null) {
+        this.infoRecurso.clear();
+      }
+      this.infoRecurso = null;
+      if(this.recursos!=null) {
+        this.recursos.clear();
+      }
+      this.recursos = null;
+      this.recursosEJB = null;
+      if(this.recursosItems!=null) {
+        this.recursosItems.clear();
+      }
+      this.recursosItems = null;
+      this.sesionMBean = null;
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", objetos liberados.");
+    }catch(Exception ex) {
+      LOGGER.debug("Destruyendo una instancia de "+this.getClass().getName()+", error.", ex);
+    }
+  }
+	
 }

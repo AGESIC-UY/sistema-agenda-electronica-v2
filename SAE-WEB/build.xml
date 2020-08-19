@@ -108,8 +108,7 @@
 
     </copy>
 
-    <war destfile="build/jar/sae-backoffice.war" webxml="build/web-backoffice.xml" 
-          filesetmanifest="merge" manifest="build/MANIFEST.backend.MF" duplicate="fail">
+    <war destfile="build/jar/sae-backoffice.war" webxml="build/web-backoffice.xml" filesetmanifest="merge" manifest="build/MANIFEST.backend.MF" duplicate="fail">
       <classes dir="build/classes"/>
       <fileset dir="WebContent">
         <exclude name="WebContent/META-INF"/>
@@ -119,6 +118,9 @@
       </fileset>
       <zipfileset dir="${SAE-Componentes.lib}" prefix="WEB-INF/lib">
         <include name="sae-componentes.jar" />
+      </zipfileset>
+      <zipfileset dir="../SAE-Config/libs" prefix="WEB-INF/lib">
+        <include name="gson-2.8.0.jar" />
       </zipfileset>
       <zipfileset file="build/jboss-web-backoffice.xml" fullpath="WEB-INF/jboss-web.xml" />
     </war>
@@ -138,15 +140,11 @@
         <exclude name="WEB-INF/.*"/>
         <exclude name="administracion/**"/>
         <exclude name="login/**"/>
-
       </fileset>
-
       <zipfileset file="build/jboss-web-frontend.xml" fullpath="WEB-INF/jboss-web.xml" />
-      
       <zipfileset dir="${SAE-Componentes.lib}" prefix="WEB-INF/lib">
         <include name="sae-componentes.jar" />
       </zipfileset>
-
       <zipfileset dir="../SAE-Config/libs" prefix="WEB-INF/lib">
         <include name="commons-digester-1.8.jar" />
         <include name="commons-beanutils-1.7.0.jar" />

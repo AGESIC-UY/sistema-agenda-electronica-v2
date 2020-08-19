@@ -21,6 +21,7 @@
 package uy.gub.imm.sae.business.ejb.facade;
 
 import java.util.List;
+import java.util.TimeZone;
 
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -31,10 +32,10 @@ import uy.gub.imm.sae.exception.UserException;
 
 public interface Agendas {
 
-	public boolean existeAgendaPorNombre(Agenda a) throws ApplicationException;
-	public Agenda crearAgenda(Agenda a) throws UserException, ApplicationException, BusinessException;
-	public void eliminarAgenda(Agenda a) throws UserException, ApplicationException;
-	public void modificarAgenda(Agenda a) throws UserException, ApplicationException;
-	public void copiarAgenda(Agenda a) throws BusinessException, ApplicationException, UserException;
+	public boolean existeAgendaPorNombre(Agenda agenda) throws ApplicationException;
+	public Agenda crearAgenda(Agenda agenda) throws UserException, ApplicationException, BusinessException;
+	public void eliminarAgenda(Agenda agenda, TimeZone timezone) throws UserException, ApplicationException;
+	public void modificarAgenda(Agenda agenda) throws UserException, ApplicationException;
+	public void copiarAgenda(Agenda agenda) throws BusinessException, ApplicationException, UserException;
 	public List<Agenda> consultarAgendas() throws ApplicationException;
 }

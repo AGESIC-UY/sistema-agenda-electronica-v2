@@ -1,168 +1,148 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-</head>
+<ui:composition template="/agendarReserva/Paso.template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="parametroBean" value="#{paso3MBean}" />
+	<ui:param name="agenda_nombre" value="#{paso3MBean.agendaNombre}" />
+	<ui:param name="paso_numero" value="3" />
+	<ui:param name="paso_texto" value="#{sesionMBean.textos['datos_necesarios']}" />
+  <ui:param name="hay_error" value="#{paso3MBean.errorInit}" />
+	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-8" />
+	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
+  <ui:param name="yaExisteReservaCamposClave" value="#{paso3MBean.yaExisteReservaCamposClave}" />
+  <ui:param name="recursoSinDisponibilidad" value="false" />
 
-<body>
-
-	<ui:composition template="/agendarReserva/Paso.template.xhtml">
-
-		<ui:param name="soloCuerpo" value="#{sesionMBean.soloCuerpo}" />
-		<ui:param name="parametroBean" value="#{paso3MBean}" />
-		<ui:param name="agenda_nombre" value="#{paso3MBean.agendaNombre}" />
-		<ui:param name="bodyId" value="paso3" />
-		<ui:param name="paso_numero" value="3" />
-		<ui:param name="paso_texto" value="#{sesionMBean.textos['datos_necesarios']}" />
-		<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-8" />
-		<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
-
-		<ui:define name="descripcion">
-      <p:outputPanel rendered="#{!paso3MBean.errorInit}">
-				<ul class="tips pasoTexto">
-					<li><h:outputText value="#{sesionMBean.textos['datos_marcados_obligatorios']}." /></li>
-				</ul>
-				<div class="descripcionAgenda">
-					<h:outputFormat escape="false" value="#{paso3MBean.descripcion}" rendered="#{paso3MBean.descripcion != null}" />
-				</div>
-				<div class="descripcionAgenda">
-					<h:outputFormat escape="false" value="#{paso3MBean.descripcionRecurso}" rendered="#{paso3MBean.descripcionRecurso != null}" />
-				</div>
+	<ui:define name="descripcion">
+     <p:outputPanel rendered="#{!paso3MBean.errorInit}">
+			<ul class="tips pasoTexto">
+				<li><h:outputText value="#{sesionMBean.textos['datos_marcados_obligatorios']}." /></li>
+			</ul>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{paso3MBean.descripcion != null}">
+			  <pre>
+				  <h:outputFormat escape="false" value="#{paso3MBean.descripcion}" />
+				</pre>
 			</p:outputPanel>
-		</ui:define>
-
-		<ui:define name="mensaje">
-      <p:outputPanel rendered="#{!paso3MBean.errorInit}">
-				<div class="box box-grey datosReserva">
-					<div class="fechaHoraReserva">
-						<h:outputText value="#{paso3MBean.diaSeleccionado}" styleClass="resaltado">
-							<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sesionMBean.locale}" />
-						</h:outputText>
-						<h:outputText value=" a las " />
-						<h:outputText value="#{paso3MBean.horaSeleccionada}" styleClass="resaltado">
-							<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
-						</h:outputText>
-						<h:outputText value=" hs" />
-					</div>
-					<div>
-						<h:outputText value="#{paso3MBean.recursoDescripcion}" />
-					</div>
-				</div>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{paso3MBean.descripcionRecurso != null}">
+        <pre>
+  				<h:outputFormat escape="false" value="#{paso3MBean.descripcionRecurso}" />
+        </pre>
 			</p:outputPanel>
-		</ui:define>
+		</p:outputPanel>
+	</ui:define>
 
-		<ui:define name="contenido">
-			<p:outputPanel rendered="#{!paso3MBean.errorInit}">
-        <p:outputPanel styleClass="form-required">
-          <h:outputText value="#{sesionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
-        </p:outputPanel>
-        
-        
-        <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3MBean.tramites}">
-	        <fieldset>
-	          <legend>
-	            <h:outputText value="#{sesionMBean.textos['tramite']}" />
-	          </legend>
-	          <p:outputPanel styleClass="form-group">
-	            <h:outputLabel value="#{sesionMBean.textos['tramite']}"
-	              for="tramite" styleClass="col-sm-3 control-label label" />
-	            <p:outputPanel styleClass="col-sm-9">
-	              <h:selectOneMenu id="tramite" value="#{paso3MBean.tramiteCodigo}"
-	                styleClass="form-control">
-	                <f:selectItems value="#{paso3MBean.tramites}" />
-	              </h:selectOneMenu>
-                <h:message for="tramite" styleClass="mensajeError" />
-	            </p:outputPanel>
-	          </p:outputPanel>
-	        </fieldset>
-        </p:outputPanel>
-        
-        
-        
-				<p:outputPanel id="formulario">
-					<h:panelGroup binding="#{paso3MBean.campos}" layout="block" />
-				</p:outputPanel>
-				<h:panelGroup binding="#{paso3MBean.camposError}" />
+	<ui:define name="mensaje">
+     <p:outputPanel rendered="#{!paso3MBean.errorInit}">
+			<div class="box box-grey datosReserva">
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{paso3MBean.diaSeleccionado}" styleClass="resaltado">
+						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sesionMBean.locale}" />
+					</h:outputText>
+					<h:outputText value=" a las " />
+					<h:outputText value="#{paso3MBean.horaSeleccionada}" styleClass="resaltado">
+						<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
+					</h:outputText>
+					<h:outputText value=" hs" />
+				</div>
+				<div>
+					<h:outputText value="#{paso3MBean.recursoDescripcion}" />
+				</div>
+			</div>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="contenido">
+		<p:outputPanel rendered="#{!paso3MBean.errorInit}">
+	    <p:outputPanel styleClass="form-horizontal" rendered="#{not empty paso3MBean.tramites}">
+	     <fieldset>
+	       <legend>
+	         <h:outputText value="#{sesionMBean.textos['tramite']}" />
+	       </legend>
+	       <p:outputPanel styleClass="form-group">
+	         <h:outputLabel value="#{sesionMBean.textos['tramite']}" for="tramite" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+	         <p:outputPanel styleClass="col-sm-9">
+	           <h:selectOneMenu id="tramite" value="#{paso3MBean.tramiteCodigo}" styleClass="form-control">
+	             <f:selectItems value="#{paso3MBean.tramites}" />
+	           </h:selectOneMenu>
+	            <h:message for="tramite" styleClass="mensajeError" />
+	         </p:outputPanel>
+	       </p:outputPanel>
+	     </fieldset>
+	    </p:outputPanel>
+			<p:outputPanel id="formulario">
+				<h:panelGroup binding="#{paso3MBean.campos}" layout="block" />
+			</p:outputPanel>
+			<fieldset>
+				<legend>
+					<h:outputText value="#{sesionMBean.textos['clausula_de_consentimiento_informado']}" />
+				</legend>
+				<div class="form-horizontal">
+					<div class="form-group">
+						<div class="col-sm-12">
+							<p class="cursiva">
+								<h:outputText value="#{paso3MBean.clausulaConsentimiento}" />
+							</p>
+						</div>
+					</div>
+					<h:panelGroup id="clausula" styleClass="form-group" layout="block">
+						<span class="col-sm-4 control-label label formularioCampoRequerido">
+							<h:outputText value="#{sesionMBean.textos['terminos_de_la_clausula']}" />
+						</span>
+						<p:outputPanel styleClass="col-sm-8">
+							<p:selectOneRadio id="condiciones" value="#{paso3MBean.aceptaCondiciones}" layout="responsive" columns="1">
+								<f:selectItem itemLabel="#{sesionMBean.textos['acepto_los_terminos']}" itemValue="SI" />
+								<f:selectItem itemLabel="#{sesionMBean.textos['no_acepto_los_terminos']}" itemValue="NO" />
+							</p:selectOneRadio>
+							<h:message id="mensajeCondiciones" for="condiciones" styleClass="mensajeError" />
+						</p:outputPanel>
+					</h:panelGroup>
+				</div>
+			</fieldset>
+
+			<h:panelGroup layout="block">
 				<fieldset>
 					<legend>
-						<h:outputText
-							value="#{sesionMBean.textos['clausula_de_consentimiento_informado']}" />
+						<h:outputText value="#{sesionMBean.textos['verificacion_de_seguridad']}" />
 					</legend>
-					<div class="form-horizontal">
-						<div class="form-group">
-							<div class="col-sm-12">
-								<p class="cursiva">
-									<h:outputText value="#{paso3MBean.clausulaConsentimiento}" />
-								</p>
-							</div>
-						</div>
-						<h:panelGroup id="clausula" styleClass="form-group" layout="block">
-							<span class="col-sm-3 control-label label formularioCampoRequerido">
-								<h:outputText value="#{sesionMBean.textos['terminos_de_la_clausula']}" />
-							</span>
-							<p:outputPanel styleClass="col-sm-9">
-								<p:selectOneRadio id="condiciones" value="#{paso3MBean.aceptaCondiciones}" layout="responsive" columns="1">
-									<f:selectItem itemLabel="#{sesionMBean.textos['acepto_los_terminos']}" itemValue="SI" />
-									<f:selectItem itemLabel="#{sesionMBean.textos['no_acepto_los_terminos']}" itemValue="NO" />
-								</p:selectOneRadio>
-								<h:message id="mensajeCondiciones" for="condiciones" styleClass="mensajeError" />
+           <div class="form-horizontal">
+						<h:panelGroup id="captcha" styleClass="form-group" layout="block">
+							<h:outputLabel value="Comprobación de seguridad" for="secureText" styleClass="col-sm-4 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-8">
+								<h:outputText styleClass="textoCaptcha" value="#{paso3MBean.textoIndicativoCaptcha}" />
+								<h:inputText id="secureText" size="10" styleClass="form-control" value="#{paso3MBean.textoCaptchaUsuario}" />
+								<p:commandLink styleClass="recargarCaptcha" name="btnRecargarCaptcha" id="btnRecargarCaptcha" value="#{sesionMBean.textos['solicitar_otra_frase']}"
+									actionListener="#{paso3MBean.recargarCaptcha}" update="captcha" />
+								<h:message id="captchaErrorMessage" for="secureText" errorClass="mensajeError" warnClass="mensajeWarn" infoClass="mensajeInfo" />
 							</p:outputPanel>
 						</h:panelGroup>
 					</div>
 				</fieldset>
+			</h:panelGroup>
 
-				<h:panelGroup layout="block">
-					<fieldset>
-						<legend>
-							<h:outputText
-								value="#{sesionMBean.textos['verificacion_de_seguridad']}" />
-						</legend>
-            <div class="form-horizontal">
-							<h:panelGroup id="captcha" styleClass="form-group" layout="block">
-								<h:outputLabel value="Comprobación de seguridad" for="secureText" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
-								<p:outputPanel styleClass="col-sm-9">
-									<h:outputText styleClass="textoCaptcha" value="#{paso3MBean.textoIndicativoCaptcha}" />
-									<h:inputText id="secureText" size="10" styleClass="form-control" value="#{paso3MBean.textoCaptchaUsuario}" />
-									<p:commandLink styleClass="recargarCaptcha"
-										name="btnRecargarCaptcha" id="btnRecargarCaptcha" value="#{sesionMBean.textos['solicitar_otra_frase']}"
-										actionListener="#{paso3MBean.recargarCaptcha}" update="captcha" />
-									<h:message id="captchaErrorMessage" for="secureText" errorClass="mensajeError" warnClass="mensajeWarn" infoClass="mensajeInfo" />
-								</p:outputPanel>
-							</h:panelGroup>
-						</div>
-					</fieldset>
-				</h:panelGroup>
-
-			</p:outputPanel>
-		</ui:define>
-		
-		<ui:define name="botones">
-		  <p:outputPanel rendered="#{!paso3MBean.errorInit}">
-				<ul class="form-action-buttons">
-					<li class="action-buttons-primary">
-						<ul>
-							<li><h:commandButton styleClass="btn-lg btn-primario"
-									name="botonConfirmarResrva" id="botonConfirmarResrva"
-									value="#{sesionMBean.textos['confirmar_reserva']} #{paso3MBean.simboloSiguiente}"
-									action="#{paso3MBean.confirmarReserva}" /></li>
-						</ul>
-					</li>
-					<li class="action-buttons-second">
-						<ul>
-							<li class="float-left"><h:commandButton name="botonDiaHora"
-									id="botonDiaHora" styleClass="btn-lg btn-link"
-									value="#{paso3MBean.simboloAnterior} #{sesionMBean.textos['dia_y_hora']}"
-									action="pasoAnterior" /></li>
-						</ul>
-					</li>
-				</ul>
-		  </p:outputPanel>
-		</ui:define>
-	</ui:composition>
-
-</body>
-</html>
+		</p:outputPanel>
+	</ui:define>
+	
+	<ui:define name="botones">
+	  <p:outputPanel rendered="#{!paso3MBean.errorInit}">
+			<ul class="form-action-buttons">
+				<li class="action-buttons-primary">
+					<ul>
+						<li>
+						  <h:commandButton styleClass="btn-lg btn-primario" name="botonConfirmarResrva" id="botonConfirmarResrva" 
+						     value="#{sesionMBean.textos['confirmar_reserva']} #{paso3MBean.simboloSiguiente}" action="#{paso3MBean.confirmarReserva}" />
+				     </li>
+					</ul>
+				</li>
+				<li class="action-buttons-second">
+					<ul>
+						<li class="float-left">
+						  <h:commandButton name="botonDiaHora" id="botonDiaHora" styleClass="btn-lg btn-link" value="#{paso3MBean.simboloAnterior} #{sesionMBean.textos['dia_y_hora']}"
+								action="pasoAnterior" />
+						</li>
+					</ul>
+				</li>
+			</ul>
+	  </p:outputPanel>
+	</ui:define>
+</ui:composition>

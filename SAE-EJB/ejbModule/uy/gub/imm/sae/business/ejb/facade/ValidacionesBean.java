@@ -54,7 +54,6 @@ public class ValidacionesBean implements ValidacionesLocal, ValidacionesRemote {
 
 	static Logger logger = Logger.getLogger(ValidacionesBean.class);
 	
-	
 	@SuppressWarnings("unchecked")
 	public List<Validacion> consultarValidaciones() throws ApplicationException{
 		try{

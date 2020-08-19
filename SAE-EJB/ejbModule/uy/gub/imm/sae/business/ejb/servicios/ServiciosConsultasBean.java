@@ -44,7 +44,6 @@ public class ServiciosConsultasBean implements ServiciosConsultasLocal, Servicio
 		}		
 
 		List<DatoReserva> datosConsultar = new ArrayList<DatoReserva>();
-//		Map<String,Object> datos = new HashMap<String, Object>();
 		List<DatoASolicitar> datosRecurso = recurso.getDatoASolicitar();
 		Iterator<DatoASolicitar> iterador = datosRecurso.iterator();
 		List<DatoASolicitar> datosOpcionales = new ArrayList<DatoASolicitar>();
@@ -64,8 +63,7 @@ public class ServiciosConsultasBean implements ServiciosConsultasLocal, Servicio
 		}
 		List<Reserva> reservas=consultaEJB.consultarReservaDatos(datosConsultar, recurso);
 		
-		// Elimino aquellas reservas que tengan más datos de la clave
-		// que los que se pasaron.
+		// Elimino aquellas reservas que tengan más datos de la clave que los que se pasaron.
 		if (datosOpcionales.size()> 0){
 			Iterator<DatoASolicitar> itD = datosOpcionales.iterator();
 			while (itD.hasNext()) {

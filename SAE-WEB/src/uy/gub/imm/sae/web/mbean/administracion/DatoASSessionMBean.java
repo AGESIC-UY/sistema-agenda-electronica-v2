@@ -24,8 +24,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.ejb.EJB;
-import javax.faces.event.PhaseEvent;
-import javax.faces.event.PhaseId;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.common.enumerados.Tipo;
@@ -40,9 +38,6 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 	
 	public static final String MSG_ID = "pantalla";
 	
-	//Booleana para saber si se despliega la tabla de Valores Posibles para el dato
-	//private Boolean mostrarValor = false;
-
 	//Booleana para saber si se despliega la tabla para agregar Valores Posibles
 	private Boolean mostrarAgregarValor = false;
 	
@@ -68,13 +63,10 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 
 	private Integer agrupacionDatoId = null;
 	
-	
-//	@EJB(name="ejb/RecursosBean")
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
 	
 	private SessionMBean sessionMBean; 
-	
 	
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
@@ -101,7 +93,6 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 		this.pagDatoASUpd = pagDatoASUpd;
 	}
 	
-	
 	public int getPagDatoAgrupUpd() {
 		return pagDatoAgrupUpd;
 	}
@@ -119,14 +110,15 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 	public ValorPosible getValorDelDatoSeleccionado() {
 		return valorDelDatoSeleccionado;
 	}
-	public void setValorDelDatoSeleccionado(ValorPosible valorDelDatoSeleccionado) {
 	
+	public void setValorDelDatoSeleccionado(ValorPosible valorDelDatoSeleccionado) {
 		this.valorDelDatoSeleccionado = valorDelDatoSeleccionado;
 	}
 
 	public Boolean getMostrarModifValor() {
 		return mostrarModifValor;
 	}
+	
 	public void setMostrarModifValor(Boolean mostrarModifValor) {
 		this.mostrarModifValor = mostrarModifValor;
 	}
@@ -134,6 +126,7 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 	public Boolean getMostrarConsultarValor() {
 		return mostrarConsultarValor;
 	}
+	
 	public void setMostrarConsultarValor(Boolean mostrarConsultarValor) {
 		this.mostrarConsultarValor = mostrarConsultarValor;
 	}
@@ -148,8 +141,7 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 				addErrorMessage(e, MSG_ID);
 				return null;
 			}
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
@@ -157,6 +149,7 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 	public int getPagValorRUpd() {
 		return pagValorRUpd;
 	}
+	
 	public void setPagValorRUpd(int pagValorRUpd) {
 		this.pagValorRUpd = pagValorRUpd;
 	}
@@ -164,20 +157,19 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 	public int getPagValorRCons() {
 		return pagValorRCons;
 	}
+	
 	public void setPagValorRCons(int pagValorRCons) {
 		this.pagValorRCons = pagValorRCons;
 	}
+	
 	public AgrupacionDato getAgrupacionSeleccionada() {
 		return agrupacionSeleccionada;
 	}
+	
 	public void setAgrupacionSeleccionada(AgrupacionDato agrupacionSeleccionada) {
 		this.agrupacionSeleccionada = agrupacionSeleccionada;
 	}
 
-	
-
-	
-	
 	public List<AgrupacionDato> getAgrupaciones() {
 		if (sessionMBean.getRecursoMarcado() != null && agrupaciones == null) {
 			cargarAgrupaciones();
@@ -193,39 +185,28 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 		}
 	}
 	
-
 	public void clearAgrupaciones() {
 		this.agrupaciones = null;
 	}
-
-	
-
 	
 	public Boolean getMostrarValor() {
-		
 		if (getDatoSeleccionado() != null &&
 			getDatoSeleccionado().getTipo() == Tipo.LIST) {
-			
 			return true;
-		}
-		else {
+		} else {
 			return false;
 		}
 	}
-/*	
-	public void setMostrarValor(Boolean mostrarValor) {
-		this.mostrarValor = mostrarValor;
-	}
-*/
+
 	public Boolean getMostrarAgregarValor() {
 		return mostrarAgregarValor;
 	}
+	
 	public void setMostrarAgregarValor(Boolean mostrarAgregarValor) {
 		this.mostrarAgregarValor = mostrarAgregarValor;
 	}
 
 	public List<DatoASolicitar> getDatosASolicitar() {
-
 		if (datosASolicitar == null) {
 			cargarDatosSolicitar();
 		}
@@ -245,13 +226,6 @@ public class DatoASSessionMBean extends SessionCleanerMBean implements Removable
 		this.datosASolicitar = null;
 	}	
 
-	public void beforePhaseConsultar(PhaseEvent event) {
-
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo("Consultar Dato a Solicitar");
-		}
-	}
-	
 	public Integer getAgrupacionDatoId() {
 		return agrupacionDatoId;
 	}

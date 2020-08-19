@@ -1,0 +1,73 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{configuracionMBean.beforePhase}" >
+		
+			<p:dialog closable="false" resizable="false" shadowOpacity="0.4" autosized="false" widgetVar="editarConf" zindex="2000" modal="true" dynamic="true" 
+        focus="editarConf:btnGuardar">
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['editar_configuracion']}" />
+				</f:facet>
+				<h:form id="editarConf">
+					
+          <p:outputPanel styleClass="form-group">
+            <p:outputLabel value="#{sessionMBean.textos['clave']}" for="clave" />
+            <h:inputText id="clave" maxlength="100" value="#{configuracionMBean.configuracionEditar.clave}"
+                disabled="#{configuracionMBean.configuracionEditar.clave!=null}" styleClass="form-control" />
+          </p:outputPanel>
+          <p:outputPanel styleClass="form-group">
+            <p:outputLabel value="#{sessionMBean.textos['valor']}" for="valor" />
+            <h:inputTextarea id="valor" maxlength="1024" cols="100" value="#{configuracionMBean.configuracionEditar.valor}" styleClass="form-control texto100" />
+					</p:outputPanel>
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btnGuardar" update="@all" actionListener="#{configuracionMBean.guardar}" value="#{sessionMBean.textos['guardar']}"
+								onclick="PF('editarConf').hide();" styleClass="btn-primario btn-100 btn" />
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btnCancelar" onclick="PF('editarConf').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+			
+			<h:form id="form">
+        <p:dataTable id="tablaConfiguraciones" value="#{configuracionMBean.configuraciones}" var="row" binding="#{configuracionMBean.configuracionesDataTable}" 
+          caption="#{sessionMBean.textos['configuraciones']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+          paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}"
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+        >
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['clave']}" />
+						</f:facet>
+						<h:outputText value="#{row.data.clave}" />
+					</p:column>
+					<p:column>
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['valor']}" />
+						</f:facet>
+						<h:outputText value="#{row.data.valor}" />
+					</p:column>
+					<p:column styleClass="alinCentro">
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['acciones']}" />
+						</f:facet>
+						<p:commandButton id="modificar" value="#{sessionMBean.textos['modificar']}" action="#{configuracionMBean.modificar}" update="form editarConf " 
+						  styleClass="ui-button-icon-only" icon="ui-icon-pencil" title="#{sessionMBean.textos['modificar']}" oncomplete="PF('editarConf').show();"  >
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>

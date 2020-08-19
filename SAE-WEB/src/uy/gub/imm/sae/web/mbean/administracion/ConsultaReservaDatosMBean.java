@@ -29,6 +29,7 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.component.UIComponent;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -43,8 +44,6 @@ import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoReserva;
 import uy.gub.imm.sae.entity.Reserva;
-import uy.gub.imm.sae.exception.ApplicationException;
-import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinReservaClient;
 
@@ -73,177 +72,84 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 
 	@PostConstruct
 	public void initAgendaRecurso() {
-		// Se controla que se haya Marcado una agenda para trabajar con los
-		// recursos
 		if (sessionMBean.getAgendaMarcada() == null) {
-			addErrorMessage("Debe tener una agenda seleccionada", MSG_ID);
-			
+		  addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-
-		// Se controla que se haya Marcado un recurso
 		if (sessionMBean.getRecursoMarcado() == null) {
-			addErrorMessage("Debe tener un recurso seleccionado", MSG_ID);
+      addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-		if ((sessionMBean.getRecursoMarcado() == null)||(sessionMBean.getRecursoMarcado() == null))
-		{
+		if (sessionMBean.getAgendaMarcada() == null || sessionMBean.getRecursoMarcado() == null) {
 			return;
 		}
-		try {
-			// guardo en session los datos a solicitar del recurso
-			List<DatoASolicitar> listaDatoSolicitar = recursosEJB
-					.consultarDatosSolicitar(sessionMBean.getRecursoMarcado());
-
-/*			List<DatoASolicitar> listaDatoSolicitar = sessionMBean.getRecursoMarcado().getDatoASolicitar();
-		*/
-			Map<String, DatoASolicitar> datoSolicMap = new HashMap<String, DatoASolicitar>();
-			for (DatoASolicitar dato : listaDatoSolicitar) {
-				datoSolicMap.put(dato.getNombre(), dato);
-			}
-			setDatosASolicitar(datoSolicMap);
-
-		} 
-	catch (ApplicationException e) {
-			addErrorMessage(e.getMessage());
-			return;
+		List<DatoASolicitar> listaDatoSolicitar = recursosEJB.consultarDatosSolicitar(sessionMBean.getRecursoMarcado());
+		Map<String, DatoASolicitar> datoSolicMap = new HashMap<String, DatoASolicitar>();
+		for (DatoASolicitar dato : listaDatoSolicitar) {
+			datoSolicMap.put(dato.getNombre(), dato);
 		}
-
+		setDatosASolicitar(datoSolicMap);
 	}
+
+  public void beforePhaseConsultarReservaDatos(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_datos"));
+    }
+  }
+
+  public void beforePhaseDetalleReserva(PhaseEvent event) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+      sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("datos_de_la_reserva"));
+    }
+  }
 
 	public String volverPagInicio() {
-
-		// Este objeto limpia la session
-		//SessionCleaner sc = new SessionCleaner();
 		return "volver";
 	}
-
 	
+	/**
+	 * Busca reservas para el recurso actual que coincidan con los datos ingresados por el usuario.
+	 * No considera reservas que corresponden a disponibilidades presenciales.
+	 * @param e
+	 */
 	public void buscarReservaDatos(ActionEvent e) {
 		boolean huboError = false;
-		ArrayList<Reserva> reservas = new ArrayList<Reserva>();
-
-		List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
-
-		if (sessionMBean.getAgendaMarcada() == null && !huboError) {
+		if(sessionMBean.getAgendaMarcada() == null && !huboError) {
 			huboError = true;
-			addErrorMessage("Debe seleccionar una agenda.", MSG_ID);
+			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-
-		if (sessionMBean.getRecursoMarcado() == null && !huboError) {
+		if(sessionMBean.getRecursoMarcado() == null && !huboError) {
 			huboError = true;
-			addErrorMessage("Debe seleccionar un recurso.", MSG_ID);
+			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 		}
-
 		if (!huboError) {
-
-			// Voy a negocio a buscar las reservas
-			reservas = (ArrayList<Reserva>) consultaEJB.consultarReservaDatos(
-					datos, sessionMBean.getRecursoMarcado());
-			this.consReservaDatosSessionMBean.setListaReservas(reservas);
-			if (reservas.isEmpty()) {
-				addErrorMessage(
-						"No se encontraron reservas con los filtros de búsqueda.",
-						MSG_ID);
-			} else {
-				this.consReservaDatosSessionMBean.setListaReservas(reservas);
-			}
+		  try {
+  	    List<DatoReserva> datos = FormularioDinReservaClient.obtenerDatosReserva(datosFiltroReservaMBean, datosASolicitar);
+  	    List<Reserva> reservas = (ArrayList<Reserva>) consultaEJB.consultarReservaDatos(datos, sessionMBean.getRecursoMarcado());
+  			this.consReservaDatosSessionMBean.setListaReservas(reservas);
+  			if(reservas.isEmpty()) {
+  				addErrorMessage(sessionMBean.getTextos().get("no_se_encontraron_reservas"),	MSG_ID);
+  			} else {
+  				this.consReservaDatosSessionMBean.setListaReservas(reservas);
+  			}
+		  }catch(Exception ex) {
+		    addErrorMessage(ex);
+		  }
 		}
-
 	}
 
 	public String verDetalleReserva() {
 		int iSelectedPos = getReservasDataTable().getRowIndex();
-		Reserva r = this.consReservaDatosSessionMBean.getListaReservas().get(
-				iSelectedPos);
-		this.consReservaDatosSessionMBean.setReservaDatos(r);
-		this.consReservaDatosSessionMBean.setDisponibilidad(r.getDisponibilidades().get(0));
+		Reserva reserva = this.consReservaDatosSessionMBean.getListaReservas().get(iSelectedPos);
+		this.consReservaDatosSessionMBean.setReservaDatos(reserva);
+		this.consReservaDatosSessionMBean.setDisponibilidad(reserva.getDisponibilidades().get(0));
 		return "detalleReserva";
-	}
-
-/*	public void armarFormularioEdicionDinamico(Recurso recurso,
-			UIComponent filtroConsulta, List<AgrupacionDato> agrupaciones)
-			throws Exception {
-		// Recurso recurso = sessionMBean.getRecursoMarcado();
-
-		// El chequeo de recurso != null es en caso de un acceso directo a la
-		// pagina, es solo
-		// para que no salte la excepcion en el log, pues de todas formas sera
-		// redirigido a una pagina de error.
-		if (filtroConsulta.getChildCount() == 0 && recurso != null) {
-			// List<AgrupacionDato> agrupaciones =
-			// recursosEJB.consultarDefinicionDeCampos(recurso);
-			setDatosASolicitar(FormularioDinamicoReserva
-					.obtenerCampos(agrupaciones));
-			FormularioDinamicoReserva formularioDin = new FormularioDinamicoReserva(
-					DATOS_FILTRO_RESERVA_MBEAN, FORMULARIO_ID);
-			UIComponent formulario = formularioDin
-					.armarFormulario(agrupaciones);
-			filtroConsulta.getChildren().add(formulario);
-		}
-	}
-
-	private List<DatoReserva> obtenerDatosReserva(Map<String, Object> origen) {
-
-		List<DatoReserva> datos = new ArrayList<DatoReserva>();
-
-		for (String nombre : datosFiltroReservaMBean.keySet()) {
-			Object valor = datosFiltroReservaMBean.get(nombre);
-
-			if (valor != null && !valor.toString().equals("")) {
-				DatoReserva dato = new DatoReserva();
-				dato.setDatoASolicitar(getDatosASolicitar().get(nombre));
-				// TODO DatoReserva implemetar correctamente el parser de object
-				// a string para cada tipo.
-				dato.setValor(valor.toString());
-				datos.add(dato);
-			}
-		}
-		return datos;
-	}
-
-	/** **************************************************************************** */
-	/*
-	 * private void armarFormularioLecturaDinamico(Recurso recurso, Reserva
-	 * reserva, UIComponent campos){
-	 *  /* Recurso recurso = sessionMBean.getRecursoMarcado(); Reserva reserva =
-	 * consultaSessionMBean.getReserva();
-	 */
-	/*
-	 * try{ //El chequeo de recurso != null es en caso de un acceso directo a la
-	 * pagina, es solo //para que no salte la excepcion en el log, pues de todas
-	 * formas sera redirigido a una pagina de error. /* if
-	 * (campos.getChildCount() == 0 && recurso != null &&
-	 * (!reserva.getDatosReserva().isEmpty())) { List<AgrupacionDato>
-	 * agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso); Map<String,
-	 * Object> valores = obtenerValores(reserva.getDatosReserva());
-	 * FormularioDinamicoReserva formularioDin = new
-	 * FormularioDinamicoReserva(valores); UIComponent formulario =
-	 * formularioDin.armarFormulario(agrupaciones);
-	 * campos.getChildren().add(formulario); } } catch (Exception e) {
-	 * addErrorMessage(e); }
-	 *  }
-	 * 
-	 * private Map<String, Object> obtenerValores(List<DatoReserva> datos) {
-	 * 
-	 * Map<String, Object> valores = new HashMap<String, Object>();
-	 * 
-	 * for (DatoReserva dato : datos) { //TODO parsear el valor de string a
-	 * object segun el tipo del DatoASolicitar
-	 * valores.put(dato.getDatoASolicitar().getNombre(), dato.getValor()); }
-	 * 
-	 * return valores; }
-	 * 
-	 */
-	/** **************************************************************************** */
-	public void beforePhaseConsultarReservaDatos(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("reserva_por_datos"));
-		}
-	}
-
-	public void beforePhaseDetalleReserva(PhaseEvent event) {
-		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("datos_de_la_reserva"));
-		}
 	}
 
 	public UIComponent getFiltroConsulta() {
@@ -252,18 +158,14 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 
 	public void setFiltroConsulta(UIComponent filtroConsulta) {
 		this.filtroConsulta = filtroConsulta;
-		if (this.sessionMBean.getRecursoMarcado() != null)
-		{
+		if (this.sessionMBean.getRecursoMarcado() != null) {
 			try {
 				List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefCamposTodos(this.sessionMBean.getRecursoMarcado());
 				FormularioDinReservaClient.armarFormularioEdicionDinamico(this.sessionMBean.getRecursoMarcado(), filtroConsulta, agrupaciones,sessionMBean.getFormatoFecha());
-				} catch (BusinessException be) {
-					addErrorMessage(be, MSG_ID);
-				} catch (Exception e) {
-					addErrorMessage(e);
-				}
+			} catch (Exception e) {
+				addErrorMessage(e);
+			}
 		}
-			
 	}
 
 	public DataTable getReservasDataTable() {
@@ -289,14 +191,8 @@ public class ConsultaReservaDatosMBean extends BaseMBean {
 	public void setCampos(UIComponent campos) {
 		this.campos = campos;
 		try {
-			List<AgrupacionDato> agrupaciones = recursosEJB
-					.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
-			FormularioDinReservaClient.armarFormularioLecturaDinamico(
-					sessionMBean.getRecursoMarcado(),
-					this.consReservaDatosSessionMBean.getReservaDatos(),
-					this.campos, agrupaciones,sessionMBean.getFormatoFecha());
-		} catch (BusinessException be) {
-			addErrorMessage(be, MSG_ID);
+			List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(sessionMBean.getRecursoMarcado(), sessionMBean.getTimeZone());
+			FormularioDinReservaClient.armarFormularioLecturaDinamico(sessionMBean.getRecursoMarcado(), this.consReservaDatosSessionMBean.getReservaDatos(), this.campos, agrupaciones,sessionMBean.getFormatoFecha());
 		} catch (Exception e) {
 			addErrorMessage(e);
 		}

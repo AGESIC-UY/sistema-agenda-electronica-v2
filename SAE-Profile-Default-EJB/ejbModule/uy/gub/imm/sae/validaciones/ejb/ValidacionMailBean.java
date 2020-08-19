@@ -26,6 +26,7 @@ import javax.ejb.Stateless;
 import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.validaciones.business.ejb.ResultadoValidacion;
 import uy.gub.imm.sae.validaciones.business.ejb.ValidadorReservaLocal;
 import uy.gub.imm.sae.validaciones.business.ejb.ValidadorReservaRemote;
@@ -54,10 +55,6 @@ public class ValidacionMailBean implements
 	 *	$							#end of the line
 	 */
 	
-	
-	private static final String EMAIL_PATTERN = 
-			"^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@"
-			+ "[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
 	
 	//Parametros
 	private final String PARAM_MAIL = "MAIL";
@@ -93,7 +90,7 @@ public class ValidacionMailBean implements
 				else if (mail != null) {
 					//Valido el mail
 					
-					if (!mail.matches(EMAIL_PATTERN)) {
+					if (!mail.matches(Utiles.EMAIL_PATTERN)) {
 						res.addError(CODIGO_ERROR_MAIL_INVALIDO, MENSAJE_ERROR_MAIL_INVALIDO);
 					}
 					else {

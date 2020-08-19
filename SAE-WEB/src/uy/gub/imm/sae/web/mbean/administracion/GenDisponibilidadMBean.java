@@ -30,6 +30,7 @@ import java.util.List;
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.ejb.EJBException;
+import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
@@ -91,55 +92,50 @@ public class GenDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void obtenerCuposModelo(ActionEvent e){
-	
 		limpiarMensajesError();
-		
 		try {
-			boolean huboError = false;
-			
+			boolean hayError = false;
 			if (sessionMBean.getAgendaMarcada() == null){
 				addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"));
-				huboError = true;
+				hayError = true;
 			}
 			if (sessionMBean.getRecursoMarcado() == null){
 				addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"));
-				huboError = true;
+				hayError = true;
 			}
-			
 			if (genDispSessionMBean.getFechaModelo() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formGenerarPatronDia:fecha");
-				huboError = true;
-			} else if (!disponibilidadesEJB.esDiaHabil(genDispSessionMBean.getFechaModelo(), sessionMBean.getRecursoMarcado())){
+				hayError = true;
+			}else if (Utiles.esFechaInvalida(genDispSessionMBean.getFechaModelo())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formGenerarPatronDia:fecha");
+        hayError = true;
+      }else if(!disponibilidadesEJB.esDiaHabil(genDispSessionMBean.getFechaModelo(), sessionMBean.getRecursoMarcado())){
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formGenerarPatronDia:fecha");
-				huboError = true;
+				hayError = true;
 			}else {
 				if (genDispSessionMBean.getFechaModelo().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formGenerarPatronDia:fecha");
-					huboError = true;
+					hayError = true;
 				}
 				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
 					if (genDispSessionMBean.getFechaModelo().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formGenerarPatronDia:fecha");
-						huboError = true;
+						hayError = true;
 					}
 				}
 			}
-			
 			VentanaDeTiempo v = new VentanaDeTiempo();
-			if (!huboError ) {
+			if (!hayError ) {
 				v.setFechaInicial(Utiles.time2InicioDelDia(genDispSessionMBean.getFechaModelo()) );
 				v.setFechaFinal(Utiles.time2FinDelDia(genDispSessionMBean.getFechaModelo()));
 				genDispSessionMBean.setDisponibilidadesDelDiaMatutinaModif(null);
 				genDispSessionMBean.setDisponibilidadesDelDiaVespertinaModif(null) ;
 				configurarDisponibilidadesDelDiaModif();
 			}
-		
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
-		
 	}
-
 	
 	public RowList<CupoPorDia> obtenerCupos(VentanaDeTiempo v){
 		
@@ -225,61 +221,86 @@ public class GenDisponibilidadMBean extends BaseMBean {
 	}
 
 	public void beforePhaseGenerarDisponibilidades (PhaseEvent event) {
+    //Verificar que el usuario tiene permisos para acceder a esta página
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
+    //Establecer el título de la pantalla
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("copiar_dia"));
 		}
 	}
 
 	public void generarDisponibilidades(ActionEvent event){
-		
 		limpiarMensajesError();
-		
 		try {
-		
-			Boolean huboError = false;
-			
+			boolean hayError = false;
 			if (genDispSessionMBean.getFechaModelo() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formGenerarPatronDia:fecha");
-				huboError = true;
-			} else if (!disponibilidadesEJB.esDiaHabil(genDispSessionMBean.getFechaModelo(), sessionMBean.getRecursoMarcado())){
+				hayError = true;
+			}else if(Utiles.esFechaInvalida(genDispSessionMBean.getFechaModelo())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formGenerarPatronDia:fecha");
+        hayError = true;
+			}else if (!disponibilidadesEJB.esDiaHabil(genDispSessionMBean.getFechaModelo(), sessionMBean.getRecursoMarcado())){
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_no_corresponde_a_un_dia_habil"), "formGenerarPatronDia:fecha");
-				huboError = true;
+				hayError = true;
 			}else {
 				if (genDispSessionMBean.getFechaModelo().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formGenerarPatronDia:fecha");
-					huboError = true;
+					hayError = true;
 				}
 				if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
 					if (genDispSessionMBean.getFechaModelo().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formGenerarPatronDia:fecha");
-						huboError = true;
+						hayError = true;
 					}
 				}
 			}
-			
+      Calendar hoy = new GregorianCalendar();
+      hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));
+      hoy.set(Calendar.HOUR_OF_DAY, 0);
+      hoy.set(Calendar.MINUTE, 0);
+      hoy.set(Calendar.SECOND, 0);
+      hoy.set(Calendar.MILLISECOND, 0);
 			if (genDispSessionMBean.getFechaInicial() == null ) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_obligatoria"), "formGenerarPatronDia:fechaDesde");
-				huboError = true;
+				hayError = true;
+			}else if (Utiles.esFechaInvalida(genDispSessionMBean.getFechaInicial())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_es_invalida"), "formGenerarPatronDia:fechaDesde");
+        hayError = true;
+      }else {
+        if(genDispSessionMBean.getFechaInicial().before(hoy.getTime())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_hoy"), "formGenerarPatronDia:fechaDesde");
+          hayError = true;
+        }
 			}
-	
-			if (genDispSessionMBean.getFechaFinal() == null ) {
+			if (genDispSessionMBean.getFechaFinal() == null) {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_obligatoria"), "formGenerarPatronDia:fechaHasta");
-				huboError = true;
-			}
-			
-			if(genDispSessionMBean.getFechaInicial()!=null && genDispSessionMBean.getFechaFinal()!=null){
+				hayError = true;
+			}else if (Utiles.esFechaInvalida(genDispSessionMBean.getFechaFinal())) {
+        addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_es_invalida"), "formGenerarPatronDia:fechaHasta");
+        hayError = true;
+      }else {
+        if(genDispSessionMBean.getFechaFinal().before(hoy.getTime())) {
+          addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_igual_o_posterior_a_hoy"), "formGenerarPatronDia:fechaHasta");
+          hayError = true;
+        }
+      }
+			if(genDispSessionMBean.getFechaInicial()!=null && !Utiles.esFechaInvalida(genDispSessionMBean.getFechaInicial()) &&
+			    genDispSessionMBean.getFechaFinal()!=null && !Utiles.esFechaInvalida(genDispSessionMBean.getFechaFinal())){
 				if(genDispSessionMBean.getFechaInicial().compareTo(genDispSessionMBean.getFechaFinal()) > 0) {
 					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "formGenerarPatronDia:fechaDesde", "formGenerarPatronDia:fechaHasta");
-					huboError = true;
+					hayError = true;
 				}else {
 					if (genDispSessionMBean.getFechaInicial().before(sessionMBean.getRecursoMarcado().getFechaInicioDisp())){
 						addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_debe_ser_igual_o_posterior_a_la_fecha_de_inicio_de_la_disponibilidad_del_recurso"), "formGenerarPatronDia:fechaDesde");
-						huboError = true;
+						hayError = true;
 					}
 					if (sessionMBean.getRecursoMarcado().getFechaFinDisp() != null){
 						if (genDispSessionMBean.getFechaFinal().after(sessionMBean.getRecursoMarcado().getFechaFinDisp())){
 							addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_igual_o_anterior_a_la_fecha_de_fin_de_la_disponibilidad_del_recurso"), "formGenerarPatronDia:fechaHasta");
-							huboError = true;
+							hayError = true;
 						}
 					}
 					int cantDias = 0;
@@ -291,36 +312,35 @@ public class GenDisponibilidadMBean extends BaseMBean {
 					}
 					if (cantDias > sessionMBean.getRecursoMarcado().getCantDiasAGenerar()){
 						addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_dias_comprendidos_en_el_periodo_debe_ser_menor_que_la_cantidad_de_dias_a_generar_para"), "formGenerarPatronDia:fechaHasta");
-						huboError = true;
+						hayError = true;
 					}
 				}
 			}
-			
-			if (!huboError) {
-				try{
-					VentanaDeTiempo ventana = new VentanaDeTiempo();
-					ventana.setFechaInicial(Utiles.time2InicioDelDia(genDispSessionMBean.getFechaInicial()) );
-					ventana.setFechaFinal(Utiles.time2FinDelDia(genDispSessionMBean.getFechaFinal()));
-					disponibilidadesEJB.generarDisponibilidades(sessionMBean.getRecursoMarcado(),genDispSessionMBean.getFechaModelo(), ventana, genDispSessionMBean.getDiasAplicar());
-					addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"));
-				} catch (OptimisticLockException lockE){
-					addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));
-				} catch (PersistenceException persE){
-					addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));				
-				} catch (EJBException eE){
-					if (eE.getCause() instanceof OptimisticLockException){
-						addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));			
-					}else {
-						addErrorMessage(eE);
-					}
-				} catch (Exception e) {
-					addErrorMessage(e);
+			if(hayError) {
+			  return;
+			}
+			try{
+				VentanaDeTiempo ventana = new VentanaDeTiempo();
+				ventana.setFechaInicial(Utiles.time2InicioDelDia(genDispSessionMBean.getFechaInicial()) );
+				ventana.setFechaFinal(Utiles.time2FinDelDia(genDispSessionMBean.getFechaFinal()));
+				disponibilidadesEJB.generarDisponibilidades(sessionMBean.getRecursoMarcado(),genDispSessionMBean.getFechaModelo(), ventana, genDispSessionMBean.getDiasAplicar());
+				addInfoMessage(sessionMBean.getTextos().get("disponibilidades_creadas"));
+			} catch (OptimisticLockException lockE){
+				addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));
+			} catch (PersistenceException persE){
+				addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));				
+			} catch (EJBException eE){
+				if (eE.getCause() instanceof OptimisticLockException){
+					addErrorMessage(sessionMBean.getTextos().get("error_de_acceso_concurrente"));			
+				}else {
+					addErrorMessage(eE);
 				}
+			} catch (Exception e) {
+				addErrorMessage(e);
 			}
 		}catch(Exception ex) {
 			ex.printStackTrace();
 		}
-		
 	}
 
 	public GenDispSessionMBean getGenDispSessionMBean() {

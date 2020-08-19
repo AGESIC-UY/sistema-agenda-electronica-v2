@@ -46,7 +46,6 @@ public class TextoAgendaMBean  extends BaseMBean{
 
 	public static final String MSG_ID = "pantalla";
 
-	
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendasBean!uy.gub.imm.sae.business.ejb.facade.AgendasRemote")
 	private Agendas agendasEJB;
 
@@ -55,8 +54,8 @@ public class TextoAgendaMBean  extends BaseMBean{
 	
 	public SessionMBean sessionMBean;
 	public TextoAgenda textoAux = new TextoAgenda();
-	
-	
+  private String idiomaTextos = null;
+  
 	public TextoAgenda getTextoAux() {
 		return textoAux;
 	}
@@ -78,7 +77,6 @@ public class TextoAgendaMBean  extends BaseMBean{
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 			return;
 		}
-		
 		//Se carga el idioma por defecto para los textos
 		List<SelectItem> idiomasSoportados = getIdiomasSoportados();
 		if(idiomasSoportados.isEmpty()) {
@@ -113,13 +111,9 @@ public class TextoAgendaMBean  extends BaseMBean{
 		}
 		cargarTextosEditables(idiomaTextos);
 	}
-	/**************************************************************************/
-	/*                   Action  de Texto Agenda  (navegación)                 */	
-	/**************************************************************************/	
-	
 	
 	public void guardar(ActionEvent e) {
-		if (sessionMBean.getAgendaMarcada() != null) {
+		if(sessionMBean.getAgendaMarcada() != null) {
  			try {
  				//Guardar los textos del idoma actual
  				Agenda agenda = sessionMBean.getAgendaMarcada();
@@ -138,20 +132,16 @@ public class TextoAgendaMBean  extends BaseMBean{
  						}
  					}
  				}
- 				
  				List<TramiteAgenda> tramites = generalEJB.consultarTramites(agenda);
  				agenda.setTramites(tramites);
- 				
 				agendasEJB.modificarAgenda(agenda);
 				addInfoMessage(sessionMBean.getTextos().get("agenda_modificada"), MSG_ID); 
- 			} catch (Exception ex) {
+ 			}catch (Exception ex) {
  				addErrorMessage(ex, MSG_ID);
  			}
-		}
-		else {
+		}else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 		}
-		
 	}
 	
 	public Agendas getAgendasEJB() {
@@ -167,16 +157,14 @@ public class TextoAgendaMBean  extends BaseMBean{
 		}
 	}
 	
-	//=======================================================================
-	
-	private String idiomaTextos = null;
-	
 	public String getIdiomaTextos() {
 		return idiomaTextos;
 	}
+	
 	public void setIdiomaTextos(String idiomaTextos) {
 		this.idiomaTextos = idiomaTextos;
 	}
+	
 	public List<SelectItem> getIdiomasSoportados() {
 		Agenda agenda = sessionMBean.getAgendaMarcada();
 		List<SelectItem> idiomas = new ArrayList<SelectItem>();
@@ -190,7 +178,6 @@ public class TextoAgendaMBean  extends BaseMBean{
 			}
 		}
 		Collections.sort(idiomas, new SelectItemComparator());
-		
 		return idiomas;
 	}
 	
@@ -234,7 +221,6 @@ public class TextoAgendaMBean  extends BaseMBean{
 				//Nada para hacer
 			}
 		}
-
 		textoAux = new TextoAgenda();
 		copiarTextoAgenda(textoAgenda, textoAux);
 	}
@@ -251,7 +237,5 @@ public class TextoAgendaMBean  extends BaseMBean{
 		copia.setTextoCorreoConf(original.getTextoCorreoConf());
 		copia.setTextoCorreoCanc(original.getTextoCorreoCanc());
 	}
-	
-	
 
 }

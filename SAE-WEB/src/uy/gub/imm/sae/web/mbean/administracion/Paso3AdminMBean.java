@@ -20,8 +20,12 @@ package uy.gub.imm.sae.web.mbean.administracion;
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,10 +43,14 @@ import javax.faces.model.SelectItem;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.primefaces.context.RequestContext;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Comunicaciones;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
+import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.ModoAutocompletado;
+import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.entity.DatoASolicitar;
@@ -66,6 +74,7 @@ import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
 import uy.gub.imm.sae.exception.WarningAutocompletarException;
+import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
 /**
@@ -76,8 +85,7 @@ import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
  *
  *
  */
-
-public class Paso3AdminMBean extends PasoAdminMBean {
+public class Paso3AdminMBean extends BaseMBean {
 
 	static Logger logger = Logger.getLogger(Paso3AdminMBean.class);
 	public static final String FORMULARIO_ID = "datosReserva";
@@ -89,10 +97,12 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
 	private Recursos recursosEJB;
 
+  @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ComunicacionesBean!uy.gub.imm.sae.business.ejb.facade.ComunicacionesRemote")
+  private Comunicaciones comunicacionesEJB;
+	
 	private SessionMBean sessionMBean;
 
 	private UIComponent campos;
-	private UIComponent camposError;
 	private Map<String, Object> datosReservaMBean;
 	private FormularioDinamicoReserva formularioDin;
 
@@ -101,9 +111,10 @@ public class Paso3AdminMBean extends PasoAdminMBean {
   private String tramiteCodigo;
 	private String aceptaCondiciones;
 
+  private boolean yaExisteReservaCamposClave = false;
+	
 	public void beforePhase(PhaseEvent event) {
 		disableBrowserCache(event);
-
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));
 			if (sessionMBean.getReserva() == null) {
@@ -116,21 +127,17 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 
 	@PostConstruct
 	public void init() {
-
 		if (sessionMBean.getAgenda() == null || sessionMBean.getRecurso() == null) {
-			redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+			redirect("inicio");
 			return;
 		}
-		
     try {
       this.tramiteCodigo = null;
       tramitesAgenda = new HashMap<String, TramiteAgenda>();
       tramites = new ArrayList<SelectItem>();
-      
       Reserva reserva = sessionMBean.getReserva();
       Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
       List<TramiteAgenda> tramites0 = agendarReservasEJB.consultarTramites(agenda);
-
       if(tramites0.size()==1) {
         TramiteAgenda tramite = tramites0.get(0);
         tramiteCodigo = tramite.getTramiteCodigo();
@@ -144,10 +151,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
       }
     }catch(Exception ex) {
       ex.printStackTrace();
-      redirect(ESTADO_INVALIDO_PAGE_OUTCOME);
+      redirect("inicio");
       return;
     }
-		
 	}
 
 	public SessionMBean getSessionMBean() {
@@ -168,40 +174,40 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 
 	public String getRecursoDescripcion() {
 		Recurso recurso = sessionMBean.getRecurso();
-		if (recurso != null) {
+		if(recurso != null) {
 			String descripcion = recurso.getNombre();
 			if(descripcion != null && !descripcion.equals(recurso.getDireccion())) {
 				descripcion = descripcion + " - " + recurso.getDireccion();
 			}
 			return  descripcion;
-		} else {
+		}else {
 			return null;
 		}
 	}
 
 	public String getDescripcion() {
 		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgenda(), sessionMBean.getIdiomaActual());
-		if (textoAgenda != null) {
+		if(textoAgenda != null) {
 			return textoAgenda.getTextoPaso3();
-		} else {
+		}else {
 			return null;
 		}
 	}
 
 	public String getDescripcionRecurso() {
 		TextoRecurso textoRecurso = getTextoRecurso(sessionMBean.getRecursoMarcado(), sessionMBean.getIdiomaActual());
-		if (textoRecurso != null) {
+		if(textoRecurso != null) {
 			return textoRecurso.getTextoPaso3();
-		} else {
+		}else {
 			return null;
 		}
 	}
 
 	public String getEtiquetaDelRecurso() {
 		TextoAgenda textoAgenda = getTextoAgenda(sessionMBean.getAgendaMarcada(), sessionMBean.getIdiomaActual());
-		if (textoAgenda != null) {
+		if(textoAgenda != null) {
 			return textoAgenda.getTextoSelecRecurso();
-		} else {
+		}else {
 			return null;
 		}
 	}
@@ -211,9 +217,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	}
 
 	public Date getHoraSeleccionada() {
-		if (sessionMBean.getDisponibilidad() != null) {
+		if(sessionMBean.getDisponibilidad() != null) {
 			return sessionMBean.getDisponibilidad().getHoraInicio();
-		} else {
+		}else {
 			return null;
 		}
 	}
@@ -233,30 +239,22 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 
 	public void setCampos(UIComponent campos) {
 		this.campos = campos;
-
 		try {
 			Recurso recurso = sessionMBean.getRecurso();
-
 			// El chequeo de recurso != null es en caso de un acceso directo a
 			// la pagina, es solo
 			// para que no salte la excepcion en el log, pues de todas formas
 			// sera redirigido a una pagina de error.
 			if (campos.getChildCount() == 0 && recurso != null) {
-
 				if (formularioDin == null) {
 					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
 					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
-
+					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID, FormularioDinamicoReserva.TipoFormulario.EDICION, null, sessionMBean.getFormatoFecha());
 					HashMap<Integer, HashMap<Integer, ServicioPorRecurso>> serviciosAutocompletar = new HashMap<Integer, HashMap<Integer, ServicioPorRecurso>>();
-
 					List<ServicioPorRecurso> lstServiciosPorRecurso = recursosEJB.consultarServicioAutocompletar(recurso);
-
 					for (ServicioPorRecurso sRec : lstServiciosPorRecurso) {
 						List<ServicioAutocompletarPorDato> lstDatos = sRec.getAutocompletadosPorDato();
 						List<ParametrosAutocompletar> parametros = sRec.getAutocompletado().getParametrosAutocompletados();
-
 						DatoASolicitar ultimo = null;
 						for (ParametrosAutocompletar param : parametros) {
 							if (ModoAutocompletado.SALIDA.equals(param.getModo())) {
@@ -265,31 +263,29 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 										if (ultimo == null) {
 											ultimo = sDato.getDatoASolicitar();
 										} else {
-											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo
-													.getAgrupacionDato().getOrden().intValue()) {
+											if(sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > ultimo.getAgrupacionDato().getOrden().intValue()) {
 												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-												if (auxServiciosRecurso.size() > 1) {
+												if(auxServiciosRecurso.size() > 1) {
 													auxServiciosRecurso.remove(sRec.getId());
-												} else {
+												}else {
 													serviciosAutocompletar.remove(ultimo.getId());
 												}
 												ultimo = sDato.getDatoASolicitar();
-											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == 
-											    ultimo.getAgrupacionDato().getOrden().intValue()) {
-												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
+											}else if(sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == ultimo.getAgrupacionDato().getOrden().intValue()) {
+												if(sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
 													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-													if (auxServiciosRecurso.size() > 1) {
+													if(auxServiciosRecurso.size() > 1) {
 														auxServiciosRecurso.remove(sRec.getId());
-													} else {
+													}else {
 														serviciosAutocompletar.remove(ultimo.getId());
 													}
 													ultimo = sDato.getDatoASolicitar();
-												} else if (sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
-													if (sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
+												}else if(sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
+													if(sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
 														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-														if (auxServiciosRecurso.size() > 1) {
+														if(auxServiciosRecurso.size() > 1) {
 															auxServiciosRecurso.remove(sRec.getId());
-														} else {
+														}else {
 															serviciosAutocompletar.remove(ultimo.getId());
 														}
 														ultimo = sDato.getDatoASolicitar();
@@ -297,9 +293,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 												}
 											}
 										}
-										if (serviciosAutocompletar.containsKey(ultimo.getId())) {
+										if(serviciosAutocompletar.containsKey(ultimo.getId())) {
 											serviciosAutocompletar.get(ultimo.getId()).put(sRec.getId(), sRec);
-										} else {
+										}else {
 											HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = new HashMap<Integer, ServicioPorRecurso>();
 											auxServiciosRecurso.put(sRec.getId(), sRec);
 											serviciosAutocompletar.put(ultimo.getId(), auxServiciosRecurso);
@@ -319,100 +315,6 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 		}
 	}
 
-	public UIComponent getCamposError() {
-		return camposError;
-	}
-
-	public void setCamposError(UIComponent camposError) {
-		this.camposError = camposError;
-
-		try {
-			Recurso recurso = sessionMBean.getRecurso();
-
-			// El chequeo de recurso != null es en caso de un acceso directo a
-			// la pagina, es solo
-			// para que no salte la excepcion en el log, pues de todas formas
-			// sera redirigido a una pagina de error.
-			if (camposError.getChildCount() == 0 && recurso != null) {
-
-				if (formularioDin == null) {
-					List<AgrupacionDato> agrupaciones = recursosEJB.consultarDefinicionDeCampos(recurso, sessionMBean.getTimeZone());
-					sessionMBean.setDatosASolicitar(obtenerCampos(agrupaciones));
-					formularioDin = new FormularioDinamicoReserva(DATOS_RESERVA_MBEAN, FORMULARIO_ID,
-							FormularioDinamicoReserva.TipoFormulario.EDICION, sessionMBean.getFormatoFecha());
-
-					HashMap<Integer, HashMap<Integer, ServicioPorRecurso>> serviciosAutocompletar = new HashMap<Integer, HashMap<Integer, ServicioPorRecurso>>();
-
-					List<ServicioPorRecurso> lstServiciosPorRecurso = recursosEJB.consultarServicioAutocompletar(recurso);
-
-					for (ServicioPorRecurso sRec : lstServiciosPorRecurso) {
-						List<ServicioAutocompletarPorDato> lstDatos = sRec.getAutocompletadosPorDato();
-						List<ParametrosAutocompletar> parametros = sRec.getAutocompletado().getParametrosAutocompletados();
-
-						DatoASolicitar ultimo = null;
-						for (ParametrosAutocompletar param : parametros) {
-							if (ModoAutocompletado.SALIDA.equals(param.getModo())) {
-								for (ServicioAutocompletarPorDato sDato : lstDatos) {
-									if (sDato.getNombreParametro().equals(param.getNombre())) {
-										if (ultimo == null) {
-											ultimo = sDato.getDatoASolicitar();
-										} else {
-											if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() > 
-											  ultimo.getAgrupacionDato().getOrden().intValue()) {
-												HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = serviciosAutocompletar.get(ultimo.getId());
-												if (auxServiciosRecurso.size() > 1) {
-													auxServiciosRecurso.remove(sRec.getId());
-												} else {
-													serviciosAutocompletar.remove(ultimo.getId());
-												}
-												ultimo = sDato.getDatoASolicitar();
-											} else if (sDato.getDatoASolicitar().getAgrupacionDato().getOrden().intValue() == 
-											    ultimo.getAgrupacionDato().getOrden().intValue()) {
-												if (sDato.getDatoASolicitar().getFila().intValue() > ultimo.getFila().intValue()) {
-													HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = 
-													    serviciosAutocompletar.get(ultimo.getId());
-													if (auxServiciosRecurso.size() > 1) {
-														auxServiciosRecurso.remove(sRec.getId());
-													} else {
-														serviciosAutocompletar.remove(ultimo.getId());
-													}
-													ultimo = sDato.getDatoASolicitar();
-												} else if (sDato.getDatoASolicitar().getFila().intValue() == ultimo.getFila().intValue()) {
-													if (sDato.getDatoASolicitar().getColumna().intValue() > ultimo.getColumna().intValue()) {
-														HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = 
-														    serviciosAutocompletar.get(ultimo.getId());
-														if (auxServiciosRecurso.size() > 1) {
-															auxServiciosRecurso.remove(sRec.getId());
-														} else {
-															serviciosAutocompletar.remove(ultimo.getId());
-														}
-														ultimo = sDato.getDatoASolicitar();
-													}
-												}
-											}
-										}
-										if (serviciosAutocompletar.containsKey(ultimo.getId())) {
-											serviciosAutocompletar.get(ultimo.getId()).put(sRec.getId(), sRec);
-										} else {
-											HashMap<Integer, ServicioPorRecurso> auxServiciosRecurso = new HashMap<Integer, ServicioPorRecurso>();
-											auxServiciosRecurso.put(sRec.getId(), sRec);
-											serviciosAutocompletar.put(ultimo.getId(), auxServiciosRecurso);
-										}
-									}
-								}
-							}
-						}
-					}
-					formularioDin.armarFormulario(agrupaciones, serviciosAutocompletar);
-				}
-				UIComponent errores = formularioDin.getComponenteMensajes();
-				camposError.getChildren().add(errores);
-			}
-		} catch (Exception e) {
-			addErrorMessage(e, FORMULARIO_ID);
-		}
-	}
-
 	public Map<String, Object> getDatosReservaMBean() {
 		return datosReservaMBean;
 	}
@@ -423,16 +325,14 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 
 	public String confirmarReserva() {
 		limpiarMensajesError();
-		
+    yaExisteReservaCamposClave = false;
+    sessionMBean.setReservaConfirmada(null);
 		try {
-
 			boolean hayError = false;
-			
       if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
         hayError = true;
         addErrorMessage(sessionMBean.getTextos().get("debe_seleccionar_el_tramite"), FORM_ID+":tramite");
       }
-			
 			HtmlPanelGroup clausulaGroup = (HtmlPanelGroup) FacesContext.getCurrentInstance().getViewRoot().findComponent("form:clausula");
 			String clausulaStyleClass = clausulaGroup.getStyleClass();
 			if (this.aceptaCondiciones==null || !this.aceptaCondiciones.equals("SI")) {
@@ -448,7 +348,6 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 					clausulaGroup.setStyleClass(clausulaStyleClass);
 				}
 			}
-			
 			List<String> idComponentes = new ArrayList<String>();
 			Set<DatoReserva> datos = new HashSet<DatoReserva>();
 			for (String nombre : datosReservaMBean.keySet()) {
@@ -457,29 +356,29 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 				if (valor != null && ! valor.toString().trim().equals("")) {
 					DatoReserva dato = new DatoReserva();
 					dato.setDatoASolicitar(sessionMBean.getDatosASolicitar().get(nombre));
-					dato.setValor(valor.toString());
+          String sValor = valor.toString().trim();
+          if(Tipo.STRING.equals(dato.getDatoASolicitar().getTipo()) || Tipo.NUMBER.equals(dato.getDatoASolicitar().getTipo())) {
+            //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
+            sValor = Utiles.convertirISO88591aUTF8(sValor);
+          }
+					dato.setValor(sValor);
 					datos.add(dato);
 				}
 			}
-			
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
 			Reserva reserva = sessionMBean.getReserva();
 			reserva.setDatosReserva(datos);
-			
 			agendarReservasEJB.validarDatosReserva(sessionMBean.getEmpresaActual(), reserva);
-			
 			if(hayError) {
 				return null;
 			}
-			
       reserva.setTramiteCodigo(this.tramiteCodigo);
       reserva.setTramiteNombre(tramitesAgenda.get(this.tramiteCodigo).getTramiteNombre());
-			
 			boolean confirmada = false;
 			while (!confirmada) {
 				try {
-					
 					Reserva rConfirmada = agendarReservasEJB.confirmarReserva(sessionMBean.getEmpresaActual(), reserva, null, null, true);
+					reserva.setSerie(rConfirmada.getSerie());
 					reserva.setNumero(rConfirmada.getNumero());
 					reserva.setCodigoSeguridad(rConfirmada.getCodigoSeguridad());
 					reserva.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());
@@ -488,21 +387,21 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 					//Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
 				}
 			}
-			
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-			String linkCancelacion = request.getScheme()+"://"+request.getServerName();
-			if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-				linkCancelacion = linkCancelacion + ":" + request.getServerPort();
-			}
-			Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
-			linkCancelacion = linkCancelacion + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&ri="+reserva.getId();
-			agendarReservasEJB.enviarComunicacionesConfirmacion(linkCancelacion, reserva, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
-
-			//La reserva se confirm�, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
+			String linkBase = request.getScheme()+"://"+request.getServerName();
+      if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
+        linkBase = linkBase + ":" + request.getServerPort();
+      }
+			Integer recursoId = reserva.getDisponibilidades().get(0).getRecurso().getId();
+			Integer agendaId = reserva.getDisponibilidades().get(0).getRecurso().getAgenda().getId();
+			String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&ri="+reserva.getId();
+      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&r="+recursoId+"&ri="+reserva.getId();
+      comunicacionesEJB.enviarComunicacionesConfirmacion(sessionMBean.getEmpresaActual(), linkCancelacion, linkModificacion, reserva, sessionMBean.getIdiomaActual(), 
+			    sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
 			sessionMBean.setReservaConfirmada(reserva);
 			sessionMBean.setReserva(null);
-		} catch (ValidacionPorCampoException e) {
+		}catch (ValidacionPorCampoException e) {
 			//Alguno de los campos no tiene el formato esperado
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -516,11 +415,10 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 					addErrorMessage(mensaje, "form:"+dato.getNombre());
 					idComponentesError.add(e.getNombreCampo(i));
 				}
-				//idComponentesError.add(e.getNombreCampo(i));
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch (ErrorValidacionException e) {
+		}catch (ErrorValidacionException e) {
 			//Algun grupo de campos no es valido según alguna validacion
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -534,7 +432,7 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			
 			return null;
-		} catch (ErrorValidacionCommitException e) { 
+		}catch (ErrorValidacionCommitException e) { 
 			//Algun grupo de campos no es valido según alguna validacion
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -547,16 +445,53 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			addErrorMessage(mensaje);
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		}	catch (ValidacionClaveUnicaException vcuEx) {
-			addErrorMessage(vcuEx);
+		}catch (ValidacionClaveUnicaException vcuEx) {
+      yaExisteReservaCamposClave = true;
+      String mensajeReservaPrevia = "ya_tiene_una_reserva_para_el_dia_seleccionado";
+      Recurso recurso = sessionMBean.getRecurso();
+      if(recurso.getPeriodoValidacion()!=null && recurso.getPeriodoValidacion()>0) {
+        Reserva reserva = sessionMBean.getReserva();
+        Date fecha = reserva.getDisponibilidades().get(0).getFecha();
+        Date fechaDesde = fecha;
+        Date fechaHasta = fecha;
+        Integer periodoValidacion = recurso.getPeriodoValidacion();
+        if(periodoValidacion==null) {
+          periodoValidacion=0;
+        }
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(fecha);
+        cal.add(Calendar.DATE, -1*periodoValidacion);
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        fechaDesde = cal.getTime();
+        cal.setTime(fecha);
+        cal.add(Calendar.DATE, 1*periodoValidacion);
+        cal.set(Calendar.HOUR_OF_DAY, 23);
+        cal.set(Calendar.MINUTE, 59);
+        cal.set(Calendar.SECOND, 59);
+        cal.set(Calendar.MILLISECOND, 999);
+        fechaHasta = cal.getTime();
+        DateFormat df = new SimpleDateFormat(sessionMBean.getFormatoFecha());
+        String periodo = df.format(fechaDesde) + " - " + df.format(fechaHasta);
+        mensajeReservaPrevia = sessionMBean.getTextos().get("ya_tiene_una_reserva_para_el_periodo").replace("{periodo}", periodo);;
+      }
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < vcuEx.getCantCampos(); i++) {
 				idComponentesError.add(vcuEx.getNombreCampo(i));
+        addErrorMessage(mensajeReservaPrevia, "form:"+vcuEx.getNombreCampo(i));
 			}
+			//Si hay más de un trámite también forma parte de la clave
+      if(tramites.size()>1) {
+        idComponentesError.add("tramite");
+        addErrorMessage(mensajeReservaPrevia, "form:tramite");
+      }
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
+			//Se oculta la sección de errores comun para evitar que repita el mensaje 
+      RequestContext.getCurrentInstance().execute("document.getElementById('pantalla').style.display='none'");
 			return null;
-		}
-		catch (ValidacionException e) {
+		}catch (ValidacionException e) {
 			//Faltan campos requeridos
 			List<String> idComponentesError = new ArrayList<String>();
 			for(int i = 0; i < e.getCantCampos(); i++) {
@@ -567,19 +502,31 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 			}
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
-		} catch(BusinessException bEx) {
+		}catch(BusinessException bEx) {
       //Seguramente esto fue lanzado por una Accion
       addErrorMessage(bEx.getMessage());
       bEx.printStackTrace();
       return null;
-    } catch(Exception ex) {
+    }catch(Exception ex) {
 			addErrorMessage(sessionMBean.getTextos().get("sistema_en_mantenimiento"));
 			ex.printStackTrace();
 			return null;
-		}
-		//Blanqueo el formulario de datos de la reserva
+		} finally {
+      //Si no hay una reserva confirmada es porque falló alguna validación y hay que deshacer el cambio de caracteres
+      if(sessionMBean.getReservaConfirmada() == null) {
+        for(String nombre : datosReservaMBean.keySet()) {
+          Object valor = datosReservaMBean.get(nombre);
+          DatoASolicitar datoSol = sessionMBean.getDatosASolicitar().get(nombre);
+          if(valor!=null && datoSol!=null && (Tipo.STRING.equals(datoSol.getTipo()) || Tipo.NUMBER.equals(datoSol.getTipo())) && !valor.toString().trim().isEmpty()) {
+            //Esto es un workaround para un problema en la codificación de los strings que tienen tildes
+            String sValor = Utiles.convertirISO88591aUTF8(valor.toString().trim());
+            datosReservaMBean.put(nombre, sValor);
+          }
+        }
+      }
+    }
+		//Blanquear el formulario de datos de la reserva
 		datosReservaMBean.clear();
-		
 		return "reservaConfirmada";
 	}
 	
@@ -590,53 +537,35 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 	 *         agrupaciones en un mapa cuya clave es el nombre del campo
 	 */
 	private Map<String, DatoASolicitar> obtenerCampos(
-			List<AgrupacionDato> agrupaciones) {
-
+		List<AgrupacionDato> agrupaciones) {
 		Map<String, DatoASolicitar> camposXnombre = new HashMap<String, DatoASolicitar>();
-
 		for (AgrupacionDato agrupacion : agrupaciones) {
 			for (DatoASolicitar dato : agrupacion.getDatosASolicitar()) {
 				camposXnombre.put(dato.getNombre(), dato);
 			}
 		}
-
 		return camposXnombre;
 	}
 
 	public String autocompletarCampo() {
-
-		Map<String, String> requestParameterMap = FacesContext
-				.getCurrentInstance().getExternalContext()
-				.getRequestParameterMap();
-
+		Map<String, String> requestParameterMap = FacesContext.getCurrentInstance().getExternalContext().getRequestParameterMap();
 		String claves = (String) requestParameterMap.get("paramIdsServicio");
-
 		try {
 			List<String> idComponentes = new ArrayList<String>();
-
 			for (String nombre : datosReservaMBean.keySet()) {
 				idComponentes.add(nombre);
 			}
-
 			FormularioDinamicoReserva.desmarcarCampos(idComponentes, campos);
-
 			String[] arrParamIdServicio = claves.split("\\|");
-
 			for (String paramIdServicio : arrParamIdServicio) {
 				ServicioPorRecurso sRec = new ServicioPorRecurso();
 				sRec.setId(new Integer(paramIdServicio));
-
-				Map<String, Object> valoresAutocompletar = this.agendarReservasEJB
-						.autocompletarCampo(sRec, datosReservaMBean);
-
+				Map<String, Object> valoresAutocompletar = this.agendarReservasEJB.autocompletarCampo(sRec, datosReservaMBean);
 				for (String nombre : valoresAutocompletar.keySet()) {
-
-					datosReservaMBean.put(nombre,
-							valoresAutocompletar.get(nombre).toString());
+					datosReservaMBean.put(nombre,	valoresAutocompletar.get(nombre).toString());
 				}
 			}
-
-		} catch (ErrorAutocompletarException e) {
+		}catch (ErrorAutocompletarException e) {
 			List<String> idComponentesError = new ArrayList<String>();
 			for (int i = 0; i < e.getCantCampos(); i++) {
 				idComponentesError.add(e.getNombreCampo(i));
@@ -646,12 +575,9 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 				mensaje += "  |  " + e.getMensaje(i);
 			}
 			addErrorMessage(mensaje, FORMULARIO_ID);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError,
-					campos);
-
+			FormularioDinamicoReserva.marcarCamposError(idComponentesError,	campos);
 			return null;
-		} catch (WarningAutocompletarException e) {
-
+		}catch (WarningAutocompletarException e) {
 			List<String> idComponentesError = new ArrayList<String>();
 			for (int i = 0; i < e.getCantCampos(); i++) {
 				idComponentesError.add(e.getNombreCampo(i));
@@ -661,27 +587,21 @@ public class Paso3AdminMBean extends PasoAdminMBean {
 				mensaje += "  |  " + e.getMensaje(i);
 			}
 			addInfoMessage(mensaje, FORMULARIO_ID);
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError,
-					campos);
-
+			FormularioDinamicoReserva.marcarCamposError(idComponentesError,	campos);
 			return null;
 		} catch (AutocompletarException e) {
 			// Faltan campos requeridos
 			addErrorMessage(e.getMessage(), FORMULARIO_ID);
-
 			List<String> idComponentesError = new ArrayList<String>();
 			for (int i = 0; i < e.getCantCampos(); i++) {
 				idComponentesError.add(e.getNombreCampo(i));
 			}
-			FormularioDinamicoReserva.marcarCamposError(idComponentesError,
-					campos);
-
+			FormularioDinamicoReserva.marcarCamposError(idComponentesError,	campos);
 			return null;
 		} catch (Exception e) {
 			addErrorMessage(e, FORMULARIO_ID);
 			return null;
 		}
-
 		return null;
 	}
 
@@ -705,4 +625,8 @@ public class Paso3AdminMBean extends PasoAdminMBean {
     return tramites;
   }
 	
+  public boolean isYaExisteReservaCamposClave() {
+    return yaExisteReservaCamposClave;
+  }
+  
 }

@@ -12,6 +12,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import javax.ejb.EJB;
 import javax.ejb.Schedule;
@@ -25,6 +26,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.Table;
+import javax.persistence.TemporalType;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
@@ -42,7 +44,9 @@ import org.apache.cxf.endpoint.Client;
 import org.apache.cxf.frontend.ClientProxy;
 import org.apache.cxf.transport.http.HTTPConduit;
 import org.apache.log4j.Logger;
+import org.jboss.ejb3.annotation.TransactionTimeout;
 import org.jboss.ws.extensions.addressing.AttributedURIImpl;
+import org.joda.time.DateTime;
 
 import uy.gub.agesic.AgesicConstants;
 import uy.gub.agesic.beans.RSTBean;
@@ -76,7 +80,7 @@ public class ServiciosTrazabilidadBean {
   @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
 	private Configuracion confBean;
 	
-	private static Logger logger = Logger.getLogger(ServiciosTrazabilidadBean.class);
+	private static final Logger logger = Logger.getLogger(ServiciosTrazabilidadBean.class);
 
 	/*
 	 * Por documentación del campo estado ver el documento Metadato_Trazas_Edicion_01_SinIntro.pdf
@@ -119,6 +123,8 @@ public class ServiciosTrazabilidadBean {
 	public String registrarCabezal(Empresa empresa, Reserva reserva, String transaccionId, String procesoId, boolean inicioAsistido, 
 			String transaccionPadreId, Long pasoPadre) {
 
+    logger.debug("Comenzando a registrar un cabezal de traza con id de transacción "+transaccionId);
+	  
 		boolean habilitado = false;
 		//Primero ver si la agenda soporta trazabilidad
 		Agenda agenda = reserva.getDisponibilidades().get(0).getRecurso().getAgenda();
@@ -126,6 +132,7 @@ public class ServiciosTrazabilidadBean {
 			habilitado = agenda.getConTrazabilidad().booleanValue();
 		}
 		if (!habilitado) {
+	    logger.debug("Se ignora la solicitud porque trazabilidad no está habilitado para la agenda.");
 			return null;
 		}
 		//Después ver si la instalación soporta trazabilidad 
@@ -135,19 +142,12 @@ public class ServiciosTrazabilidadBean {
 			habilitado = false;
 		}
 		if (!habilitado) {
+      logger.debug("Se ignora la solicitud porque trazabilidad no está habilitado para la instalación.");
 			return null;
 		}
-		
-		int timeout = 5000;
-		try {
-			timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
-		} catch (Exception nfEx) {
-			timeout = 5000;
-		}
-
 		CabezalDTO traza = null;
 		try {
-			URL urlWsdl = CabezalService.class.getResource("CabezalService.wsdl");
+      URL urlWsdl = CabezalService.class.getResource("CabezalService.wsdl");
 
 			// Consultar el servicio web
 			CabezalService cabezalService = new CabezalService(urlWsdl);
@@ -155,7 +155,6 @@ public class ServiciosTrazabilidadBean {
 			CabezalWS cabezalPort = cabezalService.getCabezalWSPort();
 			
 			traza = new CabezalDTO();
-			
 			//I.Friedmann: El modelo de trazabilidad está pensado para que aplique a cualquier tipo de proceso: 
 			//trámites, expedientes, compras, reclamos, etc... en el caso de Agenda se trata de Trámites, y el valor 
 			//que corresponde a ese tipo de proceso es el 1
@@ -202,13 +201,44 @@ public class ServiciosTrazabilidadBean {
 			//Ejemplo: 2015-11-16, 17:26:32 +03:00
 			traza.setFechaHoraOrganismo(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
 
-			String wsaTo = confBean.getString("WS_TRAZABILIDAD_WSATO_CABEZAL");
-			String wsaAction = confBean.getString("WS_TRAZABILIDAD_WSAACTION_CABEZAL");
-			configurarSeguridad(cabezalPort, wsaTo, wsaAction, timeout);
+	    String urlSts = confBean.getString("WS_TRAZABILIDAD_URLSTS");
+	    String rol = confBean.getString("WS_TRAZABILIDAD_ROL");
+	    String policy = confBean.getString("WS_TRAZABILIDAD_POLICY");
 
+	    String orgKsPath = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PATH");
+	    String orgKsPass = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PASS");
+	    String orgKsAlias = confBean.getString("WS_TRAZABILIDAD_ORG_KS_ALIAS");
+
+	    String sslKsPath = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PATH");
+	    String sslKsPass = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PASS");
+	    String sslKsAlias = confBean.getString("WS_TRAZABILIDAD_SSL_KS_ALIAS");
+
+	    String sslTsPath = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PATH");
+	    String sslTsPass = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PASS");
+
+	    String wsaTo = confBean.getString("WS_TRAZABILIDAD_WSATO_CABEZAL");
+			String wsaAction = confBean.getString("WS_TRAZABILIDAD_WSAACTION_CABEZAL");
+			
+			String wsAddressLocation = confBean.getString("WS_TRAZABILIDAD_LOCATION_CABEZAL");
+			
+	    int timeout = 5000;
+	    try {
+	      timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
+	    } catch (Exception nfEx) {
+	      timeout = 5000;
+	    }
+
+			configurarWSPort(cabezalPort, urlSts, rol, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias, sslTsPath, sslTsPass, 
+			    wsAddressLocation, wsaTo, wsaAction, timeout);
+
+			logger.debug("Realizando la invocación del servicio web...");
+			
 			CabezalResponseDTO cabezalResp = cabezalPort.persist(traza);
 			if (cabezalResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.cabezal.EstadoRespuestaEnum.OK)) {
 				registrarTraza(empresa, reserva.getId(), transaccionId, cabezalToXml(traza), true, false, true);
+				
+				logger.debug("El cabezal de la traza fue registrado correctamente");
+				
 				return cabezalResp.getGuid();
 			} else {
 				// No se pudo registrar la traza pero no se puede cancelar la reserva
@@ -233,6 +263,8 @@ public class ServiciosTrazabilidadBean {
 	 */
 	public void registrarLinea(Empresa empresa, Reserva reserva, String transaccionId, String oficina, Paso paso) {
 		
+    logger.debug("Comenzando a registrar una línea de traza con id de transacción "+transaccionId);
+	  
 		boolean habilitado = false;
 		
 		//Primero ver si la agenda soporta trazabilidad
@@ -250,6 +282,7 @@ public class ServiciosTrazabilidadBean {
 			habilitado = false;
 		}
 		if (!habilitado) {
+      logger.debug("Se ignora la solicitud porque trazabilidad no está habilitado para la agenda.");
 			return;
 		}
 
@@ -259,7 +292,6 @@ public class ServiciosTrazabilidadBean {
 		query.setParameter("transaccionId", transaccionId);
 		long pasoProceso = (Long) query.getSingleResult();
 		pasoProceso++; //Este pasoProceso es uno más que la cantidad de lineas de la transacción
-		
 		LineaDTO traza = null;
 		traza = new LineaDTO();
 		traza.setIdTransaccion(transaccionId);
@@ -283,6 +315,8 @@ public class ServiciosTrazabilidadBean {
 		traza.setPasoDelProceso(pasoProceso);
 
 		registrarTraza(empresa, reserva.getId(), transaccionId, lineaToXml(traza), false, false, false);
+		
+    logger.debug("La línea de la traza fue registrada correctamente");
 	}
 
 	private String cabezalToXml(CabezalDTO cabezal) {
@@ -373,11 +407,16 @@ public class ServiciosTrazabilidadBean {
 		return null;
 	}
 
+  private static final long LOCK_ID_REINTENTAR = 1414141414;
 	@SuppressWarnings("unchecked")
-	@Schedule(second = "0", minute = "*/3", hour = "*", persistent = false)
+  @TransactionTimeout(value=30, unit=TimeUnit.MINUTES)
+	@Schedule(second = "0", minute = "*/5", hour = "*", persistent = false)
+  //@Schedule(second = "0", minute = "*/1", hour = "*", persistent = false)
 	public void reintentarTrazas() {
 
-		boolean habilitado = false;
+    logger.info("Reintentando el envío de trazas pendientes...");
+	  
+	  boolean habilitado = false;
 		try {
 			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
 		} catch (NumberFormatException nfEx) {
@@ -386,139 +425,184 @@ public class ServiciosTrazabilidadBean {
 		if (!habilitado) {
 			return;
 		}
-		
-		int maxIntentos = 15;
-		try {
-			maxIntentos = confBean.getLong("WS_TRAZABILIDAD_MAXINTENTOS").intValue();
-		} catch (Exception nfEx) {
-			maxIntentos = 15;
-		}
-		
-		String eql = "SELECT t FROM Trazabilidad t WHERE t.enviado=FALSE AND t.intentos<:maxIntentos ORDER BY id";
-		Query query = globalEntityManager.createQuery(eql);
-		query.setParameter("maxIntentos", maxIntentos);
-		List<Trazabilidad> trazas = (List<Trazabilidad>) query.getResultList();
-		if (!trazas.isEmpty()) {
 
-			CabezalService cabezalService = new CabezalService(CabezalService.class.getResource("CabezalService.wsdl"));
-			CabezalWS cabezalPort = cabezalService.getCabezalWSPort();
-			String wsaToCabezal = confBean.getString("WS_TRAZABILIDAD_WSATO_CABEZAL");
-			String wsaActionCabezal = confBean.getString("WS_TRAZABILIDAD_WSAACTION_CABEZAL");
-
-			LineaService lineaService = new LineaService(LineaService.class.getResource("LineaService.wsdl"));
-			LineaWS lineaPort = lineaService.getLineaWSPort();
-			String wsaToLinea = confBean.getString("WS_TRAZABILIDAD_WSATO_LINEA");
-			String wsaActionLinea = confBean.getString("WS_TRAZABILIDAD_WSAACTION_LINEA");
-			
-			int timeout = 5000;
-			try {
-				timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
-			} catch (Exception nfEx) {
-				timeout = 5000;
-			}
-
-			//Determinar el nombre de la tabla de reservas
-			Table tabla = Reserva.class.getAnnotation(Table.class);
-			String nombreTablaReservas = "reservas";
-			if(tabla != null) {
-				nombreTablaReservas = tabla.name();
-			}
-			
-			for (Trazabilidad traza : trazas) {
-				traza.setFechaUltIntento(new Date());
-				traza.setIntentos(traza.getIntentos() + 1);
-				
-				try {
-					if (traza.getEsCabezal()) {
-						CabezalDTO cabezal = xmlToCabezal(traza.getDatos());
-						configurarSeguridad(cabezalPort, wsaToCabezal, wsaActionCabezal, timeout);
-						CabezalResponseDTO cabezalResp = cabezalPort.persist(cabezal);
-						if (cabezalResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.cabezal.EstadoRespuestaEnum.OK)) {
-							//Actualizar el codigo de trazabilidad en la tabla de reservas
-							//Y enviar el mail al usuario
-							if(traza.getEmpresa()!=null && traza.getReservaId()!=null) {
-								try {
-									//
-									String esquema = traza.getEmpresa().getDatasource();
-
-									//Actualizar el codigo de trazabilidad en la tabla de reservas
-									String sql = "UPDATE "+esquema+"."+nombreTablaReservas+
-											" SET trazabilidad_guid=:trazabilidadGuid WHERE id=:reservaId";
-									Query update = globalEntityManager.createNativeQuery(sql);
-									update.setParameter("trazabilidadGuid", cabezalResp.getGuid());
-									update.setParameter("reservaId", traza.getReservaId());
-									update.executeUpdate();
-									
-									//Obtener el texto para el mail de notificación de código de trazabilidad
-									
-									//glabandera 04/02/2016 hasta no tener un texto configurable no se enviará mail
-									//Enviar el código por mail al usuario
-//									sql = "SELECT valor FROM "+esquema+".ae_datos_reserva dr JOIN "+esquema+".ae_datos_a_solicitar ds ON "
-//											+ " ds.id=dr.aeds_id JOIN "+esquema+".ae_agrupaciones_datos ad ON ad.id=ds.aead_id WHERE "
-//											+ "dr.aers_id=:reservaId AND UPPER(ds.nombre)='MAIL' AND UPPER(ad.nombre)='DATOS PERSONALES'";
-//									update = globalEntityManager.createNativeQuery(sql);
-//									update.setParameter("reservaId", traza.getReservaId());
-//									List<String> emails = update.getResultList();
-//									for(String email : emails) {
-//										if(email != null && !email.trim().isEmpty()) {
-//											//ToDo: crear un mensaje apropiado
-//											MailUtiles.enviarMail(email, "Su código de trazabilidad", "El código de trazabilidad de su reserva es '"+cabezalResp.getGuid()+"'", MailUtiles.CONTENT_TYPE_PLAIN);
-//										}
-//									}
-									
-								}catch(Exception ex) {
-									ex.printStackTrace();
-								}
-							}
-							traza.setEnviado(true);
-						} else {
-							traza.setEnviado(false);
-						}
-					} else {
-						LineaDTO linea = xmlToLinea(traza.getDatos());
-						configurarSeguridad(lineaPort, wsaToLinea, wsaActionLinea, timeout);
-						ResponseDTO lineaResp = lineaPort.persist(linea);
-						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
-							traza.setEnviado(true);
-						} else {
-							traza.setEnviado(false);
-						}
-					}
-				} catch (Exception ex) {
-					ex.printStackTrace();
-				} finally {
-					try {
-						globalEntityManager.merge(traza);
-					}catch(Exception ex) {
-						//
-					}
-				}
-			}
-		}
+    try {
+      //Intentar liberar el lock por si lo tiene esta instancia
+      boolean lockOk = (boolean)globalEntityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID_REINTENTAR+")").getSingleResult();
+      //Intentar obtener el lock
+      lockOk = (boolean)globalEntityManager.createNativeQuery("SELECT pg_try_advisory_lock("+LOCK_ID_REINTENTAR+")").getSingleResult();
+      if(!lockOk) {
+        //Otra instancia tiene el lock
+        logger.info("No se ejecuta el reintento de trazas porque hay otra instancia haciéndolo.");
+        return;
+      }
+      //No hay otra instancia con el lock, se continúa
+  		
+  		int maxIntentos = 15;
+  		try {
+  			maxIntentos = confBean.getLong("WS_TRAZABILIDAD_MAXINTENTOS").intValue();
+  		} catch (Exception nfEx) {
+  			maxIntentos = 15;
+  		}
+  		
+  		String eql = "SELECT t FROM Trazabilidad t WHERE t.enviado=FALSE AND t.intentos<:maxIntentos ORDER BY id";
+  		
+      logger.debug("Consulta para determinar las trazas pendientes: "+eql);
+  		
+  		Query query = globalEntityManager.createQuery(eql);
+  		query.setParameter("maxIntentos", maxIntentos);
+  		List<Trazabilidad> trazas = (List<Trazabilidad>) query.getResultList();
+  		
+      logger.debug("Se encontraron "+trazas.size()+" trazas pendientes de envío");
+  		
+  		if (!trazas.isEmpty()) {
+  
+        String urlSts = confBean.getString("WS_TRAZABILIDAD_URLSTS");
+        String rol = confBean.getString("WS_TRAZABILIDAD_ROL");
+        String policy = confBean.getString("WS_TRAZABILIDAD_POLICY");
+  
+        String orgKsPath = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PATH");
+        String orgKsPass = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PASS");
+        String orgKsAlias = confBean.getString("WS_TRAZABILIDAD_ORG_KS_ALIAS");
+  
+        String sslKsPath = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PATH");
+        String sslKsPass = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PASS");
+        String sslKsAlias = confBean.getString("WS_TRAZABILIDAD_SSL_KS_ALIAS");
+  
+        String sslTsPath = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PATH");
+        String sslTsPass = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PASS");
+  
+        URL urlWsdl = CabezalService.class.getResource("CabezalService.wsdl");
+  			CabezalService cabezalService = new CabezalService(urlWsdl);
+  			CabezalWS cabezalPort = cabezalService.getCabezalWSPort();
+  			String wsaToCabezal = confBean.getString("WS_TRAZABILIDAD_WSATO_CABEZAL");
+  			String wsaActionCabezal = confBean.getString("WS_TRAZABILIDAD_WSAACTION_CABEZAL");
+  
+  			LineaService lineaService = new LineaService(LineaService.class.getResource("LineaService.wsdl"));
+  			LineaWS lineaPort = lineaService.getLineaWSPort();
+  			String wsaToLinea = confBean.getString("WS_TRAZABILIDAD_WSATO_LINEA");
+  			String wsaActionLinea = confBean.getString("WS_TRAZABILIDAD_WSAACTION_LINEA");
+        
+  			String wsAddressLocationCabezal = confBean.getString("WS_TRAZABILIDAD_LOCATION_CABEZAL");
+        String wsAddressLocationLinea = confBean.getString("WS_TRAZABILIDAD_LOCATION_LINEA");
+  			
+  			int timeout = 5000;
+  			try {
+  				timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
+  			} catch (Exception nfEx) {
+  				timeout = 5000;
+  			}
+  
+  			//Determinar el nombre de la tabla de reservas
+  			Table tabla = Reserva.class.getAnnotation(Table.class);
+  			String nombreTablaReservas = "reservas";
+  			if(tabla != null) {
+  				nombreTablaReservas = tabla.name();
+  			}
+  			
+  			DateTime tokenCabezalVence = null;
+        DateTime tokenLineaVence = null;
+  			
+  			for (Trazabilidad traza : trazas) {
+  				traza.setFechaUltIntento(new Date());
+  				traza.setIntentos(traza.getIntentos() + 1);
+  
+  				logger.debug("Procesando la traza ["+traza.getId()+"] ("+(traza.getEsCabezal()?"cabezal":"línea")+")");
+  				try {
+  					if (traza.getEsCabezal()) {
+  						CabezalDTO cabezal = xmlToCabezal(traza.getDatos());
+              if(tokenCabezalVence==null || !tokenCabezalVence.isAfterNow()) {
+                logger.debug("No hay token STS o está por vencerse, se pide uno... ");
+                tokenCabezalVence = configurarWSPort(cabezalPort, urlSts, rol, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias, sslTsPath, sslTsPass, 
+                    wsAddressLocationCabezal, wsaToCabezal, wsaActionCabezal, timeout);
+              }
+  						CabezalResponseDTO cabezalResp = cabezalPort.persist(cabezal);
+  						if (cabezalResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.cabezal.EstadoRespuestaEnum.OK)) {
+  							//Actualizar el codigo de trazabilidad en la tabla de reservas
+  							//Y enviar el mail al usuario
+  							if(traza.getEmpresa()!=null && traza.getReservaId()!=null) {
+  								try {
+  									//
+  									String esquema = traza.getEmpresa().getDatasource();
+  									//Actualizar el codigo de trazabilidad en la tabla de reservas
+  									String sql = "UPDATE "+esquema+"."+nombreTablaReservas+ " SET trazabilidad_guid=:trazabilidadGuid WHERE id=:reservaId";
+  									Query update = globalEntityManager.createNativeQuery(sql);
+  									update.setParameter("trazabilidadGuid", cabezalResp.getGuid());
+  									update.setParameter("reservaId", traza.getReservaId());
+  									update.executeUpdate();
+  								}catch(Exception ex) {
+  									ex.printStackTrace();
+  								}
+  							}
+  							traza.setEnviado(true);
+  						} else {
+                logger.warn("El servicio se invocó correctamente pero no respondió OK: "+cabezalResp.getEstado()+"/"+cabezalResp.getMensaje());
+  							traza.setEnviado(false);
+  						}
+  					} else {
+  						LineaDTO linea = xmlToLinea(traza.getDatos());
+              if(tokenLineaVence==null || !tokenLineaVence.isAfterNow()) {
+                logger.debug("No hay token STS o está por vencerse, se pide uno... ");
+                tokenLineaVence = configurarWSPort(lineaPort, urlSts, rol, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias, sslTsPath, sslTsPass, 
+                    wsAddressLocationLinea, wsaToLinea, wsaActionLinea, timeout);
+              }
+  						ResponseDTO lineaResp = lineaPort.persist(linea);
+  						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
+  							traza.setEnviado(true);
+  						} else {
+  							traza.setEnviado(false);
+  						}
+  					}
+  	        logger.debug("La traza ["+traza.getId()+"] fue procesada correctamente.");
+  				} catch (Exception ex) {
+            logger.debug("La traza ["+traza.getId()+"] no pudo ser procesada!", ex);
+  				} finally {
+  					try {
+  						globalEntityManager.merge(traza);
+  					}catch(Exception ex) {
+  						//
+  					}
+  				}
+  			}
+  		}
+		}finally {
+      //Intentar liberar el lock (si lo tiene esta instancia)
+      globalEntityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID_REINTENTAR+")").getSingleResult();
+      logger.info("Ejecución del reintento de trazas finalizada.");
+    }
 
 	}
 
+	/**
+	 * Aplica la política de seguridad requerida para invocar un servicio web en la plataforma.
+	 * Obtiene el token STS, añade los handlers necesarios y configura los timeouts.
+	 * @return La fecha en la cual vence el token para que el cliente pida otro si está vencido.
+	 * @throws Exception
+	 */
 	@SuppressWarnings("rawtypes")
-	private void configurarSeguridad(Object port, String wsaTo, String wsaAction, int timeout) throws Exception {
-		/* */
-		String urlSts = confBean.getString("WS_TRAZABILIDAD_URLSTS");
-		String rol = confBean.getString("WS_TRAZABILIDAD_ROL");
-		String policy = confBean.getString("WS_TRAZABILIDAD_POLICY");
-
-		String orgKsPath = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PATH");
-		String orgKsPass = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PASS");
-		String orgKsAlias = confBean.getString("WS_TRAZABILIDAD_ORG_KS_ALIAS");
-
-		String sslKsPath = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PATH");
-		String sslKsPass = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PASS");
-		String sslKsAlias = confBean.getString("WS_TRAZABILIDAD_SSL_KS_ALIAS");
-
-		String sslTsPath = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PATH");
-		String sslTsPass = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PASS");
-
+  private DateTime configurarWSPort(Object port, String urlSts, String rol, String policy, String orgKsPath, String orgKsPass, String orgKsAlias, String sslKsPath, 
+      String sslKsPass, String sslKsAlias, String sslTsPath, String sslTsPass, String wsAddressLocation, String wsaTo, String wsaAction, int timeout) throws Exception {
+		
+	  logger.debug("Propiedades del servicio web: ");
+    logger.debug("--- urlSts: "+urlSts);
+    logger.debug("--- rol: "+rol);
+    logger.debug("--- policy: "+policy);
+    logger.debug("--- orgKsPath: "+orgKsPath);
+    logger.debug("--- orgKsPass: ***");
+    logger.debug("--- orgKsAlias: "+orgKsAlias);
+    logger.debug("--- sslKsPath: "+sslKsPath);
+    logger.debug("--- sslKsPass: ***");
+    logger.debug("--- sslKsAlias: "+sslKsAlias);
+    logger.debug("--- sslTsPath: "+sslTsPath);
+    logger.debug("--- sslTsPass: ***");
+    logger.debug("--- wsAddressLocation: "+wsAddressLocation);
+    logger.debug("--- wsaTo: "+wsaTo);
+    logger.debug("--- wsaAction: "+wsaAction);
+    logger.debug("--- timeout: "+timeout);
+	  
 		SAMLAssertion tokenSTS = obtenerTokenSTS(urlSts, rol, wsaTo, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias,
 				sslTsPath, sslTsPass, timeout);
-
+		
 		AddressingBuilder addrBuilder = SOAPAddressingBuilder.getAddressingBuilder();
 		SOAPAddressingProperties addrProps = (SOAPAddressingProperties) addrBuilder.newAddressingProperties();
 
@@ -532,12 +616,16 @@ public class ServiciosTrazabilidadBean {
 		customHandlerChain.add(new SoapHandler());
 
 		BindingProvider bindingProvider = (BindingProvider) port;
-
+		
 		Map<String, Object> reqContext = bindingProvider.getRequestContext();
 		reqContext.put(JAXWSAConstants.CLIENT_ADDRESSING_PROPERTIES, addrProps);
 		reqContext.put(AgesicConstants.SAML1_PROPERTY, tokenSTS);
 		reqContext.put("javax.xml.ws.client.connectionTimeout", timeout);
 		reqContext.put("javax.xml.ws.client.receiveTimeout", timeout);
+    if(wsAddressLocation != null) {
+      //Si no se define se deja lo que tenga el WSDL
+      reqContext.put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, wsAddressLocation);
+    }
 
 		// Para configurar el keystore y el truststore
 		Client client = ClientProxy.getClient(port);
@@ -548,6 +636,12 @@ public class ServiciosTrazabilidadBean {
 		conduit.setTlsClientParameters(tlsParams);
 		bindingProvider.getBinding().setHandlerChain(customHandlerChain);
 
+    //Se le quita algunos segundos para prevenir que venza mientras se ejecuta alguna acción
+		DateTime tokenVence = tokenSTS.getAssertion().getConditions().getNotOnOrAfter().minusSeconds(3); 
+		
+		logger.debug("Token STS obtenido, vence "+tokenVence.toString()+ " (hora actual: "+(new DateTime()).toString()+")");
+		
+		return tokenVence;
 	}
 
 	private SAMLAssertion obtenerTokenSTS(String urlSts, String rol, String wsaTo, String policy, String orgKsPath, String orgKsPass,
@@ -620,110 +714,157 @@ public class ServiciosTrazabilidadBean {
 		return organismoOid+":"+tramiteId+":"+idInterno;
 	}
 
-	
-	
+	//El id puede ser cualquier número que compartan todos los módulos y que no entre en conflicto con
+	//otro lock
+  private static final long LOCK_ID_FINALIZAR = 1313131313;
 	@SuppressWarnings("unchecked")
-	@Schedule(second = "0", minute = "0", hour = "1", persistent = false)
+  @Schedule(second = "0", minute = "0", hour = "1", timezone = "America/Montevideo", persistent = false)
+  //@Schedule(second = "0", minute = "*/1", hour = "*", persistent = false)
+  @TransactionTimeout(value=30, unit=TimeUnit.MINUTES)
 	public void finalizarTrazas() {
-		//Template para la consulta de reservas vencidas con trazabilidad habilitada
-	  //Se buscan todas las reservas correspondientes a disponibilidades anteriores al día de hoy
-	  //que tengan alguna traza registrada y no tengan una traza marcada como final
-		String sql = "SELECT r.id, t.transaccion_id, s.nombre, count(*) AS lineas "
-				+ "FROM {empresa}.ae_disponibilidades d "
-				+ "JOIN {empresa}.ae_reservas_disponibilidades rd ON rd.aedi_id=d.id "
-				+ "JOIN {empresa}.ae_reservas r ON r.id=rd.aers_id "
-				+ "JOIN {empresa}.ae_recursos s ON s.id=d.aere_id "
-				+ "JOIN global.ae_trazabilidad t ON t.reserva_id=r.id AND t.empresa_id={empresaId} "
-				+ "WHERE NOT EXISTS( "
-				+ "  SELECT 1 FROM global.ae_trazabilidad t1 "
-				+ "  WHERE t1.empresa_id=t.empresa_id "
-				+ " AND t1.reserva_id=t.reserva_id "
-				+ " AND t1.es_final=true) "
-				+ "AND d.fecha < :ahora "
-				+ "GROUP BY r.id, t.transaccion_id, s.nombre";
-		
-		//Armar y configurar el invocador del servicio web
-		LineaService lineaService = new LineaService(LineaService.class.getResource("LineaService.wsdl"));
-		LineaWS lineaPort = lineaService.getLineaWSPort();
-		String wsaToLinea = confBean.getString("WS_TRAZABILIDAD_WSATO_LINEA");
-		String wsaActionLinea = confBean.getString("WS_TRAZABILIDAD_WSAACTION_LINEA");
-		int timeout = 5000;
-		try {
-			timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
-		} catch (Exception nfEx) {
-			timeout = 5000;
-		}
-		long version = 0;
-		try {
-			version = confBean.getLong("WS_TRAZABILIDAD_VERSION");
-		} catch (NumberFormatException nfEx) {
-			version = 100;
-		}
-		//Cargar todas las empresas
-		List<Empresa> empresas = globalEntityManager.createQuery("SELECT e FROM Empresa e WHERE e.fechaBaja IS NULL").getResultList();
-		//Para cada empresa determinar sus trazas vencidas y abiertas y tratar de cerrarlas
-		Integer reservaId=null;
-		String transaccionId=null;
-		String oficina=null;
-		BigInteger lineas=null;
-		for(Empresa empresa : empresas) {
-			try {
-				String sql1 = sql.replace("{empresa}", empresa.getDatasource()).replace("{empresaId}", empresa.getId().toString());
-				
-				logger.debug("Consulta para determinar las trazas a cerrar en la empresa ["+empresa.getNombre()+"]: "+sql1);
-				
-				Query query = globalEntityManager.createNativeQuery(sql1);
-				//query.setParameter("ahora", new Date(), TemporalType.DATE);
-				List<Object[]> aTrazas = (List<Object[]>) query.getResultList();
+	  
+	  try {
+  	  logger.info("Iniciando ejecución de cierre de trazas...");
+  	  
+  	  //Intentar liberar el lock por si lo tiene esta instancia
+  	  boolean lockOk = (boolean)globalEntityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID_FINALIZAR+")").getSingleResult();
+  	  //Intentar obtener el lock
+  	  lockOk = (boolean)globalEntityManager.createNativeQuery("SELECT pg_try_advisory_lock("+LOCK_ID_FINALIZAR+")").getSingleResult();
+  	  if(!lockOk) {
+  	    //Otra instancia tiene el lock
+  	    logger.info("No se ejecuta el cierre de trazas porque hay otra instancia haciéndolo.");
+  	    return;
+  	  }
+  	  //No hay otra instancia con el lock, se continúa
+  	  
+  		//Template para la consulta de reservas vencidas con trazabilidad habilitada
+  	  //Se buscan todas las reservas correspondientes a disponibilidades anteriores al día de hoy
+  	  //que tengan alguna traza registrada y no tengan una traza marcada como final
+  		String sql = "SELECT r.id, t.transaccion_id, s.nombre, count(*) AS lineas "
+  				+ "FROM {empresa}.ae_disponibilidades d "
+  				+ "JOIN {empresa}.ae_reservas_disponibilidades rd ON rd.aedi_id=d.id "
+  				+ "JOIN {empresa}.ae_reservas r ON r.id=rd.aers_id "
+  				+ "JOIN {empresa}.ae_recursos s ON s.id=d.aere_id "
+  				+ "JOIN global.ae_trazabilidad t ON t.reserva_id=r.id AND t.empresa_id={empresaId} "
+  				+ "WHERE NOT EXISTS( "
+  				+ "  SELECT 1 FROM global.ae_trazabilidad t1 "
+  				+ "  WHERE t1.empresa_id=t.empresa_id "
+  				+ " AND t1.reserva_id=t.reserva_id "
+  				+ " AND t1.es_final=true) "
+  				+ "AND d.fecha < :ahora "
+  				+ "GROUP BY r.id, t.transaccion_id, s.nombre";
+  		
+  		//Armar y configurar el invocador del servicio web
+  		LineaService lineaService = new LineaService(LineaService.class.getResource("LineaService.wsdl"));
+  		LineaWS lineaPort = lineaService.getLineaWSPort();
+  		String wsaToLinea = confBean.getString("WS_TRAZABILIDAD_WSATO_LINEA");
+  		String wsaActionLinea = confBean.getString("WS_TRAZABILIDAD_WSAACTION_LINEA");
+  		int timeout = 5000;
+  		try {
+  			timeout = confBean.getLong("WS_TRAZABILIDAD_TIMEOUT").intValue();
+  		} catch (Exception nfEx) {
+  			timeout = 5000;
+  		}
+  		long version = 0;
+  		try {
+  			version = confBean.getLong("WS_TRAZABILIDAD_VERSION");
+  		} catch (NumberFormatException nfEx) {
+  			version = 100;
+  		}
+  		
+      String urlSts = confBean.getString("WS_TRAZABILIDAD_URLSTS");
+      String rol = confBean.getString("WS_TRAZABILIDAD_ROL");
+      String policy = confBean.getString("WS_TRAZABILIDAD_POLICY");
 
-        logger.debug("Se encontraron "+aTrazas.size()+" trazas.");
-				
-				for(Object[] aTraza : aTrazas) {
-					
-					try {
-						reservaId = (Integer) aTraza[0];
-						transaccionId = (String)aTraza[1];
-						oficina = (String)aTraza[2];
-						lineas = (BigInteger)aTraza[3];
-						
-						LineaDTO linea = null;
-						linea = new LineaDTO();
-						linea.setIdTransaccion(transaccionId);
-						linea.setEdicionModelo(version);
-						linea.setOficina(oficina);
-						try {
-							linea.setFechaHoraOrganismo(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
-						}catch(Exception ex) {
-							linea.setFechaHoraOrganismo(null);
-						}
-						linea.setPaso(Paso.FINALIZACION.getLPaso());
-						linea.setDescripcionDelPaso(Paso.FINALIZACION.getAsunto());
-						linea.setEstadoProceso(Paso.FINALIZACION.getEstado());
-						linea.setTipoRegistroTrazabilidad(3); //Comun
-						linea.setPasoDelProceso(lineas.longValue()+1);
-			
-            configurarSeguridad(lineaPort, wsaToLinea, wsaActionLinea, timeout);
-            ResponseDTO lineaResp = lineaPort.persist(linea);
-						lineaResp.setEstado(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK);
-						
-						//Solo se registra la traza final si se pudo enviar correctamente, ya que en otro caso se requiere
-						//volver a generar una traza con la fecha del momento
-						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
-							registrarTraza(empresa, reservaId, transaccionId, lineaToXml(linea), false, true, true);
-							logger.info("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") fue cerrada.");
-						}else {
-							logger.warn("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") no fue cerrada: "+lineaResp.getMensaje());
-						}
-					} catch (Exception ex) {
-						logger.error("No se pudo cerrar la traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
-						ex.printStackTrace();
-					}
-				}
-			}catch(Exception ex) {
-				logger.error("No se pudo cerrar las trazas de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
-			}
-		}
+      String orgKsPath = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PATH");
+      String orgKsPass = confBean.getString("WS_TRAZABILIDAD_ORG_KS_PASS");
+      String orgKsAlias = confBean.getString("WS_TRAZABILIDAD_ORG_KS_ALIAS");
+
+      String sslKsPath = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PATH");
+      String sslKsPass = confBean.getString("WS_TRAZABILIDAD_SSL_KS_PASS");
+      String sslKsAlias = confBean.getString("WS_TRAZABILIDAD_SSL_KS_ALIAS");
+
+      String sslTsPath = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PATH");
+      String sslTsPass = confBean.getString("WS_TRAZABILIDAD_SSL_TS_PASS");
+
+      String wsAddressLocationLinea = confBean.getString("WS_TRAZABILIDAD_LOCATION_LINEA");
+      
+
+  		//Cargar todas las empresas
+  		List<Empresa> empresas = globalEntityManager.createQuery("SELECT e FROM Empresa e WHERE e.fechaBaja IS NULL").getResultList();
+  		//Para cada empresa determinar sus trazas vencidas y abiertas y tratar de cerrarlas
+  		Integer reservaId=null;
+  		String transaccionId=null;
+  		String oficina=null;
+  		BigInteger lineas=null;
+
+      DateTime tokenVence = null;
+  		for(Empresa empresa : empresas) {
+  			try {
+  				String sql1 = sql.replace("{empresa}", empresa.getDatasource()).replace("{empresaId}", empresa.getId().toString());
+  				
+  				logger.debug("Consulta para determinar las trazas a cerrar en la empresa ["+empresa.getNombre()+"]: "+sql1);
+  				
+  				Query query = globalEntityManager.createNativeQuery(sql1);
+  				query.setParameter("ahora", new Date(), TemporalType.DATE);
+  				List<Object[]> aTrazas = (List<Object[]>) query.getResultList();
+  
+          logger.debug("Se encontraron "+aTrazas.size()+" trazas para la empresa ["+empresa.getNombre()+"].");
+  				
+          int iTraza = 0;
+  				for(Object[] aTraza : aTrazas) {
+  				  iTraza++;
+  					try {
+  						reservaId = (Integer) aTraza[0];
+  						transaccionId = (String)aTraza[1];
+  						oficina = (String)aTraza[2];
+  						lineas = (BigInteger)aTraza[3];
+  						
+  						LineaDTO linea = null;
+  						linea = new LineaDTO();
+  						linea.setIdTransaccion(transaccionId);
+  						linea.setEdicionModelo(version);
+  						linea.setOficina(oficina);
+  						try {
+  							linea.setFechaHoraOrganismo(DatatypeFactory.newInstance().newXMLGregorianCalendar(new GregorianCalendar()));
+  						}catch(Exception ex) {
+  							linea.setFechaHoraOrganismo(null);
+  						}
+  						linea.setPaso(Paso.FINALIZACION.getLPaso());
+  						linea.setDescripcionDelPaso(Paso.FINALIZACION.getAsunto());
+  						linea.setEstadoProceso(Paso.FINALIZACION.getEstado());
+  						linea.setTipoRegistroTrazabilidad(3); //Comun
+  						linea.setPasoDelProceso(lineas.longValue()+1);
+  			
+  						//Invocar el servicio web de la PGE (si el token está vencido pedir otro)
+  						if(tokenVence==null || !tokenVence.isAfterNow()) {
+  						  logger.debug("No hay token STS o está por vencerse, se pide uno... ");
+  						  tokenVence = configurarWSPort(lineaPort, urlSts, rol, policy, orgKsPath, orgKsPass, orgKsAlias, sslKsPath, sslKsPass, sslKsAlias, sslTsPath, sslTsPass, 
+  						      wsAddressLocationLinea, wsaToLinea, wsaActionLinea, timeout);
+  						}
+              ResponseDTO lineaResp = lineaPort.persist(linea);
+  						//Solo se registra la traza final si se pudo enviar correctamente, ya que en otro caso se requiere
+  						//volver a generar una traza con la fecha del momento
+              lineaResp.setEstado(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK);
+  						if (lineaResp.getEstado().equals(uy.gub.agesic.itramites.bruto.web.ws.linea.EstadoRespuestaEnum.OK)) {
+  							registrarTraza(empresa, reservaId, transaccionId, lineaToXml(linea), false, true, true);
+  							logger.debug("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") fue cerrada ("+iTraza+"/"+aTrazas.size()+").");
+  						}else {
+  							logger.debug("La traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+") no fue cerrada: "+lineaResp.getMensaje()+" ("+iTraza+"/"+aTrazas.size()+").");
+  						}
+  					} catch (Exception ex) {
+  						logger.error("No se pudo cerrar la traza "+transaccionId+" de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
+  						ex.printStackTrace();
+  					}
+  				}
+  			}catch(Exception ex) {
+  				logger.error("No se pudo cerrar las trazas de la empresa "+empresa.getId()+" ("+empresa.getNombre()+")", ex);
+  			}
+  		}
+	  }finally {
+	    //Intentar liberar el lock (si lo tiene esta instancia)
+	    globalEntityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID_FINALIZAR+")").getSingleResult();
+      logger.info("Ejecución de cierre de trazas finalizada.");
+	  }
 	}
-	
-	
 }

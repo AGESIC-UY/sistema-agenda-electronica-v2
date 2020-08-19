@@ -26,6 +26,7 @@ import javax.naming.NamingException;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote;
+import uy.gub.imm.sae.business.ejb.facade.Comunicaciones;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.common.SAEProfile;
@@ -71,5 +72,8 @@ public class LookupLocalBusinessLocator implements BusinessLocator {
 		return lookup(Consultas.class, SAEProfile.getInstance().getProperties().getProperty(SAEProfile.EJB_CONSULTAS_JNDI_KEY));
 	}
 
-
+  public Comunicaciones getComunicaciones() throws ApplicationException {
+    return lookup(Comunicaciones.class, SAEProfile.getInstance().getProperties().getProperty(SAEProfile.EJB_COMUNICACIONES_JNDI_KEY));
+  }
+	
 }

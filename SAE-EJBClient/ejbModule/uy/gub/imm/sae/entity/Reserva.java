@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.EnumType;
@@ -39,6 +40,7 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.SequenceGenerator;
@@ -50,6 +52,7 @@ import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlTransient;
 
 import uy.gub.imm.sae.common.enumerados.Estado;
+import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 
 @Entity
 @Table (name = "ae_reservas")
@@ -58,26 +61,37 @@ public class Reserva implements Serializable {
 	private static final long serialVersionUID = 3500715468120358550L;
 
 	private Integer id;
+	private String serie;
 	private Integer numero;
-	private Estado estado;
+	private Estado estado; //Si está cancelada (C) hay que tomar en cuenta el campo fechaLiberacion
 	private String observaciones;
-	private Date fechaCreacion;
-	private Date fechaActualizacion;
+	private Date fechaCreacion; //En GMT
+	private Date fechaActualizacion; //En GMT
 	private Integer version;
 	private Llamada llamada;
 	private String origen;
 	private String ucrea;
+	private Date fcancela; //En GMT
 	private String ucancela;
+	private TipoCancelacion tcancela;
+	private Date fechaLiberacion; //Cuándo se libera el cupo, en GMT
 	
 	private String codigoSeguridad; //Código utilizado para la cencelación
 	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
 	
-	private String tramiteCodigo;
-	private String tramiteNombre;
+	private String tramiteCodigo; //Código del trámite en TrámitesUy
+	private String tramiteNombre; //Nombre del trámite en TrámitesUy
 
-	private List<Disponibilidad> disponibilidades;
+	private List<Disponibilidad> disponibilidades; //Es una lista pero solo debería haber una
 	private Set<DatoReserva> datosReserva;
 	private List<Atencion> atenciones;
+	
+	private TokenReserva token;
+	
+	private String ipOrigen;
+	
+	private boolean miPerfilNotificada = false;
+	private boolean notificar;
 	
 	public Reserva () {
 		estado = Estado.P;
@@ -85,24 +99,10 @@ public class Reserva implements Serializable {
 		fechaActualizacion = fechaCreacion;
 		disponibilidades = new ArrayList<Disponibilidad>();
 		datosReserva = new HashSet<DatoReserva>();
+		miPerfilNotificada = false;
+		notificar = true;
 	}
 	
-	public Reserva (Integer id, Integer numero, Estado estado, String obs, Date creacion, Disponibilidad d, DatoReserva dr) {
-	
-		this.id = id;
-		this.numero = numero;
-		this.estado = estado;
-		this.observaciones = obs;
-		this.fechaCreacion = creacion;
-		this.fechaActualizacion = creacion;
-		
-		this.disponibilidades = new ArrayList<Disponibilidad>();
-		this.disponibilidades.add(d);
-		this.datosReserva = new HashSet<DatoReserva>();
-		this.datosReserva.add(dr);
-	}
-
-
 	@Id
 	@GeneratedValue (strategy = GenerationType.SEQUENCE, generator="seq_reserva")
 	@SequenceGenerator (name ="seq_reserva", initialValue = 1, sequenceName = "s_ae_reserva",allocationSize=1)
@@ -146,8 +146,7 @@ public class Reserva implements Serializable {
 		this.datosReserva = datosReserva;
 	}
 	
-	// Se agrega la lista de atencion para poder hacer el reporte
-	// de vino - No vino
+	// Se agrega la lista de atencion para poder hacer el reporte de vino - No vino
 	@XmlTransient
 	@OneToMany (mappedBy="reserva")
 	public List <Atencion> getAtenciones(){
@@ -166,6 +165,7 @@ public class Reserva implements Serializable {
 	public List<Disponibilidad> getDisponibilidades() {
 		return disponibilidades;
 	}
+	
 	public void setDisponibilidades(List<Disponibilidad> disponibilidades) {
 		this.disponibilidades = disponibilidades;
 	}
@@ -209,28 +209,6 @@ public class Reserva implements Serializable {
 		this.version = version;
 	}
 
-	@Transient
-	public String getEstadoDescripcion(){
-		
-		return getEstadoDescripcion(estado);
-		
-	}
-	
-	public void setEstadoDescripcion(String estado){
-		
-	}
-	
-	@Transient
-	public String getEstadoDescripcion(Estado e){
-		
-		String resultado = "";
-		
-		if (e != null){
-			resultado = e.getDescripcion();
-		}        
-		return resultado;
-	}
-
 	@Override
 	public String toString() {
 		String strDisp = "disponibilidades=";
@@ -238,14 +216,11 @@ public class Reserva implements Serializable {
 			Disponibilidad disp = iterator.next();
 			strDisp+= disp.toString()+",";			
 		}
-		
 		String strDatos = "datos=";
-		
 		for (Iterator<DatoReserva> iterator = datosReserva.iterator(); iterator.hasNext();) {
 			DatoReserva dato = iterator.next();
 			strDatos+=dato.toString()+",";
 		}
-		
 		return "Reserva [id="+ id + "," + strDisp + "," + strDatos +"]";
 	}
 
@@ -287,18 +262,6 @@ public class Reserva implements Serializable {
 		this.codigoSeguridad = codigoSeguridad;
 	}
 
-	@Transient
-	public String getNumeroDocumento() {
-		String documento = "";
-		for(DatoReserva dato : getDatosReserva()) {
-			DatoASolicitar datoSol = dato.getDatoASolicitar();
-			if("NroDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-				documento = dato.getValor();
-			}
-		}
-		return documento;
-	}
-
   @Column(name="tramite_codigo")
 	public String getTramiteCodigo() {
     return tramiteCodigo;
@@ -317,18 +280,13 @@ public class Reserva implements Serializable {
     this.tramiteNombre = tramiteNombre;
   }
 
-  @Transient
-	public String getTipoDocumento() {
-		String tipoDocumento = "";
-		for(DatoReserva dato : getDatosReserva()) {
-			DatoASolicitar datoSol = dato.getDatoASolicitar();
-			if("TipoDocumento".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-				tipoDocumento = dato.getValor();
-			}
-		}
-		
-		return tipoDocumento;
-	}
+  public String getSerie() {
+    return serie!=null?serie:"";
+  }
+
+  public void setSerie(String serie) {
+    this.serie = serie;
+  }
 
 	@Column(name="trazabilidad_guid")
 	public String getTrazabilidadGuid() {
@@ -339,5 +297,140 @@ public class Reserva implements Serializable {
 		this.trazabilidadGuid = trazabilidadGuid;
 	}
 	
-	
+  @Enumerated (EnumType.STRING)
+  public TipoCancelacion getTcancela() {
+    return tcancela;
+  }
+
+  public void setTcancela(TipoCancelacion tcancela) {
+    this.tcancela = tcancela;
+  }
+
+  public Date getFcancela() {
+    return fcancela;
+  }
+
+  public void setFcancela(Date fcancela) {
+    this.fcancela = fcancela;
+  }
+
+  @ManyToOne (optional = true, cascade={CascadeType.PERSIST, CascadeType.MERGE})
+  @JoinColumn (name = "aetr_id", nullable = true)
+  public TokenReserva getToken() {
+    return token;
+  }
+
+  public void setToken(TokenReserva token) {
+    this.token = token;
+  }
+
+  @Column (name = "ip_origen")
+  public String getIpOrigen() {
+    return ipOrigen;
+  }
+
+  public void setIpOrigen(String ipOrigen) {
+    this.ipOrigen = ipOrigen;
+  }
+
+  @Column (name = "flibera")
+  public Date getFechaLiberacion() {
+    return fechaLiberacion;
+  }
+
+  public void setFechaLiberacion(Date fechaLiberacion) {
+    this.fechaLiberacion = fechaLiberacion;
+  }
+
+  @Column (name = "mi_perfil_notif")
+  public boolean isMiPerfilNotificada() {
+    return miPerfilNotificada;
+  }
+
+  public void setMiPerfilNotificada(boolean miPerfilNotificada) {
+    this.miPerfilNotificada = miPerfilNotificada;
+  }
+  
+  @Column (name = "notificar")
+  public boolean getNotificar() {
+    return notificar;
+  }
+
+  public void setNotificar(boolean notificar) {
+    this.notificar = notificar;
+  }
+
+  @Transient
+  public String getEstadoDescripcion(){
+    return getEstadoDescripcion(estado);
+  }
+  
+  @Transient
+  public String getEstadoDescripcion(Estado estado){
+    return (estado != null ? estado.getDescripcion() : "");
+  }
+
+  @Transient
+  public String getPaisDocumento() {
+    String paisDocumento = "";
+    for(DatoReserva dato : getDatosReserva()) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if(DatoASolicitar.PAIS_DOCUMENTO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        paisDocumento = dato.getValor();
+      }
+    }
+    return paisDocumento;
+  }
+
+  @Transient
+  public String getTipoDocumento() {
+    String tipoDocumento = "";
+    for(DatoReserva dato : getDatosReserva()) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if(DatoASolicitar.TIPO_DOCUMENTO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        tipoDocumento = dato.getValor();
+      }
+    }
+    return tipoDocumento;
+  }
+
+  @Transient
+  public String getNumeroDocumento() {
+    String documento = "";
+    for(DatoReserva dato : getDatosReserva()) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        documento = dato.getValor();
+      }
+    }
+    return documento;
+  }
+
+  @Transient
+  public String getDocumento() {
+    String tipoDocumento = null;
+    String numeroDocumento = null;
+    for(DatoReserva dato : datosReserva) {
+      DatoASolicitar datoSol = dato.getDatoASolicitar();
+      if(DatoASolicitar.TIPO_DOCUMENTO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        tipoDocumento = dato.getValor();
+      }
+      if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+        numeroDocumento = dato.getValor();
+      }
+    }
+    return (tipoDocumento!=null?tipoDocumento+" ":"")+(numeroDocumento!=null?numeroDocumento:"Sin documento");
+  }
+  
+  @Transient
+	public Boolean getPresencial() {
+	  return(disponibilidades.isEmpty()? null : disponibilidades.get(0).getPresencial());
+	}
+  
+  @Transient
+  public Date getFechaHora() {
+    return (disponibilidades.isEmpty()? null : disponibilidades.get(0).getHoraInicio());
+  }
+  
+  
 }

@@ -1,38 +1,26 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
 	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
 		<f:view beforePhase="#{accionMantenimientoMBean.beforePhase}">
 
-			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
-				widgetVar="eliminarAccion" zindex="2000" modal="true">
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarAccion" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
 				<f:facet name="header">
 					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
 				</f:facet>
 				<h:form id="elimRec">
-					<h:outputText
-						value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_accion']}" />
+					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_accion']}" />
 					<p:outputPanel styleClass="row panelBotonesPopUp">
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton id="btn_eliminar" update="form:panelForm"
-								actionListener="#{accionMantenimientoMBean.eliminarAccion}"
-								value="#{sessionMBean.textos['eliminar']}"
-								onclick="PF('eliminarAccion').hide();"
-								styleClass="btn-primario btn-100 btn">
-							</p:commandButton>
+							<p:commandButton id="btn_eliminar" update="form:panelForm" actionListener="#{accionMantenimientoMBean.eliminarAccion}"
+								value="#{sessionMBean.textos['eliminar']}" onclick="PF('eliminarAccion').hide();" styleClass="btn-primario btn-100 btn" />
 						</p:outputPanel>
 						<p:outputPanel styleClass="col-sm-6">
-							<p:commandButton onclick="PF('eliminarAccion').hide();"
-								value="#{sessionMBean.textos['cancelar']}"
-								styleClass="btn-link btn-100 btn">
-							</p:commandButton>
+							<p:commandButton onclick="PF('eliminarAccion').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
 						</p:outputPanel>
 					</p:outputPanel>
 				</h:form>
@@ -40,22 +28,19 @@
 
 			<h:form id="form" rendered="#{sessionMBean.empresaActual != null}">
 				<p:outputPanel id="panelForm">
-
 					<p:outputPanel styleClass="botonesDerecha">
-						<p:commandButton id="agregarAccion"
-							value="#{sessionMBean.textos['agregar_accion']}"
-							styleClass="btn btn-secundario"
-							actionListener="#{accionMantenimientoMBean.crearAccion}"
-							update="form:panelAcciones" />
+						<p:commandButton id="agregarAccion" value="#{sessionMBean.textos['agregar_accion']}" styleClass="btn btn-secundario"
+							actionListener="#{accionMantenimientoMBean.crearAccion}" update="form:panelAcciones" />
 					</p:outputPanel>
-
-					<p:dataTable value="#{accionMantenimientoMBean.accionesSeleccion}"
-						var="row" id="tablaAcciones" rows="25" paginator="true"
-						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
-						binding="#{accionMantenimientoMBean.accionesDataTable}"
-						caption="#{sessionMBean.textos['listado_de_acciones']}"
-						emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
-
+					<p:dataTable id="tablaAcciones" value="#{accionMantenimientoMBean.accionesSeleccion}" var="row" binding="#{accionMantenimientoMBean.accionesDataTable}"
+						caption="#{sessionMBean.textos['listado_de_acciones']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+            paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+            paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+            paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+            paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+            paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+            paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+  				>
 						<p:column headerText="#{sessionMBean.textos['nombre']}">
 							<h:outputText value="#{row.data.nombre}"></h:outputText>
 						</p:column>
@@ -69,109 +54,73 @@
 							<f:facet name="header">
 								<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
 							</f:facet>
-							<p:commandButton id="modificarAccion" value="#{sessionMBean.textos['modificar']}"
-								actionListener="#{accionMantenimientoMBean.editarAccion}"
-								icon="ui-icon-pencil" update="form:panelAcciones" styleClass="ui-button-icon-only"
-								title="#{sessionMBean.textos['modificar']}">
-							</p:commandButton>
-							<p:commandButton id="eliminarAccion" value="#{sessionMBean.textos['eliminar']}"
-								actionListener="#{accionMantenimientoMBean.selecAccionEliminar}" update="form:panelAcciones"
-								oncomplete="PF('eliminarAccion').show();" icon="ui-icon-trash" styleClass="ui-button-icon-only"
-								title="#{sessionMBean.textos['eliminar']}">
-							</p:commandButton>
+							<p:commandButton id="modificarAccion" value="#{sessionMBean.textos['modificar']}" actionListener="#{accionMantenimientoMBean.editarAccion}"
+								icon="ui-icon-pencil" update="form:panelAcciones" styleClass="ui-button-icon-only" title="#{sessionMBean.textos['modificar']}" />
+							<p:commandButton id="eliminarAccion" value="#{sessionMBean.textos['eliminar']}" actionListener="#{accionMantenimientoMBean.selecAccionEliminar}" 
+							  update="form:panelAcciones" oncomplete="PF('eliminarAccion').show();" icon="ui-icon-trash" styleClass="ui-button-icon-only" title="#{sessionMBean.textos['eliminar']}" />
 						</p:column>
 					</p:dataTable>
 				</p:outputPanel>
 
 				<p:outputPanel id="panelAcciones">
           <p:outputPanel rendered="#{accionMantenimientoMBean.accion != null}">
-	
 						<p:outputPanel styleClass="form-required">
 							<h:outputText
 								value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
 						</p:outputPanel>
 						<fieldset id="basic">
 							<legend>
-								<h:outputText
-									value="#{sessionMBean.textos['datos_de_la_accion']}" />
+								<h:outputText value="#{sessionMBean.textos['datos_de_la_accion']}" />
 							</legend>
 							<p:outputPanel styleClass="form-horizontal">
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['nombre']}"
-										for="nombreAccion"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<h:outputLabel value="#{sessionMBean.textos['nombre']}" for="nombreAccion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="nombreAccion"
-											value="#{accionMantenimientoMBean.accion.nombre}"
-											maxlength="50" styleClass="form-control" />
-										<p:message for="nombreAccion"></p:message>
+										<h:inputText id="nombreAccion" value="#{accionMantenimientoMBean.accion.nombre}" maxlength="50" styleClass="form-control" />
+										<p:message for="nombreAccion" />
 									</p:outputPanel>
 								</p:outputPanel>
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['descripcion']}"
-										for="descripcionAccion"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<h:outputLabel value="#{sessionMBean.textos['descripcion']}" for="descripcionAccion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="descripcionAccion"
-											value="#{accionMantenimientoMBean.accion.descripcion}"
-											maxlength="100" styleClass="form-control" />
-										<p:message for="descripcionAccion"></p:message>
+										<h:inputText id="descripcionAccion" value="#{accionMantenimientoMBean.accion.descripcion}" maxlength="100" styleClass="form-control" />
+										<p:message for="descripcionAccion" />
 									</p:outputPanel>
 								</p:outputPanel>
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['servicio']}"
-										for="servicioAccion"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<h:outputLabel value="#{sessionMBean.textos['servicio']}" for="servicioAccion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="servicioAccion"
-											value="#{accionMantenimientoMBean.accion.servicio}"
-											maxlength="250" styleClass="form-control" />
-										<p:message for="servicioAccion"></p:message>
+										<h:inputText id="servicioAccion" value="#{accionMantenimientoMBean.accion.servicio}" maxlength="250" styleClass="form-control" />
+										<p:message for="servicioAccion" />
 									</p:outputPanel>
 								</p:outputPanel>
 								<p:outputPanel styleClass="form-group">
-									<h:outputLabel value="#{sessionMBean.textos['host']}"
-										for="hostAccion"
-										styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<h:outputLabel value="#{sessionMBean.textos['host']}" for="hostAccion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
 									<p:outputPanel styleClass="col-sm-9">
-										<h:inputText id="hostAccion"
-											value="#{accionMantenimientoMBean.accion.host}"
-											maxlength="100" styleClass="form-control" />
-										<p:message for="hostAccion"></p:message>
+										<h:inputText id="hostAccion" value="#{accionMantenimientoMBean.accion.host}" maxlength="100" styleClass="form-control" />
+										<p:message for="hostAccion" />
 									</p:outputPanel>
 								</p:outputPanel>
-	
 								<p:outputPanel styleClass="botonesDerecha">
-									<p:commandButton id="agregarParametro"
-										value="#{sessionMBean.textos['agregar_parametro']}"
-										styleClass="btn btn-secundario"
-										actionListener="#{accionMantenimientoMBean.crearParametro}"
-										update="form:parametrosAccion" >
-									</p:commandButton>
+									<p:commandButton id="agregarParametro" value="#{sessionMBean.textos['agregar_parametro']}" styleClass="btn btn-secundario"
+										actionListener="#{accionMantenimientoMBean.crearParametro}" update="form:parametrosAccion" />
 								</p:outputPanel>
-	
-								<p:dataTable
-									value="#{accionMantenimientoMBean.accion.parametrosAccion}"
-									var="row" id="parametrosAccion" rowIndexVar="num" 
-									caption="#{sessionMBean.textos['parametros']}"
-									emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+								<p:dataTable id="parametrosAccion" value="#{accionMantenimientoMBean.accion.parametrosAccion}" var="row" rowIndexVar="num" 
+									caption="#{sessionMBean.textos['parametros']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
 									<p:column headerText="#{sessionMBean.textos['nombre']}">
                     <p:outputPanel styleClass="form-group">
                       <p:outputPanel styleClass="col-sm-12">
-		    								<h:inputText id="parametroNombre" value="#{row.nombre}" maxlength="50" title="#{sessionMBean.textos['nombre']}"></h:inputText>
-                        <p:message for="parametroNombre"></p:message>
+		    								<h:inputText id="parametroNombre" value="#{row.nombre}" maxlength="50" title="#{sessionMBean.textos['nombre']}" />
+                        <p:message for="parametroNombre" />
                       </p:outputPanel>
                     </p:outputPanel>
 									</p:column>
 									<p:column styleClass="alinCentro">
 										<f:facet name="header">
-											<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+											<h:outputText value="#{sessionMBean.textos['acciones']}" />
 										</f:facet>
-										<p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}"
-											action="#{accionMantenimientoMBean.eliminarParametro(num)}"
-											icon="ui-icon-trash" update="form:panelAcciones"
-											title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
-										</p:commandButton>
+										<p:commandButton id="eliminarParametro" value="#{sessionMBean.textos['eliminar']}" action="#{accionMantenimientoMBean.eliminarParametro(num)}"
+											icon="ui-icon-trash" update="form:panelAcciones" title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only" />
 									</p:column>
 								</p:dataTable>
 							</p:outputPanel>
@@ -180,28 +129,24 @@
 						<ul class="form-action-buttons">
 							<li class="action-buttons-primary">
 								<ul>
-									<li><p:commandButton
-											value="#{sessionMBean.textos['guardar']}"
-											actionListener="#{accionMantenimientoMBean.guardarAccion}"
-											styleClass="btn-lg btn-primario" update="form:panelForm form:panelAcciones" /></li>
+									<li>
+									  <p:commandButton value="#{sessionMBean.textos['guardar']}" actionListener="#{accionMantenimientoMBean.guardarAccion}"
+											styleClass="btn-lg btn-primario" update="form:panelForm form:panelAcciones" />
+									</li>
 								</ul>
 							</li>
 							<li class="action-buttons-second">
 								<ul>
 									<li class="float-left">
-									  <p:commandButton
-											value="#{sessionMBean.textos['cancelar']}"
-											actionListener="#{accionMantenimientoMBean.cancelarAccion}"
-											styleClass="btn-lg btn-link" update="form:panelForm form:panelAcciones" /></li>
+									  <p:commandButton value="#{sessionMBean.textos['cancelar']}" actionListener="#{accionMantenimientoMBean.cancelarAccion}"
+											styleClass="btn-lg btn-link" update="form:panelForm form:panelAcciones" />
+									</li>
 								</ul>
 							</li>
 						</ul>
-
           </p:outputPanel>
 				</p:outputPanel>
-
 			</h:form>
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

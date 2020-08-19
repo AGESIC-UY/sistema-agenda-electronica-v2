@@ -1,39 +1,28 @@
-<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml"
-	xmlns:ui="http://java.sun.com/jsf/facelets"
-	xmlns:p="http://primefaces.org/ui"
-	xmlns:f="http://java.sun.com/jsf/core"
-	xmlns:h="http://java.sun.com/jsf/html">
-
-<ui:composition template="/templates/layout.xhtml">
-<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+  <ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
 	<ui:define name="cuerpo">
-		<f:view
-			beforePhase="#{llamadorMBean.beforePhaseConfiguracionLlamador}">
+		<f:view beforePhase="#{llamadorMBean.beforePhaseConfiguracionLlamador}">
 			<p:outputPanel rendered="#{sessionMBean.recursoMarcado != null}">
-
 				<h:form>
 					<p:outputPanel>
 						<div class="form-inline">
 							<div class="form-group">
-								<h:outputLabel value="#{sessionMBean.textos['tamano_de_la_pantalla']}"
-									styleClass="control-label" for="pantalla" />
-								<h:selectOneMenu styleClass="form-control" id="pantalla"
-									valueChangeListener="#{llamadorMBean.cambioTipoMonitor}">
+								<h:outputLabel value="#{sessionMBean.textos['tamano_de_la_pantalla']}" styleClass="control-label" for="monitor" />
+								<h:selectOneMenu styleClass="form-control" id="monitor" valueChangeListener="#{llamadorMBean.cambioTipoMonitor}">
 									<f:selectItems value="#{llamadorMBean.tiposDeMonitores}" />
 								</h:selectOneMenu>
 							</div>
-							<p:commandButton value="#{sessionMBean.textos['abrir_llamador']}"
-								action="#{llamadorMBean.abrirLlamador}"
-								rendered="#{sessionMBean.agendaMarcada != null}"
-								styleClass="btn-lg btn-primario">
-							</p:commandButton>
+							<p:commandButton value="#{sessionMBean.textos['abrir_llamador']}" action="#{llamadorMBean.abrirLlamador}" 
+							  rendered="#{sessionMBean.agendaMarcada != null}" styleClass="btn-lg btn-primario" />
 						</div>
 					</p:outputPanel>
-
 				</h:form>
 			</p:outputPanel>
 		</f:view>
 	</ui:define>
 </ui:composition>
-</html>

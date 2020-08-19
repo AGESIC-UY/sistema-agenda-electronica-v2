@@ -108,8 +108,6 @@ public class EmpresaMBean extends BaseMBean {
 		return empresaSessionMBean.getEmpresaLogo();
 	} 
 	
-	
-	
 	public Row<Empresa> getRowSelect() {
 		return rowSelect;
 	}
@@ -126,27 +124,27 @@ public class EmpresaMBean extends BaseMBean {
 		this.empresasDataTable = empresasDataTable;
 	}
 
+	public boolean isUltimaEmpresaEliminar() {
+	  return this.empresaSessionMBean.isUltimaEmpresaEliminar();
+	}
+	
 	//Lista de empresas para seleccionar en la eliminacion/modificacion.
 	public RowList<Empresa> getEmpresasSeleccion() {
 		try {
-			List<Empresa> entidades = empresasEJB.consultarTodasEmpresas();
-			empresasSeleccion = new RowList<Empresa>(entidades);
-		} catch (Exception e) {
-			addErrorMessage(e, MSG_ID);
+			List<Empresa> empresas = empresasEJB.consultarTodasEmpresas();
+			empresasSeleccion = new RowList<Empresa>(empresas);
+		} catch (Exception ex) {
+			addErrorMessage(ex, MSG_ID);
 		}
 		return empresasSeleccion;
 	}
 	
 	public String guardar() {
-		
 		limpiarMensajesError();
-		
 		if (getEmpresaEditar() != null) {
 			try {
 				Empresa empresa = getEmpresaEditar();
-				
 				boolean hayErrores = false;
-				
 				if(empresa.getOrganismoCodigo()==null || empresa.getOrganismoCodigo().trim().isEmpty()) {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_codigo_del_organismo_es_obligatorio"), "form:codigoOrganismo");
@@ -155,7 +153,6 @@ public class EmpresaMBean extends BaseMBean {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_codigo_de_la_unidad_ejecutora_es_obligatorio"), "form:codigoUnidadEjecutora");
 				}
-				
 				if(empresa.getNombre()==null || empresa.getNombre().trim().isEmpty()) {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_nombre_de_la_empresa_es_obligatorio"), "form:nombreEmpresa");
@@ -199,16 +196,13 @@ public class EmpresaMBean extends BaseMBean {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("la_direccion_para_la_clausula_de_consentimiento_informado_es_obligatoria"), "form:ccDireccion");
 				}
-				if(empresa.getLogoTexto()==null ||empresa.getLogoTexto().trim().isEmpty())
-				{
+				if(empresa.getLogoTexto()==null ||empresa.getLogoTexto().trim().isEmpty()) {
 					hayErrores = true;
 					addErrorMessage(sessionMBean.getTextos().get("el_texto_alternativo_del_logo_no_puede_estar_vacio"), "form:textoLogoEmpresa");
 				}
-				
 				if(hayErrores) {
 					return null;
 				}
-
 				boolean nueva = (empresa.getId() == null);
 				//Verificar que no existe otra empresa con el mismo nombre
 				if(nueva) {
@@ -253,6 +247,7 @@ public class EmpresaMBean extends BaseMBean {
 	public void selecEmpresaEliminar(ActionEvent e){
 		Empresa empresaEliminar = ((Row<Empresa>)empresasDataTable.getRowData()).getData();
 		empresaSessionMBean.setEmpresaEliminar(empresaEliminar);
+    empresaSessionMBean.setUltimaEmpresaEliminar(empresasSeleccion!=null && empresasSeleccion.size()==1);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -270,35 +265,27 @@ public class EmpresaMBean extends BaseMBean {
 		Empresa empresaEliminar = empresaSessionMBean.getEmpresaEliminar();
 		if (empresaEliminar != null){
 			Empresa empresaActual = sessionMBean.getEmpresaActual();
-			boolean seleccionEmpliminar = false;
 			try {
-				
-				if (empresaEliminar.getId()!=empresaActual.getId() && empresasEJB.empresaEsquemaValido(empresaEliminar.getId())) {
-					seleccionEmpliminar = true;
+				if (!empresaEliminar.getId().equals(empresaActual.getId()) && empresasEJB.empresaEsquemaValido(empresaEliminar.getId())) {
 					sessionMBean.seleccionarEmpresa(empresaEliminar.getId());
 				}
-				empresasEJB.eliminarEmpresa(empresaEliminar);
+				empresasEJB.eliminarEmpresa(empresaEliminar, sessionMBean.getTimeZone());
 				//Recargar la lista de empresas
-				List<Empresa> entidades = empresasEJB.consultarEmpresas();
-				empresasSeleccion = new RowList<Empresa>(entidades);
+				List<Empresa> empresas = empresasEJB.consultarEmpresas();
+				empresasSeleccion = new RowList<Empresa>(empresas);
 				empresaSessionMBean.setEmpresaEliminar(null);
 				addInfoMessage(sessionMBean.getTextos().get("empresa_eliminada"), MSG_ID);
-			} catch (ApplicationException aEx) {
-				addErrorMessage(aEx, MSG_ID);
-			} catch (UserException e) {
-				addErrorMessage(e, MSG_ID);
-			}finally
-			{
-				if (seleccionEmpliminar)
-				{
-					sessionMBean.seleccionarEmpresa(empresaActual.getId());
-					sessionMBean.cargarEmpresasUsuario();
-				}else if(empresaEliminar.getId()==empresaActual.getId())
-				{
-					sessionMBean.setEmpresaActual(null);
-					sessionMBean.cargarDatosUsuario();
+			} catch (ApplicationException | UserException ex) {
+				addErrorMessage(ex, MSG_ID);
+			}finally {
+				if(empresaEliminar.getId().equals(empresaActual.getId())) {
+				  //Se eliminó la empresa seleccionada
+          sessionMBean.setEmpresaActual(null);
+				  sessionMBean.cargarEmpresasUsuario();
+				  sessionMBean.seleccionarEmpresa(sessionMBean.getEmpresaActual().getId());
+				}else {
+          sessionMBean.cargarEmpresasUsuario();
 				}
-					
 			}
 		}
 		return null;
@@ -316,9 +303,15 @@ public class EmpresaMBean extends BaseMBean {
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			if(request.getParameter("n")!=null) {
+			  //Solicitud para crear una empresa nueva
 				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_empresa"));
 			}else {
-				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_empresa"));
+			  //Puede ser que sea editar una empresa existente o se está creando una nueva (se cambió el valor en un combo y no llega el parámetro n)
+			  String tituloActual = sessionMBean.getPantallaTitulo();
+			  //Si el título actual es el de crear empresa no se cambia
+			  if(tituloActual!=null && !tituloActual.equals(sessionMBean.getTextos().get("crear_empresa"))) {
+			    sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_empresa"));
+			  }
 			}
 		}
 	}
@@ -380,25 +373,37 @@ public class EmpresaMBean extends BaseMBean {
 		try {
 			byte[] bytes = IOUtils.toByteArray(archivo.getInputstream());
 			empresaSessionMBean.getEmpresaEditar().setLogo(bytes);
-			boolean actualizarLogo = false;
+			boolean actualizarLogoCabezal = false;
 			if(sessionMBean.getEmpresaActualId()!=null && empresaSessionMBean.getEmpresaEditar()!=null && empresaSessionMBean.getEmpresaEditar().getId()!=null) {
 				try {
 					Integer empresaActualId = Integer.valueOf(sessionMBean.getEmpresaActualId());
 					Integer empresaEditarId  = empresaSessionMBean.getEmpresaEditar().getId();
 					if(empresaActualId.intValue() == empresaEditarId.intValue()) {
-						actualizarLogo = true;
+					  actualizarLogoCabezal = true;
 					}
 				}catch(Exception ex) {
 					//
 				}
 			}
-			if(actualizarLogo) {
-				//si la empresa que edito es la actual tengo que modificar el logo en el cabezal
+			if(actualizarLogoCabezal) {
+				//Si la empresa que se edita es la actual hay que modificar el logo en el cabezal
 				sessionMBean.setEmpresaActualLogoBytes(bytes);
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
+	}
+	
+	public void quitarLogo() {
+    empresaSessionMBean.getEmpresaEditar().setLogo(null);
+    if(sessionMBean.getEmpresaActualId()!=null && empresaSessionMBean.getEmpresaEditar()!=null && empresaSessionMBean.getEmpresaEditar().getId()!=null) {
+      Integer empresaActualId = Integer.valueOf(sessionMBean.getEmpresaActualId());
+      Integer empresaEditarId  = empresaSessionMBean.getEmpresaEditar().getId();
+      if(empresaActualId.intValue() == empresaEditarId.intValue()) {
+        //Si la empresa que se edita es la actual hay que modificar el logo en el cabezal
+        sessionMBean.setEmpresaActualLogoBytes(null);
+      }
+    }
 	}
 	
 }

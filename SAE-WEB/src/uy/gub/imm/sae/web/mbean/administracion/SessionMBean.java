@@ -52,10 +52,12 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.apache.log4j.Logger;
 import org.jboss.security.SecurityContext;
 import org.jboss.security.SecurityContextAssociation;
 import org.jboss.security.SecurityContextFactory;
 import org.picketbox.commons.cipher.Base64;
+import org.primefaces.context.RequestContext;
 import org.primefaces.event.SelectEvent;
 import org.primefaces.model.DefaultStreamedContent;
 import org.primefaces.model.StreamedContent;
@@ -65,6 +67,7 @@ import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
+import uy.gub.imm.sae.common.RolesXRecurso;
 import uy.gub.imm.sae.common.SofisHashMap;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
@@ -73,9 +76,12 @@ import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
+import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.entity.global.Usuario;
 import uy.gub.imm.sae.exception.ApplicationException;
+import uy.gub.imm.sae.web.common.AgendaComparatorNombre;
+import uy.gub.imm.sae.web.common.RecursoComparatorNombre;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
 import uy.gub.imm.sae.web.common.SelectItemComparator;
@@ -85,6 +91,8 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	public static final String MSG_ID = "pantalla";
 
+  private static Logger LOGGER = Logger.getLogger(SessionMBean.class);
+	
 	private Usuario usuarioActual;
 	private Empresa empresaActual;
 	private List<SelectItem> empresasUsuario;
@@ -107,21 +115,6 @@ public class SessionMBean extends SessionCleanerMBean {
   @EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionRemote")
   private Configuracion configuracionEJB;
 	
-	
-	@PostConstruct
-	public void postConstruct() {
-		//Se cargan los textos antes que los datos del usuario porque hay cosas que dependen de esto
-		cargarTextos();
-		//Se cargan los datos del usuario
-		cargarDatosUsuario();
-		//Se vuelven a cargar los textos despues de los datos del usuario para incluir los traducidos en el idioma actual
-		cargarTextos();
-		//Cargar las propiedades de configuracion
-		Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
-		if(bMostrarFechaActual!=null) {
-		  mostrarFechaActual = bMostrarFechaActual.booleanValue();
-		}
-	}
 	
 	private String idiomaActual = Locale.getDefault().getLanguage();
 	
@@ -160,14 +153,28 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	private Map<String, DatoASolicitar> datosASolicitar;
 
-	// Numero de puesto asignado al usuario en el momento de atender reservas
-	// con el modulo Llamador
-	private String puesto = "";
-
 	private String codigoSeguridadReserva;
 	
 	private List<SelectItem> idiomasSoportados = null;
+	
+	//Cantidad de filas por página que se muestra en las tablas
+  private Integer tablasFilasPorPagina = 25;
 
+  @PostConstruct
+  public void postConstruct() {
+    //Se cargan los textos antes que los datos del usuario porque hay cosas que dependen de esto
+    cargarTextos();
+    //Se cargan los datos del usuario
+    cargarDatosUsuario();
+    //Se vuelven a cargar los textos despues de los datos del usuario para incluir los traducidos en el idioma actual
+    cargarTextos();
+    //Cargar las propiedades de configuracion
+    Boolean bMostrarFechaActual = configuracionEJB.getBoolean("MOSTRAR_FECHA_ACTUAL");
+    if(bMostrarFechaActual!=null) {
+      mostrarFechaActual = bMostrarFechaActual.booleanValue();
+    }
+  }
+  
 	public TimeZone getTimeZone() {
 		//Primero se devuelve la de la Agenda, si tiene
 		Agenda agenda = getAgendaMarcada();
@@ -227,7 +234,12 @@ public class SessionMBean extends SessionCleanerMBean {
   }
 	
 	
-	// *****************************************************************************************************
+	public Integer getTablasFilasPorPagina() {
+    return tablasFilasPorPagina;
+  }
+
+
+  // *****************************************************************************************************
 	// ***************************Pasos para la reserva
 	// *****************************************************************************************************
 	private RowList<Disponibilidad> disponibilidadesDelDiaMatutina;
@@ -272,6 +284,10 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public void beforePhaseInicio(PhaseEvent event) {
+    if (empresasUsuario.isEmpty()) {
+      FacesContext ctx = FacesContext.getCurrentInstance();
+      ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+    }
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			setPantallaTitulo(getTextos().get("inicio"));
 		}
@@ -401,9 +417,11 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 	
 	public void cargarAgendas() {
-		List<Agenda> entidades;
 		try {
-			entidades = generalEJB.consultarAgendas();
+		  List<Agenda> entidades = generalEJB.consultarAgendas();
+		  //Ordenar las agendas
+		  Collections.sort(entidades, new AgendaComparatorNombre());
+		  //Añadir un item al inicio para la "no-selección"
 			Agenda ninguna = new Agenda();
 			ninguna.setId(0);
 			ninguna.setNombre(getTextos().get("ninguna"));
@@ -426,6 +444,8 @@ public class SessionMBean extends SessionCleanerMBean {
 			try {
 				List<Recurso> entidades;
 				entidades = generalEJB.consultarRecursos(getAgendaMarcada());
+	      //Ordenar los recursos
+	      Collections.sort(entidades, new RecursoComparatorNombre());
 				recursos = new RowList<Recurso>(entidades);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
@@ -444,12 +464,12 @@ public class SessionMBean extends SessionCleanerMBean {
 	 * */
 	public RowList<Recurso> getRecursosSeleccion() {
 		
-		RowList<Recurso> ret = new RowList<Recurso>();
 		if(recursos==null || recursos.isEmpty()) {
 			cargarRecursos();
 		}
 		
-		if(recursos !=null) {
+		RowList<Recurso> ret = new RowList<Recurso>();
+    if(recursos !=null) {
 			ret.addAll(recursos);
 		}
 
@@ -460,7 +480,6 @@ public class SessionMBean extends SessionCleanerMBean {
 		ret.add(0, new Row<Recurso>(ninguno, ret));
 		
 		return ret;
-		
 	}
 
 	// Si hay recurso selecciondada, se cargan los datos del recurso asociados.
@@ -568,18 +587,9 @@ public class SessionMBean extends SessionCleanerMBean {
 		this.datosASolicitar = datosASolicitar;
 	}
 
-	public String getPuesto() {
-		return puesto;
-	}
-
-	public void setPuesto(String puesto) {
-		this.puesto = puesto;
-	}
-
 	public Boolean getMostrarLlamador() {
 		if (recursos != null && recursos.getSelectedRow() != null) {
-			mostrarLlamador = recursos.getSelectedRow().getData()
-					.getUsarLlamador();
+			mostrarLlamador = recursos.getSelectedRow().getData().getUsarLlamador();
 		} else {
 			mostrarLlamador = true;
 		}
@@ -591,6 +601,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public Row<Agenda> getRowSelectAgenda() {
+    if(getAgendaMarcada() == null) {
+      return getAgendas().get(0);
+    }
 		return rowSelectAgenda;
 	}
 
@@ -599,6 +612,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public Row<Recurso> getRowSelectRecurso() {
+	  if(getRecursoMarcado() == null) {
+	    return getRecursosSeleccion().get(0);
+	  }
 		return rowSelectRecurso;
 	}
 
@@ -639,11 +655,9 @@ public class SessionMBean extends SessionCleanerMBean {
 
 	
 	public void cargarDatosUsuario() {
-		
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			HttpSession session = request.getSession();
-			
 			//Esto es para prevenir el ataque de Session Fixation: cada vez que se pide recargar los datos del usuario se
 			//genera un id de sesión nuevo, y se copian todos los datos que estaban de la anterior
 			//1-Almacenar en un map temporal todas las propiedades de la sesión actual
@@ -661,7 +675,6 @@ public class SessionMBean extends SessionCleanerMBean {
 			for(String nombre : map0.keySet()) {
 				session.setAttribute(nombre, map0.get(nombre));
 			}
-			
 			if (usuarioActual == null) {
 				// No esta definido el usuario actual, se carga ahora
 				//Si está en la sesión el atributo "codigocda" se utiliza como código de usuario el atributo "documentocda",
@@ -672,20 +685,15 @@ public class SessionMBean extends SessionCleanerMBean {
 				Map<String, Object> sessionAttrs = FacesContext.getCurrentInstance().getExternalContext().getSessionMap();
 				if(sessionAttrs.containsKey("codigocda") && sessionAttrs.containsKey("documentocda") && 
 						sessionAttrs.containsKey("codigocda_encriptado") && sessionAttrs.containsKey("documentocda_encriptado")) {
-					
 					//Viene de la válvula de CDA
-					
 					String codigoCda = (String)sessionAttrs.get("documentocda");
 					byte[] codigoCdaEncriptado = (byte[])sessionAttrs.get("documentocda_encriptado");
-
 					loginUsername = codigoCda;
 					loginPassword = Base64.encodeBytes(codigoCdaEncriptado);
-					
 					try {
 		        if (request.getUserPrincipal() != null) {
 		        	request.logout();
 		        }
-		        
 						SecurityContext secContext = SecurityContextFactory.createSecurityContext("SDSAE");
 						SecurityContextAssociation.setSecurityContext(secContext);
 						request.login(loginUsername, loginPassword);
@@ -708,9 +716,6 @@ public class SessionMBean extends SessionCleanerMBean {
 					session.removeAttribute("codigocda_encriptado");
 					session.removeAttribute("documentocda_encriptado");
 				}
-				
-				/* */
-				
 				String codigo = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
 				if (codigo != null) {
 					try {
@@ -733,10 +738,19 @@ public class SessionMBean extends SessionCleanerMBean {
 							empresaActualLogoBytes = usuariosEmpresasEJB.obtenerLogoEmpresaPorEmpresaId((Integer) empresasUsuario.get(0).getValue());
 						} else {
 							empresaActual = null;
+              FacesContext ctx = FacesContext.getCurrentInstance();
+              ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
 						}
 					} catch (ApplicationException aEx) {
 						aEx.printStackTrace();
 					}
+				}else {
+          if("cda".equalsIgnoreCase(getTipoLogout())) {
+            ExternalContext ectx = FacesContext.getCurrentInstance().getExternalContext();
+            ectx.redirect("/sae-admin/logoutcda");
+          }else {
+            cerrarSesion();
+          }
 				}
 			}
 		} catch (Exception ex) {
@@ -876,17 +890,14 @@ public class SessionMBean extends SessionCleanerMBean {
 		String password = request.getParameter("formLogin:password");
 		
 		if(username==null || username.isEmpty() || password==null || password.isEmpty()) {
-			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Debe ingresar su código de usuario  y contraseña"));
+			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_WARN, "Advertencia", "Debe ingresar su código de usuario  y contraseña"));
 			return null;
 		}
 		try {
-			
 			request.login(username, password);
 			this.loginUsername = username;
 			this.loginPassword = password;
-
 			cargarDatosUsuario();
-
 			return "inicio";
 		} catch (Exception ex) {
 			fc.addMessage(null, new FacesMessage(FacesMessage.SEVERITY_ERROR, "Error", "Código de usuario o contraseña incorrectos"));
@@ -1099,9 +1110,25 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 
 	public void cambioIdiomaActual(ValueChangeEvent event) {
+	  limpiarMensajesError();
 		idiomasSoportados = null;
-		idiomaActual = (String) event.getNewValue();
-		cargarTextos();
+		try {
+		  LOGGER.debug("Cambiando idoma de la interfaz...");
+  		String idiomaSeleccionado = (String) event.getNewValue();
+      List<String> idiomasDisponibles = usuariosEmpresasEJB.obtenerIdiomasSoportados();
+      LOGGER.debug("Verificando que el idioma seleccionado ("+idiomaSeleccionado+" sea uno de los soportados ("+idiomasDisponibles+")");
+  		if(!idiomasDisponibles.contains(idiomaSeleccionado)) {
+  		  LOGGER.warn("No se pudo cambiar el idioma porque "+idiomaSeleccionado+" no es un idioma soportado");
+  		  return;
+  		}
+  		idiomaActual = idiomaSeleccionado;
+  		RequestContext.getCurrentInstance().execute("document.documentElement.lang='"+idiomaActual+"'");
+      LOGGER.debug("Idioma cambiado, cargando textos...");
+      cargarTextos();
+      LOGGER.debug("Textos cargados.");
+		}catch(Exception ex) {
+		  LOGGER.error("No se pudo cambiar el idioma", ex);
+		}
 	}
 	
 	public byte[] getEmpresaActualLogoBytes() {
@@ -1134,11 +1161,64 @@ public class SessionMBean extends SessionCleanerMBean {
 	}
 	
 	
-
-	
-	
 	public void limpiarTrazas() {
 		agendarReservasEJB.limpiarTrazas();
 	}
 
+  public boolean tieneRol(String rol) {
+    return tieneRoles(new String[]{rol});
+  }
+  
+  public boolean tieneRoles(String[] roles) {
+    if(usuarioActual == null) {
+      return false;
+    }
+    if(usuarioActual.isSuperadmin() != null && usuarioActual.isSuperadmin().booleanValue()) {
+      return true;
+    }
+    List<String> rolesRecurso = null;
+    Recurso recurso = this.getRecursoMarcado();
+    for(String rol : roles) {
+      try {
+        //Verificar si es un rol por recurso
+        RolesXRecurso.valueOf(rol);
+        //El rol es uno de los del enumerado, hay que verificar si el usuario tiene el rol en el recurso actual
+        if(recurso != null) {
+          //Si aún no se cargaron los roles del usuario en el recurso se cargan ahora
+          if(rolesRecurso == null) {
+            RolesUsuarioRecurso rolesRecursoUsuario = recursosEJB.getRolesUsuarioRecurso(usuarioActual.getId(), recurso.getId());
+            if(rolesRecursoUsuario != null && rolesRecursoUsuario.getRoles() != null) {
+              String[] aRoles = rolesRecursoUsuario.getRoles().split(",");
+              rolesRecurso = new ArrayList<String>();
+              for(int i=0; i<aRoles.length; i++) {
+                rolesRecurso.add(aRoles[i].trim());
+              }
+            }
+          }
+          if(rolesRecurso != null) {
+            if(rolesRecurso.contains(rol)) {
+              return true;
+            }
+          }
+        }
+      }catch(IllegalArgumentException iaEx) {
+        //El rol indicado no es uno de los del enumerado, hay que ver si el usuario tiene el rol a nivel de JAAS
+        if(FacesContext.getCurrentInstance().getExternalContext().isUserInRole(rol)) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+  
+  public String getMensajeReservaExistente() {
+    if(this.recurso==null || this.recurso.getId()==null) {
+      return "";
+    }
+    if(this.recurso.getPeriodoValidacion()==null || this.getRecurso().getPeriodoValidacion()==0) {
+      return textos.get("solo_se_permite_una_reserva_diaria");
+    }
+    return textos.get("solo_se_permite_una_reserva_en_un_periodo_de_dias").replace("{dias}", ""+(this.recurso.getPeriodoValidacion()*2));
+  }
+	
 }
