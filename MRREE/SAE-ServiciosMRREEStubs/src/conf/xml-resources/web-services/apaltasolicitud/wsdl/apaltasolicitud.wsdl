@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="PAltaSolicitud" targetNamespace="TramitesExterior" xmlns:wsdlns="TramitesExterior" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns="http://schemas.xmlsoap.org/wsdl/" xmlns:tns="TramitesExterior">
+	<types>
+		<schema targetNamespace="TramitesExterior" xmlns="http://www.w3.org/2001/XMLSchema" xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/" elementFormDefault="qualified">
+			<element name="PAltaSolicitud.Execute">
+				<complexType>
+					<sequence>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudnumero" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Fecha_solicitud" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudnumerodocumento" type="xsd:long"/>
+						<element minOccurs="1" maxOccurs="1" name="Fecha_nac" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudprimernombre" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudsegundonombre" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudprimerapellido" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudsegundoapellido" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudemail" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudtelefono" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudanioemigracion" type="xsd:short"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicituddptouruguay" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudnombremadre" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudnombrepadre" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Tramite" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Consulado" type="xsd:string"/>
+						<element minOccurs="1" maxOccurs="1" name="Solicitudnumerollamado" type="xsd:long"/>
+					</sequence>
+				</complexType>
+			</element>
+			<element name="PAltaSolicitud.ExecuteResponse">
+				<complexType>
+					<sequence>
+						<element name="retval" type="xsd:string"/>
+					</sequence>
+				</complexType>
+			</element>
+		</schema>
+	</types>
+	<message name="PAltaSolicitud.ExecuteSoapIn">
+		<part name="parameters" element="tns:PAltaSolicitud.Execute"/>
+	</message>
+	<message name="PAltaSolicitud.ExecuteSoapOut">
+		<part name="parameters" element="tns:PAltaSolicitud.ExecuteResponse"/>
+	</message>
+	<portType name="PAltaSolicitudSoapPort">
+		<operation name="Execute">
+			<input message="wsdlns:PAltaSolicitud.ExecuteSoapIn"/>
+			<output message="wsdlns:PAltaSolicitud.ExecuteSoapOut"/>
+		</operation>
+	</portType>
+	<binding name="PAltaSolicitudSoapBinding" type="wsdlns:PAltaSolicitudSoapPort">
+		<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+		<operation name="Execute">
+			<soap:operation soapAction="TramitesExterioraction/APALTASOLICITUD.Execute"/>
+			<input>
+				<soap:body use="literal"/>
+			</input>
+			<output>
+				<soap:body use="literal"/>
+			</output>
+		</operation>
+	</binding>
+	<service name="PAltaSolicitud">
+		<port name="PAltaSolicitudSoapPort" binding="wsdlns:PAltaSolicitudSoapBinding">
+			<soap:address location="https://mrree.gub.uy:18443/ciexterior/servlet/apaltasolicitud"/>
+		</port>
+	</service>
+</definitions>
