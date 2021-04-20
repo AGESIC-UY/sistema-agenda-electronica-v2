@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="system">
-    <system systemId="file:/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-ServiciosMRREEStubs/wsdl/apaltasolicitud.wsdl" uri="src/conf/xml-resources/web-services/apaltasolicitud/wsdl/apaltasolicitud.wsdl"/>
-    <system systemId="file:/home/spio/Desarrollo/AGESIC-AGENDA2/SAE-ServiciosMRREEStubs/wsdl/apcancelarsolicitud.wsdl" uri="src/conf/xml-resources/web-services/NewWebServiceFromWSDL/wsdl/apcancelarsolicitud.wsdl"/>
-</catalog>
