@@ -78,8 +78,8 @@ public class ConsultaMBean extends SessionCleanerMBean {
 	}
 	
   public void beforePhaseConsultarReservaId(PhaseEvent event) {
-    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
-      FacesContext ctx = FacesContext.getCurrentInstance();
+     if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
+     FacesContext ctx = FacesContext.getCurrentInstance();
       FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
     }
     if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
@@ -88,7 +88,7 @@ public class ConsultaMBean extends SessionCleanerMBean {
   }
 
   public void beforePhaseConsultarReservaNumero(PhaseEvent event) {
-    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO"})) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "AE_R_GENERADORREPORTES_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
       FacesContext.getCurrentInstance().getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
     }

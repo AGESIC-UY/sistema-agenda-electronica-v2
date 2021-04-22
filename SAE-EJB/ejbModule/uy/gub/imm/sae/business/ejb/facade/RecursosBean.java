@@ -53,6 +53,7 @@ import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
+import uy.gub.imm.sae.entity.RecursoAud;
 import uy.gub.imm.sae.entity.RolesUsuarioRecurso;
 import uy.gub.imm.sae.entity.RolesUsuarioRecursoId;
 import uy.gub.imm.sae.entity.ServicioPorRecurso;
@@ -70,7 +71,7 @@ import uy.gub.imm.sae.exportar.RecursoExportar;
 import uy.gub.imm.sae.exportar.ValorPosibleExport;
 
 @Stateless
-@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_LLAMADOR" })
+@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	@PersistenceContext(unitName = "SAE-EJB")
@@ -93,7 +94,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws ApplicationException
 	 * @throws BusinessException
 	 */
-	public Recurso crearRecurso(Agenda a, Recurso r) throws UserException,
+	public Recurso crearRecurso(Agenda a, Recurso r, String codigoUsuario) throws UserException,
 			ApplicationException, BusinessException {
 		if (a == null) {
 			throw new UserException("debe_haber_una_agenda_seleccionada");
@@ -256,7 +257,22 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 		
 		
+		if (r.getReservaPendienteTiempoMax()!=null && r.getReservaPendienteTiempoMax() < 0 ){
+			throw new UserException("reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero");
+			
+		}
+	    
+	    
+	    if (r.getReservaMultiplePendienteTiempoMax()!=null && r.getReservaMultiplePendienteTiempoMax() < 0 ){
+	    	throw new UserException("reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero");
+		}
+		
+		
 		entityManager.persist(r);
+		
+		//Guardar registro en histórico (crear Recurso)
+		this.guardarHistoricoRecurso(r, codigoUsuario, 0);
+		
 		// paso a agregar agrupacion
 		AgrupacionDato agrupDato = new AgrupacionDato();
 		agrupDato.setNombre("datos_personales");
@@ -275,7 +291,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		d1.setAgrupacionDato(agrupDato);
 		d1.setAnchoDespliegue(100);
 		d1.setEsClave(true);
-    d1.setSoloLectura(false);
+		d1.setSoloLectura(false);
 		d1.setEtiqueta("Tipo de documento");
 		d1.setIncluirEnLlamador(true);
 		d1.setLargo(20);
@@ -379,7 +395,16 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 	}
 
-	public Recurso crearRecursoImportado(Agenda agenda, Recurso recurso) throws UserException,
+	public void guardarHistoricoRecurso(Recurso r, String codigoUsuario, Integer tipoOperacion) {
+		RecursoAud recursoAud = new RecursoAud(r);
+		recursoAud.setUsuario(codigoUsuario);
+		recursoAud.setFechaModificacion(new Date());
+		recursoAud.setTipoOperacion(tipoOperacion);
+		
+		entityManager.persist(recursoAud);
+	}
+	
+	public Recurso crearRecursoImportado(Agenda agenda, Recurso recurso, String codigoUsuario) throws UserException,
 			ApplicationException, BusinessException {
 		if (agenda == null) {
 			throw new UserException("debe_haber_una_agenda_seleccionada");
@@ -499,6 +524,18 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (recurso.getUsarLlamador() == null) {
 		  recurso.setUsarLlamador(true);
 		}
+		
+		
+		if (recurso.getReservaPendienteTiempoMax()!=null && recurso.getReservaPendienteTiempoMax() < 0 ){
+			throw new UserException("reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero");
+		}
+	    
+	    
+	    if (recurso.getReservaMultiplePendienteTiempoMax()!=null && recurso.getReservaMultiplePendienteTiempoMax() < 0 ){
+	    	throw new UserException("reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero");
+		}
+		
+		
 		entityManager.persist(recurso);
 		
 		
@@ -507,6 +544,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		AccionMiPerfil accionMiPerfil = obtenerAccionMiPerfilPorDefecto(recurso);
 		entityManager.persist(accionMiPerfil);
 		
+		//Guardar registro en histórico (crea Recurso importado)
+		this.guardarHistoricoRecurso(recurso, codigoUsuario, 0);
 		
 		return recurso;	
 
@@ -533,10 +572,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 * @throws ApplicationException
 	 */
-	public void modificarRecurso(Recurso recurso) throws UserException,
+	public void modificarRecurso(Recurso recurso, String codigoUsuario) throws UserException,
 			BusinessException, ApplicationException {
 
 		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	recurso.getId());
+		boolean guardarHistorico = !recurso.equals(recursoActual);
 
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
@@ -690,6 +730,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		
 		}
 		
+		
+		if (recurso.getReservaPendienteTiempoMax()!=null && recurso.getReservaPendienteTiempoMax() < 0 ){
+			throw new UserException("reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero");
+			
+		}
+	    
+	    
+	    if (recurso.getReservaMultiplePendienteTiempoMax()!=null && recurso.getReservaMultiplePendienteTiempoMax() < 0 ){
+	    	throw new UserException("reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero");
+		}
+		
 
 		recursoActual.setNombre(recurso.getNombre());
 		recursoActual.setDescripcion(recurso.getDescripcion());
@@ -765,6 +816,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
     recursoActual.setMiPerfilRecVencim(recurso.getMiPerfilRecVencim());
     recursoActual.setMiPerfilRecHora(recurso.getMiPerfilRecHora());
     recursoActual.setMiPerfilRecDias(recurso.getMiPerfilRecDias());
+    
+    recursoActual.setReservaPendienteTiempoMax(recurso.getReservaPendienteTiempoMax());
+    recursoActual.setReservaMultiplePendienteTiempoMax(recurso.getReservaMultiplePendienteTiempoMax());
     
 		for (TextoRecurso viejo : recursoActual.getTextosRecurso().values()) {
 			entityManager.remove(viejo);
@@ -854,6 +908,11 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			entityManager.merge(accionActual);
 			
 		}
+		
+		//Guardar registro en histórico (modificar Recurso)
+		if (guardarHistorico) {
+			this.guardarHistoricoRecurso(recursoActual, codigoUsuario, 1);
+		}
 
 	}
 
@@ -870,7 +929,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws ApplicationException
 	 */
 	@SuppressWarnings("unchecked")
-	public void eliminarRecurso(Recurso recurso, TimeZone timezone) throws UserException, ApplicationException {
+	public void eliminarRecurso(Recurso recurso, TimeZone timezone, String codigoUsuario) throws UserException, ApplicationException {
 		Recurso recursoActual = (Recurso) entityManager.find(Recurso.class,	recurso.getId());
 		if (recursoActual == null) {
 			throw new UserException("no_se_encuentra_el_recurso_especificado");
@@ -915,6 +974,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			validacionPorRecurso.setFechaBaja(new Date());
 		}
 		recursoActual.setFechaBaja(new Date());
+		
+		//Guardar registro en histórico (eliminar Recurso)
+		this.guardarHistoricoRecurso(recursoActual, codigoUsuario, 2);
 	}
 
 	public Recurso consultarRecurso(Recurso r) throws UserException {
@@ -1014,7 +1076,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * permitidos: Administrador, Planificador
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 	public List<DatoDelRecurso> consultarDatosDelRecurso(Recurso r)
 			throws ApplicationException, BusinessException {
 
@@ -1462,6 +1524,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		datoActual.setIncluirEnLlamador(d.getIncluirEnLlamador()!=null?d.getIncluirEnLlamador():false);
 		datoActual.setLargoEnLlamador(d.getLargoEnLlamador()!=null?d.getLargoEnLlamador():d.getLargo());
 		datoActual.setOrdenEnLlamador(d.getOrdenEnLlamador()!=null?d.getOrdenEnLlamador():1);
+		datoActual.setIncluirEnNovedades(d.getIncluirEnNovedades()!=null?d.getIncluirEnNovedades():false);
 	}
 
 	/**
@@ -1875,7 +1938,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_FCALL_CENTER", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 	public List<AgrupacionDato> consultarDefinicionDeCampos(Recurso recurso, TimeZone timezone) throws UserException {
 		if (recurso == null) {
 			throw new UserException("debe_especificar_el_recurso");
@@ -2121,7 +2184,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 
-	public void copiarRecurso(Recurso recurso) throws BusinessException,
+	public Recurso copiarRecurso(Recurso recurso, String codigoUsuario) throws BusinessException,
 			ApplicationException, UserException {
 
 		//Antes de que haga el entityManager.find(recurso), me guardo la accionMiPerfil que viene en el recurso como transient para no perderla
@@ -2172,6 +2235,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 
 		entityManager.persist(rCopia);
 
+		//Guardar registro en histórico (crear Recurso)
+		this.guardarHistoricoRecurso(rCopia, codigoUsuario, 0);
+		
 		// 2
 		rCopia.setTextosRecurso(new HashMap<String, TextoRecurso>());
 		if (recurso.getTextosRecurso() != null) {
@@ -2295,6 +2361,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			aCopia.setRecurso(rCopia);
 			entityManager.persist(aCopia);
 		}
+		
+		return rCopia;
 	}
 
 	/**
@@ -2304,7 +2372,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	 * @throws BusinessException
 	 */
 	@SuppressWarnings("unchecked")
-	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION" })
+	@RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_FCALL_CENTER", "RA_AE_FATENCION", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 	public List<ServicioPorRecurso> consultarServicioAutocompletar(Recurso r)
 			throws BusinessException {
 
@@ -2352,7 +2420,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 
-	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE) throws UserException {
+	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE, String codigoUsuario) throws UserException {
 		if (b == null) {
 			return null;
 		}
@@ -2362,7 +2430,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 			ByteArrayInputStream input = new ByteArrayInputStream(b);
 			RecursoExportar recursoExp = (RecursoExportar) jaxbUnmarshaller.unmarshal(input);
 			Recurso recurso = ExportarHelper.importarRecurso(recursoExp, versionSAE);
-			recurso = crearRecursoImportado(a, recurso);
+			recurso = crearRecursoImportado(a, recurso, codigoUsuario);
 			recurso.setAgrupacionDatos(new ArrayList<AgrupacionDato>());
 			for(AgrupacionDatoExport agdExp : recursoExp.getAgrupaciones()){
 				AgrupacionDato agd = ExportarHelper.importarAgrupacionDato(agdExp);

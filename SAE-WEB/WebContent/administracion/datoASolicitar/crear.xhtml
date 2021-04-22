@@ -111,10 +111,14 @@
 										<p:selectBooleanCheckbox id="requerido" value="#{datoASolicitarMBean.datoASolicitarNuevo.requerido}" />
 										<p:outputLabel value="#{sessionMBean.textos['requerido']}" for="requerido" />
 									</p:outputPanel>
-                  <p:outputPanel>
-                    <p:selectBooleanCheckbox id="sololectura" value="#{datoASolicitarMBean.datoASolicitarNuevo.soloLectura}" />
-                    <p:outputLabel value="#{sessionMBean.textos['solo_lectura_si_hay_valor_en_la_url']}" for="sololectura" />
-                  </p:outputPanel>
+				                  	<p:outputPanel>
+				                    	<p:selectBooleanCheckbox id="sololectura" value="#{datoASolicitarMBean.datoASolicitarNuevo.soloLectura}" />
+				                    	<p:outputLabel value="#{sessionMBean.textos['solo_lectura_si_hay_valor_en_la_url']}" for="sololectura" />	
+				                  	</p:outputPanel>
+				                  	<p:outputPanel>
+				                  		<p:selectBooleanCheckbox id="datoextra" value="#{datoASolicitarMBean.datoASolicitarNuevo.incluirEnNovedades}" />
+				                  		<p:outputLabel value="#{sessionMBean.textos['envio_novedades_como_dato_extra']}" for="datoextra" />
+				                	</p:outputPanel>
 								</p:outputPanel>
 							</p:outputPanel>
 

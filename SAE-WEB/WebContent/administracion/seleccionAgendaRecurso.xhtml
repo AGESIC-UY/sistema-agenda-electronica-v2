@@ -23,7 +23,7 @@
 							<f:facet name="header">
 								<h:outputText value="Agendas"></h:outputText>
 							</f:facet>
-							<p:ajax event="rowSelectRadio" listener="#{sessionMBean.seleccionarAgenda}" update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:mpTablas" />
+							<p:ajax event="rowSelectRadio" listener="#{sessionMBean.seleccionarAgenda}" update="mostrarAgendaRecurso :formSeleccionAgendaRecruso:mpTablas :formMenu:menuLateral" />
               <p:column selectionMode="single" selectRow="true" id="colSelAgenda" >
                 <p:outputLabel value="#{row.data.nombre}" for="colSelAgenda" styleClass="ui-helper-hidden-accessible" />
               </p:column>

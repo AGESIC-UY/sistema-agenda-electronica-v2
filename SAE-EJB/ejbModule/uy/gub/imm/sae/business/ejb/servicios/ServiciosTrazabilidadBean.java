@@ -278,7 +278,7 @@ public class ServiciosTrazabilidadBean {
 		//Después ver si la instalación soporta trazabilidad 
 		try {
 			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
-		} catch (NumberFormatException nfEx) {
+		} catch (Exception nfEx) {
 			habilitado = false;
 		}
 		if (!habilitado) {
@@ -419,7 +419,7 @@ public class ServiciosTrazabilidadBean {
 	  boolean habilitado = false;
 		try {
 			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
-		} catch (NumberFormatException nfEx) {
+		} catch (Exception nfEx) {
 			habilitado = false;
 		}
 		if (!habilitado) {
@@ -719,12 +719,25 @@ public class ServiciosTrazabilidadBean {
   private static final long LOCK_ID_FINALIZAR = 1313131313;
 	@SuppressWarnings("unchecked")
   @Schedule(second = "0", minute = "0", hour = "1", timezone = "America/Montevideo", persistent = false)
-  //@Schedule(second = "0", minute = "*/1", hour = "*", persistent = false)
+  //@Schedule(second = "0", minute = "*/2", hour = "*", persistent = false)
   @TransactionTimeout(value=30, unit=TimeUnit.MINUTES)
 	public void finalizarTrazas() {
 	  
 	  try {
+		  
   	  logger.info("Iniciando ejecución de cierre de trazas...");
+  	  
+	  	boolean habilitado = false;
+		try {
+			habilitado = confBean.getBoolean("WS_TRAZABILIDAD_HABILITADO");
+		} catch (Exception nfEx) {
+			habilitado = false;
+		}
+		if (!habilitado) {
+			logger.info("finalizar trazas: no está habilitado el envio de trazas...");
+			return;
+		}
+		
   	  
   	  //Intentar liberar el lock por si lo tiene esta instancia
   	  boolean lockOk = (boolean)globalEntityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID_FINALIZAR+")").getSingleResult();

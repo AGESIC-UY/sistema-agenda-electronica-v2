@@ -34,7 +34,7 @@ public interface Agendas {
 
 	public boolean existeAgendaPorNombre(Agenda agenda) throws ApplicationException;
 	public Agenda crearAgenda(Agenda agenda) throws UserException, ApplicationException, BusinessException;
-	public void eliminarAgenda(Agenda agenda, TimeZone timezone) throws UserException, ApplicationException;
+	public void eliminarAgenda(Agenda agenda, TimeZone timezone, String codigoUsuario) throws UserException, ApplicationException;
 	public void modificarAgenda(Agenda agenda) throws UserException, ApplicationException;
 	public void copiarAgenda(Agenda agenda) throws BusinessException, ApplicationException, UserException;
 	public List<Agenda> consultarAgendas() throws ApplicationException;

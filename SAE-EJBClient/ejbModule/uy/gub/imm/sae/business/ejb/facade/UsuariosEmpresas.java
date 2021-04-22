@@ -47,7 +47,7 @@ public interface UsuariosEmpresas {
 	public Empresa obtenerEmpresaPorNombre(String nombre) throws ApplicationException;
 	public List<Empresa> consultarEmpresas() throws ApplicationException;
 	public Empresa guardarEmpresa(Empresa empresa) throws ApplicationException, UserException; 
-	public void eliminarEmpresa(Empresa empresa, TimeZone timezone) throws ApplicationException, UserException;
+	public void eliminarEmpresa(Empresa empresa, TimeZone timezone, String codigoUsuario) throws ApplicationException, UserException;
 
 	public List<String> obtenerRolesUsuarioEmpresa(Integer usuarioId, Integer empresaId) throws ApplicationException;
 	public void guardarRolesUsuarioEmpresa(UsuarioEmpresaRoles roles) throws ApplicationException;

@@ -117,6 +117,23 @@
       <url-pattern>/administracion/seleccionAgendaRecurso.xhtml</url-pattern>
       <url-pattern>/administracion/disponibilidad/*</url-pattern>
       <url-pattern>/administracion/consulta/*</url-pattern>
+            
+            <url-pattern>/administracion/disponibilidad/consultarPorDia.xhtml</url-pattern>
+            <url-pattern>/administracion/llamador/*</url-pattern>
+            <url-pattern>/administracion/recurso/consultar.xhtml</url-pattern>
+            <url-pattern>/administracion/recurso/consultarDatos.xhtml</url-pattern>
+            <url-pattern>/administracion/recurso/modificar.xhtml</url-pattern>
+            <url-pattern>/administracion/recurso/modificarConsultar.xhtml</url-pattern>
+            <url-pattern>/administracion/recurso/modificarTextos.xhtml</url-pattern>
+            <url-pattern>/administracion/recurso/importar.xhtml</url-pattern>
+            <url-pattern>/administracion/datoASolicitar/consultar.xhtml</url-pattern>
+            <url-pattern>/administracion/datoASolicitar/consultarDatos.xhtml</url-pattern>
+            <url-pattern>/administracion/datoASolicitar/modificar.xhtml</url-pattern>
+            <url-pattern>/administracion/datoASolicitar/modificarConsultar.xhtml</url-pattern>
+            
+            <url-pattern>/agendarReserva/*</url-pattern>
+            
+            <url-pattern>/administracion/reserva/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>RA_AE_ANONIMO</role-name>
@@ -234,4 +251,5 @@
 	<security-role>
 		<role-name>RA_AE_ANONIMO</role-name>
 	</security-role>
+
 </web-app>

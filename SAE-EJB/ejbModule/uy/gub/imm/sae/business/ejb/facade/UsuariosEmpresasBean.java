@@ -225,7 +225,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 		return empresa;
 	}
 	
-	public void eliminarEmpresa(Empresa empresa, TimeZone timezone) throws ApplicationException, UserException {
+	public void eliminarEmpresa(Empresa empresa, TimeZone timezone, String codigoUsuario) throws ApplicationException, UserException {
 		if(empresa==null || empresa.getId() == null) {
 			return;
 		}
@@ -247,7 +247,7 @@ public class UsuariosEmpresasBean implements UsuariosEmpresasLocal,  UsuariosEmp
 			List<Agenda> agendasEliminar = agendasEJB.consultarAgendas();
 			for (Agenda agenda : agendasEliminar) {
 				try {
-					agendasEJB.eliminarAgenda(agenda, timezone);
+					agendasEJB.eliminarAgenda(agenda, timezone, codigoUsuario);
 				} catch (UserException e) {
 					throw new UserException("no_se_puede_eliminar_la_empresa_porque_hay_reservas_vivas");
 				}

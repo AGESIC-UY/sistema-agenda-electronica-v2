@@ -137,7 +137,8 @@ CREATE TABLE ae_datos_a_solicitar (
     aead_id integer NOT NULL,
     aere_id integer NOT NULL,
     borrar_flag boolean DEFAULT true NOT NULL,
-    solo_lectura boolean DEFAULT false NOT NULL
+    solo_lectura boolean DEFAULT false NOT NULL,
+    incluir_en_novedades boolean DEFAULT false NOT NULL
 );
 ALTER TABLE ae_datos_a_solicitar OWNER TO sae;
 
@@ -318,7 +319,30 @@ CREATE TABLE ae_recursos (
     validar_por_ip boolean NOT NULL DEFAULT false,
     cantidad_por_ip integer DEFAULT null,
     periodo_por_ip integer DEFAULT null,
-    ips_sin_validacion varchar(4000) DEFAULT NULL
+    ips_sin_validacion varchar(4000) DEFAULT NULL,
+    cancela_tiempo integer NOT NULL DEFAULT 0,
+    cancela_unidad integer NOT NULL DEFAULT 12,
+    cancela_tipo varchar(1) NOT NULL DEFAULT 'I',
+    mi_perfil_con_hab bool NOT NULL DEFAULT true,
+  mi_perfil_can_hab bool NOT NULL DEFAULT true,
+  mi_perfil_rec_hab bool NOT NULL DEFAULT true,
+  mi_perfil_con_tit varchar(255) NULL DEFAULT NULL,
+  mi_perfil_con_cor varchar(500) NULL DEFAULT NULL
+  mi_perfil_con_lar varchar(1024) NULL DEFAULT NULL,
+  mi_perfil_con_ven int4 NULL,
+  mi_perfil_can_tit varchar(255) NULL DEFAULT NULL,
+  mi_perfil_can_cor varchar(500) NULL DEFAULT NULL,
+  mi_perfil_can_lar varchar(1024) NULL DEFAULT NULL,
+  mi_perfil_can_ven int4 NULL,
+  mi_perfil_rec_tit varchar(255) NULL DEFAULT NULL,
+  mi_perfil_rec_cor varchar(500) NULL DEFAULT NULL,
+  mi_perfil_rec_lar varchar(1024) NULL DEFAULT NULL,
+  mi_perfil_rec_ven int4 NULL,
+  mi_perfil_rec_hora int4 NULL,
+  mi_perfil_rec_dias int4 NULL,
+  reserva_pen_tiempo_max integer DEFAULT NULL,
+  reserva_pend_tiempo_max integer DEFAULT NULL 
+  
 );
 ALTER TABLE ae_recursos OWNER TO sae;
 
@@ -341,7 +365,11 @@ CREATE TABLE ae_reservas (
     tcancela character varying(1),
     fcancela timestamp without time zone,
     aetr_id int4 NULL DEFAULT NULL,
-    ip_origen varchar(16) DEFAULT NULL
+    ip_origen varchar(16) DEFAULT NULL,
+    flibera timestamp DEFAULT NULL,
+    mi_perfil_notif boolean NOT NULL DEFAULT true,
+	notificar boolean DEFAULT true,
+    reserva_hija_id integer NULL
 );
 ALTER TABLE ae_reservas OWNER TO sae;
 
@@ -435,9 +463,8 @@ CREATE TABLE ae_tokens_reservas (
 	tramite varchar(10) NULL,
 	notas varchar(4000) NULL,
 	"version" int4 NOT NULL,
-	ip_origen varchar(16) DEFAULT NULL
-) ;
-
+  ip_origen varchar(16) DEFAULT NULL
+);
 ALTER TABLE ae_tokens_reservas OWNER TO sae;
 
 CREATE TABLE ae_tramites_agendas (
@@ -497,6 +524,152 @@ CREATE TABLE ae_valores_del_dato (
     borrar_flag boolean DEFAULT true NOT NULL
 );
 ALTER TABLE ae_valores_del_dato OWNER TO sae;
+
+CREATE TABLE ae_acciones_miperfil_recurso
+(
+   id integer NOT NULL,
+   recurso_id integer NOT NULL,
+   
+   titulo_con_1 character varying(100), 
+   url_con_1 character varying(1024),  
+   destacada_con_1 boolean,
+   titulo_con_2 character varying(100), 
+   url_con_2 character varying(1024),  
+   destacada_con_2 boolean,
+   titulo_con_3 character varying(100), 
+   url_con_3 character varying(1024),  
+   destacada_con_3 boolean,
+   titulo_con_4 character varying(100), 
+   url_con_4 character varying(1024),  
+   destacada_con_4 boolean,
+   titulo_con_5 character varying(100), 
+   url_con_5 character varying(1024),  
+   destacada_con_5 boolean,
+
+   titulo_can_1 character varying(100), 
+   url_can_1 character varying(1024),  
+   destacada_can_1 boolean,
+   titulo_can_2 character varying(100), 
+   url_can_2 character varying(1024),  
+   destacada_can_2 boolean,
+   titulo_can_3 character varying(100), 
+   url_can_3 character varying(1024),  
+   destacada_can_3 boolean,
+   titulo_can_4 character varying(100), 
+   url_can_4 character varying(1024),  
+   destacada_can_4 boolean,
+   titulo_can_5 character varying(100), 
+   url_can_5 character varying(1024),  
+   destacada_can_5 boolean,
+
+   titulo_rec_1 character varying(100), 
+   url_rec_1 character varying(1024),  
+   destacada_rec_1 boolean,
+   titulo_rec_2 character varying(100), 
+   url_rec_2 character varying(1024),  
+   destacada_rec_2 boolean,
+   titulo_rec_3 character varying(100), 
+   url_rec_3 character varying(1024),  
+   destacada_rec_3 boolean,
+   titulo_rec_4 character varying(100), 
+   url_rec_4 character varying(1024),  
+   destacada_rec_4 boolean,
+   titulo_rec_5 character varying(100), 
+   url_rec_5 character varying(1024),  
+   destacada_rec_5 boolean,
+   
+   CONSTRAINT ae_acciones_miperfil_recurso_pkey PRIMARY KEY (id)
+);
+ALTER TABLE ae_acciones_miperfil_recurso OWNER TO sae;
+
+
+CREATE TABLE ae_recursos_aud
+(
+   id int4 NOT NULL,
+   id_recurso int4 NOT NULL,
+   nombre varchar(100) NOT NULL,
+   descripcion varchar(1000) NOT NULL,
+   fecha_inicio timestamp NOT NULL,
+   fecha_fin timestamp NULL,
+   fecha_inicio_disp timestamp NOT NULL,
+   fecha_fin_disp timestamp NULL,
+   dias_inicio_ventana_intranet int4 NOT NULL,
+   dias_ventana_intranet int4 NOT NULL,
+   dias_inicio_ventana_internet int4 NOT NULL,
+   dias_ventana_internet int4 NOT NULL,
+   ventana_cupos_minimos int4 NOT NULL,
+   cant_dias_a_generar int4 NOT NULL,
+   largo_lista_espera int4 NULL,
+   fecha_baja timestamp NULL,
+   mostrar_numero_en_llamador bool NOT NULL,
+   visible_internet bool NOT NULL,
+   usar_llamador bool NOT NULL,
+   serie varchar(3) NULL,
+   sabado_es_habil bool NOT NULL,
+   domingo_es_habil bool NOT NULL DEFAULT false,
+   mostrar_numero_en_ticket bool NOT NULL,
+   mostrar_id_en_ticket bool NULL,
+   fuente_ticket varchar(100) NOT NULL DEFAULT 'Helvetica-Bold'::character varying,
+   tamanio_fuente_grande int4 NOT NULL DEFAULT 12,
+   tamanio_fuente_normal int4 NOT NULL DEFAULT 10,
+   tamanio_fuente_chica int4 NOT NULL DEFAULT 8,
+   oficina_id varchar(25) NULL,
+   direccion varchar(100) NULL,
+   localidad varchar(100) NULL,
+   departamento varchar(100) NULL,
+   telefonos varchar(100) NULL,
+   horarios varchar(100) NULL,
+   latitud numeric NULL,
+   longitud numeric NULL,
+   agenda int4 NOT NULL,
+   presencial_admite bool NOT NULL DEFAULT false,
+   presencial_cupos int4 NOT NULL DEFAULT 0,
+   presencial_lunes bool NOT NULL DEFAULT false,
+   presencial_martes bool NOT NULL DEFAULT false,
+   presencial_miercoles bool NOT NULL DEFAULT false,
+   presencial_jueves bool NOT NULL DEFAULT false,
+   presencial_viernes bool NOT NULL DEFAULT false,
+   presencial_sabado bool NOT NULL DEFAULT false,
+   presencial_domingo bool NOT NULL DEFAULT false,
+   multiple_admite bool NOT NULL DEFAULT false,
+   cambios_admite bool NOT NULL DEFAULT false,
+   cambios_tiempo int4 NULL,
+   cambios_unidad int4 NULL,
+   periodo_validacion int4 NOT NULL DEFAULT 0,
+   validar_por_ip bool NOT NULL DEFAULT false,
+   cantidad_por_ip int4 NULL,
+   periodo_por_ip int4 NULL,
+   ips_sin_validacion varchar(4000) NULL DEFAULT NULL::character varying,
+   cancela_tiempo int4 NOT NULL DEFAULT 0,
+   cancela_unidad int4 NOT NULL DEFAULT 12,
+   cancela_tipo varchar(1) NOT NULL DEFAULT 'I'::character varying,
+   mi_perfil_con_hab bool NOT NULL DEFAULT true,
+   mi_perfil_con_tit varchar(200) NULL DEFAULT NULL::character varying,
+   mi_perfil_con_cor varchar(500) NULL DEFAULT NULL::character varying,
+   mi_perfil_con_lar varchar(3200) NULL DEFAULT NULL::character varying,
+   mi_perfil_con_ven int4 NULL,
+   mi_perfil_can_hab bool NOT NULL DEFAULT true,
+   mi_perfil_can_tit varchar(200) NULL DEFAULT NULL::character varying,
+   mi_perfil_can_cor varchar(500) NULL DEFAULT NULL::character varying,
+   mi_perfil_can_lar varchar(3200) NULL DEFAULT NULL::character varying,
+   mi_perfil_can_ven int4 NULL,
+   mi_perfil_rec_hab bool NOT NULL DEFAULT true,
+   mi_perfil_rec_tit varchar(200) NULL DEFAULT NULL::character varying,
+   mi_perfil_rec_cor varchar(500) NULL DEFAULT NULL::character varying,
+   mi_perfil_rec_lar varchar(3200) NULL DEFAULT NULL::character varying,
+   mi_perfil_rec_ven int4 NULL,
+   mi_perfil_rec_hora int4 NULL,
+   mi_perfil_rec_dias int4 NULL,
+   reserva_pen_tiempo_max integer DEFAULT NULL,
+   reserva_pend_tiempo_max integer DEFAULT NULL, 
+   fecha_modificacion timestamp NULL,
+   usuario varchar(45) NULL,
+   "version" int4 NOT NULL,
+   tipo_operacion int2 null, -- 0 creación, 1 modificación y 2 eliminación;,
+   
+   CONSTRAINT ae_recursos_aud_pkey PRIMARY KEY (id)
+);
+ALTER TABLE ae_recursos_aud OWNER TO sae;
 
 --
 -- SECUENCIAS
@@ -607,6 +780,11 @@ ALTER TABLE s_ae_valorposible OWNER TO sae;
 CREATE SEQUENCE s_ae_valrecurso START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
 ALTER TABLE s_ae_valrecurso OWNER TO sae;
 
+CREATE SEQUENCE s_ae_acciones_miperfil;
+ALTER TABLE s_ae_acciones_miperfil OWNER TO sae;
+
+CREATE SEQUENCE s_ae_recurso_aud START WITH 1 INCREMENT BY 1 NO MINVALUE NO MAXVALUE CACHE 1;
+ALTER TABLE s_ae_recurso_aud OWNER TO sae;
 --
 -- DATOS
 --
@@ -722,6 +900,9 @@ ALTER TABLE ONLY ae_llamadas ADD CONSTRAINT ae_llamadas_aers_id_key UNIQUE (aers
 CREATE INDEX ae_reservas_aetr_id_idx ON ae_reservas USING btree (aetr_id);
 CREATE INDEX ae_reservas_disponibilidades_disponibilidad ON ae_reservas_disponibilidades USING btree (aedi_id);
 CREATE INDEX ae_reservas_disponibilidades_reserva ON ae_reservas_disponibilidades USING btree (aers_id);
+CREATE INDEX ae_datos_reserva_aeds_id_idx ON ae_datos_reserva USING btree (aeds_id);
+CREATE INDEX ae_datos_reserva_aers_id_idx ON ae_datos_reserva USING btree (aers_id);
+CREATE INDEX ae_disponibilidades_fecha_idx ON ae_disponibilidades USING btree (fecha);
 
 -- FOREIGN KEYS 
 
@@ -745,7 +926,7 @@ ALTER TABLE ONLY ae_reservas_disponibilidades ADD CONSTRAINT fk79b9a11211242882 
 ALTER TABLE ONLY ae_reservas_disponibilidades ADD CONSTRAINT fk79b9a112406004b7 FOREIGN KEY (aedi_id) REFERENCES ae_disponibilidades(id);
 ALTER TABLE ONLY ae_valor_constante_val_rec ADD CONSTRAINT fk8a30e71e8d2f46a5 FOREIGN KEY (aevr_id) REFERENCES ae_validaciones_por_recurso(id);
 ALTER TABLE ONLY ae_textos_agenda ADD CONSTRAINT fk96b86f5fe4ef2a07 FOREIGN KEY (aeag_id) REFERENCES ae_agendas(id);
-ALTER TABLE ONLY ae_tokens_reservas ADD CONSTRAINT ae_tokens_reservas_recurso FOREIGN KEY (aere_id) REFERENCES ae_agendas(id);
+ALTER TABLE ONLY ae_tokens_reservas ADD CONSTRAINT ae_tokens_reservas_recurso FOREIGN KEY (aere_id) REFERENCES ae_recursos(id);
 ALTER TABLE ONLY ae_validaciones_por_recurso ADD CONSTRAINT fk9e323ab1104398e1 FOREIGN KEY (aere_id) REFERENCES ae_recursos(id);
 ALTER TABLE ONLY ae_validaciones_por_recurso ADD CONSTRAINT fk9e323ab123ebf200 FOREIGN KEY (aeva_id) REFERENCES ae_validaciones(id);
 ALTER TABLE ONLY ae_datos_reserva ADD CONSTRAINT fk9ecc9f5911242882 FOREIGN KEY (aers_id) REFERENCES ae_reservas(id);

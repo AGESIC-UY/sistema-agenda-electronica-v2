@@ -52,15 +52,19 @@ public interface AgendarReservasHelperLocal {
 	public List<Object[]> obtenerCuposConsumidos(Recurso r, VentanaDeTiempo ventana, TimeZone timezone);
 	public List<Integer> obtenerCuposXDia(VentanaDeTiempo ventana, List<Object[]> cuposAsignados, List<Object[]> cuposConsumidos);
 	public Reserva crearReservaPendiente(Disponibilidad d, TokenReserva token, String ipOrigen);
+	public Reserva crearReservasParesPendiente(Disponibilidad d,Disponibilidad d2, TokenReserva token, String ipOrigen) throws ApplicationException;
 	public boolean chequeoCupoDisponible(Disponibilidad d, boolean reservaTomada);
 	public List<DatoASolicitar> obtenerDatosASolicitar(Recurso r);
 	public List<ValidacionPorRecurso> obtenerValidacionesPorRecurso(Recurso r);
 	public void validarDatosReservaBasico(List<DatoASolicitar> campos, Map<String, DatoReserva> valores) throws ValidacionException;
 	public void validarDatosReservaExtendido(List<ValidacionPorRecurso> validaciones, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, ReservaDTO reservaDTO) throws ApplicationException, BusinessException, ErrorValidacionException, ErrorValidacionCommitException;
-	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Disponibilidad disponibilidad, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, String tramite);
+	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Disponibilidad disponibilidad, List<DatoASolicitar> campos, Map<String, DatoReserva> valores, String tramite, Integer idReserva);
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, ErrorAutocompletarException, WarningAutocompletarException;
 	//Cuenta las reservas existentes para la IP dada, en el período considerado por el recurso (hoy +- intervalo)
 	//Si se pasa un id de reserva la excluye de la cuenta
 	public int cantidadReservasPorIp(Recurso recurso, String ipOrigen, Integer reservaId);
+	public void eliminarReservasParesPendientes(Reserva reserva1) throws ApplicationException;
+	public void eliminarReservaPendiente(Reserva reserva1) throws ApplicationException;
+	
 	
 }

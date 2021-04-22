@@ -12,6 +12,7 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.faces.context.FacesContext;
 
 import org.primefaces.component.column.Column;
 import org.primefaces.component.datatable.DataTable;
@@ -53,6 +54,11 @@ public class ListaDeEsperaMBean extends BaseMBean {
 	private List<SelectItem> itemsEstado;
 	
   public void beforePhaseListaDeEspera(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_FATENCION", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
     if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
       sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("lista_de_espera"));
     }

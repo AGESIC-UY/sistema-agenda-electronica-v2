@@ -93,6 +93,8 @@ public class Reserva implements Serializable {
 	private boolean miPerfilNotificada = false;
 	private boolean notificar;
 	
+	private Reserva reservaHija;
+	
 	public Reserva () {
 		estado = Estado.P;
 		fechaCreacion = new Date();
@@ -431,6 +433,22 @@ public class Reserva implements Serializable {
   public Date getFechaHora() {
     return (disponibilidades.isEmpty()? null : disponibilidades.get(0).getHoraInicio());
   }
+  
+  
+  @ManyToOne (optional = true, cascade = {
+	        CascadeType.PERSIST, 
+	        CascadeType.MERGE,
+	        CascadeType.REFRESH
+  })
+  @JoinColumn (name = "reserva_hija_id", nullable = true)
+  public Reserva getReservaHija() {
+    return reservaHija;
+  }
+
+  public void setReservaHija(Reserva reservaHija) {
+	this.reservaHija = reservaHija;
+  }
+	    
   
   
 }

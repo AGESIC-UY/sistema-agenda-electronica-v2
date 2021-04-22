@@ -20,7 +20,7 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
-
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
@@ -138,5 +138,25 @@ public interface AgendarReservas {
   public TokenReserva cancelarReservasMultiples(Integer tokenId) throws UserException;
   
   public Reserva modificarReservaNotificar(Integer idReserva, Boolean notificar) throws UserException;
-  public void modificarReservaMultipleNotificar(TokenReserva tokenReserva, Boolean notificar) throws UserException;   
+  public void modificarReservaMultipleNotificar(TokenReserva tokenReserva, Boolean notificar) throws UserException; 
+  
+  
+  /* Servicios para reserva múltiple vacunación COVID */
+  
+  
+  /*
+   * Crea dos nuevas reservas en estado pendiente, controla que aun exista cupo.
+  */
+  public Reserva marcarReservasPares(Disponibilidad d,Disponibilidad d2, TokenReserva token, String ipOrigen) throws UserException;
+  
+  Reserva generarYConfirmarReservasVacunacion(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos,
+          String idTransaccionPadre, String pasoTransaccionPadre, TokenReserva tokenReserva, String idioma, Date fechaReservaDos, String tipoDocReservaDos, String tipoDosisReservaDos) throws UserException;
+  
+  public Reserva confirmarReservasPares(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
+  
+  public TokenReserva cancelarReservasParesMultiple(Integer tokenId, Integer reservaId) throws UserException;
+  
+  public void cancelarReservaVacunacion(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva,Integer idReserva2, Boolean masiva) throws UserException;
+  
+  
 }

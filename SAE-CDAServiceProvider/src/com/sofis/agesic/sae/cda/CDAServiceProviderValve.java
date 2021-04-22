@@ -235,11 +235,11 @@ public class CDAServiceProviderValve extends ValveBase {
 			// No permitir acceder a /sso si no es una invocacion del IdP (debe contener un mensaje SAMLResponse del IdP)
 			String samlResponse = getParameter(httpRequest, SAML_RESPONSE);
 			if (samlResponse == null) {
-				logger.fine("[" + httpRequest.getContextPath()+"/"+httpRequest.getServletPath() + "] El acceso a la URL de retorno no contiene una respuesta SAML. Se muestra error y termina la ejecucion.");
 				
 				//Es posible que contenga un LogoutRequest del CDA
 				String samlRequest = getParameter(httpRequest, SAML_REQUEST);
 				if(samlRequest != null) {
+	        logger.fine("[" + httpRequest.getContextPath()+"/"+httpRequest.getServletPath() + "] Se recibe una invocación de logout desde CDA.");
 					try {
 						processSAMLRequest(samlRequest, httpRequest, httpResponse);
 					}catch(CDAServiceProviderException ex) {
@@ -248,6 +248,7 @@ public class CDAServiceProviderValve extends ValveBase {
 					}
 					return;
 				}
+        logger.fine("[" + httpRequest.getContextPath()+"/"+httpRequest.getServletPath() + "] El acceso a la URL de retorno no contiene una respuesta SAML. Se muestra error y termina la ejecucion.");
 				
 				try {
 					httpResponse.getWriter().write("Esta URL solo debe ser invocada por el Proveedor de Identidades de su Organización");
@@ -698,6 +699,8 @@ public class CDAServiceProviderValve extends ValveBase {
 
 			// Armar la solicitud de logout
 			LogoutRequest logoutRequest = buildSAMLLogoutRequest(programData, providerId, userData);
+			
+			printXMLObject("LOGOUTREQUEST", logoutRequest);
 
 			Marshaller marshaller = org.opensaml.Configuration.getMarshallerFactory().getMarshaller(logoutRequest);
 			org.w3c.dom.Element authDOM = marshaller.marshall(logoutRequest);
@@ -731,6 +734,8 @@ public class CDAServiceProviderValve extends ValveBase {
 			redirectUrl = redirectUrl + queryParametersToSign;
 			redirectUrl = redirectUrl + "&Signature=" + URLEncoder.encode(sigStringVal, "UTF-8");
 
+			logger.log(Level.FINE, "URL de logout: {0}", redirectUrl);
+			
 			// Enviar la orden de redicción
 			httpResponse.sendRedirect(redirectUrl);
 

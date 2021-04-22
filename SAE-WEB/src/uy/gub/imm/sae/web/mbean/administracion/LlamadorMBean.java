@@ -107,6 +107,11 @@ public class LlamadorMBean extends BaseMBean {
 	
   /** Configura titulo pantalla de configuracion del llamador cuando se accede desde la administracion */
   public void beforePhaseConfiguracionLlamador(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
     if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
       sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("configuracion_del_llamador"));
     }
@@ -114,6 +119,11 @@ public class LlamadorMBean extends BaseMBean {
   
 	/** Valida parametros para armar el llamador generico */
 	public void beforePhaseListaDeLlamadas(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("lista_de_llamadas"));
 			try {

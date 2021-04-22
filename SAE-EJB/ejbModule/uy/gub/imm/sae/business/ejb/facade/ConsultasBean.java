@@ -30,6 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.math.BigDecimal;
 
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
@@ -43,6 +44,7 @@ import javax.persistence.TemporalType;
 import org.apache.commons.lang.StringUtils;
 
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
+import uy.gub.imm.sae.business.dto.RecursoDTO;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
@@ -149,14 +151,15 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 	
 	/**
 	 * Busca las reservas confirmadas existentes que tengan los mismos valores en todos los datos claves y que correspondan al trámite indicado.
-	 * No considera reservas que corresponden a disponibilidades presenciales. 
+	 * No considera reservas que corresponden a disponibilidades presenciales.
+	 * Si se le indica un id de reserva excluye de la consulta la reserva con dicho id (para validar cuando la reserva ya está guardada) 
 	 * @param datos
 	 * @param recurso
 	 * @param fecha
 	 * @return
 	 */
 	@SuppressWarnings("unchecked")
-	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos , Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite){
+	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos , Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite, Integer idReserva){
 		String selectStr =	" SELECT DISTINCT(reserva) " ;
 		String fromStr =   	" FROM Reserva reserva " +
 						   					"	JOIN reserva.disponibilidades disp " +
@@ -169,6 +172,10 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 					  						"   AND disp.fecha >= :fechaDesde " +
                         "   AND disp.fecha <= :fechaHasta " +
 				  							"   AND reserva.estado NOT IN (:usada,:cancelada) ";
+		if (idReserva!=null) {
+			whereStr=whereStr+" AND reserva.id<>:idReserva";
+		}
+		
 		boolean hayCamposClaveNulos = false;
 		if (! datos.isEmpty()) {
 			whereStr = whereStr + "    AND (" ;
@@ -198,14 +205,17 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 		}
 		
 		String consulta = selectStr + fromStr + whereStr  + " ORDER BY reserva.id ";
-		List<Reserva> reservas = (List<Reserva>)entityManager.createQuery(consulta)
-      .setParameter("tramiteCodigo", codigoTramite)
-			.setParameter("recurso", recurso)
-			.setParameter("fechaDesde", fechaDesde, TemporalType.DATE)
-      .setParameter("fechaHasta", fechaHasta, TemporalType.DATE)
-      .setParameter("usada", Estado.U)
-      .setParameter("cancelada", Estado.C)
-			.getResultList();
+		Query query=entityManager.createQuery(consulta)
+								 .setParameter("tramiteCodigo", codigoTramite)
+								 .setParameter("recurso", recurso)
+								 .setParameter("fechaDesde", fechaDesde, TemporalType.DATE)
+								 .setParameter("fechaHasta", fechaHasta, TemporalType.DATE)
+								 .setParameter("usada", Estado.U)
+								 .setParameter("cancelada", Estado.C);
+		 if (idReserva!=null) {
+			 query.setParameter("idReserva", idReserva);
+		 }
+		 List<Reserva> reservas=(List <Reserva>)query.getResultList();
 		
 		/* 12/03/2010 - Corrige que al traer reservas con la misma clave que se ingreso, 
 		 * se filtren las que tengan algun dato clave mas ingresado (por ejemplo cuando 
@@ -543,14 +553,13 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
   		}
 		}
 		String queryString = 
-			"SELECT r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, a.asistio, r.tramiteCodigo, "	+ 
-			    "r.tramiteNombre, d.presencial, r.fcancela, r.ucancela, r.tcancela " +
+			"SELECT r.id, r.numero, r.estado, d.id, d.fecha, d.horaInicio, das.id, das.nombre, das.tipo, dr.valor, ll.puesto, r.tramiteCodigo, "	+ 
+			    "r.tramiteNombre, d.presencial, r.fcancela, r.ucancela, r.tcancela , r.codigoSeguridad " +
 			"FROM Reserva r " +
 			"JOIN r.disponibilidades d " +
 			"LEFT JOIN r.datosReserva dr " +
 			"LEFT JOIN dr.datoASolicitar das " +
 			"LEFT JOIN r.llamada ll " +
-			"LEFT JOIN r.atenciones a "+
 			"WHERE d.recurso.id = :recurso " +
 			"  AND d.fecha BETWEEN :fi AND :ff " +
 			where +
@@ -587,15 +596,31 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 			Tipo tipoDatoReserva  = (Tipo) rowReserva[8];
 			String valorDatoReserva = (String) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
-			Boolean asistio          = (Boolean)rowReserva[11];
-      String tramiteCodigo    = (String) rowReserva[12];
-      String tramiteNombre    = (String) rowReserva[13];
-      Boolean presencial       = (Boolean)rowReserva[14];
-      Date fcancela           = (Date) rowReserva[15];
-      String ucancela         = (String) rowReserva[16];
-      TipoCancelacion tcancela    = (TipoCancelacion) rowReserva[17];
+      String tramiteCodigo    = (String) rowReserva[11];
+      String tramiteNombre    = (String) rowReserva[12];
+      Boolean presencial       = (Boolean)rowReserva[13];
+      Date fcancela           = (Date) rowReserva[14];
+      String ucancela         = (String) rowReserva[15];
+      TipoCancelacion tcancela    = (TipoCancelacion) rowReserva[16];
+			String codigoSeguridad = (String) rowReserva[17];
 			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
 				idReservaActual = reservaId;
+				
+				 String queryStringAtencion
+	                = "SELECT a FROM Atencion a "
+	                + "WHERE a.reserva.id = :reserva "
+	                + "ORDER BY a.id DESC";
+
+	                Query queryAtencion = entityManager.createQuery(queryStringAtencion);
+	                queryAtencion.setParameter("reserva", reservaId);
+	                List<Atencion> list = queryAtencion.setMaxResults(1).getResultList();
+	                Boolean asistio = null;
+	                if(list!=null && !list.isEmpty()){
+		                if(list.get(0)!=null && list.get(0).getAsistio()!=null){
+		                    asistio = list.get(0).getAsistio();
+		                }
+	                }
+				
 				if (reservaDTO != null) {
 					reservas.add(reservaDTO);
 				}
@@ -607,12 +632,13 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 				reservaDTO.setHoraInicio(dispHoraInicio);
 				reservaDTO.setPuestoLlamada(puesto);
 				reservaDTO.setAsistio(asistio);
-		    reservaDTO.setTramiteCodigo(tramiteCodigo);
-		    reservaDTO.setTramiteNombre(tramiteNombre);
-		    reservaDTO.setPresencial(presencial);
-        reservaDTO.setFcancela(fcancela);
-        reservaDTO.setUcancela(ucancela);
-        reservaDTO.setTcancela(tcancela==null?null:tcancela.toString());
+				reservaDTO.setTramiteCodigo(tramiteCodigo);
+				reservaDTO.setTramiteNombre(tramiteNombre);
+				reservaDTO.setPresencial(presencial);
+		    	reservaDTO.setFcancela(fcancela);
+	    		reservaDTO.setUcancela(ucancela);
+	    		reservaDTO.setTcancela(tcancela==null?null:tcancela.toString());
+				reservaDTO.setCodigoSeguridad(codigoSeguridad);
 			}
 			if (nombreDatoReserva != null) {
 			  if(valorDatoReserva == null) {
@@ -1505,7 +1531,104 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
       throw new UserException("error_no_solucionable"); 
     }
   }
+  
+  /**
+   * Permite consultar las disponibilidades para un recurso en un ventana de tiempo, según los requerimientos de la operación "disponibilidades_por_recurso_tiempo" del servicio web REST
+   */
+  public Map<String, Object> consultarDisponibilidadesPorRecursoTiempo(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma, VentanaDeTiempo ventana) throws UserException {
+    if(idEmpresa==null) {
+      throw new UserException("debe_especificar_la_empresa");
+    }
+    if(idAgenda==null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso==null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if(ventana == null){
+    	throw new UserException("debe_especificar_la_ventana");
+    }
+    else{
+	    if(ventana.getFechaInicial()==null || ventana.getFechaFinal() ==null){
+	    	throw new UserException("debe_especificar_la_ventana");	
+	    }
+    }
+    
+    //Obtener la empresa
+    Empresa empresa;
+    try {
+      empresa = empresasEJB.obtenerEmpresaPorId(idEmpresa);
+      if(empresa==null) {
+        throw new UserException("no_se_encuentra_la_empresa_especificada");
+      }
+    }catch(ApplicationException aEx) {
+      throw new UserException("no_se_encuentra_la_empresa_especificada");
+    }
+    //Obtener la agenda
+    Agenda agenda;
+    try {
+      agenda = agendarReservasEJB.consultarAgendaPorId(idAgenda);
+      if(agenda==null) {
+        throw new UserException("no_se_encuentra_la_agenda_especificada");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_la_agenda_especificada");
+    }
+    Recurso recurso;
+    try {
+      recurso = agendarReservasEJB.consultarRecursoPorId(agenda, idRecurso);
+      if(recurso==null) {
+        throw new UserException("no_se_encuentra_lel_recurso_especificado");
+      }
+    }catch(ApplicationException | BusinessException ex) {
+      throw new UserException("no_se_encuentra_lel_recurso_especificado");
+    }
+    try {
+      //Respuesta
+      Map<String, Object> resp = new HashMap<String, Object>();
+      //Textos del paso 2 de la agenda y el recurso (según idioma)
+      if(idioma!=null && !idioma.isEmpty() && agenda.getTextosAgenda().containsKey(idioma)) {
+        resp.put("textoAgendaPaso2", agenda.getTextosAgenda().get(idioma).getTextoPaso2());
+      }else {
+        if(!agenda.getTextosAgenda().isEmpty()) {
+          resp.put("textoAgendaPaso2", agenda.getTextosAgenda().values().toArray(new TextoAgenda[0])[0].getTextoPaso2());
+        }
+      }
+      if(idioma!=null && !idioma.isEmpty() && recurso.getTextosRecurso().containsKey(idioma)) {
+        resp.put("textoRecursoPaso2", recurso.getTextosRecurso().get(idioma).getTextoPaso2());
+      }else {
+        if(!recurso.getTextosRecurso().isEmpty()) {
+          resp.put("textoRecursoPaso2", recurso.getTextosRecurso().values().toArray(new TextoRecurso[0])[0].getTextoPaso2());
+        }
+      }
 
+      //Determinar el timezone según la agenda o la empresa
+      TimeZone timezone = TimeZone.getDefault();
+      if(agenda.getTimezone()!=null && !agenda.getTimezone().isEmpty()) {
+        timezone = TimeZone.getTimeZone(agenda.getTimezone());
+      }else {
+        if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+          timezone = TimeZone.getTimeZone(empresa.getTimezone());
+        }
+      }
+      //Obtener las disponibilidades para la ventana
+      List<Disponibilidad> disps = agendarReservasEJB.obtenerDisponibilidades(recurso, ventana, timezone);
+      SimpleDateFormat formatoClave = new SimpleDateFormat("yyyyMMdd HH:mm");
+      //La clave está compuesta por la tupla [fecha hora id-disponibilidad] y el valor es la cantidad de cupos disponibles
+      Map<String, Integer> cuposPorFechaHora = new HashMap<String, Integer>();
+      for (Disponibilidad disp : disps) {
+        cuposPorFechaHora.put(formatoClave.format(disp.getHoraInicio())+" "+disp.getId(), disp.getCupo());
+      }
+      //Retornar la respuesta
+      resp.put("disponibilidades", cuposPorFechaHora);
+      return resp;
+    }catch(Exception ex) {
+      ex.printStackTrace();
+      throw new UserException("error_no_solucionable"); 
+    }
+  }
+
+  
   /**
    * Valida que el token y el id de la empresa existan y se correspondan
    */
@@ -1646,4 +1769,112 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
     
     return reservas;
   }
+  
+
+  /**
+   * Esta función es utilizada por el servicio web REST para determinar los cambios en los 'Datos generales' de un recurso 
+   * durante un periodo determinado.
+   * La empresa se determina en base al token, el cual debe estar registrado (el organismo que desee invocar el
+   * servicio tendrá que solicitar un token para cada empresa).
+   */
+  public List<RecursoDTO> consultarCambiosEnUnRecurso(String token, Integer idEmpresa, Integer idAgenda, Integer idRecurso, 
+		  											  Date fechaDesde, Date fechaHasta) throws UserException {
+	  
+	if(idAgenda == null) {
+      throw new UserException("debe_especificar_la_agenda");
+    }
+    if(idRecurso == null) {
+        throw new UserException("debe_especificar_el_recurso");
+    }
+    try {
+      //Determinar el esquema sobre el cual hay que hacer la consulta en base al token
+      String query = "SELECT t FROM Token t WHERE t.token=:token";
+      Token oToken = (Token) globalEntityManager.createQuery(query).setParameter("token", token).getSingleResult();
+      
+      String esquema = oToken.getEmpresa().getDatasource();
+      query = "SELECT rec.id_recurso, rec.nombre, rec.descripcion, rec.direccion, rec.localidad, rec.departamento, rec.latitud, rec.longitud,"
+              + " rec.telefonos, rec.horarios, rec.fecha_inicio, rec.fecha_fin, rec.fecha_inicio_disp, rec.fecha_fin_disp, rec.visible_internet, "
+              + " rec.sabado_es_habil, rec.domingo_es_habil, rec.cant_dias_a_generar, rec.periodo_validacion"
+              + " FROM {esquema}.ae_recursos_aud rec "
+              + " WHERE rec.id > 0";
+
+      if(idRecurso != null) {
+        query += " AND rec.id_recurso=:idRecurso ";
+      }
+      
+      if(idAgenda != null) {
+        query += " AND rec.agenda=:idAgenda ";
+      }
+  
+      if(fechaDesde != null) {
+        query += " AND rec.fecha_modificacion >=:fechaDesde ";
+      }
+      
+      if(fechaHasta != null) {
+        query += " AND rec.fecha_modificacion <=:fechaHasta ";
+      }
+      
+      query += " ORDER BY rec.id";
+      
+      query = query.replace("{esquema}", esquema);
+      Query query1 = globalEntityManager.createNativeQuery(query);
+      
+      if(idRecurso != null) {
+        query1.setParameter("idRecurso", idRecurso);
+      }
+      
+      if(idAgenda != null) {
+        query1.setParameter("idAgenda", idAgenda);
+      }
+      
+      if(fechaDesde != null) {
+        query1.setParameter("fechaDesde", fechaDesde, TemporalType.TIMESTAMP);
+      }
+      
+      if(fechaHasta != null) {
+        query1.setParameter("fechaHasta", fechaHasta, TemporalType.TIMESTAMP);
+      }
+      
+      @SuppressWarnings("unchecked")
+      List<Object[]> ress = query1.getResultList();
+
+      List<RecursoDTO> resp = new ArrayList<>();
+      RecursoDTO recursoDTO = null;
+      for(Object[] res : ress) {
+          recursoDTO = new RecursoDTO();
+          recursoDTO.setId((Integer)res[0]);
+          recursoDTO.setNombre((String)res[1]);
+          recursoDTO.setDescripcion((String)res[2]);
+          recursoDTO.setDireccion((String)res[3]);
+          recursoDTO.setLocalidad((String)res[4]);
+          recursoDTO.setDepartamento((String)res[5]);
+          recursoDTO.setLatitud((BigDecimal)res[6]);
+          recursoDTO.setLongitud((BigDecimal)res[7]);
+          recursoDTO.setTelefonos((String)res[8]);
+          recursoDTO.setHorarios((String)res[9]);
+          
+          recursoDTO.setFechaInicio(new SimpleDateFormat("yyyyMMdd").format((Date) res[10]));
+          recursoDTO.setFechaFin(new SimpleDateFormat("yyyyMMdd").format((Date) res[11]));
+          recursoDTO.setFechaInicioDisp(new SimpleDateFormat("yyyyMMdd").format((Date) res[12]));
+          recursoDTO.setFechaFinDisp(new SimpleDateFormat("yyyyMMdd").format((Date) res[13]));
+
+          recursoDTO.setVisibleInternet(((Boolean)res[14]) == true ? "S" : "N");
+          recursoDTO.setSabadoEsHabil(((Boolean)res[15]) == true ? "S" : "N");
+          recursoDTO.setDomingoEsHabil(((Boolean)res[16]) == true ? "S" : "N");
+          recursoDTO.setCantDiasAGenerar((Integer)res[17]);
+          recursoDTO.setPeriodoValidacion((Integer)res[18]);
+         
+          resp.add(recursoDTO);
+      }
+      return resp;
+    } catch (NoResultException nrEx) {
+      throw new UserException("no_se_encuentra_el_token_especificado");   
+    } catch (NonUniqueResultException nurEx) {
+      throw new UserException("no_se_encuentra_el_token_especificado");   
+    } catch(Exception ex) {
+        ex.printStackTrace();
+        throw new UserException("error_no_solucionable"); 
+      }
+  }
+  
 }

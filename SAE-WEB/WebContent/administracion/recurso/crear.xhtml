@@ -148,29 +148,39 @@
 								<p:outputLabel value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}" for="ChecksabadoEsHabil" />
 							</p:outputPanel>
 						</p:outputPanel>
-            <p:outputPanel styleClass="form-group">
-              <h:outputText value="#{sessionMBean.textos['domingo']}" styleClass="col-sm-3 control-label label" />
-              <p:outputPanel styleClass="col-sm-9">
-                <p:selectBooleanCheckbox value="#{recursoMBean.recursoNuevo.domingoEsHabil}" id="CheckDomingoEsHabil" >
-                  <p:ajax update="configuracionAtencionPresencial" />
-                </p:selectBooleanCheckbox>
-                <p:outputLabel value="#{sessionMBean.textos['considerar_el_domingo_como_dia_habil']}" for="CheckDomingoEsHabil" />
-              </p:outputPanel>
-            </p:outputPanel>
-						<p:outputPanel styleClass="form-group">
-							<p:outputLabel value="#{sessionMBean.textos['cantidad_de_dias_a_generar']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" for="CantDias" />
-							<p:outputPanel styleClass="col-sm-9">
-								<h:inputText id="CantDias" converter="integerConverter" value="#{recursoMBean.recursoNuevo.cantDiasAGenerar}" maxlength="5" styleClass="form-control textoCorto" />
-								<p:message for="CantDias" errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+			            <p:outputPanel styleClass="form-group">
+			              <h:outputText value="#{sessionMBean.textos['domingo']}" styleClass="col-sm-3 control-label label" />
+			              <p:outputPanel styleClass="col-sm-9">
+			                <p:selectBooleanCheckbox value="#{recursoMBean.recursoNuevo.domingoEsHabil}" id="CheckDomingoEsHabil" >
+			                  <p:ajax update="configuracionAtencionPresencial" />
+			                </p:selectBooleanCheckbox>
+			                <p:outputLabel value="#{sessionMBean.textos['considerar_el_domingo_como_dia_habil']}" for="CheckDomingoEsHabil" />
+			              </p:outputPanel>
+			            </p:outputPanel>
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['cantidad_de_dias_a_generar']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" for="CantDias" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="CantDias" converter="integerConverter" value="#{recursoMBean.recursoNuevo.cantDiasAGenerar}" maxlength="5" styleClass="form-control textoCorto" />
+									<p:message for="CantDias" errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+								</p:outputPanel>
 							</p:outputPanel>
-						</p:outputPanel>
-            <p:outputPanel styleClass="form-group">
-              <p:outputLabel value="#{sessionMBean.textos['periodo_validacion']} (#{sessionMBean.textos['dias']})" for="PeriodoValidacion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
-              <p:outputPanel styleClass="col-sm-9">
-                <h:inputText id="PeriodoValidacion" value="#{recursoMBean.recursoNuevo.periodoValidacion}" maxlength="3" styleClass="form-control textoCorto" />
-                <p:message for="PeriodoValidacion" errorClass="mensajeError" infoClass="mensajeInfo" />
-              </p:outputPanel>
-            </p:outputPanel>
+			            <p:outputPanel styleClass="form-group">
+			              <p:outputLabel value="#{sessionMBean.textos['periodo_validacion']} (#{sessionMBean.textos['dias']})" for="PeriodoValidacion" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+			              <p:outputPanel styleClass="col-sm-9">
+			                <h:inputText id="PeriodoValidacion" value="#{recursoMBean.recursoNuevo.periodoValidacion}" maxlength="3" styleClass="form-control textoCorto" />
+			                <p:message for="PeriodoValidacion" errorClass="mensajeError" infoClass="mensajeInfo" />
+			              </p:outputPanel>
+			            </p:outputPanel>
+			            <p:outputPanel styleClass="form-group">
+			              <p:outputLabel value="#{sessionMBean.textos['reserva_pendiente_tiempo_max']} (#{sessionMBean.textos['minutos']})" for="tiempoMaxReserva" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+			              <p:outputPanel styleClass="col-sm-9">
+			                <h:inputText id="tiempoMaxReserva"
+									value="#{recursoMBean.recursoNuevo.reservaPendienteTiempoMax}"
+									maxlength="4" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+			                <p:message for="tiempoMaxReserva" errorClass="mensajeError" infoClass="mensajeInfo" />
+			              </p:outputPanel>
+			            </p:outputPanel>
 					</p:outputPanel>
 				</fieldset>
 				<fieldset>
@@ -452,11 +462,24 @@
               <h:outputText value="#{sessionMBean.textos['reserva_multiple']}" styleClass="col-sm-3 control-label label" />
               <p:outputPanel styleClass="col-sm-9">
                 <p:outputPanel>
-                  <p:selectBooleanCheckbox value="#{recursoMBean.recursoNuevo.multipleAdmite}" id="admiteMultiple" />
+                  <p:selectBooleanCheckbox value="#{recursoMBean.recursoNuevo.multipleAdmite}" id="admiteMultiple" >
+                  	<p:ajax update="configuracionReservaMultiple" listener="#{recursoMBean.setNullReservaMultipleTiempoMax}" />
+				  </p:selectBooleanCheckbox>
                   <p:outputLabel value="#{sessionMBean.textos['admite_reserva_multiple']}" for="admiteMultiple" />
                 </p:outputPanel>
               </p:outputPanel>
             </p:outputPanel>
+            <p:outputPanel styleClass="form-group">
+            <p:outputLabel value="#{sessionMBean.textos['reserva_multiple_pendiente_tiempo_max']} (#{sessionMBean.textos['minutos']})" for="tiempoMaxReservaMultiple" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+            <p:outputPanel styleClass="col-sm-9">
+              <h:inputText id="tiempoMaxReservaMultiple"
+									value="#{recursoMBean.recursoNuevo.reservaMultiplePendienteTiempoMax}"
+									maxlength="4" styleClass="form-control textoCorto"
+									converter="integerConverter"
+									disabled="#{!recursoMBean.recursoNuevo.multipleAdmite}" />
+              <p:message for="tiempoMaxReservaMultiple" errorClass="mensajeError" infoClass="mensajeInfo" />
+            </p:outputPanel>
+          </p:outputPanel>
           </p:outputPanel>
         </fieldset>
         

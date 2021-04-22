@@ -72,6 +72,11 @@ public class Paso1AdminMBean extends BaseMBean {
   private boolean recursoTieneDisponibilidad = true;
 
 	public void beforePhase (PhaseEvent phaseEvent) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		disableBrowserCache(phaseEvent);
 		if (phaseEvent.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("realizar_reserva"));

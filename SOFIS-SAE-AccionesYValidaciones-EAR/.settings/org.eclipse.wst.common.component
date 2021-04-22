@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="SOFIS-SAE-AccionesYValidaciones-EAR">
+        <wb-resource deploy-path="/" source-path="/EarContent" tag="defaultRootSource"/>
+        <dependent-module archiveName="SOFIS-SAE-AccionesYValidaciones.jar" deploy-path="/" handle="module:/resource/SOFIS-SAE-AccionesYValidaciones/SOFIS-SAE-AccionesYValidaciones">
+            <dependent-object/>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>

@@ -202,7 +202,7 @@ public class AgendaMBean extends BaseMBean {
  				if(sessionMBean.getAgendaMarcada()!=null && sessionMBean.getAgendaMarcada().getId().equals(agenda.getId())) {
  					sessionMBean.desseleccionarAgenda();
  				}
- 				agendasEJB.eliminarAgenda(agenda, sessionMBean.getTimeZone());
+ 				agendasEJB.eliminarAgenda(agenda, sessionMBean.getTimeZone(), sessionMBean.getUsuarioActual().getCodigo());
 				sessionMBean.cargarAgendas();
  				agendasSeleccion = null;
 				addInfoMessage(sessionMBean.getTextos().get("agenda_eliminada"), MSG_ID);

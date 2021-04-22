@@ -10,7 +10,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FCALL_CENTER","RA_AE_FATENCION", "RA_AE_ANONIMO"})
+@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FCALL_CENTER","RA_AE_FATENCION", "RA_AE_ANONIMO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class ConsultaFeriadosBean implements ConsultaFeriadosRemote, ConsultaFeriadosLocal {
 
 	@PersistenceContext(unitName = "SAE-EJB")

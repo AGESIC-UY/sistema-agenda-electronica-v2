@@ -38,9 +38,9 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 public interface Recursos {
-	public Recurso crearRecurso(Agenda a, Recurso r) throws UserException, ApplicationException, BusinessException;
-	public void modificarRecurso(Recurso r) throws UserException, BusinessException, ApplicationException;
-	public void eliminarRecurso(Recurso recurso, TimeZone timezone) throws UserException, ApplicationException;
+	public Recurso crearRecurso(Agenda a, Recurso r, String codigoUsuario) throws UserException, ApplicationException, BusinessException;
+	public void modificarRecurso(Recurso r, String codigoUsuario) throws UserException, BusinessException, ApplicationException;
+	public void eliminarRecurso(Recurso recurso, TimeZone timezone, String codigoUsuario) throws UserException, ApplicationException;
 	public Recurso consultarRecurso(Recurso r) throws UserException;	
     //Métodos asociados a DatoDelRecurso
 	public DatoDelRecurso agregarDatoDelRecurso(Recurso r, DatoDelRecurso d) throws UserException;
@@ -67,13 +67,13 @@ public interface Recursos {
 	public void eliminarValorPosible(ValorPosible v) throws UserException;
 	public List<ValorPosible> consultarValoresPosibles(DatoASolicitar d) throws ApplicationException;
 	public boolean existeValorPosiblePeriodo(ValorPosible v) throws ApplicationException;
-	public void copiarRecurso(Recurso r) throws BusinessException, ApplicationException, UserException;
+	public Recurso copiarRecurso(Recurso r, String codigoUsuario) throws BusinessException, ApplicationException, UserException;
 	//Métodos asociados a ServicioPorRecurso
 	List<ServicioPorRecurso> consultarServicioAutocompletar (Recurso r) throws BusinessException;
 	public Boolean existeRecursoPorNombre(Recurso r) throws ApplicationException;
 	//Métodos de exportación e importación
 	public byte[] exportarRecurso(Recurso r, String versionSAE) throws UserException;
-	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE) throws UserException;
+	public Recurso importarRecurso(Agenda a, byte[] b, String versionSAE, String codigoUsuario) throws UserException;
 	//Metodos de AccionesMiPerfil del recurso
 	public AccionMiPerfil obtenerAccionMiPerfilDeRecurso(Integer recursoId);
 	public AccionMiPerfil obtenerAccionMiPerfilPorDefecto(Recurso recurso);

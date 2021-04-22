@@ -32,6 +32,7 @@ import javax.faces.component.UIComponent;
 import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
+import javax.faces.context.FacesContext;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Comunicaciones;
@@ -114,12 +115,22 @@ public class ReservaMBean extends BaseMBean {
 	}
 
   public void beforePhaseCancelarReserva(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_FCALL_CENTER", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
     if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
       sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("cancelar_reserva"));
     }
   }
   
   public void beforePhaseCancelarReservasPeriodo(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
     if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
       sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("cancelar_reserva_por_periodo"));
     }

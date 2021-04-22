@@ -35,7 +35,7 @@ public class ExportarHelper {
 		recursoExportar.setFechaBaja(recurso.getFechaBaja());
 		recursoExportar.setMostrarNumeroEnLlamador(recurso.getMostrarNumeroEnLlamador());
 		recursoExportar.setVisibleInternet(recurso.getVisibleInternet());
-    recursoExportar.setMostrarIdEnTicket(recurso.getMostrarIdEnTicket());
+		recursoExportar.setMostrarIdEnTicket(recurso.getMostrarIdEnTicket());
 		recursoExportar.setMostrarNumeroEnTicket(recurso.getMostrarNumeroEnTicket());
 		recursoExportar.setFuenteTicket(recurso.getFuenteTicket());
 		recursoExportar.setTamanioFuenteChica(recurso.getTamanioFuenteChica());
@@ -44,7 +44,7 @@ public class ExportarHelper {
 		recursoExportar.setUsarLlamador(recurso.getUsarLlamador());
 		recursoExportar.setSerie(recurso.getSerie());
 		recursoExportar.setSabadoEsHabil(recurso.getSabadoEsHabil());
-    recursoExportar.setDomingoEsHabil(recurso.getDomingoEsHabil());
+		recursoExportar.setDomingoEsHabil(recurso.getDomingoEsHabil());
 		recursoExportar.setOficinaId(recurso.getOficinaId());
 		recursoExportar.setDireccion(recurso.getDireccion());
 		recursoExportar.setLocalidad(recurso.getLocalidad());
@@ -55,47 +55,50 @@ public class ExportarHelper {
 		recursoExportar.setLongitud(recurso.getLongitud());
 		
 		recursoExportar.setPresencialAdmite(recurso.getPresencialAdmite());
-    recursoExportar.setPresencialCupos(recurso.getPresencialCupos());
-    recursoExportar.setPresencialLunes(recurso.getPresencialLunes());
-    recursoExportar.setPresencialMartes(recurso.getPresencialMartes());
-    recursoExportar.setPresencialMiercoles(recurso.getPresencialMiercoles());
-    recursoExportar.setPresencialJueves(recurso.getPresencialJueves());
-    recursoExportar.setPresencialViernes(recurso.getPresencialViernes());
-    recursoExportar.setPresencialSabado(recurso.getPresencialSabado());
-    recursoExportar.setPresencialDomingo(recurso.getPresencialDomingo());
-
-    recursoExportar.setMultipleAdmite(recurso.getMultipleAdmite());
-    recursoExportar.setCambiosAdmite(recurso.getCambiosAdmite());
-    recursoExportar.setCambiosTiempo(recurso.getCambiosTiempo());
-    recursoExportar.setCambiosUnidad(recurso.getCambiosUnidad());
-    recursoExportar.setPeriodoValidacion(recurso.getPeriodoValidacion());
-
-    recursoExportar.setValidarPorIP(recurso.getValidarPorIP());
-    recursoExportar.setCantidadPorIP(recurso.getCantidadPorIP());
-    recursoExportar.setPeriodoPorIP(recurso.getPeriodoPorIP());
-    recursoExportar.setIpsSinValidacion(recurso.getIpsSinValidacion());
-    
-    recursoExportar.setCancelacionTiempo(recurso.getCancelacionTiempo()); 
-    recursoExportar.setCancelacionUnidad(recurso.getCancelacionUnidad()); 
-    recursoExportar.setCancelacionTipo(recurso.getCancelacionTipo()); 
-
-    recursoExportar.setMiPerfilConHab(recurso.getMiPerfilConHab());
-    recursoExportar.setMiPerfilConTitulo(recurso.getMiPerfilConTitulo());
-    recursoExportar.setMiPerfilConCorto(recurso.getMiPerfilConCorto());
-    recursoExportar.setMiPerfilConLargo(recurso.getMiPerfilConLargo());
-    recursoExportar.setMiPerfilConVencim(recurso.getMiPerfilConVencim());
-    recursoExportar.setMiPerfilCanHab(recurso.getMiPerfilCanHab());
-    recursoExportar.setMiPerfilCanTitulo(recurso.getMiPerfilCanTitulo());
-    recursoExportar.setMiPerfilCanCorto(recurso.getMiPerfilCanCorto());
-    recursoExportar.setMiPerfilCanLargo(recurso.getMiPerfilCanLargo());
-    recursoExportar.setMiPerfilCanVencim(recurso.getMiPerfilCanVencim());
-    recursoExportar.setMiPerfilRecHab(recurso.getMiPerfilRecHab());
-    recursoExportar.setMiPerfilRecTitulo(recurso.getMiPerfilRecTitulo());
-    recursoExportar.setMiPerfilRecCorto(recurso.getMiPerfilRecCorto());
-    recursoExportar.setMiPerfilRecLargo(recurso.getMiPerfilRecLargo());
-    recursoExportar.setMiPerfilRecVencim(recurso.getMiPerfilRecVencim());
-    recursoExportar.setMiPerfilRecHora(recurso.getMiPerfilRecHora());
-    recursoExportar.setMiPerfilRecDias(recurso.getMiPerfilRecDias());
+	    recursoExportar.setPresencialCupos(recurso.getPresencialCupos());
+	    recursoExportar.setPresencialLunes(recurso.getPresencialLunes());
+	    recursoExportar.setPresencialMartes(recurso.getPresencialMartes());
+	    recursoExportar.setPresencialMiercoles(recurso.getPresencialMiercoles());
+	    recursoExportar.setPresencialJueves(recurso.getPresencialJueves());
+	    recursoExportar.setPresencialViernes(recurso.getPresencialViernes());
+	    recursoExportar.setPresencialSabado(recurso.getPresencialSabado());
+	    recursoExportar.setPresencialDomingo(recurso.getPresencialDomingo());
+	
+	    recursoExportar.setMultipleAdmite(recurso.getMultipleAdmite());
+	    recursoExportar.setCambiosAdmite(recurso.getCambiosAdmite());
+	    recursoExportar.setCambiosTiempo(recurso.getCambiosTiempo());
+	    recursoExportar.setCambiosUnidad(recurso.getCambiosUnidad());
+	    recursoExportar.setPeriodoValidacion(recurso.getPeriodoValidacion());
+	
+	    recursoExportar.setValidarPorIP(recurso.getValidarPorIP());
+	    recursoExportar.setCantidadPorIP(recurso.getCantidadPorIP());
+	    recursoExportar.setPeriodoPorIP(recurso.getPeriodoPorIP());
+	    recursoExportar.setIpsSinValidacion(recurso.getIpsSinValidacion());
+	    
+	    recursoExportar.setCancelacionTiempo(recurso.getCancelacionTiempo()); 
+	    recursoExportar.setCancelacionUnidad(recurso.getCancelacionUnidad()); 
+	    recursoExportar.setCancelacionTipo(recurso.getCancelacionTipo()); 
+	
+	    recursoExportar.setMiPerfilConHab(recurso.getMiPerfilConHab());
+	    recursoExportar.setMiPerfilConTitulo(recurso.getMiPerfilConTitulo());
+	    recursoExportar.setMiPerfilConCorto(recurso.getMiPerfilConCorto());
+	    recursoExportar.setMiPerfilConLargo(recurso.getMiPerfilConLargo());
+	    recursoExportar.setMiPerfilConVencim(recurso.getMiPerfilConVencim());
+	    recursoExportar.setMiPerfilCanHab(recurso.getMiPerfilCanHab());
+	    recursoExportar.setMiPerfilCanTitulo(recurso.getMiPerfilCanTitulo());
+	    recursoExportar.setMiPerfilCanCorto(recurso.getMiPerfilCanCorto());
+	    recursoExportar.setMiPerfilCanLargo(recurso.getMiPerfilCanLargo());
+	    recursoExportar.setMiPerfilCanVencim(recurso.getMiPerfilCanVencim());
+	    recursoExportar.setMiPerfilRecHab(recurso.getMiPerfilRecHab());
+	    recursoExportar.setMiPerfilRecTitulo(recurso.getMiPerfilRecTitulo());
+	    recursoExportar.setMiPerfilRecCorto(recurso.getMiPerfilRecCorto());
+	    recursoExportar.setMiPerfilRecLargo(recurso.getMiPerfilRecLargo());
+	    recursoExportar.setMiPerfilRecVencim(recurso.getMiPerfilRecVencim());
+	    recursoExportar.setMiPerfilRecHora(recurso.getMiPerfilRecHora());
+	    recursoExportar.setMiPerfilRecDias(recurso.getMiPerfilRecDias());
+	    
+	    recursoExportar.setReservaPendienteTiempoMax(recurso.getReservaPendienteTiempoMax());
+	    recursoExportar.setReservaMultiplePendienteTiempoMax(recurso.getReservaMultiplePendienteTiempoMax());
     
 		for (AgrupacionDato agrupacionDato : recurso.getAgrupacionDatos()) {
 			if (agrupacionDato.getFechaBaja() == null) {
@@ -207,7 +210,7 @@ public class ExportarHelper {
 		recurso.setFechaBaja(recursoExportar.getFechaBaja());
 		recurso.setMostrarNumeroEnLlamador(recursoExportar.getMostrarNumeroEnLlamador());
 		recurso.setVisibleInternet(recursoExportar.getVisibleInternet());
-    recurso.setMostrarIdEnTicket(recursoExportar.getMostrarIdEnTicket());
+		recurso.setMostrarIdEnTicket(recursoExportar.getMostrarIdEnTicket());
 		recurso.setMostrarNumeroEnTicket(recursoExportar.getMostrarNumeroEnTicket());
 		recurso.setFuenteTicket(recursoExportar.getFuenteTicket());
 		recurso.setTamanioFuenteChica(recursoExportar.getTamanioFuenteChica());
@@ -216,7 +219,7 @@ public class ExportarHelper {
 		recurso.setUsarLlamador(recursoExportar.getUsarLlamador());
 		recurso.setSerie(recursoExportar.getSerie());
 		recurso.setSabadoEsHabil(recursoExportar.getSabadoEsHabil());
-    recurso.setDomingoEsHabil(recursoExportar.getDomingoEsHabil());
+		recurso.setDomingoEsHabil(recursoExportar.getDomingoEsHabil());
 		recurso.setOficinaId(recursoExportar.getOficinaId());
 		recurso.setDireccion(recursoExportar.getDireccion());
 		recurso.setLocalidad(recursoExportar.getLocalidad());
@@ -234,40 +237,43 @@ public class ExportarHelper {
 		recurso.setPresencialViernes(recursoExportar.getPresencialViernes());
 		recurso.setPresencialSabado(recursoExportar.getPresencialSabado());
 		recurso.setPresencialDomingo(recursoExportar.getPresencialDomingo());
-    recurso.setMultipleAdmite(recursoExportar.getMultipleAdmite());
-    recurso.setCambiosAdmite(recursoExportar.getCambiosAdmite());
-    recurso.setCambiosTiempo(recursoExportar.getCambiosTiempo());
-    recurso.setCambiosUnidad(recursoExportar.getCambiosUnidad());
-    recurso.setPeriodoValidacion(recursoExportar.getPeriodoValidacion());
-
-    recurso.setValidarPorIP(recursoExportar.getValidarPorIP());
-    recurso.setCantidadPorIP(recursoExportar.getCantidadPorIP());
-    recurso.setPeriodoPorIP(recursoExportar.getPeriodoPorIP());
-    recurso.setIpsSinValidacion(recursoExportar.getIpsSinValidacion());
-    
-    recurso.setCancelacionTiempo(recursoExportar.getCancelacionTiempo()); 
-    recurso.setCancelacionUnidad(recursoExportar.getCancelacionUnidad()); 
-    recurso.setCancelacionTipo(recursoExportar.getCancelacionTipo()); 
-    
-    recurso.setMiPerfilConHab(recursoExportar.getMiPerfilConHab());
-    recurso.setMiPerfilConTitulo(recursoExportar.getMiPerfilConTitulo());
-    recurso.setMiPerfilConCorto(recursoExportar.getMiPerfilConCorto());
-    recurso.setMiPerfilConLargo(recursoExportar.getMiPerfilConLargo());
-    recurso.setMiPerfilConVencim(recursoExportar.getMiPerfilConVencim());
-    
-    recurso.setMiPerfilCanHab(recursoExportar.getMiPerfilCanHab());
-    recurso.setMiPerfilCanTitulo(recursoExportar.getMiPerfilCanTitulo());
-    recurso.setMiPerfilCanCorto(recursoExportar.getMiPerfilCanCorto());
-    recurso.setMiPerfilCanLargo(recursoExportar.getMiPerfilCanLargo());
-    recurso.setMiPerfilCanVencim(recursoExportar.getMiPerfilCanVencim());
-
-    recurso.setMiPerfilRecHab(recursoExportar.getMiPerfilRecHab());
-    recurso.setMiPerfilRecTitulo(recursoExportar.getMiPerfilRecTitulo());
-    recurso.setMiPerfilRecCorto(recursoExportar.getMiPerfilRecCorto());
-    recurso.setMiPerfilRecLargo(recursoExportar.getMiPerfilRecLargo());
-    recurso.setMiPerfilRecVencim(recursoExportar.getMiPerfilRecVencim());
-    recurso.setMiPerfilRecHora(recursoExportar.getMiPerfilRecHora());
-    recurso.setMiPerfilRecDias(recursoExportar.getMiPerfilRecDias());
+	    recurso.setMultipleAdmite(recursoExportar.getMultipleAdmite());
+	    recurso.setCambiosAdmite(recursoExportar.getCambiosAdmite());
+	    recurso.setCambiosTiempo(recursoExportar.getCambiosTiempo());
+	    recurso.setCambiosUnidad(recursoExportar.getCambiosUnidad());
+	    recurso.setPeriodoValidacion(recursoExportar.getPeriodoValidacion());
+	
+	    recurso.setValidarPorIP(recursoExportar.getValidarPorIP());
+	    recurso.setCantidadPorIP(recursoExportar.getCantidadPorIP());
+	    recurso.setPeriodoPorIP(recursoExportar.getPeriodoPorIP());
+	    recurso.setIpsSinValidacion(recursoExportar.getIpsSinValidacion());
+	    
+	    recurso.setCancelacionTiempo(recursoExportar.getCancelacionTiempo()); 
+	    recurso.setCancelacionUnidad(recursoExportar.getCancelacionUnidad()); 
+	    recurso.setCancelacionTipo(recursoExportar.getCancelacionTipo()); 
+	    
+	    recurso.setMiPerfilConHab(recursoExportar.getMiPerfilConHab());
+	    recurso.setMiPerfilConTitulo(recursoExportar.getMiPerfilConTitulo());
+	    recurso.setMiPerfilConCorto(recursoExportar.getMiPerfilConCorto());
+	    recurso.setMiPerfilConLargo(recursoExportar.getMiPerfilConLargo());
+	    recurso.setMiPerfilConVencim(recursoExportar.getMiPerfilConVencim());
+	    
+	    recurso.setMiPerfilCanHab(recursoExportar.getMiPerfilCanHab());
+	    recurso.setMiPerfilCanTitulo(recursoExportar.getMiPerfilCanTitulo());
+	    recurso.setMiPerfilCanCorto(recursoExportar.getMiPerfilCanCorto());
+	    recurso.setMiPerfilCanLargo(recursoExportar.getMiPerfilCanLargo());
+	    recurso.setMiPerfilCanVencim(recursoExportar.getMiPerfilCanVencim());
+	
+	    recurso.setMiPerfilRecHab(recursoExportar.getMiPerfilRecHab());
+	    recurso.setMiPerfilRecTitulo(recursoExportar.getMiPerfilRecTitulo());
+	    recurso.setMiPerfilRecCorto(recursoExportar.getMiPerfilRecCorto());
+	    recurso.setMiPerfilRecLargo(recursoExportar.getMiPerfilRecLargo());
+	    recurso.setMiPerfilRecVencim(recursoExportar.getMiPerfilRecVencim());
+	    recurso.setMiPerfilRecHora(recursoExportar.getMiPerfilRecHora());
+	    recurso.setMiPerfilRecDias(recursoExportar.getMiPerfilRecDias());
+	    
+	    recurso.setReservaPendienteTiempoMax(recursoExportar.getReservaPendienteTiempoMax());
+	    recurso.setReservaMultiplePendienteTiempoMax(recursoExportar.getReservaMultiplePendienteTiempoMax());
 
 		return recurso;
 	}

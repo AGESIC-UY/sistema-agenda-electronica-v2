@@ -24,11 +24,8 @@ public class Utilidades {
 		}
 	}
 	
-	
 	public static void main(String[] args) throws NoSuchAlgorithmException {
 		System.out.println("admin -> ["+encriptarPassword("admin")+"]");
 	}
 
-	
-	
 }

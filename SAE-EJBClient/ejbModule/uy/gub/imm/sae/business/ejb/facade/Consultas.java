@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.TimeZone;
 
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
+import uy.gub.imm.sae.business.dto.RecursoDTO;
 import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
@@ -45,7 +46,7 @@ public interface Consultas {
 	public List<ReservaDTO> consultarReservasEnEspera(Recurso recurso, Boolean atencionPresencial, TimeZone timezone) throws UserException;
 	public List<ReservaDTO> consultarReservasEnEsperaUtilizadas(Recurso recurso, Boolean atencionPresencial, TimeZone timezone) throws UserException;
 	public List<Reserva> consultarReservaDatos(List<DatoReserva> datos ,Recurso recurso);
-	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos, Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite);	
+	public List<Reserva> consultarReservaDatosPeriodo(List<DatoReserva> datos, Recurso recurso, Date fechaDesde, Date fechaHasta, String codigoTramite, Integer idReserva);	
 	public List<ReservaDTO> consultarReservasUsadasPeriodo(Recurso recurso, VentanaDeTiempo periodo, Boolean atencionPresencial) throws UserException;
 	public List<Reserva> consultarReservasParaModificarCancelar(List<DatoReserva> datos, Recurso recurso, String codigoSeguridadReserva, TimeZone timezone);
 	
@@ -63,9 +64,13 @@ public interface Consultas {
   
   public boolean validarTokenEmpresa(String token, Integer idEmpresa);
   public Map<String, Object> consultarRecursosPorAgenda(Integer idEmpresa, Integer idAgenda, String idioma) throws UserException;
-	public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;
+  public Map<String, Object> consultarDisponibilidadesPorRecurso(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma) throws UserException;
+  public Map<String, Object> consultarDisponibilidadesPorRecursoTiempo(Integer idEmpresa, Integer idAgenda, Integer idRecurso, String idioma, VentanaDeTiempo ventana) throws UserException;
 	
 	public Map<String, Object> consultarDatosEmpresa(Integer idEmpresa);
 	
 	public String consultarConfiguracion(String clave);
+	
+	public List<RecursoDTO> consultarCambiosEnUnRecurso(String token, Integer idEmpresa, Integer idAgenda, Integer idRecurso, Date fechaDesde, Date fechaHasta) throws UserException;
+	
 }

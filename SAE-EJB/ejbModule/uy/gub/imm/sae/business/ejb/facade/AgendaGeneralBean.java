@@ -41,7 +41,7 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.login.SAEPrincipal;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FCALL_CENTER","RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_LLAMADOR"})
+@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FCALL_CENTER","RA_AE_ANONIMO", "RA_AE_FATENCION", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class AgendaGeneralBean implements AgendaGeneralLocal, AgendaGeneralRemote {
 	
 	@PersistenceContext(unitName = "AGENDA-GLOBAL")

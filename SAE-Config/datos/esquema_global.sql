@@ -221,6 +221,7 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'false');
+INSERT INTO ae_configuracion (clave, valor) VALUES('WS_NOVEDADES_XML_LOG', 'false');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_TIMEOUT', '9000');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_LOCATION_CABEZAL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_LOCATION', '');
@@ -230,6 +231,14 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('IDIOMAS_SOPORTADOS', 'es');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('GOOGLE_ANALYTICS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('RESERVA_PENDIENTE_TIEMPO_MAXIMO', '10');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('RESERVA_MULTIPLE_PENDIENTE_TIEMPO_MAXIMO', '2880');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_HABILITADO', 'false');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_URL', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_KS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_KS_PASS', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_TS_PATH', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_TS_PASS', '');
+
+
 
 INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_al_sistema', 'Ingrese al Sistema de Agenda electrónica');
 INSERT INTO ae_textos (codigo, texto) VALUES ('string', 'Texto');
@@ -1165,7 +1174,49 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('la_cantidad_de_reservas_por_ip_de
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_de_validacion_por_ip_es_obligatorio', 'El período de validación por IP es obligatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('el_periodo_de_validacion_por_ip_debe_ser_mayor_o_igual_a_cero', 'El período de validación por IP debe ser mayor o igual a cero');
 INSERT INTO ae_textos (codigo, texto) VALUES ('limite_de_reservas_para_la_direccion_ip_alcanzado', 'No se admiten más de {cantidad} reservas desde una misma dirección IP');
-
+INSERT INTO ae_textos (codigo, texto) VALUES ('consulta_de_cancelaciones', 'Consulta de cancelaciones');
+INSERT INTO ae_textos (codigo, texto) VALUES ('creacion', 'Creación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cancelacion', 'Cancelación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('todos', 'Todos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('todas', 'Todas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cantidad_de_elementos', 'Cantidad de elementos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_de_cancelaciones_de_reservas', 'Configuración de cancelaciones de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('cancelaciones_de_reservas', 'Cancelaciones de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('tipo_liberacion_cupo', 'Tipo de liberación del cupo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('inmediata', 'Inmediata');
+INSERT INTO ae_textos (codigo, texto) VALUES ('diferida', 'Diferida');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_tiempo_previo_para_cancelaciones_es_requerido', 'El tiempo previo para cancelaciones es requerido');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_tiempo_previo_para_cancelaciones_debe_ser_mayor_o_igual_a_cero', 'El tiempo previo para cancelaciones debe ser mayor o igual a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('el_tipo_de_cancelacion_es_obligatorio', 'El tipo de cancelación es obligatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ha_expirado_el_plazo_de_cancelacion', 'Ha expirado el plazo de cancelación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_de_liberacion', 'Fecha de liberación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('liberar', 'Liberar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_reserva_o_no_esta_cancelada', 'No se encuentra la reserva o no está cancelada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_liberada', 'El cupo de la reserva ha sido liberado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('esta_seguro_que_desea_liberar_el_cupo_de_la_reserva', '¿Está seguro que desea liberar el cupo de la reserva?');
+INSERT INTO ae_textos (codigo, texto) VALUES ('configuracion_de_mi_perfil', 'Configuración de Mi Perfil');
+INSERT INTO ae_textos (codigo, texto) VALUES ('enviar_aviso_al_confirmar', 'Enviar un aviso al confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('enviar_aviso_al_cancelar', 'Enviar un aviso al cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('enviar_aviso_recordatorio', 'Enviar un recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva', 'No se pudo enviar una notificación al usuario; tome nota de los datos de la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_notificacion_de_cancelacion', 'No se pudo enviar una notificación al usuario');
+INSERT INTO ae_textos (codigo,texto) VALUES ('reporte_recursos_por_agenda','Reporte de Recursos por Agenda');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_hasta_debe_ser_posterior_a_la_fecha_desde', 'La fecha hasta debe ser posterior a la fecha desde');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_fecha_reserva_dos', 'Debe especificar la fecha para la reserva de la segunda dosis');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_tipo_doc_reserva_dos', 'Debe especificar el tipo de documento para la reserva de la segunda dosis');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_disponibilidad2_especificada', 'No se encuentra la disponibilidad para la reserva de la segunda dosis');
+INSERT INTO ae_textos (codigo, texto) VALUES ('error_marcar_reservas_pares', 'Error: no se ha podido crear las reservas de primera y segunda dosis');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_reserva_segunda', 'Debe especificar la reserva de la segunda dosis');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_reserva_primer_dosis_esta_utilizada', 'La reserva de primer dosis está utilizada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puede_cancelar_la_reserva_dos', 'No se puede cancelar la reserva de la segunda dosis por si sola, la cancelación se hace mediante la reserva de la primer dosis y el sistema cancela ambas reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_existen_reservas_para_confirmar', 'No existen reservas para confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('envio_novedades_como_dato_extra', 'Envío a novedades como dato extra');
+INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_reserva_dos_debe_ser_posterior_a_la_fecha_reserva_uno', 'La fecha de la reserva dos debe ser posterior a la fecha de la reserva uno');
+INSERT INTO ae_textos (codigo, texto) VALUES ('error_marcar_reserva', 'Error: no se ha podido crear la reserva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_pendiente_tiempo_max', 'Reserva pendiente tiempo máximo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_multiple_pendiente_tiempo_max', 'Reserva múltiple pendiente tiempo máximo');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero', 'El tiempo máximo para una reserva pendiente debe ser mayor a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero', 'El tiempo máximo para las reservas múltiples pendientes debe ser mayor a cero');
 --
 -- CLAVES PRIMARIAS
 --

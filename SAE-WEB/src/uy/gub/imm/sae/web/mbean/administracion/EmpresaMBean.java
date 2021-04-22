@@ -269,7 +269,7 @@ public class EmpresaMBean extends BaseMBean {
 				if (!empresaEliminar.getId().equals(empresaActual.getId()) && empresasEJB.empresaEsquemaValido(empresaEliminar.getId())) {
 					sessionMBean.seleccionarEmpresa(empresaEliminar.getId());
 				}
-				empresasEJB.eliminarEmpresa(empresaEliminar, sessionMBean.getTimeZone());
+				empresasEJB.eliminarEmpresa(empresaEliminar, sessionMBean.getTimeZone(), sessionMBean.getUsuarioActual().getCodigo());
 				//Recargar la lista de empresas
 				List<Empresa> empresas = empresasEJB.consultarEmpresas();
 				empresasSeleccion = new RowList<Empresa>(empresas);

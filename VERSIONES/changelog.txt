@@ -1,0 +1,312 @@
+Versión 1.1 (2016-05-24)
+* Si el BackEnd utiliza CDA no se genera ni se permite enviar por mail la contraseña de los usuarios (ya que no tiene validez porque solo vale la contraseña de CDA).
+* Cuando el BackEnd utiliza CDA se verifica que la cuenta del usuario esté validada ya sea por certificado o en forma presencial (no se permite autoaprovisionamiento).
+* Se corrigieron problemas en el Single Logout cuando la solicitud de logout la realiza una aplicación diferente.
+* Se creó una pantalla específica para mostrar a los usuarios que se loguean correctamente en CDA pero no están registrados en SAE.
+* Se cambió la versión de OpenLayers para que funcione en IE 9.
+* Se corrigieron problemas de visualización de los scrolls.
+
+Versión 1.2 (2016-08-31)
+* Se incorporó un servicio web REST que permite obtener información sobre las reservas.
+* Para lo anterior también se incorporó la posibilidad de asociar tokens a los usuarios para permitir identificarlos cuando invocan servicios web REST.
+* Se incorporó la posibilidad de realizar la autenticación contra un servidor LDAP.
+* Al modificar cupos, si se marca la casilla para aplicar el cambio a los días subsiguientes se permite especificar cuáles días de la semana serán modificados.
+* Se corrigieron detalles de accesibilidad y usabilidad reportados por UNIT:
+  - Se cambió la forma de seleccionar agendas y recursos; ahora se utilizan radiobuttons para marcar la opción seleccionada.
+  - Se añadió la posibilidad de navegar por el menú de páginas con el teclado.
+  - Se corrigió un problema que impedía navegar correctamente los calendarios usando el teclado.
+  - Se quitaron los editores HTML debido a que en Chrome capturan el foco y no permiten pasar al siguiente componente con el tabulador.
+  - Se cambió el comportamiento del link "Saltar al contenido" para que salte también el menú superior.
+  - Se cambiaron los títulos de las páginas para que sean más representativos.
+  - Se cambiaron los textos de los links "Recargar listado" por textos más explícitos.
+  - Se ajustaron algunos mensajes de error que eran muy vagos.
+  - Se añadió identificación de campo obligatorio a varios campos que no lo tenían.
+  - Se añadió tooltip HTML a todos los botones que solo tienen ícono (antes era por javascript) .
+  - Se homogeneizaron los botones "Cancelar" y "Guardar" entre las páginas para que estén todos del mismo lado.
+  - Se ajustaron estilos para resaltar la opción del menú seleccionada cuando se navega con teclado.
+  - Se cambiaron varios textos de las pantallas.
+* Se añadió la posibilidad de mostrar el identificador de la reserva en el ticket de confirmación
+* Se ajustaron parámetros en las invocaciones a los servicios de trazabilidad
+  - Se dejó de enviar el identificador de la oficina, que es interno de SAE, y en cambio se envía el nombre.
+  - Se comenzó a enviar el número de paso del proceso.
+  - Se dejó de marcar como finalizada las trazas correspondientes a las atenciones.
+* Se implementó un proceso periódico nocturno que registra una traza de finalización para todas las reservas del día anterior.
+* Se quitaron paquetes que estaban como dependencias y que no eran necesarios.
+
+Versión 1.3 (2016-09-09)
+* Se corrigió el bug por el cual se perdían los atributos "u" (URL de retorno), "p" (parámetros), "t" (identificador de trazabilidad padre) y "i" (idioma) cuando se volvía al paso 1 luego de haber pasado al paso 2.
+* Se corrigió el problema por el cual no se podían registrar empresas cuyo OID tuviera más de 25 caracteres de largo.
+
+Versión 1.4 (2016-10-06)
+* Se corrigió el bug por el cual no se mostraban las disponibilidades de los meses posteriores al actual.
+* Se corrigió el problema por el cual la fecha que se muestra en el ticket estaba siempre en GMT0.
+* Se cambió la forma de determinar el primer día disponible para reservar de forma de saltear los días no hábiles.
+* Se quitó la obligatoriedad del campo descripción para las agendas.
+* Se quitó la carga automática del campo descripción cuando se elige un trámite en la creación de una agenda.
+* Se corrigió el problema por el cual solo se mostraban hasta 25 días en la consulta de disponibilidades.
+* Se agregó la exigencia de seleccionar al menos un idioma para las agendas.
+* Se corrigió un problema por el cual los valores por defecto pasados por parámetro a la reserva podían quedar cortados si incluyen más de un punto.
+* Se corrigió un problema por el cual no se enviaba el proceso padre al sistema de trazabilidad si no el cliente no informaba también el paso padre.
+* Se incorporó la posibilidad de crear disponibilidades para los domingos (igual que para los sábados)
+* Se corrigieron y cambiaron algunos textos.
+* Se ocultó el dato sobre el código de trazabilidad para las agendas que no están integradas con el Sistema de Trazabilidad.
+* Se incorporó la posibilidad de asociar múltiples trámites a las agendas:
+  - Al crear la agenda se puede asociar a múltiples trámites
+  - Al realizar una reserva se debe seleccionar el trámite que se desea realizar (si hay más de uno)
+  - Al invocar al Sistema de Trazabilidad se informa el trámite seleccionado durante la reserva
+  - Al invocar al Sistema de Novedades se informa el trámite seleccionado durante la reserva
+  - Al consultar reservas y realizar reportes se obtiene información sobre el trámite realizado
+* Se reincorporó la posibilidad de definir acciones de usuario para ser ejecutadas al confirmar o cancelar reservas
+  - Se permite utilizar la acción AccionNotificarBean
+  - Se permite incorporar acciones propias mediante la implementación de una interfaz en un proyecto JavaEE
+* Se reincorporó la posibilidad de definir validaciones de usuario para ser ejecutadas al confirmar o cancelar reservas
+  - Se permite utilizar las validaciones ValidacionMailBean y ValidadorDatosPersonaBean
+  - Se permite incorporar validaciones propias mediante la implementación de una interfaz en un proyecto JavaEE
+
+Versión 1.4.p1 (2016-11-17)
+* Se corrigieron y cambiaron algunos textos.
+* Se corrigió un bug por el cual se calculaban mal los días con disponibilidades luego de que se eliminaban disponibilidades de una semana.
+* Se corrigió un problema con los timezones al momento de desplegar las horas para el día de hoy.
+* Se cambió la válvula de CDA para permitir la autenticación de usuarios cuya cuenta no haya sido validado ni por certificado ni presencial.
+* Se incluye la versión de la aplicación en el archivo MANIFEST.MF de la válvula de CDA.
+* Se corrigió un defecto por el cual en Internet Explorer 9 el botón para subir un archivo solo funciona si se hace clic en la mitad del mismo.
+* Se añadió un mensaje de aviso de ejecución correcta al copiar una agenda.
+* Se cambiaron los checkboxes y radiobuttons para que funcionen correctamente cuando se hace clic sobre la etiqueta.
+* Se añadió texto oculto descriptivo para cada uno de los botones que solo tienen íconos (para ser usado por los lectores de pantalla).
+* Se corrigió un problema que impedía copiar una agenda si ésta tenía algún texto personalizado asociado.
+* Se corrigó el problema por el cual no se mostraba un mensaje de error apropiado cuando dos usuarios diferentes seleccionaban el mismo último cupo en un horario.
+* Se quitó el caché de la definición de las agendas en la reserva pública para evitar que los usuarios vean definiciones antiguas si acceden dos veces a una agenda y en el medio ésta fue modificada.
+* Se añadió la posibilidad de utilizar TLS en el envío de mail (aunque esto se documenta como una configuración opcional).
+* Se corrigió un bug por el cual no se podía seleccionar un timezone cuyo nombre sea mayor a 25 caracteres, tanto para empresas como para agendas.
+* Se corrigió un bug que hacía que las trazas nunca se cerraran y se continuaran enviando todos los días las respectivas trazas de cierre.
+* Se añadió la posibilidad de realizar más de una reserva para el mismo día con los mismos valores en todos los campos clave si se seleccionan diferentes trámites.
+* Se cambiaron los mensajes relativos a los errores de fechas (vigencia y disponibilidad) al crear y modificar recursos.
+
+Versión 1.5 (2016-11-21)
+* Se añadió el parámetro "q" a la URL de la reserva pública para permitir especificar el trámite a realizar.
+* Se añadió el despliegue opcional de la fecha actual (según la agenda seleccionada) en la parte superior de ambas interfaces.
+
+Versión 2.0.0 (2017-01-09)
+* Se pasó a utilizar el sistema de versionado semántico (mayor.minor.release[-build])
+* Se corrige un bug por el cual los envíos fallidos al Sistema de Notificaciones se reintentaban indefinidamente.
+* Se modificó la lógica de despliegue de textos para que en caso de no encontrar una etiqueta en la tabla ae_textos principal en lugar de dar un error se muestra la propia etiqueta como texto.
+* Se corrigió un error por el cual se mostraba la adevertencia "No hay otro administrador" cuando se creaba un usuario nuevo y se marcaba y desmarcaba la casilla "superadministrador".
+* Se corrigió un error por el cual al clonar una agenda no se copiaban los trámites asociados.
+* Se separaron las consultas de reservas de los reportes en el menú principal.
+* Se añadió la posibilidad se asociar algunos roles a los usuarios en recursos individuales. Los roles admitidos son "planificador" y "emisor de reportes".
+* Se modificaron los roles necesarios para permitir realizar consultas de reservas y generar reportes.
+* Se corrigieron errores en los controles de datos de recursos y los mensajes desplegados.
+* Se añadió la versión de la aplicación al archivo generado por la exportación de un recurso.
+* Se añadió el mecanismo de atención presencial (configuración del recurso, reserva, llamada y atención, reporte).
+* Se añadió la posibilidad de configurar el timeout de los servicios web de TrámitesUy
+* Se corrigió un error por el cual la pantalla quedaba en blanco cuando se intentaba pasar al paso 2 de la reserva privada en una agenda que no tenía recursos.
+* En la pantalla "Lista de espera" se oculta el botón "LLamar siguiente" cuando se visualizan las llamadas anteriores.
+* Se añadió el reporte de asistencias presenciales.
+* Se mejoró el manejo de los casos de la reserva pública cuando se especifica un recurso que no existe o no está habilitado para internet.
+* En la pantalla de consulta de datos a solicitar se cambió para mostrar el nombre de la agrupación junto a su identificador en lugar de mostrar el orden.
+* Se solucionó un problema por el cual al deseleccionar una agenda o un recurso y volver a la página de selección de agenda y recurso éstos seguían marcados.
+* Se añadió la funcionalidad para eliminar disponibilidades especificando un período de fechas.
+* Se añadió un campo "etiqueta" a las agrupaciones de datos a solicitar, y el campo "nombre" pasó a ser utilizado igual que el campo "nombre" de los datos a solicitar.
+* Se añadió la posibilidad de especificar los valores por defecto de los campos especificando el nombre de las agrupaciones y campos en lugar del identificador.
+* Se añadió la posibilidad de configurar que los datos a solicitar sean solo lectura si se especifican valores por defecto en la URL.
+* Se añadió la funcionalidad para permitir cancelar reservas en forma masiva especificando un período.
+* Se modificó el reporte de reservas para incluir datos relacionados con la cancelación de reservas (fecha, tipo, usuario).
+* Se añadió el nombre del trámite a realizar en la lista de espera.
+
+Versión 2.0.1 (2017-02-02)
+* Se cambió el período de ejecución del depurador de reservas no confirmadas de 30 minutos a 5, pero se continúa dando plazo de 10 minutos para la confirmación.
+* Se corrigió un bug por el cual se podía eliminar agendas y recursos con reservas vivas para el día de hoy.
+* Se añadió la posibilidad de eliminar el logo de las empresas.
+* Se cambió el paso 2 de la reserva para no mostrar las horas que no tienen cupos disponibles.
+* Se cambió el comportamiento de la aplicación cuando inicia sesión un usuario que no tiene ninguna empresa asociada para mostrar un mensaje de error y no permitir hacer nada más que logout.
+* Se cambió el comportamiento para que al eliminar un usuario de una empresa, si esa era la última empresa del usuario entonces se lo marca como eliminado (se puede recuperar creando otro usuario con el mismo documento).
+* No se permite cancelar reservas vencidas.
+* Se corrigió un bug por el cual luego de crear un dato a solicitar de tipo lista no se volvía a mostrar el campo "largo".
+* Se mejoró la validación del campo "Valor" de las opciones de los datos a solicitar de tipo lista.
+* Al configurar un recurso, si se marca que admite atención presencial entonces se obliga a marcar al menos un día de la semana.
+* Se corrigió la edición de recursos cuando tiene disponibilidades presenciales creadas (no permitría cambiar la fecha de disponibilidad).
+* Se añadió un control para no permitir atención presencial en recursos que no están vigentes en el día actual.
+* Al generar el ticket de confirmación, si el nombre de la agenda o del recurso es muy largo se permite que ocupe más de una línea.
+* Se permite configurar la fuente y el tamaño de la letra utilizada para generar el ticket de confirmación.
+* Se corrigió un bug por el cual al momento de configurar una agenda, si había un error en alguno de los trámites asociados, todos los trámites quedaban marcados con error.
+
+Versión 2.0.2 (2017-02-02)
+* Al quitar la última empresa de un usuario superadministrador no se marca como eliminado (aún puede acceder).
+* No se permite eliminar la última empresa
+
+Versión 1.5.p1 (2017-04-20)
+* Se cambió el procedimiento periódico de cierre de trazas para reducir las conexiones a la base de datos, reutilizar tokens STS y coordinar la ejecución de múltiples nodos.
+
+Versión 1.5.p2 (2017-04-25)
+* Se redujo el consumo de memoria en algunas clases.
+* Se realizó el cambio de versión de JSF (Mojarra 2.1.7 a 2.1.21) para solucionar un bug por el cual no se liberan los objetos correspondientes a managed beans de alcance view.
+
+Versión 2.0.3 (2017-05-03)
+* Se cambiaron algunos textos.
+* Se solucionó un problema por el cual al cancelar reservas por período no se estaban cancelando las reservas pendientes pero no confirmadas.
+* Se cambió el procedimiento periódico de cierre de trazas para reducir las conexiones a la base de datos, reutilizar tokens STS y coordinar la ejecución de múltiples nodos.
+* Se corrigió un problema por el cual el atributo lang del tag <html> no mostraba el idioma correcto al cambiarlo, tanto en la reserva pública como privada.
+* Se cambió la forma de verificar la validez de las fechas para hacerlo del lado del servidor como el resto de los campos y mostrar los errores todos juntos, y también para interpretar mejor las fechas incorrectas.
+* Se cambiaron algunos estilos para adecuarlos a los requerimientos de accesibilidad y usabilidad.
+
+Versión 2.0.4 (2017-07-06)
+* Se cambiaron algunos textos.
+* Se cambiaron los paginadores de la tablas para no utilizar íconos y en su lugar usar textos (requirió cambios en PrimeFaces 5.3)
+* Se corrigió el problema por el cual los pop-ups que solicitan confirmación no obtenían el foco para permitir seleccionar la opción deseada con el teclado.
+* Se cambió la funcionalidad para modificar cupos de un día para quitar el botón "Continuar" y hacer la visualización del formulario solo dependiente de los datos seleccionados. 
+* Se cambiaron los procesos de reenvío de trazas y novedades para sincronizar la ejecución de múltiples nodos y además reutilizar tokens STS.
+* Se cambió el código que integra la aplicación con el sistema de TramitesUy.
+* Se introdujo la posibilidad de configurar la URL final de los servicios web de Trazabilidad, TrámitesUy y Novedades mediante la base de datos .
+* En la pantalla de selección de agenda y recursos las opciones disponibles ahora se orden en forma alfabética.
+* En el listado de llamadas realizadas se añadió una columna para indicar si la persona llamada asistió o no.
+* Se añadió el reporte de atención presencial a la lista de reportes que pueden emitir los usuarios con el rol por recurso "Generador de reportes".
+* Se quitó en la configuración por defecto la protección de CDA (cuando está habilitada) para los servicios web REST.
+* Se corrigió un bug que provocaba que al intentar guardar una agenda luego de vaciar la lista de trámites se perdiese información sobre los trámites seleccionados (y entonces no permitía guardar la agenda).
+* Se corrigió un bug por el cual no se cargaban las preguntas de captcha si el idioma por defecto de la JVM coincide con el idioma por defecto del usuario (normalmente "es").
+* Se estableció un timeout de 30 minutos para los procesos vinculados al reenvío y cierre de trazas en el sistema de Trazabilidad.
+* En la reserva pública se oculta la lista de selección de idioma si solo hay un idioma disponible para la agenda.
+* En la interfaz de administración se oculta la lista de selección de idioma si solo hay un idioma disponible.
+* En la interfaz de administración se oculta la lista de selección de empresa si solo hay una disponible para el usuario.
+* Se añadió el nombre del recurso y el código de cancelación como datos de salida del servicio web REST de consulta de reservas por documento.
+* En la página final de la reserva pública según se muestre el botón "Contiuar con el trámite" o no se aplican estilos diferentes a los botones y links.
+* Se ajustaron algunos estilos CSS que cambiaron en el formulario tipo.
+* Se cambió el mensaje desplegado cuando se selecciona un recurso que no tiene disponibilidades (pasó de error a advertencia, y se utiliza un título y texto específico).
+* Se añadió el servicio web REST de consultas de todos los datos de todas las reservas de una persona identificada por su documento.
+
+Versión 2.0.5 (2017-07-10)
+* Se corrigió un problema por el cual al crear una empresa el título de la página cambiaba de "Crear empresa" a "Editar empresa".
+* Se corrigió un bug por el cual se perdían los valores por defecto de los atributos pasados por URL.
+* Se añadió una verificación sobre los valores de los parámetros pasados como valores por defecto por URL.
+
+Versión 2.0.6 (2017-08-24)
+* Se añadió el parámetro opcional codTramite al servicio web Obtener reservas por documento
+* Se añadieron los parámetros opcionales codTramite, fechaDesde y fechaHasta al servicio web "Obtener reservas por documento full".
+* Los parámetros tipoDocumento y numeroDocumento del servicio "Obtener reservas por documento full" pasaron a ser opcionales.
+* Se renombró el servicio web "Obtener reservas por documento full" para incorporar hecho de que el trámite y el documento son opcionales.
+* Se modificó el título de los mensajes de warning y error para el caso en que hay solo un mensaje a desplegar ("Hay 1 errores.." por "Hay un error")
+* Se añadieron los servicios web "Recursos por agenda", "Disponibilidades por recurso" y "Confirmar reserva".
+* Se modificó la parte donde se muestran los textos de cada paso en la reserva pública y privada para contemplar los saltos de línea y otros formatos provistos por el administrador.
+
+Versión 2.0.7 (2017-11-10)
+* Se corrigió un problema con el almacenamiento de los textos con caracteres especiales (tildes, eñes, etc) obtenidos desde los formularios dinámicos.
+* Se añadió la sección de configuración global al backend.
+* Se incorporó Google Analytics.
+* Se añadió el envío del correo electrónico de confirmación cuando se realiza la reserva mediante el servicio web.
+* Se corrigió un bug por el cual fallaba la reserva mediante el servicio web si en los datos no estaba indicado el paso de la transacción padre.
+* Se introdujo una transformación al número del documento cuando el tipo es "cédula de identidad", para quitar los puntos y los guiones, y así no permitir el registro de la misma cédula dos veces como si fuese diferente.
+* Se cambió el mensaje cuando en la reserva pública se accede a una agenda que no tiene recursos vigentes (de "parámetros incorrectos" a "no hay disponibilidades").
+* Se quitó el autocompletado del campo para el código de usuario en el formulario de inicio de sesión.
+* Se incorporó la posibilidad de invocar los servicios web REST mediante el método GET.
+* Se incorporó la reserva presencial autogestionada.
+* Se corrigió un problema por el cual la validación se correos electrónicos solo admitía minúsculas y rechazaba las direcciones que contuvieran mayúsculas.
+
+Versión 2.0.8 (2018-03-20)
+* Se corrigió un bug con los datos con tildes y otros caracteres cuando el formulario no puede ser validado.
+* Se corrigió un bug por el cual se mostraba la fecha en lugar de la hora en el mail de confirmación cuando se hacía la reserva mediante el servicio web.
+* Se corrigió un bug por el cual los reportes fallan si hay que incluir un campo de tipo lista que tiene como valor algo que no está actualmente entre los valores disponibles de la lista.
+* Se corrigió un bug en el mapa por el cual al hacer zoom out el marcador se iba corriendo hacia el norte.
+* Se hizo que el nombre del trámite en la confirmación mediante servicio web sea opcional y si no se especifica se busca entre los asociados a la agenda.
+* Se cambiaron las páginas de error cuando no se tiene permiso y no existe un recurso.
+* Se permite utilizar metavariables en el texto de la página del paso final (impresión del ticket).
+* Se cambiaron algunos textos.
+
+Versión 2.0.8.R1 (2018-06-22)
+* Se corrigió un bug por el cual el servicio web de confirmación de reservas devolvía el texto a mostrar sin remplazar las metavariables.
+* Se añadió el servicio web "Reservas vigentes por documento".
+* Se añadió el servicio web "Cancelación de reserva".
+
+Versión 2.1.0 (2018-09-12)
+* Se añadió la funcionalidad de reservas múltiples.
+* Se añadió la posibilidad de modificar reservas confirmadas (solo día y hora).
+* Se corrigió un problema por el cual no se estaba pasando el código del trámite seleccionado a las acciones y validaciones personalizadas.
+
+Versión 2.1.1 (2018-09-21)
+* Se añadió la posibilidad de configurar si el recurso admite cambios en las reservas y los plazos.
+* Se añadió la posibilidad de incluir el link de modificación en la confirmación de reservas.
+* Se añadió el control de admisión de cambios en las reservas previo a la confirmación.
+
+Versión 2.2.0 (2019-09-10)
+* Se añadió la posibilidad de configurar un período de existencia de otra validación en lugar de hacerlo día a día.
+* Se añadió la posibilidad de limitar la cantidad de reservas que se realizan desde una misma IP en un período de tiempo.
+* Se añadió la consulta de reservas canceladas para una agenda.
+* Se añadió la posibilidad de configurar los recursos para que la liberación de cupos de reservas canceladas sea diferida.
+* Se añadió la posibilidad de liberar cupos de reservas canceladas en forma diferida.
+* Se corrigió un problema en la generación del reporte de reservas por datos, con el estado "Cancelada".
+
+Versión 2.2.1 (2019-09-26)
+* Se corrigió un problema con la validación de reservas desde la misma IP (no tomaba en cuenta el recurso).
+
+Versión 2.3.0 (2019-10-10)
+* Se añadió la configuración básica de MiPerfil por recurso (habilitado/no habilitado).
+* Se añadió el envío de avisos a MiPerfil al confirmar y cancelar reservas.
+* Se añadió el envío de recordatorios a MiPerfil.
+
+Versión 2.3.1 (2019-10-25)
+* Se añadió la configuración completa del envio de los mensajes de MiPerfil.
+* Se añadió la configuración de los textos de los mensajes de MiPerfil.
+* Se añadieron las acciones de MiPerfil y su configuración correspondiente.
+
+Version 2.3.2 (2019-10-31)
+** se corrige un problema en la confirmación de reserva cuando no se puede enviar la notificación a mi perfil
+
+Version 2.3.3 (2019-11-08)
+** Se agrega un nuevo parámetro en el servicio REST de confirmar reserva llamado "notificar", que indica si se debe enviar notificación al reservar, y además 
+   se guarda este valor en un nuevo campo de la tabla reserva, y al cancelar o modificar la reserva utilizando los servicios REST se fija en este campo.
+   En caso de que el nuevo parámetro no se reciba, se envía la notificación.    
+** Se agrega un nuevo parámetro en el servicio REST de confirmar reservas múltiples llamado "notificar", el cual funciona igual que el parámetro de confirmar 
+   reserva mencionado anteriormente, realizando lo mismo para cada una de las reservas incluidas.
+** Se incorpora un paramentro en la configuracion general llamado MIPERFIL_OID.
+   En caso de existir y ser no vacio entonces es el que se utilizará para la invocación a mi perfil, si no existe se sigue utilizando el actual.
+** Se solicitó que la acción de cancelación se cargue por defecto pero pueda ser eliminada. Esto es posible hacerlo simplemente borrando la información de la acción
+   desde la edición del recurso. Al estar vacía la información de la acción (en particular al tener vacía la URL) la misma no se envía.    
+
+Version 2.3.4 (2019-11-22)
+** Consolidación de ajustes que se hicieron sobre la version 2.3.0
+
+Version 2.3.4.1 (2019-11-28)
+** Ajuste: en texto de recordatorios la metavariable {{HORA}} se estaba sustituyendo por la fecha
+
+Version 2.3.4.2 (2019-12-05)
+** Ajuste: en texto de recordatorios la metavariable {{HORA}} estaba quedando siempre en 00:00
+
+Version 2.3.5 (2020-04-17)
+** Nuevo servicio REST - Consulta de reservas vigentes por empresa y lista de personas(tipoDoc, NroDoc). Nombre del método: reservas-vigentes-por-empresa-y-documento
+
+Version 2.3.6 (2020-04-29)
+** Se modifica creación de usuarios para que en el caso de un usuario existente, traiga la informacin de permisos sobre los recursos
+
+Versión 2.3.7 (2020-09-21)
+* Se implementa un nuevo perfil llamado 'Administrador de recursos', que tendrá acceso a las mismas opciones que los perfiles “Planificador”, “Funcionario de call center”, “Funcionario de atención”, “Llamador” y además tendrá acceso a la opción de menú “Recursos” y sus subopciones excepto “Crear recurso”.
+* Se incorporó un servicio web REST que permite obtener las modificaciones en recursos. Actualmente SAE no guarda registro histórico de los cambios realizados a nivel de recursos, por lo tanto fue necesario implementar una funcionalidad para almacenar este registro cada vez que se realice un cambio de los “Datos generales”.
+
+Versión 2.3.8 (2020-10-08)
+* Se modifican los logos de presidencia.
+* Se elimina el logo de Uruguay Digital.
+* Se añade la columna "código" para cada reserva, en el reporte de reservas. Refiere al código de cancelación de las reservas.
+* Se corrige problema reportado en Servicio web REST para obtener las modificaciones de los recursos en un período de tiempo.
+* Se corrige problema reportado en Servicio web REST ConfirmarReservaInput.
+
+Versión 2.3.9 (2020-12-17)
+* Se añade reporte de recursos por agenda
+
+Versión 2.3.10 (2021-02-16)
+* Se añade nuevo servicio REST "Disponibilidades por recurso y tiempo"
+* Se añaden nuevos servicio REST para el nuevo componente de vacunación
+* Correción de nullPointer en reporte de asistencia 
+* Modificación de la columna Asistió en la pantalla del llamador
+
+Versión 2.3.11 (2021-02-22)
+* Se modifico el servicio de novedades para permitir datos extras 
+* Se añadio un campo booleano en la creación y modificación de datos
+
+Versión 2.3.12 (2021-02-24)
+* Se modifico el servicio de novedades para cuando no haya datos extras no se envien en el xml al servicio.
+
+Versión 2.3.13 (2021-02-26)
+* Se hizo un fix para que se eliminaran las reservas pendientes en caso no haber disponibilidades a la hora de reservar.
+
+Versión 2.3.14 (2021-03-15)
+* Requerimientos del Encargo 32:
+  - Req 1: Modificar algoritmo de servicio de confirmación múltiple
+  - Req 2: Modificar backend de SAE
+  

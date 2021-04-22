@@ -44,6 +44,11 @@ import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
 
+import uy.gub.imm.opencsv.ext.entity.CommonLabelValueImpl;
+import uy.gub.imm.opencsv.ext.entity.LabelValue;
+import uy.gub.imm.opencsv.ext.entity.TableCellValue;
+import uy.gub.imm.opencsv.ext.file.StandardCSVFile;
+import uy.gub.imm.opencsv.ext.printer.CSVWebFilePrinter;
 import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
@@ -364,10 +369,10 @@ public class RecursoMBean extends BaseMBean{
         hayErrores = true;
   		}
 		}
-    if (recurso.getVentanaCuposMinimos() == null){
-      addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposM");
-      hayErrores = true;
-    }
+	    if (recurso.getVentanaCuposMinimos() == null){
+	      addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_es_obligatoria"), FORM_ID+":VCuposM");
+	      hayErrores = true;
+	    }
 		if (recurso.getVentanaCuposMinimos()!=null && recurso.getVentanaCuposMinimos().intValue() < 0 ){
 			addErrorMessage(sessionMBean.getTextos().get("la_cantidad_de_cupos_minimos_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":VCuposM");
       hayErrores = true;
@@ -456,13 +461,24 @@ public class RecursoMBean extends BaseMBean{
       addErrorMessage(sessionMBean.getTextos().get("el_tipo_de_cancelacion_es_obligatorio"), FORM_ID+":cancelacionTipo");
       hayErrores = true;
     }
+    
+    
+    if (recurso.getReservaPendienteTiempoMax()!=null && recurso.getReservaPendienteTiempoMax().intValue() < 0 ){
+		addErrorMessage(sessionMBean.getTextos().get("reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero"), FORM_ID+":tiempoMaxReserva");
+		hayErrores = true;
+	}
+    
+    
+    if (recurso.getReservaMultiplePendienteTiempoMax()!=null && recurso.getReservaMultiplePendienteTiempoMax().intValue() < 0 ){
+		addErrorMessage(sessionMBean.getTextos().get("reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero"), FORM_ID+":tiempoMaxReservaMultiple");
+		hayErrores = true;
+	}
+    
 		if(hayErrores) {
 		  return;
 		}
 		try {
-			
-			
-			recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), recurso);
+			recursosEJB.crearRecurso(sessionMBean.getAgendaMarcada(), recurso, sessionMBean.getUsuarioActual().getCodigo());
 			sessionMBean.cargarRecursos();
 			sessionMBean.desmarcarRecurso();
 			//Se blanquea la info en la página
@@ -487,9 +503,18 @@ public class RecursoMBean extends BaseMBean{
  				if(sessionMBean.getRecursoMarcado()!=null && sessionMBean.getRecursoMarcado().getId().equals(recurso.getId())) {
  					sessionMBean.desseleccionarRecurso();
  				}
- 				recursosEJB.eliminarRecurso(recurso, sessionMBean.getTimeZone());
- 				sessionMBean.cargarRecursos();
- 				sessionMBean.desmarcarRecurso();
+				recursosEJB.eliminarRecurso(recurso, sessionMBean.getTimeZone(), sessionMBean.getUsuarioActual().getCodigo());
+				/*
+				  Se hace este chequeo porque cuando se accede con un usuario 'Administrador de recursos', luego de hacer alguna
+				modificación en alguno de sus recursos, la aplicación recargaba la lista de recursos y se perdía la selección
+				del recurso que le daba acceso a las opciones del menú
+				*/
+				if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR_DE_RECURSOS" }) || sessionMBean.getUsuarioActual().getSuperadmin()) {
+					sessionMBean.cargarRecursos();
+					sessionMBean.desmarcarRecurso();
+				} else {
+					sessionMBean.removeRecursoEnLista(recurso);
+				}
  				addInfoMessage(sessionMBean.getTextos().get("recurso_eliminado"), MSG_ID);
  			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
@@ -534,9 +559,18 @@ public class RecursoMBean extends BaseMBean{
 			    //Le setteo la accion al recurso (transient)
 			    recurso.setAccionMiPerfil(accionMiPerfil);
 			    
-				recursosEJB.copiarRecurso(recurso);
-				sessionMBean.cargarRecursos();
-				sessionMBean.desmarcarRecurso();
+				Recurso nuevoR = recursosEJB.copiarRecurso(recurso, sessionMBean.getUsuarioActual().getCodigo());
+				/*
+				  Se hace este chequeo porque cuando se accede con un usuario 'Administrador de recursos', luego de hacer alguna
+				modificación en alguno de sus recursos, la aplicación recargaba la lista de recursos y se perdía la selección
+				del recurso que le daba acceso a las opciones del menú
+				*/
+				if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR_DE_RECURSOS" }) || sessionMBean.getUsuarioActual().getSuperadmin()) {
+					sessionMBean.cargarRecursos();
+					sessionMBean.desmarcarRecurso();
+				} else {
+					sessionMBean.addRecursoALista(nuevoR);
+				}
 				addInfoMessage(sessionMBean.getTextos().get("recurso_copiado"), MSG_ID);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
@@ -561,7 +595,7 @@ public class RecursoMBean extends BaseMBean{
  					addErrorMessage(sessionMBean.getTextos().get("la_descripcion_del_recurso_es_obligatoria"), FORM_ID+":descripcion");
           hayErrores = true;
  				}
-        //Fechas de vigencia
+ 				//Fechas de vigencia
  				if (recurso.getFechaInicio()==null){
  					addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_inicio_de_vigencia_es_obligatoria"), FORM_ID+":fechaInicio");
           hayErrores = true;
@@ -754,15 +788,41 @@ public class RecursoMBean extends BaseMBean{
           addErrorMessage(sessionMBean.getTextos().get("el_tipo_de_cancelacion_es_obligatorio"), FORM_ID+":cancelacionTipo");
           hayErrores = true;
         }
+        
+        
+        if (recurso.getReservaPendienteTiempoMax()!=null && recurso.getReservaPendienteTiempoMax().intValue() < 0 ){
+			addErrorMessage(sessionMBean.getTextos().get("reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero"), FORM_ID+":tiempoMaxReserva");
+			hayErrores = true;
+		}
+        
+        
+        if (recurso.getReservaMultiplePendienteTiempoMax()!=null && recurso.getReservaMultiplePendienteTiempoMax().intValue() < 0 ){
+        	System.out.println("VALOR DE RESERVA MULTIPLE PENDIENTE MAX " + recurso.getReservaMultiplePendienteTiempoMax());
+			addErrorMessage(sessionMBean.getTextos().get("reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero"), FORM_ID+":tiempoMaxReservaMultiple");
+			hayErrores = true;
+		}
+        
+        
+        
+        
  				if(hayErrores) {
  					return null;
  				}
  				if(recurso.getIpsSinValidacion()!=null) {
  				  recurso.setIpsSinValidacion(recurso.getIpsSinValidacion().replace(" ", ";").replace(",", ";").replace("-", ";"));
  				}
- 				recursosEJB.modificarRecurso(sessionMBean.getRecursoSeleccionado());
- 				addInfoMessage(sessionMBean.getTextos().get("recurso_modificado"), MSG_ID); 				
-				sessionMBean.cargarRecursos();
+				recursosEJB.modificarRecurso(sessionMBean.getRecursoSeleccionado(), sessionMBean.getUsuarioActual().getCodigo());
+				/*
+				  Se hace este chequeo porque cuando se accede con un usuario 'Administrador de recursos', luego de hacer alguna
+				modificación en alguno de sus recursos, la aplicación recargaba la lista de recursos y se perdía la selección
+				del recurso que le daba acceso a las opciones del menú
+				*/
+				if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR_DE_RECURSOS" }) || sessionMBean.getUsuarioActual().getSuperadmin()) {
+					sessionMBean.cargarRecursos();
+				} else {
+					sessionMBean.setRecursoEnLista(recurso);
+				}
+				addInfoMessage(sessionMBean.getTextos().get("recurso_modificado"), MSG_ID);
  				return "guardar";
  			} catch (Exception e) {
  				addErrorMessage(e, MSG_ID);
@@ -828,13 +888,12 @@ public class RecursoMBean extends BaseMBean{
 	 			try {
 	 				recursosEJB.modificarDatoDelRecurso(sessionMBean.getDatoDelRecursoSeleccionado());
 	 				addInfoMessage(sessionMBean.getTextos().get("dato_modificado"), MSG_ID);
-	 				sessionMBean.setDatoDelRecursoSeleccionado(null);;
+	 				sessionMBean.setDatoDelRecursoSeleccionado(null);
 	 			} catch (Exception e) {
 	 				addErrorMessage(e, MSG_ID);
 	 			}
 			}
-		}
-		else {
+		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_dato_seleccionado"), MSG_ID);
 		}
 	}
@@ -842,7 +901,7 @@ public class RecursoMBean extends BaseMBean{
 	public void cancelarModifDato(ActionEvent event) {
 		sessionMBean.setDatoDelRecursoSeleccionado(null);
 		sessionMBean.cargarDatosDelRecurso();
-		sessionMBean.setDatoDelRecursoSeleccionado(null);;
+		sessionMBean.setDatoDelRecursoSeleccionado(null);
 	}
 
 	public void cancelarAgregarDato(ActionEvent event) {
@@ -883,8 +942,7 @@ public class RecursoMBean extends BaseMBean{
  			} finally {
  				this.getSessionMBean().setDatoDelRecursoSeleccionado(null);
  			}
-		}
-		else {
+		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_dato_seleccionado"), MSG_ID);
 		}
 	}
@@ -892,7 +950,6 @@ public class RecursoMBean extends BaseMBean{
 	/**************************************************************************/
 	/*               Action  de Datos del Recurso  (navegación)               */	
 	/**************************************************************************/	
-
 
 	@SuppressWarnings("unchecked")
 	public String consultarDatos() throws ApplicationException, BusinessException {
@@ -905,8 +962,7 @@ public class RecursoMBean extends BaseMBean{
 			List<DatoDelRecurso> datosDelRecurso= recursosEJB.consultarDatosDelRecurso(r);
 			sessionMBean.getRecursoSeleccionado().setDatoDelRecurso(datosDelRecurso);
 			return "consultarDatos";
-		}
-		else {
+		} else {
 			sessionMBean.setRecursoSeleccionado(null);
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_un_recurso_seleccionado"), MSG_ID);
 			return null;
@@ -916,8 +972,7 @@ public class RecursoMBean extends BaseMBean{
 	public String consultarRecursos() throws ApplicationException {
     if (sessionMBean.getAgendaMarcada() != null){
 			return "consultarRecursos";
-		}
-		else {
+		} else {
 			addErrorMessage(sessionMBean.getTextos().get("debe_haber_una_agenda_seleccionada"), MSG_ID);
 			return null;
 		}
@@ -944,24 +999,44 @@ public class RecursoMBean extends BaseMBean{
 	
 	
 	public void beforePhaseCrear(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("crear_recurso"));
 		}
 	}
 	
 	public void beforePhaseModificarConsultar(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("consultar_recursos"));
 		}
 	}
 	
 	public void beforePhaseModificar(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_recurso"));
 		}
 	}
 
 	public void beforePhaseImportar(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("importar_recurso"));
 		}
@@ -1066,9 +1141,18 @@ public class RecursoMBean extends BaseMBean{
 		
 		try {
 			byte[] bytes = IOUtils.toByteArray(archivo.getInputstream());
-			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes, sessionMBean.getVersion());
+			Recurso recurso = recursosEJB.importarRecurso(sessionMBean.getAgendaMarcada(), bytes, sessionMBean.getVersion(), sessionMBean.getUsuarioActual().getCodigo());
 			if(recurso != null) {
-				sessionMBean.cargarRecursos();
+				/*
+				  Se hace este chequeo porque cuando se accede con un usuario 'Administrador de recursos', luego de hacer alguna
+				modificación en alguno de sus recursos, la aplicación recargaba la lista de recursos y se perdía la selección
+				del recurso que le daba acceso a las opciones del menú
+				*/
+				if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR_DE_RECURSOS" }) || sessionMBean.getUsuarioActual().getSuperadmin()) {
+					sessionMBean.cargarRecursos();
+				} else {
+					sessionMBean.addRecursoALista(recurso);
+				}
 				addInfoMessage(sessionMBean.getTextos().get("recurso_importado_exitosamente"), MSG_ID);
 			}
 		} catch (IOException e) {
@@ -1128,6 +1212,70 @@ public class RecursoMBean extends BaseMBean{
     
     return null;
   }
+  
+  public void reporteRecursos(ActionEvent e) {
+      limpiarMensajesError();
+      boolean hayErrores = false;
+      
+   
+      try {
+          Agenda agendaMarcada = sessionMBean.getAgendaMarcada();
+          List<Recurso> recursos1 = generalEJB.consultarRecursos(agendaMarcada);
+          List<List<TableCellValue>> contenido = new ArrayList<>();
+          
+          //Datos a desplegar en el reporte, en este casos las reservas por fecha y hora
+          LabelValue[] filtros = {
+        		  new CommonLabelValueImpl(sessionMBean.getTextos().get("agenda") + ": ", agendaMarcada.getNombre())
+          };
 
+
+          for (Recurso recurso: recursos1) {
+              List<TableCellValue> filaDatos = new ArrayList<>();
+              filaDatos.add(new TableCellValue(recurso.getId()));
+              filaDatos.add(new TableCellValue(recurso.getNombre()));
+              filaDatos.add(new TableCellValue(recurso.getDescripcion()));
+              filaDatos.add(new TableCellValue(Utiles.date2string(recurso.getFechaInicio(), Utiles.DIA)));
+              filaDatos.add(new TableCellValue(Utiles.date2string(recurso.getFechaFin(), Utiles.DIA)));
+              filaDatos.add(new TableCellValue(Utiles.date2string(recurso.getFechaInicioDisp(), Utiles.DIA)));
+              filaDatos.add(new TableCellValue(recurso.getDireccion()));
+              filaDatos.add(new TableCellValue(recurso.getDepartamento()));
+              filaDatos.add(new TableCellValue(recurso.getLocalidad()));
+              filaDatos.add(new TableCellValue(recurso.getLatitud().toString()));
+              filaDatos.add(new TableCellValue(recurso.getLongitud().toString()));
+              filaDatos.add(new TableCellValue(recurso.getTelefonos()));
+              filaDatos.add(new TableCellValue(recurso.getHorarios()));
+              contenido.add(filaDatos);
+          }
+
+          String[] cabezales = {sessionMBean.getTextos().get("identificador"), sessionMBean.getTextos().get("nombre"), sessionMBean.getTextos().get("descripcion"),
+              sessionMBean.getTextos().get("inicio_de_vigencia"), sessionMBean.getTextos().get("fin_de_vigencia"), sessionMBean.getTextos().get("inicio_de_disponibilidad"),
+              sessionMBean.getTextos().get("direccion"), sessionMBean.getTextos().get("departamento"),
+              sessionMBean.getTextos().get("localidad"), sessionMBean.getTextos().get("latitud"), sessionMBean.getTextos().get("longitud"),
+              sessionMBean.getTextos().get("telefonos"), sessionMBean.getTextos().get("horarios")
+          };
+          StandardCSVFile fileCSV = new StandardCSVFile(filtros, cabezales, contenido);
+
+          String nombre = sessionMBean.getTextos().get("reporte_recursos_por_agenda");
+          nombre = nombre.replace(" ", "_");
+
+          CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
+          printer.print();
+      } catch (Exception e1) {
+          addErrorMessage(e1);
+      }
+  }
+  
+  
+  public void setNullReservaMultipleTiempoMax() {
+	  if(sessionMBean.getRecursoSeleccionado()!=null){
+		  sessionMBean.getRecursoSeleccionado().setReservaMultiplePendienteTiempoMax(0);  
+	  }
+	  
+	  if(recursoNuevo!=null){
+		  recursoNuevo.setReservaMultiplePendienteTiempoMax(0);
+	  }
+	  
+  }
+  
 	
 }

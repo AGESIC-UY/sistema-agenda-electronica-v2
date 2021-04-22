@@ -20,6 +20,7 @@
 
 package uy.gub.imm.sae.web.mbean.administracion;
 
+import javax.faces.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,10 +31,11 @@ import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.component.html.HtmlSelectBooleanCheckbox;
 import javax.faces.context.FacesContext;
-import javax.faces.event.ActionEvent;
 import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
+
+import org.primefaces.component.datatable.DataTable;
 
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Disponibilidades;
@@ -45,9 +47,6 @@ import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.CupoPorDia;
 import uy.gub.imm.sae.web.common.Row;
 import uy.gub.imm.sae.web.common.RowList;
-
-import org.primefaces.component.datatable.DataTable;
-
 
 public class DisponibilidadMBean extends BaseMBean {
 	public static final String MSG_ID = "pantalla";
@@ -191,7 +190,8 @@ public class DisponibilidadMBean extends BaseMBean {
 					int i = 0;
 					List<CupoPorDia> listaCupos = new ArrayList<CupoPorDia>();
 					//Iterar por cada día y determinar cuántos cupos tiene
-					//Si para un día hay disponibilidades pero no hay cupos significa que ya pasó la hora de la última disponibilidad (pero igual hay que mostrar el día)
+					// Si para un día hay disponibilidades pero no hay cupos significa que ya pasó
+					// la hora de la última disponibilidad (pero igual hay que mostrar el día)
 					while ( !fecha.after( fechaFin ) ){
 					  boolean hayDisponFecha = disponibilidadesEJB.hayDisponibilidadesFecha(sessionMBean.getRecursoMarcado(), fecha.getTime());
 						if (cupos.get(i) != -1 || hayDisponFecha){
@@ -235,11 +235,6 @@ public class DisponibilidadMBean extends BaseMBean {
 	public void setDispSessionMBean(DispSessionMBean dispSessionMBean) {
 		this.dispSessionMBean = dispSessionMBean;
 	}
-
-	/*
-	----------------------------------------------------------------------------
-	A partir de acá estoy probando disponibilidades en la mañana y la tarde
-	*/
 
 	public RowList<DisponibilidadReserva> getDisponibilidadesMatutina() {
 		return dispSessionMBean.getDisponibilidadesDelDiaMatutina();
@@ -321,11 +316,8 @@ public class DisponibilidadMBean extends BaseMBean {
 				cal.setTime(d.getHoraInicio());
 				
 				if (cal.get(Calendar.AM_PM) == Calendar.AM) {
-					//Matutino
 					dispMatutinas.add(d);
-				}
-				else {
-					//Vespertino
+				} else {
 					dispVespertinas.add(d);
 				}
 			}
@@ -333,7 +325,6 @@ public class DisponibilidadMBean extends BaseMBean {
 		} catch (Exception e) { 
 				addErrorMessage(e);
 		}
-		
 		
 		dispSessionMBean.setDisponibilidadesDelDiaMatutinaModif(new RowList<DisponibilidadReserva>(dispMatutinas));
 		dispSessionMBean.setDisponibilidadesDelDiaVespertinaModif(new RowList<DisponibilidadReserva>(dispVespertinas));
@@ -357,7 +348,7 @@ public class DisponibilidadMBean extends BaseMBean {
 	
 	public void beforePhaseConsultar (PhaseEvent event) {
 	  //Verificar que el usuario tiene permisos para acceder a esta página
-	  if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+	  if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
       ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
 	  }
@@ -369,7 +360,7 @@ public class DisponibilidadMBean extends BaseMBean {
 	
 	public void beforePhaseModifCupo (PhaseEvent event) {
     //Verificar que el usuario tiene permisos para acceder a esta página
-    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
       ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
     }
@@ -381,7 +372,7 @@ public class DisponibilidadMBean extends BaseMBean {
 	
 	public void beforePhaseConsultarXdia (PhaseEvent event) {
     //Verificar que el usuario tiene permisos para acceder a esta página
-    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
       ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
     }

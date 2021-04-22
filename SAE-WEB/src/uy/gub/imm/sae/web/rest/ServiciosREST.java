@@ -1,7 +1,9 @@
 package uy.gub.imm.sae.web.rest;
 
+import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -10,6 +12,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.TimeZone;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.util.Calendar;
+import java.util.Date;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.Consumes;
@@ -26,10 +36,13 @@ import org.apache.log4j.Logger;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import uy.gub.imm.sae.business.dto.RecursoDTO;
 import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
 import uy.gub.imm.sae.business.ejb.facade.Comunicaciones;
 import uy.gub.imm.sae.business.ejb.facade.Consultas;
 import uy.gub.imm.sae.business.utilidades.Metavariables;
+import uy.gub.imm.sae.common.Utiles;
+import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.factories.BusinessLocator;
 import uy.gub.imm.sae.common.factories.BusinessLocatorFactory;
@@ -51,9 +64,10 @@ public class ServiciosREST {
 
   static Logger logger = Logger.getLogger(ServiciosREST.class);
   
-	private final static SimpleDateFormat FORMATOFECHA_CONHORA = new SimpleDateFormat("yyyyMMdd HH:mm"); 	
+  private final static SimpleDateFormat FORMATOFECHA_CONHORA = new SimpleDateFormat("yyyyMMdd HH:mm"); 	
   private final static SimpleDateFormat FORMATOFECHA_SINHORA = new SimpleDateFormat("yyyyMMdd");   
   private final static SimpleDateFormat FORMATOFECHA_HORA = new SimpleDateFormat("HHmm");  
+  private final static SimpleDateFormat FORMATOFECHA = new SimpleDateFormat("dd-MM-yyyy");  
 	
   @Context
   private HttpServletRequest httpRequest;
@@ -578,6 +592,7 @@ public class ServiciosREST {
     input.setToken(token);    
     return getDisponibilidadesPorRecurso(input);
   }
+   
   
   private String getDisponibilidadesPorRecurso(DisponibilidadesPorRecursoInput input) {
     try {
@@ -591,6 +606,8 @@ public class ServiciosREST {
         jError.addProperty("error", "no_se_encuentra_el_token_especificado");
         return jError.toString();
       }
+     
+      
       //Hacer un login falso para que cambie el esquema
       String falsoUsuario = "sae" + input.getIdEmpresa()+ "-" + ((new Date()).getTime()+(new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
       String password = Utilidades.encriptarPassword(falsoUsuario);
@@ -649,6 +666,178 @@ public class ServiciosREST {
 
   // ======================================================================================================================================
   // ======================================================================================================================================
+  
+  @POST
+  @Path("/disponibilidades_por_recurso_tiempo")
+  @Consumes("application/json")
+  @Produces("application/json")
+  public String getDisponibilidadesPorRecursoTiempoPost(DisponibilidadesPorRecursoInput input) {
+    return getDisponibilidadesPorRecursoTiempo(input);
+  }
+  
+  
+  
+  @GET
+  @Path("/disponibilidades_por_recurso_tiempo")
+  @Produces("application/json")
+  public String getDisponibilidadesPorRecursoTiempoGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda, 
+      @QueryParam("idRecurso") Integer idRecurso, @QueryParam("idioma") String idioma, @QueryParam("fechaDesde") String fechaDesde, @QueryParam("fechaHasta") String fechaHasta) {
+    DisponibilidadesPorRecursoInput input = new DisponibilidadesPorRecursoInput();
+    input.setIdAgenda(idAgenda);
+    input.setIdEmpresa(idEmpresa);
+    input.setIdioma(idioma);
+    input.setIdRecurso(idRecurso);
+    input.setToken(token);    
+    input.setFechaDesde(fechaDesde);
+    input.setFechaHasta(fechaHasta);
+    return getDisponibilidadesPorRecursoTiempo(input);
+  }
+
+  
+  private String getDisponibilidadesPorRecursoTiempo(DisponibilidadesPorRecursoInput input) {
+	    
+	  Date fechaDesde = null;
+	  Date fechaHasta = null;
+	  
+	  
+	  try {
+	      //Validar el token y la empresa
+	      BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+	      Consultas consultas = bl.getConsultas();
+	      boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+	      if(!tokenValido) {
+	        JsonObject jError = new JsonObject();
+	        jError.addProperty("resultado", "0");
+	        jError.addProperty("error", "no_se_encuentra_el_token_especificado");
+	        return jError.toString();
+	      }
+	      
+	      if(input.getFechaDesde()!=null && !input.getFechaDesde().trim().isEmpty()) {
+	          try {
+	        	  
+	        	  fechaDesde = FORMATOFECHA.parse(input.getFechaDesde());
+		    	  
+		    	  if(Utiles.esFechaInvalida(fechaDesde)){
+		    		  JsonObject jError = new JsonObject();
+		    		  jError.addProperty("resultado", "0");
+				      jError.addProperty("error", "La fecha desde es inválida");
+				      return jError.toString();  
+		    	  }
+		    	  
+	          }catch(Exception ex) {
+	        	  JsonObject jError = new JsonObject();
+	    		  jError.addProperty("resultado", "0");
+			      jError.addProperty("error", "La fecha desde es inválida");
+			      return jError.toString();
+	          }
+	      }
+	      else{
+	    	  JsonObject jError = new JsonObject();
+		      jError.addProperty("resultado", "0");
+		      jError.addProperty("error", "el parámetro fecha desde es requerido");
+		      return jError.toString();
+	    	  
+	      }
+	      
+	      if(input.getFechaHasta()!=null && !input.getFechaHasta().trim().isEmpty()) {
+	          try {
+	        	  fechaHasta = FORMATOFECHA.parse(input.getFechaHasta());
+		    	  
+		    	  if(Utiles.esFechaInvalida(fechaHasta)){
+		    		  JsonObject jError = new JsonObject();
+		    		  jError.addProperty("resultado", "0");
+				      jError.addProperty("error", "La fecha hasta es inválida");
+				      return jError.toString();  
+		    	  }
+		    	  
+		    	  if(fechaDesde.compareTo(fechaHasta)>0){
+		    		  JsonObject jError = new JsonObject();
+		    		  jError.addProperty("resultado", "0");
+				      jError.addProperty("error", "La fecha hasta debe ser igual o posterior a la fecha desde");
+				      return jError.toString(); 
+		    	  }
+		    	  
+	          }catch(Exception ex) {
+	        	  JsonObject jError = new JsonObject();
+	    		  jError.addProperty("resultado", "0");
+			      jError.addProperty("error", "La fecha hasta es inválida");
+			      return jError.toString();
+	          }
+	      }
+	      else{
+	    	  JsonObject jError = new JsonObject();
+		      jError.addProperty("resultado", "0");
+		      jError.addProperty("error", "el parámetro fecha hasta es requerido");
+		      return jError.toString();
+	      }
+	      
+	      
+	      VentanaDeTiempo ventana = new VentanaDeTiempo();
+	      
+	      ventana.setFechaInicial(fechaDesde);
+	      ventana.setFechaFinal(fechaHasta);
+	     
+	      
+	      //Hacer un login falso para que cambie el esquema
+	      String falsoUsuario = "sae" + input.getIdEmpresa()+ "-" + ((new Date()).getTime()+(new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+	      String password = Utilidades.encriptarPassword(falsoUsuario);
+	      httpRequest.login(falsoUsuario, password);
+	      //Obtener las disponibilidades
+	      Map<String, Object> resp = consultas.consultarDisponibilidadesPorRecursoTiempo(input.getIdEmpresa(),  input.getIdAgenda(), input.getIdRecurso(), 
+	          input.getIdioma(), ventana);
+	      //Transformar el resultado a un objeto JSon para devolver
+	      JsonObject jDisp = new JsonObject();
+	      jDisp.addProperty("textoAgendaPaso2", (String)resp.get("textoAgendaPaso2"));
+	      jDisp.addProperty("textoRecursoPaso2", (String)resp.get("textoRecursoPaso2"));
+	      @SuppressWarnings("unchecked")
+	      Map<String, Integer> disps = (Map<String, Integer>)resp.get("disponibilidades");
+	      List<String> claves = new ArrayList<String>(disps.keySet());
+	      Collections.sort(claves);
+	      String fechaActual = null;
+	      JsonArray jDisps = new JsonArray();
+	      jDisp.add("disponibilidades", jDisps);
+	      JsonObject porFecha = null;
+	      JsonObject porHora = null;
+	      for(String clave : claves) {
+	        String[] fechaHoraId = clave.split(" ");
+	        String fecha = fechaHoraId[0];
+	        String hora = fechaHoraId[1];
+	        String id = fechaHoraId[2];
+	        if(fechaActual==null || !fechaActual.equals(fecha)) {
+	          porFecha = new JsonObject();
+	          porHora = new JsonObject();
+	          porFecha.add(fecha, porHora);
+	          jDisps.add(porFecha);
+	          fechaActual = fecha;
+	        }
+	        JsonObject dispPorHora = new JsonObject();
+	        dispPorHora.addProperty("id", id);
+	        dispPorHora.addProperty("cupo", disps.get(clave));
+	        porHora.add(hora, dispPorHora);
+	      }
+	      //Devolver el resultado en formato string
+	      return jDisp.toString();
+	    }catch(UserException uEx) {
+	      JsonObject jError = new JsonObject();
+	      jError.addProperty("error", uEx.getCodigoError());
+	      return jError.toString();
+	    }catch(Exception ex) {
+	      JsonObject jError = new JsonObject();
+	      jError.addProperty("error", ex.getMessage());
+	      return jError.toString();
+	    } finally {
+	      try {
+	        httpRequest.logout();
+	      }catch(Exception ex) {
+	        //Nada para hacer
+	      }
+	    }
+   }
+  
+  
+  // ======================================================================================================================================
+  // ======================================================================================================================================
+
   
   @POST
   @Path("/confirmar_reserva")
@@ -1764,29 +1953,510 @@ public class ServiciosREST {
     }
   }
 
-  // ======================================================================================================================================
-  // ======================================================================================================================================
+    @POST
+    @Path("/cambios-en-recurso")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String cambiosEnRecursoPost(CambiosEnRecursoInput input) {
+        return obtenerCambios(input);
+    }
   
-//	@POST
-//	@Path("/enviar_recordatorios")
-//	////@Consumes("application/json")
-//	////@Produces("application/json")
-//	public void enviarRecordatoriosPost() {
-//		  BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
-//	    ServiciosMiPerfil s = bl.getServiciosMiPerfil();
-//	    s.enviarRecordatorios();
-//	
-//	}
-//	
-//	@GET
-//	@Path("/enviar_recordatorios")
-//	////@Produces("application/json")
-//	public void enviarRecordatoriosGet() {
-//		  BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
-//		    ServiciosMiPerfil s = bl.getServiciosMiPerfil();
-//		    s.enviarRecordatorios();
-//	}
- 
+    @GET
+    @Path("/cambios-en-recurso")
+    @Produces("application/json")
+    public String cambiosEnRecursoGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda, 
+    								  @QueryParam("idRecurso") Integer idRecurso, @QueryParam("fechaDesde") String fechaDesde, 
+    								  @QueryParam("fechaHasta") String fechaHasta) {
+    	
+        CambiosEnRecursoInput input = new CambiosEnRecursoInput();
+        input.setIdEmpresa(idEmpresa);
+        input.setIdAgenda(idAgenda);
+        input.setIdRecurso(idRecurso);
+        input.setFechaDesde(fechaDesde);
+        input.setFechaHasta(fechaHasta);
+        input.setToken(token);
+        
+        return obtenerCambios(input);
+    }
+
+    private String obtenerCambios(CambiosEnRecursoInput input) {
+        try {
+            BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+            Consultas consultas = bl.getConsultas();
+            
+            boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+            if(!tokenValido) {
+              JsonObject jError = new JsonObject();
+              jError.addProperty("resultado", "[]");
+              jError.addProperty("error", "no_se_encuentra_el_token_especificado");
+              return jError.toString();
+            }
+
+            Date fechaDesde = null;
+            Date fechaHasta = null;
+            if (input.getFechaDesde() != null && !input.getFechaDesde().trim().isEmpty()) {
+                try {
+                    fechaDesde = new SimpleDateFormat("yyyyMMdd").parse(input.getFechaDesde());
+                    fechaDesde.setHours(00);
+                    fechaDesde.setMinutes(00);
+                    fechaDesde.setSeconds(00);
+                } catch (Exception ex) {
+                    fechaDesde = new Date();
+                }
+            }
+            if (input.getFechaHasta() != null && !input.getFechaHasta().trim().isEmpty()) {
+                try {
+                    fechaHasta = new SimpleDateFormat("yyyyMMdd").parse(input.getFechaHasta());
+                    fechaHasta.setHours(23);
+                    fechaHasta.setMinutes(59);
+                    fechaHasta.setSeconds(59);
+                } catch (Exception ex) {
+                    fechaHasta = new Date();
+                }
+            }
+
+            List<RecursoDTO> registrosDeCambioEnRecurso = consultas.consultarCambiosEnUnRecurso(input.getToken(), input.getIdEmpresa(),
+                    input.getIdAgenda(), input.getIdRecurso(), fechaDesde, fechaHasta);
+            @SuppressWarnings("unchecked")
+            JsonArray jRegistrosDeRecurso = new JsonArray();
+            for (RecursoDTO recurso : registrosDeCambioEnRecurso) {
+                JsonObject jRecurso = new JsonObject();
+                jRecurso.addProperty("id", recurso.getId());
+                jRecurso.addProperty("nombre", recurso.getNombre());
+                jRecurso.addProperty("descripcion", recurso.getDescripcion());
+                jRecurso.addProperty("direccion", recurso.getDireccion());
+                jRecurso.addProperty("localidad", recurso.getLocalidad());
+                jRecurso.addProperty("departamento", recurso.getDepartamento());
+                jRecurso.addProperty("latitud", recurso.getLatitud());
+                jRecurso.addProperty("longitud", recurso.getLongitud());
+                jRecurso.addProperty("telefonos", recurso.getTelefonos());
+                jRecurso.addProperty("horarios", recurso.getHorarios());
+                jRecurso.addProperty("fecha_inicio", recurso.getFechaInicio());
+                jRecurso.addProperty("fecha_fin", recurso.getFechaFin());
+                jRecurso.addProperty("fecha_inicio_disp", recurso.getFechaInicioDisp());
+                jRecurso.addProperty("fecha_fin_disp", recurso.getFechaFinDisp());
+                jRecurso.addProperty("visible_internet", recurso.getVisibleInternet());
+                jRecurso.addProperty("sabado_es_habil", recurso.getSabadoEsHabil());
+                jRecurso.addProperty("domingo_es_habil", recurso.getDomingoEsHabil());
+                jRecurso.addProperty("cant_dias_a_generar", recurso.getCantDiasAGenerar());
+                jRecurso.addProperty("periodo_validacion", recurso.getPeriodoValidacion());
+
+                jRegistrosDeRecurso.add(jRecurso);
+            }
+            //Devolver el resultado en formato string
+            return jRegistrosDeRecurso.toString();
+        } catch (UserException uEx) {
+            JsonObject jError = new JsonObject();
+            jError.addProperty("error", uEx.getCodigoError());
+            return jError.toString();
+        } catch (Exception ex) {
+            JsonObject jError = new JsonObject();
+            jError.addProperty("error", ex.getMessage());
+            return jError.toString();
+        }
+    }	
+
+    
+    
+    
+    // ======================================================================================================================================
+    // =================================== SERVICIOS PARA VACUNACIÓN ========================================================================
+    
+    
+    @POST
+    @Path("/reserva_multiple_anadir_reserva_vacunacion")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String reservaMultipleVacunacionAnadirReservaPost(ReservaMultipleAnadirReservaInput input) {
+        return reservaMultipleAnadirReservaVacunacion(input);
+    }
+
+    @GET
+    @Path("/reserva_multiple_anadir_reserva_vacunacion")
+    @Produces("application/json")
+    public String reservaMultipleAnadirVacunacionReservaGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda,
+            @QueryParam("idRecurso") Integer idRecurso, @QueryParam("idDisponibilidad") Integer idDisponibilidad, @QueryParam("idioma") String idioma,
+            @QueryParam("datosReserva") String datosReserva, @QueryParam("tokenReserva") String tokenReserva, 
+            @QueryParam("fechaReservaDos") String fechaReservaDos,@QueryParam("tipoDocReservaDos") String tipoDocReservaDos,@QueryParam("tipoDosisReservaDos") String tipoDosisReservaDos) {
+        ReservaMultipleAnadirReservaInput input = new ReservaMultipleAnadirReservaInput();
+        input.setDatosReserva(datosReserva);
+        input.setIdAgenda(idAgenda);
+        input.setIdDisponibilidad(idDisponibilidad);
+        input.setIdEmpresa(idEmpresa);
+        input.setIdioma(idioma);
+        input.setIdRecurso(idRecurso);
+        input.setToken(token);
+        input.setTokenReserva(tokenReserva);
+        input.setFechaReservaDos(fechaReservaDos);
+        input.setTipoDocReservaDos(tipoDocReservaDos);
+        return reservaMultipleAnadirReservaVacunacion(input);
+    }
+
+    private String reservaMultipleAnadirReservaVacunacion(ReservaMultipleAnadirReservaInput input) {
+        Date fechaDos = null;
+        
+        try {
+        	
+        	
+            if (input.getIdEmpresa() == null) {
+                return jError("debe_especificar_la_empresa");
+            }
+            if (input.getIdAgenda() == null) {
+                return jError("debe_especificar_la_agenda");
+            }
+            if (input.getIdRecurso() == null) {
+                return jError("debe_especificar_el_recurso");
+            }
+            if (input.getIdDisponibilidad() == null) {
+                return jError("debe_especificar_la_disponibilidad");
+            }
+            if (input.getTokenReserva() == null || input.getTokenReserva().trim().isEmpty()) {
+                return jError("debe_especificar_el_token_de_reservas");
+            }
+            if (input.getFechaReservaDos() == null || input.getFechaReservaDos().trim().isEmpty()) {
+                return jError("debe_especificar_la_fecha_reserva_dos");
+            }
+            if (input.getTipoDocReservaDos() == null || input.getTipoDocReservaDos().trim().isEmpty()) {
+                return jError("debe_especificar_el_tipo_doc_reserva_dos");
+            }
+            
+            
+            
+            //Validar el token y la empresa
+            BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+            Consultas consultas = bl.getConsultas();
+            boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+            if (!tokenValido) {
+                return jError("no_se_encuentra_el_token_especificado");
+            }
+            
+            try{
+                fechaDos = FORMATOFECHA_CONHORA.parse(input.getFechaReservaDos());
+                if(Utiles.esFechaInvalida(fechaDos)){
+                    JsonObject jError = new JsonObject();
+                    jError.addProperty("resultado", "0");
+                    jError.addProperty("error", "La fecha para la reserva dos es inválida");
+                    return jError.toString();  
+                }
+            }catch(Exception ex) {
+                JsonObject jError = new JsonObject();
+                jError.addProperty("resultado", "0");
+                jError.addProperty("error", "La fecha hasta es inválida");
+                return jError.toString();
+            }
+		    	  
+            
+            //Hacer un login falso para que cambie el esquema
+            String falsoUsuario = "sae" + input.getIdEmpresa() + "-" + ((new Date()).getTime() + (new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+            String password = Utilidades.encriptarPassword(falsoUsuario);
+            httpRequest.login(falsoUsuario, password);
+            AgendarReservas agendarReservas = bl.getAgendarReservas();
+            //Verificar el token de reserva
+            if (input.getTokenReserva() == null || input.getTokenReserva().trim().isEmpty()) {
+                return jError("debe_especificar_el_token_de_reservas");
+            }
+            TokenReserva tokenReserva = agendarReservas.obtenerTokenReserva(input.getTokenReserva());
+            if (tokenReserva == null || tokenReserva.getRecurso() == null || !tokenReserva.getRecurso().getId().equals(input.getIdRecurso().intValue())) {
+                return jError("no_se_encuentra_el_token_de_reservas_especificado");
+            }
+            if (tokenReserva.getEstado() == Estado.R) {
+                return jError("el_token_esta_confirmado");
+            }
+            if (tokenReserva.getEstado() == Estado.C) {
+                return jError("el_token_esta_cancelado");
+            }
+            Long tiempoMaximo;
+            String sTiempoMaximo = "0";
+            Empresa empresa = agendarReservas.obtenerEmpresaPorId(input.getIdEmpresa());
+            if(empresa!=null && empresa.getOrganismoId()!=null){
+                sTiempoMaximo = consultas.consultarConfiguracion("RESERVA_MULTIPLE_PENDIENTE_TIEMPO_MAXIMO");
+            }
+            
+            
+            try {
+                tiempoMaximo = Long.valueOf(sTiempoMaximo);
+            } catch (Exception ex) {
+                tiempoMaximo = 10L;
+            }
+            Date fechaToken = tokenReserva.getUltimaReserva() != null ? tokenReserva.getUltimaReserva() : tokenReserva.getFechaInicio();
+            long diferenciaMinutos = (((new Date()).getTime() - fechaToken.getTime()) / 60000);
+            if (diferenciaMinutos > tiempoMaximo) {
+                return jError("el_token_ha_expirado");
+            }
+            //Generar y confirmar la reserva
+            Reserva reserva = agendarReservas.generarYConfirmarReservasVacunacion(input.getIdEmpresa(), input.getIdAgenda(), input.getIdRecurso(), input.getIdDisponibilidad(),
+                    input.getDatosReserva(), null, null, tokenReserva, input.getIdioma(), fechaDos,input.getTipoDocReservaDos(),input.getTipoDosisReservaDos());
+            //Enviar la respuesta
+            JsonObject jReserva = new JsonObject();
+            jReserva.addProperty("resultado", "1");
+            jReserva.addProperty("id", reserva.getId());
+            jReserva.addProperty("serieNumero", reserva.getSerie() + "-" + reserva.getNumero());
+            jReserva.addProperty("codigoCancelacion", reserva.getCodigoSeguridad());
+            jReserva.addProperty("codigoTrazabilidad", reserva.getTrazabilidadGuid());
+            Disponibilidad disp = reserva.getDisponibilidades().get(0);
+            jReserva.addProperty("fechaHora", FORMATOFECHA_SINHORA.format(disp.getFecha()) + FORMATOFECHA_HORA.format(disp.getHoraInicio()));
+            return jReserva.toString();
+        } catch (UserException uEx) {
+            if (uEx instanceof ValidacionClaveUnicaException) {
+                //Ya existe una reserva para la clave
+                return jError("ya_existe_una_reserva_para_el_dia_especificado_con_los_datos_proporcionados");
+            }
+            if (uEx instanceof ValidacionPorCampoException) {
+                //Hay al menos un campo que tiene problemas
+                JsonArray jMensajes = new JsonArray();
+                ValidacionPorCampoException vpcEx = (ValidacionPorCampoException) uEx;
+                for (int i = 0; i < vpcEx.getCantCampos(); i++) {
+                    jMensajes.add(vpcEx.getMensaje(i) + "/" + vpcEx.getNombreCampo(i));
+                }
+                JsonObject jError = new JsonObject();
+                jError.addProperty("resultado", "0");
+                jError.add("errores", jMensajes);
+                return jError.toString();
+            }
+            if ("el_horario_acaba_de_quedar_sin_cupos".equals(uEx.getCodigoError())) {
+                //No hay cupos para la disponibilidad seleccionada
+                JsonObject jError = new JsonObject();
+                jError.addProperty("resultado", "2");
+                jError.addProperty("error", uEx.getCodigoError());
+                return jError.toString();
+            }
+            //Otro error no manejado específicamente
+            return jError(uEx.getCodigoError());
+        } catch (Exception ex) {
+            //Otro error no manejado específicamente
+            ex.printStackTrace();
+            return jError(ex.getMessage());
+        } finally {
+            try {
+                httpRequest.logout();
+            } catch (Exception ex) {
+                //Nada para hacer
+            }
+        }
+    }
+    
+    // ======================================================================================================================================
+    // ======================================================================================================================================
+    @POST
+    @Path("/reserva_multiple_eliminar_reserva_vacunacion")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String reservaMultipleEliminarReservasVacunacionPost(ReservaMultipleEliminarReservaInput input) {
+        return reservaMultipleEliminarReservasVacunacion(input);
+    }
+
+    @GET
+    @Path("/reserva_multiple_eliminar_reserva_vacunacion")
+    @Produces("application/json")
+    public String reservaMultipleEliminarReservasVacunacionGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda,
+            @QueryParam("idRecurso") Integer idRecurso, @QueryParam("idReserva") Integer idReserva, @QueryParam("tokenReserva") String tokenReserva, @QueryParam("idioma") String idioma) {
+        ReservaMultipleEliminarReservaInput input = new ReservaMultipleEliminarReservaInput();
+        input.setIdAgenda(idAgenda);
+        input.setIdReserva(idReserva);
+        input.setIdEmpresa(idEmpresa);
+        input.setIdioma(idioma);
+        input.setIdRecurso(idRecurso);
+        input.setToken(token);
+        input.setTokenReserva(tokenReserva);
+        return reservaMultipleEliminarReservasVacunacion(input);
+    }
+
+    private String reservaMultipleEliminarReservasVacunacion(ReservaMultipleEliminarReservaInput input) {
+        try {
+            if (input.getIdEmpresa() == null) {
+                return jError("debe_especificar_la_empresa");
+            }
+            if (input.getIdAgenda() == null) {
+                return jError("debe_especificar_la_agenda");
+            }
+            if (input.getIdRecurso() == null) {
+                return jError("debe_especificar_el_recurso");
+            }
+            if (input.getIdReserva() == null) {
+                return jError("debe_especificar_la_reserva");
+            }
+            if (input.getTokenReserva() == null || input.getTokenReserva().trim().isEmpty()) {
+                return jError("debe_especificar_el_token_de_reservas");
+            }
+            //Validar el token y la empresa
+            BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+            Consultas consultas = bl.getConsultas();
+            boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+            if (!tokenValido) {
+                return jError("no_se_encuentra_el_token_especificado");
+            }
+            //Hacer un login falso para que cambie el esquema
+            String falsoUsuario = "sae" + input.getIdEmpresa() + "-" + ((new Date()).getTime() + (new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+            String password = Utilidades.encriptarPassword(falsoUsuario);
+            httpRequest.login(falsoUsuario, password);
+            AgendarReservas agendarReservas = bl.getAgendarReservas();
+            //Validar el token de reservas
+            TokenReserva tokenReserva = agendarReservas.obtenerTokenReserva(input.getTokenReserva());
+            if (tokenReserva == null || tokenReserva.getRecurso() == null || tokenReserva.getRecurso().getId().intValue() != input.getIdRecurso().intValue()) {
+                return jError("no_se_encuentra_el_token_especificado");
+            }
+            if (tokenReserva.getEstado() == Estado.R) {
+                return jError("el_token_esta_confirmado");
+            }
+            if (tokenReserva.getEstado() == Estado.C) {
+                return jError("el_token_esta_cancelado");
+            }
+            Long tiempoMaximo;
+            String sTiempoMaximo = "0";
+            Empresa empresa = agendarReservas.obtenerEmpresaPorId(input.getIdEmpresa());
+            if(empresa!=null && empresa.getOrganismoId()!=null){
+                sTiempoMaximo = consultas.consultarConfiguracion("RESERVA_MULTIPLE_PENDIENTE_TIEMPO_MAXIMO");
+            }
+            
+            try {
+                tiempoMaximo = Long.valueOf(sTiempoMaximo);
+            } catch (Exception ex) {
+                tiempoMaximo = 10L;
+            }
+            Date fechaToken = tokenReserva.getUltimaReserva() != null ? tokenReserva.getUltimaReserva() : tokenReserva.getFechaInicio();
+            long diferenciaMinutos = (((new Date()).getTime() - fechaToken.getTime()) / 60000);
+            if (diferenciaMinutos > tiempoMaximo) {
+                return jError("el_token_ha_expirado");
+            }
+            //Eliminar la reserva
+            agendarReservas.cancelarReservasParesMultiple(tokenReserva.getId(), input.getIdReserva());
+            //Enviar la respuesta
+            JsonObject jReserva = new JsonObject();
+            jReserva.addProperty("resultado", "1");
+            return jReserva.toString();
+        } catch (UserException uEx) {
+            return jError(uEx.getCodigoError());
+        } catch (Exception ex) {
+            //Otro error no manejado específicamente
+            ex.printStackTrace();
+            return jError(ex.getMessage());
+        } finally {
+            try {
+                httpRequest.logout();
+            } catch (Exception ex) {
+                //Nada para hacer
+            }
+        }
+    }
+    
+    
+    // ======================================================================================================================================
+    // ======================================================================================================================================
+    @POST
+    @Path("/cancelar_reserva_vacunacion")
+    @Consumes("application/json")
+    @Produces("application/json")
+    public String cancelarReservasVacunacionPost(CancelarReservaInput input) {
+        return cancelarReservaVacunacion(input);
+    }
+
+    @GET
+    @Path("/cancelar_reserva_vacunacion")
+    @Produces("application/json")
+    public String cancelarReservasVacunacionGet(@QueryParam("token") String token, @QueryParam("idEmpresa") Integer idEmpresa, @QueryParam("idAgenda") Integer idAgenda,
+            @QueryParam("idRecurso") Integer idRecurso, @QueryParam("idReserva") Integer idReserva, @QueryParam("codigoCancelacion") String codigoCancelacion,
+            @QueryParam("idioma") String idioma) {
+        CancelarReservaInput input = new CancelarReservaInput();
+        input.setIdAgenda(idAgenda);
+        input.setIdEmpresa(idEmpresa);
+        input.setIdioma(idioma);
+        input.setIdRecurso(idRecurso);
+        input.setToken(token);
+        input.setIdReserva(idReserva);
+        input.setCodigoCancelacion(codigoCancelacion);
+        return cancelarReservaVacunacion(input);
+    }
+
+    private String cancelarReservaVacunacion(CancelarReservaInput input) {
+        try {
+            //Validar el token y la empresa
+        	BusinessLocator bl = BusinessLocatorFactory.getLocatorContextoNoAutenticado();
+            Consultas consultas = bl.getConsultas();
+            boolean tokenValido = consultas.validarTokenEmpresa(input.getToken(), input.getIdEmpresa());
+            if (!tokenValido) {
+                JsonObject jError = new JsonObject();
+                jError.addProperty("resultado", "0");
+                jError.addProperty("error", "no_se_encuentra_el_token_especificado");
+                return jError.toString();
+            }
+            //Hacer un login falso para que cambie el esquema
+            String falsoUsuario = "sae" + input.getIdEmpresa() + "-" + ((new Date()).getTime() + (new Random()).nextInt(1000)) + "/" + input.getIdEmpresa();
+            String password = Utilidades.encriptarPassword(falsoUsuario);
+            httpRequest.login(falsoUsuario, password);
+            AgendarReservas agendarReservas = bl.getAgendarReservas();
+            //Obtener la reserva, primer dosis
+            Reserva reserva = agendarReservas.consultarReservaPorId(input.getIdReserva());
+            if (reserva == null) {
+                throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+            }
+            
+            //Verificar que la reserva a cancelar sea correspondiente a la primer dosis
+            if (reserva.getReservaHija() == null ) {
+                throw new UserException("no_se_puede_cancelar_la_reserva_dos");
+            }
+            //Verificar el código de cancelación
+            if (reserva.getCodigoSeguridad() != null && !reserva.getCodigoSeguridad().equals(input.getCodigoCancelacion())) {
+                throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+            }
+            
+            //Obtener la reserva, segunda dosis
+            Reserva reserva2 = agendarReservas.consultarReservaPorId(reserva.getReservaHija().getId());
+            if (reserva2 == null) {
+                throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+            }
+            //Verificar el código de cancelación
+            if (reserva2.getCodigoSeguridad() != null && !reserva2.getCodigoSeguridad().equals(input.getCodigoCancelacion())) {
+                throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+            }
+            
+            //Cancelar la reserva
+            Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+            agendarReservas.cancelarReservaVacunacion(input.getIdEmpresa(), recurso.getAgenda().getId(), recurso.getId(), input.getIdReserva(),reserva2.getId(),false);
+            //Enviar las comunicaciones   
+            try {
+            	Comunicaciones comunicaciones = bl.getComunicaciones();
+                Empresa empresa = agendarReservas.obtenerEmpresaPorId(input.getIdEmpresa());
+                //ToDo: quitar esto si se obtiene la empresa
+                Map<String, Object> datosEmpresa = consultas.consultarDatosEmpresa(input.getIdEmpresa());
+                String formatoFecha = datosEmpresa != null && datosEmpresa.containsKey("FORMATO_FECHA") ? (String) datosEmpresa.get("FORMATO_FECHA") : "dd/MM/yyyy";
+                String formatoHora = datosEmpresa != null && datosEmpresa.containsKey("FORMATO_HORA") ? (String) datosEmpresa.get("FORMATO_HORA") : "HH:mm";
+                if (reserva.getNotificar() == true) {
+                	comunicaciones.enviarComunicacionesCancelacion(empresa, reserva, input.getIdioma(), formatoFecha, formatoHora);
+                }
+                
+                if (reserva2.getNotificar() == true) {
+                	comunicaciones.enviarComunicacionesCancelacion(empresa, reserva2, input.getIdioma(), formatoFecha, formatoHora);
+                }
+                
+            } catch (Exception ex) {
+                //Nada para hacer, no se envía mensaje
+            }
+            //Enviar la respuesta
+            JsonObject jRespuesta = new JsonObject();
+            jRespuesta.addProperty("resultado", "1");
+            return jRespuesta.toString();
+        } catch (UserException uEx) {
+            JsonObject jError = new JsonObject();
+            jError.addProperty("resultado", "0");
+            jError.addProperty("error", uEx.getCodigoError());
+            return jError.toString();
+        } catch (Exception ex) {
+            JsonObject jError = new JsonObject();
+            jError.addProperty("resultado", "0");
+            jError.addProperty("error", ex.getMessage());
+            return jError.toString();
+        } finally {
+            try {
+                httpRequest.logout();
+            } catch (Exception ex) {
+                //Nada para hacer
+            }
+        }
+    }
+    
+    // ======================================================================================================================================
+    // ======================================================================================================================================
+    
 
 }
 	

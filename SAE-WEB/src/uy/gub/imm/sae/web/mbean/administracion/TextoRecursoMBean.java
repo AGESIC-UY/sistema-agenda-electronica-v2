@@ -34,6 +34,7 @@ import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
+import javax.faces.context.FacesContext;
 
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.entity.Agenda;
@@ -138,7 +139,7 @@ public class TextoRecursoMBean  extends BaseMBean {
  				}
  				copiarTextoRecurso(textoRec, textoRecurso);
 				
-				recursosEJB.modificarRecurso(sessionMBean.getRecursoMarcado());
+				recursosEJB.modificarRecurso(sessionMBean.getRecursoMarcado(), sessionMBean.getUsuarioActual().getCodigo());
 				addInfoMessage(sessionMBean.getTextos().get("recurso_modificado"), MSG_ID); 
 			} catch (Exception ex) {
 				addErrorMessage(ex, MSG_ID);
@@ -159,6 +160,11 @@ public class TextoRecursoMBean  extends BaseMBean {
 	}
 
 	public void beforePhaseModifTexto(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("modificar_textos_de_recursos"));
 		}

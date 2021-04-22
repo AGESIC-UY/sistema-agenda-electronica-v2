@@ -33,6 +33,37 @@
     <param><param-name>sqlCDARequiredQuery</param-name><param-value>select con_cda from {esquema}.ae_agendas where id={a}</param-value></param>
   </valve>
 -->
+<!--
+  <valve>
+    <class-name>com.sofis.agesic.sae.cda.CDAServiceProviderValve</class-name>
+    <module>cda</module>
+    <param><param-name>debug</param-name><param-value>false</param-value></param>
+    <param><param-name>relaxValidityPeriod</param-name><param-value>true</param-value></param>
+    <param><param-name>idpUrlLogin</param-name><param-value>https://test-eid.portal.gub.uy:443/v1.1/idp/profile/SAML2/POST/SSO</param-value></param>
+    <param><param-name>providerId</param-name><param-value>http://agenda.sofis.com.uy/sp</param-value></param>
+    <param><param-name>spReturnUrl</param-name><param-value>https://agenda2.sofis.com.uy:13002/sae/cda</param-value></param>
+    <param><param-name>returnPath</param-name><param-value>/cda</param-value></param>
+    <param><param-name>keystorePath</param-name><param-value>/opt/jboss/7.1.1-agenda/standalone/configuration/cda-ks.jks</param-value></param>
+    <param><param-name>keystorePass</param-name><param-value>sofis2uy</param-value></param>
+    <param><param-name>certAlias</param-name><param-value>agenda.sofis.com.uy</param-value></param>
+    <param><param-name>truststorePath</param-name><param-value>/opt/jboss/7.1.1-agenda/standalone/configuration/cda-ts.jks</param-value></param>
+    <param><param-name>truststorePass</param-name><param-value>agesic</param-value></param>
+    <param><param-name>validarFirma</param-name><param-value>true</param-value></param>
+    <param><param-name>restrictedUrls</param-name><param-value>/sae/*</param-value></param>
+    <param><param-name>excludedUrls</param-name><param-value>/sae/javax.faces.resource/*,/sae/resources/*,/sae/recursos/*,/sae/mapa/*</param-value></param>
+    <param><param-name>defaultRoles</param-name><param-value>usuario_autenticado</param-value></param>
+    <param><param-name>getParameterMethod</param-name><param-value>GETPARAMETER</param-value></param>
+    <param><param-name>setPrincipalEnable</param-name><param-value>true</param-value></param>
+    <param><param-name>setContextEnable</param-name><param-value>true</param-value></param>
+    <param><param-name>contextAttribute</param-name><param-value>CONTEXTO_VALVULA</param-value></param>
+    <param><param-name>attributeMappings</param-name><param-value>sae.PrimerNombre=Nombre,sae.PrimerApellido=Apellido</param-value></param>
+    <param><param-name>logoutPath</param-name><param-value>/logoutcda</param-value></param>
+    <param><param-name>idpUrlLogout</param-name><param-value>https://test-eid.portal.gub.uy:443/v1.1/idp/profile/SAML2/Redirect/SLO</param-value></param>
+    <param><param-name>sqlDatasource</param-name><param-value>java:/postgres-sae-global-ds</param-value></param>
+    <param><param-name>sqlSchemaResolverQuery</param-name><param-value>select datasource from global.ae_empresas where id={e}</param-value></param>
+    <param><param-name>sqlCDARequiredQuery</param-name><param-value>select con_cda from {esquema}.ae_agendas where id={a}</param-value></param>
+  </valve>
+ -->
  
 <!--Descomentar esto solo si NO se utiliza un Apache delante del JBoss -->
 <!-- - ->  

@@ -103,6 +103,9 @@ public class RecursoExportar {
   private Integer miPerfilRecHora;
   private Integer miPerfilRecDias;
   
+  private Integer reservaPendienteTiempoMax;
+  private Integer reservaMultiplePendienteTiempoMax;
+  
 	@XmlElement(name = "agrupaciones")
 	private List<AgrupacionDatoExport> agrupaciones = new ArrayList<AgrupacionDatoExport>();
 
@@ -718,6 +721,23 @@ public class RecursoExportar {
 
   public void setMiPerfilRecDias(Integer miPerfilRecDias) {
     this.miPerfilRecDias = miPerfilRecDias;
+  }
+  
+  public Integer getReservaPendienteTiempoMax() {
+	    return reservaPendienteTiempoMax;
+	  }
+
+  public void setReservaPendienteTiempoMax(Integer reservaPendienteTiempoMax) {
+    this.reservaPendienteTiempoMax = reservaPendienteTiempoMax;
+  }
+  
+  
+  public Integer getReservaMultiplePendienteTiempoMax() {
+    return reservaMultiplePendienteTiempoMax;
+  }
+
+  public void setReservaMultiplePendienteTiempoMax(Integer reservaMultiplePendienteTiempoMax) {
+    this.reservaMultiplePendienteTiempoMax = reservaMultiplePendienteTiempoMax;
   }
 
 }

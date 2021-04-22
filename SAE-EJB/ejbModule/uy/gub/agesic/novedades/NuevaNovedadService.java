@@ -6,6 +6,8 @@ import javax.jws.WebParam;
 import javax.jws.WebService;
 import javax.jws.soap.SOAPBinding;
 import javax.xml.bind.annotation.XmlSeeAlso;
+import uy.gub.agesic.novedades.ObjectFactory;
+import uy.gub.agesic.novedades.Publicar;
 
 
 /**
@@ -14,7 +16,7 @@ import javax.xml.bind.annotation.XmlSeeAlso;
  * Generated source version: 2.2
  * 
  */
-@WebService(name = "NuevaNovedadService", targetNamespace = "http://servicios.pge.red.uy/SAENovedades/publicacion")
+@WebService(name = "NuevaNovedadService", targetNamespace = "http://servicios.pge.red.uy/SAENovedades/v2/publicacion")
 @SOAPBinding(parameterStyle = SOAPBinding.ParameterStyle.BARE)
 @XmlSeeAlso({
     ObjectFactory.class
@@ -28,7 +30,7 @@ public interface NuevaNovedadService {
      */
     @WebMethod
     public void nuevaNovedad(
-        @WebParam(name = "publicar", targetNamespace = "http://novedades.sae.agesic.gub.uy/", partName = "novedad")
+        @WebParam(name = "publicar", targetNamespace = "http://novedades.sae.agesic.gub.uy/v2/", partName = "novedad")
         Publicar novedad);
 
 }

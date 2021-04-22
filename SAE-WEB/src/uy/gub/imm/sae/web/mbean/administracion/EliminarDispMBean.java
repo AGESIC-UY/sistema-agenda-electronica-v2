@@ -78,7 +78,7 @@ public class EliminarDispMBean extends BaseMBean {
 
 	public void beforePhaseEliminarSemana(PhaseEvent event) {
     //Verificar que el usuario tiene permisos para acceder a esta página
-    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
       ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
     }
@@ -90,7 +90,7 @@ public class EliminarDispMBean extends BaseMBean {
 	
   public void beforePhaseEliminarPeriodo(PhaseEvent event) {
     //Verificar que el usuario tiene permisos para acceder a esta página
-    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO"})) {
+    if(!sessionMBean.tieneRoles(new String[]{"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_PLANIFICADOR_X_RECURSO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})) {
       FacesContext ctx = FacesContext.getCurrentInstance();
       ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
     }

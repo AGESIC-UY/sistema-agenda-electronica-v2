@@ -1,0 +1,17 @@
+
+<security-domain name="SDSAE" cache-type="default">
+  <authentication>
+    <login-module code="uy.gub.imm.sae.login.SAEPorEmpresaLDAPLoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+      <module-option name="ldapHost" value="{host}"/>
+      <module-option name="ldapPort" value="{port}"/>
+      <module-option name="ldapUser" value="{user}"/>
+      <module-option name="ldapPass" value="{pass}"/>
+      <module-option name="ldapBase" value="{base}"/>
+      <module-option name="ldapAttr" value="{attr}"/>
+    </login-module>
+    <login-module code="uy.gub.imm.sae.login.SAEAnonimoLoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+    </login-module>
+  </authentication>
+</security-domain>

@@ -97,7 +97,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	 * @throws ApplicationException 
 	 */
 	@SuppressWarnings({"unchecked" })
-	public void eliminarAgenda(Agenda agenda, TimeZone timezone) throws UserException, ApplicationException {
+	public void eliminarAgenda(Agenda agenda, TimeZone timezone, String codigoUsuario) throws UserException, ApplicationException {
 		agenda = (Agenda) entityManager.find(Agenda.class, agenda.getId());
 		if (agenda == null) {
 			throw new UserException("no_se_encuentra_la_agenda_especificada");
@@ -112,7 +112,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 			.setParameter("agenda", agenda)
 			.getResultList(); 
 		for (Recurso recurso : recursos) {
-			recursosEJB.eliminarRecurso(recurso, timezone);
+			recursosEJB.eliminarRecurso(recurso, timezone, codigoUsuario);
 		}
 		agenda.setFechaBaja(new Date());
 	}

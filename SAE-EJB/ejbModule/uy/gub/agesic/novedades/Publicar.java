@@ -1,10 +1,13 @@
 
 package uy.gub.agesic.novedades;
 
+import java.util.ArrayList;
+import java.util.List;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
-import javax.xml.bind.annotation.XmlRootElement;
+import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlSchemaType;
+import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 import javax.xml.datatype.XMLGregorianCalendar;
 
@@ -31,7 +34,30 @@ import javax.xml.datatype.XMLGregorianCalendar;
  *         &lt;element name="nombreAgenda" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="codigoRecurso" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
  *         &lt;element name="nombreRecurso" type="{http://www.w3.org/2001/XMLSchema}string" minOccurs="0"/>
- *         &lt;element name="accion" type="{http://novedades.sae.agesic.gub.uy/}acciones" minOccurs="0"/>
+ *         &lt;element name="accion" type="{http://novedades.sae.agesic.gub.uy/v2/}acciones" minOccurs="0"/>
+ *         &lt;element name="datosextras" minOccurs="0">
+ *           &lt;complexType>
+ *             &lt;complexContent>
+ *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *                 &lt;sequence>
+ *                   &lt;element name="datoextra" maxOccurs="unbounded">
+ *                     &lt;complexType>
+ *                       &lt;complexContent>
+ *                         &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+ *                           &lt;sequence>
+ *                             &lt;element name="tipo" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                             &lt;element name="nombre" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                             &lt;element name="valor" type="{http://www.w3.org/2001/XMLSchema}string"/>
+ *                           &lt;/sequence>
+ *                         &lt;/restriction>
+ *                       &lt;/complexContent>
+ *                     &lt;/complexType>
+ *                   &lt;/element>
+ *                 &lt;/sequence>
+ *               &lt;/restriction>
+ *             &lt;/complexContent>
+ *           &lt;/complexType>
+ *         &lt;/element>
  *       &lt;/sequence>
  *     &lt;/restriction>
  *   &lt;/complexContent>
@@ -40,7 +66,6 @@ import javax.xml.datatype.XMLGregorianCalendar;
  * 
  * 
  */
-@XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
 @XmlType(name = "publicar", propOrder = {
     "timestamp",
@@ -55,8 +80,10 @@ import javax.xml.datatype.XMLGregorianCalendar;
     "nombreAgenda",
     "codigoRecurso",
     "nombreRecurso",
-    "accion"
+    "accion",
+    "datosextras"
 })
+@XmlRootElement
 public class Publicar {
 
     @XmlSchemaType(name = "dateTime")
@@ -73,6 +100,7 @@ public class Publicar {
     protected String codigoRecurso;
     protected String nombreRecurso;
     protected Acciones accion;
+    protected Publicar.Datosextras datosextras;
 
     /**
      * Gets the value of the timestamp property.
@@ -384,6 +412,213 @@ public class Publicar {
      */
     public void setAccion(Acciones value) {
         this.accion = value;
+    }
+
+    /**
+     * Gets the value of the datosextras property.
+     * 
+     * @return
+     *     possible object is
+     *     {@link Publicar.Datosextras }
+     *     
+     */
+    public Publicar.Datosextras getDatosextras() {
+        return datosextras;
+    }
+
+    /**
+     * Sets the value of the datosextras property.
+     * 
+     * @param value
+     *     allowed object is
+     *     {@link Publicar.Datosextras }
+     *     
+     */
+    public void setDatosextras(Publicar.Datosextras value) {
+        this.datosextras = value;
+    }
+
+
+    /**
+     * <p>Java class for anonymous complex type.
+     * 
+     * <p>The following schema fragment specifies the expected content contained within this class.
+     * 
+     * <pre>
+     * &lt;complexType>
+     *   &lt;complexContent>
+     *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *       &lt;sequence>
+     *         &lt;element name="datoextra" maxOccurs="unbounded">
+     *           &lt;complexType>
+     *             &lt;complexContent>
+     *               &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+     *                 &lt;sequence>
+     *                   &lt;element name="tipo" type="{http://www.w3.org/2001/XMLSchema}string"/>
+     *                   &lt;element name="nombre" type="{http://www.w3.org/2001/XMLSchema}string"/>
+     *                   &lt;element name="valor" type="{http://www.w3.org/2001/XMLSchema}string"/>
+     *                 &lt;/sequence>
+     *               &lt;/restriction>
+     *             &lt;/complexContent>
+     *           &lt;/complexType>
+     *         &lt;/element>
+     *       &lt;/sequence>
+     *     &lt;/restriction>
+     *   &lt;/complexContent>
+     * &lt;/complexType>
+     * </pre>
+     * 
+     * 
+     */
+    @XmlAccessorType(XmlAccessType.FIELD)
+    @XmlType(name = "", propOrder = {
+        "datoextra"
+    })
+    public static class Datosextras {
+
+        @XmlElement(required = true)
+        protected List<Publicar.Datosextras.Datoextra> datoextra;
+
+        /**
+         * Gets the value of the datoextra property.
+         * 
+         * <p>
+         * This accessor method returns a reference to the live list,
+         * not a snapshot. Therefore any modification you make to the
+         * returned list will be present inside the JAXB object.
+         * This is why there is not a <CODE>set</CODE> method for the datoextra property.
+         * 
+         * <p>
+         * For example, to add a new item, do as follows:
+         * <pre>
+         *    getDatoextra().add(newItem);
+         * </pre>
+         * 
+         * 
+         * <p>
+         * Objects of the following type(s) are allowed in the list
+         * {@link Publicar.Datosextras.Datoextra }
+         * 
+         * 
+         */
+        public List<Publicar.Datosextras.Datoextra> getDatoextra() {
+            if (datoextra == null) {
+                datoextra = new ArrayList<Publicar.Datosextras.Datoextra>();
+            }
+            return this.datoextra;
+        }
+
+
+        /**
+         * <p>Java class for anonymous complex type.
+         * 
+         * <p>The following schema fragment specifies the expected content contained within this class.
+         * 
+         * <pre>
+         * &lt;complexType>
+         *   &lt;complexContent>
+         *     &lt;restriction base="{http://www.w3.org/2001/XMLSchema}anyType">
+         *       &lt;sequence>
+         *         &lt;element name="tipo" type="{http://www.w3.org/2001/XMLSchema}string"/>
+         *         &lt;element name="nombre" type="{http://www.w3.org/2001/XMLSchema}string"/>
+         *         &lt;element name="valor" type="{http://www.w3.org/2001/XMLSchema}string"/>
+         *       &lt;/sequence>
+         *     &lt;/restriction>
+         *   &lt;/complexContent>
+         * &lt;/complexType>
+         * </pre>
+         * 
+         * 
+         */
+        @XmlAccessorType(XmlAccessType.FIELD)
+        @XmlType(name = "", propOrder = {
+            "tipo",
+            "nombre",
+            "valor"
+        })
+        public static class Datoextra {
+
+            @XmlElement(required = true)
+            protected String tipo;
+            @XmlElement(required = true)
+            protected String nombre;
+            @XmlElement(required = true)
+            protected String valor;
+
+            /**
+             * Gets the value of the tipo property.
+             * 
+             * @return
+             *     possible object is
+             *     {@link String }
+             *     
+             */
+            public String getTipo() {
+                return tipo;
+            }
+
+            /**
+             * Sets the value of the tipo property.
+             * 
+             * @param value
+             *     allowed object is
+             *     {@link String }
+             *     
+             */
+            public void setTipo(String value) {
+                this.tipo = value;
+            }
+
+            /**
+             * Gets the value of the nombre property.
+             * 
+             * @return
+             *     possible object is
+             *     {@link String }
+             *     
+             */
+            public String getNombre() {
+                return nombre;
+            }
+
+            /**
+             * Sets the value of the nombre property.
+             * 
+             * @param value
+             *     allowed object is
+             *     {@link String }
+             *     
+             */
+            public void setNombre(String value) {
+                this.nombre = value;
+            }
+
+            /**
+             * Gets the value of the valor property.
+             * 
+             * @return
+             *     possible object is
+             *     {@link String }
+             *     
+             */
+            public String getValor() {
+                return valor;
+            }
+
+            /**
+             * Sets the value of the valor property.
+             * 
+             * @param value
+             *     allowed object is
+             *     {@link String }
+             *     
+             */
+            public void setValor(String value) {
+                this.valor = value;
+            }
+
+        }
+
     }
 
 }

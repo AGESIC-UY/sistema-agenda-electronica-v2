@@ -44,4 +44,6 @@ public interface Disponibilidades {
 	public boolean esDiaHabil(Date fecha, Recurso r) throws UserException;
 	
 	public Disponibilidad obtenerDisponibilidadPresencial(Recurso recurso, TimeZone timezone);
+	
+	public Disponibilidad obtenerDisponibilidadEnHoraInicio(Recurso recurso, Date horaInicio);
 }

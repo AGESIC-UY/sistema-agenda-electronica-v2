@@ -87,6 +87,9 @@ import uy.gub.imm.sae.web.common.RowList;
 import uy.gub.imm.sae.web.common.SelectItemComparator;
 import uy.gub.imm.sae.web.common.SessionCleanerMBean;
 
+import java.util.Arrays;
+import java.util.logging.Level;
+
 public class SessionMBean extends SessionCleanerMBean {
 
 	public static final String MSG_ID = "pantalla";
@@ -126,6 +129,7 @@ public class SessionMBean extends SessionCleanerMBean {
 	private Row<Agenda> rowSelectAgenda;
 
 	private RowList<Recurso> recursos;
+	private RowList<Recurso> recursosAux;
 	private Row<Recurso> rowSelectRecurso;
 
 	private RowList<DatoDelRecurso> datosDelRecurso;
@@ -159,6 +163,9 @@ public class SessionMBean extends SessionCleanerMBean {
 	
 	//Cantidad de filas por página que se muestra en las tablas
   private Integer tablasFilasPorPagina = 25;
+
+  private List<String> rolesPorEmpresa = new ArrayList<>();
+  private Map<Integer, List<String>> rolesPorRecurso;
 
   @PostConstruct
   public void postConstruct() {
@@ -328,6 +335,13 @@ public class SessionMBean extends SessionCleanerMBean {
 		return recursos;
 	}
 
+	public RowList<Recurso> getRecursosAux() {
+		if (this.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+			return recursosAux;
+		}
+		return recursos;
+	}
+
 	// Recurso seleccionado en pantalla de selección de agendas y recursos
 	public Recurso getRecursoMarcado() {
 		if (recursos != null && recursos.getSelectedRow() != null) {
@@ -365,7 +379,14 @@ public class SessionMBean extends SessionCleanerMBean {
 	public void setRecursoSeleccionado(Recurso recurso) {
 		this.recursoSeleccionado = recurso;
 		if (recurso != null) {
-			this.desmarcarRecurso();
+			/*
+			  Se hace este chequeo porque cuando se accede con un usuario 'Administrador de recursos', luego de hacer alguna
+			modificación en alguno de sus recursos, la aplicación recargaba la lista de recursos y se perdía la selección
+			del recurso que le daba acceso a las opciones del menú
+			*/
+			if (!this.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR_DE_RECURSOS" })) {
+				this.desmarcarRecurso();
+			}
 		}
 	}
 
@@ -416,9 +437,49 @@ public class SessionMBean extends SessionCleanerMBean {
 		this.setRecursoSeleccionado(null);
 	}
 	
+	private void cargarRoles() {
+		try {
+			rolesPorEmpresa = usuariosEmpresasEJB.obtenerRolesUsuarioEmpresa(usuarioActual.getId(), empresaActual.getId());
+			rolesPorRecurso = new HashMap<>();
+			List<RolesUsuarioRecurso> rolesRecursoUsuario = recursosEJB.getRolesUsuarioRecurso(usuarioActual.getId());
+			for (RolesUsuarioRecurso rolRecursoUsuario : rolesRecursoUsuario) {
+				String[] roles = rolRecursoUsuario.getRoles().split(",");
+				for (int i = 0; i < roles.length; i++) {
+					roles[i] = roles[i].trim();
+				}
+				rolesPorRecurso.put(rolRecursoUsuario.getId().getRecursoId(), Arrays.asList(roles));
+			}
+		} catch (ApplicationException ex) {
+			LOGGER.error("No se pudo cargar los roles del usuario en la empresa", ex);
+		}
+	}
+
 	public void cargarAgendas() {
 		try {
-		  List<Agenda> entidades = generalEJB.consultarAgendas();
+			List<Agenda> entidades;
+			if (usuarioActual == null) {
+				entidades = new ArrayList();
+			} else {
+				List<Agenda> agendas1 = generalEJB.consultarAgendas();
+				if (!rolesPorEmpresa.isEmpty() || usuarioActual.getSuperadmin()) {
+					// Tiene acceso a todas las agendas
+					entidades = agendas1;
+				} else {
+					// Solo tiene acceso a las agendas que tienen recursos para
+					// los cuales tiene un rol
+					entidades = new ArrayList();
+					for (Agenda agenda1 : agendas1) {
+						List<Recurso> recursos1 = generalEJB.consultarRecursos(agenda1);
+						for (Recurso recurso1 : recursos1) {
+							if (rolesPorRecurso.containsKey(recurso1.getId())) {
+								if (!entidades.contains(agenda1)) {
+									entidades.add(agenda1);
+								}
+							}
+						}
+					}
+				}
+			}
 		  //Ordenar las agendas
 		  Collections.sort(entidades, new AgendaComparatorNombre());
 		  //Añadir un item al inicio para la "no-selección"
@@ -427,7 +488,7 @@ public class SessionMBean extends SessionCleanerMBean {
 			ninguna.setNombre(getTextos().get("ninguna"));
 			ninguna.setDescripcion(getTextos().get("ninguna"));
 			entidades.add(0, ninguna);
-			agendas = new RowList<Agenda>(entidades);
+			agendas = new RowList<>(entidades);
 			if (recursos != null) {
 				recursos.clear();
 			}
@@ -439,22 +500,97 @@ public class SessionMBean extends SessionCleanerMBean {
 	// Si hay agenda selecciondada, se cargan los recursos asociados.
 	// En caso contrario se vacía la lista de recursos
 	public void cargarRecursos() {
-
 		if (getAgendaMarcada() != null) {
 			try {
-				List<Recurso> entidades;
-				entidades = generalEJB.consultarRecursos(getAgendaMarcada());
-	      //Ordenar los recursos
-	      Collections.sort(entidades, new RecursoComparatorNombre());
-				recursos = new RowList<Recurso>(entidades);
+				List<Recurso> entidades = new ArrayList();
+				List<Recurso> entidades1 = new ArrayList();
+				List<Recurso> recursos1 = generalEJB.consultarRecursos(getAgendaMarcada());
+				if (!rolesPorEmpresa.isEmpty() || usuarioActual.getSuperadmin()) {
+					// Tiene acceso a todas las agendas
+					entidades = recursos1;
+
+					if (rolesPorEmpresa.contains("RA_AE_ADMINISTRADOR") || usuarioActual.getSuperadmin()) {
+						entidades1 = recursos1;
+					} else {
+						/*
+						 * Se hace este chequeo porque cuando se accede con un
+						 * usuario 'Administrador de recursos', en el consultar
+						 * recursos se muestren solamente los recursos en los
+						 * cuáles el usuario tiene dicho rol
+						 */
+						for (Recurso recurso1 : recursos1) {
+							if (rolesPorRecurso.containsKey(recurso1.getId())) {
+								if (rolesPorRecurso.get(recurso1.getId()).contains("RA_AE_ADMINISTRADOR_DE_RECURSOS")) {
+									if (!entidades1.contains(recurso1)) {
+										entidades1.add(recurso1);
+									}
+								}
+							}
+						}
+					}
+				} else {
+					for (Recurso recurso1 : recursos1) {
+						if (rolesPorRecurso.containsKey(recurso1.getId())) {
+							if (!entidades.contains(recurso1)) {
+								entidades.add(recurso1);
+							}
+							/*
+							 * Se hace este chequeo porque cuando se accede con
+							 * un usuario 'Administrador de recursos', en el
+							 * consultar recursos se muestren solamente los
+							 * recursos en los cuáles el usuario tiene dicho rol
+							 */
+							if (rolesPorRecurso.get(recurso1.getId()).contains("RA_AE_ADMINISTRADOR_DE_RECURSOS")) {
+								if (!entidades1.contains(recurso1)) {
+									entidades1.add(recurso1);
+								}
+							}
+						}
+					}
+				}
+				// Ordenar los recursos
+				Collections.sort(entidades, new RecursoComparatorNombre());
+				Collections.sort(entidades1, new RecursoComparatorNombre());
+				recursos = new RowList<>(entidades);
+				recursosAux = new RowList<>(entidades1);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
 			}
-		} else {
-			if (recursos != null) {
-				recursos.clear();
-			}
+		} else if (recursos != null) {
+			recursos.clear();
+			recursosAux.clear();
 		}
+	}
+	
+	/**
+	 * Este método se utiliza para modificar recurso, cuando se accede con un usuario que tenga el rol de recursos
+	 * 'Administrador de recursos'
+	 */
+	public void setRecursoEnLista(Recurso newR) {
+		int pos = 0;
+		for (Row<Recurso> rEnLista : this.getRecursosAux()) {
+			if (rEnLista.getData().getId().equals(newR.getId())) {
+				this.getRecursosAux().set(pos, new Row<Recurso>(newR, this.getRecursosAux()));
+				break;
+			}
+			pos++;
+		}
+	}
+	
+	/**
+	 * Este método se utiliza para eliminar recurso, cuando se accede con un usuario que tenga el rol de recursos
+	 * 'Administrador de recursos'
+	 */
+	public void removeRecursoEnLista(Recurso newR) {
+		this.getRecursosAux().remove(new Row<Recurso>(newR, this.getRecursosAux()));
+	}
+	
+	/**
+	 * Este método se utiliza para copiar o importar recurso, cuando se accede con un usuario que tenga el rol de recursos
+	 * 'Administrador de recursos'
+	 */
+	public void addRecursoALista(Recurso newR) {
+		this.getRecursosAux().add(0, new Row<Recurso>(newR, this.getRecursosAux()));
 	}
 	
 	/**
@@ -489,8 +625,7 @@ public class SessionMBean extends SessionCleanerMBean {
 		if (this.getRecursoSeleccionado() != null) {
 			try {
 				List<DatoDelRecurso> entidades;
-				entidades = recursosEJB.consultarDatosDelRecurso(this
-						.getRecursoSeleccionado());
+				entidades = recursosEJB.consultarDatosDelRecurso(this.getRecursoSeleccionado());
 				datosDelRecurso = new RowList<DatoDelRecurso>(entidades);
 			} catch (Exception e) {
 				addErrorMessage(e, MSG_ID);
@@ -838,6 +973,8 @@ public class SessionMBean extends SessionCleanerMBean {
 		} catch (Exception ex) {
 			ex.printStackTrace();
 		}
+		//Cargar los roles del usuario en la empresa y en cada uno de los recursos
+        cargarRoles();
 		// Cargar las agendas del usuario para la empresa actual
 		cargarAgendas();
 	}

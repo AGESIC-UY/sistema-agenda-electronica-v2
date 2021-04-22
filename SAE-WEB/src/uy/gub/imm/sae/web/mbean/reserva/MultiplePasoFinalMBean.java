@@ -44,7 +44,9 @@ import uy.gub.imm.sae.entity.TextoAgenda;
 import uy.gub.imm.sae.entity.TokenReserva;
 import uy.gub.imm.sae.entity.global.Empresa;
 import uy.gub.imm.sae.exception.ApplicationException;
+import uy.gub.imm.sae.exception.ErrorValidacionException;
 import uy.gub.imm.sae.exception.UserException;
+import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.web.common.BaseMBean;
 import uy.gub.imm.sae.web.common.FormularioDinamicoReserva;
 
@@ -292,7 +294,28 @@ public class MultiplePasoFinalMBean extends BaseMBean {
       //La reserva se confirmo, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
       sesionMBean.setReserva(null);
       sesionMBean.setTokenReserva(tokenReserva);
-    }catch(Exception ex) {
+    }
+    catch(ErrorValidacionException evex){
+    	if(evex.getMensajes()!=null && !evex.getMensajes().isEmpty()){
+    		addErrorMessage(evex.getMensajes().get(0));
+    	}
+    	else{
+    		addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
+    	}
+    	evex.printStackTrace();
+        return false;
+    }
+    catch(ValidacionException vex){
+    	if(vex.getMensajes()!=null && !vex.getMensajes().isEmpty()){
+    		addErrorMessage(vex.getMensajes().get(0));
+    	}
+    	else{
+    		addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
+    	}
+    	vex.printStackTrace();
+        return false;
+    }
+    catch(Exception ex) {
       addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
       ex.printStackTrace();
       return false;

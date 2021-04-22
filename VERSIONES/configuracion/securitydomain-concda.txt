@@ -1,0 +1,17 @@
+
+<security-domain name="SDSAE" cache-type="default">
+  <authentication>
+    <login-module code="uy.gub.imm.sae.login.SAEPorEmpresaLoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+    </login-module>
+    <login-module code="uy.gub.imm.sae.login.SAECDALoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+      <module-option name="keystorePath" value="{JBOSS_HOME}/standalone/configuration/cda-ks.jks"/>
+      <module-option name="certAlias" value="{cert-alias}"/>
+      <module-option name="keystorePass" value="{cert-pass}"/>
+    </login-module>
+    <login-module code="uy.gub.imm.sae.login.SAEAnonimoLoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+    </login-module>
+  </authentication>
+</security-domain>

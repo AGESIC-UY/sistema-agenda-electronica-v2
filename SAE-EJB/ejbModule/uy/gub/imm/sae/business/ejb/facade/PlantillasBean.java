@@ -33,7 +33,7 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR"})
+@RolesAllowed({"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class PlantillasBean implements PlantillasLocal, PlantillasRemote{
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;

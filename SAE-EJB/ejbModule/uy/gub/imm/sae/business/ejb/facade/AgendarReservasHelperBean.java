@@ -519,7 +519,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 	}
 
 	public List<Reserva> validarDatosReservaPorClave(Recurso recurso, Disponibilidad disponibilidad, 
-	    List<DatoASolicitar> campos, Map<String, DatoReserva> valores, String codigoTramite) {
+	    List<DatoASolicitar> campos, Map<String, DatoReserva> valores, String codigoTramite, Integer idReserva) {
   	//Se supone que si un campo es clave tiene que ser requerido.
   	//Si cambia este supuesto, se deberá revisar este procedimiento.
   	List<Reserva> listaReserva = new ArrayList<Reserva>();
@@ -561,7 +561,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		  cal.add(Calendar.DATE, 1*periodoValidacion);
 		  fechaHasta = Utiles.time2FinDelDia(cal.getTime());
   		//Consultar las reservas por dato de reserva (solo para los campos clave)
-  		listaReserva = consultaEJB.consultarReservaDatosPeriodo(datoReservaLista, recurso, fechaDesde, fechaHasta, codigoTramite);
+  		listaReserva = consultaEJB.consultarReservaDatosPeriodo(datoReservaLista, recurso, fechaDesde, fechaHasta, codigoTramite,idReserva);
   	}
 		return listaReserva;
 	}
@@ -882,6 +882,106 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		}
 		return autocompletador;
 	}
+	
+	
+	/*
+     * Crea las reservas pares como pendiente, para la primera y segunda dosis de vacunación, realiza todo en una transaccion independiente
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Override
+    public Reserva crearReservasParesPendiente(Disponibilidad disp,Disponibilidad disp2, TokenReserva token, String ipOrigen) throws ApplicationException {
+        Reserva reserva = new Reserva();
+        disp = entityManager.find(Disponibilidad.class, disp.getId());
+        disp2 = entityManager.find(Disponibilidad.class, disp2.getId());
+        if (token != null) {
+            token = entityManager.find(TokenReserva.class, token.getId());
+            token.setUltimaReserva(new Date());
+            token.setIpOrigen(ipOrigen);
+        }
+        try{
+            //Creo y seteo atributos
+            Reserva reserva2 = new Reserva();
+            reserva2.setEstado(Estado.P);
+            reserva2.getDisponibilidades().add(disp2);
+            reserva2.setFechaCreacion(new Date());
+            reserva2.setToken(token);
+            reserva2.setIpOrigen(ipOrigen);
+            //reserva2.setOrigen(origen.getValor());
+            
+            reserva.setEstado(Estado.P);
+            reserva.getDisponibilidades().add(disp);
+            reserva.setFechaCreacion(new Date());
+            reserva.setToken(token);
+            reserva.setIpOrigen(ipOrigen);
+            //reserva.setOrigen(origen.getValor());
+            reserva.setReservaHija(reserva2);
+
+            entityManager.persist(reserva);
+            entityManager.flush();
+            entityManager.refresh(reserva);
+            
+            
+        }
+        catch (Exception e) {
+        	logger.error(e.getMessage());
+            throw new ApplicationException("Error: no se han podido guardar las reservas pares");
+        }
+        
+        
+        return reserva;
+    }
+    
+    
+    /*
+     * Elimina las reservas pares como pendiente, para la primera y segunda dosis de vacunación, realiza todo en una transaccion independiente
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Override
+    public void eliminarReservasParesPendientes(Reserva reserva1) throws ApplicationException {
+        
+        try{
+        	Reserva reserva = new Reserva();
+        	reserva = entityManager.find(Reserva.class, reserva1.getId());
+            Reserva reserva2 = reserva.getReservaHija();
+            reserva.setReservaHija(null);
+            entityManager.merge(reserva);
+            if(reserva2!=null){
+            	entityManager.remove(reserva2);
+            }
+            entityManager.remove(reserva);
+            entityManager.flush();
+            
+        }
+        catch (Exception e) {
+        	logger.error(e.getMessage());
+            throw new ApplicationException("Error: no se han podido eliminar las reservas pares");
+        }
+        
+        
+    }
+    
+    
+    /*
+     * Elimina la reserva como pendiente.
+     */
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Override
+    public void eliminarReservaPendiente(Reserva reserva1) throws ApplicationException {
+        
+        try{
+        	Reserva reserva = new Reserva();
+        	reserva = entityManager.find(Reserva.class, reserva1.getId());
+            entityManager.remove(reserva);
+            entityManager.flush();
+            
+        }
+        catch (Exception e) {
+        	logger.error(e.getMessage());
+            throw new ApplicationException("Error: no se han podido eliminar la reserva");
+        }
+        
+        
+    }
 	
 }
 

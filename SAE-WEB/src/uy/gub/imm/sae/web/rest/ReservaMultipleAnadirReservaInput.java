@@ -10,6 +10,12 @@ public class ReservaMultipleAnadirReservaInput {
   private Integer idDisponibilidad;
   private String datosReserva;
   private String idioma;
+  
+  /* Campos utilizados para la reserva multiple para vacunación */
+  private String fechaReservaDos;
+  private String tipoDocReservaDos;
+  private String tipoDosisReservaDos;
+  /* ---- */
 
   public String getToken() {
     return token;
@@ -58,6 +64,30 @@ public class ReservaMultipleAnadirReservaInput {
   }
   public void setIdioma(String idioma) {
     this.idioma = idioma;
+  }
+  
+  public String getFechaReservaDos() {
+    return fechaReservaDos;
+  }
+
+  public void setFechaReservaDos(String fechaReservaDos) {
+    this.fechaReservaDos = fechaReservaDos;
+  }
+
+  public String getTipoDocReservaDos() {
+    return tipoDocReservaDos;
+  }
+
+  public void setTipoDocReservaDos(String tipoDocReservaDos) {
+    this.tipoDocReservaDos = tipoDocReservaDos;
+  }
+
+  public String getTipoDosisReservaDos() {
+    return tipoDosisReservaDos;
+  }
+
+  public void setTipoDosisReservaDos(String tipoDosisReservaDos) {
+    this.tipoDosisReservaDos = tipoDosisReservaDos;
   }
   
 }

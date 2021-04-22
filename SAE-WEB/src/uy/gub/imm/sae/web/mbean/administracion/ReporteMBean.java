@@ -206,8 +206,6 @@ public class ReporteMBean extends BaseMBean {
       CSVWebFilePrinter printer = new CSVWebFilePrinter(fileCSV, nombre);
       printer.print(); 
 		} catch (Exception e1) {
-			System.out.println("-------- Comienza problema -----------");
-			e1.printStackTrace();
 			addErrorMessage(e1);
 		}
 		return null;
@@ -693,7 +691,7 @@ public class ReporteMBean extends BaseMBean {
 	// Arma la lista de etiquetas para encabezar la planilla excel
 	private String[] armarCabezales(List<AgrupacionDato> datos){
 		String[] cabezales = {sessionMBean.getTextos().get("identificador"), sessionMBean.getTextos().get("fecha"),
-				sessionMBean.getTextos().get("hora"), sessionMBean.getTextos().get("numero")};
+				sessionMBean.getTextos().get("hora"), sessionMBean.getTextos().get("numero"), sessionMBean.getTextos().get("codigo")};
 		
 		for(AgrupacionDato grupo: datos) {
 			for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
@@ -762,7 +760,8 @@ public class ReporteMBean extends BaseMBean {
 	      filaDatos.add(new TableCellValue(Utiles.date2string(reserva.getHoraInicio(), Utiles.HORA)));
 			}
 			filaDatos.add(new TableCellValue(reserva.getNumero()!=null?reserva.getNumero():0));
-			for(AgrupacionDato grupo: agrupaciones) {
+			filaDatos.add(new TableCellValue(reserva.getCodigoSeguridad()!=null && !reserva.getCodigoSeguridad().isEmpty()?reserva.getCodigoSeguridad():""));
+				for(AgrupacionDato grupo: agrupaciones) {
 				for(DatoASolicitar campo: grupo.getDatosASolicitar()) {
 					if (campo.getIncluirEnReporte()) {
 						String clave = campo.getNombre();

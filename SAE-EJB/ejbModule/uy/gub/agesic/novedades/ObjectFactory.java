@@ -10,7 +10,7 @@ import javax.xml.namespace.QName;
 /**
  * This object contains factory methods for each 
  * Java content interface and Java element interface 
- * generated in the uy.gub.agesic.sae.novedades package. 
+ * generated in the uy.gub.agesic.sae.novedades.v2 package. 
  * <p>An ObjectFactory allows you to programatically 
  * construct new instances of the Java representation 
  * for XML content. The Java representation of XML 
@@ -24,22 +24,14 @@ import javax.xml.namespace.QName;
 @XmlRegistry
 public class ObjectFactory {
 
-    private final static QName _PublicarResponse_QNAME = new QName("http://novedades.sae.agesic.gub.uy/", "publicarResponse");
-    private final static QName _Publicar_QNAME = new QName("http://novedades.sae.agesic.gub.uy/", "publicar");
+    private final static QName _PublicarResponse_QNAME = new QName("http://novedades.sae.agesic.gub.uy/v2/", "publicarResponse");
+    private final static QName _Publicar_QNAME = new QName("http://novedades.sae.agesic.gub.uy/v2/", "publicar");
 
     /**
-     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: uy.gub.agesic.sae.novedades
+     * Create a new ObjectFactory that can be used to create new instances of schema derived classes for package: uy.gub.agesic.sae.novedades.v2
      * 
      */
     public ObjectFactory() {
-    }
-
-    /**
-     * Create an instance of {@link PublicarResponse }
-     * 
-     */
-    public PublicarResponse createPublicarResponse() {
-        return new PublicarResponse();
     }
 
     /**
@@ -51,10 +43,34 @@ public class ObjectFactory {
     }
 
     /**
+     * Create an instance of {@link Publicar.Datosextras }
+     * 
+     */
+    public Publicar.Datosextras createPublicarDatosextras() {
+        return new Publicar.Datosextras();
+    }
+
+    /**
+     * Create an instance of {@link PublicarResponse }
+     * 
+     */
+    public PublicarResponse createPublicarResponse() {
+        return new PublicarResponse();
+    }
+
+    /**
+     * Create an instance of {@link Publicar.Datosextras.Datoextra }
+     * 
+     */
+    public Publicar.Datosextras.Datoextra createPublicarDatosextrasDatoextra() {
+        return new Publicar.Datosextras.Datoextra();
+    }
+
+    /**
      * Create an instance of {@link JAXBElement }{@code <}{@link PublicarResponse }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://novedades.sae.agesic.gub.uy/", name = "publicarResponse")
+    @XmlElementDecl(namespace = "http://novedades.sae.agesic.gub.uy/v2/", name = "publicarResponse")
     public JAXBElement<PublicarResponse> createPublicarResponse(PublicarResponse value) {
         return new JAXBElement<PublicarResponse>(_PublicarResponse_QNAME, PublicarResponse.class, null, value);
     }
@@ -63,7 +79,7 @@ public class ObjectFactory {
      * Create an instance of {@link JAXBElement }{@code <}{@link Publicar }{@code >}}
      * 
      */
-    @XmlElementDecl(namespace = "http://novedades.sae.agesic.gub.uy/", name = "publicar")
+    @XmlElementDecl(namespace = "http://novedades.sae.agesic.gub.uy/v2/", name = "publicar")
     public JAXBElement<Publicar> createPublicar(Publicar value) {
         return new JAXBElement<Publicar>(_Publicar_QNAME, Publicar.class, null, value);
     }

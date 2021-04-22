@@ -22,10 +22,11 @@ package uy.gub.imm.sae.web.mbean.administracion;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
-import javax.faces.event.ActionEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
+import javax.faces.context.FacesContext;
 
+import javax.faces.event.ActionEvent;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.entity.AgrupacionDato;
 import uy.gub.imm.sae.web.common.BaseMBean;
@@ -56,9 +57,11 @@ public class AgrupacionMBean extends BaseMBean {
 	public SessionMBean getSessionMBean() {
 		return sessionMBean;
 	}
+	
 	public void setSessionMBean(SessionMBean sessionMBean) {
 		this.sessionMBean = sessionMBean;
 	}
+	
 	public DatoASSessionMBean getDatoASSessionMBean() {
 		return datoASSessionMBean;
 	}
@@ -68,6 +71,11 @@ public class AgrupacionMBean extends BaseMBean {
 	}
 	
 	public void beforePhaseModificarAgrupaciones(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if (!sessionMBean.tieneRoles(new String[] { "RA_AE_ADMINISTRADOR" })) {
+			FacesContext ctx = FacesContext.getCurrentInstance();
+			ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		}
 		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
 			sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("gestionar_agrupaciones"));
 		}

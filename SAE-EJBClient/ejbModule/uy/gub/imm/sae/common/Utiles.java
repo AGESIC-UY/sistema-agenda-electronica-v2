@@ -41,6 +41,8 @@ public class Utiles {
   
   public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
   
+  public static final String SEGUNDA_DOSIS = "datos_personales.TipoDosis.D2";
+  
 	public static Integer DIA = 1;
 	public static Integer DIA_HORA = 2;
 	public static Integer HORA = 3;

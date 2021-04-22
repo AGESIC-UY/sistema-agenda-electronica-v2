@@ -46,8 +46,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
 import javax.persistence.Version;
+import javax.persistence.SqlResultSetMapping;
+import javax.persistence.EntityResult;
+import javax.persistence.FieldResult;
+import javax.persistence.ColumnResult;
 import javax.xml.bind.annotation.XmlTransient;
-
 import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 
 @Entity
@@ -162,6 +165,9 @@ public class Recurso implements Serializable {
   private Integer miPerfilRecHora;
   private Integer miPerfilRecDias;
   
+  private Integer reservaPendienteTiempoMax;
+  private Integer reservaMultiplePendienteTiempoMax;
+  
   private AccionMiPerfil accionMiPerfil;
   
 	public Recurso () {
@@ -187,41 +193,41 @@ public class Recurso implements Serializable {
 		presencialJueves = false;
 		presencialViernes = false;
 		presencialSabado = false;
-    presencialDomingo = false;
-    
-    multipleAdmite = false;
-    cambiosAdmite = false;
-    cambiosTiempo = null;
-    cambiosUnidad = null;
-    
-    periodoValidacion = null;
-    
-    validarPorIP = null;
-    cantidadPorIP = null;
-    periodoPorIP = null;
-    ipsSinValidacion = null;
-    
-    cancelacionTiempo = null;
-    cancelacionUnidad = null;
-    cancelacionTipo = null;
-    
-    miPerfilConHab = true;
-    miPerfilCanHab = true;
-    miPerfilRecHab = true;
-    miPerfilConTitulo="";
-    miPerfilConCorto="";
-    miPerfilConLargo="";
-    miPerfilConVencim=0;
-    miPerfilCanTitulo="";
-    miPerfilCanCorto="";
-    miPerfilCanLargo="";
-    miPerfilCanVencim=0;
-    miPerfilRecTitulo="";
-    miPerfilRecCorto="";
-    miPerfilRecLargo="";
-    miPerfilRecVencim=0;
-    miPerfilRecHora=0;
-    miPerfilRecDias=0;
+	    presencialDomingo = false;
+	    
+	    multipleAdmite = false;
+	    cambiosAdmite = false;
+	    cambiosTiempo = null;
+	    cambiosUnidad = null;
+	    
+	    periodoValidacion = null;
+	    
+	    validarPorIP = null;
+	    cantidadPorIP = null;
+	    periodoPorIP = null;
+	    ipsSinValidacion = null;
+	    
+	    cancelacionTiempo = null;
+	    cancelacionUnidad = null;
+	    cancelacionTipo = null;
+	    
+	    miPerfilConHab = true;
+	    miPerfilCanHab = true;
+	    miPerfilRecHab = true;
+	    miPerfilConTitulo="";
+	    miPerfilConCorto="";
+	    miPerfilConLargo="";
+	    miPerfilConVencim=0;
+	    miPerfilCanTitulo="";
+	    miPerfilCanCorto="";
+	    miPerfilCanLargo="";
+	    miPerfilCanVencim=0;
+	    miPerfilRecTitulo="";
+	    miPerfilRecCorto="";
+	    miPerfilRecLargo="";
+	    miPerfilRecVencim=0;
+	    miPerfilRecHora=0;
+	    miPerfilRecDias=0;
     
 	}
 	
@@ -256,9 +262,9 @@ public class Recurso implements Serializable {
 		mostrarNumeroEnTicket = original.getMostrarNumeroEnTicket();
 		fuenteTicket = original.getFuenteTicket();
 		tamanioFuenteChica = original.getTamanioFuenteChica();
-    tamanioFuenteNormal = original.getTamanioFuenteNormal();
-    tamanioFuenteGrande = original.getTamanioFuenteGrande();
-    mostrarIdEnTicket = original.getMostrarIdEnTicket();
+	    tamanioFuenteNormal = original.getTamanioFuenteNormal();
+	    tamanioFuenteGrande = original.getTamanioFuenteGrande();
+	    mostrarIdEnTicket = original.getMostrarIdEnTicket();
 		usarLlamador = original.getUsarLlamador();
 		serie = original.getSerie();
 		visibleInternet = original.getVisibleInternet();
@@ -277,50 +283,53 @@ public class Recurso implements Serializable {
 		this.latitud = original.latitud;
 		this.longitud = original.longitud;
 	
-    this.presencialAdmite = original.presencialAdmite;
-    this.presencialCupos = original.presencialCupos;
-    this.presencialLunes = original.presencialLunes;
-    this.presencialMartes = original.presencialMartes;
-    this.presencialMiercoles = original.presencialMiercoles;
-    this.presencialJueves = original.presencialJueves;
-    this.presencialViernes = original.presencialViernes;
-    this.presencialSabado = original.presencialSabado;
-    this.presencialDomingo = original.presencialDomingo;
-		
-    this.multipleAdmite = original.multipleAdmite;
+	    this.presencialAdmite = original.presencialAdmite;
+	    this.presencialCupos = original.presencialCupos;
+	    this.presencialLunes = original.presencialLunes;
+	    this.presencialMartes = original.presencialMartes;
+	    this.presencialMiercoles = original.presencialMiercoles;
+	    this.presencialJueves = original.presencialJueves;
+	    this.presencialViernes = original.presencialViernes;
+	    this.presencialSabado = original.presencialSabado;
+	    this.presencialDomingo = original.presencialDomingo;
+			
+	    this.multipleAdmite = original.multipleAdmite;
+	    
+	    this.cambiosAdmite = original.cambiosAdmite;
+	    this.cambiosTiempo = original.cambiosTiempo;
+	    this.cambiosUnidad = original.cambiosUnidad;
+	    
+	    this.periodoValidacion = original.periodoValidacion;
+	    
+	    this.validarPorIP = original.validarPorIP;
+	    this.cantidadPorIP = original.cantidadPorIP;
+	    this.periodoPorIP = original.periodoPorIP;
+	    this.ipsSinValidacion = original.ipsSinValidacion;
+	    
+	    this.cancelacionTiempo = original.cancelacionTiempo;
+	    this.cancelacionUnidad = original.cancelacionUnidad;
+	    this.cancelacionTipo = original.cancelacionTipo;
     
-    this.cambiosAdmite = original.cambiosAdmite;
-    this.cambiosTiempo = original.cambiosTiempo;
-    this.cambiosUnidad = original.cambiosUnidad;
-    
-    this.periodoValidacion = original.periodoValidacion;
-    
-    this.validarPorIP = original.validarPorIP;
-    this.cantidadPorIP = original.cantidadPorIP;
-    this.periodoPorIP = original.periodoPorIP;
-    this.ipsSinValidacion = original.ipsSinValidacion;
-    
-    this.cancelacionTiempo = original.cancelacionTiempo;
-    this.cancelacionUnidad = original.cancelacionUnidad;
-    this.cancelacionTipo = original.cancelacionTipo;
-    
-    miPerfilConHab = original.miPerfilConHab;
-    miPerfilCanHab = original.miPerfilCanHab;
-    miPerfilRecHab = original.miPerfilRecHab;
-    miPerfilConTitulo = original.miPerfilConTitulo;
-    miPerfilConCorto = original.miPerfilConCorto;
-    miPerfilConLargo = original.miPerfilConLargo;
-    miPerfilConVencim = original.miPerfilConVencim;
-    miPerfilCanTitulo = original.miPerfilCanTitulo;
-    miPerfilCanCorto = original.miPerfilCanCorto;
-    miPerfilCanLargo = original.miPerfilCanLargo;
-    miPerfilCanVencim = original.miPerfilCanVencim;
-    miPerfilRecTitulo = original.miPerfilRecTitulo;
-    miPerfilRecCorto = original.miPerfilRecCorto;
-    miPerfilRecLargo = original.miPerfilRecLargo;
-    miPerfilRecVencim = original.miPerfilRecVencim;
-    miPerfilRecHora = original.miPerfilRecHora;
-    miPerfilRecDias = original.miPerfilRecDias;
+	    miPerfilConHab = original.miPerfilConHab;
+	    miPerfilCanHab = original.miPerfilCanHab;
+	    miPerfilRecHab = original.miPerfilRecHab;
+	    miPerfilConTitulo = original.miPerfilConTitulo;
+	    miPerfilConCorto = original.miPerfilConCorto;
+	    miPerfilConLargo = original.miPerfilConLargo;
+	    miPerfilConVencim = original.miPerfilConVencim;
+	    miPerfilCanTitulo = original.miPerfilCanTitulo;
+	    miPerfilCanCorto = original.miPerfilCanCorto;
+	    miPerfilCanLargo = original.miPerfilCanLargo;
+	    miPerfilCanVencim = original.miPerfilCanVencim;
+	    miPerfilRecTitulo = original.miPerfilRecTitulo;
+	    miPerfilRecCorto = original.miPerfilRecCorto;
+	    miPerfilRecLargo = original.miPerfilRecLargo;
+	    miPerfilRecVencim = original.miPerfilRecVencim;
+	    miPerfilRecHora = original.miPerfilRecHora;
+	    miPerfilRecDias = original.miPerfilRecDias;
+	    
+	    this.reservaPendienteTiempoMax = original.getReservaPendienteTiempoMax();
+	    this.reservaMultiplePendienteTiempoMax = original.getReservaMultiplePendienteTiempoMax();
     
 	}
 
@@ -1085,6 +1094,25 @@ public class Recurso implements Serializable {
   public void setMiPerfilRecDias(Integer miPerfilRecDias) {
     this.miPerfilRecDias = miPerfilRecDias;
   }
+  
+  @Column (name = "reserva_pen_tiempo_max", nullable = false)
+  public Integer getReservaPendienteTiempoMax() {
+    return reservaPendienteTiempoMax;
+  }
+
+  public void setReservaPendienteTiempoMax(Integer reservaPendienteTiempoMax) {
+    this.reservaPendienteTiempoMax = reservaPendienteTiempoMax;
+  }
+  
+  
+  @Column (name = "reserva_multiple_pend_tiempo_max", nullable = false)
+  public Integer getReservaMultiplePendienteTiempoMax() {
+    return reservaMultiplePendienteTiempoMax;
+  }
+
+  public void setReservaMultiplePendienteTiempoMax(Integer reservaMultiplePendienteTiempoMax) {
+    this.reservaMultiplePendienteTiempoMax = reservaMultiplePendienteTiempoMax;
+  }
 
     @Transient
     public AccionMiPerfil getAccionMiPerfil() {
@@ -1095,6 +1123,122 @@ public class Recurso implements Serializable {
 		this.accionMiPerfil = accionMiPerfil;
 	}
 
+@Override
+public boolean equals(Object obj) {
+	if (this == obj)
+		return true;
+	if (obj == null)
+		return false;
+	if (getClass() != obj.getClass())
+		return false;
+	Recurso other = (Recurso) obj;
+	if (cantDiasAGenerar == null) {
+		if (other.cantDiasAGenerar != null)
+			return false;
+	} else if (!cantDiasAGenerar.equals(other.cantDiasAGenerar))
+		return false;
+	if (departamento == null) {
+		if (other.departamento != null)
+			return false;
+	} else if (!departamento.equals(other.departamento))
+		return false;
+	if (descripcion == null) {
+		if (other.descripcion != null)
+			return false;
+	} else if (!descripcion.equals(other.descripcion))
+		return false;
+	if (direccion == null) {
+		if (other.direccion != null)
+			return false;
+	} else if (!direccion.equals(other.direccion))
+		return false;
+	if (domingoEsHabil == null) {
+		if (other.domingoEsHabil != null)
+			return false;
+	} else if (!domingoEsHabil.equals(other.domingoEsHabil))
+		return false;
+	if (fechaFin == null) {
+		if (other.fechaFin != null)
+			return false;
+	} else if (!fechaFin.equals(other.fechaFin))
+		return false;
+	if (fechaFinDisp == null) {
+		if (other.fechaFinDisp != null)
+			return false;
+	} else if (!fechaFinDisp.equals(other.fechaFinDisp))
+		return false;
+	if (fechaInicio == null) {
+		if (other.fechaInicio != null)
+			return false;
+	} else if (!fechaInicio.equals(other.fechaInicio))
+		return false;
+	if (fechaInicioDisp == null) {
+		if (other.fechaInicioDisp != null)
+			return false;
+	} else if (!fechaInicioDisp.equals(other.fechaInicioDisp))
+		return false;
+	if (horarios == null) {
+		if (other.horarios != null)
+			return false;
+	} else if (!horarios.equals(other.horarios))
+		return false;
+	if (id == null) {
+		if (other.id != null)
+			return false;
+	} else if (!id.equals(other.id))
+		return false;
+	if (latitud == null) {
+		if (other.latitud != null)
+			return false;
+	} else if (!latitud.equals(other.latitud))
+		return false;
+	if (localidad == null) {
+		if (other.localidad != null)
+			return false;
+	} else if (!localidad.equals(other.localidad))
+		return false;
+	if (longitud == null) {
+		if (other.longitud != null)
+			return false;
+	} else if (!longitud.equals(other.longitud))
+		return false;
+	if (nombre == null) {
+		if (other.nombre != null)
+			return false;
+	} else if (!nombre.equals(other.nombre))
+		return false;
+	if (periodoValidacion == null) {
+		if (other.periodoValidacion != null)
+			return false;
+	} else if (!periodoValidacion.equals(other.periodoValidacion))
+		return false;
+	if (sabadoEsHabil == null) {
+		if (other.sabadoEsHabil != null)
+			return false;
+	} else if (!sabadoEsHabil.equals(other.sabadoEsHabil))
+		return false;
+	if (telefonos == null) {
+		if (other.telefonos != null)
+			return false;
+	} else if (!telefonos.equals(other.telefonos))
+		return false;
+	if (visibleInternet == null) {
+		if (other.visibleInternet != null)
+			return false;
+	} else if (!visibleInternet.equals(other.visibleInternet))
+		return false;
+	if (reservaPendienteTiempoMax == null) {
+		if (other.reservaPendienteTiempoMax != null)
+			return false;
+	} else if (!reservaPendienteTiempoMax.equals(other.reservaPendienteTiempoMax))
+		return false;
+	if (reservaMultiplePendienteTiempoMax == null) {
+		if (other.reservaMultiplePendienteTiempoMax != null)
+			return false;
+	} else if (!reservaMultiplePendienteTiempoMax.equals(other.reservaMultiplePendienteTiempoMax))
+		return false;
+	return true;
+}
   
   
 }

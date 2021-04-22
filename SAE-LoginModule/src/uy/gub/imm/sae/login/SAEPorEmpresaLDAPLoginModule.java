@@ -211,6 +211,7 @@ public class SAEPorEmpresaLDAPLoginModule extends AbstractServerLoginModule {
 			rolesGroup.addMember(new SimpleGroup("RA_AE_PLANIFICADOR"));
 			rolesGroup.addMember(new SimpleGroup("RA_AE_FCALL_CENTER"));
 			rolesGroup.addMember(new SimpleGroup("RA_AE_LLAMADOR"));
+			rolesGroup.addMember(new SimpleGroup("RA_AE_ADMINISTRADOR_DE_RECURSOS"));
 		}else if(empresa != null) {
 		
 			//Obtener los roles para el usuario en la empresa dada

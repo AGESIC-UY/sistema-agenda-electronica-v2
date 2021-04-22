@@ -1,0 +1,8 @@
+
+<system-properties>
+  <property name="org.apache.coyote.http11.Http11Protocol.COMPRESSION" value="on"/>
+  <property name="org.apache.coyote.http11.Http11Protocol.COMPRESSION_MIME_TYPES" value="text/javascript,text/css,text/html,text/xml,text/json"/>
+  <property name="org.apache.tomcat.util.http.Parameters.MAX_COUNT" value="10000"/>
+  <property name="org.apache.coyote.http11.Http11Protocol.SERVER" value="Server undisclosed"/>
+  <property name="org.apache.catalina.connector.URI_ENCODING" value="UTF-8"/>
+</system-properties>

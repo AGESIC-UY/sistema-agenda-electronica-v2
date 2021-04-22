@@ -78,7 +78,6 @@ public class UsuarioEmpresaRoles implements Serializable {
 		this.llamador = llamador;
 	}
 	
-	
 	public void marcarRol(String nombreRol, boolean valor) {
 		if("RA_AE_ADMINISTRADOR".equals(nombreRol)) {
 			this.administrador = valor;

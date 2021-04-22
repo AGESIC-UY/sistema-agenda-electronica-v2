@@ -60,7 +60,7 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_LLAMADOR"})
+@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class LlamadasBean implements LlamadasLocal, LlamadasRemote {
 
 	@PersistenceContext(unitName = "SAE-EJB")

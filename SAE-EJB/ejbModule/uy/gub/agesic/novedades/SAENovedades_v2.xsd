@@ -1,0 +1,47 @@
+    <xs:schema elementFormDefault="unqualified" targetNamespace="http://novedades.sae.agesic.gub.uy/v2/" xmlns:tns="http://novedades.sae.agesic.gub.uy/v2/" version="1.0" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+      <xs:element name="publicar" type="tns:publicar" nillable="true"/>
+      <xs:element name="publicarResponse" type="tns:publicarResponse"/>
+      <xs:complexType name="publicar">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="timestamp" type="xs:dateTime"/>
+          <xs:element minOccurs="0" name="tipoDocumento" type="xs:string"/>
+          <xs:element minOccurs="0" name="paisDocumento" type="xs:string"/>
+          <xs:element minOccurs="0" name="numeroDocumento" type="xs:string"/>
+          <xs:element minOccurs="0" name="fechaHoraReserva" type="xs:string"/>
+          <xs:element minOccurs="0" name="numeroReserva" type="xs:string"/>
+          <xs:element minOccurs="0" name="oidOrganismo" type="xs:string"/>
+          <xs:element minOccurs="0" name="nombreOrganismo" type="xs:string"/>
+          <xs:element minOccurs="0" name="codigoAgenda" type="xs:string"/>
+          <xs:element minOccurs="0" name="nombreAgenda" type="xs:string"/>
+          <xs:element minOccurs="0" name="codigoRecurso" type="xs:string"/>
+          <xs:element minOccurs="0" name="nombreRecurso" type="xs:string"/>
+          <xs:element minOccurs="0" name="accion" type="tns:acciones"/>
+		  <xs:element minOccurs="0" name="datosextras">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element maxOccurs="unbounded" name="datoextra">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="tipo" type="xs:string" />
+									<xs:element name="nombre" type="xs:string" />
+									<xs:element name="valor" type="xs:string" />
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+        </xs:sequence>
+      </xs:complexType>
+      <xs:complexType name="publicarResponse">
+        <xs:sequence/>
+      </xs:complexType>
+      <xs:simpleType name="acciones">
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="RESERVA"/>
+          <xs:enumeration value="CANCELACION"/>
+          <xs:enumeration value="ASISTENCIA"/>
+          <xs:enumeration value="INASISTENCIA"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:schema>

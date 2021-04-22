@@ -43,6 +43,7 @@ public class ReservaDTO implements Serializable {
   private String numeroDocumento;
   private String tramiteCodigo;
   private String tramiteNombre;
+  private String codigoSeguridad;
   private Boolean presencial;
   private String ucancela;
   private String tcancela;
@@ -164,6 +165,14 @@ public class ReservaDTO implements Serializable {
 
   public void setTramiteNombre(String tramiteNombre) {
     this.tramiteNombre = tramiteNombre;
+  }
+
+  public String getCodigoSeguridad() {
+    return codigoSeguridad;
+  }
+
+  public void setCodigoSeguridad(String codigoSeguridad) {
+    this.codigoSeguridad = codigoSeguridad;
   }
 
   public Boolean getPresencial() {

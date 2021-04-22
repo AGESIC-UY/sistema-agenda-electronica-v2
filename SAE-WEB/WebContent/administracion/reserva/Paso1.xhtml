@@ -33,7 +33,7 @@
    				</pre>
 				</p:outputPanel>
 				<h:panelGroup rendered="#{paso1AdminMBean.infoRecurso != null}" styleClass="infoAdicional box-grey" layout="block">
-					<h:outputText value="Información adicional}: " styleClass="tituloResalte" />
+					<h:outputText value="Información adicional: " styleClass="tituloResalte" />
 					<p:dataList value="#{paso1AdminMBean.infoRecurso}" var="row">
 						<h:outputText value="#{row.etiqueta}: " />
 						<h:outputText value="#{row.valor}" />

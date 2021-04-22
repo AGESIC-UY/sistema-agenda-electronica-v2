@@ -39,7 +39,7 @@ import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.entity.Reserva;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FATENCION"})
+@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class LlamadasHelperBean implements LlamadasHelperLocal {
 
 	@PersistenceContext(unitName = "SAE-EJB")

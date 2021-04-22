@@ -87,6 +87,8 @@ public class DatoASolicitar implements Serializable{
 	private AgrupacionDato agrupacionDato;
 	private Recurso recurso;
 	
+	private Boolean incluirEnNovedades;
+	
 	public DatoASolicitar () {
 		datosReserva = new ArrayList<DatoReserva>();
 		validacionesPorDato = new ArrayList<ValidacionPorDato>();
@@ -99,6 +101,7 @@ public class DatoASolicitar implements Serializable{
 		incluirEnLlamador = false;
 		borrarFlag = true;
 		soloLectura = false;
+		incluirEnNovedades = false;
 	}
 	
 	
@@ -128,6 +131,7 @@ public class DatoASolicitar implements Serializable{
 		incluirEnLlamador = d.getIncluirEnLlamador();
 		largoEnLlamador = d.getLargoEnLlamador();
 		ordenEnLlamador = d.getOrdenEnLlamador();
+		incluirEnNovedades = d.getIncluirEnNovedades();
 		
 		if (d.getBorrarFlag()!=null) {
 			borrarFlag = d.getBorrarFlag();
@@ -369,6 +373,19 @@ public class DatoASolicitar implements Serializable{
 		this.recurso = recurso;
 	}
 	
+	@Column (name = "incluir_en_novedades", nullable = false)
+	public Boolean getIncluirEnNovedades() {
+		if(incluirEnNovedades==null) {
+			return false;
+		}
+		return incluirEnNovedades;
+	}
+	
+	public void setIncluirEnNovedades(Boolean incluirEnNovedades) {
+		this.incluirEnNovedades = incluirEnNovedades;
+	}
+	
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof DatoASolicitar) {
@@ -378,5 +395,5 @@ public class DatoASolicitar implements Serializable{
 			return false;
 		}
 	}
-
+	
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="SOFIS-SAE-AccionesYValidaciones">
+        <wb-resource deploy-path="/" source-path="/ejbModule" tag="defaultRootSource"/>
+        <property name="java-output-path" value="/SOFIS-SAE-AccionesYValidaciones/build/classes"/>
+        <property name="ClientProject" value="SOFIS-SAE-AccionesYValidacionesClient"/>
+        <property name="ClientJARURI" value="SOFIS-SAE-AccionesYValidacionesClient.jar"/>
+    </wb-module>
+</project-modules>

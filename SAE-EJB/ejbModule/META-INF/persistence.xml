@@ -33,6 +33,7 @@
 		<mapping-file>META-INF/orm.xml</mapping-file>
 		<class>uy.gub.imm.sae.entity.Agenda</class>
 		<class>uy.gub.imm.sae.entity.Recurso</class>
+		<class>uy.gub.imm.sae.entity.RecursoAud</class>
 		<class>uy.gub.imm.sae.entity.Disponibilidad</class>
 		<class>uy.gub.imm.sae.entity.Plantilla</class>
 		<class>uy.gub.imm.sae.entity.Reserva</class>
@@ -73,7 +74,7 @@
     <class>uy.gub.imm.sae.entity.AccionMiPerfil</class>
 		<properties>
 			<property name="hibernate.dialect" value="org.hibernate.dialect.PostgreSQLDialect" />
-      <property name="hibernate.show_sql" value="false" />
+      		<property name="hibernate.show_sql" value="false" />
 			<property name="hibernate.format_sql" value="false" />
 			<property name="hibernate.multiTenancy" value="SCHEMA" />
 			<property name="hibernate.tenant_identifier_resolver" value="uy.gub.imm.sae.business.em.CurrentTenantIdentifierResolverImpl" />

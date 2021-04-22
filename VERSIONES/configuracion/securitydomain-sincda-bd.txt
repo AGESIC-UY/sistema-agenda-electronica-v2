@@ -1,0 +1,12 @@
+
+<security-domain name="SDSAE" cache-type="default">
+  <authentication>
+    <login-module code="uy.gub.imm.sae.login.SAEPorEmpresaLoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+      <module-option name="enabled" value="false"/>
+    </login-module>
+    <login-module code="uy.gub.imm.sae.login.SAEAnonimoLoginModule" flag="sufficient" module="saelogin">
+      <module-option name="dsJndiName" value="java:/postgres-sae-ds"/>
+    </login-module>
+  </authentication>
+</security-domain>

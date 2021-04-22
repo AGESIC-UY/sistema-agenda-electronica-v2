@@ -339,7 +339,7 @@ public class MultiplePaso1MBean extends BaseMBean {
               addErrorMessage(sesionMBean.getTextos().get("el_token_esta_cancelado"));
               errorInit = true;
             }else {
-              Long tiempoMaximo = configuracionEJB.getLong("RESERVA_PENDIENTE_TIEMPO_MAXIMO");
+              Long tiempoMaximo = configuracionEJB.getLong("RESERVA_MULTIPLE_PENDIENTE_TIEMPO_MAXIMO");
               if(tiempoMaximo == null) {
                 tiempoMaximo = 10L;
               }
@@ -368,7 +368,7 @@ public class MultiplePaso1MBean extends BaseMBean {
             if(token.getEstado() != Estado.P) {
               sesionMBean.setTokenReserva(null);
             }else {
-              Long tiempoMaximo = configuracionEJB.getLong("RESERVA_PENDIENTE_TIEMPO_MAXIMO");
+              Long tiempoMaximo = configuracionEJB.getLong("RESERVA_MULTIPLE_PENDIENTE_TIEMPO_MAXIMO");
               if(tiempoMaximo == null) {
                 tiempoMaximo = 10L;
               }

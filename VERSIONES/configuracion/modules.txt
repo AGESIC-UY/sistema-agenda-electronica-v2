@@ -1,0 +1,7 @@
+
+<subsystem xmlns="urn:jboss:domain:ee:1.0">
+  <global-modules>
+    <module name="remote" slot="main"/>
+    <module name="saelogin" slot="main"/>
+  </global-modules>
+</subsystem>

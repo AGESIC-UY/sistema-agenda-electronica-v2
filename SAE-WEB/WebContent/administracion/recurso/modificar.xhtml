@@ -270,6 +270,16 @@
 									infoClass="mensajeInfo" />
 							</p:outputPanel>
 						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+			              <p:outputLabel value="#{sessionMBean.textos['reserva_pendiente_tiempo_max']} (#{sessionMBean.textos['minutos']})" for="tiempoMaxReserva" styleClass="col-sm-3 control-label label" />
+			              <p:outputPanel styleClass="col-sm-9">
+			              	<h:inputText id="tiempoMaxReserva"
+									value="#{recursoMBean.recursoSeleccionado.reservaPendienteTiempoMax}"
+									maxlength="4" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+			                <p:message for="tiempoMaxReserva" errorClass="mensajeError" infoClass="mensajeInfo" />
+			              </p:outputPanel>
+			            </p:outputPanel>
 					</p:outputPanel>
 				</fieldset>
 				<fieldset>
@@ -642,7 +652,7 @@
 						</p:outputPanel>
 						<p:outputPanel styleClass="form-group">
 							<h:outputLabel value="#{sessionMBean.textos['tiempo_unidad']}"
-								for="cancelacionesUnidad"
+								for="cancelacionUnidad"
 								styleClass="col-sm-3 control-label label" />
 							<p:outputPanel styleClass="col-sm-9">
 								<h:selectOneMenu id="cancelacionUnidad"
@@ -686,14 +696,28 @@
 								<p:outputPanel>
 									<p:selectBooleanCheckbox
 										value="#{recursoMBean.recursoSeleccionado.multipleAdmite}"
-										id="admiteMultiple" />
+										id="admiteMultiple">
+										<p:ajax update="configuracionReservaMultiple" listener="#{recursoMBean.setNullReservaMultipleTiempoMax}" />
+									</p:selectBooleanCheckbox>
 									<p:outputLabel
 										value="#{sessionMBean.textos['admite_reserva_multiple']}"
 										for="admiteMultiple" />
 								</p:outputPanel>
 							</p:outputPanel>
 						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+				            <p:outputLabel value="#{sessionMBean.textos['reserva_multiple_pendiente_tiempo_max']} (#{sessionMBean.textos['minutos']})" for="tiempoMaxReservaMultiple" styleClass="col-sm-3 control-label label " />
+				            <p:outputPanel styleClass="col-sm-9">
+				              <h:inputText id="tiempoMaxReservaMultiple"
+									value="#{recursoMBean.recursoSeleccionado.reservaMultiplePendienteTiempoMax}"
+									maxlength="4" styleClass="form-control textoCorto"
+									converter="integerConverter"
+									disabled="#{!recursoMBean.recursoSeleccionado.multipleAdmite}" />
+				              <p:message for="tiempoMaxReservaMultiple" errorClass="mensajeError" infoClass="mensajeInfo" />
+				            </p:outputPanel>
+		          		</p:outputPanel>
 					</p:outputPanel>
+					
 				</fieldset>
 
 				<fieldset>

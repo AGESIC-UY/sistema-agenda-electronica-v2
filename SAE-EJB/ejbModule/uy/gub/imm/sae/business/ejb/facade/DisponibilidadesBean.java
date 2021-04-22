@@ -53,7 +53,7 @@ import uy.gub.imm.sae.exception.RolException;
 import uy.gub.imm.sae.exception.UserException;
 
 @Stateless
-@RolesAllowed({"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR"})
+@RolesAllowed({"RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class DisponibilidadesBean implements DisponibilidadesLocal, DisponibilidadesRemote {
 	
 	@PersistenceContext(unitName = "SAE-EJB")
@@ -783,6 +783,37 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
       default:
         return false;
     }
+  }
+  
+  
+  /**
+   * Retorna la disponibilidad viva para un recurso, fecha y hora de inicio. No considera las disponibilidades presenciales
+   */
+  @SuppressWarnings("unchecked")
+  public Disponibilidad obtenerDisponibilidadEnHoraInicio(Recurso recurso, Date horaInicio) {
+      Disponibilidad disponibilidad = null;
+      //Se obtienen la disponibilidad viva para un recurso generada para la fecha y hora inicio indicadas.
+      //No se debe considerar las disponibilidades presenciales
+      String consulta = "SELECT d "
+              + "FROM  Disponibilidad d "
+              + "WHERE d.recurso IS NOT NULL "
+              + "  AND d.presencial = false "
+              + "  AND d.recurso.id = :rid "
+              + "  AND d.fechaBaja IS NULL "
+              + "  AND d.fecha = :f "
+              + "  AND d.horaInicio = :hi "
+              + "ORDER BY d.horaInicio ";
+      List<Disponibilidad> disponibilidades = entityManager.createQuery(consulta)
+              .setParameter("rid", recurso.getId())
+              .setParameter("f", horaInicio, TemporalType.DATE)
+              .setParameter("hi", horaInicio, TemporalType.TIMESTAMP)
+              .getResultList();
+      
+      if(!disponibilidades.isEmpty()){
+          disponibilidad = disponibilidades.get(0);
+      }
+
+      return disponibilidad;
   }
   
 

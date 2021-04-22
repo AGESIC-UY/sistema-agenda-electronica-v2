@@ -1,11 +1,13 @@
 
 package uy.gub.agesic.novedades;
 
+import java.net.MalformedURLException;
 import java.net.URL;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebEndpoint;
 import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceException;
 import javax.xml.ws.WebServiceFeature;
 
 
@@ -15,15 +17,49 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "NuevaNovedadService", targetNamespace = "http://servicios.pge.red.uy/SAENovedades/publicacion", wsdlLocation = "file:/home/spio/Desktop/Cosas/AGESIC-AGENDA/PandS/src/PublicacionTopico-SAENovedades.wsdl")
+@WebServiceClient(name = "NuevaNovedadService", targetNamespace = "http://servicios.pge.red.uy/SAENovedades/v2/publicacion", wsdlLocation = "file:/home/sofis-iquezada/Documentos/SAE/ENCARGO/novedades_datoextra/PublicacionTopico-SAENovedades_v2.wsdl")
 public class NuevaNovedadService_Service
     extends Service
 {
 
-    private final static QName NUEVANOVEDADSERVICE_QNAME = new QName("http://servicios.pge.red.uy/SAENovedades/publicacion", "NuevaNovedadService");
+    private final static URL NUEVANOVEDADSERVICE_WSDL_LOCATION;
+    private final static WebServiceException NUEVANOVEDADSERVICE_EXCEPTION;
+    private final static QName NUEVANOVEDADSERVICE_QNAME = new QName("http://servicios.pge.red.uy/SAENovedades/v2/publicacion", "NuevaNovedadService");
+
+    static {
+        URL url = null;
+        WebServiceException e = null;
+        try {
+            url = new URL("file:/home/sofis-iquezada/Documentos/SAE/ENCARGO/novedades_datoextra/PublicacionTopico-SAENovedades_v2.wsdl");
+        } catch (MalformedURLException ex) {
+            e = new WebServiceException(ex);
+        }
+        NUEVANOVEDADSERVICE_WSDL_LOCATION = url;
+        NUEVANOVEDADSERVICE_EXCEPTION = e;
+    }
+
+    public NuevaNovedadService_Service() {
+        super(__getWsdlLocation(), NUEVANOVEDADSERVICE_QNAME);
+    }
+
+    public NuevaNovedadService_Service(WebServiceFeature... features) {
+        super(__getWsdlLocation(), NUEVANOVEDADSERVICE_QNAME, features);
+    }
 
     public NuevaNovedadService_Service(URL wsdlLocation) {
         super(wsdlLocation, NUEVANOVEDADSERVICE_QNAME);
+    }
+
+    public NuevaNovedadService_Service(URL wsdlLocation, WebServiceFeature... features) {
+        super(wsdlLocation, NUEVANOVEDADSERVICE_QNAME, features);
+    }
+
+    public NuevaNovedadService_Service(URL wsdlLocation, QName serviceName) {
+        super(wsdlLocation, serviceName);
+    }
+
+    public NuevaNovedadService_Service(URL wsdlLocation, QName serviceName, WebServiceFeature... features) {
+        super(wsdlLocation, serviceName, features);
     }
 
     /**
@@ -33,7 +69,7 @@ public class NuevaNovedadService_Service
      */
     @WebEndpoint(name = "NuevaNovedadPort")
     public NuevaNovedadService getNuevaNovedadPort() {
-        return super.getPort(new QName("http://servicios.pge.red.uy/SAENovedades/publicacion", "NuevaNovedadPort"), NuevaNovedadService.class);
+        return super.getPort(new QName("http://servicios.pge.red.uy/SAENovedades/v2/publicacion", "NuevaNovedadPort"), NuevaNovedadService.class);
     }
 
     /**
@@ -45,7 +81,14 @@ public class NuevaNovedadService_Service
      */
     @WebEndpoint(name = "NuevaNovedadPort")
     public NuevaNovedadService getNuevaNovedadPort(WebServiceFeature... features) {
-        return super.getPort(new QName("http://servicios.pge.red.uy/SAENovedades/publicacion", "NuevaNovedadPort"), NuevaNovedadService.class, features);
+        return super.getPort(new QName("http://servicios.pge.red.uy/SAENovedades/v2/publicacion", "NuevaNovedadPort"), NuevaNovedadService.class, features);
+    }
+
+    private static URL __getWsdlLocation() {
+        if (NUEVANOVEDADSERVICE_EXCEPTION!= null) {
+            throw NUEVANOVEDADSERVICE_EXCEPTION;
+        }
+        return NUEVANOVEDADSERVICE_WSDL_LOCATION;
     }
 
 }
