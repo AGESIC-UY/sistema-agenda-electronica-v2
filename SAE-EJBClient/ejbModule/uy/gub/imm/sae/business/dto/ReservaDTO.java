@@ -231,4 +231,21 @@ public class ReservaDTO implements Serializable {
     this.flibera = flibera;
   }
 
+@Override
+public String toString() {
+	return "ReservaDTO [id=" + id + ", numero=" + numero + ", serie=" + serie
+			+ ", estado=" + estado + ", fecha=" + fecha + ", horaInicio="
+			+ horaInicio + ", datos=" + datos + ", puestoLlamada="
+			+ puestoLlamada + ", origen=" + origen + ", fcrea=" + fcrea
+			+ ", ucrea=" + ucrea + ", asistio=" + asistio
+			+ ", numeroDocumento=" + numeroDocumento + ", tramiteCodigo="
+			+ tramiteCodigo + ", tramiteNombre=" + tramiteNombre
+			+ ", codigoSeguridad=" + codigoSeguridad + ", presencial="
+			+ presencial + ", ucancela=" + ucancela + ", tcancela=" + tcancela
+			+ ", fcancela=" + fcancela + ", ipOrigen=" + ipOrigen
+			+ ", flibera=" + flibera + "]";
+}
+  
+  
+
 }

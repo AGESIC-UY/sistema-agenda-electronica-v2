@@ -1058,7 +1058,6 @@ public class ServiciosREST {
         Map<String, Object> datosEmpresa = consultas.consultarDatosEmpresa(input.getIdEmpresa());
         String formatoFecha = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_FECHA")?(String)datosEmpresa.get("FORMATO_FECHA"):"dd/MM/yyyy";
         String formatoHora = datosEmpresa!=null && datosEmpresa.containsKey("FORMATO_HORA")?(String)datosEmpresa.get("FORMATO_HORA"):"HH:mm";
-        //System.out.println(reserva.getNotificar());//PRUEBA
         if(reserva.getNotificar()==true){
         	comunicaciones.enviarComunicacionesCancelacion(empresa, reserva, input.getIdioma(), formatoFecha, formatoHora);
         }

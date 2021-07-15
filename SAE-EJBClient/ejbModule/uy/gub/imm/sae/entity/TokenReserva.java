@@ -61,6 +61,9 @@ public class TokenReserva implements Serializable {
 
 	private Integer version;
 
+	//Id del token origen (cuando se copia o se mueve de un recurso a otro)
+	//private Integer idOrigen;
+	
 	public TokenReserva () {
 		estado = Estado.P;
 		fechaInicio = new Date();
@@ -179,6 +182,14 @@ public class TokenReserva implements Serializable {
     this.ipOrigen = ipOrigen;
   }
 
+//	@Column (name = "id_origen")
+//	public Integer getIdOrigen() {
+//		return idOrigen;
+//	}
+//	public void setIdOrigen(Integer idOrigen) {
+//		this.idOrigen = idOrigen;
+//	}
+	
 	@Version
 	@Column(name="version", nullable=false)
 	public Integer getVersion() {

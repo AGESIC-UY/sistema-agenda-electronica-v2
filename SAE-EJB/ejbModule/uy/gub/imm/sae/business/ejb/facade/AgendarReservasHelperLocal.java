@@ -66,5 +66,9 @@ public interface AgendarReservasHelperLocal {
 	public void eliminarReservasParesPendientes(Reserva reserva1) throws ApplicationException;
 	public void eliminarReservaPendiente(Reserva reserva1) throws ApplicationException;
 	
+	/*Métodos para activar y desactivar un recurso en internet en una transacción separada mientras se realizan tareas de mantenimiento de larga duración*/
+	public void desactivarRecursoVisibleInternet(Recurso recurso);
+	public void activarRecursoVisibleInternet(Recurso recurso);
+	
 	
 }

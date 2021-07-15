@@ -1217,6 +1217,38 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_pendiente_tiempo_max', 'R
 INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_multiple_pendiente_tiempo_max', 'Reserva múltiple pendiente tiempo máximo');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero', 'El tiempo máximo para una reserva pendiente debe ser mayor a cero');
 INSERT INTO ae_textos (codigo, texto) VALUES ('reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero', 'El tiempo máximo para las reservas múltiples pendientes debe ser mayor a cero');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mover_reservas', 'Mover reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('datos_de_reservas_a_mover', 'Datos de las reservas a mover');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agenda_origen', 'Agenda origen');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recurso_origen', 'Recurso origen');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agenda_destino', 'Agenda destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recurso_destino', 'Recurso destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_reservas', 'Fecha de las reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('enviar_correo', 'Enviar notificaciones a los usuarios');
+INSERT INTO ae_textos (codigo, texto) VALUES ('generar_novedades', 'Generar novedades');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_lista_de_agendas', 'No se pudo cargar la lista de agendas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_lista_de_recursos', 'No se pudo cargar la lista de recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('confirmar_movimiento_reservas', 'Confirmar movimiento de reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('ejecutar', 'Ejecutar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('validar', 'Validar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('correo_de_traslado', 'Correo de traslado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_para_el_correo_de_traslado', 'Texto para el correo de traslado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda_origen', 'Nombre de la agenda de origen');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_recurso_origen', 'Nombre del recurso de origen');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda_destino', 'Nombre de la agenda de destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_recurso_destino', 'Nombre del recurso de destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puedo_mover_las_reservas', 'No se pudo mover todas las reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('paso_uno_datos_reservas_mover', 'Paso 1 - Datos de las reservas a mover');
+INSERT INTO ae_textos (codigo, texto) VALUES ('paso_dos_datos_reservas_mover', 'Paso 2 - Datos del recurso destino de las reservas');
+INSERT INTO ae_textos (codigo, texto) VALUES ('siguiente', 'Siguiente');
+INSERT INTO ae_textos(codigo, texto)  VALUES('carga_masiva_recursos_disponibilidades', 'Carga masiva de recursos y disponibilidades');
+INSERT INTO ae_textos(codigo, texto)  VALUES('no_existen_reservas_recurso_origen', 'No existen reservas a mover en la fecha y horario seleccionado');
+INSERT INTO ae_textos(codigo, texto)  VALUES('recurso_origen_recurso_destino_hora_inicio_distintas', 'Si el recurso origen es igual al recurso destino, las horas inicio deben ser distintas');
+INSERT INTO ae_textos(codigo, texto) VALUES('no_se_validar_las_reservas', 'No se ha podido validar en el paso 2');
+INSERT INTO ae_textos (codigo, texto) VALUES('debe_seleccionar_agenda_recurso_destino', 'Debe seleccionar agenda destino y recurso destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_destino', 'Fecha destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_destino_vacia', 'Seleccione una fecha destino');
+
 --
 -- CLAVES PRIMARIAS
 --

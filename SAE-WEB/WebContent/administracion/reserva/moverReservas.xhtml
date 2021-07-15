@@ -1,0 +1,207 @@
+<ui:composition template="/templates/layout.xhtml" xmlns="http://www.w3.org/1999/xhtml" xmlns:p="http://primefaces.org/ui"
+    xmlns:ui="http://java.sun.com/jsf/facelets" xmlns:f="http://java.sun.com/jsf/core" xmlns:h="http://java.sun.com/jsf/html">
+    <ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+    <ui:define name="cuerpo">
+        <f:view beforePhase="#{moverReservasMBean.beforePhaseMoverReservas}">
+
+            <p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+                <h:form id="form">
+                    <p:outputPanel id="pnlForm">
+                        <p:outputPanel styleClass="form-required">
+                            <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+                        </p:outputPanel>
+                        <p:outputPanel id="pnlDatosReservas">
+                            <fieldset>
+                                <legend>
+                                    <h:outputText value="#{sessionMBean.textos['paso_uno_datos_reservas_mover']}"  />
+                                </legend>
+                                <p:outputPanel styleClass="form-horizontal">
+                                    <p:outputPanel styleClass="form-group">
+                                        <p:outputLabel value="#{sessionMBean.textos['agenda_origen']}" for="txtAgendaOrigen"
+                                            styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                                        <p:outputPanel styleClass="col-sm-9">
+                                            <h:inputText id="txtAgendaOrigen" value="#{sessionMBean.agendaMarcada.nombre}" maxlength="100" size="100"
+                                                styleClass="form-control" readonly="true" />
+                                            <p:message for="txtAgendaOrigen" />
+                                        </p:outputPanel>
+                                    </p:outputPanel>                                
+                                    <p:outputPanel styleClass="form-group">
+                                        <p:outputLabel value="#{sessionMBean.textos['recurso_origen']}" for="txtRecursoOrigen"
+                                            styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                                        <p:outputPanel styleClass="col-sm-9">
+                                            <h:inputText id="txtRecursoOrigen" value="#{sessionMBean.recursoMarcado.nombre}" maxlength="100" size="100"
+                                                styleClass="form-control" readonly="true" />
+                                            <p:message for="txtRecursoOrigen" />
+                                        </p:outputPanel>
+                                    </p:outputPanel>                                
+                                    <p:outputPanel styleClass="form-group">
+                                        <h:outputLabel value="#{sessionMBean.textos['fecha_reservas']}" for="datFechaReservas"
+                                            styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+                                        <p:outputPanel styleClass="col-sm-9">
+                                            <h:inputText id="datFechaOrigen" value="#{moverReservasMBean.moverReservasFecha}" styleClass="datepicker" 
+                                                converter="dateConverter"  disabled="#{moverReservasMBean.disablePaso1}">
+                                                <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}" />
+                                                <f:attribute name="onError" value="zero" />
+                                            </h:inputText>
+                                            <p:message for="datFechaOrigen" />
+                                        </p:outputPanel>
+                                    </p:outputPanel>
+                                    <p:outputPanel styleClass="form-group">
+										<h:outputLabel value="#{sessionMBean.textos['hora_de_inicio']}" for="seleccionHoraD" styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
+										<p:outputPanel styleClass="col-sm-9">
+											<h:selectOneMenu id="seleccionHoraD" styleClass="hora form-control" disabled="#{moverReservasMBean.disablePaso1}" value="#{moverReservasMBean.horaD}">
+												<f:selectItems value="#{moverReservasMBean.horas}" />
+											</h:selectOneMenu>
+											<h:outputText value=" : " />
+											<h:outputLabel value="minutos" for="seleccionMinD" styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
+											<h:selectOneMenu id="seleccionMinD" styleClass="hora form-control" disabled="#{moverReservasMBean.disablePaso1}" value="#{moverReservasMBean.minD}">
+												<f:selectItems value="#{moverReservasMBean.minutos}" />
+											</h:selectOneMenu>
+											<h:outputText styleClass="comentario" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+											<p:message for="seleccionHoraD" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<h:outputLabel value="#{sessionMBean.textos['hora_de_fin']}" for="seleccionHoraH" styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
+										<p:outputPanel styleClass="col-sm-9">
+											<h:selectOneMenu id="seleccionHoraH" styleClass="hora form-control" disabled="#{moverReservasMBean.disablePaso1}" value="#{moverReservasMBean.horaH}">
+												<f:selectItems value="#{moverReservasMBean.horas}" />
+											</h:selectOneMenu>
+											<h:outputText value=" : " />
+											<h:outputLabel value="minutos" for="seleccionMinH" styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
+											<h:selectOneMenu id="seleccionMinH" styleClass="hora form-control" disabled="#{moverReservasMBean.disablePaso1}" value="#{moverReservasMBean.minH}">
+												<f:selectItems value="#{moverReservasMBean.minutos}" />
+											</h:selectOneMenu>
+											<h:outputText styleClass="comentario" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+											<p:message for="seleccionHoraH" />
+										</p:outputPanel>
+									</p:outputPanel>												
+                                    <p:outputPanel styleClass="form-group">
+                                        <h:outputText value="#{sessionMBean.textos['enviar_correo']}" styleClass="col-sm-3 control-label label" />
+                                        <p:outputPanel styleClass="col-sm-9">
+                                            <p:selectBooleanCheckbox id="chkMoverReservasEnviarCorreo" 
+                                                value="#{moverReservasMBean.moverReservasEnviarCorreo}" disabled="#{moverReservasMBean.disablePaso1}" />
+                                            <p:outputLabel value="#{sessionMBean.textos['enviar_correo']}" for="chkMoverReservasEnviarCorreo" />
+                                        </p:outputPanel>
+                                    </p:outputPanel>
+                                    <p:outputPanel styleClass="form-group">
+                                        <h:outputText value="#{sessionMBean.textos['generar_novedades']}" styleClass="col-sm-3 control-label label" />
+                                        <p:outputPanel styleClass="col-sm-9">
+                                            <p:selectBooleanCheckbox id="chkMoverReservasGenerarNovedades" 
+                                                value="#{moverReservasMBean.moverReservasGenerarNovedades}" disabled="#{moverReservasMBean.disablePaso1}"/>
+                                            <p:outputLabel value="#{sessionMBean.textos['generar_novedades']}" for="chkMoverReservasGenerarNovedades" />
+                                        </p:outputPanel>
+                                    </p:outputPanel>    
+                                    <p:outputPanel styleClass="form-group">
+                                        <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+                                            <p:commandButton id="btnSiguiente" value="#{sessionMBean.textos['validar']}" update="form:pnlForm"
+                                                actionListener="#{moverReservasMBean.validarRecursoOrigen}" styleClass="btn btn-primario" rendered="#{!moverReservasMBean.verPaso2}" />
+                                        </p:outputPanel>
+                                    </p:outputPanel>                                   
+                                </p:outputPanel>
+                            </fieldset>
+                            
+                            <p:outputPanel rendered="#{moverReservasMBean.verPaso2}">
+	                            <fieldset>
+	                                <legend>
+	                                    <h:outputText value="#{sessionMBean.textos['paso_dos_datos_reservas_mover']}"  />
+	                                </legend>
+	                                <p:outputPanel styleClass="form-horizontal">
+	                                    <p:outputPanel styleClass="form-group">
+	                                        <h:outputLabel value="#{sessionMBean.textos['agenda_destino']}" for="selAgendaDestino" 
+	                                            styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+	                                        <p:outputPanel styleClass="col-sm-9">
+	                                            <h:selectOneMenu id="selAgendaDestino" value="#{moverReservasMBean.moverReservasAgendaDestinoId}"
+	                                                valueChangeListener="#{moverReservasMBean.moverReservasAgendaSeleccionada}" styleClass="form-control textoLargo" 
+	                                                update="pnlMoverReservasRecursoDestino" disabled="#{moverReservasMBean.paso==2}">
+	                                                <p:ajax update="pnlMoverReservasRecursoDestino" listener="#{moverReservasMBean.moverReservasAgendaSeleccionada}" />
+	                                                <f:selectItems value="#{moverReservasMBean.moverReservasAgendasDisponibles}" />
+	                                            </h:selectOneMenu>
+	                                            <p:message for="selAgendaDestino" />
+	                                        </p:outputPanel>
+                                    	</p:outputPanel>                                
+	                                    <p:outputPanel id="pnlMoverReservasRecursoDestino" styleClass="form-group">
+	                                        <h:outputLabel value="#{sessionMBean.textos['recurso_destino']}" for="selRecursoDestino" 
+	                                            styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+	                                        <p:outputPanel styleClass="col-sm-9">
+	                                            <h:selectOneMenu id="selRecursoDestino" value="#{moverReservasMBean.moverReservasRecursoDestinoId}"
+	                                                 styleClass="form-control textoLargo"  disabled="#{moverReservasMBean.paso==2}">
+	                                                <f:selectItems value="#{moverReservasMBean.moverReservasRecursosDisponibles}" />
+	                                            </h:selectOneMenu>
+	                                            <p:message for="selRecursoDestino" />
+	                                        </p:outputPanel>
+                                    	</p:outputPanel>                                
+	                                    <p:outputPanel styleClass="form-group">
+	                                        <h:outputLabel value="#{sessionMBean.textos['fecha_destino']}" for="datFechaReservas"
+	                                            styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+	                                        <p:outputPanel styleClass="col-sm-9">
+	                                            <h:inputText id="datFechaDestino" value="#{moverReservasMBean.moverReservasFechaDestino}" styleClass="datepicker" 
+	                                                converter="dateConverter"  disabled="#{moverReservasMBean.paso==2}">
+	                                                <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}" />
+	                                                <f:attribute name="onError" value="zero" />
+	                                            </h:inputText>
+	                                            <p:message for="datFechaDestino" />
+	                                        </p:outputPanel>
+	                                    </p:outputPanel>
+	                                    <p:outputPanel styleClass="form-group">
+											<h:outputLabel value="#{sessionMBean.textos['hora_de_inicio']}" for="seleccionHoraD" styleClass="col-sm-3 control-label label formularioCampoRequerido"/>
+											<p:outputPanel styleClass="col-sm-9">
+												<h:selectOneMenu id="seleccionHoraDestino" styleClass="hora form-control" value="#{moverReservasMBean.horaInicioDestino}" disabled="#{moverReservasMBean.paso==2}">
+													<f:selectItems value="#{moverReservasMBean.horas}" />
+												</h:selectOneMenu>
+												<h:outputText value=" : " />
+												<h:outputLabel value="minutos" for="seleccionMinDestino" styleClass="ui-helper-hidden-accessible formularioCampoRequerido" />
+												<h:selectOneMenu id="seleccionMinDestino" styleClass="hora form-control" value="#{moverReservasMBean.minInicioDestino}" disabled="#{moverReservasMBean.paso==2}">
+													<f:selectItems value="#{moverReservasMBean.minutos}" />
+												</h:selectOneMenu>
+												<h:outputText styleClass="comentario" value="#{sessionMBean.textos['zona_horaria']}: #{sessionMBean.timeZone.ID}" />
+												<p:message for="seleccionHoraDestino" />
+											</p:outputPanel>
+										</p:outputPanel>
+																						
+	                                        
+	                                    <p:outputPanel styleClass="form-group" rendered="#{moverReservasMBean.paso==1}">
+	                                        <p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+	                                            <p:commandButton id="btnValidar" value="#{sessionMBean.textos['validar']}" update="form:pnlForm"
+	                                                actionListener="#{moverReservasMBean.moverReservasValidar}" styleClass="btn btn-primario"/>
+	                                        </p:outputPanel>
+	                                    </p:outputPanel>
+	                                    <p:outputPanel styleClass="form-group" rendered="#{moverReservasMBean.paso==2 and !moverReservasMBean.reservasMovidas}">
+	                                        <p:outputPanel styleClass="col-sm-3 col-sm-offset-3">
+	                                            <p:commandButton id="btnEjecutar" value="#{sessionMBean.textos['ejecutar']}" update="form:pnlForm" 
+	                                                actionListener="#{moverReservasMBean.moverReservasEjecutar}" styleClass="btn btn-primario" 
+	                                                disabled="#{not moverReservasMBean.permitirMoverReservas}"
+	                                                onstart="PF('buiEjecutar').show();PF('pbEjecutar').start();" 
+	                                                oncomplete="PF('pbEjecutar').cancel();PF('buiEjecutar').hide();" />
+	                                        </p:outputPanel>                                    
+                                    	</p:outputPanel>                                   
+	                                </p:outputPanel>
+	                            </fieldset>
+                            </p:outputPanel>
+                        </p:outputPanel>                        
+                        
+                        <ul class="form-action-buttons">
+							<li class="action-buttons-second">
+								<ul>
+									<li class="float-left">
+									  <p:commandButton value="#{sessionMBean.textos['cancelar']}" action="#{moverReservasMBean.cancelar}" immediate="true" styleClass="btn-lg btn-link" />
+								  </li>
+								</ul>
+							</li>
+						</ul>
+                        
+                        <p:blockUI id="buiEjecutar" widgetVar="buiEjecutar" block="pnlDatosReservas" >
+                            Moviendo reservas, por favor espere...<br />
+                            <p:graphicImage library="images" name="loading.gif"/>
+                        </p:blockUI>
+                        
+                        <p:progressBar widgetVar="pbEjecutar" ajax="true" value="#{moverReservasMBean.progreso}" labelTemplate="{value}%" 
+                            styleClass="animated" global="false" />
+                    </p:outputPanel>
+                    
+
+                </h:form>
+            </p:outputPanel>
+        </f:view>
+    </ui:define>
+</ui:composition>

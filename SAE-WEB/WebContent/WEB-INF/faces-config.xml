@@ -898,6 +898,15 @@
       <redirect />
 		</navigation-case>
 	</navigation-rule>
+	
+	<navigation-rule>
+		<from-view-id>/administracion/reserva/moverReservas.xhtml</from-view-id>
+		<navigation-case>
+			<from-outcome>moverReservas</from-outcome>
+			<to-view-id>/administracion/reserva/moverReservas.xhtml</to-view-id>
+      		<redirect />
+		</navigation-case>
+	</navigation-rule>
 
 	<navigation-rule>
 		<from-view-id>/agendarReserva/Paso1.xhtml</from-view-id>
@@ -1226,5 +1235,17 @@
     <converter-id>dateConverter</converter-id>
     <converter-class>uy.gub.imm.sae.web.common.DateConverter</converter-class>
   </converter>
+
+    <managed-bean>
+        <managed-bean-name>moverReservasMBean</managed-bean-name>
+        <managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.MoverReservasMBean</managed-bean-class>
+        <managed-bean-scope>view</managed-bean-scope>
+        <managed-property>
+            <property-name>sessionMBean</property-name>
+            <property-class>uy.gub.imm.sae.web.mbean.administracion.SessionMBean</property-class>
+            <value>#{sessionMBean}</value>
+        </managed-property>
+    </managed-bean>
+
 
 </faces-config>

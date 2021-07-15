@@ -563,7 +563,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 			"WHERE d.recurso.id = :recurso " +
 			"  AND d.fecha BETWEEN :fi AND :ff " +
 			where +
-			"ORDER BY d.fecha, d.horaInicio, r.numero "; 
+			"ORDER BY d.fecha, d.horaInicio, r.numero, r.id "; 
 		
 		Query query = entityManager.createQuery(queryString);
 		query.setParameter("recurso", recurso.getId());
@@ -596,14 +596,17 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 			Tipo tipoDatoReserva  = (Tipo) rowReserva[8];
 			String valorDatoReserva = (String) rowReserva[9];
 			Integer puesto           = (Integer)rowReserva[10];
-      String tramiteCodigo    = (String) rowReserva[11];
-      String tramiteNombre    = (String) rowReserva[12];
-      Boolean presencial       = (Boolean)rowReserva[13];
-      Date fcancela           = (Date) rowReserva[14];
-      String ucancela         = (String) rowReserva[15];
-      TipoCancelacion tcancela    = (TipoCancelacion) rowReserva[16];
+			String tramiteCodigo    = (String) rowReserva[11];
+		    String tramiteNombre    = (String) rowReserva[12];
+		    Boolean presencial       = (Boolean)rowReserva[13];
+		    Date fcancela           = (Date) rowReserva[14];
+		    String ucancela         = (String) rowReserva[15];
+		    TipoCancelacion tcancela    = (TipoCancelacion) rowReserva[16];
 			String codigoSeguridad = (String) rowReserva[17];
-			if (idReservaActual == null || ! idReservaActual.equals(reservaId)) {
+			
+			
+			
+			if (idReservaActual == null || !idReservaActual.equals(reservaId)) {
 				idReservaActual = reservaId;
 				
 				 String queryStringAtencion
@@ -612,7 +615,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 	                + "ORDER BY a.id DESC";
 
 	                Query queryAtencion = entityManager.createQuery(queryStringAtencion);
-	                queryAtencion.setParameter("reserva", reservaId);
+	                queryAtencion.setParameter("reserva", idReservaActual);
 	                List<Atencion> list = queryAtencion.setMaxResults(1).getResultList();
 	                Boolean asistio = null;
 	                if(list!=null && !list.isEmpty()){
@@ -621,6 +624,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 		                }
 	                }
 				
+	                
 				if (reservaDTO != null) {
 					reservas.add(reservaDTO);
 				}
@@ -640,22 +644,23 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
 	    		reservaDTO.setTcancela(tcancela==null?null:tcancela.toString());
 				reservaDTO.setCodigoSeguridad(codigoSeguridad);
 			}
+			
 			if (nombreDatoReserva != null) {
 			  if(valorDatoReserva == null) {
-			    valorDatoReserva = "";
+				  valorDatoReserva = "";
 			  }
-				if (tipoDatoReserva == Tipo.LIST) {
+			  if (tipoDatoReserva == Tipo.LIST) {
 					String valor = valoresPosiblesPorEtiqueta.get(datoASolicitarId).get(valorDatoReserva);
 					if(valor==null) {
 					  valor = valorDatoReserva;
 					}
 					reservaDTO.getDatos().put(nombreDatoReserva, valor);			
-				} else {
+			  } else {
 					reservaDTO.getDatos().put(nombreDatoReserva, valorDatoReserva);			
-				}
-				if(DatoASolicitar.NUMERO_DOCUMENTO.equals(nombreDatoReserva) && nombreDatoReserva!=null) {
+			  }
+			  if(DatoASolicitar.NUMERO_DOCUMENTO.equals(nombreDatoReserva) && nombreDatoReserva!=null) {
 					reservaDTO.setNumeroDocumento(valorDatoReserva.toString());
-				}
+			  }
 			}
 		}
 		if (reservaDTO != null) {
@@ -712,7 +717,7 @@ public class ConsultasBean implements ConsultasLocal, ConsultasRemote {
       (atencionPresencial!=null?(atencionPresencial.booleanValue()?"  AND d.presencial = true ":"  AND d.presencial = false "):"") +
       "  AND d.fecha BETWEEN :fi AND :ff " +
       "  AND r.estado = 'U' " +
-      "ORDER BY d.fecha, d.horaInicio, r.numero"; 
+      "ORDER BY d.fecha, d.horaInicio, r.numero, r.id "; 
 
     Query query = entityManager.createQuery(queryString);
     query.setParameter("recurso", recurso.getId());

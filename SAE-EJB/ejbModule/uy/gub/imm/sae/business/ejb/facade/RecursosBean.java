@@ -43,6 +43,8 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
+import org.apache.commons.lang.BooleanUtils;
+
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Tipo;
@@ -240,17 +242,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		if (r.getAccionMiPerfil() != null) {
 			
 			//Controlo que haya una sola accion de confirmacion destacada
-			if (getCantAccionMiPerfilDestacadasConfirmacion(r.getAccionMiPerfil()) != 1) {
+			if (BooleanUtils.isTrue(r.getMiPerfilConHab()) && getCantAccionMiPerfilDestacadasConfirmacion(r.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_confirmacion_destacada");
 			}
 			
 			//Controlo que haya una sola accion de cancelacion destacada
-			if (getCantAccionMiPerfilDestacadasCancelacion(r.getAccionMiPerfil()) != 1) {
+			if (BooleanUtils.isTrue(r.getMiPerfilCanHab()) && getCantAccionMiPerfilDestacadasCancelacion(r.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_cancelacion_destacada");
 			}
 			
 			//Controlo que haya una sola accion de recordatorio destacada
-			if (getCantAccionMiPerfilDestacadasRecordatorio(r.getAccionMiPerfil()) != 1) {
+			if (BooleanUtils.isTrue(r.getMiPerfilRecHab()) && getCantAccionMiPerfilDestacadasRecordatorio(r.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_recordatorio_destacada");
 			}
 		
@@ -711,20 +713,22 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		
 		//Controles de la acción MiPerfil
 		//--------------------------------
+
+		
 		if (recurso.getAccionMiPerfil() != null) {
-			
+		    
 			//Controlo que haya una sola accion de confirmacion destacada
-			if (getCantAccionMiPerfilDestacadasConfirmacion(recurso.getAccionMiPerfil()) != 1) {
+			if (BooleanUtils.isTrue(recurso.getMiPerfilConHab()) && getCantAccionMiPerfilDestacadasConfirmacion(recurso.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_confirmacion_destacada");
 			}
 			
 			//Controlo que haya una sola accion de cancelacion destacada
-			if (getCantAccionMiPerfilDestacadasCancelacion(recurso.getAccionMiPerfil()) != 1) {
+			if (BooleanUtils.isTrue(recurso.getMiPerfilCanHab()) && getCantAccionMiPerfilDestacadasCancelacion(recurso.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_cancelacion_destacada");
 			}
 			
 			//Controlo que haya una sola accion de recordatorio destacada
-			if (getCantAccionMiPerfilDestacadasRecordatorio(recurso.getAccionMiPerfil()) != 1) {
+			if (BooleanUtils.isTrue(recurso.getMiPerfilRecHab()) && getCantAccionMiPerfilDestacadasRecordatorio(recurso.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_recordatorio_destacada");
 			}
 		
@@ -849,63 +853,66 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		
 		//Si el recurso tiene una accion, debo guardarla
 		if (recurso.getAccionMiPerfil() != null) {
-		AccionMiPerfil accionActual = (AccionMiPerfil) entityManager.find(AccionMiPerfil.class,	recurso.getAccionMiPerfil().getId());
-
-			if (accionActual == null) {
+    		AccionMiPerfil accionActual = null;
+    		if(recurso.getAccionMiPerfil().getId() != null) {
+    		    accionActual = (AccionMiPerfil) entityManager.find(AccionMiPerfil.class, recurso.getAccionMiPerfil().getId());
+                //Actualizo la acción
+                accionActual.setDestacada_con_1(recurso.getAccionMiPerfil().getDestacada_con_1());
+                accionActual.setDestacada_con_2(recurso.getAccionMiPerfil().getDestacada_con_2());
+                accionActual.setDestacada_con_3(recurso.getAccionMiPerfil().getDestacada_con_3());
+                accionActual.setDestacada_con_4(recurso.getAccionMiPerfil().getDestacada_con_4());
+                accionActual.setDestacada_con_5(recurso.getAccionMiPerfil().getDestacada_con_5());
+                accionActual.setDestacada_can_1(recurso.getAccionMiPerfil().getDestacada_can_1());
+                accionActual.setDestacada_can_2(recurso.getAccionMiPerfil().getDestacada_can_2());
+                accionActual.setDestacada_can_3(recurso.getAccionMiPerfil().getDestacada_can_3());
+                accionActual.setDestacada_can_4(recurso.getAccionMiPerfil().getDestacada_can_4());
+                accionActual.setDestacada_can_5(recurso.getAccionMiPerfil().getDestacada_can_5());
+                accionActual.setDestacada_rec_1(recurso.getAccionMiPerfil().getDestacada_rec_1());
+                accionActual.setDestacada_rec_2(recurso.getAccionMiPerfil().getDestacada_rec_2());
+                accionActual.setDestacada_rec_3(recurso.getAccionMiPerfil().getDestacada_rec_3());
+                accionActual.setDestacada_rec_4(recurso.getAccionMiPerfil().getDestacada_rec_4());
+                accionActual.setDestacada_rec_5(recurso.getAccionMiPerfil().getDestacada_rec_5());
+                
+                accionActual.setTitulo_con_1(recurso.getAccionMiPerfil().getTitulo_con_1());
+                accionActual.setTitulo_con_2(recurso.getAccionMiPerfil().getTitulo_con_2());
+                accionActual.setTitulo_con_3(recurso.getAccionMiPerfil().getTitulo_con_3());
+                accionActual.setTitulo_con_4(recurso.getAccionMiPerfil().getTitulo_con_4());
+                accionActual.setTitulo_con_5(recurso.getAccionMiPerfil().getTitulo_con_5());
+                accionActual.setTitulo_can_1(recurso.getAccionMiPerfil().getTitulo_can_1());
+                accionActual.setTitulo_can_2(recurso.getAccionMiPerfil().getTitulo_can_2());
+                accionActual.setTitulo_can_3(recurso.getAccionMiPerfil().getTitulo_can_3());
+                accionActual.setTitulo_can_4(recurso.getAccionMiPerfil().getTitulo_can_4());
+                accionActual.setTitulo_can_5(recurso.getAccionMiPerfil().getTitulo_can_5());
+                accionActual.setTitulo_rec_1(recurso.getAccionMiPerfil().getTitulo_rec_1());
+                accionActual.setTitulo_rec_2(recurso.getAccionMiPerfil().getTitulo_rec_2());
+                accionActual.setTitulo_rec_3(recurso.getAccionMiPerfil().getTitulo_rec_3());
+                accionActual.setTitulo_rec_4(recurso.getAccionMiPerfil().getTitulo_rec_4());
+                accionActual.setTitulo_rec_5(recurso.getAccionMiPerfil().getTitulo_rec_5());
+                
+                accionActual.setUrl_con_1(recurso.getAccionMiPerfil().getUrl_con_1());
+                accionActual.setUrl_con_2(recurso.getAccionMiPerfil().getUrl_con_2());
+                accionActual.setUrl_con_3(recurso.getAccionMiPerfil().getUrl_con_3());
+                accionActual.setUrl_con_4(recurso.getAccionMiPerfil().getUrl_con_4());
+                accionActual.setUrl_con_5(recurso.getAccionMiPerfil().getUrl_con_5());
+                accionActual.setUrl_can_1(recurso.getAccionMiPerfil().getUrl_can_1());
+                accionActual.setUrl_can_2(recurso.getAccionMiPerfil().getUrl_can_2());
+                accionActual.setUrl_can_3(recurso.getAccionMiPerfil().getUrl_can_3());
+                accionActual.setUrl_can_4(recurso.getAccionMiPerfil().getUrl_can_4());
+                accionActual.setUrl_can_5(recurso.getAccionMiPerfil().getUrl_can_5());
+                accionActual.setUrl_rec_1(recurso.getAccionMiPerfil().getUrl_rec_1());
+                accionActual.setUrl_rec_2(recurso.getAccionMiPerfil().getUrl_rec_2());
+                accionActual.setUrl_rec_3(recurso.getAccionMiPerfil().getUrl_rec_3());
+                accionActual.setUrl_rec_4(recurso.getAccionMiPerfil().getUrl_rec_4());
+                accionActual.setUrl_rec_5(recurso.getAccionMiPerfil().getUrl_rec_5());
+                    
+                entityManager.merge(accionActual);
+    		}else {
 				//Creo la acción 
 				accionActual = new AccionMiPerfil(); 
+				accionActual.setRecurso(recursoActual);
+				entityManager.persist(accionActual);
 			}
 		
-			//Actualizo la acción
-			accionActual.setDestacada_con_1(recurso.getAccionMiPerfil().getDestacada_con_1());
-			accionActual.setDestacada_con_2(recurso.getAccionMiPerfil().getDestacada_con_2());
-			accionActual.setDestacada_con_3(recurso.getAccionMiPerfil().getDestacada_con_3());
-			accionActual.setDestacada_con_4(recurso.getAccionMiPerfil().getDestacada_con_4());
-			accionActual.setDestacada_con_5(recurso.getAccionMiPerfil().getDestacada_con_5());
-			accionActual.setDestacada_can_1(recurso.getAccionMiPerfil().getDestacada_can_1());
-			accionActual.setDestacada_can_2(recurso.getAccionMiPerfil().getDestacada_can_2());
-			accionActual.setDestacada_can_3(recurso.getAccionMiPerfil().getDestacada_can_3());
-			accionActual.setDestacada_can_4(recurso.getAccionMiPerfil().getDestacada_can_4());
-			accionActual.setDestacada_can_5(recurso.getAccionMiPerfil().getDestacada_can_5());
-			accionActual.setDestacada_rec_1(recurso.getAccionMiPerfil().getDestacada_rec_1());
-			accionActual.setDestacada_rec_2(recurso.getAccionMiPerfil().getDestacada_rec_2());
-			accionActual.setDestacada_rec_3(recurso.getAccionMiPerfil().getDestacada_rec_3());
-			accionActual.setDestacada_rec_4(recurso.getAccionMiPerfil().getDestacada_rec_4());
-			accionActual.setDestacada_rec_5(recurso.getAccionMiPerfil().getDestacada_rec_5());
-			
-			accionActual.setTitulo_con_1(recurso.getAccionMiPerfil().getTitulo_con_1());
-			accionActual.setTitulo_con_2(recurso.getAccionMiPerfil().getTitulo_con_2());
-			accionActual.setTitulo_con_3(recurso.getAccionMiPerfil().getTitulo_con_3());
-			accionActual.setTitulo_con_4(recurso.getAccionMiPerfil().getTitulo_con_4());
-			accionActual.setTitulo_con_5(recurso.getAccionMiPerfil().getTitulo_con_5());
-			accionActual.setTitulo_can_1(recurso.getAccionMiPerfil().getTitulo_can_1());
-			accionActual.setTitulo_can_2(recurso.getAccionMiPerfil().getTitulo_can_2());
-			accionActual.setTitulo_can_3(recurso.getAccionMiPerfil().getTitulo_can_3());
-			accionActual.setTitulo_can_4(recurso.getAccionMiPerfil().getTitulo_can_4());
-			accionActual.setTitulo_can_5(recurso.getAccionMiPerfil().getTitulo_can_5());
-			accionActual.setTitulo_rec_1(recurso.getAccionMiPerfil().getTitulo_rec_1());
-			accionActual.setTitulo_rec_2(recurso.getAccionMiPerfil().getTitulo_rec_2());
-			accionActual.setTitulo_rec_3(recurso.getAccionMiPerfil().getTitulo_rec_3());
-			accionActual.setTitulo_rec_4(recurso.getAccionMiPerfil().getTitulo_rec_4());
-			accionActual.setTitulo_rec_5(recurso.getAccionMiPerfil().getTitulo_rec_5());
-			
-			accionActual.setUrl_con_1(recurso.getAccionMiPerfil().getUrl_con_1());
-			accionActual.setUrl_con_2(recurso.getAccionMiPerfil().getUrl_con_2());
-			accionActual.setUrl_con_3(recurso.getAccionMiPerfil().getUrl_con_3());
-			accionActual.setUrl_con_4(recurso.getAccionMiPerfil().getUrl_con_4());
-			accionActual.setUrl_con_5(recurso.getAccionMiPerfil().getUrl_con_5());
-			accionActual.setUrl_can_1(recurso.getAccionMiPerfil().getUrl_can_1());
-			accionActual.setUrl_can_2(recurso.getAccionMiPerfil().getUrl_can_2());
-			accionActual.setUrl_can_3(recurso.getAccionMiPerfil().getUrl_can_3());
-			accionActual.setUrl_can_4(recurso.getAccionMiPerfil().getUrl_can_4());
-			accionActual.setUrl_can_5(recurso.getAccionMiPerfil().getUrl_can_5());
-			accionActual.setUrl_rec_1(recurso.getAccionMiPerfil().getUrl_rec_1());
-			accionActual.setUrl_rec_2(recurso.getAccionMiPerfil().getUrl_rec_2());
-			accionActual.setUrl_rec_3(recurso.getAccionMiPerfil().getUrl_rec_3());
-			accionActual.setUrl_rec_4(recurso.getAccionMiPerfil().getUrl_rec_4());
-			accionActual.setUrl_rec_5(recurso.getAccionMiPerfil().getUrl_rec_5());
-				
-			entityManager.merge(accionActual);
 			
 		}
 		
@@ -2520,9 +2527,14 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
   
   public AccionMiPerfil obtenerAccionMiPerfilDeRecurso(Integer recursoId){
 	  try {
-	      Query query = entityManager.createQuery("SELECT a FROM AccionMiPerfil a WHERE a.recurso.id=:recursoId order by a.id desc");
+		  AccionMiPerfil acc = new AccionMiPerfil(); 
+		  
+		  Query query = entityManager.createQuery("SELECT a FROM AccionMiPerfil a WHERE a.recurso.id=:recursoId order by a.id desc");
 	      query.setMaxResults(1);
-	      AccionMiPerfil acc = (AccionMiPerfil) query.setParameter("recursoId", recursoId).getSingleResult();
+	      List<AccionMiPerfil> list = (List<AccionMiPerfil>) query.setParameter("recursoId", recursoId).getResultList();
+	      if(!list.isEmpty()){
+	    	acc = list.get(0);  
+	      }
 	      return acc;
 	    }catch(Exception ex) {
 	      ex.printStackTrace();

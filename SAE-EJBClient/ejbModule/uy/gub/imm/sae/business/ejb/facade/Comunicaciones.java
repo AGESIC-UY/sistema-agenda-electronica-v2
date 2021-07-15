@@ -28,12 +28,18 @@ import uy.gub.imm.sae.exception.UserException;
 
 public interface Comunicaciones {
 
-  public void enviarComunicacionesConfirmacion(Empresa empresa, String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException;
+  public void enviarComunicacionesConfirmacion(Empresa empresa, String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, 
+		  String formatoFecha, String formatoHora) throws UserException;
   
-  public void enviarComunicacionesConfirmacion(Empresa empresa, String templateLinkCancelacion, String templateLinkModificacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException;
+  public void enviarComunicacionesConfirmacion(Empresa empresa, String templateLinkCancelacion, String templateLinkModificacion, TokenReserva tokenReserva, 
+		  String idioma, String formatoFecha, String formatoHora) throws UserException;
   
   public void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException;
 
-  public void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException;
+  public void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, 
+		  String cuerpo) throws UserException;
 
+  public void enviarComunicacionesTraslado(Empresa empresa, String linkCancelacion, String linkModificacion, Reserva reservaOrigen, Reserva reservaDestino, 
+                  String idioma, String formatoFecha, String formatoHora) throws UserException;
+          
 }

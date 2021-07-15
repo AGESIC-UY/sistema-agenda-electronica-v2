@@ -232,20 +232,11 @@ public class ServiciosMiPerfilBean {
     	tituloAviso = tituloAviso.replace("\"", "\\\"");
     	textoCorto = textoCorto.replace("\"", "\\\"");
     	textoAviso = textoAviso.replace("\"", "\\\"");
-    //	System.out.println("-->tituloAviso: " + tituloAviso);
-   // 	System.out.println("-->textoCorto: " + textoCorto);
-   // 	System.out.println("-->textoAviso: " + textoAviso);
     	tituloAviso = tituloAviso.replace("\\\\\"", "\\\"");
     	textoCorto = textoCorto.replace("\\\\\"", "\\\"");
     	textoAviso = textoAviso.replace("\\\\\"", "\\\"");
-//    	System.out.println("-->tituloAviso: " + tituloAviso);
- //   	System.out.println("-->textoCorto: " + textoCorto);
- //   	System.out.println("-->textoAviso: " + textoAviso);
-    	
     }
 		
-		
-
     //No se admiten las metavariables para el link de cancelación y modificación porque se envían como acciones
     JsonObject jObject = new JsonObject();
     String miPerfilOId = confBean.getString("MIPERFIL_OID");
@@ -568,7 +559,6 @@ public class ServiciosMiPerfilBean {
 //            strPRUEBA = Metavariables.remplazarMetavariables(strPRUEBA, 1, "","",
 //            		"", "", fechaPrueba, "", 1, "", "",
 //                    (String)formatoFecha, (String)formatoHora, "", "");
-//            System.out.println(strPRUEBA);
 //          ////////////////////////////////////////////////////////////////////////////////////////////////
 //          ////////////////////////////////////////////////////////////////////////////////////////////////
             

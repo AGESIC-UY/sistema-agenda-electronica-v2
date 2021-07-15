@@ -310,3 +310,12 @@ Versión 2.3.14 (2021-03-15)
   - Req 1: Modificar algoritmo de servicio de confirmación múltiple
   - Req 2: Modificar backend de SAE
   
+Versión 2.3.15
+* Se añade la funcionalidad para mover reservas entre recursos incluso de diferentes agendas (aunque de la misma empresa).
+
+Versión 2.3.15 - R1
+* Se corrige acceso por url a la pantalla de movimiento de reservas.
+
+Versión 2.3.15 - R2
+* Corrección de horarios dentro del día actual
+* Eliminación de mensaje antes del movimiento de reservas

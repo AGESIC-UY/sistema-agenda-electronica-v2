@@ -390,9 +390,9 @@ public class Paso3AdminMBean extends BaseMBean {
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			String linkBase = request.getScheme()+"://"+request.getServerName();
-      if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
-        linkBase = linkBase + ":" + request.getServerPort();
-      }
+		    if("http".equals(request.getScheme()) && request.getServerPort()!=80 || "https".equals(request.getScheme()) && request.getServerPort()!=443) {
+		        linkBase = linkBase + ":" + request.getServerPort();
+		    }
 			Integer recursoId = reserva.getDisponibilidades().get(0).getRecurso().getId();
 			Integer agendaId = reserva.getDisponibilidades().get(0).getRecurso().getAgenda().getId();
 			String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&ri="+reserva.getId();

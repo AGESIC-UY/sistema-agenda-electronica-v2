@@ -35,142 +35,148 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 
 @Entity
-@Table (name = "ae_comunicaciones")
+@Table(name = "ae_comunicaciones")
 public class Comunicacion implements Serializable {
 
-	public enum Tipo1 {EMAIL, SMS, TEXTOAVOZ}
-	public enum Tipo2 {RESERVA, CANCELA, RESERVAMULTIPLE, CANCELAMULTIPLE}
-	
-	private static final long serialVersionUID = 3500715468120358550L;
+    public enum Tipo1 {
+        EMAIL, SMS, TEXTOAVOZ
+    }
 
-	private Integer id;
-	
-	private Tipo1 tipo1; //EMAIL, SMS, TEXTOAVOZ
-	private Tipo2 tipo2; //RESERVA, CANCELA
-	
-	private String destino; //Dirección de email, número de celular, número fijo
-	private String mensaje;
-	
-	private Recurso recurso;
-	private Reserva reserva;
-  private TokenReserva tokenReserva;
-	
-	private Boolean procesado;
-	
-	public Comunicacion () {
-	}
+    public enum Tipo2 {
+        RESERVA, CANCELA, RESERVAMULTIPLE, CANCELAMULTIPLE, TRASLADA
+    }
 
-	public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, Reserva reserva, String mensaje) {
-		super();
-		this.tipo1 = tipo1;
-		this.tipo2 = tipo2;
-		this.destino = destino;
-		this.recurso = recurso;
-		this.reserva = reserva;
-		this.procesado = false;
-		this.mensaje = mensaje;
-	}
+    private static final long serialVersionUID = 3500715468120358550L;
 
-  public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, TokenReserva tokenReserva, String mensaje) {
-    super();
-    this.tipo1 = tipo1;
-    this.tipo2 = tipo2;
-    this.destino = destino;
-    this.recurso = recurso;
-    this.tokenReserva = tokenReserva;
-    this.procesado = false;
-    this.mensaje = mensaje;
-  }
+    private Integer id;
 
-	@Id
-	@GeneratedValue (strategy = GenerationType.SEQUENCE, generator="seq_comunicacion")
-	@SequenceGenerator (name ="seq_comunicacion", initialValue = 1, sequenceName = "s_ae_comunicaciones", allocationSize=1)
-	public Integer getId() {
-		return id;
-	}
-	public void setId(Integer id) {
-		this.id = id;
-	}
-	
-	@Column(name="tipo_1")
-	@Enumerated(EnumType.STRING)
-	public Tipo1 getTipo1() {
-		return tipo1;
-	}
+    private Tipo1 tipo1; // EMAIL, SMS, TEXTOAVOZ
+    private Tipo2 tipo2; // RESERVA, CANCELA
 
-	public void setTipo1(Tipo1 tipo1) {
-		this.tipo1 = tipo1;
-	}
+    private String destino; // Dirección de email, número de celular, número
+                            // fijo
+    private String mensaje;
 
-	@Column(name="tipo_2")
-	@Enumerated(EnumType.STRING)
-	public Tipo2 getTipo2() {
-		return tipo2;
-	}
+    private Recurso recurso;
+    private Reserva reserva;
+    private TokenReserva tokenReserva;
 
-	public void setTipo2(Tipo2 tipo2) {
-		this.tipo2 = tipo2;
-	}
+    private Boolean procesado;
 
-	@Column(name="destino")
-	public String getDestino() {
-		return destino;
-	}
+    public Comunicacion() {
+    }
 
-	public void setDestino(String destino) {
-		this.destino = destino;
-	}
+    public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, Reserva reserva, String mensaje) {
+        super();
+        this.tipo1 = tipo1;
+        this.tipo2 = tipo2;
+        this.destino = destino;
+        this.recurso = recurso;
+        this.reserva = reserva;
+        this.procesado = false;
+        this.mensaje = mensaje;
+    }
 
-	@ManyToOne (optional = false)
-	@JoinColumn (name = "recurso_id", nullable = false)
-	public Recurso getRecurso() {
-		return recurso;
-	}
+    public Comunicacion(Tipo1 tipo1, Tipo2 tipo2, String destino, Recurso recurso, TokenReserva tokenReserva, String mensaje) {
+        super();
+        this.tipo1 = tipo1;
+        this.tipo2 = tipo2;
+        this.destino = destino;
+        this.recurso = recurso;
+        this.tokenReserva = tokenReserva;
+        this.procesado = false;
+        this.mensaje = mensaje;
+    }
 
-	public void setRecurso(Recurso recurso) {
-		this.recurso = recurso;
-	}
+    @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_comunicacion")
+    @SequenceGenerator(name = "seq_comunicacion", initialValue = 1, sequenceName = "s_ae_comunicaciones", allocationSize = 1)
+    public Integer getId() {
+        return id;
+    }
 
-	@ManyToOne
-	@JoinColumn (name = "reserva_id", nullable = false)
-	public Reserva getReserva() {
-		return reserva;
-	}
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-	public void setReserva(Reserva reserva) {
-		this.reserva = reserva;
-	}
+    @Column(name = "tipo_1")
+    @Enumerated(EnumType.STRING)
+    public Tipo1 getTipo1() {
+        return tipo1;
+    }
 
-	@Column(name="procesado")
-	public Boolean getProcesado() {
-		return procesado;
-	}
+    public void setTipo1(Tipo1 tipo1) {
+        this.tipo1 = tipo1;
+    }
 
-	public void setProcesado(Boolean procesado) {
-		this.procesado = procesado;
-	}
+    @Column(name = "tipo_2")
+    @Enumerated(EnumType.STRING)
+    public Tipo2 getTipo2() {
+        return tipo2;
+    }
 
-	public static long getSerialversionuid() {
-		return serialVersionUID;
-	}
+    public void setTipo2(Tipo2 tipo2) {
+        this.tipo2 = tipo2;
+    }
 
-  public String getMensaje() {
-    return mensaje;
-  }
+    @Column(name = "destino")
+    public String getDestino() {
+        return destino;
+    }
 
-  public void setMensaje(String mensaje) {
-    this.mensaje = mensaje;
-  }
-	
-  @ManyToOne
-  @JoinColumn (name = "token_id", nullable = false)
-  public TokenReserva getTokenReserva() {
-    return tokenReserva;
-  }
+    public void setDestino(String destino) {
+        this.destino = destino;
+    }
 
-  public void setTokenReserva(TokenReserva tokenReserva) {
-    this.tokenReserva = tokenReserva;
-  }
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "recurso_id", nullable = false)
+    public Recurso getRecurso() {
+        return recurso;
+    }
 
-	
+    public void setRecurso(Recurso recurso) {
+        this.recurso = recurso;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "reserva_id", nullable = false)
+    public Reserva getReserva() {
+        return reserva;
+    }
+
+    public void setReserva(Reserva reserva) {
+        this.reserva = reserva;
+    }
+
+    @Column(name = "procesado")
+    public Boolean getProcesado() {
+        return procesado;
+    }
+
+    public void setProcesado(Boolean procesado) {
+        this.procesado = procesado;
+    }
+
+    public static long getSerialversionuid() {
+        return serialVersionUID;
+    }
+
+    public String getMensaje() {
+        return mensaje;
+    }
+
+    public void setMensaje(String mensaje) {
+        this.mensaje = mensaje;
+    }
+
+    @ManyToOne
+    @JoinColumn(name = "token_id", nullable = false)
+    public TokenReserva getTokenReserva() {
+        return tokenReserva;
+    }
+
+    public void setTokenReserva(TokenReserva tokenReserva) {
+        this.tokenReserva = tokenReserva;
+    }
+
 }

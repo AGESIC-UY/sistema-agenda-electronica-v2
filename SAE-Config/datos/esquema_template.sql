@@ -369,7 +369,8 @@ CREATE TABLE ae_reservas (
     flibera timestamp DEFAULT NULL,
     mi_perfil_notif boolean NOT NULL DEFAULT true,
 	notificar boolean DEFAULT true,
-    reserva_hija_id integer NULL
+    reserva_hija_id integer NULL,
+    id_origen integer NULL
 );
 ALTER TABLE ae_reservas OWNER TO sae;
 
@@ -430,6 +431,7 @@ CREATE TABLE ae_textos_agenda (
     aeag_id integer NOT NULL,
     texto_correo_conf character varying(1000),
     texto_correo_canc character varying(1000),
+    ae_textos_agenda character varying(1000),
     por_defecto boolean DEFAULT false NOT NULL,
     idioma character varying(5) NOT NULL
 );

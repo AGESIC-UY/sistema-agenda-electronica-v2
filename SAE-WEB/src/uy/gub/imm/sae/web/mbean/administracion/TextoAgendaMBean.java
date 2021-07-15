@@ -49,12 +49,12 @@ public class TextoAgendaMBean  extends BaseMBean{
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendasBean!uy.gub.imm.sae.business.ejb.facade.AgendasRemote")
 	private Agendas agendasEJB;
 
-  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
-  private AgendaGeneral generalEJB;
+	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  	private AgendaGeneral generalEJB;
 	
 	public SessionMBean sessionMBean;
 	public TextoAgenda textoAux = new TextoAgenda();
-  private String idiomaTextos = null;
+	private String idiomaTextos = null;
   
 	public TextoAgenda getTextoAux() {
 		return textoAux;
@@ -236,6 +236,7 @@ public class TextoAgendaMBean  extends BaseMBean{
 		copia.setTextoTicketConf(original.getTextoTicketConf());
 		copia.setTextoCorreoConf(original.getTextoCorreoConf());
 		copia.setTextoCorreoCanc(original.getTextoCorreoCanc());
+		copia.setTextoCorreoTras(original.getTextoCorreoTras());
 	}
 
 }

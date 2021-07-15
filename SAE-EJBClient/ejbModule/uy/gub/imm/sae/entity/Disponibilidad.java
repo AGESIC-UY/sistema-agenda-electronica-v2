@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -37,6 +38,7 @@ import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
+import javax.persistence.Transient;
 import javax.persistence.Version;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -179,6 +181,12 @@ public class Disponibilidad implements Serializable {
 	@Override
 	public String toString() {
 		return "Disponibilidad [id="+id+",fecha=" + fecha + ",horaIni=" + horaInicio +"]";
+	}
+	
+	@Transient
+	public Integer getFrecuencia(){
+		long diff = this.horaFin.getTime()-this.horaInicio.getTime();
+		return new Long(TimeUnit.MILLISECONDS.toMinutes(diff)).intValue();
 	}
 
 	

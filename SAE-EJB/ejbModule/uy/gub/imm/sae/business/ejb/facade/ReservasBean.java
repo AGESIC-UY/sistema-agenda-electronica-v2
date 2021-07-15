@@ -3,6 +3,7 @@ package uy.gub.imm.sae.business.ejb.facade;
 import java.util.List;
 
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.OptimisticLockException;
@@ -20,6 +21,9 @@ public class ReservasBean implements Reservas {
 
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager em;
+	
+	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
+	private AgendarReservasRemote agendarReservasEJB;
 	
 	@SuppressWarnings("unchecked")
 	public void modificarEstadoReserva(ReservaDTO reserva) throws AccesoMultipleException {
@@ -43,7 +47,7 @@ public class ReservasBean implements Reservas {
 		r.setEstado(Estado.U);
 		r.setOrigen(reserva.getOrigen());
 		
-		em.flush();
-		
+		em.flush();		
 	}
+	
 }

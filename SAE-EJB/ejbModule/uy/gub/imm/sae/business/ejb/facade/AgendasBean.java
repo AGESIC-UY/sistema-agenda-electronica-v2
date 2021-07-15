@@ -155,6 +155,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	  		nuevo.setTextoTicketConf(viejo.getTextoTicketConf());
 	  		nuevo.setTextoCorreoConf(viejo.getTextoCorreoConf());
 	  		nuevo.setTextoCorreoCanc(viejo.getTextoCorreoCanc());
+	  		nuevo.setTextoCorreoTras(viejo.getTextoCorreoTras());
 	  		nuevo.setAgenda(agendaActual);
 	  		agendaActual.getTextosAgenda().put(idioma, nuevo);
 	  		entityManager.persist(nuevo);
@@ -221,6 +222,7 @@ public class AgendasBean implements AgendasLocal,  AgendasRemote{
 	  		nuevo.setTextoTicketConf(viejo.getTextoTicketConf());
 	  		nuevo.setTextoCorreoConf(viejo.getTextoCorreoConf());
 	  		nuevo.setTextoCorreoCanc(viejo.getTextoCorreoCanc());
+	  		nuevo.setTextoCorreoTras(viejo.getTextoCorreoTras());
 	  		nuevo.setAgenda(aCopia);
 	  		aCopia.getTextosAgenda().put(idioma, nuevo);
   		}

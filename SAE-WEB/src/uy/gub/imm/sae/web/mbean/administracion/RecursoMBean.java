@@ -538,8 +538,15 @@ public class RecursoMBean extends BaseMBean{
 			
 			//Cargo la accionMiPerfil, que contiene la info de todas las acciones del recurso
 		    AccionMiPerfil accionMiPerfil = recursosEJB.obtenerAccionMiPerfilDeRecurso(recursoNuevo.getId());
+		    
 		    //Le setteo la accion al recurso (transient)
-		    sessionMBean.getRecursoSeleccionado().setAccionMiPerfil(accionMiPerfil);
+		    if(accionMiPerfil!=null && accionMiPerfil.getId()!=null){
+		    	sessionMBean.getRecursoSeleccionado().setAccionMiPerfil(accionMiPerfil);
+		    }
+		    else{
+		    	sessionMBean.getRecursoSeleccionado().setAccionMiPerfil(recursosEJB.obtenerAccionMiPerfilPorDefecto(recursoNuevo));
+		    }
+		    
 		    
 			return "modificar";
 		} else {
@@ -557,7 +564,14 @@ public class RecursoMBean extends BaseMBean{
 				//Cargo la accionMiPerfil, que contiene la info de todas las acciones del recurso
 			    AccionMiPerfil accionMiPerfil = recursosEJB.obtenerAccionMiPerfilDeRecurso(recurso.getId());
 			    //Le setteo la accion al recurso (transient)
-			    recurso.setAccionMiPerfil(accionMiPerfil);
+			    //Le setteo la accion al recurso (transient)
+			    if(accionMiPerfil!=null && accionMiPerfil.getId()!=null){
+			    	recurso.setAccionMiPerfil(accionMiPerfil);
+			    }
+			    else{
+			    	recurso.setAccionMiPerfil(recursosEJB.obtenerAccionMiPerfilPorDefecto(recursoNuevo));
+			    }
+			    //recurso.setAccionMiPerfil(accionMiPerfil);
 			    
 				Recurso nuevoR = recursosEJB.copiarRecurso(recurso, sessionMBean.getUsuarioActual().getCodigo());
 				/*
@@ -797,7 +811,6 @@ public class RecursoMBean extends BaseMBean{
         
         
         if (recurso.getReservaMultiplePendienteTiempoMax()!=null && recurso.getReservaMultiplePendienteTiempoMax().intValue() < 0 ){
-        	System.out.println("VALOR DE RESERVA MULTIPLE PENDIENTE MAX " + recurso.getReservaMultiplePendienteTiempoMax());
 			addErrorMessage(sessionMBean.getTextos().get("reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero"), FORM_ID+":tiempoMaxReservaMultiple");
 			hayErrores = true;
 		}

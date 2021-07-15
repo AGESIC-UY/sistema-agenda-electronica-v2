@@ -95,6 +95,11 @@ public class Reserva implements Serializable {
 	
 	private Reserva reservaHija;
 	
+	//Id de la reserva origen (cuando se copia o se mueve de un recurso a otro)
+	private Integer idOrigen;
+	
+	private Integer idDestino;
+	
 	public Reserva () {
 		estado = Estado.P;
 		fechaCreacion = new Date();
@@ -362,6 +367,14 @@ public class Reserva implements Serializable {
     this.notificar = notificar;
   }
 
+	@Column (name = "id_origen")
+	public Integer getIdOrigen() {
+		return idOrigen;
+	}
+	public void setIdOrigen(Integer idOrigen) {
+		this.idOrigen = idOrigen;
+	}
+  
   @Transient
   public String getEstadoDescripcion(){
     return getEstadoDescripcion(estado);
@@ -448,7 +461,17 @@ public class Reserva implements Serializable {
   public void setReservaHija(Reserva reservaHija) {
 	this.reservaHija = reservaHija;
   }
-	    
+  
+  
+  
+  @Transient
+  public Integer getIdDestino() {
+		return idDestino;
+  }
+  
+  public void setIdDestino(Integer idDestino) {
+		this.idDestino = idDestino;
+  }
   
   
 }

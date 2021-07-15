@@ -44,12 +44,12 @@
 
 		<!-- Se llama a cada tarea build con las propiedades ya seteadas para todo el proceso de build -->
 		<subant target="build" buildpathref="buildlist" failonerror="true" inheritall="true"/>
-		
+<!--
 		 <copy file="${jars.path}/sae-1-recursos.ear" todir="${dist}" overwrite="true" />
   		 <copy file="${jars.path}/sae-1-service.ear" todir="${dist}" overwrite="true" />
          <copy file="${jars.path}/sae-2-backoffice.ear" todir="${dist}" overwrite="true" />
          <copy file="${jars.path}/sae-2-frontend.ear" todir="${dist}" overwrite="true" />
-
+-->
 
 
 	</target>

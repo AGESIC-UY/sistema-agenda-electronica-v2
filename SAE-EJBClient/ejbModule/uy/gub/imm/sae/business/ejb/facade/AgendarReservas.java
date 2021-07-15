@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import uy.gub.imm.sae.business.dto.ResultadoEjecucion;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.Disponibilidad;
@@ -46,7 +47,7 @@ public interface AgendarReservas {
 	public Agenda consultarAgendaPorId(Integer id) throws ApplicationException, BusinessException;
 	public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException;
 	public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException;
-  public TramiteAgenda consultarTramitePorCodigo(Agenda a, String codigo) throws ApplicationException;
+	public TramiteAgenda consultarTramitePorCodigo(Agenda a, String codigo) throws ApplicationException;
 	public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException;
 	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException;
 	
@@ -54,6 +55,7 @@ public interface AgendarReservas {
 	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso r) throws UserException;
 	public List<Integer> obtenerCuposPorDia(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
 	public List<Disponibilidad> obtenerDisponibilidades(Recurso r, VentanaDeTiempo v, TimeZone timezone) throws UserException;
+	public List<Disponibilidad> obtenerDisponibilidades(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone, boolean ajustarVentanaSegunAhora) throws UserException;
   /**
    * Crea una nueva reserva en estado pendiente, controla que aun exista cupo.
    */
@@ -67,9 +69,9 @@ public interface AgendarReservas {
 	public Reserva confirmarReserva(Empresa e, Reserva r, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
 	public Reserva consultarReservaPorId(Integer idReserva) throws UserException;
-  public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException;
+	public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException;
 	public void cancelarReserva(Empresa e, Recurso recurso, Reserva reserva) throws UserException;
-  public void liberarReserva(Integer idEmpresa, Integer idReserva) throws UserException;
+	public void liberarReserva(Integer idEmpresa, Integer idReserva) throws UserException;
 	
 	
 	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) throws ApplicationException, BusinessException, AutocompletarException, UserException;
@@ -158,5 +160,21 @@ public interface AgendarReservas {
   
   public void cancelarReservaVacunacion(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva,Integer idReserva2, Boolean masiva) throws UserException;
   
-  
+  /**
+   * Verifica que se pueda mover reservas de un recurso a otro, incluso entre diferentes agendas.
+   * @param empresa
+   * @param recursoOrigen
+   * @param recursoDestino
+   * @param fecha
+   * @return
+   * @throws UserException
+   */
+	public ResultadoEjecucion validarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino, VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino) 
+		throws UserException, ApplicationException, BusinessException;
+	
+	public ResultadoEjecucion ejecutarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino,VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino, boolean enviarComunicaciones, 
+			String linkBase, boolean generarNovedades, String uuid) throws UserException, ApplicationException, BusinessException;
+	
+	public Long obtenerReservasConfirmadasRecursoOrigen(Recurso recurso, VentanaDeTiempo periodo)  throws UserException;
+
 }

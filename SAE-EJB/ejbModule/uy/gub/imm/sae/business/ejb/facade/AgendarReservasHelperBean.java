@@ -45,6 +45,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
+import org.apache.commons.lang.BooleanUtils;
 import org.apache.log4j.Logger;
 
 import uy.gub.imm.sae.business.dto.ReservaDTO;
@@ -262,6 +263,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 		if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
 			ventana.setFechaInicial(recurso.getFechaInicioDisp());
 		}
+		
 		//Cupos consumidos, es decir, cantidad de reservas por dia no canceladas.
 		//No se debe considerar las disponibilidades presenciales
 		//Si la reserva está cancelada hay que tomar en cuenta el campo fechaLiberacion
@@ -283,7 +285,6 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 			.setParameter("hoy", ahora, TemporalType.DATE)
 			.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
 			.setParameter("cancelado", Estado.C)
-      .setParameter("ahora", new Date())
 			.getResultList();
 		return cuposConsumidos;
 	}
@@ -312,6 +313,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 				if (fechaDelCupoA.equals(cont.getTime())) {
 					//Nunca deberia ser mas grande que un Entero.	
 					cantidadDeCupos = ((Long)cupoAsignado[1]).intValue();
+					
 					if (iterCuposAsignados.hasNext()) {
 						cupoAsignado = iterCuposAsignados.next();
 					} else {
@@ -320,7 +322,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
 					if (cupoConsumido != null) {
 						Date fechaDelCupoC = (Date)cupoConsumido[0];
 						if (fechaDelCupoC.equals(cont.getTime())) {
-							//Nunca deberia ser mas grande que un Entero.	
+							//Nunca deberia ser mas grande que un Entero.
 							cantidadDeCupos -= ((Long)cupoConsumido[1]).intValue();
 							if (cantidadDeCupos < -1) {
 								//Solo se da en el caso de que mas de uno hayan querido reservar a la vez cuando quedaba solo un cupo
@@ -376,7 +378,7 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
   		"WHERE d = :disp AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora)")
 		.setParameter("disp", disponibilidad)
 		.setParameter("cancelado", Estado.C)
-    .setParameter("ahora", new Date())
+		.setParameter("ahora", new Date())
 		.getSingleResult()).intValue();
 		int minimo = reservaTomada?0:1;
 		return (disponibilidad.getCupo() - cantReservas) < minimo;
@@ -967,22 +969,34 @@ public class AgendarReservasHelperBean implements AgendarReservasHelperLocal{
     @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     @Override
     public void eliminarReservaPendiente(Reserva reserva1) throws ApplicationException {
-        
         try{
         	Reserva reserva = new Reserva();
         	reserva = entityManager.find(Reserva.class, reserva1.getId());
             entityManager.remove(reserva);
             entityManager.flush();
-            
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
         	logger.error(e.getMessage());
             throw new ApplicationException("Error: no se han podido eliminar la reserva");
         }
-        
-        
     }
 	
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Override
+    public void desactivarRecursoVisibleInternet(Recurso recurso) {
+    	recurso = entityManager.find(Recurso.class, recurso.getId());
+    	if(BooleanUtils.isTrue(recurso.getVisibleInternet())) {
+    		recurso.setVisibleInternet(false);
+    	}
+    }
+
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Override
+    public void activarRecursoVisibleInternet(Recurso recurso) {
+    	recurso = entityManager.find(Recurso.class, recurso.getId());
+    	if(!BooleanUtils.isTrue(recurso.getVisibleInternet())) {
+    		recurso.setVisibleInternet(true);
+    	}
+    }
 }
 
 
