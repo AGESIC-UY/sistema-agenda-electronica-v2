@@ -127,6 +127,14 @@
         <include name="gson-2.8.0.jar" />
       </zipfileset>
     	
+	  <zipfileset dir="../SAE-Config/libs" prefix="lib">
+        <include name="opencsv-4.0.jar" />
+      </zipfileset>
+    	
+	  <zipfileset dir="../SAE-Config/libs" prefix="lib">
+	        <include name="commons-lang3-3.7.jar" />
+      </zipfileset>	
+    	
       <fileset file="../SAE-EJB/build/jar/${build.sae.service.ejb}.jar" />
       <fileset file="../SAE-Profile-${build.profile}-EJB/build/jar/${build.sae.profile.ejb}.jar" />
     </ear>

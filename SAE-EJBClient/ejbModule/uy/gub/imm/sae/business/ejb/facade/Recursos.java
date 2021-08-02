@@ -20,10 +20,12 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
+import uy.gub.imm.sae.business.utilidades.CamposCSV;
 import uy.gub.imm.sae.entity.AccionMiPerfil;
 import uy.gub.imm.sae.entity.Agenda;
 import uy.gub.imm.sae.entity.AgrupacionDato;
@@ -78,7 +80,10 @@ public interface Recursos {
 	public AccionMiPerfil obtenerAccionMiPerfilDeRecurso(Integer recursoId);
 	public AccionMiPerfil obtenerAccionMiPerfilPorDefecto(Recurso recurso);
 
-
+	//Método para carga masiva
+	public String cargaMasiva(Agenda a, byte[] b, String codigoUsuario,TimeZone timezone) throws UserException;
+	
+	
   /**
    * Almacena en la base de datos los roles por recurso asociados al usuario.
    * @param usuarioId Identificador del usuario

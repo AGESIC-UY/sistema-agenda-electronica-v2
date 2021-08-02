@@ -20,6 +20,7 @@
 
 package uy.gub.imm.sae.web.common;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import javax.faces.application.FacesMessage;
@@ -43,7 +44,7 @@ import uy.gub.imm.sae.web.mbean.reserva.SesionMBean;
 
 public abstract class BaseMBean {
 	
-	public static final String version = "2.3.15 R1 (202107021800)";
+	public static final String version = "2.3.16 R1";
 
 	protected static final String FORM_ID = "form";
 	
@@ -307,5 +308,13 @@ public abstract class BaseMBean {
 		return "▶";
 	}
 	
+	
+	protected void removerMensages() {
+        Iterator<FacesMessage> msgIterator = FacesContext.getCurrentInstance().getMessages();
+        while (msgIterator.hasNext()) {
+            msgIterator.next();
+            msgIterator.remove();
+        }
+    }
 	
 }

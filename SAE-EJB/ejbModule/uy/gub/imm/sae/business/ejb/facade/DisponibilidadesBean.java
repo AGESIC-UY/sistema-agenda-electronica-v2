@@ -41,11 +41,14 @@ import javax.persistence.TemporalType;
 
 import org.apache.log4j.Logger;
 
+import uy.gub.imm.sae.business.dto.ReservaDTO;
 import uy.gub.imm.sae.business.utilidades.SimpleCalendario;
 import uy.gub.imm.sae.common.DisponibilidadReserva;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.VentanaDeTiempo;
 import uy.gub.imm.sae.common.enumerados.Estado;
+import uy.gub.imm.sae.common.enumerados.Tipo;
+import uy.gub.imm.sae.entity.DatoASolicitar;
 import uy.gub.imm.sae.entity.Disponibilidad;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.exception.ApplicationException;
@@ -816,5 +819,113 @@ public class DisponibilidadesBean implements DisponibilidadesLocal, Disponibilid
       return disponibilidad;
   }
   
+  
+  /**
+   * Retorna verdadero si existen disponibilidades para un recurso en una fecha en especifico
+   */
+  @SuppressWarnings("unchecked")
+  public Boolean existeDisponibilidadFechaRecurso(Date fecha, Recurso recurso) {
+      Boolean result = Boolean.FALSE;
+    		  
+
+      String consulta = "SELECT d "
+              + "FROM  Disponibilidad d "
+              + "WHERE d.recurso IS NOT NULL "
+              + "  AND d.recurso.id = :rid "
+              + "  AND d.fechaBaja IS NULL " 
+              + "  AND d.fecha = :f ";
+      
+      List<Disponibilidad> disponibilidades = entityManager.createQuery(consulta)
+              .setParameter("f", fecha, TemporalType.DATE)
+              .setParameter("rid", recurso.getId())
+              .getResultList();
+      
+      if(!disponibilidades.isEmpty()){
+          result = Boolean.TRUE;
+      }
+      
+
+      return result;
+  }
+  
+  /**
+   * Retorna verdadero si existen disponibilidades para un recurso en una fecha en especifico
+   */
+  @SuppressWarnings("unchecked")
+  public List<Disponibilidad> obtenerDisponibilidadesRangoHoraInicio(Date fecha,Date horaInicioInit,Date horaInicioFin, Recurso recurso) {
+      
+    		  
+
+      List<Disponibilidad> disponibilidades =  entityManager.createQuery(
+				    	  		"SELECT d " +
+				    	  		"FROM Disponibilidad d " + 
+				    	  		"WHERE d.recurso = :r " +
+				    	  		"  AND d.fechaBaja IS NULL " +
+				    	  		"  AND d.fecha = :f " +
+				    	  		"  AND d.horaInicio BETWEEN :fi AND :ff " +
+				    	  		" ORDER BY d.horaInicio ")
+				    	  		.setParameter("r", recurso)
+				    	  		.setParameter("f", fecha, TemporalType.DATE)
+				    	  		.setParameter("fi", horaInicioInit, TemporalType.TIMESTAMP)
+				    	  		.setParameter("ff", horaInicioFin, TemporalType.TIMESTAMP)
+				    	  		.getResultList();
+      
+
+      return disponibilidades;
+  }
+  
+  
+
+  /**
+   * Retorna la disponibilidad de una fecha en especifico con la hora inicio min
+   */
+  @SuppressWarnings("unchecked")
+  public Disponibilidad obtenerDisponibilidadEnHoraInicioMin(Recurso recurso,Date fecha) {
+      Disponibilidad disponibilidad = null;
+      String consulta = "SELECT d "
+              + "FROM  Disponibilidad d "
+              + "WHERE d.recurso IS NOT NULL "
+              + "  AND d.recurso.id = :rid "
+              + "  AND d.fechaBaja IS NULL "
+              + "  AND d.fecha = :f "
+              + "ORDER BY d.horaInicio ";
+      List<Disponibilidad> disponibilidades = entityManager.createQuery(consulta)
+              .setParameter("rid", recurso.getId())
+              .setParameter("f", fecha, TemporalType.DATE)
+              .setMaxResults(1)
+              .getResultList();
+      
+      if(!disponibilidades.isEmpty()){
+          disponibilidad = disponibilidades.get(0);
+      }
+
+      return disponibilidad;
+  }
+  
+  /**
+   * Retorna la disponibilidad de una fecha en especifico con la hora inicio max
+   */
+  @SuppressWarnings("unchecked")
+  public Disponibilidad obtenerDisponibilidadEnHoraInicioMax(Recurso recurso,Date fecha) {
+      Disponibilidad disponibilidad = null;
+      String consulta = "SELECT d "
+              + "FROM  Disponibilidad d "
+              + "WHERE d.recurso IS NOT NULL "
+              + "  AND d.recurso.id = :rid "
+              + "  AND d.fechaBaja IS NULL "
+              + "  AND d.fecha = :f "
+              + "ORDER BY d.horaInicio DESC";
+      List<Disponibilidad> disponibilidades = entityManager.createQuery(consulta)
+              .setParameter("rid", recurso.getId())
+              .setParameter("f", fecha, TemporalType.DATE)
+              .setMaxResults(1)
+              .getResultList();
+      
+      if(!disponibilidades.isEmpty()){
+          disponibilidad = disponibilidades.get(0);
+      }
+
+      return disponibilidad;
+  }
 
 }

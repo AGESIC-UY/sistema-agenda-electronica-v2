@@ -177,17 +177,19 @@ public class Disponibilidad implements Serializable {
 	public void setPlantilla(Plantilla plantilla) {
 		this.plantilla = plantilla;
 	}
-
-	@Override
-	public String toString() {
-		return "Disponibilidad [id="+id+",fecha=" + fecha + ",horaIni=" + horaInicio +"]";
-	}
 	
 	@Transient
 	public Integer getFrecuencia(){
 		long diff = this.horaFin.getTime()-this.horaInicio.getTime();
 		return new Long(TimeUnit.MILLISECONDS.toMinutes(diff)).intValue();
 	}
+	
+
+	@Override
+	public String toString() {
+		return "Disponibilidad [id="+id+",fecha=" + fecha + ",horaIni=" + horaInicio +"]";
+	}
+	
 
 	
 }

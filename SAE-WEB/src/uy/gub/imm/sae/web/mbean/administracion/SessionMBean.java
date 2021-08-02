@@ -161,6 +161,8 @@ public class SessionMBean extends SessionCleanerMBean {
 	
 	private List<SelectItem> idiomasSoportados = null;
 	
+	private Boolean envioCorreoReserva = Boolean.TRUE;
+	
 	//Cantidad de filas por página que se muestra en las tablas
   private Integer tablasFilasPorPagina = 25;
 
@@ -1356,6 +1358,15 @@ public class SessionMBean extends SessionCleanerMBean {
       return textos.get("solo_se_permite_una_reserva_diaria");
     }
     return textos.get("solo_se_permite_una_reserva_en_un_periodo_de_dias").replace("{dias}", ""+(this.recurso.getPeriodoValidacion()*2));
+  }
+  
+  
+  public Boolean getEnvioCorreoReserva() {
+	return envioCorreoReserva;
+  }
+
+  public void setEnvioCorreoReserva(Boolean envioCorreoReserva) {
+	this.envioCorreoReserva = envioCorreoReserva;
   }
 	
 }

@@ -1,0 +1,5 @@
+
+<connector name="http" protocol="HTTP/1.1" scheme="http" socket-binding="http" enabled="false"/>
+<connector name="https" protocol="HTTP/1.1" scheme="https" socket-binding="https" secure="true">
+  <ssl password="{cert-pass}" certificate-key-file="${jboss.server.config.dir}/sae.jks" protocol="TLSv1"/>
+</connector>

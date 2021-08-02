@@ -86,7 +86,8 @@ public class SesionMBean	extends BaseMBean {
 	private Disponibilidad disponibilidad;
 	private Reserva reserva;
 	private Reserva reservaConfirmada;
-  private Reserva reservaCancelar;
+	private Reserva reservaCancelar;
+	private Boolean envioCorreoReserva = Boolean.TRUE;
 
   
   private Reserva reservaModificar1; //Reserva que se desea modificar
@@ -740,6 +741,17 @@ public class SesionMBean	extends BaseMBean {
     }
     return textos.get("solo_se_permite_una_reserva_en_un_periodo_de_dias").replace("{dias}", ""+(this.recurso.getPeriodoValidacion()*2));
   }
+
+  public Boolean getEnvioCorreoReserva() {
+	return envioCorreoReserva;
+  }
+
+  public void setEnvioCorreoReserva(Boolean envioCorreoReserva) {
+	this.envioCorreoReserva = envioCorreoReserva;
+  }
+  
+  
+  
   
   
 }

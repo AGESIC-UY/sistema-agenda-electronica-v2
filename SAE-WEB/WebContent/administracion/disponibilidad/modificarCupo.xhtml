@@ -69,8 +69,8 @@
 										<p:outputLabel value="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}" for="todasM" styleClass="ui-helper-hidden-accessible" />
 									</f:facet>
 									<h:selectBooleanCheckbox value="#{rowMM.data.seleccionado}" id="horaM">
-                    <p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarUno}" />
-                  </h:selectBooleanCheckbox>
+                    					<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarUno}" />
+                  					</h:selectBooleanCheckbox>
 									<p:outputLabel value=" #{rowMM.data.horaInicio}" for="horaM" styleClass="ui-helper-hidden-accessible">
 										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
 									</p:outputLabel>

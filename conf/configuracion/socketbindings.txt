@@ -1,0 +1,4 @@
+
+<outbound-socket-binding name="sae-mail-smtp">
+  <remote-destination host="{smtp-host}" port="{smtp-port}"/>
+</outbound-socket-binding>

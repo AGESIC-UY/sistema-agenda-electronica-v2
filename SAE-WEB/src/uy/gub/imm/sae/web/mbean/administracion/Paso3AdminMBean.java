@@ -70,6 +70,7 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAutocompletarException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionPorCampoException;
@@ -325,8 +326,9 @@ public class Paso3AdminMBean extends BaseMBean {
 
 	public String confirmarReserva() {
 		limpiarMensajesError();
-    yaExisteReservaCamposClave = false;
-    sessionMBean.setReservaConfirmada(null);
+		yaExisteReservaCamposClave = false;
+		sessionMBean.setReservaConfirmada(null);
+		sessionMBean.setEnvioCorreoReserva(Boolean.TRUE);
 		try {
 			boolean hayError = false;
       if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
@@ -387,6 +389,10 @@ public class Paso3AdminMBean extends BaseMBean {
 					//Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
 				}
 			}
+			
+			sessionMBean.setReservaConfirmada(reserva);
+			sessionMBean.setReserva(null);
+			
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
 			String linkBase = request.getScheme()+"://"+request.getServerName();
@@ -396,11 +402,10 @@ public class Paso3AdminMBean extends BaseMBean {
 			Integer recursoId = reserva.getDisponibilidades().get(0).getRecurso().getId();
 			Integer agendaId = reserva.getDisponibilidades().get(0).getRecurso().getAgenda().getId();
 			String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&ri="+reserva.getId();
-      String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&r="+recursoId+"&ri="+reserva.getId();
-      comunicacionesEJB.enviarComunicacionesConfirmacion(sessionMBean.getEmpresaActual(), linkCancelacion, linkModificacion, reserva, sessionMBean.getIdiomaActual(), 
+			String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sessionMBean.getEmpresaActual().getId()+"&a="+agendaId+"&r="+recursoId+"&ri="+reserva.getId();
+			comunicacionesEJB.enviarComunicacionesConfirmacion(sessionMBean.getEmpresaActual(), linkCancelacion, linkModificacion, reserva, sessionMBean.getIdiomaActual(), 
 			    sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora());
-			sessionMBean.setReservaConfirmada(reserva);
-			sessionMBean.setReserva(null);
+			
 		}catch (ValidacionPorCampoException e) {
 			//Alguno de los campos no tiene el formato esperado
 			List<String> idComponentesError = new ArrayList<String>();
@@ -503,11 +508,15 @@ public class Paso3AdminMBean extends BaseMBean {
 			FormularioDinamicoReserva.marcarCamposError(idComponentesError, campos);
 			return null;
 		}catch(BusinessException bEx) {
-      //Seguramente esto fue lanzado por una Accion
-      addErrorMessage(bEx.getMessage());
-      bEx.printStackTrace();
-      return null;
-    }catch(Exception ex) {
+			//Seguramente esto fue lanzado por una Accion
+			addErrorMessage(bEx.getMessage());
+			bEx.printStackTrace();
+			return null;
+		}catch(UserException uEx) {
+			sessionMBean.setEnvioCorreoReserva(Boolean.FALSE);
+			datosReservaMBean.clear();
+			return "reservaConfirmada";
+		}catch(Exception ex) {
 			addErrorMessage(sessionMBean.getTextos().get("sistema_en_mantenimiento"));
 			ex.printStackTrace();
 			return null;

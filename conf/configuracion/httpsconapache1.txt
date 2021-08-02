@@ -1,0 +1,3 @@
+
+<connector name="http" protocol="HTTP/1.1" scheme="http" socket-binding="http" enabled="false"/>
+<connector name="ajp13" protocol="AJP/1.3" scheme="https" socket-binding="ajp"/>

@@ -170,6 +170,8 @@ public class Recurso implements Serializable {
   
   private AccionMiPerfil accionMiPerfil;
   
+  private boolean seleccionado;
+  
 	public Recurso () {
 		visibleInternet = false;
 		plantillas = new ArrayList<Plantilla>();
@@ -1122,6 +1124,17 @@ public class Recurso implements Serializable {
 	public void setAccionMiPerfil(AccionMiPerfil accionMiPerfil) {
 		this.accionMiPerfil = accionMiPerfil;
 	}
+	
+	
+	
+	@Transient
+	public boolean isSeleccionado() {
+		return seleccionado;
+	}
+
+	public void setSeleccionado(boolean seleccionado) {
+		this.seleccionado = seleccionado;
+	}
 
 @Override
 public boolean equals(Object obj) {
@@ -1236,6 +1249,26 @@ public boolean equals(Object obj) {
 		if (other.reservaMultiplePendienteTiempoMax != null)
 			return false;
 	} else if (!reservaMultiplePendienteTiempoMax.equals(other.reservaMultiplePendienteTiempoMax))
+		return false;
+	if (diasInicioVentanaIntranet == null) {
+		if (other.diasInicioVentanaIntranet != null)
+			return false;
+	} else if (!diasInicioVentanaIntranet.equals(other.diasInicioVentanaIntranet))
+		return false;
+	if (diasVentanaIntranet == null) {
+		if (other.diasVentanaIntranet != null)
+			return false;
+	} else if (!diasVentanaIntranet.equals(other.diasVentanaIntranet))
+		return false;
+	if (diasInicioVentanaInternet == null) {
+		if (other.diasInicioVentanaInternet != null)
+			return false;
+	} else if (!diasInicioVentanaInternet.equals(other.diasInicioVentanaInternet))
+		return false;
+	if (diasVentanaInternet == null) {
+		if (other.diasVentanaInternet != null)
+			return false;
+	} else if (!diasVentanaInternet.equals(other.diasVentanaInternet))
 		return false;
 	return true;
 }

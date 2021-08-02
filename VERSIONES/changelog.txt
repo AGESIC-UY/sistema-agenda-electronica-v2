@@ -312,6 +312,9 @@ Versión 2.3.14 (2021-03-15)
   
 Versión 2.3.15
 * Se añade la funcionalidad para mover reservas entre recursos incluso de diferentes agendas (aunque de la misma empresa).
+* Mejora en el cron de depuración de reservas.
+
+* Eliminación de mensaje antes del movimiento de reservas
 
 Versión 2.3.15 - R1
 * Se corrige acceso por url a la pantalla de movimiento de reservas.
@@ -319,3 +322,22 @@ Versión 2.3.15 - R1
 Versión 2.3.15 - R2
 * Corrección de horarios dentro del día actual
 * Eliminación de mensaje antes del movimiento de reservas
+
+
+Versión 2.3.16
+* Requerimientos del Encargo 35:
+  * Requerimiento 1: Agregar nueva opción “Carga masiva“ en el menú recursos.
+  * Requerimiento 2: Importar recursos y disponibilidades.
+  * Requerimiento 3: Agregar nueva opción “Actualizaciónmasiva“ en el menú recursos.
+  * Requerimiento 4: Actualizar datos de internet e intranet para un conjunto de recursos.
+  * Requerimiento 5: Modificar funcionalidad de Cancelar reservas por período.
+  
+* Se corrige error que se presenta cuando se genera una reserva y la agenda del recurso no tiene textos de correo.
+* Se corrige problema reportado en el movimiento de reservas cuando la disponibilidad solo tiene reservas en estado P. En este sentido se estaba dejando el cupo en 0, lo cual no era correcto. El cupo debe mantenerse si solo existen reservas en estado P en la disponibilidad.
+
+Versión 2.3.16 R1
+* Se corrige error que se presenta cuando se genera una reserva y la agenda del recurso no tiene textos de correo, tanto en sae público como en sae privado.
+* Se corrige error que se presenta luego de una actualización masiva el check general quedaba seleccionado, ahora queda deseleccionado como los demas checks.
+* Se corrige error que se presenta luego de una carga masiva se generaba una disponibilidad fuera del rango de horarios que se especifica en la planilla. En este sentido si el     rango era de 12:15 a 15:00 se generaba una disponibilidad extra con hora inicio 15:05, se corrigío y ahora la hora inicio de la última disponibilidad en este ejemplo queda en 14:55.
+* Se corrige error que se presenta luego de una carga masiva, actualización de disponibilidades se traslapan, no mostraba mensaje de error en la línea que ocurría el traslape, ahora ya muestra la línea de error y un mensaje general.
+* Se corrige problema que se presenta en el envío de novedades, no siempre se envíaban la novedades debido a que el ID de bloqueo en el proceso de envío de novedades estaba siendo utilizado en el proceso de depuración de reservas, se cambio el ID de bloque en el depurador de reservas para que esto no choqué a la hora que se ejecuten los dos procesos.

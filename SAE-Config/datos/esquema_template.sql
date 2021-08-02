@@ -323,11 +323,11 @@ CREATE TABLE ae_recursos (
     cancela_tiempo integer NOT NULL DEFAULT 0,
     cancela_unidad integer NOT NULL DEFAULT 12,
     cancela_tipo varchar(1) NOT NULL DEFAULT 'I',
-    mi_perfil_con_hab bool NOT NULL DEFAULT true,
-  mi_perfil_can_hab bool NOT NULL DEFAULT true,
-  mi_perfil_rec_hab bool NOT NULL DEFAULT true,
+    mi_perfil_con_hab bool NOT NULL DEFAULT false,
+  mi_perfil_can_hab bool NOT NULL DEFAULT false,
+  mi_perfil_rec_hab bool NOT NULL DEFAULT false,
   mi_perfil_con_tit varchar(255) NULL DEFAULT NULL,
-  mi_perfil_con_cor varchar(500) NULL DEFAULT NULL
+  mi_perfil_con_cor varchar(500) NULL DEFAULT NULL,
   mi_perfil_con_lar varchar(1024) NULL DEFAULT NULL,
   mi_perfil_con_ven int4 NULL,
   mi_perfil_can_tit varchar(255) NULL DEFAULT NULL,
@@ -341,8 +341,8 @@ CREATE TABLE ae_recursos (
   mi_perfil_rec_hora int4 NULL,
   mi_perfil_rec_dias int4 NULL,
   reserva_pen_tiempo_max integer DEFAULT NULL,
-  reserva_pend_tiempo_max integer DEFAULT NULL 
-  
+  reserva_pend_tiempo_max integer DEFAULT null,
+  reserva_multiple_pend_tiempo_max int4 NULL
 );
 ALTER TABLE ae_recursos OWNER TO sae;
 
@@ -431,7 +431,7 @@ CREATE TABLE ae_textos_agenda (
     aeag_id integer NOT NULL,
     texto_correo_conf character varying(1000),
     texto_correo_canc character varying(1000),
-    ae_textos_agenda character varying(1000),
+    texto_correo_tras character varying(1000),
     por_defecto boolean DEFAULT false NOT NULL,
     idioma character varying(5) NOT NULL
 );
@@ -664,6 +664,7 @@ CREATE TABLE ae_recursos_aud
    mi_perfil_rec_dias int4 NULL,
    reserva_pen_tiempo_max integer DEFAULT NULL,
    reserva_pend_tiempo_max integer DEFAULT NULL, 
+   reserva_multiple_pend_tiempo_max int4 NULL,
    fecha_modificacion timestamp NULL,
    usuario varchar(45) NULL,
    "version" int4 NOT NULL,

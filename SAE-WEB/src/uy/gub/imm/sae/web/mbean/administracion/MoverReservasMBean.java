@@ -200,6 +200,7 @@ public class MoverReservasMBean extends BaseMBean {
 	
 	
 	public void validarRecursoOrigen() {
+
 		boolean hayError = false;
 		if(moverReservasFecha==null) {
 			addErrorMessage(sessionMBean.getTextos().get("seleccione_un_dia"), MSG_ID);
@@ -270,6 +271,9 @@ public class MoverReservasMBean extends BaseMBean {
 	}
 	
 	
+	
+	
+	
 	public void moverReservasValidar() {
 		boolean hayError = false;
 		if(StringUtils.isBlank(moverReservasAgendaDestinoId) || StringUtils.isBlank(moverReservasRecursoDestinoId)) {
@@ -329,14 +333,10 @@ public class MoverReservasMBean extends BaseMBean {
 				for(String mensaje : resultado.getMensajes()) {
 					addAdvertenciaMessage(mensaje, MSG_ID);
 				}
-				
-				if(!resultado.getMensajes().isEmpty()){
-					addAdvertenciaMessage("Presione el botón Ejecutar para proceder con el movimiento", MSG_ID);
-				}
-				
 				for(String warning : resultado.getWarnings()) {
 					addAdvertenciaMessage(warning, MSG_ID);
 				}
+                addAdvertenciaMessage("Presione el botón Ejecutar para proceder con el movimiento", MSG_ID);
 				paso = 2;
 			}else {
 				for(String error : resultado.getErrores()) {

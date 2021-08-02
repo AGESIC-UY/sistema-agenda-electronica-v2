@@ -105,8 +105,8 @@ public class CrearDisponibilidadMBean extends BaseMBean {
 				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_obligatoria"), "formCrearDisponibilidad:fecha");
 				hayError = true;
 			}else if (Utiles.esFechaInvalida(crearDispSessionMBean.getFechaCrear())) {
-        addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formCrearDisponibilidad:fecha");
-        hayError = true;
+				addErrorMessage(sessionMBean.getTextos().get("la_fecha_es_invalida"), "formCrearDisponibilidad:fecha");
+				hayError = true;
       }else { 
 		    Calendar hoy = new GregorianCalendar();
 		    hoy.add(Calendar.MILLISECOND, sessionMBean.getTimeZone().getOffset(hoy.getTimeInMillis()));

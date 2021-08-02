@@ -101,195 +101,195 @@ import uy.gub.imm.sae.exception.ValidacionIPException;
 
 @Stateless
 public class AgendarReservasBean implements AgendarReservasLocal, AgendarReservasRemote {
-	
-	@PersistenceContext(unitName = "AGENDA-GLOBAL")
-	private EntityManager globalEntityManager;
+  
+  @PersistenceContext(unitName = "AGENDA-GLOBAL")
+  private EntityManager globalEntityManager;
 
-	@PersistenceContext(unitName = "SAE-EJB")
-	private EntityManager entityManager;
+  @PersistenceContext(unitName = "SAE-EJB")
+  private EntityManager entityManager;
 
-	@EJB
-	private AgendarReservasHelperLocal helper; 
+  @EJB
+  private AgendarReservasHelperLocal helper; 
 
-	@EJB
-	private ServiciosTrazabilidadBean trazaBean;
+  @EJB
+  private ServiciosTrazabilidadBean trazaBean;
 
-	@EJB
-	private ServiciosNovedadesBean novedadesBean;
+  @EJB
+  private ServiciosNovedadesBean novedadesBean;
 
-	@EJB
-	private AccionesHelperLocal helperAccion;
+  @EJB
+  private AccionesHelperLocal helperAccion;
 
-	@Resource
-	private SessionContext ctx;
+  @Resource
+  private SessionContext ctx;
 
-	@EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
-	private Recursos recursosEJB;
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/RecursosBean!uy.gub.imm.sae.business.ejb.facade.RecursosRemote")
+  private Recursos recursosEJB;
 
-	@EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
-	private UsuariosEmpresas empresasEJB;
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
+  private UsuariosEmpresas empresasEJB;
 
-	@EJB(mappedName="java:global/sae-1-service/sae-ejb/ComunicacionesBean!uy.gub.imm.sae.business.ejb.facade.ComunicacionesRemote")
-	private Comunicaciones comunicacionesBean;
+  @EJB(mappedName="java:global/sae-1-service/sae-ejb/ComunicacionesBean!uy.gub.imm.sae.business.ejb.facade.ComunicacionesRemote")
+  private Comunicaciones comunicacionesBean;
 
-	@EJB
-	private DisponibilidadesLocal disponibilidadEJB;
-	
+  @EJB
+  private DisponibilidadesLocal disponibilidadEJB;
+  
     @Resource(lookup = "java:jboss/infinispan/container/sae")
     private EmbeddedCacheManager saeCacheManager;
     
-	static Logger logger = Logger.getLogger(AgendarReservasBean.class);
-	
-	
-	/**
-	* Retorna la agenda cuyo nombre sea <b>id</b> siempre y cuando esta viva (fechaBaja == null).
-	* @throws ApplicationException 
-	* @throws EntidadNoEncontradaException 
-	* @throws ApplicationException 
-	* @throws BusinessException 
-	* @throws ParametroIncorrectoException 
-	*/
-	public Agenda consultarAgendaPorId(Integer id) throws ApplicationException, BusinessException {
-		if(id == null) {
-			return null;
-		}
-		Agenda agenda = null;
-		try {
-			agenda = (Agenda) entityManager.createQuery("select a from Agenda a where a.id=:id and a.fechaBaja is null").setParameter("id", id).getSingleResult();
-			return agenda;
-		}catch(NonUniqueResultException nurEx) {
-			throw new ApplicationException("no_se_encuentra_la_agenda_especificada");
-		}catch(NoResultException nrEx) {
-			throw new ApplicationException("no_se_encuentra_la_agenda_especificada");
-		}
-	}
-	
-	/**
-	* Retorna el recurso cuyo que esté asociada a la reserva con el identificador <b>reservId</b> 
-	* @throws ApplicationException 
-	* @throws EntidadNoEncontradaException 
-	* @throws ApplicationException 
-	* @throws BusinessException 
-	* @throws ParametroIncorrectoException 
-	*/
-	public Recurso consultarRecursoPorReservaId(Integer reservId) throws ApplicationException, BusinessException {
-		if(reservId == null) {
-			return null;
-		}
-		Recurso recurso = null;
-		try {
-			recurso = (Recurso) entityManager
-  	    .createQuery("select distinct d.recurso from Reserva r join r.disponibilidades d where r.id=:reservaId and r.estado ='R'")
-  			.setParameter("reservaId", reservId)
-  			.getSingleResult();
-			return recurso;
-		}catch(NonUniqueResultException nurEx) {
-			throw new ApplicationException("no_se_encuentra_el_recurso_especificado");
-		}catch(NoResultException nrEx) {
-			return null;
-		}
-	}
-	
-	/**
-	 * Retorna el recurso cuyo id sea <b>id</b> siempre y cuando esta vivo (fechaBaja == null).
-	 * Controla que el usuario tenga rol FuncionarioAtencion sobre la agenda <b>a</b>
-	 * Roles permitidos: FuncionarioAtencion
-	 * @throws BusinessException 
-	 * @throws ApplicationException 
-	 * @throws BusinessException 
-	 * @throws ParametroIncorrectoException 
-	 */
-	public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException  {
-		if (a == null || id == null) {
-			throw new BusinessException("-1","Parametros nulos");
-		}
-		a = consultarAgendaPorId(a.getId());
-		if (a == null) {
-			throw new BusinessException("-1","No se encuentra la agenda");
-		}
-		Recurso recurso = null;
-		try {
-			recurso = (Recurso) entityManager.createQuery("from Recurso r where r.id = :id and r.fechaBaja is null and r.agenda = :a")
-			  .setParameter("id", id)
-			  .setParameter("a", a)
-			  .getSingleResult();
-		}catch (NoResultException e) {
-			throw new BusinessException("-1", "No se encuentra el recurso de id "+id);
-		}catch (Exception e) {
-			throw new ApplicationException(e);
-		}
-		return recurso;		
-	}
-	
-	/**
-	 * Retorna una lista de agendas vivas (fechaBaja == null) ordenada por nombre
-	 * Solo retorna las agendas para las que el usuario tenga rol FuncionarioAtencion.
-	 * Solo retorna las agendas tales que una posterior llamada a consultarRecursos retorne
-	 * por lo menos un recurso.
-	 * Roles permitidos: FuncionarioAtencion
-	 * @throws ApplicationException 
-	 * @throws ApplicationException 
-	 * @throws BusinessException 
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException {
-		List<Agenda> agendas = null;
-		try {
-			agendas = (List<Agenda>) entityManager.createQuery("from Agenda a where a.fechaBaja is null order by a.nombre")
-					.getResultList();
-		}catch (Exception e) {
-			throw new ApplicationException(e);
-		}
-		List<Agenda> agendasValidas = new ArrayList<Agenda>();
-		for (Agenda agenda : agendas) {
-			if (consultarRecursos(agenda).size() != 0) {
-				agendasValidas.add(agenda);
-			}
-		}
-		return agendasValidas;
-	}
+  static Logger logger = Logger.getLogger(AgendarReservasBean.class);
+  
+  
+  /**
+  * Retorna la agenda cuyo nombre sea <b>id</b> siempre y cuando esta viva (fechaBaja == null).
+  * @throws ApplicationException 
+  * @throws EntidadNoEncontradaException 
+  * @throws ApplicationException 
+  * @throws BusinessException 
+  * @throws ParametroIncorrectoException 
+  */
+  public Agenda consultarAgendaPorId(Integer id) throws ApplicationException, BusinessException {
+    if(id == null) {
+      return null;
+    }
+    Agenda agenda = null;
+    try {
+      agenda = (Agenda) entityManager.createQuery("select a from Agenda a where a.id=:id and a.fechaBaja is null").setParameter("id", id).getSingleResult();
+      return agenda;
+    }catch(NonUniqueResultException nurEx) {
+      throw new ApplicationException("no_se_encuentra_la_agenda_especificada");
+    }catch(NoResultException nrEx) {
+      throw new ApplicationException("no_se_encuentra_la_agenda_especificada");
+    }
+  }
+  
+  /**
+  * Retorna el recurso cuyo que esté asociada a la reserva con el identificador <b>reservId</b> 
+  * @throws ApplicationException 
+  * @throws EntidadNoEncontradaException 
+  * @throws ApplicationException 
+  * @throws BusinessException 
+  * @throws ParametroIncorrectoException 
+  */
+  public Recurso consultarRecursoPorReservaId(Integer reservId) throws ApplicationException, BusinessException {
+    if(reservId == null) {
+      return null;
+    }
+    Recurso recurso = null;
+    try {
+      recurso = (Recurso) entityManager
+        .createQuery("select distinct d.recurso from Reserva r join r.disponibilidades d where r.id=:reservaId and r.estado ='R'")
+        .setParameter("reservaId", reservId)
+        .getSingleResult();
+      return recurso;
+    }catch(NonUniqueResultException nurEx) {
+      throw new ApplicationException("no_se_encuentra_el_recurso_especificado");
+    }catch(NoResultException nrEx) {
+      return null;
+    }
+  }
+  
+  /**
+   * Retorna el recurso cuyo id sea <b>id</b> siempre y cuando esta vivo (fechaBaja == null).
+   * Controla que el usuario tenga rol FuncionarioAtencion sobre la agenda <b>a</b>
+   * Roles permitidos: FuncionarioAtencion
+   * @throws BusinessException 
+   * @throws ApplicationException 
+   * @throws BusinessException 
+   * @throws ParametroIncorrectoException 
+   */
+  public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException  {
+    if (a == null || id == null) {
+      throw new BusinessException("-1","Parametros nulos");
+    }
+    a = consultarAgendaPorId(a.getId());
+    if (a == null) {
+      throw new BusinessException("-1","No se encuentra la agenda");
+    }
+    Recurso recurso = null;
+    try {
+      recurso = (Recurso) entityManager.createQuery("from Recurso r where r.id = :id and r.fechaBaja is null and r.agenda = :a")
+        .setParameter("id", id)
+        .setParameter("a", a)
+        .getSingleResult();
+    }catch (NoResultException e) {
+      throw new BusinessException("-1", "No se encuentra el recurso de id "+id);
+    }catch (Exception e) {
+      throw new ApplicationException(e);
+    }
+    return recurso;   
+  }
+  
+  /**
+   * Retorna una lista de agendas vivas (fechaBaja == null) ordenada por nombre
+   * Solo retorna las agendas para las que el usuario tenga rol FuncionarioAtencion.
+   * Solo retorna las agendas tales que una posterior llamada a consultarRecursos retorne
+   * por lo menos un recurso.
+   * Roles permitidos: FuncionarioAtencion
+   * @throws ApplicationException 
+   * @throws ApplicationException 
+   * @throws BusinessException 
+   */
+  @SuppressWarnings("unchecked")
+  public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException {
+    List<Agenda> agendas = null;
+    try {
+      agendas = (List<Agenda>) entityManager.createQuery("from Agenda a where a.fechaBaja is null order by a.nombre")
+          .getResultList();
+    }catch (Exception e) {
+      throw new ApplicationException(e);
+    }
+    List<Agenda> agendasValidas = new ArrayList<Agenda>();
+    for (Agenda agenda : agendas) {
+      if (consultarRecursos(agenda).size() != 0) {
+        agendasValidas.add(agenda);
+      }
+    }
+    return agendasValidas;
+  }
 
-	/**
-	 * Retorna una lista de recursos vivos (fechaBaja == null) ordenados por nombre
-	 * Solo retorna aquellos recursos tales que la fecha actual este comprendida entre
-	 * la fechaInicio y fechaFin del recurso. 
-	 * Controla que el usuario tenga rol FuncionarioAtencion sobre la agenda <b>a</b>
-	 * Roles permitidos: FuncionarioAtencion
-	 * @throws ApplicationException 
-	 * @throws BusinessException 
-	 */
-	@SuppressWarnings("unchecked")
-	public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException {
-		if (a == null) {
-			throw new BusinessException("-1", "Parametro nulo");
-		}
-		a = entityManager.find(Agenda.class, a.getId());
-		if (a == null) {
-			throw new BusinessException("-1", "No se encuentra la agenda indicada");
-		}
-		List<Recurso> recursos = null;
-		Date ahora = new Date();
-		try {
-			recursos = (List<Recurso>)entityManager.createQuery(
-				"from Recurso r where " +
-				"r.agenda = :a and " +
-				"r.fechaBaja is null and  " +
-				"r.fechaInicio <= :ahora and " +
-				"(r.fechaFin is null or r.fechaFin >= :ahora)" +
-				"order by r.descripcion")
-				.setParameter("a", a)
-				.setParameter("ahora", ahora, TemporalType.TIMESTAMP)
-				.getResultList();
-		}catch (Exception e) {
-			throw new ApplicationException(e);
-		}
-		return recursos;
-	}
+  /**
+   * Retorna una lista de recursos vivos (fechaBaja == null) ordenados por nombre
+   * Solo retorna aquellos recursos tales que la fecha actual este comprendida entre
+   * la fechaInicio y fechaFin del recurso. 
+   * Controla que el usuario tenga rol FuncionarioAtencion sobre la agenda <b>a</b>
+   * Roles permitidos: FuncionarioAtencion
+   * @throws ApplicationException 
+   * @throws BusinessException 
+   */
+  @SuppressWarnings("unchecked")
+  public List<Recurso> consultarRecursos(Agenda a) throws ApplicationException, BusinessException {
+    if (a == null) {
+      throw new BusinessException("-1", "Parametro nulo");
+    }
+    a = entityManager.find(Agenda.class, a.getId());
+    if (a == null) {
+      throw new BusinessException("-1", "No se encuentra la agenda indicada");
+    }
+    List<Recurso> recursos = null;
+    Date ahora = new Date();
+    try {
+      recursos = (List<Recurso>)entityManager.createQuery(
+        "from Recurso r where " +
+        "r.agenda = :a and " +
+        "r.fechaBaja is null and  " +
+        "r.fechaInicio <= :ahora and " +
+        "(r.fechaFin is null or r.fechaFin >= :ahora)" +
+        "order by r.descripcion")
+        .setParameter("a", a)
+        .setParameter("ahora", ahora, TemporalType.TIMESTAMP)
+        .getResultList();
+    }catch (Exception e) {
+      throw new ApplicationException(e);
+    }
+    return recursos;
+  }
 
   public void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva) throws UserException {
     cancelarReserva(empresa, recurso, reserva, false);
   }
-	
+  
   public void cancelarReserva(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idReserva) throws UserException {
     if(idEmpresa==null) {
       throw new UserException("debe_especificar_la_empresa");
@@ -337,18 +337,18 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     cancelarReserva(empresa, recurso, reserva, false);
   }
   
-	private void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva, boolean masiva) throws UserException {
-		if (recurso == null) {
-			throw new UserException("debe_especificar_el_recurso");
-		}
-		if (reserva == null) {
-			throw new UserException("debe_especificar_la_reserva");
-		}
-		Reserva r = entityManager.find(Reserva.class, reserva.getId());
-		if (r == null) {
-			throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
-		}
-		//Determinar el timezone de la reserva
+  private void cancelarReserva(Empresa empresa, Recurso recurso, Reserva reserva, boolean masiva) throws UserException {
+    if (recurso == null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    if (reserva == null) {
+      throw new UserException("debe_especificar_la_reserva");
+    }
+    Reserva r = entityManager.find(Reserva.class, reserva.getId());
+    if (r == null) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    //Determinar el timezone de la reserva
     TimeZone timezone = TimeZone.getDefault();
     if(recurso.getAgenda().getTimezone()!=null && !recurso.getAgenda().getTimezone().isEmpty()) {
       timezone = TimeZone.getTimeZone(recurso.getAgenda().getTimezone());
@@ -357,9 +357,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         timezone = TimeZone.getTimeZone(empresa.getTimezone());
       }
     }
-		//Determinar si aún se está a tiempo de cancelar la reserva (no aplica si es masiva)
-		if(!masiva) {
-		  Calendar horaLimiteTimezone = new GregorianCalendar();
+    //Determinar si aún se está a tiempo de cancelar la reserva (no aplica si es masiva)
+    if(!masiva) {
+      Calendar horaLimiteTimezone = new GregorianCalendar();
       horaLimiteTimezone.setTime(reserva.getFechaHora());
       horaLimiteTimezone.add(recurso.getCancelacionUnidad(), -1*recurso.getCancelacionTiempo());
       Calendar horaActualTimezone = new GregorianCalendar();
@@ -367,22 +367,22 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       if(!horaActualTimezone.before(horaLimiteTimezone)) {
         throw new UserException("ha_expirado_el_plazo_de_cancelacion");
       }
-		}	
-		ReservaDTO reservaDTO = new ReservaDTO();
-		reservaDTO.setEstado(r.getEstado().toString());
-		reservaDTO.setFecha(r.getDisponibilidades().get(0).getFecha());
-		reservaDTO.setHoraInicio(r.getDisponibilidades().get(0).getHoraInicio());
-		reservaDTO.setId(r.getId());
-		reservaDTO.setOrigen(r.getOrigen());
-		reservaDTO.setNumero(r.getDisponibilidades().get(0).getNumerador() + 1);
-		reservaDTO.setTramiteCodigo(r.getTramiteCodigo());
-		reservaDTO.setTramiteNombre(r.getTramiteNombre());
-		reservaDTO.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase()); //el usuario de sesion es el que esta cancelando la reserva anterior y ese dato lo enviamos hacia GAP
-		reservaDTO.setTcancela(masiva?TipoCancelacion.M.toString():TipoCancelacion.I.toString());
-		reservaDTO.setFcancela(new Date());
-		if (r.getLlamada() != null) {
-			reservaDTO.setPuestoLlamada(r.getLlamada().getPuesto());
-		}
+    } 
+    ReservaDTO reservaDTO = new ReservaDTO();
+    reservaDTO.setEstado(r.getEstado().toString());
+    reservaDTO.setFecha(r.getDisponibilidades().get(0).getFecha());
+    reservaDTO.setHoraInicio(r.getDisponibilidades().get(0).getHoraInicio());
+    reservaDTO.setId(r.getId());
+    reservaDTO.setOrigen(r.getOrigen());
+    reservaDTO.setNumero(r.getDisponibilidades().get(0).getNumerador() + 1);
+    reservaDTO.setTramiteCodigo(r.getTramiteCodigo());
+    reservaDTO.setTramiteNombre(r.getTramiteNombre());
+    reservaDTO.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase()); //el usuario de sesion es el que esta cancelando la reserva anterior y ese dato lo enviamos hacia GAP
+    reservaDTO.setTcancela(masiva?TipoCancelacion.M.toString():TipoCancelacion.I.toString());
+    reservaDTO.setFcancela(new Date());
+    if (r.getLlamada() != null) {
+      reservaDTO.setPuestoLlamada(r.getLlamada().getPuesto());
+    }
     //Ejecuto acciones asociadas al evento cancelar
     Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
     for (DatoReserva valor : reserva.getDatosReserva()) {
@@ -394,10 +394,10 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       throw new UserException(ex.getMessage());
     }
     r.setEstado(Estado.C);
-		r.setObservaciones(reserva.getObservaciones());
-		r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
-		r.setTcancela(masiva?TipoCancelacion.M:TipoCancelacion.I);
-		r.setFcancela(reservaDTO.getFcancela());
+    r.setObservaciones(reserva.getObservaciones());
+    r.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+    r.setTcancela(masiva?TipoCancelacion.M:TipoCancelacion.I);
+    r.setFcancela(reservaDTO.getFcancela());
     //Determinar la fecha de liberación según la cancelación sea inmediata o diferida
     if(recurso.getCancelacionTipo()==null || FormaCancelacion.I.equals(recurso.getCancelacionTipo())) {
       //Es inmediata, el cupo se libera al instante
@@ -430,18 +430,18 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       fechaHoraLiberacion.add(Calendar.MILLISECOND, (int)milisegundosAleatorios);
       r.setFechaLiberacion(fechaHoraLiberacion.getTime());
     }
-		//Registrar la cancelacion en el sistema de trazas del PEU
-		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), r.getTramiteCodigo(), r.getId());
-		if(transaccionId != null) {
-			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.CANCELACION);
-		}
-		//Publicar la novedad
-		novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
-	}
+    //Registrar la cancelacion en el sistema de trazas del PEU
+    String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), r.getTramiteCodigo(), r.getId());
+    if(transaccionId != null) {
+      trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.CANCELACION);
+    }
+    //Publicar la novedad
+    novedadesBean.publicarNovedad(empresa, reserva, Acciones.CANCELACION);
+  }
 
-	/**
-	 * Libera el cupo de una reserva cancelada pero no liberada aún
-	 */
+  /**
+   * Libera el cupo de una reserva cancelada pero no liberada aún
+   */
   public void liberarReserva(Integer idEmpresa, Integer idReserva) throws UserException {
     if(idEmpresa==null) {
       throw new UserException("debe_especificar_la_empresa");
@@ -471,8 +471,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     reserva.setFechaLiberacion(new Date());
     entityManager.merge(reserva);
   }
-	
-	
+  
+  
   /**
    * Consulta una reserva por numero y para un recurso.
    * En caso contrario simplemente se busca la reserva por id y se la retorna (sin validar nada)
@@ -488,36 +488,36 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     return reserva;
   }
 
-	/**
-	 * Para controlar la existencia de cupo sin necesidad de utilizar bloqueo persiste la reserva y luego chequea que el cupo real no sea negativo, 
-	 * si esto sucede, elimina fisicamente la reserva y cancela la operacion.
-	 * @throws BusinessException 
-	 * @throws UserException 
-	 */
-	public Reserva marcarReserva(Disponibilidad disponibilidad, TokenReserva token, String ipOrigen) throws UserException {
-		if (disponibilidad == null) {
-			throw new UserException("debe_especificar_la_disponibilidad");
-		}
-		disponibilidad = entityManager.find(Disponibilidad.class, disponibilidad.getId());
-		if (disponibilidad == null) {
-			throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
-		}		
-		//Se crea la reserva en una transaccion independiente
-		Reserva reserva = helper.crearReservaPendiente(disponibilidad, token, ipOrigen);
-		//Chequeo que el cupo real no de negativo
-		//Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
-		//De lo contrario la reserva se ha marcado con exito	
-		if (helper.chequeoCupoDisponible(disponibilidad, true)) {
-			try{
-				helper.eliminarReservaPendiente(reserva);
-			} catch (ApplicationException ex) {
-          		throw new UserException("error_marcar_reserva");
-      		}
-      		throw new UserException("el_horario_acaba_de_quedar_sin_cupos");
-		}
-		return reserva;
-	}
-		
+  /**
+   * Para controlar la existencia de cupo sin necesidad de utilizar bloqueo persiste la reserva y luego chequea que el cupo real no sea negativo, 
+   * si esto sucede, elimina fisicamente la reserva y cancela la operacion.
+   * @throws BusinessException 
+   * @throws UserException 
+   */
+  public Reserva marcarReserva(Disponibilidad disponibilidad, TokenReserva token, String ipOrigen) throws UserException {
+    if (disponibilidad == null) {
+      throw new UserException("debe_especificar_la_disponibilidad");
+    }
+    disponibilidad = entityManager.find(Disponibilidad.class, disponibilidad.getId());
+    if (disponibilidad == null) {
+      throw new UserException("no_se_encuentra_la_disponibilidad_especificada");
+    }   
+    //Se crea la reserva en una transaccion independiente
+    Reserva reserva = helper.crearReservaPendiente(disponibilidad, token, ipOrigen);
+    //Chequeo que el cupo real no de negativo
+    //Si el cupo real da negativo, elimino la reserva pendiente y cancelo la operacion
+    //De lo contrario la reserva se ha marcado con exito  
+    if (helper.chequeoCupoDisponible(disponibilidad, true)) {
+      try{
+        helper.eliminarReservaPendiente(reserva);
+      } catch (ApplicationException ex) {
+              throw new UserException("error_marcar_reserva");
+          }
+          throw new UserException("el_horario_acaba_de_quedar_sin_cupos");
+    }
+    return reserva;
+  }
+    
   public Reserva marcarReservaValidandoDatos(Disponibilidad disponibilidad, Reserva reserva, TokenReserva token, String ipOrigen) throws UserException {
     if (disponibilidad == null) {
       throw new UserException("debe_especificar_la_disponibilidad");
@@ -585,49 +585,49 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
     return reservaNueva;
   }
-	
-	/**
-	 * Elimina fisicamente una reserva marcada como pendiente.
-	 */
-	public void desmarcarReserva(Reserva r) throws BusinessException {
-		if (r == null) {
-			throw new BusinessException("-1", "Parametro nulo");
-		}
-		r = entityManager.find(Reserva.class, r.getId());
-		if (r == null) {
-			throw new BusinessException("-1", "No se encuentra la reserva indicada");
-		}		
-		if (r.getEstado() != Estado.P) {
-			throw new BusinessException("-1", "Solo se puede desmarcar reservas en estado pendiente");
-		}
-		entityManager.remove(r);
-	}
-	
-	public void validarDatosReserva(Empresa empresa, Reserva reserva) throws BusinessException, ValidacionException, ApplicationException {
-		if (reserva == null || reserva.getDatosReserva()==null) {
+  
+  /**
+   * Elimina fisicamente una reserva marcada como pendiente.
+   */
+  public void desmarcarReserva(Reserva r) throws BusinessException {
+    if (r == null) {
+      throw new BusinessException("-1", "Parametro nulo");
+    }
+    r = entityManager.find(Reserva.class, r.getId());
+    if (r == null) {
+      throw new BusinessException("-1", "No se encuentra la reserva indicada");
+    }   
+    if (r.getEstado() != Estado.P) {
+      throw new BusinessException("-1", "Solo se puede desmarcar reservas en estado pendiente");
+    }
+    entityManager.remove(r);
+  }
+  
+  public void validarDatosReserva(Empresa empresa, Reserva reserva) throws BusinessException, ValidacionException, ApplicationException {
+    if (reserva == null || reserva.getDatosReserva()==null) {
       throw new BusinessException("debe_especificar_la_reserva");
-		}
-		Set<DatoReserva> datosNuevos = reserva.getDatosReserva();
-		reserva = entityManager.find(Reserva.class, reserva.getId());
-		if (reserva == null) {
-			throw new BusinessException("no_se_encuentra_la_reserva_especificada");
-		}
-		if (reserva.getEstado() == Estado.U) {
-			throw new BusinessException("no_es_posible_confirmar_su_reserva");
-		}
-		if (reserva.getEstado() != Estado.P) {
-			throw new BusinessException("no_es_posible_confirmar_su_reserva");
-		}
-		//Armo las estructuras de Map necesarias para poder ejecutar las validaciones sobre los datos de la reserva
-		Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
-		Recurso recurso = disponibilidad.getRecurso();
-		List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
-		Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
-		for (DatoReserva valor : datosNuevos) {
-			valores.put(valor.getDatoASolicitar().getNombre(), valor);
-		}
-		//Validacion basica: campos obligatorios y formato
-		helper.validarDatosReservaBasico(campos, valores);
+    }
+    Set<DatoReserva> datosNuevos = reserva.getDatosReserva();
+    reserva = entityManager.find(Reserva.class, reserva.getId());
+    if (reserva == null) {
+      throw new BusinessException("no_se_encuentra_la_reserva_especificada");
+    }
+    if (reserva.getEstado() == Estado.U) {
+      throw new BusinessException("no_es_posible_confirmar_su_reserva");
+    }
+    if (reserva.getEstado() != Estado.P) {
+      throw new BusinessException("no_es_posible_confirmar_su_reserva");
+    }
+    //Armo las estructuras de Map necesarias para poder ejecutar las validaciones sobre los datos de la reserva
+    Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
+    Recurso recurso = disponibilidad.getRecurso();
+    List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
+    Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
+    for (DatoReserva valor : datosNuevos) {
+      valores.put(valor.getDatoASolicitar().getNombre(), valor);
+    }
+    //Validacion basica: campos obligatorios y formato
+    helper.validarDatosReservaBasico(campos, valores);
     //Validacion por campos clave: no puede haber otra reserva con los mismos datos
     List<Reserva> reservasPrevias = helper.validarDatosReservaPorClave(recurso, disponibilidad, campos, valores, reserva.getTramiteCodigo(),reserva.getId());
     if (!reservasPrevias.isEmpty()) {
@@ -659,49 +659,49 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         }
       }
     }
-		//Validaciones extendidas: definidas por el usuario
-		List<ValidacionPorRecurso> validaciones = helper.obtenerValidacionesPorRecurso(recurso);
-		ReservaDTO reservaDTO = new ReservaDTO();
-		reservaDTO.setEstado(reserva.getEstado().toString());
-		reservaDTO.setFecha(reserva.getDisponibilidades().get(0).getFecha());
-		reservaDTO.setHoraInicio(reserva.getDisponibilidades().get(0).getHoraInicio());
-		reservaDTO.setId(reserva.getId());
-		if (ctx.isCallerInRole("RA_AE_FCALL_CENTER") || ctx.isCallerInRole("RA_AE_ADMINISTRADOR_DE_RECURSOS")){
-			reservaDTO.setOrigen("C"); //Call center
-		}else if (ctx.isCallerInRole("RA_AE_ANONIMO")){
-			reservaDTO.setOrigen("W"); //Web
-		}else{
-			reservaDTO.setOrigen("I"); //Otro
-		}
+    //Validaciones extendidas: definidas por el usuario
+    List<ValidacionPorRecurso> validaciones = helper.obtenerValidacionesPorRecurso(recurso);
+    ReservaDTO reservaDTO = new ReservaDTO();
+    reservaDTO.setEstado(reserva.getEstado().toString());
+    reservaDTO.setFecha(reserva.getDisponibilidades().get(0).getFecha());
+    reservaDTO.setHoraInicio(reserva.getDisponibilidades().get(0).getHoraInicio());
+    reservaDTO.setId(reserva.getId());
+    if (ctx.isCallerInRole("RA_AE_FCALL_CENTER") || ctx.isCallerInRole("RA_AE_ADMINISTRADOR_DE_RECURSOS")){
+      reservaDTO.setOrigen("C"); //Call center
+    }else if (ctx.isCallerInRole("RA_AE_ANONIMO")){
+      reservaDTO.setOrigen("W"); //Web
+    }else{
+      reservaDTO.setOrigen("I"); //Otro
+    }
     reservaDTO.setTramiteCodigo(reserva.getTramiteCodigo());
     reservaDTO.setTramiteNombre(reserva.getTramiteNombre());
-		reservaDTO.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
-		reservaDTO.setNumero(reserva.getDisponibilidades().get(0).getNumerador() + 1);
-		if (reserva.getLlamada() != null) {
-			reservaDTO.setPuestoLlamada(reserva.getLlamada().getPuesto());
-		}
-		//Ejecucion de los validadores personalizados.
-		helper.validarDatosReservaExtendido(validaciones, campos, valores, reservaDTO);
-	}
+    reservaDTO.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
+    reservaDTO.setNumero(reserva.getDisponibilidades().get(0).getNumerador() + 1);
+    if (reserva.getLlamada() != null) {
+      reservaDTO.setPuestoLlamada(reserva.getLlamada().getPuesto());
+    }
+    //Ejecucion de los validadores personalizados.
+    helper.validarDatosReservaExtendido(validaciones, campos, valores, reservaDTO);
+  }
 
-	/**
-	 * Confirma la reserva.
-	 * Solo aplica si la reserva existe y está en el estado P (Pendiente).
-	 * Si la reserva debe tener datos, estos son exigidos y validados en este metodo, incluyendo la verificacion de clave unica
-	 * Si se trata de una reserva individual (el token es nulo) queda en estado Reservada (confirmada); si se trata de una reserva 
-	 *   perteneciente a un bloque de reservas múltiples permanece en estado pendiente
-	 * @throws ApplicationException 
-	 * @throws BusinessException
-	 * @return Reserva: Devuelve la reserva pues se le ha asignado un numero unico de reserva dentro de la hora a la que pertenece. 
-	 * @throws UserException
-	 * @throws ValidacionException 
-	 */
-	public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
-		throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
-		if (reserva == null || reserva.getDatosReserva()==null) {
+  /**
+   * Confirma la reserva.
+   * Solo aplica si la reserva existe y está en el estado P (Pendiente).
+   * Si la reserva debe tener datos, estos son exigidos y validados en este metodo, incluyendo la verificacion de clave unica
+   * Si se trata de una reserva individual (el token es nulo) queda en estado Reservada (confirmada); si se trata de una reserva 
+   *   perteneciente a un bloque de reservas múltiples permanece en estado pendiente
+   * @throws ApplicationException 
+   * @throws BusinessException
+   * @return Reserva: Devuelve la reserva pues se le ha asignado un numero unico de reserva dentro de la hora a la que pertenece. 
+   * @throws UserException
+   * @throws ValidacionException 
+   */
+  public Reserva confirmarReserva(Empresa empresa, Reserva reserva, String transaccionPadreId, Long pasoPadre, boolean inicioAsistido) 
+    throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException {
+    if (reserva == null || reserva.getDatosReserva()==null) {
       throw new BusinessException("debe_especificar_la_reserva");
-		}
-		//Esto se lee antes de recuperar la reserva de la base porque puede haber cambiado
+    }
+    //Esto se lee antes de recuperar la reserva de la base porque puede haber cambiado
     Set<DatoReserva> datosNuevos = reserva.getDatosReserva();
     String tramiteCodigo = reserva.getTramiteCodigo();
     String tramiteNombre = reserva.getTramiteNombre();
@@ -713,70 +713,70 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       }
     }
     //Volver a cargar la reserva para evitar conflicto de versiones
-		reserva = entityManager.find(Reserva.class, reserva.getId());
-		if (reserva == null) {
-			throw new UserException("no_se_encuentra_la_reserva_especificada");
-		}
-		if (reserva.getEstado() != Estado.P) {
-			throw new UserException("no_es_posible_confirmar_su_reserva");
-		}
-		//Pisar estos datos con lo que vino de la interfaz
-		for(DatoReserva dato : datosNuevos) {
-		  reserva.getDatosReserva().add(dato);
-		}
+    reserva = entityManager.find(Reserva.class, reserva.getId());
+    if (reserva == null) {
+      throw new UserException("no_se_encuentra_la_reserva_especificada");
+    }
+    if (reserva.getEstado() != Estado.P) {
+      throw new UserException("no_es_posible_confirmar_su_reserva");
+    }
+    //Pisar estos datos con lo que vino de la interfaz
+    for(DatoReserva dato : datosNuevos) {
+      reserva.getDatosReserva().add(dato);
+    }
     reserva.setTramiteCodigo(tramiteCodigo);
     reserva.setTramiteNombre(tramiteNombre);
-		//Ajustar el número de documento si es una cédula (dejar solo dígitos)
-		String tipoDocumento = null;
-		String numeroDocumento = null;
-		for(DatoReserva datoReserva : reserva.getDatosReserva()) {
-		  if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
-		    numeroDocumento = datoReserva.getValor();
-		  }
+    //Ajustar el número de documento si es una cédula (dejar solo dígitos)
+    String tipoDocumento = null;
+    String numeroDocumento = null;
+    for(DatoReserva datoReserva : reserva.getDatosReserva()) {
+      if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+        numeroDocumento = datoReserva.getValor();
+      }
       if(DatoASolicitar.TIPO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
         tipoDocumento = datoReserva.getValor();
       }
-		}
-		if("CI".equalsIgnoreCase(tipoDocumento) && numeroDocumento!=null) {
-		  numeroDocumento = numeroDocumento.replaceAll("[.-]", "");
-		  for(DatoReserva datoReserva : reserva.getDatosReserva()) {
-	      if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
-	        datoReserva.setValor(numeroDocumento);
-	      }
-		  }
-		}
-		//Validar los datos de la reserva: campos obligatorios, campos clave duplicados, validaciones extendidas 
+    }
+    if("CI".equalsIgnoreCase(tipoDocumento) && numeroDocumento!=null) {
+      numeroDocumento = numeroDocumento.replaceAll("[.-]", "");
+      for(DatoReserva datoReserva : reserva.getDatosReserva()) {
+        if(DatoASolicitar.NUMERO_DOCUMENTO.equalsIgnoreCase(datoReserva.getDatoASolicitar().getNombre()))  {
+          datoReserva.setValor(numeroDocumento);
+        }
+      }
+    }
+    //Validar los datos de la reserva: campos obligatorios, campos clave duplicados, validaciones extendidas 
     validarDatosReserva(empresa, reserva);
     //Pasó las validaciones
-		Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
-		List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
-		Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
-		for (DatoASolicitar datoASolicitar : campos) {
-			camposMap.put(datoASolicitar.getNombre(), datoASolicitar);
-		}
-		Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
-		for (DatoReserva valor : datosNuevos) {
-			valores.put(valor.getDatoASolicitar().getNombre(), valor);
-		}
-		for (DatoReserva dato: valores.values()) {
-			DatoASolicitar campo = camposMap.get(dato.getDatoASolicitar().getNombre());
-			DatoReserva datoNuevo = new DatoReserva();
-			datoNuevo.setValor(dato.getValor());
-			datoNuevo.setReserva(reserva);
-			datoNuevo.setDatoASolicitar(campo);
-			entityManager.persist(datoNuevo);
-			reserva.getDatosReserva().add(datoNuevo);
-		}
-		//Confirmo la reserva, paso el estado a Reservada (si no es múltiple) y le asigno el numero de reserva dentro de la disponibilidad.
-		//Con mutua exclusion en el acceso al numerador de la disponibilidad
-		Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
-		try {
-			disponibilidad.setNumerador(disponibilidad.getNumerador()+1);
-			entityManager.flush();
-		} catch(OptimisticLockException olEx){
-			throw new AccesoMultipleException("error_de_acceso_concurrente");
-		}
-		String origen;
+    Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+    List<DatoASolicitar> campos = helper.obtenerDatosASolicitar(recurso);
+    Map<String, DatoASolicitar> camposMap = new HashMap<String, DatoASolicitar>();
+    for (DatoASolicitar datoASolicitar : campos) {
+      camposMap.put(datoASolicitar.getNombre(), datoASolicitar);
+    }
+    Map<String, DatoReserva> valores = new HashMap<String, DatoReserva>();
+    for (DatoReserva valor : datosNuevos) {
+      valores.put(valor.getDatoASolicitar().getNombre(), valor);
+    }
+    for (DatoReserva dato: valores.values()) {
+      DatoASolicitar campo = camposMap.get(dato.getDatoASolicitar().getNombre());
+      DatoReserva datoNuevo = new DatoReserva();
+      datoNuevo.setValor(dato.getValor());
+      datoNuevo.setReserva(reserva);
+      datoNuevo.setDatoASolicitar(campo);
+      entityManager.persist(datoNuevo);
+      reserva.getDatosReserva().add(datoNuevo);
+    }
+    //Confirmo la reserva, paso el estado a Reservada (si no es múltiple) y le asigno el numero de reserva dentro de la disponibilidad.
+    //Con mutua exclusion en el acceso al numerador de la disponibilidad
+    Disponibilidad disponibilidad = reserva.getDisponibilidades().get(0);
+    try {
+      disponibilidad.setNumerador(disponibilidad.getNumerador()+1);
+      entityManager.flush();
+    } catch(OptimisticLockException olEx){
+      throw new AccesoMultipleException("error_de_acceso_concurrente");
+    }
+    String origen;
     if (ctx.isCallerInRole("RA_AE_FCALL_CENTER") || ctx.isCallerInRole("RA_AE_ADMINISTRADOR_DE_RECURSOS")){
       origen = "C"; //Call Center
     }else if (ctx.isCallerInRole("RA_AE_ANONIMO")){
@@ -806,156 +806,155 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     if(reserva.getToken() == null) {
       reserva.setEstado(Estado.R);
     }
-		reserva.setSerie(recurso.getSerie());
-		reserva.setNumero(disponibilidad.getNumerador());
-		reserva.setOrigen(origen);
-		reserva.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
-		//Asignar un codigo de seguridad
-		String codigoSeguridad = ""+(new Date()).getTime();
-		if(codigoSeguridad.length()>5) {
-			codigoSeguridad = codigoSeguridad.substring(codigoSeguridad.length()-5);
-		}
-		reserva.setCodigoSeguridad(codigoSeguridad);
-		//Si no es parte de una reserva múltiple se registra en el sistema de trazabilidad y en el de novedades
-		if(reserva.getToken() == null) {
-  		//Registrar en el sistema de trazas
-  		String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
-  		if(empresa.getOid() != null && transaccionId != null) {
-  			//Registrar el cabezal en el sistema de trazabilidad del PEU
-  			String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, reserva.getTramiteCodigo(), inicioAsistido, transaccionPadreId, pasoPadre);
-  			if(trazaGuid != null) {
-  				reserva.setTrazabilidadGuid(trazaGuid);
-  			}else {
-  				reserva.setTrazabilidadGuid("---");
-  			}
-  			//Registrar la primera linea en el sistema de trazabilidad del PEU
-  			//ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
-  			//en la base de datos para futuros intentos
-  			trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
-  			//Publicar la novedad
-  			novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
-  		}
-		}
-		return reserva;
-	}
+    reserva.setSerie(recurso.getSerie());
+    reserva.setNumero(disponibilidad.getNumerador());
+    reserva.setOrigen(origen);
+    reserva.setUcrea(ctx.getCallerPrincipal().getName().toLowerCase());
+    //Asignar un codigo de seguridad
+    String codigoSeguridad = ""+(new Date()).getTime();
+    if(codigoSeguridad.length()>5) {
+      codigoSeguridad = codigoSeguridad.substring(codigoSeguridad.length()-5);
+    }
+    reserva.setCodigoSeguridad(codigoSeguridad);
+    //Si no es parte de una reserva múltiple se registra en el sistema de trazabilidad y en el de novedades
+    if(reserva.getToken() == null) {
+      //Registrar en el sistema de trazas
+      String transaccionId = trazaBean.armarTransaccionId(empresa.getOid(), reserva.getTramiteCodigo(), reserva.getId());
+      if(empresa.getOid() != null && transaccionId != null) {
+        //Registrar el cabezal en el sistema de trazabilidad del PEU
+        String trazaGuid = trazaBean.registrarCabezal(empresa, reserva, transaccionId, reserva.getTramiteCodigo(), inicioAsistido, transaccionPadreId, pasoPadre);
+        if(trazaGuid != null) {
+          reserva.setTrazabilidadGuid(trazaGuid);
+        }else {
+          reserva.setTrazabilidadGuid("---");
+        }
+        //Registrar la primera linea en el sistema de trazabilidad del PEU
+        //ToDo: esto habria que hacerlo solo si pudo invocar el cabezal; en otro caso solo habría que guardar la invocación
+        //en la base de datos para futuros intentos
+        trazaBean.registrarLinea(empresa, reserva, transaccionId, recurso.getNombre(), ServiciosTrazabilidadBean.Paso.RESERVA);
+        //Publicar la novedad
+        novedadesBean.publicarNovedad(empresa, reserva, Acciones.RESERVA);
+      }
+    }
+    return reserva;
+  }
 
-	public List<Disponibilidad> obtenerDisponibilidades(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws UserException {
-		return obtenerDisponibilidades(recurso, ventana, timezone, true);
-	}
-	
-	@SuppressWarnings("unchecked")
-	public List<Disponibilidad> obtenerDisponibilidades(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone, boolean ajustarVentanaSegunAhora) throws UserException {
-		if (recurso == null) {
-			throw new UserException("debe_especificar_el_recurso");
-		}
-	    if (ventana == null) {
-	      throw new UserException("debe_especificar_la ventana");
-	    }
-		recurso = entityManager.find(Recurso.class, recurso.getId());
-		if (recurso == null) {
-			throw new UserException("no_se_encuentra_el_recurso_especificado");
-		}
-		//Ajustar la hora segun el timezone
-		Calendar cal = new GregorianCalendar();
-		cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTime().getTime()));
-		Date ahora = cal.getTime();
-//		if (ajustarVentanaSegunAhora && ventana.getFechaInicial().before(ahora)) {
-//			ventana.setFechaInicial(ahora);
-//		}
-//		if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
-//			ventana.setFechaInicial(recurso.getFechaInicioDisp());
-//		}
-		//Determinar todas las disponibilidades
-		//No se debe considerar las disponibilidades presenciales
-		String eql = "SELECT d " +
-				"FROM Disponibilidad d " +
-				"WHERE d.recurso IS NOT NULL " +
-				"  AND d.presencial = false " +
-				"  AND d.recurso = :r " +
-				"  AND d.fechaBaja IS NULL " +
-				"  AND d.horaInicio >= :fi " +
-				"  AND d.horaFin <= :ff " +
-				"ORDER BY d.fecha ASC, d.horaInicio ";
-		List<Disponibilidad> disponibilidades =  entityManager.createQuery(eql)
-		.setParameter("r", recurso)
-		.setParameter("fi", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
-		.setParameter("ff", ventana.getFechaFinal(), TemporalType.TIMESTAMP)
-		.getResultList();
-		
-		
-		//Determinar las reservas vivas
-		//No se debe considerar las disponibilidades presenciales
-		//Para las reservas canceladas hay que ver si ya se liberó el cupo o aún no
-		String cons = "SELECT d.id, d.fecha, d.horaInicio, COUNT(r) " +
-				"FROM Disponibilidad d " +
-				"JOIN d.reservas r " +
-				"WHERE d.recurso IS NOT NULL " +
-				"  AND d.recurso = :recurso " +
-				"  AND d.fechaBaja IS NULL " +
-				"  AND d.horaInicio >= :finicio " +
-				"  AND d.horaFin <= :ffin " +
-		        //"  AND (d.fecha <> :finicio OR d.horaInicio >= :fiCompleta) " +
-				"  AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora) " +
-				"GROUP BY d.id, d.fecha, d.horaInicio " +
-				"ORDER BY d.fecha asc, d.horaInicio ASC ";
-		List<Object[]> cantReservasVivas =  entityManager.createQuery(cons)
-		.setParameter("recurso", recurso)
-		.setParameter("finicio", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
-		.setParameter("ffin", ventana.getFechaFinal(), TemporalType.TIMESTAMP)
-		//.setParameter("fiCompleta", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
-		.setParameter("cancelado", Estado.C)
-        .setParameter("ahora", new Date(), TemporalType.TIMESTAMP)
-		.getResultList();
-		//Quitar de las disponibilidades las reservas vivas
-		Map<Integer, Integer> cantResVivasPorDispon = new HashMap<Integer, Integer>();
-		for(Object[] oo : cantReservasVivas) {
-			//logger.info("ID DISPONIBILIDAD " + (Integer)oo[0]);
-			//logger.info("cantidad de reservas en esta DISPONIBILIDAD " +  ((Long)oo[3]).intValue());
-			cantResVivasPorDispon.put((Integer)oo[0], ((Long)oo[3]).intValue());
-		}
-		
-		List<Disponibilidad> disp = new ArrayList<Disponibilidad>();
-		for (Disponibilidad d : disponibilidades) {
-			Integer cant =  cantResVivasPorDispon.get(d.getId());
-			if(cant == null) {
-				cant = 0;
-			}
-			Disponibilidad dto = new Disponibilidad();
-			dto.setId(d.getId());
-			dto.setFecha(d.getFecha());
-			dto.setHoraInicio(d.getHoraInicio());
-			dto.setHoraFin(dto.getHoraFin());
-			dto.setRecurso(null);
-			dto.setCupo(d.getCupo() - cant);
-			//logger.info("NUEVO CUPO EN LA DISPONIBILIDAD CON ID " + d.getId() + " cupos "+ dto.getCupo());
-			disp.add(dto);
-		}
-		return disp;
-	}
+  public List<Disponibilidad> obtenerDisponibilidades(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws UserException {
+    return obtenerDisponibilidades(recurso, ventana, timezone, true);
+  }
+  
+  @SuppressWarnings("unchecked")
+  public List<Disponibilidad> obtenerDisponibilidades(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone, boolean ajustarVentanaSegunAhora) throws UserException {
+    if (recurso == null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+      if (ventana == null) {
+        throw new UserException("debe_especificar_la ventana");
+      }
+    recurso = entityManager.find(Recurso.class, recurso.getId());
+    if (recurso == null) {
+      throw new UserException("no_se_encuentra_el_recurso_especificado");
+    }
+    //Ajustar la hora segun el timezone
+    Calendar cal = new GregorianCalendar();
+    cal.add(Calendar.MILLISECOND, timezone.getOffset(cal.getTime().getTime()));
+    Date ahora = cal.getTime();
+    if (ajustarVentanaSegunAhora && ventana.getFechaInicial().before(ahora)) {
+      ventana.setFechaInicial(ahora);
+    }
+    if (ventana.getFechaInicial().before(recurso.getFechaInicioDisp())) {
+      ventana.setFechaInicial(recurso.getFechaInicioDisp());
+    }
+    //Determinar todas las disponibilidades
+    //No se debe considerar las disponibilidades presenciales
+    String eql = "SELECT d " +
+        "FROM Disponibilidad d " +
+        "WHERE d.recurso IS NOT NULL " +
+        "  AND d.presencial = false " +
+        "  AND d.recurso = :r " +
+        "  AND d.fechaBaja IS NULL " +
+        "  AND d.horaInicio >= :fi " +
+        "  AND d.horaFin <= :ff " +
+        "ORDER BY d.fecha ASC, d.horaInicio ";
+    List<Disponibilidad> disponibilidades =  entityManager.createQuery(eql)
+    .setParameter("r", recurso)
+    .setParameter("fi", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
+    .setParameter("ff", ventana.getFechaFinal(), TemporalType.TIMESTAMP)
+    .getResultList();
+    
+    
+    //Determinar las reservas vivas
+    //No se debe considerar las disponibilidades presenciales
+    //Para las reservas canceladas hay que ver si ya se liberó el cupo o aún no
+    String cons = "SELECT d.id, d.fecha, d.horaInicio, COUNT(r) " +
+        "FROM Disponibilidad d " +
+        "JOIN d.reservas r " +
+        "WHERE d.recurso IS NOT NULL " +
+        "  AND d.recurso = :recurso " +
+        "  AND d.fechaBaja IS NULL " +
+        "  AND d.horaInicio >= :finicio " +
+        "  AND d.horaFin <= :ffin " +
+        "  AND (d.fecha <> :finicio OR d.horaInicio >= :fiCompleta) " +
+        "  AND (r.estado <> :cancelado OR r.fechaLiberacion>=:ahora) " +
+        "GROUP BY d.id, d.fecha, d.horaInicio " +
+        "ORDER BY d.fecha asc, d.horaInicio ASC ";
+    List<Object[]> cantReservasVivas =  entityManager.createQuery(cons)
+    .setParameter("recurso", recurso)
+    .setParameter("finicio", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
+    .setParameter("ffin", ventana.getFechaFinal(), TemporalType.TIMESTAMP)
+    .setParameter("fiCompleta", ventana.getFechaInicial(), TemporalType.TIMESTAMP)
+    .setParameter("cancelado", Estado.C)
+    .setParameter("ahora", new Date(), TemporalType.TIMESTAMP)
+    .getResultList();
+    //Quitar de las disponibilidades las reservas vivas
+    Map<Integer, Integer> cantResVivasPorDispon = new HashMap<Integer, Integer>();
+    for(Object[] oo : cantReservasVivas) {
+      cantResVivasPorDispon.put((Integer)oo[0], ((Long)oo[3]).intValue());
+    }
+    
+    List<Disponibilidad> disp = new ArrayList<Disponibilidad>();
+    for (Disponibilidad d : disponibilidades) {
+      Integer cant =  cantResVivasPorDispon.get(d.getId());
+      if(cant == null) {
+        cant = 0;
+      }
+      Disponibilidad dto = new Disponibilidad();
+      dto.setId(d.getId());
+      dto.setFecha(d.getFecha());
+      dto.setHoraInicio(d.getHoraInicio());
+      dto.setHoraFin(dto.getHoraFin());
+      dto.setRecurso(null);
+      dto.setCupo(d.getCupo() - cant);
 
-	/**
-	 * Devuelve las fechas limites para las cuales se tienen disponibilidades, 
-	 * cumpliendo con los periodos para realizar reservas indicado en el recurso, es decir:
-	 * El inicio del calendario es el primer dia que tenga asigando disponibilidades, 
-	 * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
-	 * y sea mayor o igual al dia actual.
-	 * El fin del calendario es el ultimo dia que tenga asignado disponibilidades,
-	 * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
-	 * y tratando de satisfacer que:
-	 *      	La diferencia entre fin - inicio sea mayor o igual a ventanaDiasMinimos.
-	 *          Los cupos disponibles en la ventana sea mayor o igual a ventanaCuposMinimos. Si 
-	 *          esto no fuera posible se debe agrandar la ventana hasta llegar
-	 *          a la ultima disponibilidad sin pasarse del periodo de fin de disponibilidades.
-	 *          
-	 * En este caso la ventana de tiempo retornada representa dias, por lo cual, la hora del dia
-	 * esta asignada a las 00:00:00.
-	 *  
-	 * @param recurso
-	 * @return
-	 * @throws BusinessException 
-	 * @throws RolException 
-	 */
-	public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso recurso) throws UserException {
+      disp.add(dto);
+    }
+    return disp;
+  }
+
+
+  /**
+   * Devuelve las fechas limites para las cuales se tienen disponibilidades, 
+   * cumpliendo con los periodos para realizar reservas indicado en el recurso, es decir:
+   * El inicio del calendario es el primer dia que tenga asigando disponibilidades, 
+   * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
+   * y sea mayor o igual al dia actual.
+   * El fin del calendario es el ultimo dia que tenga asignado disponibilidades,
+   * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
+   * y tratando de satisfacer que:
+   *        La diferencia entre fin - inicio sea mayor o igual a ventanaDiasMinimos.
+   *          Los cupos disponibles en la ventana sea mayor o igual a ventanaCuposMinimos. Si 
+   *          esto no fuera posible se debe agrandar la ventana hasta llegar
+   *          a la ultima disponibilidad sin pasarse del periodo de fin de disponibilidades.
+   *          
+   * En este caso la ventana de tiempo retornada representa dias, por lo cual, la hora del dia
+   * esta asignada a las 00:00:00.
+   *  
+   * @param recurso
+   * @return
+   * @throws BusinessException 
+   * @throws RolException 
+   */
+  public VentanaDeTiempo obtenerVentanaCalendarioIntranet(Recurso recurso) throws UserException {
     if (recurso == null) {
       throw new UserException("debe_especificar_el_recurso");
     }
@@ -963,60 +962,60 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     if (recurso == null) {
       throw new UserException("no_se_encuentra_el_recurso_especificado");
     }
-		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaIntranet(recurso);
-		return ventanaEstatica;
-	}
+    VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaIntranet(recurso);
+    return ventanaEstatica;
+  }
 
-	/**
-	 * Devuelve las fechas limites para las cuales se tienen disponibilidades, 
-	 * cumpliendo con los periodos para realizar reservas indicado en el recurso, es decir:
-	 * El inicio del calendario es el primer dia que tenga asigando disponibilidades, 
-	 * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
-	 * y sea mayor o igual al dia actual.
-	 * El fin del calendario es el ultimo dia que tenga asignado disponibilidades,
-	 * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
-	 * y tratando de satisfacer que:
-	 *      	La diferencia entre fin - inicio sea mayor o igual a ventanaDiasMinimos.
-	 *          Los cupos disponibles en la ventana sea mayor o igual a ventanaCuposMinimos. Si 
-	 *          esto no fuera posible se debe agrandar la ventana hasta llegar
-	 *          a la ultima disponibilidad sin pasarse del periodo de fin de disponibilidades.
-	 *          
-	 * En este caso la ventana de tiempo retornada representa dias, por lo cual, la hora del dia
-	 * esta asignada a las 00:00:00.
-	 *  
-	 * @param recurso
-	 * @return
-	 * @throws BusinessException 
-	 * @throws RolException 
-	 */
-	public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso recurso) throws UserException {
-		if (recurso == null) {
-			throw new UserException("debe_especificar_el_recurso");
-		}
-		recurso = entityManager.find(Recurso.class, recurso.getId());
-		if (recurso == null) {
-			throw new UserException("no_se_encuentra_el_recurso_especificado");
-		}
-		VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaInternet(recurso);
-		return ventanaEstatica;
-	}
+  /**
+   * Devuelve las fechas limites para las cuales se tienen disponibilidades, 
+   * cumpliendo con los periodos para realizar reservas indicado en el recurso, es decir:
+   * El inicio del calendario es el primer dia que tenga asigando disponibilidades, 
+   * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
+   * y sea mayor o igual al dia actual.
+   * El fin del calendario es el ultimo dia que tenga asignado disponibilidades,
+   * que este dentro del periodo de vigencia de las disponibilidades indicado en el recurso 
+   * y tratando de satisfacer que:
+   *        La diferencia entre fin - inicio sea mayor o igual a ventanaDiasMinimos.
+   *          Los cupos disponibles en la ventana sea mayor o igual a ventanaCuposMinimos. Si 
+   *          esto no fuera posible se debe agrandar la ventana hasta llegar
+   *          a la ultima disponibilidad sin pasarse del periodo de fin de disponibilidades.
+   *          
+   * En este caso la ventana de tiempo retornada representa dias, por lo cual, la hora del dia
+   * esta asignada a las 00:00:00.
+   *  
+   * @param recurso
+   * @return
+   * @throws BusinessException 
+   * @throws RolException 
+   */
+  public VentanaDeTiempo obtenerVentanaCalendarioInternet(Recurso recurso) throws UserException {
+    if (recurso == null) {
+      throw new UserException("debe_especificar_el_recurso");
+    }
+    recurso = entityManager.find(Recurso.class, recurso.getId());
+    if (recurso == null) {
+      throw new UserException("no_se_encuentra_el_recurso_especificado");
+    }
+    VentanaDeTiempo ventanaEstatica = helper.obtenerVentanaCalendarioEstaticaInternet(recurso);
+    return ventanaEstatica;
+  }
 
-	/**
-	 * Devuelve una lista de enteros indicando los cupos disponibles, por dia, asignados al recurso. 
-	 * Es decir, para cada dia de la ventana de tiempo, devuelve la cantidad de cupos 
-	 * disponibles en ese dia para el recurso dado.
-	 * 
-	 * Si el dia de inicio de la ventana es "hoy", solo se toman en cuenta los cupos a partir de "ahora",
-	 * es decir, las disponibilidades cuya horaInicio sea mayor al tiempo actual.
-	 * Para los dias de la ventana que no tengan disponibilidad o sean dias del pasado ( < "hoy"), 
-	 * se devolvera un valor negativo indicando que ese dia es no-agendable.
-	 * Para los dias de la ventana que no les queden cupos libres, se devolvera 0. 
-	 * @param recurso
-	 * @param ventana
-	 * @return 
-	 */
-	@RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_FCALL_CENTER", "RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_ANONIMO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
-	public List<Integer> obtenerCuposPorDia(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws UserException {
+  /**
+   * Devuelve una lista de enteros indicando los cupos disponibles, por dia, asignados al recurso. 
+   * Es decir, para cada dia de la ventana de tiempo, devuelve la cantidad de cupos 
+   * disponibles en ese dia para el recurso dado.
+   * 
+   * Si el dia de inicio de la ventana es "hoy", solo se toman en cuenta los cupos a partir de "ahora",
+   * es decir, las disponibilidades cuya horaInicio sea mayor al tiempo actual.
+   * Para los dias de la ventana que no tengan disponibilidad o sean dias del pasado ( < "hoy"), 
+   * se devolvera un valor negativo indicando que ese dia es no-agendable.
+   * Para los dias de la ventana que no les queden cupos libres, se devolvera 0. 
+   * @param recurso
+   * @param ventana
+   * @return 
+   */
+  @RolesAllowed({"RA_AE_ADMINISTRADOR","RA_AE_FCALL_CENTER", "RA_AE_PLANIFICADOR","RA_AE_FATENCION", "RA_AE_ANONIMO", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
+  public List<Integer> obtenerCuposPorDia(Recurso recurso, VentanaDeTiempo ventana, TimeZone timezone) throws UserException {
     if (recurso == null) {
       throw new UserException("debe_especificar_el_recurso");
     }
@@ -1027,72 +1026,72 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     if (recurso == null) {
       throw new UserException("no_se_encuentra_el_recurso_especificado");
     }
-		//Obtener los cupos para cada dia y hora
-		List<Object[]> cuposAsignados  = helper.obtenerCuposAsignados(recurso, ventana, timezone);
-		//Obtengo las reservas vivas para cada día y hora
-		List<Object[]> cuposConsumidos = helper.obtenerCuposConsumidos(recurso,ventana, timezone);
-		//Armar la lista de resultados indicando los cupos para todos los dias solicitados en la ventana
-		List<Integer> cuposXdia = helper.obtenerCuposXDia(ventana, cuposAsignados, cuposConsumidos);
-		return cuposXdia;
-	}
-	
-	/**
-	 * Completa campos de la reserva.
-	 * Los datos necesarios para el servicio son exigidos en el mismo
-	 * @throws ApplicationException 
-	 * @throws BusinessException
-	 * @throws UserException
-	 * @throws AutocompletarException 
-	 * @return Map<String, Object>: devuelve un Map con los valores que se desea asignar a cada campo. 
-	 */
-	public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) 
-		throws ApplicationException, BusinessException, AutocompletarException, UserException {
-		if (s == null) {
-			throw new BusinessException("-1", "Parametro nulo");
-		}
-		s = entityManager.find(ServicioPorRecurso.class, s.getId());
-		if (s == null) {
-			throw new BusinessException("-1", "No se encuentra el servicio indicado");
-		}
-		s.getAutocompletadosPorDato().size();
-		s.getAutocompletado().getParametrosAutocompletados().size();
-		Map<String, Object> campos = helper.autocompletarCampo(s,datosParam);
-		return campos;
-	}
+    //Obtener los cupos para cada dia y hora
+    List<Object[]> cuposAsignados  = helper.obtenerCuposAsignados(recurso, ventana, timezone);
+    //Obtengo las reservas vivas para cada día y hora
+    List<Object[]> cuposConsumidos = helper.obtenerCuposConsumidos(recurso,ventana, timezone);
+    //Armar la lista de resultados indicando los cupos para todos los dias solicitados en la ventana
+    List<Integer> cuposXdia = helper.obtenerCuposXDia(ventana, cuposAsignados, cuposConsumidos);
+    return cuposXdia;
+  }
+  
+  /**
+   * Completa campos de la reserva.
+   * Los datos necesarios para el servicio son exigidos en el mismo
+   * @throws ApplicationException 
+   * @throws BusinessException
+   * @throws UserException
+   * @throws AutocompletarException 
+   * @return Map<String, Object>: devuelve un Map con los valores que se desea asignar a cada campo. 
+   */
+  public Map<String, Object> autocompletarCampo(ServicioPorRecurso s, Map<String, Object> datosParam) 
+    throws ApplicationException, BusinessException, AutocompletarException, UserException {
+    if (s == null) {
+      throw new BusinessException("-1", "Parametro nulo");
+    }
+    s = entityManager.find(ServicioPorRecurso.class, s.getId());
+    if (s == null) {
+      throw new BusinessException("-1", "No se encuentra el servicio indicado");
+    }
+    s.getAutocompletadosPorDato().size();
+    s.getAutocompletado().getParametrosAutocompletados().size();
+    Map<String, Object> campos = helper.autocompletarCampo(s,datosParam);
+    return campos;
+  }
 
-	@Override
-	public Empresa obtenerEmpresaPorId(Integer empresaId) throws ApplicationException {
-		if(empresaId == null) {
-			return null;
-		}
-		try {
-			Empresa empresa = globalEntityManager.find(Empresa.class, empresaId);
-			return empresa;
-		}catch(NonUniqueResultException nurEx) {
-			throw new ApplicationException("no_se_encuentra_la_empresa_especificada");
-		}catch(NoResultException nrEx) {
-			throw new ApplicationException("no_se_encuentra_la_empresa_especificada");
-		}
-	}
+  @Override
+  public Empresa obtenerEmpresaPorId(Integer empresaId) throws ApplicationException {
+    if(empresaId == null) {
+      return null;
+    }
+    try {
+      Empresa empresa = globalEntityManager.find(Empresa.class, empresaId);
+      return empresa;
+    }catch(NonUniqueResultException nurEx) {
+      throw new ApplicationException("no_se_encuentra_la_empresa_especificada");
+    }catch(NoResultException nrEx) {
+      throw new ApplicationException("no_se_encuentra_la_empresa_especificada");
+    }
+  }
 
-/*	
-	public void enviarComunicacionesConfirmacion(Empresa empresa, String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
-		//Enviar mail
-		String cuerpo = enviarMailConfirmacion(linkCancelacion, linkModificacion, reserva, idioma, formatoFecha, formatoHora);
-		boolean mailOk = (cuerpo!=null);
-		//Almacenar datos para SMS y TextoAVoz, si corresponde
-		almacenarSmsYTav(Comunicacion.Tipo2.RESERVA, reserva, formatoFecha, formatoHora);
-		//Enviar aviso a MiPerfil
-		boolean mipOk = enviarAvisoMiPerfil(empresa, reserva, Comunicacion.Tipo2.RESERVA);
+/*  
+  public void enviarComunicacionesConfirmacion(Empresa empresa, String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
+    //Enviar mail
+    String cuerpo = enviarMailConfirmacion(linkCancelacion, linkModificacion, reserva, idioma, formatoFecha, formatoHora);
+    boolean mailOk = (cuerpo!=null);
+    //Almacenar datos para SMS y TextoAVoz, si corresponde
+    almacenarSmsYTav(Comunicacion.Tipo2.RESERVA, reserva, formatoFecha, formatoHora);
+    //Enviar aviso a MiPerfil
+    boolean mipOk = enviarAvisoMiPerfil(empresa, reserva, Comunicacion.Tipo2.RESERVA);
     if(!mailOk && !mipOk) {
       throw new UserException("no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva");
     }
-	}
-*/	
+  }
+*/  
   /**
    * Este método es similares a enviarComunicacionesConfirmacion pero aplica a un TokenReserva que contenga múltiples reservas en lugar de a una sola.
    */
-/*	
+/*  
   public void enviarComunicacionesConfirmacion(Empresa empresa, String templateLinkCancelacion, String templateLinkModificacion, TokenReserva tokenReserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
     List<Reserva> reservas = obtenerReservasMultiples(tokenReserva.getId(), false);
     StringBuilder cuerpos = new StringBuilder();
@@ -1140,14 +1139,14 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
   }
 */
-	
-/*	
-	public void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
-	  enviarComunicacionesCancelacion(empresa, reserva, idioma, formatoFecha, formatoHora, null, null);
-	}
+  
+/*  
+  public void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora) throws UserException {
+    enviarComunicacionesCancelacion(empresa, reserva, idioma, formatoFecha, formatoHora, null, null);
+  }
 */
-	
-/*	
+  
+/*  
   private void enviarComunicacionesCancelacion(Empresa empresa, Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
     //Enviar mail
     boolean mailOk = enviarMailCancelacion(reserva, idioma, formatoFecha, formatoHora, asunto, cuerpo);
@@ -1161,103 +1160,103 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
   }
 */
-	
-/*	
-	private String enviarMailConfirmacion(String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) {
-		//Se envía el mail obligatorio al usuario
-		Recurso recurso = null;
-		String email = null;
-		try {
-			recurso = reserva.getDisponibilidades().get(0).getRecurso();
-			Agenda agenda = recurso.getAgenda();
-			TextoAgenda textoAgenda = null;
-			if(agenda.getTextosAgenda()!=null) {
-				textoAgenda = agenda.getTextosAgenda().get(idioma);
-			}
-			if(textoAgenda == null) {
-				for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
-					if(ta.isPorDefecto()) {
-						textoAgenda = ta;
-					}
-				}
-			}
-			if(textoAgenda == null) {
-				textoAgenda = new TextoAgenda();
-			}
-			//Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
-			String cuerpo = null;
+  
+/*  
+  private String enviarMailConfirmacion(String linkCancelacion, String linkModificacion, Reserva reserva, String idioma, String formatoFecha, String formatoHora) {
+    //Se envía el mail obligatorio al usuario
+    Recurso recurso = null;
+    String email = null;
+    try {
+      recurso = reserva.getDisponibilidades().get(0).getRecurso();
+      Agenda agenda = recurso.getAgenda();
+      TextoAgenda textoAgenda = null;
+      if(agenda.getTextosAgenda()!=null) {
+        textoAgenda = agenda.getTextosAgenda().get(idioma);
+      }
+      if(textoAgenda == null) {
+        for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
+          if(ta.isPorDefecto()) {
+            textoAgenda = ta;
+          }
+        }
+      }
+      if(textoAgenda == null) {
+        textoAgenda = new TextoAgenda();
+      }
+      //Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
+      String cuerpo = null;
       cuerpo = textoAgenda.getTextoCorreoConf();
       if(cuerpo != null && !cuerpo.isEmpty()) {
         cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, linkCancelacion, linkModificacion);
-  			for(DatoReserva dato : reserva.getDatosReserva()) {
-  				DatoASolicitar datoSol = dato.getDatoASolicitar();
-  				if(DatoASolicitar.CORREO_ELECTRONICO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-  					email = dato.getValor();
-						MailUtiles.enviarMail(email, "Confirmación de reserva", cuerpo, MailUtiles.CONTENT_TYPE_HTML);
-  					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, cuerpo);
-  					comunicacion.setProcesado(true);
-  					entityManager.persist(comunicacion);
-  				}
-  			}
+        for(DatoReserva dato : reserva.getDatosReserva()) {
+          DatoASolicitar datoSol = dato.getDatoASolicitar();
+          if(DatoASolicitar.CORREO_ELECTRONICO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+            email = dato.getValor();
+            MailUtiles.enviarMail(email, "Confirmación de reserva", cuerpo, MailUtiles.CONTENT_TYPE_HTML);
+            Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, cuerpo);
+            comunicacion.setProcesado(true);
+            entityManager.persist(comunicacion);
+          }
+        }
         return cuerpo;
       }else {
         //Indicar que no se pudo enviar el mail
         return null;
       }
-		}catch(MessagingException mEx) {
-		  logger.warn("No se pudo enviar el mail de confirmación", mEx);
-			try {
-				if(recurso != null) {
-					if(email == null) {
-						email = "***";
-					}
-					Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, null);
-					entityManager.persist(comunicacion);
-				}
-			}catch(Exception ex) {
-				//
-			}
+    }catch(MessagingException mEx) {
+      logger.warn("No se pudo enviar el mail de confirmación", mEx);
+      try {
+        if(recurso != null) {
+          if(email == null) {
+            email = "***";
+          }
+          Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.RESERVA, email, recurso, reserva, null);
+          entityManager.persist(comunicacion);
+        }
+      }catch(Exception ex) {
+        //
+      }
       //Indicar que no se pudo enviar el mail
-			return null;
-		}
-	}
+      return null;
+    }
+  }
 */
-	
-/*	
-	private boolean enviarMailCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) {
-		//Se envía el mail obligatorio al usuario
-		Recurso recurso = null;
-		try {
-			recurso = reserva.getDisponibilidades().get(0).getRecurso();
-			if(cuerpo == null) {
-  			Agenda agenda = recurso.getAgenda();
-  			TextoAgenda textoAgenda = null;
-  			if(agenda.getTextosAgenda()!=null) {
-  				textoAgenda = agenda.getTextosAgenda().get(idioma);
-  			}
-  			if(textoAgenda == null) {
-  				for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
-  					if(ta.isPorDefecto()) {
-  						textoAgenda = ta;
-  					}
-  				}
-  			}
-  			if(textoAgenda != null) {
-  				cuerpo = textoAgenda.getTextoCorreoCanc();
-  			}
-			}
-			if(asunto == null) {
-			  asunto = "Cancelación de reserva";
-			}
-			//Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
-	    String emailTo = null;
-			for(DatoReserva dato : reserva.getDatosReserva()) {
-				DatoASolicitar datoSol = dato.getDatoASolicitar();
-				if(DatoASolicitar.CORREO_ELECTRONICO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-				  emailTo = dato.getValor();
-				}
-			}
-			if(emailTo != null) {
+  
+/*  
+  private boolean enviarMailCancelacion(Reserva reserva, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) {
+    //Se envía el mail obligatorio al usuario
+    Recurso recurso = null;
+    try {
+      recurso = reserva.getDisponibilidades().get(0).getRecurso();
+      if(cuerpo == null) {
+        Agenda agenda = recurso.getAgenda();
+        TextoAgenda textoAgenda = null;
+        if(agenda.getTextosAgenda()!=null) {
+          textoAgenda = agenda.getTextosAgenda().get(idioma);
+        }
+        if(textoAgenda == null) {
+          for(TextoAgenda ta : agenda.getTextosAgenda().values()) {
+            if(ta.isPorDefecto()) {
+              textoAgenda = ta;
+            }
+          }
+        }
+        if(textoAgenda != null) {
+          cuerpo = textoAgenda.getTextoCorreoCanc();
+        }
+      }
+      if(asunto == null) {
+        asunto = "Cancelación de reserva";
+      }
+      //Obtener el mail del usuario, que es el dato a solicitar llamado "Mail" en la agrupacion que no se puede borrar
+      String emailTo = null;
+      for(DatoReserva dato : reserva.getDatosReserva()) {
+        DatoASolicitar datoSol = dato.getDatoASolicitar();
+        if(DatoASolicitar.CORREO_ELECTRONICO.equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+          emailTo = dato.getValor();
+        }
+      }
+      if(emailTo != null) {
         if(cuerpo != null && !cuerpo.isEmpty()) {
           cuerpo = Metavariables.remplazarMetavariables(cuerpo, reserva, formatoFecha, formatoHora, "", "");
           MailUtiles.enviarMail(emailTo, asunto, cuerpo, MailUtiles.CONTENT_TYPE_HTML);
@@ -1265,109 +1264,109 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         Comunicacion comunicacion = new Comunicacion(Tipo1.EMAIL, Tipo2.CANCELA, emailTo, recurso, reserva, asunto+"/"+cuerpo);
         comunicacion.setProcesado(true);
         entityManager.persist(comunicacion);
-			}else {
+      }else {
         //Indicar que no se pudo enviar el mail
-	      return false;
-			}
+        return false;
+      }
       //Indicar que se pudo enviar el mail
-			return true;
-		}catch(MessagingException mEx) {
+      return true;
+    }catch(MessagingException mEx) {
       //Indicar que no se pudo enviar el mail
-		  logger.warn("No se pudo enviar el mail de cancelación", mEx);
-			return false;
-		}
-	}
+      logger.warn("No se pudo enviar el mail de cancelación", mEx);
+      return false;
+    }
+  }
 */
-	
-/*	
-	private boolean almacenarSmsYTav(Comunicacion.Tipo2 tipo2, Reserva reserva, String formatoFecha, String formatoHora) {
-		//Se envía el mail obligatorio al usuario
-		try {
-			Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
-			//Obtener los numeros de telefono del usuario, que son los datos a solicitar llamados "TelefonoMovil"  y "TelefonoFijo" en la agrupacion que no se puede borrar
-			for(DatoReserva dato : reserva.getDatosReserva()) {
-				DatoASolicitar datoSol = dato.getDatoASolicitar();
-				if("TelefonoMovil".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-					//Tiene telefono movil, se envia SMS
-					String telefonoMovil = dato.getValor();
-					Comunicacion comunicacion = new Comunicacion(Tipo1.SMS, tipo2, telefonoMovil, recurso, reserva, null);
-					entityManager.persist(comunicacion);
-				}
-				if("TelefonoFijo".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
-					//Tiene telefono movil, se envia SMS
-					String telefonoFijo = dato.getValor();
-					Comunicacion comunicacion = new Comunicacion(Tipo1.TEXTOAVOZ, tipo2, telefonoFijo, recurso, reserva, null);
-					entityManager.persist(comunicacion);
-				}
-			}
-			return true;
-		}catch(Exception ex) {
-			return false;
-		}
-	}
+  
+/*  
+  private boolean almacenarSmsYTav(Comunicacion.Tipo2 tipo2, Reserva reserva, String formatoFecha, String formatoHora) {
+    //Se envía el mail obligatorio al usuario
+    try {
+      Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso();
+      //Obtener los numeros de telefono del usuario, que son los datos a solicitar llamados "TelefonoMovil"  y "TelefonoFijo" en la agrupacion que no se puede borrar
+      for(DatoReserva dato : reserva.getDatosReserva()) {
+        DatoASolicitar datoSol = dato.getDatoASolicitar();
+        if("TelefonoMovil".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+          //Tiene telefono movil, se envia SMS
+          String telefonoMovil = dato.getValor();
+          Comunicacion comunicacion = new Comunicacion(Tipo1.SMS, tipo2, telefonoMovil, recurso, reserva, null);
+          entityManager.persist(comunicacion);
+        }
+        if("TelefonoFijo".equalsIgnoreCase(datoSol.getNombre()) && !datoSol.getAgrupacionDato().getBorrarFlag()) {
+          //Tiene telefono movil, se envia SMS
+          String telefonoFijo = dato.getValor();
+          Comunicacion comunicacion = new Comunicacion(Tipo1.TEXTOAVOZ, tipo2, telefonoFijo, recurso, reserva, null);
+          entityManager.persist(comunicacion);
+        }
+      }
+      return true;
+    }catch(Exception ex) {
+      return false;
+    }
+  }
 */
-	
-/*	
-	private boolean enviarAvisoMiPerfil(Empresa empresa, Reserva reserva, Comunicacion.Tipo2 tipoAviso) {
+  
+/*  
+  private boolean enviarAvisoMiPerfil(Empresa empresa, Reserva reserva, Comunicacion.Tipo2 tipoAviso) {
     return miPerfilBean.enviarAviso(empresa, reserva, tipoAviso);
-	}
+  }
 */
-	
-	@SuppressWarnings("unchecked")
-	public Map<String, String> consultarTextos(String idioma) throws ApplicationException {
-	  Map<String, String> textos = new SofisHashMap();
-		try{
-			//Primero se cargan los textos globales
-			List<TextoGlobal> tGlobales = (List<TextoGlobal>) globalEntityManager.createQuery("SELECT t from TextoGlobal t ").getResultList();
-			if(tGlobales != null) {
-				for(TextoGlobal tGlobal : tGlobales) {
-					textos.put(tGlobal.getCodigo(), tGlobal.getTexto());
-				}
-			}
-		} catch (Exception e){
-			//No se pudieron cargar los textos globales, no se puede continuar
-			throw new ApplicationException(e);
-		}
-		//Luego se cargan los textos sobreescritos por el tenant pudiendo pisar textos cargados antes
-		//Atención: es probable que no haya aún un tennant configurado y por tanto no se puede hacer esta parte
-		//(pero no hay forma de determinarlo)
-		try {
-			List<TextoTenant> tTenants = (List<TextoTenant>) entityManager.
-					createQuery("SELECT t from TextoTenant t WHERE t.codigo.idioma=:idioma")
-					.setParameter("idioma", idioma).getResultList();
-			if(tTenants != null) {
-				for(TextoTenant tTenant : tTenants) {
-					textos.put(tTenant.getCodigo().getCodigo(), tTenant.getTexto());
-				}
-			}
-		}catch(Exception pEx) {
-			//Nada que hacer, se usan solo los textos globales
-		}
-		return textos;		
-	}
-	
-	@SuppressWarnings("unchecked")
-	public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException {
-		Map<String, String> preguntasCaptcha = new HashMap<String, String>();
-		try {
-			List<PreguntaCaptcha> pcs = (List<PreguntaCaptcha>) entityManager.
-					createQuery("SELECT p from PreguntaCaptcha p WHERE p.idioma=:idioma")
-					.setParameter("idioma", idioma).getResultList();
-			if(pcs != null) {
-				for(PreguntaCaptcha pc : pcs) {
-					preguntasCaptcha.put(pc.getPregunta(), pc.getRespuesta());
-				}
-			}
-		}catch(Exception pEx) {
-			//pEx.printStackTrace();
-		}
-		return preguntasCaptcha;		
-	}
-	
-	public void limpiarTrazas() {
-		trazaBean.finalizarTrazas();
-	}
-	
+  
+  @SuppressWarnings("unchecked")
+  public Map<String, String> consultarTextos(String idioma) throws ApplicationException {
+    Map<String, String> textos = new SofisHashMap();
+    try{
+      //Primero se cargan los textos globales
+      List<TextoGlobal> tGlobales = (List<TextoGlobal>) globalEntityManager.createQuery("SELECT t from TextoGlobal t ").getResultList();
+      if(tGlobales != null) {
+        for(TextoGlobal tGlobal : tGlobales) {
+          textos.put(tGlobal.getCodigo(), tGlobal.getTexto());
+        }
+      }
+    } catch (Exception e){
+      //No se pudieron cargar los textos globales, no se puede continuar
+      throw new ApplicationException(e);
+    }
+    //Luego se cargan los textos sobreescritos por el tenant pudiendo pisar textos cargados antes
+    //Atención: es probable que no haya aún un tennant configurado y por tanto no se puede hacer esta parte
+    //(pero no hay forma de determinarlo)
+    try {
+      List<TextoTenant> tTenants = (List<TextoTenant>) entityManager.
+          createQuery("SELECT t from TextoTenant t WHERE t.codigo.idioma=:idioma")
+          .setParameter("idioma", idioma).getResultList();
+      if(tTenants != null) {
+        for(TextoTenant tTenant : tTenants) {
+          textos.put(tTenant.getCodigo().getCodigo(), tTenant.getTexto());
+        }
+      }
+    }catch(Exception pEx) {
+      //Nada que hacer, se usan solo los textos globales
+    }
+    return textos;    
+  }
+  
+  @SuppressWarnings("unchecked")
+  public Map<String, String> consultarPreguntasCaptcha(String idioma) throws ApplicationException {
+    Map<String, String> preguntasCaptcha = new HashMap<String, String>();
+    try {
+      List<PreguntaCaptcha> pcs = (List<PreguntaCaptcha>) entityManager.
+          createQuery("SELECT p from PreguntaCaptcha p WHERE p.idioma=:idioma")
+          .setParameter("idioma", idioma).getResultList();
+      if(pcs != null) {
+        for(PreguntaCaptcha pc : pcs) {
+          preguntasCaptcha.put(pc.getPregunta(), pc.getRespuesta());
+        }
+      }
+    }catch(Exception pEx) {
+      //pEx.printStackTrace();
+    }
+    return preguntasCaptcha;    
+  }
+  
+  public void limpiarTrazas() {
+    trazaBean.finalizarTrazas();
+  }
+  
   @SuppressWarnings("unchecked")
   public List<TramiteAgenda> consultarTramites(Agenda agenda) throws ApplicationException {
     try{
@@ -1520,7 +1519,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
     }
     return reserva;
   }  
-	
+  
   @SuppressWarnings("unchecked")
   public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException {
     //Obtener las reservas en estado Pendiente, Reservado o Usado para el período indicado
@@ -1813,10 +1812,10 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
                 validarDatosReserva(empresa, reserva);
             }
             catch(ErrorValidacionException evex){
-            	throw evex;
+              throw evex;
             }
             catch(ValidacionException vex){
-            	throw vex;
+              throw vex;
             }
             catch (Exception ex) {
                 throw new UserException("alguna_persona_ya_tiene_reservas_confirmadas");
@@ -2226,32 +2225,32 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   
   
   public Reserva modificarReservaNotificar(Integer idReserva, Boolean notificar) throws UserException {
-	  //Obtener la reserva
-	  Reserva reservaOriginal = (Reserva) entityManager.find(Reserva.class, idReserva);
-	  if(reservaOriginal==null) {
-	    throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
-	  }
-	  //modifico el valor "notificar" de la reserva
-	  reservaOriginal.setNotificar(notificar);
-	  reservaOriginal = entityManager.merge(reservaOriginal);
+    //Obtener la reserva
+    Reserva reservaOriginal = (Reserva) entityManager.find(Reserva.class, idReserva);
+    if(reservaOriginal==null) {
+      throw new UserException("no_se_encuentra_la_reserva_o_ya_fue_cancelada");
+    }
+    //modifico el valor "notificar" de la reserva
+    reservaOriginal.setNotificar(notificar);
+    reservaOriginal = entityManager.merge(reservaOriginal);
       return reservaOriginal;
   }
   
   public void modificarReservaMultipleNotificar(TokenReserva tokenReserva, Boolean notificar) throws UserException {
-	  //Obtener las reservas asociadas al token
-	  String eql = "SELECT r FROM Reserva r WHERE r.token.id=:tokenId AND r.datosReserva IS NOT EMPTY ORDER BY r.id";
-	  @SuppressWarnings("unchecked")
-	  List<Reserva> reservas = ( List<Reserva>)entityManager.createQuery(eql).setParameter("tokenId", tokenReserva.getId()).getResultList();
-	  //Procesar cada reserva e ir setteandole la propiedad "notificar"
-	  for(Reserva reserva : reservas) {
-		  try{
-			  modificarReservaNotificar(reserva.getId(),notificar);
-		  }catch(Exception ex) {
-		      if(ex instanceof UserException) {
-		        throw (UserException)ex;
-		      }  
-		  }
-	  }  
+    //Obtener las reservas asociadas al token
+    String eql = "SELECT r FROM Reserva r WHERE r.token.id=:tokenId AND r.datosReserva IS NOT EMPTY ORDER BY r.id";
+    @SuppressWarnings("unchecked")
+    List<Reserva> reservas = ( List<Reserva>)entityManager.createQuery(eql).setParameter("tokenId", tokenReserva.getId()).getResultList();
+    //Procesar cada reserva e ir setteandole la propiedad "notificar"
+    for(Reserva reserva : reservas) {
+      try{
+        modificarReservaNotificar(reserva.getId(),notificar);
+      }catch(Exception ex) {
+          if(ex instanceof UserException) {
+            throw (UserException)ex;
+          }  
+      }
+    }  
   }
   
   
@@ -2501,9 +2500,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   @Override
   public Reserva generarYConfirmarReservasVacunacion(Integer idEmpresa, Integer idAgenda, Integer idRecurso, Integer idDisponibilidad, String valoresCampos,
           String idTransaccionPadre, String pasoTransaccionPadre, TokenReserva tokenReserva, String idioma, Date fechaReservaDos, String tipoDocReservaDos, String tipoDosisReservaDos) throws UserException {
-	  String tipoDosis = null;
-	  
-	  if (idEmpresa == null) {
+    String tipoDosis = null;
+    
+    if (idEmpresa == null) {
           throw new UserException("debe_especificar_la_empresa");
       }
       if (idAgenda == null) {
@@ -2523,7 +2522,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       }
       
       if(tipoDosisReservaDos!=null){
-      	tipoDosis = tipoDosisReservaDos;
+        tipoDosis = tipoDosisReservaDos;
       }
       
       //Obtener la empresa
@@ -2568,7 +2567,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       }
       
       if(disponibilidad2.getHoraInicio().before(disponibilidad.getHoraInicio()) || disponibilidad2.getHoraInicio().equals(disponibilidad.getHoraInicio())){
-      	throw new UserException("la_fecha_reserva_dos_debe_ser_posterior_a_la_fecha_reserva_uno");
+        throw new UserException("la_fecha_reserva_dos_debe_ser_posterior_a_la_fecha_reserva_uno");
       }
       
       
@@ -2627,7 +2626,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
                   reserva.setTrazabilidadGuid(rConfirmada.getTrazabilidadGuid());
                   confirmada = true;
               } catch (AccesoMultipleException e) {
-            	  logger.error("HOLA "  + e.getMessage());
+                logger.error("HOLA "  + e.getMessage());
                   //Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
               }
           }
@@ -2673,24 +2672,24 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       String agrupCampoValorReserva2[] = tipoDocReserva2.split("\\.", 3);
       String sAgrupacionTipoDosis, sDatoSolTipoDosis, sValorTipoDosis;
       if(tipoDosisReserva2!=null){
-    	  String agrupCampo2ValorReserva2[] = tipoDosisReserva2.split("\\.", 3);
-    	  if(agrupCampo2ValorReserva2.length==3){
-    		  sAgrupacionTipoDosis = agrupCampo2ValorReserva2[0];
-    		  sDatoSolTipoDosis = agrupCampo2ValorReserva2[1];
-			  sValorTipoDosis = agrupCampo2ValorReserva2[2];
-    	  }
-    	  else{
-    		  String constanteSplit[] = Utiles.SEGUNDA_DOSIS.split("\\.", 3);
-    		  sAgrupacionTipoDosis = constanteSplit[0];
-    		  sDatoSolTipoDosis = constanteSplit[1];
-			  sValorTipoDosis = constanteSplit[2];
-    	  }
+        String agrupCampo2ValorReserva2[] = tipoDosisReserva2.split("\\.", 3);
+        if(agrupCampo2ValorReserva2.length==3){
+          sAgrupacionTipoDosis = agrupCampo2ValorReserva2[0];
+          sDatoSolTipoDosis = agrupCampo2ValorReserva2[1];
+        sValorTipoDosis = agrupCampo2ValorReserva2[2];
+        }
+        else{
+          String constanteSplit[] = Utiles.SEGUNDA_DOSIS.split("\\.", 3);
+          sAgrupacionTipoDosis = constanteSplit[0];
+          sDatoSolTipoDosis = constanteSplit[1];
+        sValorTipoDosis = constanteSplit[2];
+        }
       }
       else{
-    	  String constanteSplit[] = Utiles.SEGUNDA_DOSIS.split("\\.", 3);
-    	  sAgrupacionTipoDosis = constanteSplit[0];
-		  sDatoSolTipoDosis = constanteSplit[1];
-		  sValorTipoDosis = constanteSplit[2];
+        String constanteSplit[] = Utiles.SEGUNDA_DOSIS.split("\\.", 3);
+        sAgrupacionTipoDosis = constanteSplit[0];
+      sDatoSolTipoDosis = constanteSplit[1];
+      sValorTipoDosis = constanteSplit[2];
       }
       
       
@@ -2807,9 +2806,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       
       //Eliminar los datos de la reserva de la segunda dosis y la propia reserva
       if(reserva2.getDatosReserva()!=null){ 
-	      for (DatoReserva dato : reserva2.getDatosReserva()) {
-	          entityManager.remove(dato);
-	      }
+        for (DatoReserva dato : reserva2.getDatosReserva()) {
+            entityManager.remove(dato);
+        }
       }
       
       entityManager.remove(reserva2);
@@ -2818,9 +2817,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 
       //Eliminar los datos de la reserva de la primer dosis y la propia reserva
       if(reserva.getDatosReserva()!=null){  
-	      for (DatoReserva dato : reserva.getDatosReserva()) {
-	          entityManager.remove(dato);
-	      }
+        for (DatoReserva dato : reserva.getDatosReserva()) {
+            entityManager.remove(dato);
+        }
       }
       entityManager.remove(reserva);
           
@@ -3008,28 +3007,28 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
   }
 
     @Override
-	public ResultadoEjecucion validarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino,VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino) 
-			throws UserException, ApplicationException, BusinessException {
-		ResultadoEjecucion ret = new ResultadoEjecucion();
-		
-		//Refrescar los recursos para que carguen los datos a solicitar y las disponibilidades
-		recursoOrigen = consultarRecursoPorId(recursoOrigen.getAgenda(), recursoOrigen.getId());
-		recursoDestino = consultarRecursoPorId(recursoDestino.getAgenda(), recursoDestino.getId());
-		int cantidadReservasTotalesAMover = 0;
-		SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm");
-		Boolean cuposDisponiblesReservas = Boolean.FALSE;
-		
-		//Primero validar si los recursos son iguales
-		if(recursoOrigen.equals(recursoDestino)){
-			//Si son iguales solo verificar las disponibilidades
-			//======================================================================================================
-			//Verificar si la fecha inicio destino está dentro de la ventana del recurso origen, se traslapa
-			if(ventanaDestino.getFechaInicial().after(ventanaOrigen.getFechaInicial()) && ventanaDestino.getFechaInicial().before(ventanaOrigen.getFechaFinal())){
-				//aquí las disponibilidades algunas se van a reutilizar validación es distinta
-				Integer reservas = 0;
-				Integer cuposDisponibles = 0;
-				//Disponibilidades y cupos
-				List<Object[]> cuposDestino = obtenerCuposDisponiblesPorDisponibilidad(recursoDestino, ventanaDestino);
+  public ResultadoEjecucion validarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino,VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino) 
+      throws UserException, ApplicationException, BusinessException {
+    ResultadoEjecucion ret = new ResultadoEjecucion();
+    
+    //Refrescar los recursos para que carguen los datos a solicitar y las disponibilidades
+    recursoOrigen = consultarRecursoPorId(recursoOrigen.getAgenda(), recursoOrigen.getId());
+    recursoDestino = consultarRecursoPorId(recursoDestino.getAgenda(), recursoDestino.getId());
+    int cantidadReservasTotalesAMover = 0;
+    SimpleDateFormat formatoHora = new SimpleDateFormat("HH:mm");
+    Boolean cuposDisponiblesReservas = Boolean.FALSE;
+    
+    //Primero validar si los recursos son iguales
+    if(recursoOrigen.equals(recursoDestino)){
+      //Si son iguales solo verificar las disponibilidades
+      //======================================================================================================
+      //Verificar si la fecha inicio destino está dentro de la ventana del recurso origen, se traslapa
+      if(ventanaDestino.getFechaInicial().after(ventanaOrigen.getFechaInicial()) && ventanaDestino.getFechaInicial().before(ventanaOrigen.getFechaFinal())){
+        //aquí las disponibilidades algunas se van a reutilizar validación es distinta
+        Integer reservas = 0;
+        Integer cuposDisponibles = 0;
+        //Disponibilidades y cupos
+        List<Object[]> cuposDestino = obtenerCuposDisponiblesPorDisponibilidad(recursoDestino, ventanaDestino);
 
 			    //Para cada disponibilidad en el origen verificar si existe en el destino y si tiene cupos disponibles suficientes para las reservas
 				List<Object[]> reservasConfirmadasyPendientesOrigen = obtenerReservasConfirmadasPorDisponibilidad(recursoOrigen, ventanaOrigen);
@@ -3067,8 +3066,9 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				//se obtienen las disponibilidades del destino con la frecuencia
 				List<Object[]> cuposDestino = obtenerCuposFrecuenciaDisponibles(recursoDestino, ventanaDestino);
 
-			    //Para cada disponibilidad en el origen verificar si existe en el destino y si tiene cupos disponibles suficientes para las reservas
-				List<Object[]> reservasConfirmadasyPendientesOrigen = obtenerReservasConfirmadasPorFrecuencia(recursoOrigen, ventanaOrigen);
+
+          //Para cada disponibilidad en el origen verificar si existe en el destino y si tiene cupos disponibles suficientes para las reservas
+        List<Object[]> reservasConfirmadasyPendientesOrigen = obtenerReservasConfirmadasPorFrecuencia(recursoOrigen, ventanaOrigen);
 
 				//vamos a crear un maps uno para el recurso destino con frecuencia ->cupos disponible
 				Map<String, Integer> cuposDisponiblesPorFrecuencia = new HashMap<String, Integer>();
@@ -3166,6 +3166,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 							+ "existe en el recurso destino pero no existe en el recurso origen.");
 				}
 				
+
 
 				//Si el dato existe en el origen el tipo debe ser compatible con el destino
 				if(datoSolicitarOrigen!=null) {
@@ -3291,7 +3292,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		
 		if(cantidadReservasTotalesAMover > 0) {
 	        ret.setElementos(cantidadReservasTotalesAMover);
-	    	ret.getMensajes().add("Cantidad de reservas a mover: "+cantidadReservasTotalesAMover+".");
 	    }else {
 	    	if(ret.getErrores().isEmpty()){
 	    		ret.getErrores().add("No hay reservas para mover.");
@@ -3301,49 +3301,51 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 		//Devolver el resultado		
 		return ret;
 	}
+
   
     @Override
-	public ResultadoEjecucion ejecutarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino, VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino, 
-			boolean enviarComunicaciones, String linkBase, boolean generarNovedades, String uuid) throws UserException, ApplicationException, BusinessException {
-		ResultadoEjecucion ret = new ResultadoEjecucion();
+  public ResultadoEjecucion ejecutarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino, VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino, 
+      boolean enviarComunicaciones, String linkBase, boolean generarNovedades, String uuid) throws UserException, ApplicationException, BusinessException {
+    ResultadoEjecucion ret = new ResultadoEjecucion();
         Cache saeCache = saeCacheManager.getCache("sae");
-		boolean recursoOrigenVisibleInternet = false;
-		boolean recursoDestinoVisibleInternet = false;
-		SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
-		Boolean traslape = Boolean.FALSE;
-		try {
-			//Refrescar los recursos para que carguen los datos a solicitar y las disponibilidades
-			recursoOrigen = consultarRecursoPorId(recursoOrigen.getAgenda(), recursoOrigen.getId());
-			recursoDestino = consultarRecursoPorId(recursoDestino.getAgenda(), recursoDestino.getId());
-			//Primero validar si los recursos son iguales
-			if(recursoOrigen.equals(recursoDestino)){
-				//Los recursos son iguales
-				
-				//verificar si hay traslape
-				if(ventanaDestino.getFechaInicial().after(ventanaOrigen.getFechaInicial()) && ventanaDestino.getFechaInicial().before(ventanaOrigen.getFechaFinal())){
-					traslape = Boolean.TRUE;
-				}
-				
-				//Determinar si los recursos son visibles en internet
-				recursoOrigenVisibleInternet = BooleanUtils.isTrue(recursoOrigen.getVisibleInternet());
-				//Deshabilitar el recurso para que no sea visible en internet
-				if(recursoOrigenVisibleInternet){
-					helper.desactivarRecursoVisibleInternet(recursoOrigen);
-				}
-				
-				//Determinar el timezone del recurso 
-				TimeZone timezoneOrigen = TimeZone.getDefault();
-				if(recursoOrigen.getAgenda().getTimezone()!=null && !recursoOrigen.getAgenda().getTimezone().isEmpty()) {
-					timezoneOrigen = TimeZone.getTimeZone(recursoOrigen.getAgenda().getTimezone());
-				}else {
-					if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
-						timezoneOrigen = TimeZone.getTimeZone(empresa.getTimezone());
-					}
-				}
-				
-				//Se va obtener las disponibilidades del recurso destino
-				//sabiendo que son el mismo recurso, algunas de esas disponibilidades pueden ya existir si se traslapan
-				List<Disponibilidad> disponibilidadesOrigen = obtenerDisponibilidades(recursoOrigen, ventanaOrigen, timezoneOrigen, false);
+    boolean recursoOrigenVisibleInternet = false;
+    boolean recursoDestinoVisibleInternet = false;
+    SimpleDateFormat formatoFecha = new SimpleDateFormat("yyyy-MM-dd");
+    Boolean traslape = Boolean.FALSE;
+    
+    try {
+      //Refrescar los recursos para que carguen los datos a solicitar y las disponibilidades
+      recursoOrigen = consultarRecursoPorId(recursoOrigen.getAgenda(), recursoOrigen.getId());
+      recursoDestino = consultarRecursoPorId(recursoDestino.getAgenda(), recursoDestino.getId());
+      //Primero validar si los recursos son iguales
+      if(recursoOrigen.equals(recursoDestino)){
+        //Los recursos son iguales
+        
+        //verificar si hay traslape
+        if(ventanaDestino.getFechaInicial().after(ventanaOrigen.getFechaInicial()) && ventanaDestino.getFechaInicial().before(ventanaOrigen.getFechaFinal())){
+          traslape = Boolean.TRUE;
+        }
+        
+        //Determinar si los recursos son visibles en internet
+        recursoOrigenVisibleInternet = BooleanUtils.isTrue(recursoOrigen.getVisibleInternet());
+        //Deshabilitar el recurso para que no sea visible en internet
+        if(recursoOrigenVisibleInternet){
+          helper.desactivarRecursoVisibleInternet(recursoOrigen);
+        }
+        
+        //Determinar el timezone del recurso 
+        TimeZone timezoneOrigen = TimeZone.getDefault();
+        if(recursoOrigen.getAgenda().getTimezone()!=null && !recursoOrigen.getAgenda().getTimezone().isEmpty()) {
+          timezoneOrigen = TimeZone.getTimeZone(recursoOrigen.getAgenda().getTimezone());
+        }else {
+          if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+            timezoneOrigen = TimeZone.getTimeZone(empresa.getTimezone());
+          }
+        }
+        
+        //Se va obtener las disponibilidades del recurso destino
+        //sabiendo que son el mismo recurso, algunas de esas disponibilidades pueden ya existir si se traslapan
+        List<Disponibilidad> disponibilidadesOrigen = obtenerDisponibilidades(recursoOrigen, ventanaOrigen, timezoneOrigen, false);
 
 				List<Disponibilidad> disponibilidadesDestino = obtenerDisponibilidades(recursoDestino, ventanaDestino, timezoneOrigen, false);
 				SimpleDateFormat formatoClave = new SimpleDateFormat("HH:mm");
@@ -3351,7 +3353,6 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				for (Disponibilidad disponibilidadDestino : disponibilidadesDestino) {
 					disponibilidadesDestinoPorHora.put(formatoClave.format(disponibilidadDestino.getHoraInicio()), disponibilidadDestino);
 		        }
-
 				
 				//Armar un mapeo entre los datos a solicitar en el recurso origen y los del recurso destino
 			    //La clave es dato.agrupacion.nombre:dato.nombre
@@ -3359,8 +3360,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			    for(DatoASolicitar datoSolicitarDestino : recursosEJB.consultarDatosSolicitar(recursoDestino)) {
 			    	String claveDato = datoSolicitarDestino.getAgrupacionDato().getNombre()+":"+datoSolicitarDestino.getNombre();
 		    		datosSolicitarPorClave.put(claveDato, datoSolicitarDestino);
-			    }
-				
+			    }				
 				
 				//Procesar las reservas del día seleccionado
 			    List<Reserva> reservasOrigen = new ArrayList<Reserva>();
@@ -3369,6 +3369,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 			    List<Reserva> reservasACancelar = new ArrayList();
 	            int reservasMovidas = 0;
 	            int reservasTraslapadas = 0;
+	            
 	            if(traslape){
 		            for (Disponibilidad disponibilidadOrigen : disponibilidadesOrigen) {
 		            	Disponibilidad dispOrigen = entityManager.find(Disponibilidad.class, disponibilidadOrigen.getId());
@@ -3378,6 +3379,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 	            
 	            
 			    for (Disponibilidad disponibilidadOrigen : disponibilidadesOrigen) {
+			    	int reservasPendientes = 0;
+		            int reservasReservadas = 0;
 			    	Disponibilidad dispOrigen = entityManager.find(Disponibilidad.class, disponibilidadOrigen.getId());
 			    	//logger.info("DISPONIBILIDAD ORIGEN " + dispOrigen.getId() + "HORA INICIO " + dispOrigen.getHoraInicio() + "CUPO " + dispOrigen.getCupo());
 			    	reservasOrigen = new ArrayList<Reserva>(dispOrigen.getReservas());
@@ -3391,323 +3394,354 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 				    		Disponibilidad dispoDestino = entityManager.find(Disponibilidad.class, disponibilidadDestino.getId());
 				    		//logger.info("DISPONIBILIDAD DESTINO " + dispoDestino.getId() + "HORA INICIO " + dispoDestino.getHoraInicio());
 
-					    	//Preguntar si las reservasOrigen caben en la disponibilidad destino en la primera que quepa se mete y luego se hace break;
-					    	if(dispOrigen.getFrecuencia()==dispoDestino.getFrecuencia()){
-					    		//Verificar los cupos en destino donde quepan todas las reservas de la disponibilidad origen
-					    		//aqui antes de preguntar si el cupo es mayor a 0, sumar en dado caso que se traslapen
-					    		if(traslape && dispOrigen.getHoraInicio().compareTo(dispoDestino.getHoraInicio())==0){
-					    			disponibilidadDestino.setCupo(disponibilidadDestino.getCupo()+dispOrigen.getReservas().size());
-					    		}
+                //Preguntar si las reservasOrigen caben en la disponibilidad destino en la primera que quepa se mete y luego se hace break;
+                if(dispOrigen.getFrecuencia()==dispoDestino.getFrecuencia()){
+                  //Verificar los cupos en destino donde quepan todas las reservas de la disponibilidad origen
+                  //aqui antes de preguntar si el cupo es mayor a 0, sumar en dado caso que se traslapen
+                  if(traslape && dispOrigen.getHoraInicio().compareTo(dispoDestino.getHoraInicio())==0){
+                    disponibilidadDestino.setCupo(disponibilidadDestino.getCupo()+dispOrigen.getReservas().size());
+                  }
 
-					    		if(disponibilidadDestino.getCupo()>0){
-							    	//Procesar cada reserva que se desea mover
-							    	for(Reserva reservaOrigen : reservasOrigen) {
-							    		if(reservaOrigen.getEstado() == Estado.R && disponibilidadDestino.getCupo()>0) {
-							    		    if(dispoDestino==null) {
-							    		        //No debería haber llegado hasta acá: hay reservas en el origen pero no existe la disponibilidad en el destino
-							    		        throw new BusinessException("no_se_puedo_mover_las_reservas");
-							    		    }
-							    			//Mover la reserva
-							    			Reserva reservaDestino = moverReserva(reservaOrigen, dispoDestino, datosSolicitarPorClave);
-							    			//Registrar las reservas a cancelar
-							    			reservaOrigen.setIdDestino(reservaDestino.getId());
-							    			reservasACancelar.add(reservaOrigen);
-							    			//Registrar las reservas (origen y destino) para enviar las comunicaciones al final
-							    			//No se envían ahora por si hay que hacer roll-back)
-							    			reservasMovidasOrigen.add(reservaOrigen);
-							    			reservasMovidasDestino.add(reservaDestino);
-							    			reservasMovidas++;
-							    			reservasYaMovidasOrigen++;
-							    			disponibilidadDestino.setCupo(disponibilidadDestino.getCupo()-1);
+                  if(disponibilidadDestino.getCupo()>0){
+                    //Procesar cada reserva que se desea mover
+                    for(Reserva reservaOrigen : reservasOrigen) {
+                    	
+                      if(reservaOrigen.getEstado() == Estado.R && disponibilidadDestino.getCupo()>0) {
+                          if(dispoDestino==null) {
+                              //No debería haber llegado hasta acá: hay reservas en el origen pero no existe la disponibilidad en el destino
+                              throw new BusinessException("no_se_puedo_mover_las_reservas");
+                          }
+                        //Mover la reserva
+                        Reserva reservaDestino = moverReserva(reservaOrigen, dispoDestino, datosSolicitarPorClave);
+                        //Registrar las reservas a cancelar
+                        reservaOrigen.setIdDestino(reservaDestino.getId());
+                        reservasACancelar.add(reservaOrigen);
+                        //Registrar las reservas (origen y destino) para enviar las comunicaciones al final
+                        //No se envían ahora por si hay que hacer roll-back)
+                        reservasMovidasOrigen.add(reservaOrigen);
+                        reservasMovidasDestino.add(reservaDestino);
+                        reservasMovidas++;
+                        reservasYaMovidasOrigen++;
+                        reservasReservadas++;
+                        disponibilidadDestino.setCupo(disponibilidadDestino.getCupo()-1);
+                        
+                      }else if(reservaOrigen.getEstado() == Estado.P) {
+                        //Simplemente se cancela;
+                        reservaOrigen.setEstado(Estado.C);
+                        reservaOrigen.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+                        reservaOrigen.setFcancela(new Date());
+                        reservasMovidas++;
+                        reservasPendientes++;
+                      }
+                      else {
+                        //Reservas en estado U o C se ignoran
+                      }
+                      saeCache.put(uuid, reservasMovidas);
+                    }
+                    reservasOrigen.removeAll(reservasACancelar);
+                    //cancelar reservas origen
+                    for(Reserva reservaCancelar : reservasACancelar){
+                      
+                      reservaCancelar.setEstado(Estado.C);
+                      reservaCancelar.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+                      reservaCancelar.setFcancela(new Date());
+                      String observacionOrigen = "Reserva movida a "+dispoDestino.getRecurso().getAgenda().getNombre()+"/"+
+                          dispoDestino.getRecurso().getNombre()+"; id destino: "+reservaCancelar.getIdDestino();
+                      if(observacionOrigen.length()>95) {
+                        observacionOrigen = observacionOrigen.substring(0, 95);
+                      }
+                      reservaCancelar.setObservaciones(observacionOrigen);
+                      entityManager.merge(reservaCancelar);
+                    }
+                    //Refrescar la disponibilidad origen porque solo se tiene un stub con datos mínimos
+                    //Y poner los cupos en 0
+                    //Preguntar primero si se traslapan para reutilizar disponibilidades
+                    //primero preguntar si son del mismo día
+                  try {
+                	  
+                    Date fechaDestino = formatoFecha.parse(formatoFecha.format(dispoDestino.getHoraInicio()));
+                    Date fechaOrigen = formatoFecha.parse(formatoFecha.format(dispOrigen.getHoraInicio()));
+                      if(fechaDestino.compareTo(fechaOrigen)==0){
 
-							    			
-							    		}else if(reservaOrigen.getEstado() == Estado.P) {
-							    			//Simplemente se cancela;
-							    			reservaOrigen.setEstado(Estado.C);
-							    			reservaOrigen.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
-							    			reservaOrigen.setFcancela(new Date());
-							    			reservasMovidas++;
-							    		}
-							    		else {
-							    			//Reservas en estado U o C se ignoran
-							    		}
-							    		saeCache.put(uuid, reservasMovidas);
-							    	}
-							    	reservasOrigen.removeAll(reservasACancelar);
-							    	//cancelar reservas origen
-							    	for(Reserva reservaCancelar : reservasACancelar){
-								    	
-							    		reservaCancelar.setEstado(Estado.C);
-							    		reservaCancelar.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
-							    		reservaCancelar.setFcancela(new Date());
-								    	String observacionOrigen = "Reserva movida a "+dispoDestino.getRecurso().getAgenda().getNombre()+"/"+
-								    			dispoDestino.getRecurso().getNombre()+"; id destino: "+reservaCancelar.getIdDestino();
-								    	if(observacionOrigen.length()>95) {
-								    		observacionOrigen = observacionOrigen.substring(0, 95);
-								    	}
-								    	reservaCancelar.setObservaciones(observacionOrigen);
-								    	entityManager.merge(reservaCancelar);
-							    	}
-							    	//Refrescar la disponibilidad origen porque solo se tiene un stub con datos mínimos
-							    	//Y poner los cupos en 0
-						    		//Preguntar primero si se traslapan para reutilizar disponibilidades
-							    	//primero preguntar si son del mismo día
-									try {
-										Date fechaDestino = formatoFecha.parse(formatoFecha.format(dispoDestino.getHoraInicio()));
-										Date fechaOrigen = formatoFecha.parse(formatoFecha.format(dispOrigen.getHoraInicio()));
-								    	if(fechaDestino.compareTo(fechaOrigen)==0){
+//                        
+                        if(traslape && disponibilidadesDestinoPorHora.get(formatoClave.format(dispOrigen.getHoraInicio()))==null){
+                          //logger.info("cupos cuando se traslapa y las horas inicio no son iguales");
+                          dispOrigen.setCupo(0);
+                        }
+                        else if(traslape){
+                          // no hace nada
+                        }
+                        else if(reservasPendientes>0 && reservasReservadas==0){
+                            // no hace nada
+                        }
+                        else if(reservasReservadas==0){
+                            // no hace nada
+                        }
+                        else{
+                          dispOrigen.setCupo(0);
+                        }
+                      }
+                      else if(reservasPendientes>0 && reservasReservadas==0){
+                          // no hace nada
+                      }
+                      else if(reservasReservadas==0){
+                          // no hace nada
+                      }
+                      else{
+                        dispOrigen.setCupo(0);
+                        //entityManager.merge(dispOrigen);
+                      }
+                  } catch (ParseException e) {
+                    throw new ApplicationException("error_mover_reservas");
+                  }
+                  
+                  
+                  }
 
-//								    		
-								    		if(traslape && disponibilidadesDestinoPorHora.get(formatoClave.format(dispOrigen.getHoraInicio()))==null){
-								    			//logger.info("cupos cuando se traslapa y las horas inicio no son iguales");
-								    			dispOrigen.setCupo(0);
-								    		}
-								    		else if(traslape){
-								    			// no hace nada
-								    		}
-								    		else{
-								    			dispOrigen.setCupo(0);
-								    		}
-								    	}
-								    	else{
-								    		dispOrigen.setCupo(0);
-								    		//entityManager.merge(dispOrigen);
-								    	}
-									} catch (ParseException e) {
-										throw new ApplicationException("error_mover_reservas");
-									}
-									
-									
-					    		}
+                }
+              }
+            }
+          }
+          
+        
+        //Si se procesaron todas las reservas y no se produjo ningún error se generan las novedades y se mandan las comunicaciones
+          if(generarNovedades || enviarComunicaciones) {
+            for(int i = 0; i<reservasMovidasOrigen.size(); i++) {
+              Reserva reservaOrigen = reservasMovidasOrigen.get(i);
+              Reserva reservaDestino = reservasMovidasDestino.get(i);
+              if(generarNovedades) {
+                novedadesBean.publicarNovedad(empresa, reservaOrigen, Acciones.CANCELACION);
+                novedadesBean.publicarNovedad(empresa, reservaDestino, Acciones.RESERVA);
+              }
+              if(enviarComunicaciones) {
+                //ToDo: cambiar esto para enviar mail de movimiento en lugar de cancelación/confirmación
+                String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
+                    "&ri="+reservaDestino.getId();
+                  String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
+                      "&r="+recursoDestino.getId()+"&ri="+reservaDestino.getId();
+                  comunicacionesBean.enviarComunicacionesTraslado(empresa, linkCancelacion, linkModificacion, reservaOrigen, reservaDestino, null, 
+                      empresa.getFormatoFecha(), empresa.getFormatoHora());
+              }
+            }
+          }
+          
+          if(traslape){
+//            logger.info("reservas movidas " + reservasMovidas);
+//            logger.info("reservas traslapadas " + reservasTraslapadas);
+//            logger.info("reservas movidas destino " + reservasMovidasDestino.size());
+            
+            ret.getMensajes().add("Reservas movidas correctamente; cantidad: "+ (reservasTraslapadas) + ".");
+          }
+          else{
+            ret.getMensajes().add("Reservas movidas correctamente; cantidad: "+reservasMovidasOrigen.size()+".");
+          }
+          
 
-					    	}
-				    	}
-			    	}
-			    }
-			    
-		    
-			  //Si se procesaron todas las reservas y no se produjo ningún error se generan las novedades y se mandan las comunicaciones
-			    if(generarNovedades || enviarComunicaciones) {
-				    for(int i = 0; i<reservasMovidasOrigen.size(); i++) {
-				    	Reserva reservaOrigen = reservasMovidasOrigen.get(i);
-				    	Reserva reservaDestino = reservasMovidasDestino.get(i);
-				    	if(generarNovedades) {
-				    		novedadesBean.publicarNovedad(empresa, reservaOrigen, Acciones.CANCELACION);
-				    		novedadesBean.publicarNovedad(empresa, reservaDestino, Acciones.RESERVA);
-				    	}
-				    	if(enviarComunicaciones) {
-				    		//ToDo: cambiar esto para enviar mail de movimiento en lugar de cancelación/confirmación
-				    		String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
-				    				"&ri="+reservaDestino.getId();
-				    	    String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
-				    	    		"&r="+recursoDestino.getId()+"&ri="+reservaDestino.getId();
-				    	    comunicacionesBean.enviarComunicacionesTraslado(empresa, linkCancelacion, linkModificacion, reservaOrigen, reservaDestino, null, 
-				    	    		empresa.getFormatoFecha(), empresa.getFormatoHora());
-				    	}
-				    }
-			    }
-			    
-			    if(traslape){
-//			    	logger.info("reservas movidas " + reservasMovidas);
-//			    	logger.info("reservas traslapadas " + reservasTraslapadas);
-//			    	logger.info("reservas movidas destino " + reservasMovidasDestino.size());
-			    	
-			    	ret.getMensajes().add("Reservas movidas correctamente; cantidad: "+ (reservasTraslapadas) + ".");
-			    }
-			    else{
-			    	ret.getMensajes().add("Reservas movidas correctamente; cantidad: "+reservasMovidasOrigen.size()+".");
-			    }
-			    
+      }
+      else{
+      
+        //Determinar si los recursos son visibles en internet
+        recursoOrigenVisibleInternet = BooleanUtils.isTrue(recursoOrigen.getVisibleInternet());
+        recursoDestinoVisibleInternet = BooleanUtils.isTrue(recursoDestino.getVisibleInternet());
+        //Deshabilitar ambos recursos en internet (si la tienen)
+        if(recursoOrigenVisibleInternet){
+          helper.desactivarRecursoVisibleInternet(recursoOrigen);
+        }
+        if(recursoDestinoVisibleInternet){
+          helper.desactivarRecursoVisibleInternet(recursoDestino);
+        }
+        //Determinar el timezone del recurso origen
+        TimeZone timezoneOrigen = TimeZone.getDefault();
+        if(recursoOrigen.getAgenda().getTimezone()!=null && !recursoOrigen.getAgenda().getTimezone().isEmpty()) {
+          timezoneOrigen = TimeZone.getTimeZone(recursoOrigen.getAgenda().getTimezone());
+        }else {
+          if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+            timezoneOrigen = TimeZone.getTimeZone(empresa.getTimezone());
+          }
+        }
+        //Determinar el timezone del recurso destino
+        TimeZone timezoneDestino = TimeZone.getDefault();
+        if(recursoDestino.getAgenda().getId().equals(recursoOrigen.getAgenda().getId())) {
+          timezoneDestino = timezoneOrigen;
+        }else {
+          if(recursoDestino.getAgenda().getTimezone()!=null && !recursoDestino.getAgenda().getTimezone().isEmpty()) {
+              timezoneDestino = TimeZone.getTimeZone(recursoDestino.getAgenda().getTimezone());
+          }else {
+            if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
+                timezoneDestino = TimeZone.getTimeZone(empresa.getTimezone());
+            }
+          }
+        }
+        
+        //Obtener las disponibilidades en ambos recursos
+        List<Disponibilidad> disponibilidadesOrigen = obtenerDisponibilidades(recursoOrigen, ventanaOrigen, timezoneOrigen, false);
+        List<Disponibilidad> disponibilidadesDestino = obtenerDisponibilidades(recursoDestino, ventanaDestino, timezoneDestino, false);
 
-			}
-			else{
-			
-				//Determinar si los recursos son visibles en internet
-				recursoOrigenVisibleInternet = BooleanUtils.isTrue(recursoOrigen.getVisibleInternet());
-				recursoDestinoVisibleInternet = BooleanUtils.isTrue(recursoDestino.getVisibleInternet());
-				//Deshabilitar ambos recursos en internet (si la tienen)
-				if(recursoOrigenVisibleInternet){
-					helper.desactivarRecursoVisibleInternet(recursoOrigen);
-				}
-				if(recursoDestinoVisibleInternet){
-					helper.desactivarRecursoVisibleInternet(recursoDestino);
-				}
-				//Determinar el timezone del recurso origen
-				TimeZone timezoneOrigen = TimeZone.getDefault();
-				if(recursoOrigen.getAgenda().getTimezone()!=null && !recursoOrigen.getAgenda().getTimezone().isEmpty()) {
-					timezoneOrigen = TimeZone.getTimeZone(recursoOrigen.getAgenda().getTimezone());
-				}else {
-					if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
-						timezoneOrigen = TimeZone.getTimeZone(empresa.getTimezone());
-					}
-				}
-				//Determinar el timezone del recurso destino
-				TimeZone timezoneDestino = TimeZone.getDefault();
-				if(recursoDestino.getAgenda().getId().equals(recursoOrigen.getAgenda().getId())) {
-					timezoneDestino = timezoneOrigen;
-				}else {
-					if(recursoDestino.getAgenda().getTimezone()!=null && !recursoDestino.getAgenda().getTimezone().isEmpty()) {
-					    timezoneDestino = TimeZone.getTimeZone(recursoDestino.getAgenda().getTimezone());
-					}else {
-						if(empresa.getTimezone()!=null && !empresa.getTimezone().isEmpty()) {
-						    timezoneDestino = TimeZone.getTimeZone(empresa.getTimezone());
-						}
-					}
-				}
-				
-				//Obtener las disponibilidades en ambos recursos
-				List<Disponibilidad> disponibilidadesOrigen = obtenerDisponibilidades(recursoOrigen, ventanaOrigen, timezoneOrigen, false);
-				List<Disponibilidad> disponibilidadesDestino = obtenerDisponibilidades(recursoDestino, ventanaDestino, timezoneDestino, false);
+          //Armar un mapeo entre los datos a solicitar en el recurso origen y los del recurso destino
+          //La clave es dato.agrupacion.nombre:dato.nombre
+          Map<String, DatoASolicitar> datosSolicitarPorClave = new HashMap<String, DatoASolicitar>();
+          for(DatoASolicitar datoSolicitarDestino : recursosEJB.consultarDatosSolicitar(recursoDestino)) {
+            String claveDato = datoSolicitarDestino.getAgrupacionDato().getNombre()+":"+datoSolicitarDestino.getNombre();
+            datosSolicitarPorClave.put(claveDato, datoSolicitarDestino);
+          }
+          //Procesar las reservas 
+          List<Reserva> reservasOrigen = new ArrayList<Reserva>();
+          List<Reserva> reservasMovidasOrigen = new ArrayList<Reserva>();
+          List<Reserva> reservasMovidasDestino = new ArrayList<Reserva>();
+          List<Reserva> reservasACancelar = new ArrayList();
+          int reservasMovidas = 0;
+          
+          
+          for (Disponibilidad disponibilidadOrigen : disponibilidadesOrigen) {
+            int reservasPendientes = 0;
+            int reservasReservadas = 0;  
+            Disponibilidad dispOrigen = entityManager.find(Disponibilidad.class, disponibilidadOrigen.getId());
+            //logger.info("DISPONIBILIDAD ORIGEN " + dispOrigen.getId() + " CUPO " + dispOrigen.getCupo());
+            reservasOrigen = new ArrayList<Reserva>();
+            reservasOrigen = dispOrigen.getReservas();
+            if(!reservasOrigen.isEmpty()){
+              
+              Integer reservasYaMovidasOrigen = 0;
+              //Recorrer la disponibilidades destino
+              for(Disponibilidad disponibilidadDestino : disponibilidadesDestino){
+                  //Refrescar la disponibilidad porque solo se tiene un stub con datos mínimos
+                Disponibilidad dispoDestino = entityManager.find(Disponibilidad.class, disponibilidadDestino.getId());
+                if(reservasYaMovidasOrigen==reservasOrigen.size()){
+                  break;
+                }
+                    
+                //logger.info("DISPONIBILIDAD DESTINO ID " + disponibilidadDestino.getId() + " CUPO " + disponibilidadDestino.getCupo());
+                //Preguntar si las reservasOrigen caben en la disponibilidad destino en la primera que quepa se mete y luego se hace break;
+                if(dispOrigen.getFrecuencia()==dispoDestino.getFrecuencia()){
+                  //Verificar los cupos en destino donde quepan todas las reservas de la disponibilidad origen
+                  if(disponibilidadDestino.getCupo()>0){
+                    //Procesar cada reserva que se desea mover
+                    for(Reserva reservaOrigen : reservasOrigen) {
+                      if(reservaOrigen.getEstado() == Estado.R && disponibilidadDestino.getCupo()>0) {
+                          if(dispoDestino==null) {
+                              //No debería haber llegado hasta acá: hay reservas en el origen pero no existe la disponibilidad en el destino
+                              throw new BusinessException("no_se_puedo_mover_las_reservas");
+                          }               
+                        //Mover la reserva
+                        Reserva reservaDestino = moverReserva(reservaOrigen, dispoDestino, datosSolicitarPorClave);
+                        //Registrar las reservas a cancelar
+                        reservaOrigen.setIdDestino(reservaDestino.getId());
+                        reservasACancelar.add(reservaOrigen);
+                        
+                        //Registrar las reservas (origen y destino) para enviar las comunicaciones al final
+                        //No se envían ahora por si hay que hacer roll-back)
+                        reservasMovidasOrigen.add(reservaOrigen);
+                        reservasMovidasDestino.add(reservaDestino);
+                        reservasMovidas++;
+                        reservasYaMovidasOrigen++;
+                        disponibilidadDestino.setCupo(disponibilidadDestino.getCupo()-1);
+                        reservasReservadas++;
+                        
+                      }else if(reservaOrigen.getEstado() == Estado.P) {
+                        //Simplemente se cancela;
+                        reservaOrigen.setEstado(Estado.C);
+                        reservaOrigen.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+                        reservaOrigen.setFcancela(new Date());
+                        reservasMovidas++;
+                        reservasPendientes++;
+                      }
+                      else {
+                        //Reservas en estado U o C se ignoran
+                      }
+                      saeCache.put(uuid, reservasMovidas);
+                    }
+                    reservasOrigen.removeAll(reservasACancelar);
+                    
+                    //cancelar reservas origen
+                    for(Reserva reservaCancelar : reservasACancelar){
+                      
+                      reservaCancelar.setEstado(Estado.C);
+                      reservaCancelar.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
+                      reservaCancelar.setFcancela(new Date());
+                      String observacionOrigen = "Reserva movida a "+dispoDestino.getRecurso().getAgenda().getNombre()+"/"+
+                          dispoDestino.getRecurso().getNombre()+"; id destino: "+reservaCancelar.getIdDestino();
+                      if(observacionOrigen.length()>95) {
+                        observacionOrigen = observacionOrigen.substring(0, 95);
+                      }
+                      reservaCancelar.setObservaciones(observacionOrigen);
+                      entityManager.merge(reservaCancelar);
+                    }
+                    //Refrescar la disponibilidad origen porque solo se tiene un stub con datos mínimos
+                    //Y poner los cupos en 0
+                    
+                    if(reservasPendientes>0 && reservasReservadas==0){
+                        // no hace nada
+                    }
+                    else if(reservasReservadas==0){
+                        // no hace nada
+                    }
+                    else{
+                    	dispOrigen.setCupo(0);
+                    }
+                  
+                  
+                  
+                  }
 
-			    //Armar un mapeo entre los datos a solicitar en el recurso origen y los del recurso destino
-			    //La clave es dato.agrupacion.nombre:dato.nombre
-			    Map<String, DatoASolicitar> datosSolicitarPorClave = new HashMap<String, DatoASolicitar>();
-			    for(DatoASolicitar datoSolicitarDestino : recursosEJB.consultarDatosSolicitar(recursoDestino)) {
-			    	String claveDato = datoSolicitarDestino.getAgrupacionDato().getNombre()+":"+datoSolicitarDestino.getNombre();
-		    		datosSolicitarPorClave.put(claveDato, datoSolicitarDestino);
-			    }
-			    //Procesar las reservas 
-			    List<Reserva> reservasOrigen = new ArrayList<Reserva>();
-			    List<Reserva> reservasMovidasOrigen = new ArrayList<Reserva>();
-			    List<Reserva> reservasMovidasDestino = new ArrayList<Reserva>();
-			    List<Reserva> reservasACancelar = new ArrayList();
-	            int reservasMovidas = 0;
-	            for (Disponibilidad disponibilidadOrigen : disponibilidadesOrigen) {
-			    	Disponibilidad dispOrigen = entityManager.find(Disponibilidad.class, disponibilidadOrigen.getId());
-			    	//logger.info("DISPONIBILIDAD ORIGEN " + dispOrigen.getId() + " CUPO " + dispOrigen.getCupo());
-			    	reservasOrigen = new ArrayList<Reserva>();
-			    	reservasOrigen = dispOrigen.getReservas();
-			    	if(!reservasOrigen.isEmpty()){
-			    		
-			    		Integer reservasYaMovidasOrigen = 0;
-				    	//Recorrer la disponibilidades destino
-				    	for(Disponibilidad disponibilidadDestino : disponibilidadesDestino){
-				    	    //Refrescar la disponibilidad porque solo se tiene un stub con datos mínimos
-				    		Disponibilidad dispoDestino = entityManager.find(Disponibilidad.class, disponibilidadDestino.getId());
-				    		if(reservasYaMovidasOrigen==reservasOrigen.size()){
-				    			break;
-				    		}
-				    				
-				    		//logger.info("DISPONIBILIDAD DESTINO ID " + disponibilidadDestino.getId() + " CUPO " + disponibilidadDestino.getCupo());
-					    	//Preguntar si las reservasOrigen caben en la disponibilidad destino en la primera que quepa se mete y luego se hace break;
-					    	if(dispOrigen.getFrecuencia()==dispoDestino.getFrecuencia()){
-					    		//Verificar los cupos en destino donde quepan todas las reservas de la disponibilidad origen
-					    		if(disponibilidadDestino.getCupo()>0){
-							    	//Procesar cada reserva que se desea mover
-							    	for(Reserva reservaOrigen : reservasOrigen) {
-							    		if(reservaOrigen.getEstado() == Estado.R && disponibilidadDestino.getCupo()>0) {
-							    		    if(dispoDestino==null) {
-							    		        //No debería haber llegado hasta acá: hay reservas en el origen pero no existe la disponibilidad en el destino
-							    		        throw new BusinessException("no_se_puedo_mover_las_reservas");
-							    		    }		    		    
-							    			//Mover la reserva
-							    			Reserva reservaDestino = moverReserva(reservaOrigen, dispoDestino, datosSolicitarPorClave);
-							    			//Registrar las reservas a cancelar
-							    			reservaOrigen.setIdDestino(reservaDestino.getId());
-							    			reservasACancelar.add(reservaOrigen);
-							    			
-							    			//Registrar las reservas (origen y destino) para enviar las comunicaciones al final
-							    			//No se envían ahora por si hay que hacer roll-back)
-							    			reservasMovidasOrigen.add(reservaOrigen);
-							    			reservasMovidasDestino.add(reservaDestino);
-							    			reservasMovidas++;
-							    			reservasYaMovidasOrigen++;
-							    			disponibilidadDestino.setCupo(disponibilidadDestino.getCupo()-1);
-							    		}else if(reservaOrigen.getEstado() == Estado.P) {
-							    			//Simplemente se cancela;
-							    			reservaOrigen.setEstado(Estado.C);
-							    			reservaOrigen.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
-							    			reservaOrigen.setFcancela(new Date());
-							    			reservasMovidas++;
-							    		}
-							    		else {
-							    			//Reservas en estado U o C se ignoran
-							    		}
-							    		saeCache.put(uuid, reservasMovidas);
-							    	}
-							    	reservasOrigen.removeAll(reservasACancelar);
-							    	
-							    	//cancelar reservas origen
-							    	for(Reserva reservaCancelar : reservasACancelar){
-								    	
-							    		reservaCancelar.setEstado(Estado.C);
-							    		reservaCancelar.setUcancela(ctx.getCallerPrincipal().getName().toLowerCase());
-							    		reservaCancelar.setFcancela(new Date());
-								    	String observacionOrigen = "Reserva movida a "+dispoDestino.getRecurso().getAgenda().getNombre()+"/"+
-								    			dispoDestino.getRecurso().getNombre()+"; id destino: "+reservaCancelar.getIdDestino();
-								    	if(observacionOrigen.length()>95) {
-								    		observacionOrigen = observacionOrigen.substring(0, 95);
-								    	}
-								    	reservaCancelar.setObservaciones(observacionOrigen);
-								    	entityManager.merge(reservaCancelar);
-							    	}
-							    	//Refrescar la disponibilidad origen porque solo se tiene un stub con datos mínimos
-							    	//Y poner los cupos en 0
-							    	dispOrigen.setCupo(0);
-									
-									
-									
-					    		}
-
-					    	}
-				    	}
-			    	}
-			    }
-	            
-	            
-			    //Si se procesaron todas las reservas y no se produjo ningún error se generan las novedades y se mandan las comunicaciones
-			    if(generarNovedades || enviarComunicaciones) {
-				    for(int i = 0; i<reservasMovidasOrigen.size(); i++) {
-				    	Reserva reservaOrigen = reservasMovidasOrigen.get(i);
-				    	Reserva reservaDestino = reservasMovidasDestino.get(i);
-				    	if(generarNovedades) {
-				    		novedadesBean.publicarNovedad(empresa, reservaOrigen, Acciones.CANCELACION);
-				    		novedadesBean.publicarNovedad(empresa, reservaDestino, Acciones.RESERVA);
-				    	}
-				    	if(enviarComunicaciones) {
-				    		//ToDo: cambiar esto para enviar mail de movimiento en lugar de cancelación/confirmación
-				    		String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
-				    				"&ri="+reservaDestino.getId();
-				    	    String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
-				    	    		"&r="+recursoDestino.getId()+"&ri="+reservaDestino.getId();
-				    	    comunicacionesBean.enviarComunicacionesTraslado(empresa, linkCancelacion, linkModificacion, reservaOrigen, reservaDestino, null, 
-				    	    		empresa.getFormatoFecha(), empresa.getFormatoHora());
-				    	}
-				    }
-			    }
-				ret.getMensajes().add("Reservas movidas correctamente; cantidad: "+reservasMovidasOrigen.size()+".");
-			}
-		}catch(UserException | BusinessException ex) {
-			ret.getErrores().add(ex.getCodigoError());
-		}catch(ApplicationException aEx) {
-			throw aEx;
-		}finally {
-			//Volver a habilitar ambos recursos en internet (si la tenían)
-			if(recursoOrigenVisibleInternet){
-				helper.activarRecursoVisibleInternet(recursoOrigen);
-			}
-			if(recursoDestinoVisibleInternet){
-				helper.activarRecursoVisibleInternet(recursoDestino);
-			}		
-		}
-		//Devolver el resultado
-		return ret;
-	}
+                }
+              }
+            }
+          }
+              
+              
+          //Si se procesaron todas las reservas y no se produjo ningún error se generan las novedades y se mandan las comunicaciones
+          if(generarNovedades || enviarComunicaciones) {
+            for(int i = 0; i<reservasMovidasOrigen.size(); i++) {
+              Reserva reservaOrigen = reservasMovidasOrigen.get(i);
+              Reserva reservaDestino = reservasMovidasDestino.get(i);
+              if(generarNovedades) {
+                novedadesBean.publicarNovedad(empresa, reservaOrigen, Acciones.CANCELACION);
+                novedadesBean.publicarNovedad(empresa, reservaDestino, Acciones.RESERVA);
+              }
+              if(enviarComunicaciones) {
+                //ToDo: cambiar esto para enviar mail de movimiento en lugar de cancelación/confirmación
+                String linkCancelacion = linkBase + "/sae/cancelarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
+                    "&ri="+reservaDestino.getId();
+                  String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+empresa.getId()+"&a="+recursoDestino.getAgenda().getId()+
+                      "&r="+recursoDestino.getId()+"&ri="+reservaDestino.getId();
+                  comunicacionesBean.enviarComunicacionesTraslado(empresa, linkCancelacion, linkModificacion, reservaOrigen, reservaDestino, null, 
+                      empresa.getFormatoFecha(), empresa.getFormatoHora());
+              }
+            }
+          }
+        ret.getMensajes().add("Reservas movidas correctamente; cantidad: "+reservasMovidasOrigen.size()+".");
+      }
+    }catch(UserException | BusinessException ex) {
+      ret.getErrores().add(ex.getCodigoError());
+    }catch(ApplicationException aEx) {
+      throw aEx;
+    }finally {
+      //Volver a habilitar ambos recursos en internet (si la tenían)
+      if(recursoOrigenVisibleInternet){
+        helper.activarRecursoVisibleInternet(recursoOrigen);
+      }
+      if(recursoDestinoVisibleInternet){
+        helper.activarRecursoVisibleInternet(recursoDestino);
+      }   
+    }
+    //Devolver el resultado
+    return ret;
+  }
     
-	private List<Object[]> obtenerCuposDisponiblesPorDisponibilidad(Recurso recurso, VentanaDeTiempo periodo) {
-	    String sQuery = "SELECT ad.id,ad.hora_inicio, ad.cupo - count(ar.id)," +
-	    				"abs((DATE_PART('day', ad.hora_fin - ad.hora_inicio) * 24 + " +
-	    				"DATE_PART('hour', ad.hora_fin - ad.hora_inicio)) * 60 + " +
-	    				"DATE_PART('minute', ad.hora_fin - ad.hora_inicio)) frecuencia " +	
-	    			    " FROM ae_disponibilidades ad LEFT JOIN ae_reservas_disponibilidades ard ON ard.aedi_id = ad.id " 
-	                    + "LEFT JOIN ae_reservas ar ON ar.id = ard.aers_id AND ar.estado <> 'C' WHERE ad.aere_id = :idRecurso AND ad.fecha = :fecha "
-	                    + "AND ad.hora_inicio>=:fi AND ad.hora_fin<=:ff "
-	                    + "GROUP BY ad.id, frecuencia";
-	    Query query = entityManager.createNativeQuery(sQuery);
+  private List<Object[]> obtenerCuposDisponiblesPorDisponibilidad(Recurso recurso, VentanaDeTiempo periodo) {
+      String sQuery = "SELECT ad.id,ad.hora_inicio, ad.cupo - count(ar.id)," +
+              "abs((DATE_PART('day', ad.hora_fin - ad.hora_inicio) * 24 + " +
+              "DATE_PART('hour', ad.hora_fin - ad.hora_inicio)) * 60 + " +
+              "DATE_PART('minute', ad.hora_fin - ad.hora_inicio)) frecuencia " +  
+                " FROM ae_disponibilidades ad LEFT JOIN ae_reservas_disponibilidades ard ON ard.aedi_id = ad.id " 
+                      + "LEFT JOIN ae_reservas ar ON ar.id = ard.aers_id AND ar.estado <> 'C' WHERE ad.aere_id = :idRecurso AND ad.fecha = :fecha "
+                      + "AND ad.hora_inicio>=:fi AND ad.hora_fin<=:ff "
+                      + "GROUP BY ad.id, frecuencia";
+      Query query = entityManager.createNativeQuery(sQuery);
         query.setParameter("idRecurso", recurso.getId());
         query.setParameter("fecha", periodo.getFechaInicial(), TemporalType.DATE);
         query.setParameter("fi", periodo.getFechaInicial(), TemporalType.TIMESTAMP);
-		query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
+    query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
         return (List<Object[]>)query.getResultList();
 	}
 	
@@ -3727,13 +3761,14 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 						"group by frecuencia,ad.id) as t " +
 						"group by t.frecuencia";
 	    Query query = entityManager.createNativeQuery(sQuery);
+
         query.setParameter("idRecurso", recurso.getId());
         query.setParameter("fi", periodo.getFechaInicial(), TemporalType.TIMESTAMP);
-		query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
+    query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
         return (List<Object[]>)query.getResultList();
-	}
-	
-	private List<Object[]> obtenerReservasConfirmadasPorFrecuencia(Recurso recurso, VentanaDeTiempo periodo) {
+  }
+  
+  private List<Object[]> obtenerReservasConfirmadasPorFrecuencia(Recurso recurso, VentanaDeTiempo periodo) {
         String sQuery = "select CAST(t.frecuencia as INTEGER), CAST(sum(t.reservas) as INTEGER) "+
 						"from ( " +
 						"SELECT " + 
@@ -3749,19 +3784,21 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
 						"AND ad.hora_inicio>=:fi AND ad.hora_fin<=:ff " + 
 						"GROUP BY frecuencia,ad.id) as t " +
 						"GROUP BY t.frecuencia";
+
         Query query = entityManager.createNativeQuery(sQuery);
         query.setParameter("idRecurso", recurso.getId());
         query.setParameter("fi", periodo.getFechaInicial(), TemporalType.TIMESTAMP);
-		query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
+    query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
         return (List<Object[]>)query.getResultList();
     }
+
 	
 	private List<Object[]> obtenerReservasConfirmadasPorDisponibilidad(Recurso recurso, VentanaDeTiempo periodo) {
         String sQuery = "SELECT ad.hora_inicio, ar.estado, count(*)," +
-		        		"abs((DATE_PART('day', ad.hora_fin - ad.hora_inicio) * 24 + " +
-						"DATE_PART('hour', ad.hora_fin - ad.hora_inicio)) * 60 + " +
-						"DATE_PART('minute', ad.hora_fin - ad.hora_inicio)) frecuencia " + 
-        				"FROM ae_disponibilidades ad JOIN ae_reservas_disponibilidades ard ON ard.aedi_id = ad.id "
+                "abs((DATE_PART('day', ad.hora_fin - ad.hora_inicio) * 24 + " +
+            "DATE_PART('hour', ad.hora_fin - ad.hora_inicio)) * 60 + " +
+            "DATE_PART('minute', ad.hora_fin - ad.hora_inicio)) frecuencia " + 
+                "FROM ae_disponibilidades ad JOIN ae_reservas_disponibilidades ard ON ard.aedi_id = ad.id "
                         + "JOIN ae_reservas ar ON ar.id = ard.aers_id WHERE ad.aere_id = :idRecurso AND ad.fecha = :fecha AND ad.presencial = false " 
                         + "AND ad.fecha_baja is NULL AND ar.estado = 'R' "
                         + "AND ad.hora_inicio>=:fi AND ad.hora_fin<=:ff "
@@ -3770,127 +3807,127 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         query.setParameter("idRecurso", recurso.getId());
         query.setParameter("fecha", periodo.getFechaInicial(), TemporalType.DATE);
         query.setParameter("fi", periodo.getFechaInicial(), TemporalType.TIMESTAMP);
-		query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
+    query.setParameter("ff", periodo.getFechaFinal(), TemporalType.TIMESTAMP);
         return (List<Object[]>)query.getResultList();
     }
     
     
     public Long obtenerReservasConfirmadasRecursoOrigen(Recurso recurso, VentanaDeTiempo periodo) throws UserException {
-    	try{
-    	
-	   
-	        String sQuery = "SELECT COUNT(*) FROM Reserva r JOIN r.disponibilidades d WHERE d.recurso.id=:idRecurso "+ 
-	        			    "AND r.estado = 'R' AND d.fechaBaja is NULL " +
-	                        "AND d.presencial = false AND d.horaInicio>=:fi " +
-	    				    "AND d.horaFin<=:ff";
-	        
-	        logger.info("HORA INICIO " + periodo.getFechaInicial());
-	        logger.info("HORA FIN " + periodo.getFechaFinal());
-	        
-	        Query query = entityManager.createQuery(sQuery);
-	        query.setParameter("idRecurso", recurso.getId());
-	        //query.setParameter("fecha", periodo.getFechaInicial(), TemporalType.DATE);
-	        query.setParameter("fi", periodo.getFechaInicial());
-			query.setParameter("ff", periodo.getFechaFinal());
-			Long cant = (Long) query.getSingleResult();
-	        
-	        
-	        if(cant>0){
-	        		return cant;
-	        }
-	        else{
-	        	return new Long("0");
-	        }
-    	}
-	    catch (Exception ex) {
-	        logger.error("No se pudo obtener las reservas del recurso origen", ex);
-	        throw new UserException("error_no_solucionable");
-	    }
+      try{
+      
+     
+          String sQuery = "SELECT COUNT(*) FROM Reserva r JOIN r.disponibilidades d WHERE d.recurso.id=:idRecurso "+ 
+                    "AND r.estado = 'R' AND d.fechaBaja is NULL " +
+                          "AND d.presencial = false AND d.horaInicio>=:fi " +
+                  "AND d.horaFin<=:ff";
+          
+          logger.info("HORA INICIO " + periodo.getFechaInicial());
+          logger.info("HORA FIN " + periodo.getFechaFinal());
+          
+          Query query = entityManager.createQuery(sQuery);
+          query.setParameter("idRecurso", recurso.getId());
+          //query.setParameter("fecha", periodo.getFechaInicial(), TemporalType.DATE);
+          query.setParameter("fi", periodo.getFechaInicial());
+      query.setParameter("ff", periodo.getFechaFinal());
+      Long cant = (Long) query.getSingleResult();
+          
+          
+          if(cant>0){
+              return cant;
+          }
+          else{
+            return new Long("0");
+          }
+      }
+      catch (Exception ex) {
+          logger.error("No se pudo obtener las reservas del recurso origen", ex);
+          throw new UserException("error_no_solucionable");
+      }
     }
     
     
     private Reserva moverReserva(Reserva reservaOrigen, Disponibilidad disponibilidadDestino, Map<String, DatoASolicitar> datosSolicitarPorClave) throws UserException {
-    	
-    	try{
-	    	//Crear la reserva destino
-	    	Reserva reservaDestino = new Reserva();
-	    	//Copiar los datos que se mantienen sin cambios
-	    	reservaDestino.setSerie(reservaOrigen.getSerie());
-	    	reservaDestino.setNumero(reservaOrigen.getNumero());
-	    	reservaDestino.setEstado(reservaOrigen.getEstado());
-	    	reservaDestino.setFechaCreacion(reservaOrigen.getFechaCreacion());
-	    	reservaDestino.setFechaActualizacion(reservaOrigen.getFechaActualizacion());
-	    	reservaDestino.setOrigen(reservaOrigen.getOrigen());
-	    	reservaDestino.setUcrea(reservaOrigen.getUcrea());
-	    	reservaDestino.setFcancela(reservaOrigen.getFcancela());
-	    	reservaDestino.setTcancela(reservaOrigen.getTcancela());
-	    	reservaDestino.setCodigoSeguridad(reservaOrigen.getCodigoSeguridad());
-	    	reservaDestino.setTrazabilidadGuid(reservaOrigen.getTrazabilidadGuid());
-	    	reservaDestino.setTramiteCodigo(reservaOrigen.getTramiteCodigo());
-	    	reservaDestino.setTramiteNombre(reservaOrigen.getTramiteNombre());
-	    	reservaDestino.setIpOrigen(reservaOrigen.getIpOrigen());
-	    	reservaDestino.setMiPerfilNotificada(reservaOrigen.isMiPerfilNotificada());
-	    	reservaDestino.setNotificar(reservaOrigen.getNotificar());    	
-	    	//Las reservas hijas no cambian de recurso o agenda
-	    	reservaDestino.setReservaHija(reservaOrigen.getReservaHija());    	
-	    	//En el caso de que sea parte de una reserva múltiple se reutiliza el mismo token
-	    	//Si necesitan cancelar todo el bloque la nueva reserva debe ser considerada parte del mismo
-	    	reservaDestino.setToken(reservaOrigen.getToken());
-	    	
-	    	//Campos que apuntan al destino
-	    	reservaDestino.getDisponibilidades().add(disponibilidadDestino);
-	    	disponibilidadDestino.getReservas().add(reservaDestino);
-	    	
-	    	//Campos calculados
-	    	reservaDestino.setFechaLiberacion(reservaOrigen.getFechaLiberacion());
-	    	
-	    	Disponibilidad disponibilidadOrigen = reservaOrigen.getDisponibilidades().get(0);
-	    	String observacionDestino = "Reserva movida de "+disponibilidadOrigen.getRecurso().getAgenda().getNombre()+"/"+
-	    			disponibilidadOrigen.getRecurso().getNombre()+"; id original: "+reservaOrigen.getId();
-	    	if(observacionDestino.length()>95) {
-	    		observacionDestino = observacionDestino.substring(0, 95);
-	    	}
-	    	reservaDestino.setObservaciones(observacionDestino);
-	    	
-	    	//Campos que se limpian
-	    	reservaDestino.setVersion(0);
-	    	reservaDestino.setLlamada(null);
-	    	reservaDestino.setAtenciones(null);
-	    	
-	    	//Campos nuevos
-	    	//Id de la reserva original
-	    	reservaDestino.setIdOrigen(reservaOrigen.getId());    	
-	    	
-	    	//Guardar la reserva
-	    	entityManager.persist(reservaDestino);
-	
-	    	//Datos de la reserva (hay que hacerlo después de haber guardado la reserva sino da error)
-	    	for(DatoReserva datoReservaOriginal : reservaOrigen.getDatosReserva()) {
-	    		DatoASolicitar datoSolicitarOriginal = datoReservaOriginal.getDatoASolicitar();
-	    		//La clave es agrupacion.nombre:dato.nombre
-	    		String claveDato = datoSolicitarOriginal.getAgrupacionDato().getNombre()+":"+datoSolicitarOriginal.getNombre();
-	    		DatoASolicitar datoSolicitarDestino = datosSolicitarPorClave.get(claveDato);
-	    		//Si el dato a solicitar no existe en el destino, se ignora
-	    		if(datoSolicitarDestino != null) {
-	    			DatoReserva datoReservaDestino = new DatoReserva();
-	    			datoReservaDestino.setReserva(reservaDestino);
-	    			datoReservaDestino.setDatoASolicitar(datoSolicitarDestino);
-	    			datoReservaDestino.setValor(datoReservaOriginal.getValor());
-	    			reservaDestino.getDatosReserva().add(datoReservaDestino);
-	    			//Guardar el dato
-	    	    	entityManager.persist(datoReservaDestino);
-	    		}
-	    	}    	
-	    	
-	    	
-	    	return reservaDestino;
-    	}
-    	catch (Exception ex) {
-	        logger.error("No se pudo mover la reserva", ex);
-	        throw new UserException("error_no_solucionable");
-	    }
-    	
-    	
+      
+      try{
+        //Crear la reserva destino
+        Reserva reservaDestino = new Reserva();
+        //Copiar los datos que se mantienen sin cambios
+        reservaDestino.setSerie(reservaOrigen.getSerie());
+        reservaDestino.setNumero(reservaOrigen.getNumero());
+        reservaDestino.setEstado(reservaOrigen.getEstado());
+        reservaDestino.setFechaCreacion(reservaOrigen.getFechaCreacion());
+        reservaDestino.setFechaActualizacion(reservaOrigen.getFechaActualizacion());
+        reservaDestino.setOrigen(reservaOrigen.getOrigen());
+        reservaDestino.setUcrea(reservaOrigen.getUcrea());
+        reservaDestino.setFcancela(reservaOrigen.getFcancela());
+        reservaDestino.setTcancela(reservaOrigen.getTcancela());
+        reservaDestino.setCodigoSeguridad(reservaOrigen.getCodigoSeguridad());
+        reservaDestino.setTrazabilidadGuid(reservaOrigen.getTrazabilidadGuid());
+        reservaDestino.setTramiteCodigo(reservaOrigen.getTramiteCodigo());
+        reservaDestino.setTramiteNombre(reservaOrigen.getTramiteNombre());
+        reservaDestino.setIpOrigen(reservaOrigen.getIpOrigen());
+        reservaDestino.setMiPerfilNotificada(reservaOrigen.isMiPerfilNotificada());
+        reservaDestino.setNotificar(reservaOrigen.getNotificar());      
+        //Las reservas hijas no cambian de recurso o agenda
+        reservaDestino.setReservaHija(reservaOrigen.getReservaHija());      
+        //En el caso de que sea parte de una reserva múltiple se reutiliza el mismo token
+        //Si necesitan cancelar todo el bloque la nueva reserva debe ser considerada parte del mismo
+        reservaDestino.setToken(reservaOrigen.getToken());
+        
+        //Campos que apuntan al destino
+        reservaDestino.getDisponibilidades().add(disponibilidadDestino);
+        disponibilidadDestino.getReservas().add(reservaDestino);
+        
+        //Campos calculados
+        reservaDestino.setFechaLiberacion(reservaOrigen.getFechaLiberacion());
+        
+        Disponibilidad disponibilidadOrigen = reservaOrigen.getDisponibilidades().get(0);
+        String observacionDestino = "Reserva movida de "+disponibilidadOrigen.getRecurso().getAgenda().getNombre()+"/"+
+            disponibilidadOrigen.getRecurso().getNombre()+"; id original: "+reservaOrigen.getId();
+        if(observacionDestino.length()>95) {
+          observacionDestino = observacionDestino.substring(0, 95);
+        }
+        reservaDestino.setObservaciones(observacionDestino);
+        
+        //Campos que se limpian
+        reservaDestino.setVersion(0);
+        reservaDestino.setLlamada(null);
+        reservaDestino.setAtenciones(null);
+        
+        //Campos nuevos
+        //Id de la reserva original
+        reservaDestino.setIdOrigen(reservaOrigen.getId());      
+        
+        //Guardar la reserva
+        entityManager.persist(reservaDestino);
+  
+        //Datos de la reserva (hay que hacerlo después de haber guardado la reserva sino da error)
+        for(DatoReserva datoReservaOriginal : reservaOrigen.getDatosReserva()) {
+          DatoASolicitar datoSolicitarOriginal = datoReservaOriginal.getDatoASolicitar();
+          //La clave es agrupacion.nombre:dato.nombre
+          String claveDato = datoSolicitarOriginal.getAgrupacionDato().getNombre()+":"+datoSolicitarOriginal.getNombre();
+          DatoASolicitar datoSolicitarDestino = datosSolicitarPorClave.get(claveDato);
+          //Si el dato a solicitar no existe en el destino, se ignora
+          if(datoSolicitarDestino != null) {
+            DatoReserva datoReservaDestino = new DatoReserva();
+            datoReservaDestino.setReserva(reservaDestino);
+            datoReservaDestino.setDatoASolicitar(datoSolicitarDestino);
+            datoReservaDestino.setValor(datoReservaOriginal.getValor());
+            reservaDestino.getDatosReserva().add(datoReservaDestino);
+            //Guardar el dato
+              entityManager.persist(datoReservaDestino);
+          }
+        }     
+        
+        
+        return reservaDestino;
+      }
+      catch (Exception ex) {
+          logger.error("No se pudo mover la reserva", ex);
+          throw new UserException("error_no_solucionable");
+      }
+      
+      
     }
   
 }

@@ -1,0 +1,8 @@
+
+<cache-container name="sae" default-cache="local-query">
+    <local-cache name="sae">
+        <transaction mode="NONE"/>
+        <eviction strategy="NONE"/>
+        <expiration max-idle="60000"/>
+    </local-cache>
+</cache-container>

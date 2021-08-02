@@ -87,8 +87,8 @@ public interface AgendarReservas {
 	public boolean hayCupoPresencial(Disponibilidad disponibilidad);
 	public Reserva confirmarReservaPresencial(Empresa empresa, Reserva reserva) throws ApplicationException, BusinessException, ValidacionException, AccesoMultipleException, UserException;
 	
+	//public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora,Boolean enviaCorreo, String asunto, String cuerpo) throws UserException;
 	public List<Integer> cancelarReservasPeriodo(Empresa empresa, Recurso recurso, VentanaDeTiempo ventana, String idioma, String formatoFecha, String formatoHora, String asunto, String cuerpo) throws UserException;
-	
 	/**
 	 * Este método es utilizado para marcar la reserva y confirmarla en un solo paso.
 	 * Está pensado para ser invocado mediante el servicio web REST confirmarReserva.
@@ -169,12 +169,15 @@ public interface AgendarReservas {
    * @return
    * @throws UserException
    */
+
 	public ResultadoEjecucion validarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino, VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino) 
 		throws UserException, ApplicationException, BusinessException;
 	
+    public Long obtenerReservasConfirmadasRecursoOrigen(Recurso recurso, VentanaDeTiempo periodo) throws UserException;	
+
 	public ResultadoEjecucion ejecutarMoverReservas(Empresa empresa, Recurso recursoOrigen, Recurso recursoDestino,VentanaDeTiempo ventanaOrigen, VentanaDeTiempo ventanaDestino, boolean enviarComunicaciones, 
 			String linkBase, boolean generarNovedades, String uuid) throws UserException, ApplicationException, BusinessException;
 	
-	public Long obtenerReservasConfirmadasRecursoOrigen(Recurso recurso, VentanaDeTiempo periodo)  throws UserException;
+
 
 }

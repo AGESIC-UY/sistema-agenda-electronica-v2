@@ -68,7 +68,7 @@
     </managed-property>
   </managed-bean>
 
-
+	
 	<managed-bean>
 		<managed-bean-name>recursoMBean</managed-bean-name>
 		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.RecursoMBean</managed-bean-class>
@@ -84,6 +84,14 @@
 			<value>#{recursoSessionMBean}</value>
 		</managed-property>
 	</managed-bean>
+	
+	<managed-bean>
+		<managed-bean-name>recursoSessionMBean</managed-bean-name>
+		<managed-bean-class>uy.gub.imm.sae.web.mbean.administracion.RecursoSessionMBean</managed-bean-class>
+		<managed-bean-scope>session</managed-bean-scope>
+	</managed-bean>
+	
+	
 
 	<managed-bean>
 		<managed-bean-name>disponibilidadMBean</managed-bean-name>

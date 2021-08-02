@@ -65,9 +65,11 @@
 	</ui:define>
 
 	<ui:define name="contenido">
-     <p:outputPanel rendered="#{!pasoFinalMBean.errorInit and not empty pasoFinalMBean.descripcion}">
+     <p:outputPanel rendered="#{!pasoFinalMBean.errorInit}">
 			<div class="infoAdicional box-grey">
-				<h:outputFormat escape="false" value="#{pasoFinalMBean.descripcion}" />
+				<h:outputText value="#{sesionMBean.textos['no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva']} " rendered="#{!sesionMBean.envioCorreoReserva}" />
+				<br/>
+				<h:outputFormat escape="false" value="#{pasoFinalMBean.descripcion}" rendered="#{not empty pasoFinalMBean.descripcion}" />
 			</div>
 		</p:outputPanel>
 	</ui:define>

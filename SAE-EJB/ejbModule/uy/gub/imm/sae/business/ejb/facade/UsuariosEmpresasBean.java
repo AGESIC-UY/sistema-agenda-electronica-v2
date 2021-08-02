@@ -38,7 +38,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.hibernate.internal.SessionImpl;
 import org.picketbox.commons.cipher.Base64;
 

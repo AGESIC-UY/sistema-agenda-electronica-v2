@@ -23,23 +23,31 @@ package uy.gub.imm.sae.web.mbean.administracion;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
+import javax.faces.application.FacesMessage;
+import javax.faces.component.html.HtmlSelectBooleanCheckbox;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
 import javax.faces.event.ActionEvent;
+import javax.faces.event.AjaxBehaviorEvent;
 import javax.faces.event.PhaseEvent;
 import javax.faces.event.PhaseId;
 import javax.faces.event.ValueChangeEvent;
 import javax.faces.model.SelectItem;
 
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.primefaces.component.datatable.DataTable;
 import org.primefaces.event.FileUploadEvent;
 import org.primefaces.model.UploadedFile;
@@ -50,8 +58,11 @@ import uy.gub.imm.opencsv.ext.entity.TableCellValue;
 import uy.gub.imm.opencsv.ext.file.StandardCSVFile;
 import uy.gub.imm.opencsv.ext.printer.CSVWebFilePrinter;
 import uy.gub.imm.sae.business.ejb.facade.AgendaGeneral;
+import uy.gub.imm.sae.business.ejb.facade.AgendarReservas;
+import uy.gub.imm.sae.business.ejb.facade.Configuracion;
 import uy.gub.imm.sae.business.ejb.facade.Recursos;
 import uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresas;
+import uy.gub.imm.sae.common.DisponibilidadReserva;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.entity.AccionMiPerfil;
 import uy.gub.imm.sae.entity.Agenda;
@@ -65,7 +76,9 @@ import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.web.common.BaseMBean;
+import uy.gub.imm.sae.web.common.RecursoComparatorNombre;
 import uy.gub.imm.sae.web.common.Row;
+import uy.gub.imm.sae.web.common.RowList;
 import uy.gub.imm.sae.web.common.TicketUtiles;
 
 public class RecursoMBean extends BaseMBean{
@@ -79,8 +92,14 @@ public class RecursoMBean extends BaseMBean{
 	@EJB(mappedName="java:global/sae-1-service/sae-ejb/UsuariosEmpresasBean!uy.gub.imm.sae.business.ejb.facade.UsuariosEmpresasRemote")
 	private UsuariosEmpresas empresasEJB;
 	
-  @EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
-  private AgendaGeneral generalEJB;
+	@EJB(mappedName="java:global/sae-1-service/sae-ejb/AgendaGeneralBean!uy.gub.imm.sae.business.ejb.facade.AgendaGeneralRemote")
+  	private AgendaGeneral generalEJB;
+	
+	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/AgendarReservasBean!uy.gub.imm.sae.business.ejb.facade.AgendarReservasRemote")
+	private AgendarReservas agendarReservasEJB;
+	
+	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionRemote")
+	private Configuracion configuracionEJB;
 	
 	private SessionMBean sessionMBean;
 	private Recurso recursoNuevo;
@@ -91,6 +110,7 @@ public class RecursoMBean extends BaseMBean{
 	private DataTable recursosDataTableModificar;
 	private DataTable recursosDataTableEliminar;
 	private DataTable recursosDataTableConsultar;
+	private DataTable recursosDataTableActualizar;
 	
 	//Tabla asociada tabla en pantalla para poder saber en que recurso se posiciona. 
 	private DataTable datosDataTable;
@@ -106,6 +126,15 @@ public class RecursoMBean extends BaseMBean{
   
   List<SelectItem> cambiosUnidades = null;
   List<SelectItem> cancelacionUnidades = null;
+  	
+  	//Combo Si ó No
+  	private List<SelectItem> aplicaTodos = new ArrayList();
+  	private Integer aplicaTodas;
+  	
+  	private List<SelectItem> agendasDisponibles;
+  	private String agendaSeleccionadaId;
+  	
+  	private Boolean seleccionarTodos=Boolean.FALSE;
   
   @PostConstruct
   public void initRecurso(){
@@ -538,7 +567,6 @@ public class RecursoMBean extends BaseMBean{
 			
 			//Cargo la accionMiPerfil, que contiene la info de todas las acciones del recurso
 		    AccionMiPerfil accionMiPerfil = recursosEJB.obtenerAccionMiPerfilDeRecurso(recursoNuevo.getId());
-		    
 		    //Le setteo la accion al recurso (transient)
 		    if(accionMiPerfil!=null && accionMiPerfil.getId()!=null){
 		    	sessionMBean.getRecursoSeleccionado().setAccionMiPerfil(accionMiPerfil);
@@ -1055,6 +1083,199 @@ public class RecursoMBean extends BaseMBean{
 		}
 	}
 	
+	public void beforePhaseCargar(PhaseEvent event) {
+		// Verificar que el usuario tiene permisos para acceder a esta página
+		if(!BooleanUtils.isTrue(sessionMBean.getUsuarioActual().isSuperadmin())) {
+	        FacesContext ctx = FacesContext.getCurrentInstance();
+	        ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+	    }
+		if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("carga_masiva_recursos_disponibilidades"));
+		}
+	}
+	
+	public void beforePhaseActualizar(PhaseEvent event) {
+		
+		 if (!FacesContext.getCurrentInstance().isPostback()) {
+			// Verificar que el usuario tiene permisos para acceder a esta página
+		   if(!BooleanUtils.isTrue(sessionMBean.getUsuarioActual().isSuperadmin())) {
+		        FacesContext ctx = FacesContext.getCurrentInstance();
+		        ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
+		    }	
+			if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
+				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("actualizacion_masiva"));
+			}
+		
+			initDatosActualizacionMasiva();
+		 }
+		
+		
+	}
+	
+	private void initDatosActualizacionMasiva(){
+		try {
+			//Cargar la lista de agendas destino
+			agendasDisponibles = new ArrayList<>();
+
+			agendasDisponibles.add(new SelectItem("", sessionMBean.getTextos().get("seleccionar")));
+
+			for(Agenda ag : generalEJB.consultarAgendas()) {
+				agendasDisponibles.add(new SelectItem(ag.getId().toString(), ag.getNombre()));
+			}
+			
+			Agenda agenda = sessionMBean.getAgendaMarcada();
+			
+				 
+	    	List<Recurso> recursosList = generalEJB.consultarRecursos(agenda);
+			Collections.sort(recursosList, new RecursoComparatorNombre());
+			if(recursosList!=null && !recursosList.isEmpty()){
+				recursoSessionMBean.setRecursos(new RowList<>(recursosList));
+			}
+			limpiarCampos();
+			
+		 } catch (Exception e) {
+			// TODO Auto-generated catch blockrecursoSessionMBean
+			e.printStackTrace();
+		 }
+	}
+	
+	private void limpiarCampos(){
+		
+		recursoSessionMBean.setDiasInicioVentanaInternet(null);
+		recursoSessionMBean.setDiasVentanaInternet(null);
+		recursoSessionMBean.setDiasInicioVentanaIntranet(null);
+		recursoSessionMBean.setDiasVentanaIntranet(null);;
+		
+	}
+	
+	
+	public void seleccionarTodosRecursos(AjaxBehaviorEvent event) {
+		
+	    limpiarMensajesError();
+	    HtmlSelectBooleanCheckbox check = (HtmlSelectBooleanCheckbox)event.getSource();
+	    Boolean isChecked = (Boolean)check.getValue();
+	    RowList<Recurso> listRecurso = recursoSessionMBean.getRecursos();
+	    if(listRecurso != null) {
+	      for (Row<Recurso> row : listRecurso) {
+	        row.getData().setSeleccionado(isChecked);
+	      }
+	    }
+	}
+	
+	public void seleccionarUno() {
+	  limpiarMensajesError();
+	}
+	
+	//@SuppressWarnings("unchecked")
+	public String actualizarRecursos() {
+		limpiarMensajesError();
+		Integer count = 0;
+		Boolean hayErrores = Boolean.FALSE;
+		List<String> mensajesErrores = new ArrayList();
+		List<String> mensajesExito = new ArrayList();
+		
+		
+		if (recursoSessionMBean.getDiasInicioVentanaIntranet() == null){
+	          addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasIVIntranet");
+	          hayErrores = true;
+        }
+		else if (recursoSessionMBean.getDiasInicioVentanaIntranet().intValue() < 0){
+	          addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":diasIVIntranet");
+	          hayErrores = true;
+        }
+	 				
+		if (recursoSessionMBean.getDiasVentanaIntranet() == null){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasVIntranet");
+			hayErrores = true;
+		}else if (recursoSessionMBean.getDiasVentanaIntranet().intValue() <= 0){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVIntranet");
+			hayErrores = true;
+		}
+	 		    
+		
+		if (recursoSessionMBean.getDiasInicioVentanaInternet() == null){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasInicioVInternet");
+            hayErrores = true;
+		}else if (recursoSessionMBean.getDiasInicioVentanaInternet().intValue() < 0){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":DiasInicioVInternet");
+			hayErrores = true;
+		}
+  
+		if (recursoSessionMBean.getDiasVentanaInternet() == null){
+            addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasVInternet");
+            hayErrores = true;
+		}else if (recursoSessionMBean.getDiasVentanaInternet().intValue() <= 0){
+			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVInternet");
+			hayErrores = true;
+		}
+			
+		
+		
+		for (Row<Recurso> row : recursoSessionMBean.getRecursos()) {
+			if(row.getData().isSeleccionado()) {
+				try {
+					count++;
+					Recurso recursoSeleccionado = row.getData();
+					recursoSeleccionado.setDiasInicioVentanaIntranet(recursoSessionMBean.getDiasInicioVentanaIntranet());
+					recursoSeleccionado.setDiasVentanaIntranet(recursoSessionMBean.getDiasVentanaIntranet());
+					recursoSeleccionado.setDiasInicioVentanaInternet(recursoSessionMBean.getDiasInicioVentanaInternet());
+					recursoSeleccionado.setDiasVentanaInternet(recursoSessionMBean.getDiasVentanaInternet());
+					recursosEJB.modificarRecurso(recursoSeleccionado, sessionMBean.getUsuarioActual().getCodigo());
+					mensajesExito.add("El recurso con ID: " + row.getData().getId() + " ha sido actualizado.");
+				}
+				catch (UserException ue) {
+					hayErrores = Boolean.TRUE;
+					mensajesErrores.add("El recurso con ID: " + row.getData().getId() + " no ha sido actualizado. Mensaje de error: " + sessionMBean.getTextos().get(ue.getCodigoError())+".");
+				}
+				catch (Exception e) {
+					addErrorMessage(e, MSG_ID);
+				}
+				
+				
+			}
+		}
+		
+		if(count==0){
+			addErrorMessage("Debe seleccionar al menos un recurso", MSG_ID);
+			return null;
+		}
+		else if(count>0){
+
+			sessionMBean.cargarRecursos();
+			initDatosActualizacionMasiva();
+			if(hayErrores){
+				for(String error : mensajesErrores){
+					addAdvertenciaMessage(error);
+				}
+				
+				for(String exito : mensajesExito){
+					addAdvertenciaMessage(exito);
+				}
+			}
+			else{
+				addInfoMessage(sessionMBean.getTextos().get("actualizacion_recursos").replaceAll("x", count.toString()), MSG_ID);
+			}
+			
+			seleccionarTodos = Boolean.FALSE;
+			return "actualizacionMasiva";
+			
+		}
+		else{
+			if(hayErrores){
+				for(String error : mensajesErrores){
+					addAdvertenciaMessage(error);
+				}
+				
+				return null;
+			}
+
+		}	
+		
+		return null;
+	}
+	
+	
+	
 	public void setOficinas(List<Oficina> ofs) {
 		mapOficinas = new HashMap<String, Oficina>();
 		oficinas = new ArrayList<SelectItem>();
@@ -1142,7 +1363,7 @@ public class RecursoMBean extends BaseMBean{
 	
 	public void subirArchivo(FileUploadEvent event) {
 		archivo = event.getFile();
-		addInfoMessage(sessionMBean.getTextos().get("archivo_cargado"), MSG_ID);
+		//addInfoMessage(sessionMBean.getTextos().get("archivo_cargado"), MSG_ID);
 	}
 	
 	public void importar(){
@@ -1172,6 +1393,103 @@ public class RecursoMBean extends BaseMBean{
 			addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_cargar_el_archivo"), MSG_ID);
 		}catch (UserException aEx) {
 			addErrorMessage(aEx, MSG_ID);
+		}
+	}
+	
+	public void cargaMasiva(){
+		
+		limpiarMensajesError();
+        removerMensages();
+		if(archivo==null || archivo.getSize()<1) {
+			addErrorMessage(sessionMBean.getTextos().get("debe_cargar_un_archivo"), "archivo_input");
+			return;
+		}
+		
+		
+		try {
+			byte[] bytes = IOUtils.toByteArray(archivo.getInputstream());
+			String resultado =recursosEJB.cargaMasiva(sessionMBean.getAgendaMarcada(), bytes, sessionMBean.getUsuarioActual().getCodigo(), sessionMBean.getTimeZone());
+			
+				
+				if(resultado==null){
+					addErrorMessage("No se ha podido realizar la carga masiva", MSG_ID); 
+				}
+				else if (StringUtils.contains(resultado, "No se ejecuta")) {
+				 addErrorMessage(resultado, MSG_ID);   
+	            } else if (StringUtils.contains(resultado, "Ha ocurrido un error")) {
+	            	addErrorMessage("Ha ocurrido un error, asegurese de estar cargando un archivo CSV separado por punto y coma (;)", MSG_ID);   
+	            } else {
+	                String[] errores = resultado.split(";");
+	                String lineasError = "Números de las líneas con errores: " + errores[0];
+	                //cortar el mensaje a 100 caracteres
+	                String cantLineasTotales = "Cantidad total de registros: " + errores[1];
+	                String cantLineasError = "Cantidad de registros con errores: " + errores[2];
+	                String cantLineasOk = "Cantidad de registros importados de forma correcta: " + errores[3];
+
+	                // Set response content type
+	                
+	                if(errores[2]!=null && Integer.parseInt(errores[2])>0){
+	                	addAdvertenciaMessage(cantLineasTotales,MSG_ID);
+		                addAdvertenciaMessage(cantLineasOk,MSG_ID);
+	                	
+	                	addAdvertenciaMessage(cantLineasError,MSG_ID);
+	                	
+	                	
+	                	if(errores[0]!=null){
+	                		addAdvertenciaMessage(lineasError, MSG_ID);
+		                }
+	                	
+	                	//traer los dos parámetros para recursos nuevos y existentes
+	                    Integer diasRecursosNuevos = Utiles.DIAS_RECURSOS_NUEVOS;
+	                    Integer diasRecursosExistentes = Utiles.DIAS_RECURSOS_EXISTENTES;
+	                    
+	                    
+	              		try {
+	              			diasRecursosNuevos = Integer.valueOf(configuracionEJB.getString("CARGA_MASIVA_DIAS_RECURSOS_NUEVOS"));
+	              		} catch (Exception nfEx) {
+	              			
+	              		}
+	              		
+	              		try {
+	              			diasRecursosExistentes = Integer.valueOf(configuracionEJB.getString("CARGA_MASIVA_DIAS_RECURSOS_EXISTENTES"));
+	              		} catch (Exception nfEx) {
+	              			
+	              		}
+	              		
+	              		
+	              		addAdvertenciaMessage("Tenga en cuenta que los errores pueden deberse por los siguientes puntos: ", MSG_ID);
+	                	addAdvertenciaMessage("- El nombre del recurso no puede estar vacío.", MSG_ID);
+	                	addAdvertenciaMessage("- El recurso a importar no puede repetirse.", MSG_ID);
+	                	addAdvertenciaMessage("- Si el recurso existe tener en cuenta que las fechas de inicio y fin, en la planilla, deben estar dentro del período de disponibilidad del mismo (fecha de inicio y fin de atención al público).", MSG_ID);
+	                	addAdvertenciaMessage("- El formato de fechas en el archivo debe ser: 'YYYY-MM-DD' .", MSG_ID);
+	                	addAdvertenciaMessage("- El formato de la disponibilidad en el archivo debe ser: 'Hora de comienzo-Hora del último grupo-duración del período-cantidad de números por período' .", MSG_ID);
+	                	addAdvertenciaMessage("- La cantidad de días para recursos nuevos no puede exceder los " + diasRecursosNuevos + " días.", MSG_ID);
+	                	addAdvertenciaMessage("- La cantidad de días para recursos existentes no puede exceder los " + diasRecursosExistentes + " días.", MSG_ID);
+	                	addAdvertenciaMessage("- Las disponibilidades no deben superponerse con otras existentes.", MSG_ID);
+	                	
+	                	
+	                }
+	                else{
+	                	addInfoMessage(cantLineasTotales,MSG_ID);
+	                	addInfoMessage(cantLineasOk,MSG_ID);
+	                	
+	                }
+	                
+	                sessionMBean.cargarRecursos();
+	            }
+			 
+			
+			//addInfoMessage(sessionMBean.getTextos().get("recurso_importado_exitosamente"), MSG_ID);
+			
+		} catch (IOException e) {
+			addErrorMessage(sessionMBean.getTextos().get("no_se_pudo_cargar_el_archivo"), MSG_ID);
+		}catch (UserException aEx) {
+			aEx.printStackTrace();
+			addErrorMessage("Error: No se pudo realizar la carga masiva", MSG_ID);
+		}
+		catch (Exception ex) {
+			ex.printStackTrace();
+			addErrorMessage("Error: No se pudo realizar la carga masiva", MSG_ID);
 		}
 	}
 	
@@ -1289,6 +1607,57 @@ public class RecursoMBean extends BaseMBean{
 	  }
 	  
   }
-  
+
+	public DataTable getRecursosDataTableActualizar() {
+		return recursosDataTableActualizar;
+	}
+	
+	public void setRecursosDataTableActualizar(DataTable recursosDataTableActualizar) {
+		this.recursosDataTableActualizar = recursosDataTableActualizar;
+	}
+	
+	
+	public List<SelectItem> getAplicaTodos() {
+		return aplicaTodos;
+	}
+	public void setAplicaTodos(List<SelectItem> aplicaTodos) {
+		this.aplicaTodos = aplicaTodos;
+	}
+
+	public Integer getAplicaTodas() {
+		return aplicaTodas;
+	}
+
+	public void setAplicaTodas(Integer aplicaTodas) {
+		this.aplicaTodas = aplicaTodas;
+	}
+
+	public List<SelectItem> getAgendasDisponibles() {
+		return agendasDisponibles;
+	}
+
+	public void setAgendasDisponibles(List<SelectItem> agendasDisponibles) {
+		this.agendasDisponibles = agendasDisponibles;
+	}
+
+	public String getAgendaSeleccionadaId() {
+		return agendaSeleccionadaId;
+	}
+
+	public void setAgendaSeleccionadaId(String agendaSeleccionadaId) {
+		this.agendaSeleccionadaId = agendaSeleccionadaId;
+	}
+
+	public Boolean getSeleccionarTodos() {
+		return seleccionarTodos;
+	}
+
+	public void setSeleccionarTodos(Boolean seleccionarTodos) {
+		this.seleccionarTodos = seleccionarTodos;
+	}
+	
+	
+	
+	
 	
 }

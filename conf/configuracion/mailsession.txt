@@ -1,0 +1,6 @@
+
+<mail-session jndi-name="java:/sae/mail">
+  <smtp-server ssl="true" outbound-socket-binding-ref="sae-mail-smtp">
+    <login name="{smtp-user}" password="{smtp-pass}"/>
+  </smtp-server>
+</mail-session>

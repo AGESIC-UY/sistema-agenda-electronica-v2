@@ -20,9 +20,15 @@
 
 package uy.gub.imm.sae.web.mbean.administracion;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.faces.model.SelectItem;
+
 import uy.gub.imm.sae.entity.DatoDelRecurso;
 import uy.gub.imm.sae.entity.Recurso;
 import uy.gub.imm.sae.web.common.RemovableFromSession;
+import uy.gub.imm.sae.web.common.RowList;
 import uy.gub.imm.sae.web.common.SessionCleanerMBean;
 
 
@@ -39,6 +45,13 @@ public class RecursoSessionMBean extends SessionCleanerMBean implements Removabl
 	private Recurso recursoSeleccionado;
 	private DatoDelRecurso datoSolicSeleccionado;
 	
+	private Integer diasInicioVentanaIntranet;
+	private Integer diasVentanaIntranet;
+	private Integer diasInicioVentanaInternet;
+	private Integer diasVentanaInternet;
+	private RowList<Recurso> recursos;
+	private Boolean aplicaTodos = Boolean.FALSE;
+	 
 	
 	public DatoDelRecurso getDatoSolicSeleccionado() {
 		return datoSolicSeleccionado;
@@ -88,6 +101,45 @@ public class RecursoSessionMBean extends SessionCleanerMBean implements Removabl
 	public void setRecursoSeleccionado(Recurso recursoSeleccionado) {
 		this.recursoSeleccionado = recursoSeleccionado;
 	}
+	public Integer getDiasInicioVentanaIntranet() {
+		return diasInicioVentanaIntranet;
+	}
+	public void setDiasInicioVentanaIntranet(Integer diasInicioVentanaIntranet) {
+		this.diasInicioVentanaIntranet = diasInicioVentanaIntranet;
+	}
+	public Integer getDiasVentanaIntranet() {
+		return diasVentanaIntranet;
+	}
+	public void setDiasVentanaIntranet(Integer diasVentanaIntranet) {
+		this.diasVentanaIntranet = diasVentanaIntranet;
+	}
+	public Integer getDiasInicioVentanaInternet() {
+		return diasInicioVentanaInternet;
+	}
+	public void setDiasInicioVentanaInternet(Integer diasInicioVentanaInternet) {
+		this.diasInicioVentanaInternet = diasInicioVentanaInternet;
+	}
+	public Integer getDiasVentanaInternet() {
+		return diasVentanaInternet;
+	}
+	public void setDiasVentanaInternet(Integer diasVentanaInternet) {
+		this.diasVentanaInternet = diasVentanaInternet;
+	}
+	public RowList<Recurso> getRecursos() {
+		return recursos;
+	}
+	public void setRecursos(RowList<Recurso> recursos) {
+		this.recursos = recursos;
+	}
+	public Boolean getAplicaTodos() {
+		return aplicaTodos;
+	}
+	public void setAplicaTodos(Boolean aplicaTodos) {
+		this.aplicaTodos = aplicaTodos;
+	}
+	
+	
+	
 	
 
 }

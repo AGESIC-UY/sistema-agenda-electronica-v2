@@ -122,6 +122,9 @@
       <zipfileset dir="../SAE-Config/libs" prefix="WEB-INF/lib">
         <include name="gson-2.8.0.jar" />
       </zipfileset>
+	  <zipfileset dir="../SAE-Config/libs" prefix="WEB-INF/lib">
+        <include name="commons-lang3-3.7.jar" />
+      </zipfileset>	
       <zipfileset file="build/jboss-web-backoffice.xml" fullpath="WEB-INF/jboss-web.xml" />
     </war>
 

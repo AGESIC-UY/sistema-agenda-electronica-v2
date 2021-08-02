@@ -46,4 +46,12 @@ public interface Disponibilidades {
 	public Disponibilidad obtenerDisponibilidadPresencial(Recurso recurso, TimeZone timezone);
 	
 	public Disponibilidad obtenerDisponibilidadEnHoraInicio(Recurso recurso, Date horaInicio);
+	
+	public Boolean existeDisponibilidadFechaRecurso(Date fecha, Recurso recurso);
+	
+	public List<Disponibilidad> obtenerDisponibilidadesRangoHoraInicio(Date fecha,Date horaInicioInit,Date horaInicioFin, Recurso recurso);
+	
+	public Disponibilidad obtenerDisponibilidadEnHoraInicioMin(Recurso recurso,Date fecha);
+	
+	public Disponibilidad obtenerDisponibilidadEnHoraInicioMax(Recurso recurso,Date fecha);
 }

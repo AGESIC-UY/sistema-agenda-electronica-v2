@@ -67,6 +67,7 @@ import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.ErrorAutocompletarException;
 import uy.gub.imm.sae.exception.ErrorValidacionCommitException;
 import uy.gub.imm.sae.exception.ErrorValidacionException;
+import uy.gub.imm.sae.exception.UserException;
 import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionIPException;
@@ -297,6 +298,7 @@ public class Paso3MBean extends BaseMBean {
 		limpiarMensajesError();
 		yaExisteReservaCamposClave = false;
 		sesionMBean.setReservaConfirmada(null);
+		sesionMBean.setEnvioCorreoReserva(Boolean.TRUE);
 		try {
 			boolean hayError = false;
 			if(this.tramiteCodigo==null || this.tramiteCodigo.isEmpty()) {
@@ -392,6 +394,11 @@ public class Paso3MBean extends BaseMBean {
 					//Reintento hasta tener exito, en algun momento no me va a dar acceso multiple.
 				}
 			}
+			
+			//La reserva se confirmo, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
+			sesionMBean.setReservaConfirmada(reserva);
+			sesionMBean.setReserva(null);
+			
 			//Enviar el mail de confirmacion
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
       Recurso recurso = reserva.getDisponibilidades().get(0).getRecurso(); 
@@ -404,9 +411,7 @@ public class Paso3MBean extends BaseMBean {
       String linkModificacion = linkBase + "/sae/modificarReserva/Paso1.xhtml?e="+sesionMBean.getEmpresaActual().getId()+"&a="+agenda.getId()+"&r="+recurso.getId()+"&ri="+reserva.getId();
       comunicacionesEJB.enviarComunicacionesConfirmacion(sesionMBean.getEmpresaActual(), linkCancelacion, linkModificacion, reserva, sesionMBean.getIdiomaActual(), 
 			    sesionMBean.getFormatoFecha(), sesionMBean.getFormatoHora());
-			//La reserva se confirmo, por lo tanto muevo la reseva a confirmada en la sesion para evitar problemas de reload de pagina.
-			sesionMBean.setReservaConfirmada(reserva);
-			sesionMBean.setReserva(null);
+
 		}catch(ValidacionPorCampoException e) {
 			//Alguno de los campos no tiene el formato esperado
 			List<String> idComponentesError = new ArrayList<String>();
@@ -517,7 +522,12 @@ public class Paso3MBean extends BaseMBean {
 			addErrorMessage(bEx.getMessage());
 			bEx.printStackTrace();
 			return null;
-		}catch(Exception ex) {
+		}catch(UserException uEx) {
+			sesionMBean.setEnvioCorreoReserva(Boolean.FALSE);
+			datosReservaMBean.clear();
+			return "reservaConfirmada";
+		}
+		catch(Exception ex) {
       addErrorMessage(sesionMBean.getTextos().get("sistema_en_mantenimiento"));
       ex.printStackTrace();
       return null;

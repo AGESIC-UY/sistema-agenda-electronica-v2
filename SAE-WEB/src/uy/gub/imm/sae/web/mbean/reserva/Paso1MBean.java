@@ -93,17 +93,17 @@ public class Paso1MBean extends BaseMBean {
 	public void init() {
 		try {
 			HttpServletRequest request = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
-      LOGGER.debug("Parámetros GET: ");
-      LOGGER.debug("              : e=["+request.getParameter("e")+"]");
-      LOGGER.debug("              : a=["+request.getParameter("a")+"]");
-      LOGGER.debug("              : r=["+request.getParameter("r")+"]");
-      LOGGER.debug("              : i=["+request.getParameter("i")+"]");
-      LOGGER.debug("              : u=["+request.getParameter("u")+"]");
-      LOGGER.debug("              : p=["+request.getParameter("p")+"]");
-      LOGGER.debug("              : t=["+request.getParameter("t")+"]");
-      LOGGER.debug("              : q=["+request.getParameter("q")+"]");
-
-      String sEmpresaId = request.getParameter("e"); //Id de la empresa
+			LOGGER.debug("Parámetros GET: ");
+			LOGGER.debug("              : e=["+request.getParameter("e")+"]");
+			LOGGER.debug("              : a=["+request.getParameter("a")+"]");
+			LOGGER.debug("              : r=["+request.getParameter("r")+"]");
+			LOGGER.debug("              : i=["+request.getParameter("i")+"]");
+			LOGGER.debug("              : u=["+request.getParameter("u")+"]");
+			LOGGER.debug("              : p=["+request.getParameter("p")+"]");
+			LOGGER.debug("              : t=["+request.getParameter("t")+"]");
+			LOGGER.debug("              : q=["+request.getParameter("q")+"]");
+			
+            String sEmpresaId = request.getParameter("e"); //Id de la empresa
 			String sAgendaId = request.getParameter("a"); //Id de la agenda
 			String sRecursoId = request.getParameter("r"); //Id del recurso
 			
@@ -173,7 +173,6 @@ public class Paso1MBean extends BaseMBean {
 			httpSession.setAttribute("a", agendaId.toString());
 			
 			String remoteUser = FacesContext.getCurrentInstance().getExternalContext().getRemoteUser();
-			
 			try {
 				// Crear un usuario falso temporal
 				String falsoUsuario = null;

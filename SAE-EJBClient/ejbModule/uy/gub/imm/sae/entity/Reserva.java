@@ -58,29 +58,30 @@ import uy.gub.imm.sae.common.enumerados.TipoCancelacion;
 @Table (name = "ae_reservas")
 public class Reserva implements Serializable {
 
-	private static final long serialVersionUID = 3500715468120358550L;
+  private static final long serialVersionUID = 3500715468120358550L;
 
-	private Integer id;
-	private String serie;
-	private Integer numero;
-	private Estado estado; //Si está cancelada (C) hay que tomar en cuenta el campo fechaLiberacion
-	private String observaciones;
-	private Date fechaCreacion; //En GMT
-	private Date fechaActualizacion; //En GMT
-	private Integer version;
-	private Llamada llamada;
-	private String origen;
-	private String ucrea;
-	private Date fcancela; //En GMT
-	private String ucancela;
-	private TipoCancelacion tcancela;
-	private Date fechaLiberacion; //Cuándo se libera el cupo, en GMT
-	
-	private String codigoSeguridad; //Código utilizado para la cencelación
-	private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
-	
-	private String tramiteCodigo; //Código del trámite en TrámitesUy
-	private String tramiteNombre; //Nombre del trámite en TrámitesUy
+  private Integer id;
+  private String serie;
+  private Integer numero;
+  private Estado estado; //Si está cancelada (C) hay que tomar en cuenta el campo fechaLiberacion
+  private String observaciones;
+  private Date fechaCreacion; //En GMT
+  private Date fechaActualizacion; //En GMT
+  private Integer version;
+  private Llamada llamada;
+  private String origen;
+  private String ucrea;
+  private Date fcancela; //En GMT
+  private String ucancela;
+  private TipoCancelacion tcancela;
+  private Date fechaLiberacion; //Cuándo se libera el cupo, en GMT
+  
+  private String codigoSeguridad; //Código utilizado para la cencelación
+  private String trazabilidadGuid; //Identificador unico asignado por el sistema de Trazabilidad del PEU
+  
+  private String tramiteCodigo; //Código del trámite en TrámitesUy
+  private String tramiteNombre; //Nombre del trámite en TrámitesUy
+
 
 	private List<Disponibilidad> disponibilidades; //Es una lista pero solo debería haber una
 	private Set<DatoReserva> datosReserva;
@@ -128,149 +129,150 @@ public class Reserva implements Serializable {
 		this.numero = numero;
 	}
 
-	@Column (nullable = false, length=1)
-	@Enumerated (EnumType.STRING)
-	public Estado getEstado() {
-		return estado;
-	}
-	public void setEstado(Estado estado) {
-		this.estado = estado;
-	}
-	
-	@Column (length = 100)
-	public String getObservaciones() {
-		return observaciones;
-	}
-	public void setObservaciones(String observaciones) {
-		this.observaciones = observaciones;
-	}
-	
-	@OneToMany (mappedBy = "reserva", fetch = FetchType.EAGER)
-	public Set<DatoReserva> getDatosReserva() {
-		return datosReserva;
-	}
-	public void setDatosReserva(Set<DatoReserva> datosReserva) {
-		this.datosReserva = datosReserva;
-	}
-	
-	// Se agrega la lista de atencion para poder hacer el reporte de vino - No vino
-	@XmlTransient
-	@OneToMany (mappedBy="reserva")
-	public List <Atencion> getAtenciones(){
-		return atenciones;
-	}
-	
-	public void setAtenciones(List<Atencion> atenciones){
-		this.atenciones = atenciones;
-	}
-	
-	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "ae_reservas_disponibilidades",
-			   inverseJoinColumns={@JoinColumn (name = "aedi_id")},
-			   joinColumns={@JoinColumn (name = "aers_id")}
-	)
-	public List<Disponibilidad> getDisponibilidades() {
-		return disponibilidades;
-	}
-	
-	public void setDisponibilidades(List<Disponibilidad> disponibilidades) {
-		this.disponibilidades = disponibilidades;
-	}
 
-	@Column (name = "fcrea", nullable=false)
-	@Temporal(TemporalType.TIMESTAMP)
-	public Date getFechaCreacion() {
-		return fechaCreacion;
-	}
-	public void setFechaCreacion(Date fechaCreacion) {
-		this.fechaCreacion = fechaCreacion;
-	}
+  @Column (nullable = false, length=1)
+  @Enumerated (EnumType.STRING)
+  public Estado getEstado() {
+    return estado;
+  }
+  public void setEstado(Estado estado) {
+    this.estado = estado;
+  }
+  
+  @Column (length = 100)
+  public String getObservaciones() {
+    return observaciones;
+  }
+  public void setObservaciones(String observaciones) {
+    this.observaciones = observaciones;
+  }
+  
+  @OneToMany (mappedBy = "reserva", fetch = FetchType.EAGER)
+  public Set<DatoReserva> getDatosReserva() {
+    return datosReserva;
+  }
+  public void setDatosReserva(Set<DatoReserva> datosReserva) {
+    this.datosReserva = datosReserva;
+  }
+  
+  // Se agrega la lista de atencion para poder hacer el reporte de vino - No vino
+  @XmlTransient
+  @OneToMany (mappedBy="reserva")
+  public List <Atencion> getAtenciones(){
+    return atenciones;
+  }
+  
+  public void setAtenciones(List<Atencion> atenciones){
+    this.atenciones = atenciones;
+  }
+  
+  @ManyToMany(fetch = FetchType.EAGER)
+  @JoinTable(name = "ae_reservas_disponibilidades",
+         inverseJoinColumns={@JoinColumn (name = "aedi_id")},
+         joinColumns={@JoinColumn (name = "aers_id")}
+  )
+  public List<Disponibilidad> getDisponibilidades() {
+    return disponibilidades;
+  }
+  
+  public void setDisponibilidades(List<Disponibilidad> disponibilidades) {
+    this.disponibilidades = disponibilidades;
+  }
 
-	@Column (name = "fact", nullable=false)
-	@Temporal(TemporalType.TIMESTAMP)
-	public Date getFechaActualizacion() {
-		return fechaActualizacion;
-	}
+  @Column (name = "fcrea", nullable=false)
+  @Temporal(TemporalType.TIMESTAMP)
+  public Date getFechaCreacion() {
+    return fechaCreacion;
+  }
+  public void setFechaCreacion(Date fechaCreacion) {
+    this.fechaCreacion = fechaCreacion;
+  }
 
-	public void setFechaActualizacion(Date fechaActualizacion) {
-		this.fechaActualizacion = fechaActualizacion;
-	}
-	
-	@XmlTransient
-	@OneToOne(optional=true, mappedBy="reserva")
-	public Llamada getLlamada() {
-		return llamada;
-	}
+  @Column (name = "fact", nullable=false)
+  @Temporal(TemporalType.TIMESTAMP)
+  public Date getFechaActualizacion() {
+    return fechaActualizacion;
+  }
 
-	public void setLlamada(Llamada llamada) {
-		this.llamada = llamada;
-	}
+  public void setFechaActualizacion(Date fechaActualizacion) {
+    this.fechaActualizacion = fechaActualizacion;
+  }
+  
+  @XmlTransient
+  @OneToOne(optional=true, mappedBy="reserva")
+  public Llamada getLlamada() {
+    return llamada;
+  }
 
-	@Version
-	@Column(name="version", nullable=false)
-	public Integer getVersion() {
-		return version;
-	}
+  public void setLlamada(Llamada llamada) {
+    this.llamada = llamada;
+  }
 
-	public void setVersion(Integer version) {
-		this.version = version;
-	}
+  @Version
+  @Column(name="version", nullable=false)
+  public Integer getVersion() {
+    return version;
+  }
 
-	@Override
-	public String toString() {
-		String strDisp = "disponibilidades=";
-		for (Iterator<Disponibilidad> iterator = disponibilidades.iterator(); iterator.hasNext();) {
-			Disponibilidad disp = iterator.next();
-			strDisp+= disp.toString()+",";			
-		}
-		String strDatos = "datos=";
-		for (Iterator<DatoReserva> iterator = datosReserva.iterator(); iterator.hasNext();) {
-			DatoReserva dato = iterator.next();
-			strDatos+=dato.toString()+",";
-		}
-		return "Reserva [id="+ id + "," + strDisp + "," + strDatos +"]";
-	}
+  public void setVersion(Integer version) {
+    this.version = version;
+  }
 
-	@Column (name = "origen", length = 1)
-	public String getOrigen() {
-		return origen;
-	}
+  @Override
+  public String toString() {
+    String strDisp = "disponibilidades=";
+    for (Iterator<Disponibilidad> iterator = disponibilidades.iterator(); iterator.hasNext();) {
+      Disponibilidad disp = iterator.next();
+      strDisp+= disp.toString()+",";      
+    }
+    String strDatos = "datos=";
+    for (Iterator<DatoReserva> iterator = datosReserva.iterator(); iterator.hasNext();) {
+      DatoReserva dato = iterator.next();
+      strDatos+=dato.toString()+",";
+    }
+    return "Reserva [id="+ id + "," + strDisp + "," + strDatos +"]";
+  }
 
-	public void setOrigen(String origen) {
-		this.origen = origen;
-	}
-	
-	@Column (name = "ucrea", length = 30)
-	public String getUcrea() {
-		return ucrea;
-	}
+  @Column (name = "origen", length = 1)
+  public String getOrigen() {
+    return origen;
+  }
 
-	public void setUcrea(String ucrea) {
-		this.ucrea = ucrea;
-	}
+  public void setOrigen(String origen) {
+    this.origen = origen;
+  }
+  
+  @Column (name = "ucrea", length = 30)
+  public String getUcrea() {
+    return ucrea;
+  }
 
-	public String getUcancela() {
-		return ucancela;
-	}
+  public void setUcrea(String ucrea) {
+    this.ucrea = ucrea;
+  }
 
-	public void setUcancela(String ucancela) {
-		this.ucancela = ucancela;
-	}
+  public String getUcancela() {
+    return ucancela;
+  }
 
-	@Column(name="codigo_seguridad")
-	public String getCodigoSeguridad() {
-		if(codigoSeguridad == null) {
-			return "0000";
-		}
-		return codigoSeguridad;
-	}
+  public void setUcancela(String ucancela) {
+    this.ucancela = ucancela;
+  }
 
-	public void setCodigoSeguridad(String codigoSeguridad) {
-		this.codigoSeguridad = codigoSeguridad;
-	}
+  @Column(name="codigo_seguridad")
+  public String getCodigoSeguridad() {
+    if(codigoSeguridad == null) {
+      return "0000";
+    }
+    return codigoSeguridad;
+  }
+
+  public void setCodigoSeguridad(String codigoSeguridad) {
+    this.codigoSeguridad = codigoSeguridad;
+  }
 
   @Column(name="tramite_codigo")
-	public String getTramiteCodigo() {
+  public String getTramiteCodigo() {
     return tramiteCodigo;
   }
 
@@ -295,15 +297,15 @@ public class Reserva implements Serializable {
     this.serie = serie;
   }
 
-	@Column(name="trazabilidad_guid")
-	public String getTrazabilidadGuid() {
-		return trazabilidadGuid;
-	}
+  @Column(name="trazabilidad_guid")
+  public String getTrazabilidadGuid() {
+    return trazabilidadGuid;
+  }
 
-	public void setTrazabilidadGuid(String trazabilidadGuid) {
-		this.trazabilidadGuid = trazabilidadGuid;
-	}
-	
+  public void setTrazabilidadGuid(String trazabilidadGuid) {
+    this.trazabilidadGuid = trazabilidadGuid;
+  }
+  
   @Enumerated (EnumType.STRING)
   public TipoCancelacion getTcancela() {
     return tcancela;
@@ -367,13 +369,13 @@ public class Reserva implements Serializable {
     this.notificar = notificar;
   }
 
-	@Column (name = "id_origen")
-	public Integer getIdOrigen() {
-		return idOrigen;
-	}
-	public void setIdOrigen(Integer idOrigen) {
-		this.idOrigen = idOrigen;
-	}
+  @Column (name = "id_origen")
+  public Integer getIdOrigen() {
+    return idOrigen;
+  }
+  public void setIdOrigen(Integer idOrigen) {
+    this.idOrigen = idOrigen;
+  }
   
   @Transient
   public String getEstadoDescripcion(){
@@ -438,9 +440,9 @@ public class Reserva implements Serializable {
   }
   
   @Transient
-	public Boolean getPresencial() {
-	  return(disponibilidades.isEmpty()? null : disponibilidades.get(0).getPresencial());
-	}
+  public Boolean getPresencial() {
+    return(disponibilidades.isEmpty()? null : disponibilidades.get(0).getPresencial());
+  }
   
   @Transient
   public Date getFechaHora() {
@@ -449,9 +451,9 @@ public class Reserva implements Serializable {
   
   
   @ManyToOne (optional = true, cascade = {
-	        CascadeType.PERSIST, 
-	        CascadeType.MERGE,
-	        CascadeType.REFRESH
+          CascadeType.PERSIST, 
+          CascadeType.MERGE,
+          CascadeType.REFRESH
   })
   @JoinColumn (name = "reserva_hija_id", nullable = true)
   public Reserva getReservaHija() {
@@ -459,18 +461,18 @@ public class Reserva implements Serializable {
   }
 
   public void setReservaHija(Reserva reservaHija) {
-	this.reservaHija = reservaHija;
+  this.reservaHija = reservaHija;
   }
   
   
   
   @Transient
   public Integer getIdDestino() {
-		return idDestino;
+    return idDestino;
   }
   
   public void setIdDestino(Integer idDestino) {
-		this.idDestino = idDestino;
+	this.idDestino = idDestino;
   }
   
   

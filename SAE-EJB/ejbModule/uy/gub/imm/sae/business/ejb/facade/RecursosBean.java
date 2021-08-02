@@ -22,29 +22,48 @@ package uy.gub.imm.sae.business.ejb.facade;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.math.BigDecimal;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
+import javax.annotation.Resource;
 import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
+import javax.ejb.SessionContext;
 import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityTransaction;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
+import javax.transaction.UserTransaction;
 import javax.xml.bind.JAXBContext;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 
-import org.apache.commons.lang.BooleanUtils;
+import org.apache.commons.lang3.BooleanUtils;
+import org.apache.commons.lang3.StringUtils;
 
+import uy.gub.imm.sae.business.dto.ResultadoEjecucion;
+import uy.gub.imm.sae.business.utilidades.CamposCSV;
+import uy.gub.imm.sae.business.utilidades.ConstantesDisponibilidad;
+import uy.gub.imm.sae.business.utilidades.ConstantesRecurso;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.Estado;
 import uy.gub.imm.sae.common.enumerados.Tipo;
@@ -63,6 +82,7 @@ import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
@@ -72,12 +92,46 @@ import uy.gub.imm.sae.exportar.ExportarHelper;
 import uy.gub.imm.sae.exportar.RecursoExportar;
 import uy.gub.imm.sae.exportar.ValorPosibleExport;
 
+import org.apache.log4j.Logger;
+import org.jboss.ejb3.annotation.TransactionTimeout;
+
+import com.google.gson.JsonObject;
+import com.opencsv.bean.ColumnPositionMappingStrategy;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+
 @Stateless
 @RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class RecursosBean implements RecursosLocal, RecursosRemote {
-
+	
+	static Logger logger = Logger.getLogger(RecursosBean.class);
+	
 	@PersistenceContext(unitName = "SAE-EJB")
 	private EntityManager entityManager;
+	
+	@EJB
+	private DisponibilidadesLocal disponibilidadEJB;
+	
+	@EJB(mappedName = "java:global/sae-1-service/sae-ejb/ConfiguracionBean!uy.gub.imm.sae.business.ejb.facade.ConfiguracionLocal")
+	private Configuracion confBean;
+	
+	@Resource
+	private SessionContext ctx;
+	
+	private static final long LOCK_ID = 1616161616;
+	
+	private final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+	
+    private final SimpleDateFormat timeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    
+    private Boolean recursoEsNuevo = Boolean.FALSE;
+    private Integer nroLinea = 0;
+    private Integer totalLineas = 0;
+    private Integer cantLineasError = 0;
+    private Integer cantLineasOK = 0;
+    private Boolean errorLinea = null;
+    
+    private ResultadoEjecucion ret = new ResultadoEjecucion();
 
 	/**
 	 * Crea el recurso <b>r</b> asociándolo a la agenda <b>a</b>. Controla la
@@ -713,10 +767,8 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		
 		//Controles de la acción MiPerfil
 		//--------------------------------
-
-		
 		if (recurso.getAccionMiPerfil() != null) {
-		    
+			
 			//Controlo que haya una sola accion de confirmacion destacada
 			if (BooleanUtils.isTrue(recurso.getMiPerfilConHab()) && getCantAccionMiPerfilDestacadasConfirmacion(recurso.getAccionMiPerfil()) != 1) {
 				throw new UserException("debe_haber_una_unica_accion_de_confirmacion_destacada");
@@ -853,7 +905,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		
 		//Si el recurso tiene una accion, debo guardarla
 		if (recurso.getAccionMiPerfil() != null) {
-    		AccionMiPerfil accionActual = null;
+			AccionMiPerfil accionActual = null;
     		if(recurso.getAccionMiPerfil().getId() != null) {
     		    accionActual = (AccionMiPerfil) entityManager.find(AccionMiPerfil.class, recurso.getAccionMiPerfil().getId());
                 //Actualizo la acción
@@ -912,7 +964,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 				accionActual.setRecurso(recursoActual);
 				entityManager.persist(accionActual);
 			}
-		
+
 			
 		}
 		
@@ -2478,6 +2530,801 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 	}
 	
+	@TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+	@TransactionTimeout(value=30, unit=TimeUnit.MINUTES)
+	public String cargaMasiva(Agenda a, byte[] b, String codigoUsuario, TimeZone timezone) throws UserException {
+		ret = new ResultadoEjecucion();
+		Boolean errorLinea = null;
+		
+		Integer contador = 0;
+        nroLinea = 1;
+        
+        totalLineas = 0;
+        cantLineasError = 0;
+        cantLineasOK = 0;
+        
+        List<Integer> lineasConError = new ArrayList<Integer>();
+        List<Recurso> recursosImportados = new ArrayList<Recurso>();
+        
+		if (b == null) {
+			return null;
+		}
+		try {
+			logger.info("Ejecución iniciada  carga masiva");
+            
+			 //Intentar liberar el lock por si lo tiene esta instancia
+		      //boolean lockOk = (boolean)entityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID+")").getSingleResult();
+		      //Intentar obtener el lock
+			boolean lockOk = (boolean)entityManager.createNativeQuery("SELECT pg_try_advisory_xact_lock("+LOCK_ID+")").getSingleResult();
+		      if(!lockOk) {
+		        //Otra instancia tiene el lock
+		        logger.info("No se ejecuta el reintento de carga masiva porque hay otra instancia haciéndolo.");
+		        return null;
+		      }
+		      //No hay otra instancia con el lock, se continúa
+           
+			
+			Reader reader = new StringReader(new String(b));
+			
+			ColumnPositionMappingStrategy strategy = new ColumnPositionMappingStrategy();
+            strategy.setType(CamposCSV.class);
+            String[] memberFieldsToBindTo = {"nombreRecurso", "Direccion", "Latitud", "Longitud", "Telefonos", "Horarios", 
+                "fechaInicio", "fechaFin", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"};
+            strategy.setColumnMapping(memberFieldsToBindTo);
+
+            CsvToBean<CamposCSV> csvToBean = new CsvToBeanBuilder(reader)
+                    .withMappingStrategy(strategy)
+                    .withSkipLines(1)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withSeparator(';')
+                    .build();
+
+            Iterator<CamposCSV> cargaMasivaIterator = csvToBean.iterator();
+			
+            
+            
+            
+            while (cargaMasivaIterator.hasNext()) {
+                nroLinea += 1;
+                contador += 1;
+                totalLineas += 1;
+                CamposCSV cargaMasivaLinea = cargaMasivaIterator.next();
+                Boolean recursoDuplicado = Boolean.FALSE;
+                if(!recursosImportados.isEmpty()){
+                	for(Recurso r : recursosImportados){
+                		if(r.getNombre().equals(cargaMasivaLinea.getNombreRecurso())){
+                			//logger.error("El recurso duplicado es.. " + cargaMasivaLinea.getNombreRecurso());
+                			//recurso duplicado en el archivo csv
+                			recursoDuplicado = Boolean.TRUE;
+                			break;
+                		}
+                	}
+                }
+                
+                //SI EL RECURSO NO ES DUPLICADO PROCESAR
+                if(!recursoDuplicado){
+                	try{
+                		Recurso recurso = this.guardarRecurso(cargaMasivaLinea,a,codigoUsuario);
+                		if (recurso!=null) {
+    	                	recursosImportados.add(recurso);
+    	                	try{
+	    	                    errorLinea = this.guardarDisponibilidades(cargaMasivaLinea,recurso);
+	    	                    
+	    	                    if (errorLinea && recursoEsNuevo) {
+	    	                    	//logger.error("El recurso eliminar es.. " + cargaMasivaLinea.getNombreRecurso());
+	    	                    	eliminarRecurso(recurso, timezone, codigoUsuario);
+	    	                    	throw new UserException("Error creando las disponibilidades  del recurso " + cargaMasivaLinea.getNombreRecurso());
+	    	                    }
+	    	                    else if(errorLinea){
+	    	                    	lineasConError.add(nroLinea);
+	    	                        cantLineasError += 1;
+	    	                    }
+	    	                    else {
+	    	                        cantLineasOK += 1;
+	    	                    }
+    	                	}catch (Exception e) {
+    	                		if(recursoEsNuevo){
+    	                			//logger.error("El recurso eliminar es.. " + cargaMasivaLinea.getNombreRecurso());
+    	                			eliminarRecurso(recurso, timezone, codigoUsuario);
+    	                		}
+    	                		
+    	                		e.printStackTrace();
+    	                		lineasConError.add(nroLinea);
+    		                    cantLineasError += 1;
+    	                	}
+    	                } else {
+    	                    lineasConError.add(nroLinea);
+    	                    cantLineasError += 1;
+    	                }
+                	}
+                	catch (Exception e) {
+                		e.printStackTrace();
+                		lineasConError.add(nroLinea);
+	                    cantLineasError += 1;
+                	}
+                	
+                }
+                else{
+                	lineasConError.add(nroLinea);
+                    cantLineasError += 1;
+                }
+                
+            }
+            
+            logger.info("Ejecución finalizada");
+            
+            
+		} catch (Exception e) {
+			logger.error("Error: No se ha podido realizar la carga masiva");
+            e.printStackTrace();
+            throw new UserException("no_se_pudo_realizar_la_importacion");
+            //return null;
+        } finally {
+            logger.info("Desbloqueando base de datos..");
+	        //Intentar liberar el lock (si lo tiene esta instancia)
+            //entityManager.createNativeQuery("SELECT pg_advisory_unlock("+LOCK_ID+")").getSingleResult();
+	        logger.info("Ejecución del reintento de carga masiva finalizada.");
+
+        }
+		
+		return StringUtils.join(lineasConError, ",") + ";" + totalLineas + ";" + cantLineasError + ";" + cantLineasOK;
+	}
+	
+	
+	
+	private Recurso guardarRecurso(CamposCSV cargaMasivaLinea,Agenda a,String codigoUsuario) throws UserException {
+        
+		Recurso recurso = null;
+		List<Recurso> recs = new ArrayList();
+		
+        if(StringUtils.isBlank(cargaMasivaLinea.getNombreRecurso())) {
+            //logger.info("El recurso no tiene nombre");
+            return null;
+        }
+        
+        //logger.info("Nombre del recurso " + cargaMasivaLinea.getNombreRecurso());
+        dateFormat.setLenient(false);
+        Date fechaInicio = null;
+    	Date fechaFin = null;
+    	
+    	 if(cargaMasivaLinea.getFechaInicio()!=null && !cargaMasivaLinea.getFechaInicio().trim().isEmpty()) {
+    		 //logger.info("Fecha inicio " + cargaMasivaLinea.getFechaInicio());
+             try {
+            	 fechaInicio = dateFormat.parse(cargaMasivaLinea.getFechaInicio());
+                 //Validación de fechas 
+                 if(fechaInicio!=null && Utiles.esFechaInvalida(fechaInicio)){
+                	 return null;  
+            	 }
+             }catch(Exception ex) {
+            	 return null;
+             }
+         }
+    	 else{
+    		 return null;
+    	 }
+    	 
+         if(cargaMasivaLinea.getFechaFin()!=null && !cargaMasivaLinea.getFechaFin().trim().isEmpty()) {
+        	//logger.info("Fecha fin " + cargaMasivaLinea.getFechaFin());
+            try {
+            	fechaFin = dateFormat.parse(cargaMasivaLinea.getFechaFin());
+                if(fechaFin!=null && Utiles.esFechaInvalida(fechaFin)){
+                	return null;  
+           	 	}
+            }catch(Exception ex) {
+            	return null;
+            }
+         }
+         else{
+    		 return null;
+    	 }
+         
+         //Comparar que la fecha Fin sea posterior a la fecha inicio
+         if (fechaInicio.compareTo(fechaFin) > 0) {
+ 			return null;
+ 		}
+         
+    	
+         
+        Integer diasPeriodo = Utiles.daysBetweenDates(fechaInicio, fechaFin);
+        if(diasPeriodo==null){
+        	return null;  
+        } 
+
+        //logger.info("Días período " + diasPeriodo);
+        
+        //traer los dos parámetros para recursos nuevos y existentes
+        Integer diasRecursosNuevos = Utiles.DIAS_RECURSOS_NUEVOS;
+        Integer diasRecursosExistentes = Utiles.DIAS_RECURSOS_EXISTENTES;
+        
+        
+  		try {
+  			diasRecursosNuevos = Integer.valueOf(confBean.getString("CARGA_MASIVA_DIAS_RECURSOS_NUEVOS"));
+  		} catch (Exception nfEx) {
+  			//logger.error("Error al obtener las configuraciones para los días de los recursos");
+  		}
+  		
+  		try {
+  			diasRecursosExistentes = Integer.valueOf(confBean.getString("CARGA_MASIVA_DIAS_RECURSOS_EXISTENTES"));
+  		} catch (Exception nfEx) {
+  			//logger.error("Error al obtener las configuraciones para los días de los recursos");
+  		}
+        
+  		try{
+			String query = "select r from Recurso r where r.nombre = ? and r.agenda.id = ? AND r.fechaBaja IS NULL";
+	        Query q = entityManager.createQuery(query);
+	        q.setParameter(1, cargaMasivaLinea.getNombreRecurso());
+	        q.setParameter(2, a.getId());
+	        recs = (List<Recurso>) q.getResultList();
+  		}
+  		catch (Exception e) {
+			return null;
+  		}
+        
+        if(!recs.isEmpty()) {
+        	try{
+	        	recurso = recs.get(0);
+	        	//logger.info("Ya existe un recurso llamado "+recurso.getNombre()+" en la agenda "+a.getNombre());
+	        	Boolean fechaDentroRango = Boolean.FALSE;
+	        	//comparar que las fechas esten dentro de las fechas de atención al cliente
+	        	//la fecha inicio esta despues de la fecha inicio disp y antes de la fecha fin disp 
+	        	if (fechaInicio.compareTo(recurso.getFechaInicioDisp())==0 || fechaInicio.after(recurso.getFechaInicioDisp())){
+	        		fechaDentroRango = Boolean.TRUE;
+				}
+	        	
+	        	if(fechaInicio.compareTo(recurso.getFechaFinDisp())==0 || fechaInicio.before(recurso.getFechaFinDisp())){
+	        		fechaDentroRango = Boolean.TRUE;
+	        	}
+	        	else{
+	        		fechaDentroRango = Boolean.FALSE;
+	        	}
+	        	
+	        	if(fechaFin.compareTo(recurso.getFechaFinDisp())==0 || fechaFin.before(recurso.getFechaFinDisp())){
+	        		fechaDentroRango = Boolean.TRUE;
+	        	}
+	
+	        	if(!fechaDentroRango){
+	        		return null;
+	        	}
+	        	else{
+	        		//logger.info("LAS FECHAS ESTAN DENTRO EL RANGO");
+	        	}
+	        	
+	        	//Comparar los días antes de continuar
+	        	if(!(diasPeriodo<=diasRecursosExistentes)){
+	        		return null;
+	        	}
+	
+	        	
+	        	this.setRecursoEsNuevo(Boolean.FALSE);
+
+	            
+	            entityManager.merge(recurso);
+	            //entityManager.flush();
+	            
+	    		//Guardar registro en histórico (crear Recurso)
+	    		this.guardarHistoricoRecurso(recurso, codigoUsuario, 1);
+	           
+	            return recurso;
+	            
+	        } catch (Exception e) {
+	        		logger.error("Error actualizando el recurso " + cargaMasivaLinea.getNombreRecurso());
+	        		throw new UserException(e.getMessage());
+		            //return null;
+	        }
+            
+        }
+        else{
+        	
+        	//Comparar los días antes de continuar
+        	if(!(diasPeriodo<=diasRecursosNuevos)){
+        		return null;
+        	}
+        	
+	        //logger.info("Creando recurso: "+cargaMasivaLinea.getNombreRecurso());
+	        
+	        
+	        this.setRecursoEsNuevo(Boolean.TRUE);
+	        Calendar hoy00 = new GregorianCalendar();
+	        hoy00.set(Calendar.HOUR_OF_DAY, 0);
+	        hoy00.set(Calendar.MINUTE, 0);
+	        hoy00.set(Calendar.SECOND, 0);
+	        hoy00.set(Calendar.MILLISECOND, 0);
+	        
+	        try {
+	        	recurso = new Recurso();
+	        	
+	            recurso.setNombre(cargaMasivaLinea.getNombreRecurso());
+	            recurso.setDescripcion(cargaMasivaLinea.getNombreRecurso());
+	            recurso.setFechaInicio(new Date());
+	            //recurso.setFechaInicio(dateFormat.parse(cargaMasivaLinea.getFechaInicio()));
+	            recurso.setFechaFin(dateFormat.parse(cargaMasivaLinea.getFechaFin()));
+	            recurso.setFechaInicioDisp(dateFormat.parse(cargaMasivaLinea.getFechaInicio()));
+	            recurso.setFechaFinDisp(dateFormat.parse(cargaMasivaLinea.getFechaFin()));
+	            recurso.setDiasInicioVentanaIntranet(ConstantesRecurso.diasInicioVentanaIntranet);
+	            recurso.setDiasVentanaIntranet(ConstantesRecurso.diasVentanaIntranet);
+	            recurso.setDiasInicioVentanaInternet(ConstantesRecurso.diasInicioVentanaInternet);
+	            recurso.setDiasVentanaInternet(ConstantesRecurso.diasVentanaInternet);
+	            recurso.setVentanaCuposMinimos(ConstantesRecurso.ventanaCuposMinimos);
+	            recurso.setCantDiasAGenerar(ConstantesRecurso.cantDiasAGenerar);
+	            recurso.setMostrarNumeroEnTicket(ConstantesRecurso.mostrarNumeroEnTicket);
+	            recurso.setLargoListaEspera(ConstantesRecurso.largoListaEspera);
+	            recurso.setVisibleInternet(ConstantesRecurso.visibleInternet);
+
+	            recurso.setAgenda(a);
+	            recurso.setDireccion(cargaMasivaLinea.getDireccion());
+	            recurso.setLocalidad(ConstantesRecurso.localidad);
+	            recurso.setDepartamento(ConstantesRecurso.departamento);
+	            recurso.setTelefonos(cargaMasivaLinea.getTelefonos());
+	            recurso.setHorarios(cargaMasivaLinea.getHorarios());
+	
+	            if(!StringUtils.isBlank(cargaMasivaLinea.getLatitud()) && !StringUtils.isBlank(cargaMasivaLinea.getLongitud())) {
+	                recurso.setLatitud(new BigDecimal(cargaMasivaLinea.getLatitud().replace(",", ".").trim()));
+	                recurso.setLongitud(new BigDecimal(cargaMasivaLinea.getLongitud().replace(",", ".").trim()));
+	            }
+
+	            recurso.setFuenteTicket(ConstantesRecurso.fuenteTicket);
+	            recurso.setTamanioFuenteGrande(ConstantesRecurso.tamanioFuenteGrande);
+	            recurso.setTamanioFuenteNormal(ConstantesRecurso.tamanioFuenteNormal);
+	            recurso.setTamanioFuenteChica(ConstantesRecurso.tamanioFuenteChica);
+	            recurso.setPeriodoValidacion(ConstantesRecurso.periodoValidacion);
+	            recurso.setValidarPorIP(ConstantesRecurso.validarPorIP);
+	            recurso.setCancelacionTiempo(ConstantesRecurso.cancelacionTiempo);
+	            recurso.setCancelacionUnidad(ConstantesRecurso.cancelacionUnidad);
+	            recurso.setCancelacionTipo(FormaCancelacion.valueOf(ConstantesRecurso.cancelacionTipo));
+//	
+	            entityManager.persist(recurso);
+	            entityManager.flush();
+	            
+	    		//Guardar registro en histórico (crear Recurso)
+	    		this.guardarHistoricoRecurso(recurso, codigoUsuario, 0);
+	    		
+	    		// paso a agregar agrupacion
+	    		AgrupacionDato agrupDato = new AgrupacionDato();
+	    		agrupDato.setNombre("datos_personales");
+	    		agrupDato.setEtiqueta("Datos personales");
+	    		agrupDato.setOrden(1);
+	    		agrupDato.setBorrarFlag(false);
+	    		agregarAgrupacionDato(recurso, agrupDato);
+
+	    		// agrego datos a solicitar tipo documento
+	    		DatoASolicitar d1 = new DatoASolicitar();
+	    		d1.setNombre(DatoASolicitar.TIPO_DOCUMENTO);
+	    		d1.setRequerido(true);
+	    		d1.setFila(1);
+	    		d1.setColumna(1);
+	    		d1.setIncluirEnReporte(true);
+	    		d1.setAgrupacionDato(agrupDato);
+	    		d1.setAnchoDespliegue(100);
+	    		d1.setEsClave(true);
+	    		d1.setSoloLectura(false);
+	    		d1.setEtiqueta("Tipo de documento");
+	    		d1.setIncluirEnLlamador(true);
+	    		d1.setLargo(20);
+	    		d1.setLargoEnLlamador(20);
+	    		d1.setOrdenEnLlamador(1);
+	    		d1.setRecurso(recurso);
+	    		d1.setRequerido(true);
+	    		d1.setTipo(Tipo.LIST);
+	    		d1.setBorrarFlag(false);
+	    		// persisto dato a solicitar
+	    		agregarDatoASolicitar(recurso, agrupDato, d1);
+	    		// Ingreso valores posibles
+	    		// creo valor cédula
+	    		ValorPosible vp1 = new ValorPosible();
+	    		vp1.setDato(d1);
+	    		vp1.setEtiqueta("Cédula de Identidad");
+	    		vp1.setFechaDesde(recurso.getFechaInicio());
+	    		vp1.setFechaHasta(recurso.getFechaFin());
+	    		vp1.setOrden(1);
+	    		vp1.setValor("CI");
+	    		vp1.setBorrarFlag(false);
+	    		agregarValorPosible(d1, vp1);
+
+	    		// creo valor pasaporte
+	    		ValorPosible vp2 = new ValorPosible();
+	    		vp2.setDato(d1);
+	    		vp2.setEtiqueta("Pasaporte");
+	    		vp2.setFechaDesde(recurso.getFechaInicio());
+	    		vp2.setFechaHasta(recurso.getFechaFin());
+	    		vp2.setOrden(2);
+	    		vp2.setValor("P");
+	    		vp2.setBorrarFlag(false);
+	    		agregarValorPosible(d1, vp2);
+
+	    		// creo valor pasaporte
+	    		ValorPosible vp3 = new ValorPosible();
+	    		vp3.setDato(d1);
+	    		vp3.setEtiqueta("Otro");
+	    		vp3.setFechaDesde(recurso.getFechaInicio());
+	    		vp3.setFechaHasta(recurso.getFechaFin());
+	    		vp3.setOrden(3);
+	    		vp3.setValor("O");
+	    		vp3.setBorrarFlag(false);
+	    		agregarValorPosible(d1, vp3);
+
+	    		// agrego datos a solicitar Nro. documento
+	    		DatoASolicitar d2 = new DatoASolicitar();
+	    		d2.setNombre(DatoASolicitar.NUMERO_DOCUMENTO);
+	    		d2.setRequerido(true);
+	    		d2.setFila(2);
+	    		d2.setColumna(1);
+	    		d2.setIncluirEnReporte(true);
+	    		d2.setAgrupacionDato(agrupDato);
+	    		d2.setAnchoDespliegue(120);
+	    		d2.setEsClave(true);
+	    		d2.setEtiqueta("Número de documento");
+	    		d2.setIncluirEnLlamador(true);
+	    		d2.setLargo(10);
+	    		d2.setLargoEnLlamador(10);
+	    		d2.setOrdenEnLlamador(2);
+	    		d2.setRecurso(recurso);
+	    		d2.setRequerido(true);
+	    		d2.setTipo(Tipo.STRING);
+	    		d2.setBorrarFlag(false);
+	    		// persisto dato a solicitar
+	    		agregarDatoASolicitar(recurso, agrupDato, d2);
+
+	    		// agrego datos a solicitar Correo electrónico
+	    		DatoASolicitar d3 = new DatoASolicitar();
+	    		d3.setNombre(DatoASolicitar.CORREO_ELECTRONICO);
+	    		d3.setRequerido(true);
+	    		d3.setFila(3);
+	    		d3.setColumna(1);
+	    		d3.setIncluirEnReporte(true);
+	    		d3.setAgrupacionDato(agrupDato);
+	    		d3.setAnchoDespliegue(100);
+	    		d3.setEsClave(false);
+	    		d3.setEtiqueta("Correo electrónico");
+	    		d3.setIncluirEnLlamador(false);
+	    		d3.setLargo(100);
+	    		d3.setLargoEnLlamador(150);
+	    		d3.setOrdenEnLlamador(3);
+	    		d3.setRecurso(recurso);
+	    		d3.setRequerido(true);
+	    		d3.setTipo(Tipo.STRING);
+	    		d3.setBorrarFlag(false);
+	    		// persisto dato a solicitar
+	    		agregarDatoASolicitar(recurso, agrupDato, d3);
+	    		
+	    		
+	    		
+	    		
+	            return recurso;
+	            
+        	} catch (Exception e) {
+        		logger.error("Error crear el recurso " + cargaMasivaLinea.getNombreRecurso());
+        		throw new UserException(e.getMessage());
+	            //return null;
+	        }
+    	}
+    }
+	
+	@TransactionTimeout(value=15, unit=TimeUnit.MINUTES)
+	private Boolean guardarDisponibilidades(CamposCSV cargaMasivaLinea,Recurso recurso) throws UserException {
+        try {
+        	
+        	//logger.info("Creando las disponibilidades, recurso: " + recurso.getId());
+            
+        	Date fechaInicio = null;
+        	Date fechaFin = null;
+        	dateFormat.setLenient(false);
+        	 if(cargaMasivaLinea.getFechaInicio()!=null && !cargaMasivaLinea.getFechaInicio().trim().isEmpty()) {
+                 try {
+                	 fechaInicio = dateFormat.parse(cargaMasivaLinea.getFechaInicio());
+                 }catch(Exception ex) {
+                	 return true;
+                 }
+             }
+        	 
+             if(cargaMasivaLinea.getFechaFin()!=null && !cargaMasivaLinea.getFechaFin().isEmpty()) {
+ 	            try {
+ 	            	fechaFin = dateFormat.parse(cargaMasivaLinea.getFechaFin());
+ 	            }catch(Exception ex) {
+ 	            	return true;
+ 	            }
+             }
+        	
+             
+             //Validación de fechas 
+             if(Utiles.esFechaInvalida(fechaInicio)){
+            	 return true;  
+	    	 }
+            
+             if(Utiles.esFechaInvalida(fechaFin)){
+            	 return true;  
+	    	 }
+           
+            //Preguntar si la fechaInicio es menor que fechaFin
+            if(!fechaInicio.before(fechaFin)){
+            	return true;
+            }
+        	
+        	if(recursoEsNuevo && fechaInicio!=null && fechaFin!=null){
+        		
+        		Boolean sabadoHabil = Boolean.FALSE;
+        		Boolean domingoHabil = Boolean.FALSE;
+        		//logger.info("Recurso nuevo, se crean las disponibilidades");
+	            String[] horaCupos = new String[]{};
+
+	            Calendar start = Calendar.getInstance();
+	            start.setTime(fechaInicio);
+	            Calendar end = Calendar.getInstance();
+	            end.setTime(fechaFin);
+	            end.add(Calendar.DATE, 1);
+	            
+	            Calendar inicioTurnos = Calendar.getInstance();
+	            Calendar finTurnos = Calendar.getInstance();
+	            Calendar horaFin = Calendar.getInstance();
+	            Boolean crearCupos = false;
+	            for (Date date = start.getTime(); start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+	                crearCupos = false;
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 1 && !StringUtils.isBlank(cargaMasivaLinea.getDomingo()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getDomingo().split("-");
+	                    domingoHabil = Boolean.TRUE;
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 2 && !StringUtils.isBlank(cargaMasivaLinea.getLunes()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getLunes().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 3 && !StringUtils.isBlank(cargaMasivaLinea.getMartes()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getMartes().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 4 && !StringUtils.isBlank(cargaMasivaLinea.getMiercoles()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getMiercoles().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 5 && !StringUtils.isBlank(cargaMasivaLinea.getJueves()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getJueves().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 6 && !StringUtils.isBlank(cargaMasivaLinea.getViernes()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getViernes().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 7 && !StringUtils.isBlank(cargaMasivaLinea.getSabado()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getSabado().split("-");
+	                    sabadoHabil = Boolean.TRUE;
+	                }
+	                if (crearCupos) {
+	                	
+	                		
+	                	
+		                    Integer duracion = Integer.valueOf(horaCupos[2]);
+		                    String inicioStr = dateFormat.format(date) + " " + horaCupos[0];
+		                    inicioTurnos.setTime(timeFormat.parse(inicioStr));
+		                    String finStr = dateFormat.format(date) + " " + horaCupos[1];
+		                    finTurnos.setTime(timeFormat.parse(finStr));
+
+		                    for (Date turnos = inicioTurnos.getTime(); inicioTurnos.getTime().before(finTurnos.getTime()); inicioTurnos.add(Calendar.MINUTE, duracion), turnos = inicioTurnos.getTime()) {
+	                    	
+	                			
+		                        horaFin.setTime(turnos);
+		                        horaFin.add(Calendar.MINUTE, duracion);
+		                        Disponibilidad disponibilidad = new Disponibilidad();
+		                        disponibilidad.setFecha(date);
+		                        disponibilidad.setHoraInicio(turnos);
+		                        disponibilidad.setHoraFin(horaFin.getTime());
+		                        disponibilidad.setCupo(Integer.valueOf(horaCupos[3]));
+		                        disponibilidad.setNumerador(ConstantesDisponibilidad.numerador);
+		                        disponibilidad.setVersion(ConstantesDisponibilidad.version);
+		                        disponibilidad.setPresencial(ConstantesDisponibilidad.presencial);
+		                        disponibilidad.setRecurso(recurso);
+		                        entityManager.persist(disponibilidad);
+		                        //ema.flush();
+		                        
+		                    }
+		                    
+		                    
+	                    if(sabadoHabil || domingoHabil){
+	                    	if(sabadoHabil){
+	                    		recurso.setSabadoEsHabil(true);
+	                    	}
+	                    	
+	                    	if(domingoHabil){
+	                    		recurso.setDomingoEsHabil(true);
+	                    	}
+	                    	
+	                    	entityManager.merge(recurso);
+	                    	
+	                    }
+
+	                }
+	                
+	            }
+	            
+
+	            
+	            
+        	}
+        	else if(fechaInicio!=null && fechaFin!=null){
+        		Boolean sabadoHabil = Boolean.FALSE;
+        		Boolean domingoHabil = Boolean.FALSE;
+        		//1. Preguntar si hay disponibilidad en ese período
+        		//logger.info("Recurso no es nuevo, se crean las disponibilidades");
+        		
+        		String[] horaCupos = new String[]{};
+
+	            Calendar start = Calendar.getInstance();
+	            start.setTime(fechaInicio);
+	            Calendar end = Calendar.getInstance();
+	            end.setTime(fechaFin);
+	            end.add(Calendar.DATE, 1);
+	            Calendar inicioTurnos = Calendar.getInstance();
+	            Calendar finTurnos = Calendar.getInstance();
+	            Calendar horaFin = Calendar.getInstance();
+	            Boolean crearCupos = false;
+	            for (Date date = start.getTime(); start.before(end); start.add(Calendar.DATE, 1), date = start.getTime()) {
+	                crearCupos = false;
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 1 && !StringUtils.isBlank(cargaMasivaLinea.getDomingo()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getDomingo().split("-");
+	                    domingoHabil = Boolean.TRUE;
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 2 && !StringUtils.isBlank(cargaMasivaLinea.getLunes()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getLunes().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 3 && !StringUtils.isBlank(cargaMasivaLinea.getMartes()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getMartes().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 4 && !StringUtils.isBlank(cargaMasivaLinea.getMiercoles()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getMiercoles().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 5 && !StringUtils.isBlank(cargaMasivaLinea.getJueves()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getJueves().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 6 && !StringUtils.isBlank(cargaMasivaLinea.getViernes()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getViernes().split("-");
+	                }
+	                if ((start.get(Calendar.DAY_OF_WEEK) == 7 && !StringUtils.isBlank(cargaMasivaLinea.getSabado()))) {
+	                    crearCupos = true;
+	                    horaCupos = cargaMasivaLinea.getSabado().split("-");
+	                    sabadoHabil = Boolean.TRUE;
+	                }
+
+	                Boolean result = disponibilidadEJB.existeDisponibilidadFechaRecurso(date,recurso);
+	                //si existen disponibilidades en esta fecha
+		                if(result && crearCupos){
+		                	
+		                	Integer duracion = Integer.valueOf(horaCupos[2]);
+		                    String inicioStr = dateFormat.format(date) + " " + horaCupos[0];
+		                    inicioTurnos.setTime(timeFormat.parse(inicioStr));
+		                    String finStr = dateFormat.format(date) + " " + horaCupos[1];
+		                    finTurnos.setTime(timeFormat.parse(finStr));
+		                    
+		                	Date dispInicio = timeFormat.parse(dateFormat.format(date) + " " + horaCupos[0]);
+		                	Date dispFin = timeFormat.parse(dateFormat.format(date) + " " + horaCupos[1]);
+		                	
+		                	//Se pregunta si existen disponibilidades para una fecha en especifico con el mismo rango de horas
+		                	List<Disponibilidad> disponibilidades = disponibilidadEJB.obtenerDisponibilidadesRangoHoraInicio(date,dispInicio,dispFin,recurso);
+		                	
+		                	if(!disponibilidades.isEmpty()){
+		                			
+				                	//Disponibilidad dispIni = disponibilidadEJB.obtenerDisponibilidadEnHoraInicioMin(recurso,date);
+				                	//Disponibilidad dispF = disponibilidadEJB.obtenerDisponibilidadEnHoraInicioMax(recurso,date);
+		                			Disponibilidad dispIni = disponibilidades.get(0);
+		                			Disponibilidad dispF = disponibilidades.get(disponibilidades.size()-1);
+				                	
+		                			for (Date turnos = inicioTurnos.getTime(); inicioTurnos.before(finTurnos); inicioTurnos.add(Calendar.MINUTE, duracion), turnos = inicioTurnos.getTime()) {
+				                        horaFin.setTime(turnos);
+				                        horaFin.add(Calendar.MINUTE, duracion);
+		                			}
+		                			
+				                	if(dispInicio.compareTo(dispIni.getHoraInicio())==0 && horaFin.getTime().compareTo(dispF.getHoraFin())==0){
+				                		//las horas son iguales
+
+				                		//logger.info("las horas son iguales actualiza las disponibilidades en los cupos");
+				                		for(Disponibilidad d : disponibilidades){
+				                			Integer cupoActual = d.getCupo();
+		                					Integer nuevoCupo = Integer.valueOf(horaCupos[3]) + cupoActual;
+				                			d.setCupo(nuevoCupo);
+				                			entityManager.merge(d);
+			                			}
+				                		
+				                	}
+				                	else{
+				                		//logger.info("se traslapan");
+				                		return true;
+				                	}
+		                	}
+		                	else{
+			                		//logger.info("hay disponibilidades, pero no en el nuevo rango de horas");
+				                    for (Date turnos = inicioTurnos.getTime(); inicioTurnos.before(finTurnos); inicioTurnos.add(Calendar.MINUTE, duracion), turnos = inicioTurnos.getTime()) {
+				                        horaFin.setTime(turnos);
+				                        horaFin.add(Calendar.MINUTE, duracion);
+				                        Disponibilidad disponibilidad = new Disponibilidad();
+				                        disponibilidad.setFecha(date);
+				                        disponibilidad.setHoraInicio(turnos);
+				                        disponibilidad.setHoraFin(horaFin.getTime());
+				                        disponibilidad.setCupo(Integer.valueOf(horaCupos[3]));
+				                        disponibilidad.setNumerador(ConstantesDisponibilidad.numerador);
+				                        disponibilidad.setVersion(ConstantesDisponibilidad.version);
+				                        disponibilidad.setPresencial(ConstantesDisponibilidad.presencial);
+				                        disponibilidad.setRecurso(recurso);
+				                        entityManager.persist(disponibilidad);
+				                    }
+		                		
+		                	}
+		                
+		                	if(sabadoHabil || domingoHabil){
+		                    	if(sabadoHabil){
+		                    		recurso.setSabadoEsHabil(true);
+		                    	}
+		                    	
+		                    	if(domingoHabil){
+		                    		recurso.setDomingoEsHabil(true);
+		                    	}
+		                    	
+		                    	entityManager.merge(recurso);
+		                    	
+		                    }
+			                
+		                }
+		                else if(crearCupos){
+		                	
+			                	//Si no existe, crea el cupo
+			                	//logger.info("no hay disponibilidades en la fecha consultada");
+			                	Integer duracion = Integer.valueOf(horaCupos[2]);
+			                    String inicioStr = dateFormat.format(date) + " " + horaCupos[0];
+			                    inicioTurnos.setTime(timeFormat.parse(inicioStr));
+			                    String finStr = dateFormat.format(date) + " " + horaCupos[1];
+			                    finTurnos.setTime(timeFormat.parse(finStr));
+			                    
+			                    for (Date turnos = inicioTurnos.getTime(); inicioTurnos.before(finTurnos); inicioTurnos.add(Calendar.MINUTE, duracion), turnos = inicioTurnos.getTime()) {
+			                        horaFin.setTime(turnos);
+			                        horaFin.add(Calendar.MINUTE, duracion);
+			                        Disponibilidad disponibilidad = new Disponibilidad();
+			                        disponibilidad.setFecha(date);
+			                        disponibilidad.setHoraInicio(turnos);
+			                        disponibilidad.setHoraFin(horaFin.getTime());
+			                        disponibilidad.setCupo(Integer.valueOf(horaCupos[3]));
+			                        disponibilidad.setNumerador(ConstantesDisponibilidad.numerador);
+			                        disponibilidad.setVersion(ConstantesDisponibilidad.version);
+			                        disponibilidad.setPresencial(ConstantesDisponibilidad.presencial);
+			                        disponibilidad.setRecurso(recurso);
+			                        entityManager.persist(disponibilidad);
+			                    }
+			                    
+			                    if(sabadoHabil || domingoHabil){
+			                    	if(sabadoHabil){
+			                    		recurso.setSabadoEsHabil(true);
+			                    	}
+			                    	
+			                    	if(domingoHabil){
+			                    		recurso.setDomingoEsHabil(true);
+			                    	}
+			                    	
+			                    	entityManager.merge(recurso);
+			                    	
+			                    }
+		                }
+	            }
+	            
+	            
+	            //Preguntar acá si es sábado o domingo
+        		
+        	}
+        	else{
+        		return true;
+        	}
+        	
+
+        	
+            return false;
+        } catch (Exception e) {
+        	logger.error("Error creando las disponibilidades  del recurso " + cargaMasivaLinea.getNombreRecurso());
+        	throw new UserException(e.getMessage());
+        	
+        }
+    }
+	
 	public List<RolesUsuarioRecurso> asociarRolesUsuarioRecurso(Integer usuarioId, Map<Integer, String[]> rolesRecurso) {
 	  
 	  //Borrar las asociaciones actuales
@@ -2527,8 +3374,7 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
   
   public AccionMiPerfil obtenerAccionMiPerfilDeRecurso(Integer recursoId){
 	  try {
-		  AccionMiPerfil acc = new AccionMiPerfil(); 
-		  
+		  AccionMiPerfil acc = new AccionMiPerfil();
 		  Query query = entityManager.createQuery("SELECT a FROM AccionMiPerfil a WHERE a.recurso.id=:recursoId order by a.id desc");
 	      query.setMaxResults(1);
 	      List<AccionMiPerfil> list = (List<AccionMiPerfil>) query.setParameter("recursoId", recursoId).getResultList();
@@ -2636,4 +3482,20 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 	  return Cant;
   }
 
+	
+  
+  public Boolean getRecursoEsNuevo() {
+		return recursoEsNuevo;
+  }
+	
+	
+  public void setRecursoEsNuevo(Boolean recursoEsNuevo) {
+		this.recursoEsNuevo = recursoEsNuevo;
+  }
+
+
+  
+  
+  
+  
 }

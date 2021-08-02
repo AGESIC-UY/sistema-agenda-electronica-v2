@@ -62,7 +62,9 @@
 
 	<ui:define name="contenido">
 		<div class="infoAdicional box-grey">
-			<h:outputFormat escape="false" value="#{pasoFinalAdminMBean.descripcion}" />
+			<h:outputText value="#{sessionMBean.textos['no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva']} " rendered="#{!sessionMBean.envioCorreoReserva}" />
+			<br/>
+			<h:outputFormat escape="false" value="#{pasoFinalAdminMBean.descripcion}" rendered="#{not empty pasoFinalAdminMBean.descripcion}" />
 		</div>
 	</ui:define>
 	

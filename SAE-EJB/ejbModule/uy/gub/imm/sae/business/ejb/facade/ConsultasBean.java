@@ -41,7 +41,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import uy.gub.imm.sae.business.dto.AtencionLLamadaReporteDT;
 import uy.gub.imm.sae.business.dto.RecursoDTO;

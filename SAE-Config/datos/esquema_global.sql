@@ -221,7 +221,7 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_URLSTS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_POLICY', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_ROL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_HABILITADO', 'false');
-INSERT INTO ae_configuracion (clave, valor) VALUES('WS_NOVEDADES_XML_LOG', 'false');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_XML_LOG', 'false');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAMITE_TIMEOUT', '9000');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_TRAZABILIDAD_LOCATION_CABEZAL', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_NOVEDADES_LOCATION', '');
@@ -237,8 +237,11 @@ INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_KS_PATH', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_KS_PASS', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_TS_PATH', '');
 INSERT INTO ae_configuracion (clave, valor) VALUES ('WS_MIPERFIL_TS_PASS', '');
-
-
+INSERT INTO ae_configuracion (clave, valor) VALUES ('DOMINIO', 'https://localhost:443');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('JSON_ESCAPE', 'false');
+INSERT INTO ae_configuracion (clave, valor) VALUES ('MIPERFIL_OID', '');
+INSERT INTO ae_configuracion (clave, valor) VALUES('CARGA_MASIVA_DIAS_RECURSOS_NUEVOS', '30');
+INSERT INTO ae_configuracion (clave, valor) VALUES('CARGA_MASIVA_DIAS_RECURSOS_EXISTENTES', '15');
 
 INSERT INTO ae_textos (codigo, texto) VALUES ('ingrese_al_sistema', 'Ingrese al Sistema de Agenda electrónica');
 INSERT INTO ae_textos (codigo, texto) VALUES ('string', 'Texto');
@@ -1200,7 +1203,31 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('enviar_aviso_al_cancelar', 'Envia
 INSERT INTO ae_textos (codigo, texto) VALUES ('enviar_aviso_recordatorio', 'Enviar un recordatorio');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva', 'No se pudo enviar una notificación al usuario; tome nota de los datos de la reserva');
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_notificacion_de_cancelacion', 'No se pudo enviar una notificación al usuario');
-INSERT INTO ae_textos (codigo,texto) VALUES ('reporte_recursos_por_agenda','Reporte de Recursos por Agenda');
+INSERT INTO ae_textos (codigo, texto) VALUES ('acc_titulo', 'Título');
+INSERT INTO ae_textos (codigo, texto) VALUES ('acc_url', 'URL');
+INSERT INTO ae_textos (codigo, texto) VALUES ('acc_destacada', 'Destacada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_una_unica_accion_de_confirmacion_destacada', 'Debe haber una (y solo una) acción de aviso al confirmar marcada como destacada, cuya URL no sea vacía.');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_una_unica_accion_de_cancelacion_destacada', 'Debe haber una (y solo una) acción de aviso al cancelar marcada como destacada, cuya URL no sea vacía.');
+INSERT INTO ae_textos (codigo, texto) VALUES ('debe_haber_una_unica_accion_de_recordatorio_destacada', 'Debe haber una (y solo una) acción de recordatorio marcada como destacada, cuya URL no sea vacía');
+INSERT INTO ae_textos (codigo, texto) VALUES ('vencimiento_aviso_al_confirmar', 'Vencimiento de aviso al confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('vencimiento_aviso_al_cancelar', 'Vencimiento de aviso al cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('vencimiento_recordatorio', 'Vencimiento de recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('hora_recordatorio', 'Hora de recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('dias_recordatorio', 'Días de recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('textos_aviso_al_confirmar', 'Textos aviso al confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('textos_aviso_al_cancelar', 'Textos aviso al cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('textos_recordatorio', 'Textos recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_titulo_aviso_al_confirmar', 'Título del aviso al confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_corto_aviso_al_confirmar', 'Texto corto del aviso al confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_largo_aviso_al_confirmar', 'Texto largo del aviso al confirmar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_titulo_aviso_al_cancelar', 'Título del aviso al cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_corto_aviso_al_cancelar', 'Texto corto del aviso al cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_largo_aviso_al_cancelar', 'Texto largo del aviso al cancelar');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_titulo_recordatorio', 'Título del recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_corto_recordatorio', 'Texto corto del recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('texto_largo_recordatorio', 'Texto largo del recordatorio');
+INSERT INTO ae_textos (codigo, texto) VALUES ('administradorDeRecursos', 'Administrador de recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('reporte_recursos_por_agenda','Reporte de Recursos por Agenda');
 INSERT INTO ae_textos (codigo, texto) VALUES ('la_fecha_hasta_debe_ser_posterior_a_la_fecha_desde', 'La fecha hasta debe ser posterior a la fecha desde');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_la_fecha_reserva_dos', 'Debe especificar la fecha para la reserva de la segunda dosis');
 INSERT INTO ae_textos (codigo, texto) VALUES ('debe_especificar_el_tipo_doc_reserva_dos', 'Debe especificar el tipo de documento para la reserva de la segunda dosis');
@@ -1231,7 +1258,7 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_lista_de_recurs
 INSERT INTO ae_textos (codigo, texto) VALUES ('confirmar_movimiento_reservas', 'Confirmar movimiento de reservas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('ejecutar', 'Ejecutar');
 INSERT INTO ae_textos (codigo, texto) VALUES ('validar', 'Validar');
-INSERT INTO ae_textos (codigo, texto) VALUES ('correo_de_traslado', 'Correo de traslado');
+INSERT INTO ae_textos (codigo, texto) VALUES ('correo_de_traslado', 'Correo de cambio de recurso');
 INSERT INTO ae_textos (codigo, texto) VALUES ('texto_para_el_correo_de_traslado', 'Texto para el correo de traslado');
 INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda_origen', 'Nombre de la agenda de origen');
 INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_recurso_origen', 'Nombre del recurso de origen');
@@ -1240,7 +1267,6 @@ INSERT INTO ae_textos (codigo, texto) VALUES ('nombre_del_recurso_destino', 'Nom
 INSERT INTO ae_textos (codigo, texto) VALUES ('no_se_puedo_mover_las_reservas', 'No se pudo mover todas las reservas');
 INSERT INTO ae_textos (codigo, texto) VALUES ('paso_uno_datos_reservas_mover', 'Paso 1 - Datos de las reservas a mover');
 INSERT INTO ae_textos (codigo, texto) VALUES ('paso_dos_datos_reservas_mover', 'Paso 2 - Datos del recurso destino de las reservas');
-INSERT INTO ae_textos (codigo, texto) VALUES ('siguiente', 'Siguiente');
 INSERT INTO ae_textos(codigo, texto)  VALUES('carga_masiva_recursos_disponibilidades', 'Carga masiva de recursos y disponibilidades');
 INSERT INTO ae_textos(codigo, texto)  VALUES('no_existen_reservas_recurso_origen', 'No existen reservas a mover en la fecha y horario seleccionado');
 INSERT INTO ae_textos(codigo, texto)  VALUES('recurso_origen_recurso_destino_hora_inicio_distintas', 'Si el recurso origen es igual al recurso destino, las horas inicio deben ser distintas');
@@ -1248,6 +1274,26 @@ INSERT INTO ae_textos(codigo, texto) VALUES('no_se_validar_las_reservas', 'No se
 INSERT INTO ae_textos (codigo, texto) VALUES('debe_seleccionar_agenda_recurso_destino', 'Debe seleccionar agenda destino y recurso destino');
 INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_destino', 'Fecha destino');
 INSERT INTO ae_textos (codigo, texto) VALUES ('fecha_destino_vacia', 'Seleccione una fecha destino');
+INSERT INTO ae_textos (codigo, texto) VALUES ('envio_de_comunicacion', 'Envío de comunicación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('aplica_envio_de_correo', 'Aplica envío de correo electrónico');
+INSERT INTO ae_textos (codigo, texto) VALUES ('actualizacion_masiva', 'Actualización Masiva');
+INSERT INTO ae_textos (codigo, texto) VALUES ('no_enviar_comunicacion_cancelacion', 'Tenga en cuenta que no se enviará una comunicación de cancelación');
+INSERT INTO ae_textos (codigo, texto) VALUES ('todos_los_recursos', 'Todos los recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('agendas_recursos', 'Agendas y Recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('aplicar_todos', 'Aplicar a todos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('seleccionar_recursos', 'Seleccionar Recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('aplicar_todos_recursos', 'Aplicar a todos los recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('mensaje_aplica_para_todos', 'En caso de estar seleccionado afectará a todos los recursos de todas las agendas de la empresa seleccionada.');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recursos_agenda', 'Recursos de la agenda');
+INSERT INTO ae_textos (codigo, texto) VALUES ('recursos_confirmados', 'Recursos confirmados');
+INSERT INTO ae_textos (codigo, texto) VALUES ('confirmar_recursos', 'Confirmar recursos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('actualizacion_recursos', 'Se han modificado x recursos de la agenda actualmente seleccionada');
+INSERT INTO ae_textos (codigo, texto) VALUES ('actualizar_datos', 'Actualizar datos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('actualizacion_masiva_datos', 'Actualización masiva de datos');
+INSERT INTO ae_textos (codigo, texto) VALUES ('carga_masiva', 'Carga Masiva');
+UPDATE ae_textos SET texto='Correo de cambio de recurso' WHERE codigo='correo_de_traslado';
+UPDATE ae_textos SET texto='Tenga en cuenta que no se ha podido enviar la notificación por correo electrónico; tome nota de los datos de la reserva.' WHERE codigo='no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva';
+
 
 --
 -- CLAVES PRIMARIAS

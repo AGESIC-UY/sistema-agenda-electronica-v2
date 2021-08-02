@@ -60,7 +60,7 @@ public class DepurarReservasBean  {
     private DepuracionReservas depuracionReservasEJB;
     
     
-    private static final long LOCK_ID_REINTENTAR = 1515151515;
+    private static final long LOCK_ID_REINTENTAR = 1818181818;
     
     /*
      * Elimina todas las Reservas que estan en estado Pendiente desde un periodo

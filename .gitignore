@@ -2,6 +2,6 @@ build/
 bin/
 *.swp
 *.class
-*.jar
 *.wsdl~
 SAE-LoginModule/build.xml
+.metadata

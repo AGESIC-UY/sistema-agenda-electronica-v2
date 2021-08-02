@@ -1,0 +1,35 @@
+
+<datasource jndi-name="java:/postgres-sae-ds" pool-name="postgres-sae-ds" enabled="true" use-java-context="true">
+  <connection-url>jdbc:postgresql://{db-host}:{db-port}/sae</connection-url>
+  <driver>postgres</driver>
+  <security>
+    <user-name>{db-user}</user-name>
+    <password>{db-pass}</password>
+  </security>
+  <validation>
+    <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
+    <background-validation>true</background-validation>
+    <background-validation-millis>2000</background-validation-millis>
+  </validation>
+  <statement>
+    <prepared-statement-cache-size>100</prepared-statement-cache-size>
+    <share-prepared-statements>true</share-prepared-statements>
+  </statement>
+</datasource>
+<datasource jndi-name="java:/postgres-sae-global-ds" pool-name="postgres-sae-global-ds" enabled="true" use-java-context="true">
+  <connection-url>jdbc:postgresql://{db-host}:{db-port}/sae</connection-url>
+  <driver>postgres</driver>
+  <security>
+    <user-name>{db-user}</user-name>
+    <password>{db-pass}</password>
+  </security>
+  <validation>
+    <check-valid-connection-sql>SELECT 1</check-valid-connection-sql>
+    <background-validation>true</background-validation>
+    <background-validation-millis>2000</background-validation-millis>
+  </validation>
+  <statement>
+    <prepared-statement-cache-size>100</prepared-statement-cache-size>
+    <share-prepared-statements>true</share-prepared-statements>
+  </statement>
+</datasource>

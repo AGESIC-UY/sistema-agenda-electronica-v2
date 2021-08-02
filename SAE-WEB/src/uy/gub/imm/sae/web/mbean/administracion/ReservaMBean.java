@@ -84,6 +84,9 @@ public class ReservaMBean extends BaseMBean {
 
 	private UIComponent filtroConsulta;
 	private UIComponent campos;
+	
+	private Boolean admiteCorreoCancelacion;
+	
 
 	@PostConstruct
 	public void initAgendaRecurso() {
@@ -417,6 +420,7 @@ public class ReservaMBean extends BaseMBean {
    * que no se pueda generar otra reserva.
    */
   public void cancelarReservasPeriodo() {
+	  limpiarMensajesError();
     boolean hayErrores = false;
     if (sessionMBean.getAgendaMarcada() == null) {
       hayErrores = true;
@@ -446,13 +450,17 @@ public class ReservaMBean extends BaseMBean {
         addErrorMessage(sessionMBean.getTextos().get("la_fecha_de_fin_debe_ser_posterior_a_la_fecha_de_inicio"), "form:Fdesde", "form:Fhasta");
       }
     }
-    if (asuntoMensaje == null || asuntoMensaje.isEmpty()) {
-      hayErrores = true;
-      addErrorMessage(sessionMBean.getTextos().get("el_asunto_del_mensaje_es_obligatorio"), "form:txtAsunto");
-    }
-    if (cuerpoMensaje == null || cuerpoMensaje.isEmpty()) {
-      hayErrores = true;
-      addErrorMessage(sessionMBean.getTextos().get("el_cuerpo_del_mensaje_es_obligatorio"), "form:txtCuerpo");
+    
+    if(admiteCorreoCancelacion.equals(Boolean.TRUE)){
+    
+	    if (asuntoMensaje == null || asuntoMensaje.isEmpty()) {
+	      hayErrores = true;
+	      addErrorMessage(sessionMBean.getTextos().get("el_asunto_del_mensaje_es_obligatorio"), "form:txtAsunto");
+	    }
+	    if (cuerpoMensaje == null || cuerpoMensaje.isEmpty()) {
+	      hayErrores = true;
+	      addErrorMessage(sessionMBean.getTextos().get("el_cuerpo_del_mensaje_es_obligatorio"), "form:txtCuerpo");
+	    }
     }
     if (!hayErrores) {
       try {
@@ -461,7 +469,7 @@ public class ReservaMBean extends BaseMBean {
         ventana.setFechaFinal(Utiles.time2FinDelDia(fechaHasta));
         //Cancelar las reservas
         List<Integer> reservasSinEnviarComunicacion = agendarReservasEJB.cancelarReservasPeriodo(sessionMBean.getEmpresaActual(), sessionMBean.getRecursoMarcado(),  
-            ventana, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), asuntoMensaje, cuerpoMensaje);
+                ventana, sessionMBean.getIdiomaActual(), sessionMBean.getFormatoFecha(), sessionMBean.getFormatoHora(), asuntoMensaje, cuerpoMensaje);
         //Si para alguna reserva no se pudo enviar la comunicación mostrar su identificador en pantalla
         if(!reservasSinEnviarComunicacion.isEmpty()) {
           addAdvertenciaMessage(sessionMBean.getTextos().get("no_se_pudo_enviar_comunicacion_para_las_reservas")+": "+reservasSinEnviarComunicacion.toString(), MSG_ID);
@@ -474,5 +482,16 @@ public class ReservaMBean extends BaseMBean {
       }
     }
   }
+  
+  public Boolean getAdmiteCorreoCancelacion() {
+    return admiteCorreoCancelacion;
+  }
+
+  public void setAdmiteCorreoCancelacion(Boolean admiteCorreoCancelacion) {
+    this.admiteCorreoCancelacion = admiteCorreoCancelacion;
+  }
+  
+  
+
 
 }

@@ -29,6 +29,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 public class Utiles {
 
@@ -42,6 +43,10 @@ public class Utiles {
   public static final String EMAIL_PATTERN = "^[_A-Za-z0-9-\\+]+(\\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\\.[A-Za-z0-9]+)*(\\.[A-Za-z]{2,})$";
   
   public static final String SEGUNDA_DOSIS = "datos_personales.TipoDosis.D2";
+  
+  public static final Integer DIAS_RECURSOS_NUEVOS  = 30;
+  
+  public static final Integer DIAS_RECURSOS_EXISTENTES  = 15;
   
 	public static Integer DIA = 1;
 	public static Integer DIA_HORA = 2;
@@ -210,6 +215,17 @@ public class Utiles {
     } catch (UnsupportedEncodingException e) {
       return texto;
     }
+  }
+  
+  
+  public static Integer daysBetweenDates(Date d1, Date d2){
+	  try{
+		  long diff = d2.getTime()- d1.getTime();
+		  return new Long(TimeUnit.DAYS.convert(diff, TimeUnit.MILLISECONDS)).intValue();
+	  }
+	  catch(Exception ex){
+		  return null;
+	  }
   }
   
 }

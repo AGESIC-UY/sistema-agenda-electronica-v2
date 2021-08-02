@@ -1,0 +1,11 @@
+
+<custom-handler name="SYSLOG" class="x1.jboss.syslog.SyslogHandler" module="syslog">
+  <level name="INFO"/>
+  <properties>
+    <property name="loghost" value="{syslog-host}"/>
+    <property name="port" value="{syslog-port}"/>
+    <property name="protocol" value="udp"/>
+    <property name="application" value="sae"/>
+    <property name="facility" value="daemon"/>
+  </properties>
+</custom-handler>

@@ -1,0 +1,7 @@
+LoadModule headers_module modules/mod_headers.so
+...
+Header set Server "Undisclosed server"
+Header set X-Powered-By "JSF"
+Header set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+Header set X-Frame-Options "SAMEORIGIN"
+Header set X-Content-Type-Options "nosniff"
