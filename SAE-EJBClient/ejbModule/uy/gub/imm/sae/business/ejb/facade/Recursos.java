@@ -43,7 +43,8 @@ public interface Recursos {
 	public Recurso crearRecurso(Agenda a, Recurso r, String codigoUsuario) throws UserException, ApplicationException, BusinessException;
 	public void modificarRecurso(Recurso r, String codigoUsuario) throws UserException, BusinessException, ApplicationException;
 	public void eliminarRecurso(Recurso recurso, TimeZone timezone, String codigoUsuario) throws UserException, ApplicationException;
-	public Recurso consultarRecurso(Recurso r) throws UserException;	
+	public Recurso consultarRecurso(Recurso r) throws UserException;
+	public List<Recurso> consultarRecursoByAgendaId(int agendaId) throws UserException;
     //Métodos asociados a DatoDelRecurso
 	public DatoDelRecurso agregarDatoDelRecurso(Recurso r, DatoDelRecurso d) throws UserException;
 	public void modificarDatoDelRecurso(DatoDelRecurso d) throws UserException;

@@ -194,6 +194,6 @@ public class Agenda implements Serializable {
 		this.conTrazabilidad = conTrazabilidad;
 	}
 
-	
-	
+
+
 }

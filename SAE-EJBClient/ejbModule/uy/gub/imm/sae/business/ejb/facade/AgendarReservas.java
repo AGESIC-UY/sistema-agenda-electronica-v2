@@ -46,6 +46,7 @@ public interface AgendarReservas {
 
 	public Agenda consultarAgendaPorId(Integer id) throws ApplicationException, BusinessException;
 	public Recurso consultarRecursoPorId(Agenda a, Integer id) throws ApplicationException, BusinessException;
+	public boolean isRecursoVisibleInternet(Recurso recurso) throws ApplicationException, BusinessException;
 	public List<Agenda> consultarAgendas() throws ApplicationException, BusinessException;
 	public TramiteAgenda consultarTramitePorCodigo(Agenda a, String codigo) throws ApplicationException;
 	public List<TramiteAgenda> consultarTramites(Agenda a) throws ApplicationException;

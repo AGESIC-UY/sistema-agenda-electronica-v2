@@ -55,7 +55,7 @@ import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 
 @Entity
 @Table (name = "ae_recursos")
-public class Recurso implements Serializable {
+public class Recurso implements Serializable, Comparable<Recurso> {
 	private static final long serialVersionUID = -5197426783029830293L;
 
 	private Integer id;
@@ -1272,6 +1272,9 @@ public boolean equals(Object obj) {
 		return false;
 	return true;
 }
-  
-  
+
+	@Override
+	public int compareTo(Recurso otro) {
+		return id - otro.getId();
+	}
 }

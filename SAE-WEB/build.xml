@@ -1,4 +1,4 @@
-<project name="SAE-WEB" default="build" basedir=".">
+<project name="SAE-WEB" default="build" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
 
   <!-- dependencias de compilacion -->
   <property name="java.src" value="src" />
@@ -6,7 +6,20 @@
   <!-- dependencias de compilacion con los proyectos client -->
   <property name="SAE-EJBClient.lib" value="../SAE-EJBClient/build/jar" />
   <property name="SAE-Componentes.lib" value="../SAE-Componentes/build/jar" />
-
+  <property name="result.dir" location="build/jacoco"/>
+  <property name="result.report.dir" location="${result.dir}/site/jacoco"/>
+  <property name="result.exec.file" location="${result.dir}/jacoco.exec"/>
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath path="../SAE-Config/libs/org.jacoco.ant-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/org.jacoco.core-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/org.jacoco.report-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/org.jacoco.agent-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/asm-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-analysis-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-commons-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-tree-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-util-9.2.jar"/>
+  </taskdef>
   <tstamp>
     <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
   </tstamp>
@@ -24,6 +37,15 @@
     </fileset>
   </path>
 
+  <path id="test.classpath">
+    <pathelement path="build/test"/>
+    <pathelement path="build/classes"/>
+    <pathelement path="../SAE-WEB/build/classes"/>
+    <pathelement path="../SAE-EJB/build/classes"/>
+    <pathelement path="../SAE-EJBClient/build/classes"/>
+    <fileset dir="../SAE-Config/libs" includes="*.jar" />
+  </path>
+
   <target name="clean">
     <sequential>
       <mkdir dir="build" />
@@ -34,6 +56,7 @@
       </delete>
       <mkdir dir="build/classes" />
       <mkdir dir="build/jar" />
+      <mkdir dir="build/test" />
     </sequential>
   </target>
 
@@ -43,12 +66,24 @@
         <path refid="base.path" />
       </classpath>
     </javac>
+    <javac destdir="build/test" classpathref="test.classpath" srcdir="test" includeantruntime="false" debug="true"/>
     <copy todir="build/classes">
       <fileset dir="${java.src}" excludes="**/*.java" />
     </copy>
   </target>
 
-  <target name="build" depends="compile,clean">
+  <target name="test" depends="compile">
+    <jacoco:coverage destfile="${result.exec.file}">
+      <junit showoutput="yes" fork="true" printsummary="yes" haltonfailure="yes" haltonerror="yes" failureProperty="test.failure" errorProperty="test.error">
+        <formatter type="plain" usefile="false"/>
+        <classpath refid="test.classpath"/>
+        <test name="uy.gub.imm.sae.web.common.CsvReportTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.web.mbean.administracion.AgendaMBeanTest" outfile="result"/>
+      </junit>
+    </jacoco:coverage>
+  </target>
+
+  <target name="build" depends="compile,clean,test,verifyNoError,verifyNoFailure">
     <!-- Parametrizo el MANIFEST.MF del BACKEND segun el tipo de build  -->
     <manifest file="build/MANIFEST.backend.MF">
       <attribute name="Built-By" value="${user.name}" />
@@ -156,6 +191,30 @@
     </war>
 
   </target>
+  <target name="verifyNoError" if="test.error">
+    <fail message="JUnit test or tests errors."/>
+  </target>
 
+  <target name="verifyNoFailure" if="test.failure">
+    <fail message="JUnit test or tests failed."/>
+  </target>
+  <target name="report" depends="test">
+    <!--  Step 3: Create coverage report  -->
+    <jacoco:report>
+      <executiondata>
+        <file file="${result.exec.file}"/>
+      </executiondata>
+      <structure name="JaCoCo Ant">
+        <classfiles>
+          <fileset dir="build/classes"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${java.src}"/>
+        </sourcefiles>
+      </structure>
+      <html destdir="${result.report.dir}"/>
+      <xml destfile="${result.report.dir}/report.xml"/>
+    </jacoco:report>
+  </target>
 
 </project>

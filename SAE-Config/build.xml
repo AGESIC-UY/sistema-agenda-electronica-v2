@@ -1,4 +1,4 @@
-<project name="SAE-Config" default="build" basedir=".">
+<project name="SAE-Config" default="build" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
 
 	<target name="init" >
 	
@@ -44,7 +44,7 @@
 
 		<!-- Se llama a cada tarea build con las propiedades ya seteadas para todo el proceso de build -->
 		<subant target="build" buildpathref="buildlist" failonerror="true" inheritall="true"/>
-		<!-- 
+		<!--
 		 <copy file="${jars.path}/sae-1-recursos.ear" todir="${dist}" overwrite="true" />
   		 <copy file="${jars.path}/sae-1-service.ear" todir="${dist}" overwrite="true" />
          <copy file="${jars.path}/sae-2-backoffice.ear" todir="${dist}" overwrite="true" />
@@ -53,5 +53,46 @@
 
 
 	</target>
-	
+	<taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+		<classpath path="../SAE-Config/libs/org.jacoco.ant-0.8.7.jar"/>
+		<classpath path="../SAE-Config/libs/org.jacoco.core-0.8.7.jar"/>
+		<classpath path="../SAE-Config/libs/org.jacoco.report-0.8.7.jar"/>
+		<classpath path="../SAE-Config/libs/org.jacoco.agent-0.8.7.jar"/>
+		<classpath path="../SAE-Config/libs/asm-9.2.jar"/>
+		<classpath path="../SAE-Config/libs/asm-analysis-9.2.jar"/>
+		<classpath path="../SAE-Config/libs/asm-commons-9.2.jar"/>
+		<classpath path="../SAE-Config/libs/asm-tree-9.2.jar"/>
+		<classpath path="../SAE-Config/libs/asm-util-9.2.jar"/>
+	</taskdef>
+	<target name="report" depends="build">
+		<jacoco:merge destfile="jacoco/merged.exec">
+			<fileset dir="../SAE-WEB/build/jacoco/" includes="*.exec"/>
+			<fileset dir="../SAE-EJB/build/jacoco/" includes="*.exec"/>
+		</jacoco:merge>
+		<!--  Step 3: Create coverage report  -->
+		<jacoco:report>
+			<structure name="Jacoco Ant">
+				<group name="SAE-WEB">
+					<classfiles>
+						<fileset dir="../SAE-WEB/build/classes"/>
+					</classfiles>
+					<sourcefiles encoding="UTF-8">
+						<fileset dir="../SAE-WEB/src"/>
+					</sourcefiles>
+				</group>
+				<group name="SAE-EJB">
+					<classfiles>
+						<fileset dir="../SAE-EJB/build/classes"/>
+					</classfiles>
+					<sourcefiles encoding="UTF-8">
+						<fileset dir="../SAE-EJB/ejbModule"/>
+					</sourcefiles>
+				</group>
+			</structure>
+			<executiondata>
+				<file file="jacoco/merged.exec"/>
+			</executiondata>
+			<xml destfile="jacoco/report.xml"/>
+		</jacoco:report>
+	</target>
 </project>

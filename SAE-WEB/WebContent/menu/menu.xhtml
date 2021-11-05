@@ -43,6 +43,7 @@
 					<p:menuitem value="#{sessionMBean.textos['crear_agenda']}" icon="ui-icon-plus" url="/administracion/agenda/crear.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['consultar_agendas']}" icon="ui-icon-search" url="/administracion/agenda/modificarConsultar.xhtml" />
 					<p:menuitem value="#{sessionMBean.textos['modificar_textos_de_agendas']}" icon="ui-icon-pencil" url="/administracion/agenda/modificarTextos.xhtml" />
+					<p:menuitem value="#{sessionMBean.textos['actualizacion_masiva']}" icon="ui-icon-pencil" url="/administracion/agenda/actualizacionMasiva.xhtml" rendered="#{sessionMBean.usuarioActual.superadmin}" />
 				</p:submenu>
                 <p:submenu id="submenuRecursos" label="#{sessionMBean.textos['recursos']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR') or sessionMBean.tieneRol('RA_AE_ADMINISTRADOR_DE_RECURSOS')}">
                     <p:menuitem value="#{sessionMBean.textos['crear_recurso']}" icon="ui-icon-plus" url="/administracion/recurso/crear.xhtml" rendered="#{sessionMBean.tieneRol('RA_AE_ADMINISTRADOR')}" /> 
@@ -50,7 +51,6 @@
 					<p:menuitem value="#{sessionMBean.textos['modificar_textos_de_recursos']}" icon="ui-icon-pencil" url="/administracion/recurso/modificarTextos.xhtml" />
           			<p:menuitem value="#{sessionMBean.textos['importar_recurso']}" icon="ui-icon-arrowthickstop-1-n" url="/administracion/recurso/importar.xhtml" />
           			<p:menuitem value="#{sessionMBean.textos['carga_masiva']}" icon="ui-icon-arrowthickstop-1-n" url="/administracion/recurso/cargaMasiva.xhtml" rendered="#{sessionMBean.usuarioActual.superadmin}" />
-          			<p:menuitem value="#{sessionMBean.textos['actualizacion_masiva']}" icon="ui-icon-pencil" url="/administracion/recurso/actualizacionMasiva.xhtml" rendered="#{sessionMBean.usuarioActual.superadmin}" />
 				</p:submenu>
 				<p:submenu id="submenuDatosASolicitar" label="#{sessionMBean.textos['datos_a_solicitar']}" aria-level="2" rendered="#{facesContext.externalContext.isUserInRole('RA_AE_ADMINISTRADOR')}">
 					<p:menuitem value="#{sessionMBean.textos['agrupaciones']}" icon="ui-icon-radio-on" url="/administracion/datoASolicitar/modificarAgrupaciones.xhtml" />

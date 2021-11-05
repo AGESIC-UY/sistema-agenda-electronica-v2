@@ -86,7 +86,8 @@ public class Paso2MBean extends BaseMBean {
 		errorInit = false;
 		try {
 			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
-			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null) {
+			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null
+					|| !agendarReservasEJB.isRecursoVisibleInternet(sesionMBean.getRecurso())) {
 				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 				errorInit = true;
 				return;

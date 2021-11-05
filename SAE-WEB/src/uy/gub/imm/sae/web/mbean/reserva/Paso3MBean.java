@@ -112,15 +112,16 @@ public class Paso3MBean extends BaseMBean {
 		errorInit = false;
 		yaExisteReservaCamposClave = false;
 		try {
-			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null) {
+			agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
+			if (sesionMBean.getAgenda() == null || sesionMBean.getRecurso() == null
+					|| !agendarReservasEJB.isRecursoVisibleInternet(sesionMBean.getRecurso())) {
 				addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 				errorInit = true;
 				return;
 			}
-      agendarReservasEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getAgendarReservas();
-      recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
-      comunicacionesEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getComunicaciones();
-		} catch (ApplicationException ex) {
+		  	recursosEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getRecursos();
+		  	comunicacionesEJB = BusinessLocatorFactory.getLocatorContextoNoAutenticado().getComunicaciones();
+		} catch (ApplicationException | BusinessException ex) {
 			addErrorMessage(sesionMBean.getTextos().get("la_combinacion_de_parametros_especificada_no_es_valida"));
 			errorInit = true;
 		}

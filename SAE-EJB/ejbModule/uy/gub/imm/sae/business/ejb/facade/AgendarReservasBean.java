@@ -99,6 +99,8 @@ import uy.gub.imm.sae.exception.ValidacionClaveUnicaException;
 import uy.gub.imm.sae.exception.ValidacionException;
 import uy.gub.imm.sae.exception.ValidacionIPException;
 
+import static org.apache.commons.lang.BooleanUtils.isTrue;
+
 @Stateless
 public class AgendarReservasBean implements AgendarReservasLocal, AgendarReservasRemote {
   
@@ -219,6 +221,16 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       throw new ApplicationException(e);
     }
     return recurso;   
+  }
+
+  /**
+   * Indica si recurso seleccionado se encuentra visible a internet.
+   * @throws BusinessException
+   * @throws ApplicationException
+   * @throws BusinessException
+   */
+  public boolean isRecursoVisibleInternet(Recurso recurso) throws ApplicationException, BusinessException {
+    return isTrue(consultarRecursoPorId(recurso.getAgenda(), recurso.getId()).getVisibleInternet());
   }
   
   /**
@@ -3327,7 +3339,7 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
         }
         
         //Determinar si los recursos son visibles en internet
-        recursoOrigenVisibleInternet = BooleanUtils.isTrue(recursoOrigen.getVisibleInternet());
+        recursoOrigenVisibleInternet = isTrue(recursoOrigen.getVisibleInternet());
         //Deshabilitar el recurso para que no sea visible en internet
         if(recursoOrigenVisibleInternet){
           helper.desactivarRecursoVisibleInternet(recursoOrigen);
@@ -3541,8 +3553,8 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       else{
       
         //Determinar si los recursos son visibles en internet
-        recursoOrigenVisibleInternet = BooleanUtils.isTrue(recursoOrigen.getVisibleInternet());
-        recursoDestinoVisibleInternet = BooleanUtils.isTrue(recursoDestino.getVisibleInternet());
+        recursoOrigenVisibleInternet = isTrue(recursoOrigen.getVisibleInternet());
+        recursoDestinoVisibleInternet = isTrue(recursoDestino.getVisibleInternet());
         //Deshabilitar ambos recursos en internet (si la tienen)
         if(recursoOrigenVisibleInternet){
           helper.desactivarRecursoVisibleInternet(recursoOrigen);
@@ -3929,5 +3941,5 @@ public class AgendarReservasBean implements AgendarReservasLocal, AgendarReserva
       
       
     }
-  
+
 }

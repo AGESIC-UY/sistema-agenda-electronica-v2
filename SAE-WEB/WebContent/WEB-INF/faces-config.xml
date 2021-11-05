@@ -34,6 +34,11 @@
 			<property-class>uy.gub.imm.sae.web.mbean.administracion.AgendaSessionMBean</property-class>
 			<value>#{agendaSessionMBean}</value>
 		</managed-property>
+		<managed-property>
+			<property-name>recursoSessionMBean</property-name>
+			<property-class>uy.gub.imm.sae.web.mbean.administracion.RecursoSessionMBean</property-class>
+			<value>#{recursoSessionMBean}</value>
+		</managed-property>
 	</managed-bean>
 	<managed-bean>
 		<managed-bean-name>textoAgendaMBean</managed-bean-name>

@@ -1,0 +1,225 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.textos['actualizacion_masiva_datos']}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{agendaMBean.beforePhaseActualizar}" >
+				<h:form id="form">
+						  <p:outputPanel id="reporte" styleClass="form-required">
+							<p:commandLink ajax="false"
+										   value="Descargar #{sessionMBean.textos['reporte_errores_actualizacion_masiva_reservas']}"
+										   rendered="#{agendaMBean.reporte!=null}">
+								<p:fileDownload value="#{agendaMBean.reporte}"/>
+							</p:commandLink>
+						  </p:outputPanel>
+						  <p:outputPanel id="panelForm">
+					        <p:outputPanel styleClass="form-required">
+					          <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+					        </p:outputPanel>
+
+							<fieldset>
+								<legend>
+									<h:outputText value="#{sessionMBean.textos['configuracion_para_intranet']}" />
+								</legend>
+								<p:outputPanel styleClass="form-horizontal">
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_intranet']}" styleClass="col-sm-3 control-label label" for="diasIVIntranet" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="diasIVIntranet" value="#{recursoSessionMBean.diasInicioVentanaIntranet}"
+											  maxlength="5" immediate="true" converter="integerConverter" styleClass="form-control textoCorto" />
+											<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_intranet_descripcion']}" />
+											<p:message for="diasIVIntranet" errorClass="mensajeError"
+												styleClass="anchoMsgErr" infoClass="mensajeInfo"/>
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['dias_de_la_ventana_de_intranet']}" styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="DiasVIntranet" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="DiasVIntranet" value="#{recursoSessionMBean.diasVentanaIntranet}" maxlength="5" immediate="true" converter="integerConverter"
+												styleClass="form-control textoCorto" />
+											<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['cantidad_de_dias_siguientes_disponibles']}" />
+											<p:message for="DiasVIntranet" errorClass="mensajeError"
+												styleClass="anchoMsgErr" infoClass="mensajeInfo"  />
+										</p:outputPanel>
+									</p:outputPanel>
+								</p:outputPanel>
+							</fieldset>
+							<fieldset>
+								<legend>
+									<h:outputText value="#{sessionMBean.textos['configuracion_para_internet']}" />
+								</legend>
+								<p:outputPanel styleClass="form-horizontal">
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_internet']}" styleClass="col-sm-3 control-label label" for="DiasInicioVInternet" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="DiasInicioVInternet" value="#{recursoSessionMBean.diasInicioVentanaInternet}" maxlength="5" immediate="true" converter="integerConverter"
+												styleClass="form-control textoCorto" />
+											<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_internet_descripcion']}" />
+											<p:message for="DiasInicioVInternet" ajaxRendered="true" errorClass="mensajeError" infoClass="mensajeInfo"></p:message>
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['dias_de_la_ventana_de_internet']}" styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="DiasVInternet" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="DiasVInternet" value="#{recursoSessionMBean.diasVentanaInternet}" maxlength="5" immediate="true" converter="integerConverter"
+												styleClass="form-control textoCorto" />
+											<h:outputText styleClass="input-msg" value="#{sessionMBean.textos['cantidad_de_dias_siguientes_disponibles']}" />
+											<p:message for="DiasVInternet" errorClass="mensajeError"
+												styleClass="anchoMsgErr" infoClass="mensajeInfo"  />
+										</p:outputPanel>
+									</p:outputPanel>
+								</p:outputPanel>
+							</fieldset>
+							<fieldset>
+								<legend>
+								  <h:outputText value="#{sessionMBean.textos['recursos_confirmados']}"/>
+								</legend>
+								<p:outputPanel styleClass="form-horizontal form-group">
+								  <p:outputPanel styleClass="form-group">
+									  <h:outputLabel value="#{sessionMBean.textos['aplicar_todos_recursos']}" for="agendaSelectAll"
+													 styleClass="col-sm-3 control-label label"/>
+									  <p:outputPanel styleClass="col-sm-9">
+										  <p:selectBooleanCheckbox id="agendaSelectAll" value="#{agendaMBean.todosLosRecursos}">
+											  <p:ajax update="agenda recursos recursosSeleccionados"
+													  listener="#{agendaMBean.seleccionarRecursosDisponibles}"
+													  onstart="PF('buiEjecutar').show();"
+													  oncomplete="PF('buiEjecutar').hide();"/>
+										  </p:selectBooleanCheckbox>
+										  <h:outputText styleClass="input-msg" value="#{sessionMBean.textos['mensaje_aplica_para_todos']}" />
+									  </p:outputPanel>
+								  </p:outputPanel>
+								  <p:outputPanel styleClass="form-group">
+									  <h:outputLabel value="#{sessionMBean.textos['agenda']}" for="agenda"
+													 styleClass="col-sm-3 control-label label"/>
+									  <p:outputPanel styleClass="col-sm-9">
+										  <h:selectOneMenu id="agenda" value="#{agendaMBean.agendaActualId}"
+														   styleClass="form-control" disabled="#{agendaMBean.todosLosRecursos}">
+											  <p:ajax update="form:recursos" process="@this" listener="#{agendaMBean.cambioSeleccionAgenda}"/>
+											  <f:selectItems value="#{agendaMBean.agendasDisponibles}"/>
+										  </h:selectOneMenu>
+									  </p:outputPanel>
+								  </p:outputPanel>
+								</p:outputPanel>
+							  	<fieldset>
+									<legend>
+										<h:outputText value="#{sessionMBean.textos['recursos_agenda']}"/>
+									</legend>
+									<p:outputPanel id="recursos" styleClass="form-horizontal form-group">
+										<p:dataTable id="tablaRecursos" value="#{agendaMBean.recursosAgenda}" var="row" rowKey="#{row.data.id}"
+													 caption="#{sessionMBean.textos['listado_de_recursos']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" disabledSelection="#{agendaMBean.todosLosRecursos}"
+													 disabledTextSelection="">
+											<f:facet name="header">
+												<h:outputText value="#{sessionMBean.textos['recursos']}"/>
+											</f:facet>
+											<p:column>
+												<f:facet name="header">
+													<h:selectBooleanCheckbox id="todos" value="#{agendaMBean.seleccionarTodos}" title="#{sessionMBean.textos['todos_los_recursos']}"
+																			 disabled="#{agendaMBean.todosLosRecursos}">
+														<p:ajax update="form:recursos" listener="#{agendaMBean.seleccionarTodosRecursos}" process="@this" />
+													</h:selectBooleanCheckbox>
+													<p:outputLabel value="#{sessionMBean.textos['todos_los_recursos']}" for="todos" styleClass="ui-helper-hidden-accessible" />
+												</f:facet>
+												<h:selectBooleanCheckbox value="#{row.data.seleccionado}" id="idRecurso" disabled="#{agendaMBean.todosLosRecursos}">
+													<p:ajax update="form:recursos" listener="#{agendaMBean.seleccionarUno}" process="@this" />
+												</h:selectBooleanCheckbox>
+												<p:outputLabel value=" #{row.data.id}" for="idRecurso" styleClass="ui-helper-hidden-accessible">
+												</p:outputLabel>
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="#{sessionMBean.textos['identificador']}" />
+												</f:facet>
+												<h:outputText value="#{row.data.id}"/>
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="#{sessionMBean.textos['nombre']}" />
+												</f:facet>
+												<h:outputText value="#{row.data.nombre}"/>
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="#{sessionMBean.textos['descripcion']}" />
+												</f:facet>
+												<h:outputText value="#{row.data.descripcion}" escape="false"/>
+											</p:column>
+										</p:dataTable>
+									</p:outputPanel>
+									<ul class="form-action-buttons">
+										<li class="action-buttons-primary">
+											<ul>
+												<li>
+													<p:commandButton
+															value="#{sessionMBean.textos['confirmar_recursos']}"
+															actionListener="#{agendaMBean.moverSeleccionados}"
+															onstart="PF('buiEjecutar').show();"
+															oncomplete="PF('buiEjecutar').hide();"
+															styleClass="btn-lg btn-secundario" update="recursosSeleccionados">
+													</p:commandButton>
+												</li>
+											</ul>
+										</li>
+										<li class="action-buttons-second"></li>
+									</ul>
+								</fieldset>
+								<fieldset>
+									<legend>
+										<h:outputText value="#{sessionMBean.textos['recursos_confirmados']}"/>
+									</legend>
+									<p:outputPanel id="recursosSeleccionados" styleClass="form-horizontal form-group">
+										<p:dataTable id="tablaRecursosSeleccionados" value="#{agendaMBean.recursosMarcados}" var="row" rowKey="#{row.id}"
+													 caption="#{sessionMBean.textos['listado_de_recursos']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}" disabledSelection="#{agendaMBean.todosLosRecursos}"
+													 disabledTextSelection="">
+											<f:facet name="header">
+												<h:outputText value="#{sessionMBean.textos['recursos']}"/>
+											</f:facet>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="#{sessionMBean.textos['identificador']}" />
+												</f:facet>
+												<h:outputText value="#{row.id}"/>
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="#{sessionMBean.textos['nombre']}" />
+												</f:facet>
+												<h:outputText value="#{row.nombre}"/>
+											</p:column>
+											<p:column>
+												<f:facet name="header">
+													<h:outputText value="#{sessionMBean.textos['descripcion']}" />
+												</f:facet>
+												<h:outputText value="#{row.descripcion}" escape="false"/>
+											</p:column>
+										</p:dataTable>
+									</p:outputPanel>
+								</fieldset>
+							</fieldset>
+							<ul class="form-action-buttons">
+								<li class="action-buttons-primary">
+									<ul>
+										<li>
+											<p:commandButton value="#{sessionMBean.textos['actualizar_datos']}"
+															 actionListener="#{agendaMBean.actualizarRecursos}"
+															 onstart="PF('buiEjecutar').show();"
+															 oncomplete="PF('buiEjecutar').hide();"
+															 styleClass="btn-lg btn-primario" update="form:panelForm form:reporte">
+											</p:commandButton>
+									  </li>
+									</ul>
+								</li>
+							</ul>
+							<p:blockUI id="buiEjecutar" widgetVar="buiEjecutar" block="panelForm" >
+                            	Actualizando recursos, por favor espere...<br />
+                            	<p:graphicImage library="images" name="loading.gif"/>
+                        	</p:blockUI>
+			      </p:outputPanel>
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>

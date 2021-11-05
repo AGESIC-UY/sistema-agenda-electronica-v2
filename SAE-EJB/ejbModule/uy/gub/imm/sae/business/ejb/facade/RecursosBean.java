@@ -20,52 +20,20 @@
 
 package uy.gub.imm.sae.business.ejb.facade;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.Reader;
-import java.io.StringReader;
-import java.math.BigDecimal;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
-
-import javax.annotation.Resource;
-import javax.annotation.security.RolesAllowed;
-import javax.ejb.EJB;
-import javax.ejb.SessionContext;
-import javax.ejb.Stateless;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityTransaction;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TemporalType;
-import javax.transaction.UserTransaction;
-import javax.xml.bind.JAXBContext;
-import javax.xml.bind.Marshaller;
-import javax.xml.bind.Unmarshaller;
-
+import com.opencsv.bean.ColumnPositionMappingStrategy;
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
 import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.StringUtils;
-
+import org.apache.log4j.Logger;
+import org.jboss.ejb3.annotation.TransactionTimeout;
 import uy.gub.imm.sae.business.dto.ResultadoEjecucion;
 import uy.gub.imm.sae.business.utilidades.CamposCSV;
 import uy.gub.imm.sae.business.utilidades.ConstantesDisponibilidad;
 import uy.gub.imm.sae.business.utilidades.ConstantesRecurso;
 import uy.gub.imm.sae.common.Utiles;
 import uy.gub.imm.sae.common.enumerados.Estado;
+import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 import uy.gub.imm.sae.common.enumerados.Tipo;
 import uy.gub.imm.sae.entity.AccionMiPerfil;
 import uy.gub.imm.sae.entity.Agenda;
@@ -82,7 +50,6 @@ import uy.gub.imm.sae.entity.TextoRecurso;
 import uy.gub.imm.sae.entity.ValidacionPorDato;
 import uy.gub.imm.sae.entity.ValidacionPorRecurso;
 import uy.gub.imm.sae.entity.ValorPosible;
-import uy.gub.imm.sae.common.enumerados.FormaCancelacion;
 import uy.gub.imm.sae.exception.ApplicationException;
 import uy.gub.imm.sae.exception.BusinessException;
 import uy.gub.imm.sae.exception.UserException;
@@ -92,21 +59,45 @@ import uy.gub.imm.sae.exportar.ExportarHelper;
 import uy.gub.imm.sae.exportar.RecursoExportar;
 import uy.gub.imm.sae.exportar.ValorPosibleExport;
 
-import org.apache.log4j.Logger;
-import org.jboss.ejb3.annotation.TransactionTimeout;
-
-import com.google.gson.JsonObject;
-import com.opencsv.bean.ColumnPositionMappingStrategy;
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
+import javax.annotation.Resource;
+import javax.annotation.security.RolesAllowed;
+import javax.ejb.EJB;
+import javax.ejb.SessionContext;
+import javax.ejb.Stateless;
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
+import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
+import javax.persistence.TemporalType;
+import javax.xml.bind.JAXBContext;
+import javax.xml.bind.Marshaller;
+import javax.xml.bind.Unmarshaller;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.Reader;
+import java.io.StringReader;
+import java.math.BigDecimal;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 @Stateless
 @RolesAllowed({ "RA_AE_ADMINISTRADOR", "RA_AE_PLANIFICADOR", "RA_AE_ANONIMO", "RA_AE_LLAMADOR", "RA_AE_ADMINISTRADOR_DE_RECURSOS"})
 public class RecursosBean implements RecursosLocal, RecursosRemote {
 	
 	static Logger logger = Logger.getLogger(RecursosBean.class);
-	
-	@PersistenceContext(unitName = "SAE-EJB")
+
 	private EntityManager entityManager;
 	
 	@EJB
@@ -1046,7 +1037,17 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		}
 		return recursoActual;
 
-	};
+	}
+
+	public List<Recurso> consultarRecursoByAgendaId(int agendaId) throws UserException {
+		List<Recurso> recursos = entityManager.createQuery("SELECT r FROM Recurso r "
+						+ "WHERE r.agenda.id = :agendaId and r.fechaBaja is null", Recurso.class)
+				.setParameter("agendaId", agendaId).getResultList();
+		if (recursos == null) {
+			throw new UserException("no_se_encuentra_el_recurso_especificado");
+		}
+		return recursos;
+	}
 
 	/**
 	 * Agrega un DatoDelRecurso <b>d</b> asociándolo al recurso <b>r</b>.
@@ -3493,9 +3494,9 @@ public class RecursosBean implements RecursosLocal, RecursosRemote {
 		this.recursoEsNuevo = recursoEsNuevo;
   }
 
+	@PersistenceContext(unitName = "SAE-EJB")
+	public void setEntityManager(EntityManager entityManager) {
+		this.entityManager = entityManager;
+	}
 
-  
-  
-  
-  
 }

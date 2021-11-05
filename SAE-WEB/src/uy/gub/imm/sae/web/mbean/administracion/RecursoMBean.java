@@ -110,9 +110,8 @@ public class RecursoMBean extends BaseMBean{
 	private DataTable recursosDataTableModificar;
 	private DataTable recursosDataTableEliminar;
 	private DataTable recursosDataTableConsultar;
-	private DataTable recursosDataTableActualizar;
-	
-	//Tabla asociada tabla en pantalla para poder saber en que recurso se posiciona. 
+
+	//Tabla asociada tabla en pantalla para poder saber en que recurso se posiciona.
 	private DataTable datosDataTable;
 
 	//Datos de los organismos 
@@ -130,11 +129,8 @@ public class RecursoMBean extends BaseMBean{
   	//Combo Si ó No
   	private List<SelectItem> aplicaTodos = new ArrayList();
   	private Integer aplicaTodas;
-  	
-  	private List<SelectItem> agendasDisponibles;
+
   	private String agendaSeleccionadaId;
-  	
-  	private Boolean seleccionarTodos=Boolean.FALSE;
   
   @PostConstruct
   public void initRecurso(){
@@ -1094,187 +1090,6 @@ public class RecursoMBean extends BaseMBean{
 		}
 	}
 	
-	public void beforePhaseActualizar(PhaseEvent event) {
-		
-		 if (!FacesContext.getCurrentInstance().isPostback()) {
-			// Verificar que el usuario tiene permisos para acceder a esta página
-		   if(!BooleanUtils.isTrue(sessionMBean.getUsuarioActual().isSuperadmin())) {
-		        FacesContext ctx = FacesContext.getCurrentInstance();
-		        ctx.getApplication().getNavigationHandler().handleNavigation(ctx, "", "noAutorizado");
-		    }	
-			if (event.getPhaseId() == PhaseId.RENDER_RESPONSE) {
-				sessionMBean.setPantallaTitulo(sessionMBean.getTextos().get("actualizacion_masiva"));
-			}
-		
-			initDatosActualizacionMasiva();
-		 }
-		
-		
-	}
-	
-	private void initDatosActualizacionMasiva(){
-		try {
-			//Cargar la lista de agendas destino
-			agendasDisponibles = new ArrayList<>();
-
-			agendasDisponibles.add(new SelectItem("", sessionMBean.getTextos().get("seleccionar")));
-
-			for(Agenda ag : generalEJB.consultarAgendas()) {
-				agendasDisponibles.add(new SelectItem(ag.getId().toString(), ag.getNombre()));
-			}
-			
-			Agenda agenda = sessionMBean.getAgendaMarcada();
-			
-				 
-	    	List<Recurso> recursosList = generalEJB.consultarRecursos(agenda);
-			Collections.sort(recursosList, new RecursoComparatorNombre());
-			if(recursosList!=null && !recursosList.isEmpty()){
-				recursoSessionMBean.setRecursos(new RowList<>(recursosList));
-			}
-			limpiarCampos();
-			
-		 } catch (Exception e) {
-			// TODO Auto-generated catch blockrecursoSessionMBean
-			e.printStackTrace();
-		 }
-	}
-	
-	private void limpiarCampos(){
-		
-		recursoSessionMBean.setDiasInicioVentanaInternet(null);
-		recursoSessionMBean.setDiasVentanaInternet(null);
-		recursoSessionMBean.setDiasInicioVentanaIntranet(null);
-		recursoSessionMBean.setDiasVentanaIntranet(null);;
-		
-	}
-	
-	
-	public void seleccionarTodosRecursos(AjaxBehaviorEvent event) {
-		
-	    limpiarMensajesError();
-	    HtmlSelectBooleanCheckbox check = (HtmlSelectBooleanCheckbox)event.getSource();
-	    Boolean isChecked = (Boolean)check.getValue();
-	    RowList<Recurso> listRecurso = recursoSessionMBean.getRecursos();
-	    if(listRecurso != null) {
-	      for (Row<Recurso> row : listRecurso) {
-	        row.getData().setSeleccionado(isChecked);
-	      }
-	    }
-	}
-	
-	public void seleccionarUno() {
-	  limpiarMensajesError();
-	}
-	
-	//@SuppressWarnings("unchecked")
-	public String actualizarRecursos() {
-		limpiarMensajesError();
-		Integer count = 0;
-		Boolean hayErrores = Boolean.FALSE;
-		List<String> mensajesErrores = new ArrayList();
-		List<String> mensajesExito = new ArrayList();
-		
-		
-		if (recursoSessionMBean.getDiasInicioVentanaIntranet() == null){
-	          addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":diasIVIntranet");
-	          hayErrores = true;
-        }
-		else if (recursoSessionMBean.getDiasInicioVentanaIntranet().intValue() < 0){
-	          addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_intranet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":diasIVIntranet");
-	          hayErrores = true;
-        }
-	 				
-		if (recursoSessionMBean.getDiasVentanaIntranet() == null){
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_es_obligatorio"), FORM_ID+":DiasVIntranet");
-			hayErrores = true;
-		}else if (recursoSessionMBean.getDiasVentanaIntranet().intValue() <= 0){
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_intranet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVIntranet");
-			hayErrores = true;
-		}
-	 		    
-		
-		if (recursoSessionMBean.getDiasInicioVentanaInternet() == null){
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasInicioVInternet");
-            hayErrores = true;
-		}else if (recursoSessionMBean.getDiasInicioVentanaInternet().intValue() < 0){
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_inicio_de_la_ventana_de_internet_debe_ser_mayor_o_igual_a_cero"), FORM_ID+":DiasInicioVInternet");
-			hayErrores = true;
-		}
-  
-		if (recursoSessionMBean.getDiasVentanaInternet() == null){
-            addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_es_obligatorio"), FORM_ID+":DiasVInternet");
-            hayErrores = true;
-		}else if (recursoSessionMBean.getDiasVentanaInternet().intValue() <= 0){
-			addErrorMessage(sessionMBean.getTextos().get("los_dias_de_la_ventana_de_internet_debe_ser_mayor_a_cero"), FORM_ID+":DiasVInternet");
-			hayErrores = true;
-		}
-			
-		
-		
-		for (Row<Recurso> row : recursoSessionMBean.getRecursos()) {
-			if(row.getData().isSeleccionado()) {
-				try {
-					count++;
-					Recurso recursoSeleccionado = row.getData();
-					recursoSeleccionado.setDiasInicioVentanaIntranet(recursoSessionMBean.getDiasInicioVentanaIntranet());
-					recursoSeleccionado.setDiasVentanaIntranet(recursoSessionMBean.getDiasVentanaIntranet());
-					recursoSeleccionado.setDiasInicioVentanaInternet(recursoSessionMBean.getDiasInicioVentanaInternet());
-					recursoSeleccionado.setDiasVentanaInternet(recursoSessionMBean.getDiasVentanaInternet());
-					recursosEJB.modificarRecurso(recursoSeleccionado, sessionMBean.getUsuarioActual().getCodigo());
-					mensajesExito.add("El recurso con ID: " + row.getData().getId() + " ha sido actualizado.");
-				}
-				catch (UserException ue) {
-					hayErrores = Boolean.TRUE;
-					mensajesErrores.add("El recurso con ID: " + row.getData().getId() + " no ha sido actualizado. Mensaje de error: " + sessionMBean.getTextos().get(ue.getCodigoError())+".");
-				}
-				catch (Exception e) {
-					addErrorMessage(e, MSG_ID);
-				}
-				
-				
-			}
-		}
-		
-		if(count==0){
-			addErrorMessage("Debe seleccionar al menos un recurso", MSG_ID);
-			return null;
-		}
-		else if(count>0){
-
-			sessionMBean.cargarRecursos();
-			initDatosActualizacionMasiva();
-			if(hayErrores){
-				for(String error : mensajesErrores){
-					addAdvertenciaMessage(error);
-				}
-				
-				for(String exito : mensajesExito){
-					addAdvertenciaMessage(exito);
-				}
-			}
-			else{
-				addInfoMessage(sessionMBean.getTextos().get("actualizacion_recursos").replaceAll("x", count.toString()), MSG_ID);
-			}
-			
-			seleccionarTodos = Boolean.FALSE;
-			return "actualizacionMasiva";
-			
-		}
-		else{
-			if(hayErrores){
-				for(String error : mensajesErrores){
-					addAdvertenciaMessage(error);
-				}
-				
-				return null;
-			}
-
-		}	
-		
-		return null;
-	}
-	
-	
 	
 	public void setOficinas(List<Oficina> ofs) {
 		mapOficinas = new HashMap<String, Oficina>();
@@ -1607,15 +1422,6 @@ public class RecursoMBean extends BaseMBean{
 	  }
 	  
   }
-
-	public DataTable getRecursosDataTableActualizar() {
-		return recursosDataTableActualizar;
-	}
-	
-	public void setRecursosDataTableActualizar(DataTable recursosDataTableActualizar) {
-		this.recursosDataTableActualizar = recursosDataTableActualizar;
-	}
-	
 	
 	public List<SelectItem> getAplicaTodos() {
 		return aplicaTodos;
@@ -1632,14 +1438,6 @@ public class RecursoMBean extends BaseMBean{
 		this.aplicaTodas = aplicaTodas;
 	}
 
-	public List<SelectItem> getAgendasDisponibles() {
-		return agendasDisponibles;
-	}
-
-	public void setAgendasDisponibles(List<SelectItem> agendasDisponibles) {
-		this.agendasDisponibles = agendasDisponibles;
-	}
-
 	public String getAgendaSeleccionadaId() {
 		return agendaSeleccionadaId;
 	}
@@ -1648,16 +1446,4 @@ public class RecursoMBean extends BaseMBean{
 		this.agendaSeleccionadaId = agendaSeleccionadaId;
 	}
 
-	public Boolean getSeleccionarTodos() {
-		return seleccionarTodos;
-	}
-
-	public void setSeleccionarTodos(Boolean seleccionarTodos) {
-		this.seleccionarTodos = seleccionarTodos;
-	}
-	
-	
-	
-	
-	
 }
