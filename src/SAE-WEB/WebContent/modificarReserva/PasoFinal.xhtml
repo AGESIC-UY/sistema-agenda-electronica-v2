@@ -1,0 +1,80 @@
+<ui:composition template="/modificarReserva/Paso.template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="parametroBean" value="#{modificarPasoFinalMBean}" />
+	<ui:param name="agenda_nombre" value="#{modificarPasoFinalMBean.agendaNombre}" />
+  <ui:param name="hay_error" value="#{modificarPasoFinalMBean.errorInit}" />
+	<ui:param name="paso_numero" value="4" />
+	<ui:param name="paso_texto" value="#{sesionMBean.textos['reserva_confirmada']}" />
+  <ui:param name="recursoSinDisponibilidad" value="false" />
+
+	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-12" />
+	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-12" />
+
+	<ui:define name="descripcion">
+     <p:outputPanel rendered="#{!modificarPasoFinalMBean.errorInit}">
+			<div class="botonesConfirmacion" >
+				<h:commandLink value="#{sesionMBean.textos['guardar_ticket']}" action="#{modificarPasoFinalMBean.generarTicket(false)}" styleClass="#{sesionMBean.urlTramite!=null?'btn btn-secundario':'btn btn-primario'}" />
+				<h:commandLink value="#{sesionMBean.textos['imprimir_ticket']}" target="_blank" action="#{modificarPasoFinalMBean.generarTicket(true)}" styleClass="btn btn-secundario" />
+				 <h:outputLink value="#{modificarPasoFinalMBean.urlTramite}" target="_blank" rendered="#{sesionMBean.urlTramite != null}" styleClass="#{sesionMBean.urlTramite!=null?'btn btn-primario':'btn btn-secundario'}">
+					 <h:outputText value="#{sesionMBean.textos['continuar_tramite']}"/>
+				 </h:outputLink>
+				<h:outputLink value="#{modificarPasoFinalMBean.urlCancelacion}" target="_blank" styleClass="btn btn-link">
+					 <h:outputText value="#{sesionMBean.textos['cancelar_reserva']}" />
+				 </h:outputLink>
+			</div>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="mensaje">
+     <p:outputPanel rendered="#{!modificarPasoFinalMBean.errorInit}">
+			<div class="box box-grey datosReservaConfirmada">
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{sesionMBean.textos['reserva_confirmada']}" />
+				</div>
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{modificarPasoFinalMBean.diaSeleccionado}" styleClass="resaltado">
+						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sesionMBean.locale}" />
+					</h:outputText>
+					<h:outputText value=" #{sesionMBean.textos['a_las']} " />
+					<h:outputText value="#{modificarPasoFinalMBean.horaSeleccionada}" styleClass="resaltado"> 
+						<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
+					</h:outputText>
+					<h:outputText value=", " />
+					<h:outputText value="#{modificarPasoFinalMBean.reservaNumero}" styleClass="resaltado" />
+				</div>
+				<div>
+					<h:outputText value="#{modificarPasoFinalMBean.recursoDescripcion}" />
+				</div>
+				<p:outputPanel rendered="#{sesionMBean.agenda.conTrazabilidad}">
+					<div class="seguridad">
+						<h:outputText value="#{sesionMBean.textos['codigo_de_trazabilidad']}: " />
+						<h:outputText value="#{sesionMBean.reservaConfirmada.trazabilidadGuid}" styleClass="negrita" />
+					</div>
+				</p:outputPanel>
+        <div class="seguridad">
+          <h:outputText value="#{sesionMBean.textos['codigo_de_seguridad']}:" />
+          <h:outputText value="#{sesionMBean.reservaConfirmada.codigoSeguridad}" styleClass="negrita" />
+        </div>
+			</div>
+     </p:outputPanel>			
+	</ui:define>
+
+	<ui:define name="contenido">
+     <p:outputPanel rendered="#{!modificarPasoFinalMBean.errorInit and not empty modificarPasoFinalMBean.descripcion}">
+			<div class="infoAdicional box-grey">
+				<h:outputFormat value="#{modificarPasoFinalMBean.descripcion}" />
+			</div>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="botones">
+    <p:outputPanel rendered="#{!modificarPasoFinalMBean.errorInit}">
+      <h:commandButton styleClass="" value="Dummy" style="display:none" />
+    </p:outputPanel>
+	</ui:define>
+
+</ui:composition>

@@ -1,0 +1,128 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{eliminarDispMBean.beforePhaseEliminarPeriodo}" >
+
+      <p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarDisp" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
+        <f:facet name="header">
+          <h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+        </f:facet>
+        <h:form id="elimRec">
+          <h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_las_disponibilidades']}" />
+          <p:outputPanel styleClass="row panelBotonesPopUp">
+            <p:outputPanel styleClass="col-sm-7">
+              <p:commandButton id="btn_eliminar" update="form:panelForm" actionListener="#{eliminarDispMBean.eliminarDisponibilidadesPeriodo}" value="#{sessionMBean.textos['si']}" 
+                onclick="PF('eliminarDisp').hide();" styleClass="btn-primario btn-100 btn">
+              </p:commandButton>
+            </p:outputPanel>
+            <p:outputPanel styleClass="col-sm-5">
+              <p:commandButton onclick="PF('eliminarDisp').hide();" value="#{sessionMBean.textos['no']}" styleClass="btn-link btn-100 btn" />
+            </p:outputPanel>
+          </p:outputPanel>
+        </h:form>
+      </p:dialog>
+
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+				<h:form id="form">
+          <p:outputPanel id="panelForm">
+			      <p:outputPanel styleClass="form-required">
+			        <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+			      </p:outputPanel>
+						<fieldset>
+							<legend>
+								<h:outputText value="#{sessionMBean.textos['periodo_a_consultar']}" />
+							</legend>
+							<p:outputPanel styleClass="form-horizontal">
+								
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['desde']}" for="Fdesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText id="Fdesde" value="#{eliminarDispMBean.fechaDesde}" styleClass="datepicker" converter="dateConverter">
+                      <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                      <f:attribute name="onError" value="zero"/>
+										</h:inputText>
+                    <p:message for="Fdesde" />
+									</p:outputPanel>
+								</p:outputPanel>
+	
+								<p:outputPanel styleClass="form-group">
+									<h:outputLabel value="#{sessionMBean.textos['hasta']}" for="Fhasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+									<p:outputPanel styleClass="col-sm-9">
+										<h:inputText id="Fhasta" value="#{eliminarDispMBean.fechaHasta}" styleClass="datepicker" converter="dateConverter">
+                      <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                      <f:attribute name="onError" value="zero"/>
+										</h:inputText>
+                    <p:message for="Fhasta" />
+									</p:outputPanel>
+								</p:outputPanel>
+	
+								<p:outputPanel styleClass="form-group">
+									<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+										<p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{eliminarDispMBean.obtenerCuposPeriodo}" 
+										  update="form:panelForm" styleClass="btn btn-secundario" />
+									</p:outputPanel>
+								</p:outputPanel>
+							</p:outputPanel>
+						</fieldset>
+						
+						<p:outputPanel id="panelDisponibilidad">
+							<p:dataTable id="tablaCupos" value="#{eliminarDispMBean.cuposPorDia}" var="row" align="center" 
+								caption="#{sessionMBean.textos['disponibilidades_en_periodo_consultado']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+	              paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}" 
+	              paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+	              paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+	              paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+	              paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+	              paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+							>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['fecha']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{row.data.fecha}">
+										<f:convertDateTime type="both" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+									</h:outputText>
+									<h:outputText value=" " />
+                  <h:outputText value="#{row.data.horaInicio}">
+                    <f:convertDateTime type="both" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+                  </h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cupos_disponibles']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{row.data.cupo}"></h:outputText>
+								</p:column>
+                <p:column>
+                  <f:facet name="header">
+                    <h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+                  </f:facet>
+                  <h:outputText value="#{row.data.cantReservas}"></h:outputText>
+                </p:column>
+	
+							</p:dataTable>
+							
+		          <ul class="form-action-buttons">
+		            <li class="action-buttons-primary">
+		              <ul>
+		                <li>
+		                  <p:commandButton value="#{sessionMBean.textos['eliminar_disponibilidades_de_todo_el_periodo']}" 
+		                    oncomplete="PF('eliminarDisp').show();" styleClass="btn-lg btn-primario" />
+		                </li>
+		              </ul>
+		            </li>
+		            <li class="action-buttons-second"></li>
+		          </ul>
+							
+						</p:outputPanel>
+          </p:outputPanel>
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>

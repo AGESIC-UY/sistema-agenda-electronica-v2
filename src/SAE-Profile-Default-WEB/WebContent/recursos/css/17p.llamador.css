@@ -1,0 +1,128 @@
+@CHARSET "ISO-8859-1";
+.miBody {
+    color: black;
+    background-color: white;
+    border:0pt;
+	margin: 0;
+	padding: 0;
+}   		
+.centrado {
+	width: 100%;
+	text-align: center;
+}
+.marco {
+	width: 100%; 
+	border: solid 1px #ececed; 
+	padding: 20px; 
+	padding-top: 10px; 
+	padding-bottom: 10px; 
+}
+.tituloCaja {
+	text-align: left;
+	border:0;
+	border-left: solid 5px #ff9113; /*#ff9113; Naranja IMM */  
+	padding: 0px;
+	padding-left: 25px;
+	vertical-align: bottom;
+	height: 55px;
+}
+.tituloTexto {
+	font-size:40px;
+	font-weight: bold;
+	font-family: sans-serif;
+	color: #58585a; /* Gris IMM */
+	padding: 0px;
+	border:none;
+}
+.tituloTextoRecurso {
+	width: 630px;
+}
+
+.llamadas{
+	border: 0;
+}
+table.llamadas thead th {
+	text-align: left;
+	border:0;
+	border-top: solid 2px #000000;
+	background-color: #f6f6f6;
+	font-size:60px;
+	font-weight: bold;
+	padding: 0px;
+}
+table.llamadas thead .hora {
+	padding-left: 40px;
+	width: 200px;
+}
+table.llamadas thead .numero {
+	padding-left: 80px;
+	padding-right: 80px;
+}
+table.llamadas thead .datos {
+}
+table.llamadas thead .datosLargo {
+	padding-left: 100px;
+}
+table.llamadas thead .puesto {
+}
+table.llamadas tbody tr td {
+	text-align: left;
+	border:0;
+	border-top: solid 2px #dedfe0;
+	font-size:100px;
+	font-weight: bold;
+	line-height:1em;
+}
+table.llamadas tbody .hora {
+	padding-left: 40px;
+	font-size:90px;
+	color: #58585a; /* Gris IMM */
+}
+table.llamadas tbody .numero {
+	padding: 0px;
+	padding-left: 80px;
+	padding-right: 80px;
+	font-size:150px;
+}
+table.llamadas tbody .datos {
+	font-size:60px;
+}
+table.llamadas tbody .datosLargo {
+	padding-left: 100px;
+}
+
+table.llamadas tbody .puesto {
+	text-align: center;
+	padding-left: 40px;
+	padding-right: 40px;
+	color: #ff9113; /*#ff9113;  Naranja IMM */
+	font-size:150px;
+}
+
+.etiquetaCorta {
+	text-align: left;
+	border:none;
+	font-size:100px;
+	font-weight: bold;
+	width: 500px; 
+}
+.etiquetaLarga {
+	text-align: left;
+	border:none;
+	font-size:100px;
+	font-weight: bold;
+	width: 750px; 
+}
+
+.efectoVisual {
+	color: #ff9113; /*#ff9113; Naranja IMM */
+}
+.contenedor-marco {
+	padding: 10px;
+}
+.marco-logo {
+	text-align: right;
+}
+.marco-spacer{
+	height: 40px;
+}

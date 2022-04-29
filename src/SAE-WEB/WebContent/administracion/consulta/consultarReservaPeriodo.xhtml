@@ -1,0 +1,64 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view
+			beforePhase="#{consultaMBean.beforePhaseConsultarReservaPeriodo}" >
+      <p:outputPanel>
+				<h:form id="form">
+          <p:outputPanel styleClass="form-required">
+            <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+          </p:outputPanel>
+					<fieldset id="basic">
+						<legend>
+							<h:outputText value="#{sessionMBean.textos['reporte_reserva_por_periodo_y_estado']}" />
+						</legend>
+						<p:outputPanel styleClass="form-horizontal">
+
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['fecha_desde']}" for="fechaDesde" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="fechaDesde" value="#{reporteMBean.fechaDesde}" styleClass="datepicker" converter="dateConverter">
+	                  <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+	                  <f:attribute name="onError" value="zero"/>
+									</h:inputText>
+                  <p:message for="fechaDesde" />
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['fecha_hasta']}" for="fechaHasta" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="fechaHasta" value="#{reporteMBean.fechaHasta}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
+									</h:inputText>
+                  <p:message for="fechaHasta" />
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['estado']}" for="estado" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:selectOneMenu id="estado" value="#{reporteMBean.estadoReservaSeleccionado}" styleClass="form-control">
+										<f:selectItems value="#{reporteMBean.estadosReserva}" />
+									</h:selectOneMenu>
+                  <p:message for="estado" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+					<ul class="form-action-buttons">
+						<li class="action-buttons-primary">
+						  <h:commandButton value="#{sessionMBean.textos['consultar']}" action="#{reporteMBean.reporteReservasFecha}" styleClass="btn-lg btn-primario" update="@form" />
+						</li>
+					</ul>
+				</h:form>
+			</p:outputPanel>
+		</f:view>
+	</ui:define>
+</ui:composition>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:fn="http://java.sun.com/jsp/jstl/functions"
+	lang="#{sessionMBean.idiomaActual}">
+<h:head>
+  <f:facet name="first">
+	  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	  <title>
+		  <h:outputText value="#{sessionMBean.textos['nombre_aplicacion']} -- #{sessionMBean.pantallaTitulo}" />
+	  </title>
+  </f:facet>
+	<h:outputScript library="primefaces" name="jquery/jquery.js" />
+	<script src="/sae-admin/resources/js/jquery-ui.js" type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/funcionesJS.js" type="text/javascript"></script>
+	<script src="/sae-admin/resources/js/bootstrap.min.js"></script>
+	<link href="/sae-admin/resources/css/bootstrap.min.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/formulario-tipo.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/layout.css" rel="stylesheet" />
+	<link href="/sae-admin/resources/css/agenda.css" rel="stylesheet" />
+	<script type="text/javascript">
+		redirect = function() {
+			window.location.href = '${pageContext.request.contextPath}';
+		}
+	</script>
+
+</h:head>
+<h:body styleClass="bodyAdmin" >
+  <f:event type="preRenderView" listener="#{sessionMBean.controlarAccesoRestringido}"/>
+
+	<a class="sr-only sr-only-focusable saltar" href="#destino_saltar_contenido">
+	 <h:outputText value="#{sessionMBean.textos['saltar_al_contenido']}" />
+  </a>
+
+	<input type="hidden" id="formatoFecha" value="#{sessionMBean.formatoFechaDatepicker}" />
+
+	<div class="cabezalPrivado navbar-fixed-top">
+		<div class="containerAdmin">
+			<div class="row">
+				<div class="col-xs-6 cabezalEmpresa">
+					<div id="logo">
+						<div>
+							<p:graphicImage id="logoimg" value="#{sessionMBean.empresaActualLogo}" styleClass="logoEmpresa" alt="#{sessionMBean.empresaActualLogoTexto}"
+								rendered="#{sessionMBean.empresaActualLogo != null}" cache="false" />
+						</div>
+						<div>
+							<h:outputText styleClass="nombre-activo" value="#{sessionMBean.empresaActualNombre}" />
+						</div>
+					</div>
+				</div>
+				<div class="col-xs-6 cabezalTramites">
+					<div class="logosSecundarios">
+						<ul class="listaHorizontal">
+							<li>
+							    <a href="https://www.presidencia.gub.uy/" title="Ir al sitio de Presidencia"> 
+							        <img src="/sae-admin/resources/images/logoPresidencia.png" alt="Presidencia" />
+							    </a>
+						    </li>
+						</ul>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="wrapper">
+		<div id="sidebar-wrapper">
+			<div>
+				<ui:insert name="menu">
+					<ui:include src="/menu/menu.xhtml" />
+				</ui:insert>
+			</div>
+		</div>
+		<div id="page-content-wrapper" tabindex="-1">
+			<div class="datosCabezal">
+				<div class="row">
+					<div class="col-sm-12">
+						<div class="navbar-header">
+							<h:form id="mostrarAgendaRecurso">
+								<ul>
+									<li>
+										<div class="form-inline">
+										  <p:outputPanel styleClass="form-group" rendered="#{sessionMBean.mostrarFechaActual}">
+										    <h:outputText value="#{sessionMBean.fechaActual}" />
+									    </p:outputPanel>
+											<h:panelGroup class="form-group" rendered="#{fn:length(sessionMBean.idiomasSoportados) > 1}">
+												<h:outputLabel for="idioma" value="#{sessionMBean.textos['idioma']}" class="label" />
+												<h:selectOneMenu id="idioma" value="#{sessionMBean.idiomaActual}" valueChangeListener="#{sessionMBean.cambioIdiomaActual}" styleClass="form-control">
+													<p:ajax update="@all" process="@this" />
+													<f:selectItems value="#{sessionMBean.idiomasSoportados}" />
+												</h:selectOneMenu>
+											</h:panelGroup>
+										</div>
+									</li>
+									<li><h:outputText value="#{sessionMBean.textos['empresa']}: #{sessionMBean.empresaActual.nombre}" /></li>
+									<li>
+									  <h:outputText value="#{sessionMBean.textos['agenda']}:" /> 
+									  <a	href="/sae-admin/administracion/seleccionAgendaRecurso.xhtml">
+										  <h:outputText value="#{sessionMBean.textos['seleccionar']}..." rendered="#{sessionMBean.agendaMarcada == null}" /> 
+											<h:outputText value="#{sessionMBean.agendaMarcada.nombre}" rendered="#{sessionMBean.agendaMarcada != null}" />
+									  </a>
+									</li>
+									<li>
+									  <h:outputText value="#{sessionMBean.textos['recurso']}:" /> 
+								    <a href="/sae-admin/administracion/seleccionAgendaRecurso.xhtml">
+										  <h:outputText value="#{sessionMBean.textos['seleccionar']}..." rendered="#{sessionMBean.recursoMarcado == null}" /> 
+										  <h:outputText value="#{sessionMBean.recursoMarcado.nombre}" rendered="#{sessionMBean.recursoMarcado != null}" />
+								    </a>
+									</li>
+									<li>
+									  <h:outputText value="#{sessionMBean.textos['usuario']}: #{sessionMBean.usuarioActual.nombre}" />
+									</li>
+									<li>
+									  <p:commandLink id="lnkCerrarSesion" value="#{sessionMBean.textos['cerrar_sesion']}" action="#{sessionMBean.cerrarSesion}" process="@this" 
+									    update="@all" oncomplete="redirect()" rendered="#{sessionMBean.tipoLogout == 'LOCAL'}" />
+										<h:outputLink value="/sae-admin/logoutcda" rendered="#{sessionMBean.tipoLogout == 'CDA'}">
+										  <h:outputText value="#{sessionMBean.textos['cerrar_sesion']}" />
+										</h:outputLink>
+									</li>
+								</ul>
+							  <div class="ui-helper-hidden-accessible">
+								  <h:commandButton value="dummy" tabindex="-1" />
+				        </div>
+							</h:form>
+						</div>
+					</div>
+				</div>
+			</div>
+			<a href="#menu-toggle" class="btn btn-default" id="menu-toggle">
+				<h:outputText value="#{sessionMBean.textos['menu']}" />
+			</a>
+			<h2 id="destino_saltar_contenido">
+				<h:outputText value="#{nombre_pagina}" />
+			</h2>
+			<p:outputPanel id="mensajes">
+			    <p:messages id="pantalla" showDetail="false" autoUpdate="true"
+			      infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+			      singleInfoTitle="#{sessionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sessionMBean.textos['mensajes_en_el_formulario_info']}"
+			      singleWarnTitle="#{sessionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sessionMBean.textos['mensajes_en_el_formulario_warn']}" 
+			      singleErrorTitle="#{sessionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sessionMBean.textos['mensajes_en_el_formulario_error']}"
+			    />
+		    </p:outputPanel>
+			<ui:insert name="cuerpo">
+			</ui:insert>
+		</div>
+	</div>
+
+	<script>
+		$("#menu-toggle").click(function(e) {
+			e.preventDefault();
+			$("#wrapper").toggleClass("toggled");
+		});
+	</script>
+
+</h:body>
+</html>

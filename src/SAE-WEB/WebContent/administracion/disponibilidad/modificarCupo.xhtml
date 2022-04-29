@@ -1,0 +1,245 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{disponibilidadMBean.beforePhaseModifCupo}" >
+
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="modificarCupos" zindex="2000" modal="true" focus="elimRec:btn_modificar" >
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+				</f:facet>
+				<h:form id="elimRec">
+					<h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_modificar_las_disponibilidades_marcadas']}" />
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-7">
+							<p:commandButton id="btn_modificar" actionListener="#{disponibilidadMBean.guardarModifDisp}" update="form:panelForm"
+								value="#{sessionMBean.textos['modificar_cupos']}" onclick="PF('modificarCupos').hide();" styleClass="btn-primario btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-5">
+							<p:commandButton onclick="PF('modificarCupos').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn" />
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+
+			<h:form id="form" rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+        <p:outputPanel id="panelForm">
+	        <p:outputPanel styleClass="form-required">
+	          <h:outputText value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+	        </p:outputPanel>
+					<fieldset>
+						<legend>
+							<h:outputText value="#{sessionMBean.textos['fecha_para_la_cual_modificar']}" />
+						</legend>
+						<p:outputPanel styleClass="form-horizontal">
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['fecha']}" for="fecha" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+								<p:outputPanel id="selecFecha" styleClass="col-sm-9">
+									<h:inputText id="fecha" value="#{dispSessionMBean.fechaModifCupo}" styleClass="datepicker" converter="dateConverter">
+                    <f:attribute name="pattern" value="#{sessionMBean.formatoFecha}"/>
+                    <f:attribute name="onError" value="zero"/>
+									</h:inputText>
+									<p:commandButton value="#{sessionMBean.textos['consultar']}" actionListener="#{disponibilidadMBean.obtenerCuposModif}"
+										update="form:panelForm" styleClass="btn btn-secundario" />
+									<p:message for="fecha"></p:message>
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</fieldset>
+	
+					<div class="row margen_inf">
+						<div class="col-sm-6">
+							<p:dataTable id="tablaMatutina" binding="#{disponibilidadMBean.tablaDispMatutinaModif}" value="#{dispSessionMBean.disponibilidadesDelDiaMatutinaModif}"
+								var="rowMM" caption="#{sessionMBean.textos['disponibilidades_por_la_manana']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+								<f:facet name="header">
+									<h:panelGroup>
+										<h:outputText value="#{sessionMBean.textos['por_la_manana']}" />
+									</h:panelGroup>
+								</f:facet>
+								<p:column>
+									<f:facet name="header">
+										<h:selectBooleanCheckbox id="todasM" title="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}">
+											<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarTodosMatutino}" />
+										</h:selectBooleanCheckbox>
+										<p:outputLabel value="#{sessionMBean.textos['todas_las_horas_del_turno_matutino']}" for="todasM" styleClass="ui-helper-hidden-accessible" />
+									</f:facet>
+									<h:selectBooleanCheckbox value="#{rowMM.data.seleccionado}" id="horaM">
+                    					<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarUno}" />
+                  					</h:selectBooleanCheckbox>
+									<p:outputLabel value=" #{rowMM.data.horaInicio}" for="horaM" styleClass="ui-helper-hidden-accessible">
+										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+									</p:outputLabel>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
+									</f:facet>
+									<h:outputText value="#{rowMM.data.horaInicio}">
+										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? true  : false)}" styleClass="verde"></h:outputText>
+									<h:outputText value="#{rowMM.data.cupo}" rendered="#{(rowMM.data.cupo > 0 ? false  : true)}" styleClass="rojo"></h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowMM.data.cantReservas}"></h:outputText>
+								</p:column>
+							</p:dataTable>
+						</div>
+						<div class="col-sm-6">
+							<p:dataTable id="tablaVespertina" binding="#{disponibilidadMBean.tablaDispVespertinaModif}" value="#{dispSessionMBean.disponibilidadesDelDiaVespertinaModif}"
+								var="rowVM" caption="#{sessionMBean.textos['disponibilidades_por_la_tarde']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+								<f:facet name="header">
+									<h:panelGroup>
+										<h:outputText value="#{sessionMBean.textos['por_la_tarde']}"></h:outputText>
+									</h:panelGroup>
+								</f:facet>
+								<p:column>
+									<f:facet name="header">
+										<h:selectBooleanCheckbox id="todasT">
+											<p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarTodosVespertino}" title="#{sessionMBean.textos['todas_las_horas_del_turno_vespertino']}" />
+										</h:selectBooleanCheckbox>
+										<p:outputLabel value="#{sessionMBean.textos['todas_las_horas_del_turno_vespertino']}" for="todasT" styleClass="ui-helper-hidden-accessible" />
+									</f:facet>
+									<h:selectBooleanCheckbox id="horaT" value="#{rowVM.data.seleccionado}">
+                    <p:ajax update="form:panelForm" listener="#{disponibilidadMBean.seleccionarUno}" />
+                  </h:selectBooleanCheckbox>
+									<p:outputLabel value=" #{rowVM.data.horaInicio}" for="horaT" styleClass="ui-helper-hidden-accessible">
+										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+									</p:outputLabel>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['hora_de_inicio']}" />
+									</f:facet>
+									<h:outputText value="#{rowVM.data.horaInicio}">
+										<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+									</h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cupos_totales']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? true : false)}" styleClass="verde"></h:outputText>
+									<h:outputText value="#{rowVM.data.cupo}" rendered="#{(rowVM.data.cupoDisponible > 0 ? false : true)}" styleClass="rojo"></h:outputText>
+								</p:column>
+								<p:column>
+									<f:facet name="header">
+										<h:outputText value="#{sessionMBean.textos['cantidad_de_reservas']}"></h:outputText>
+									</f:facet>
+									<h:outputText value="#{rowVM.data.cantReservas}"></h:outputText>
+								</p:column>
+							</p:dataTable>
+						</div>
+					</div>
+	
+					<p:outputPanel id="ap_modifDisp">
+						<p:outputPanel id="modifDisp" rendered="#{dispSessionMBean.mostrarDisponibilidad}">
+							<fieldset>
+								<legend>
+									<h:outputText value="#{sessionMBean.textos['modificacion_de_disponibilidades_para_las_horas_seleccionadas']}" />
+								</legend>
+								<p:outputPanel styleClass="form-horizontal">
+									<p:outputPanel styleClass="form-group">
+										<h:outputText value="#{sessionMBean.textos['horarios_seleccionados']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:outputText value="#{disponibilidadMBean.horasInicio}" styleClass="form-control-static" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel for="oper" value="#{sessionMBean.textos['operacion_a_realizar']}" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:selectOneMenu id="oper" styleClass="form-control textoLargo" value="#{disponibilidadMBean.tipoOperacion}">
+												<f:selectItem itemLabel="#{sessionMBean.textos['aumentar_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{1}" />
+												<f:selectItem itemLabel="#{sessionMBean.textos['disminuir_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{2}" />
+												<f:selectItem itemLabel="#{sessionMBean.textos['establecer_disponibilidades_en_la_cantidad_especificada']}" itemValue="#{3}" />
+											</h:selectOneMenu>
+											<p:message for="oper" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel id="pnlValor" styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['cantidad_de_cupos']}" for="valor" styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="valor" value="#{disponibilidadMBean.valor}" maxlength="5" styleClass="form-control textoCorto" />
+											<p:message for="valor" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel id="aplicarTodos" styleClass="form-group">
+										<h:outputText value="#{sessionMBean.textos['dias_a_aplicar']}" styleClass="col-sm-3 control-label label" />
+										<p:outputPanel styleClass="col-sm-9">
+											<p:selectBooleanCheckbox id="todosLosDias" value="#{dispSessionMBean.modificarTodos}"  >
+											  <p:ajax update="aplicarTodos" />
+											</p:selectBooleanCheckbox>
+											<p:outputLabel value="#{sessionMBean.textos['aplicar_a_todos_los_dias']}" for="todosLosDias" />
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+	                    <p:selectBooleanCheckbox id="diaAplicarLu" value="#{dispSessionMBean.diasAplicar[0]}"  />
+	                    <p:outputLabel value="#{sessionMBean.textos['lunes']}" for="diaAplicarLu" />
+	                  </p:outputPanel>
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+	                    <p:selectBooleanCheckbox id="diaAplicarMa" value="#{dispSessionMBean.diasAplicar[1]}"  />
+	                    <p:outputLabel value="#{sessionMBean.textos['martes']}" for="diaAplicarMa" />
+	                  </p:outputPanel>
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+	                    <p:selectBooleanCheckbox id="diaAplicarMi" value="#{dispSessionMBean.diasAplicar[2]}"  />
+	                    <p:outputLabel value="#{sessionMBean.textos['miercoles']}" for="diaAplicarMi" />
+	                  </p:outputPanel>
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+	                    <p:selectBooleanCheckbox id="diaAplicarJu" value="#{dispSessionMBean.diasAplicar[3]}"  />
+	                    <p:outputLabel value="#{sessionMBean.textos['jueves']}" for="diaAplicarJu" />
+	                  </p:outputPanel>
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos}">
+	                    <p:selectBooleanCheckbox id="diaAplicarVi" value="#{dispSessionMBean.diasAplicar[4]}"  />
+	                    <p:outputLabel value="#{sessionMBean.textos['viernes']}" for="diaAplicarVi" />
+	                  </p:outputPanel>
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos and sessionMBean.recursoMarcado.sabadoEsHabil}">
+	                    <p:selectBooleanCheckbox id="diaAplicarSa" value="#{dispSessionMBean.diasAplicar[5]}" />
+	                    <p:outputLabel value="#{sessionMBean.textos['sabado']}" for="diaAplicarSa" />
+	                  </p:outputPanel>
+	                  <p:outputPanel rendered="#{dispSessionMBean.modificarTodos and sessionMBean.recursoMarcado.domingoEsHabil}">
+	                    <p:selectBooleanCheckbox id="diaAplicarDo" value="#{dispSessionMBean.diasAplicar[6]}" />
+	                    <p:outputLabel value="#{sessionMBean.textos['domingo']}" for="diaAplicarDo" />
+	                  </p:outputPanel>
+											
+										</p:outputPanel>
+									</p:outputPanel>
+								</p:outputPanel>
+							</fieldset>
+	
+							<ul class="form-action-buttons">
+								<li class="action-buttons-primary">
+									<ul>
+										<li>
+										  <p:commandButton styleClass="btn-lg btn-primario" value="#{sessionMBean.textos['modificar_cupos']}" 
+										    oncomplete="PF('modificarCupos').show();" />
+									  </li>
+									</ul>
+								</li>
+								<li class="action-buttons-second">
+									<ul>
+										<li class="float-left">
+										  <h:commandButton styleClass="btn-lg btn-link" value="#{sessionMBean.textos['cancelar']}"
+												actionListener="#{disponibilidadMBean.cancelarModifDisp}" update="form:panelForm" />
+										</li>
+									</ul>
+								</li>
+							</ul>
+						</p:outputPanel>
+					</p:outputPanel>
+				</p:outputPanel>
+			</h:form>
+
+		</f:view>
+	</ui:define>
+</ui:composition>

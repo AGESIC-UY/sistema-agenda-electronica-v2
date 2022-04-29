@@ -1,0 +1,1433 @@
+<ui:composition template="/templates/layout.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml" xmlns:p="http://primefaces.org/ui"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{recursoMBean.beforePhaseModificar}">
+
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false"
+				widgetVar="eliminarDato" zindex="2000" modal="true"
+				focus="elimRec:btn_eliminar">
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+				</f:facet>
+				<h:form id="elimRec">
+					<h:outputText
+						value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_el_dato']}" />
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btn_eliminar"
+								update="form2:tablaDatos :form2:agregarDato"
+								actionListener="#{recursoMBean.eliminarDatoDelRecurso}"
+								value="#{sessionMBean.textos['eliminar']}"
+								oncomplete="PF('eliminarDato').hide();"
+								styleClass="btn-primario btn-100 btn" />
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton onclick="PF('eliminarDato').hide();"
+								value="#{sessionMBean.textos['cancelar']}"
+								styleClass="btn-link btn-100 btn" />
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+
+			<h:form id="form">
+				<p:outputPanel styleClass="form-required">
+					<h:outputText
+						value="#{sessionMBean.textos['los_campos_indicados_con_asterisco_son_obligatorios']}" />
+				</p:outputPanel>
+				<fieldset id="basic">
+					<legend>
+						<h:outputText value="#{sessionMBean.textos['datos_del_recurso']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['agenda']}"
+								for="agenda" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText value="#{sessionMBean.agendaMarcada.nombre}"
+									styleClass="form-control" id="agenda" readonly="true" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['identificador']}"
+								for="identificador" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText value="#{recursoMBean.recursoSeleccionado.id}"
+									maxlength="10" readonly="true" styleClass="form-control"
+									id="identificador" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['nombre']}"
+								for="nombre"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText value="#{recursoMBean.recursoSeleccionado.nombre}"
+									maxlength="100" styleClass="form-control" id="nombre" />
+								<p:message for="nombre" id="nombreMsgId" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['descripcion']}"
+								for="descripcion"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:inputTextarea id="descripcion"
+									value="#{recursoMBean.recursoSeleccionado.descripcion}"
+									maxlength="1000" styleClass="form-control textoLargo" />
+								<p:message for="descripcion" id="descripcionMsgId" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['direccion']}"
+								for="direccion" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="direccion"
+									value="#{recursoMBean.recursoSeleccionado.direccion}"
+									maxlength="100" styleClass="form-control textoLargo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['localidad']}"
+								for="localidad" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="localidad"
+									value="#{recursoMBean.recursoSeleccionado.localidad}"
+									maxlength="100" styleClass="form-control" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['departamento']}"
+								for="departamento" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="departamento"
+									value="#{recursoMBean.recursoSeleccionado.departamento}"
+									maxlength="100" styleClass="form-control" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['latitud']}"
+								for="latitud" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="latitud"
+									value="#{recursoMBean.recursoSeleccionado.latitud}"
+									maxlength="20" styleClass="form-control textoMedio" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['longitud']}"
+								for="longitud" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="longitud"
+									value="#{recursoMBean.recursoSeleccionado.longitud}"
+									maxlength="20" styleClass="form-control textoMedio" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['telefonos']}"
+								for="telefonos" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="telefonos"
+									value="#{recursoMBean.recursoSeleccionado.telefonos}"
+									maxlength="100" styleClass="form-control textoMedio" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['horarios']}"
+								for="horarios" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="horarios"
+									value="#{recursoMBean.recursoSeleccionado.horarios}"
+									maxlength="100" styleClass="form-control" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['inicio_de_vigencia']}"
+								for="fechaInicio"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="fechaInicio"
+									value="#{recursoMBean.recursoSeleccionado.fechaInicio}"
+									styleClass="datepicker" converter="dateConverter">
+									<f:attribute name="pattern"
+										value="#{sessionMBean.formatoFecha}" />
+									<f:attribute name="onError" value="zero" />
+								</h:inputText>
+								<p:message for="fechaInicio" id="fechaInicioMsgId" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['fin_de_vigencia']}"
+								for="fechaFin"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="fechaFin"
+									value="#{recursoMBean.recursoSeleccionado.fechaFin}"
+									styleClass="datepicker" converter="dateConverter">
+									<f:attribute name="pattern"
+										value="#{sessionMBean.formatoFecha}" />
+									<f:attribute name="onError" value="zero" />
+								</h:inputText>
+								<p:message for="fechaFin" id="fechaFinMsgId" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['inicio_de_disponibilidad']}"
+								for="fechaInicioDispon"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="fechaInicioDispon"
+									value="#{recursoMBean.recursoSeleccionado.fechaInicioDisp}"
+									styleClass="datepicker" converter="dateConverter">
+									<f:attribute name="pattern"
+										value="#{sessionMBean.formatoFecha}" />
+									<f:attribute name="onError" value="zero" />
+								</h:inputText>
+								<p:message for="fechaInicioDispon" id="fechaInicioDispMsgId" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['fin_de_disponibilidad']}"
+								for="fechaFinDispon" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="fechaFinDispon"
+									value="#{recursoMBean.recursoSeleccionado.fechaFinDisp}"
+									styleClass="datepicker" converter="dateConverter">
+									<f:attribute name="pattern"
+										value="#{sessionMBean.formatoFecha}" />
+									<f:attribute name="onError" value="zero" />
+								</h:inputText>
+								<p:message for="fechaFinDispon" id="fechaFinDispMsgId" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['recurso']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectBooleanCheckbox id="visibleInternet"
+									value="#{recursoMBean.recursoSeleccionado.visibleInternet}" />
+								<p:outputLabel
+									value="#{sessionMBean.textos['disponible_para_internet']}"
+									for="visibleInternet" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['sabado']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectBooleanCheckbox id="sabadoHabil"
+									value="#{recursoMBean.recursoSeleccionado.sabadoEsHabil}">
+									<p:ajax update="configuracionAtencionPresencial" />
+								</p:selectBooleanCheckbox>
+								<p:outputLabel
+									value="#{sessionMBean.textos['considerar_el_sabado_como_dia_habil']}"
+									for="sabadoHabil" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['domingo']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectBooleanCheckbox id="domingoHabil"
+									value="#{recursoMBean.recursoSeleccionado.domingoEsHabil}">
+									<p:ajax update="configuracionAtencionPresencial" />
+								</p:selectBooleanCheckbox>
+								<p:outputLabel
+									value="#{sessionMBean.textos['considerar_el_domingo_como_dia_habil']}"
+									for="domingoHabil" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['cantidad_de_dias_a_generar']}"
+								for="vDiasGen"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="vDiasGen"
+									value="#{recursoMBean.recursoSeleccionado.cantDiasAGenerar}"
+									maxlength="5" styleClass="form-control textoCorto" />
+								<p:message for="vDiasGen" errorClass="mensajeError"
+									infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['periodo_validacion']} (#{sessionMBean.textos['dias']})"
+								for="vPeriodoValidacion"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="vPeriodoValidacion"
+									value="#{recursoMBean.recursoSeleccionado.periodoValidacion}"
+									maxlength="3" styleClass="form-control textoCorto" />
+								<p:message for="vPeriodoValidacion" errorClass="mensajeError"
+									infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+			              <p:outputLabel value="#{sessionMBean.textos['reserva_pendiente_tiempo_max']} (#{sessionMBean.textos['minutos']})" for="tiempoMaxReserva" styleClass="col-sm-3 control-label label" />
+			              <p:outputPanel styleClass="col-sm-9">
+			              	<h:inputText id="tiempoMaxReserva"
+									value="#{recursoMBean.recursoSeleccionado.reservaPendienteTiempoMax}"
+									maxlength="4" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+			                <p:message for="tiempoMaxReserva" errorClass="mensajeError" infoClass="mensajeInfo" />
+			              </p:outputPanel>
+			            </p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_para_intranet']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_intranet']}"
+								for="diasIVIntranet" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="diasIVIntranet"
+									value="#{recursoMBean.recursoSeleccionado.diasInicioVentanaIntranet}"
+									maxlength="5" styleClass="form-control textoCorto" />
+								<h:outputText styleClass="input-msg"
+									value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_intranet_descripcion']}" />
+								<p:message for="diasIVIntranet" errorClass="mensajeError"
+									styleClass="anchoMsgErr" infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['dias_de_la_ventana_de_intranet']}"
+								for="diasVIntranet"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="diasVIntranet"
+									value="#{recursoMBean.recursoSeleccionado.diasVentanaIntranet}"
+									maxlength="5" styleClass="form-control textoCorto" />
+								<h:outputText styleClass="input-msg"
+									value="#{sessionMBean.textos['cantidad_de_dias_siguientes_disponibles']}" />
+								<p:message for="diasVIntranet" errorClass="mensajeError"
+									styleClass="anchoMsgErr" infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_para_internet']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_internet']}"
+								for="diasIVInternet" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="diasIVInternet"
+									value="#{recursoMBean.recursoSeleccionado.diasInicioVentanaInternet}"
+									maxlength="5" styleClass="form-control textoCorto" />
+								<h:outputText styleClass="input-msg"
+									value="#{sessionMBean.textos['dias_de_inicio_de_la_ventana_de_internet_descripcion']}" />
+								<p:message for="diasIVInternet" errorClass="mensajeError"
+									styleClass="anchoMsgErr" infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['dias_de_la_ventana_de_internet']}"
+								for="diasVInternet"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="diasVInternet"
+									value="#{recursoMBean.recursoSeleccionado.diasVentanaInternet}"
+									maxlength="5" styleClass="form-control textoCorto" />
+								<h:outputText styleClass="input-msg"
+									value="#{sessionMBean.textos['cantidad_de_dias_siguientes_disponibles']}" />
+								<p:message for="diasVInternet" errorClass="mensajeError"
+									styleClass="anchoMsgErr" infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_del_llamador']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['serie']}"
+								for="idSerie" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="idSerie"
+									value="#{recursoMBean.recursoSeleccionado.serie}" maxlength="3"
+									styleClass="form-control textoCorto" />
+								<h:outputText styleClass="input-msg"
+									value="#{sessionMBean.textos['serie_asociada_a_los_numeros_de_reserva']}" />
+								<p:message for="idSerie" errorClass="mensajeError"
+									infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['largo_de_la_lista_de_espera']}"
+								for="largoListaEspera"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="largoListaEspera"
+									value="#{recursoMBean.recursoSeleccionado.largoListaEspera}"
+									maxlength="5" styleClass="form-control textoCorto" />
+								<p:message for="largoListaEspera" errorClass="mensajeError"
+									infoClass="mensajeInfo" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_del_ticket']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal">
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['ticket_de_reserva']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="ticketMostrarId"
+										value="#{recursoMBean.recursoSeleccionado.mostrarIdEnTicket}" />
+									<p:outputLabel
+										value="#{sessionMBean.textos['mostrar_id_de_reserva_en_el_ticket']}"
+										for="ticketMostrarId" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="ticketMostrarNumero"
+										value="#{recursoMBean.recursoSeleccionado.mostrarNumeroEnTicket}" />
+									<p:outputLabel
+										value="#{sessionMBean.textos['mostrar_numero_de_reserva_en_el_ticket']}"
+										for="ticketMostrarNumero" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['fuente']}"
+								for="fuenteNombre"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:selectOneMenu id="fuenteNombre"
+									value="#{recursoMBean.recursoSeleccionado.fuenteTicket}"
+									styleClass="form-control">
+									<f:selectItems value="#{recursoMBean.nombresFuentes}" />
+								</h:selectOneMenu>
+								<p:message for="fuenteNombre" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel
+								value="#{sessionMBean.textos['tamanio_fuente_chica']}"
+								for="tamanioFuenteChica"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:selectOneMenu id="tamanioFuenteChica"
+									value="#{recursoMBean.recursoSeleccionado.tamanioFuenteChica}"
+									styleClass="form-control textoCorto">
+									<f:selectItems value="#{recursoMBean.tamaniosFuentes}" />
+								</h:selectOneMenu>
+								<p:message for="tamanioFuenteChica" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel
+								value="#{sessionMBean.textos['tamanio_fuente_normal']}"
+								for="tamanioFuenteNormal"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:selectOneMenu id="tamanioFuenteNormal"
+									value="#{recursoMBean.recursoSeleccionado.tamanioFuenteNormal}"
+									styleClass="form-control textoCorto">
+									<f:selectItems value="#{recursoMBean.tamaniosFuentes}" />
+								</h:selectOneMenu>
+								<p:message for="tamanioFuenteNormal" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel
+								value="#{sessionMBean.textos['tamanio_fuente_grande']}"
+								for="tamanioFuenteGrande"
+								styleClass="col-sm-3 control-label label formularioCampoRequerido" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:selectOneMenu id="tamanioFuenteGrande"
+									value="#{recursoMBean.recursoSeleccionado.tamanioFuenteGrande}"
+									styleClass="form-control textoCorto">
+									<f:selectItems value="#{recursoMBean.tamaniosFuentes}" />
+								</h:selectOneMenu>
+								<p:message for="tamanioFuenteGrande" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel
+								value="#{sessionMBean.textos['previsualizar_ticket']}"
+								styleClass="col-sm-3 control-label label" />
+							<h:commandLink
+								value="#{sesionMBean.textos['previsualizar_ticket']}"
+								target="_blank" styleClass="btn btn-link"
+								action="#{recursoMBean.generarTicket(recursoMBean.recursoSeleccionado)}" />
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_de_atencion_presencial']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal"
+						id="configuracionAtencionPresencial">
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['atencion_presencial']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.presencialAdmite}"
+										id="admitePresencial">
+										<p:ajax update="configuracionAtencionPresencial" />
+									</p:selectBooleanCheckbox>
+									<p:outputLabel
+										value="#{sessionMBean.textos['admite_atencion_presencial']}"
+										for="admitePresencial" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['cupos_por_dia']}"
+								styleClass="col-sm-3 control-label label" for="cuposPresencial" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="cuposPresencial"
+									value="#{recursoMBean.recursoSeleccionado.presencialCupos}"
+									maxlength="3" styleClass="form-control textoCorto"
+									converter="integerConverter"
+									disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+								<p:message for="cuposPresencial" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['dias_a_aplicar']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="diaAplicarLu"
+										value="#{recursoMBean.recursoSeleccionado.presencialLunes}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['lunes']}"
+										for="diaAplicarLu" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="diaAplicarMa"
+										value="#{recursoMBean.recursoSeleccionado.presencialMartes}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['martes']}"
+										for="diaAplicarMa" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="diaAplicarMi"
+										value="#{recursoMBean.recursoSeleccionado.presencialMiercoles}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['miercoles']}"
+										for="diaAplicarMi" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="diaAplicarJu"
+										value="#{recursoMBean.recursoSeleccionado.presencialJueves}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['jueves']}"
+										for="diaAplicarJu" />
+								</p:outputPanel>
+								<p:outputPanel>
+									<p:selectBooleanCheckbox id="diaAplicarVi"
+										value="#{recursoMBean.recursoSeleccionado.presencialViernes}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['viernes']}"
+										for="diaAplicarVi" />
+								</p:outputPanel>
+								<p:outputPanel
+									rendered="#{recursoMBean.recursoSeleccionado.sabadoEsHabil}">
+									<p:selectBooleanCheckbox id="diaAplicarSa"
+										value="#{recursoMBean.recursoSeleccionado.presencialSabado}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['sabado']}"
+										for="diaAplicarSa" />
+								</p:outputPanel>
+								<p:outputPanel
+									rendered="#{recursoMBean.recursoSeleccionado.domingoEsHabil}">
+									<p:selectBooleanCheckbox id="diaAplicarDo"
+										value="#{recursoMBean.recursoSeleccionado.presencialDomingo}"
+										disabled="#{!recursoMBean.recursoSeleccionado.presencialAdmite}" />
+									<p:outputLabel value="#{sessionMBean.textos['domingo']}"
+										for="diaAplicarDo" />
+								</p:outputPanel>
+								<h:inputHidden id="diaAplicarHidden" />
+								<p:message for="diaAplicarHidden" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_de_cambios_de_reservas']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal"
+						id="configuracionCambiosReserva">
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['cambios_reserva']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.cambiosAdmite}"
+										id="admiteCambios">
+										<p:ajax update="configuracionCambiosReserva" />
+									</p:selectBooleanCheckbox>
+									<p:outputLabel
+										value="#{sessionMBean.textos['admite_cambios_reserva']}"
+										for="admiteCambios" />
+								</p:outputPanel>
+							</p:outputPanel>
+							<p:outputPanel styleClass="form-group">
+								<p:outputLabel value="#{sessionMBean.textos['tiempo_previo']}"
+									styleClass="col-sm-3 control-label label" for="cambiosTiempo" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:inputText id="cambiosTiempo"
+										value="#{recursoMBean.recursoSeleccionado.cambiosTiempo}"
+										maxlength="3" styleClass="form-control textoCorto"
+										converter="integerConverter"
+										disabled="#{!recursoMBean.recursoSeleccionado.cambiosAdmite}" />
+									<p:message for="cambiosTiempo" />
+								</p:outputPanel>
+							</p:outputPanel>
+							<p:outputPanel styleClass="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['tiempo_unidad']}"
+									for="cambiosUnidad" styleClass="col-sm-3 control-label label" />
+								<p:outputPanel styleClass="col-sm-9">
+									<h:selectOneMenu id="cambiosUnidad"
+										value="#{recursoMBean.recursoSeleccionado.cambiosUnidad}"
+										styleClass="form-control"
+										disabled="#{!recursoMBean.recursoSeleccionado.cambiosAdmite}">
+										<f:selectItems value="#{recursoMBean.cambiosUnidades}" />
+									</h:selectOneMenu>
+									<p:message for="cambiosUnidad" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_de_cancelaciones_de_reservas']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal"
+						id="configuracionCancelacionesReserva">
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel value="#{sessionMBean.textos['tiempo_previo']}"
+								styleClass="col-sm-3 control-label label"
+								for="cancelacionTiempo" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="cancelacionTiempo"
+									value="#{recursoMBean.recursoSeleccionado.cancelacionTiempo}"
+									maxlength="3" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+								<p:message for="cancelacionTiempo" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel value="#{sessionMBean.textos['tiempo_unidad']}"
+								for="cancelacionUnidad"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:selectOneMenu id="cancelacionUnidad"
+									value="#{recursoMBean.recursoSeleccionado.cancelacionUnidad}"
+									styleClass="form-control">
+									<f:selectItems value="#{recursoMBean.cancelacionUnidades}" />
+								</h:selectOneMenu>
+								<p:message for="cancelacionUnidad" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputLabel
+								value="#{sessionMBean.textos['tipo_liberacion_cupo']}"
+								for="cancelacionTipo" styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:selectOneRadio id="cancelacionTipo"
+									value="#{recursoMBean.recursoSeleccionado.cancelacionTipo}"
+									layout="responsive" columns="1">
+									<f:selectItem itemLabel="#{sessionMBean.textos['inmediata']}"
+										itemValue="I" />
+									<f:selectItem itemLabel="#{sessionMBean.textos['diferida']}"
+										itemValue="D" />
+								</p:selectOneRadio>
+								<p:message for="cancelacionTipo" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_de_reserva_multiple']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal"
+						id="configuracionReservaMultiple">
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['reserva_multiple']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.multipleAdmite}"
+										id="admiteMultiple">
+										<p:ajax update="configuracionReservaMultiple" listener="#{recursoMBean.setNullReservaMultipleTiempoMax}" />
+									</p:selectBooleanCheckbox>
+									<p:outputLabel
+										value="#{sessionMBean.textos['admite_reserva_multiple']}"
+										for="admiteMultiple" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+				            <p:outputLabel value="#{sessionMBean.textos['reserva_multiple_pendiente_tiempo_max']} (#{sessionMBean.textos['minutos']})" for="tiempoMaxReservaMultiple" styleClass="col-sm-3 control-label label " />
+				            <p:outputPanel styleClass="col-sm-9">
+				              <h:inputText id="tiempoMaxReservaMultiple"
+									value="#{recursoMBean.recursoSeleccionado.reservaMultiplePendienteTiempoMax}"
+									maxlength="4" styleClass="form-control textoCorto"
+									converter="integerConverter"
+									disabled="#{!recursoMBean.recursoSeleccionado.multipleAdmite}" />
+				              <p:message for="tiempoMaxReservaMultiple" errorClass="mensajeError" infoClass="mensajeInfo" />
+				            </p:outputPanel>
+		          		</p:outputPanel>
+					</p:outputPanel>
+					
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_de_validacion_por_ip']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal"
+						id="configuracionValidarPorIP">
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['validar_por_ip']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.validarPorIP}"
+										id="validarPorIP">
+										<p:ajax update="configuracionValidarPorIP" />
+									</p:selectBooleanCheckbox>
+									<p:outputLabel value="#{sessionMBean.textos['validar_por_ip']}"
+										for="validarPorIP" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['cantidad_reservas_por_ip']}"
+								styleClass="col-sm-3 control-label label" for="cantidadPorIP" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="cantidadPorIP"
+									value="#{recursoMBean.recursoSeleccionado.cantidadPorIP}"
+									maxlength="5" styleClass="form-control textoCorto"
+									converter="integerConverter"
+									disabled="#{!recursoMBean.recursoSeleccionado.validarPorIP}" />
+								<p:message for="cantidadPorIP" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['periodo_validacion_por_ip']} (#{sessionMBean.textos['dias']})"
+								styleClass="col-sm-3 control-label label" for="periodoPorIP" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="periodoPorIP"
+									value="#{recursoMBean.recursoSeleccionado.periodoPorIP}"
+									maxlength="3" styleClass="form-control textoCorto"
+									converter="integerConverter"
+									disabled="#{!recursoMBean.recursoSeleccionado.validarPorIP}" />
+								<p:message for="periodoPorIP" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<p:outputLabel
+								value="#{sessionMBean.textos['direcciones_ip_sin_validacion']}"
+								styleClass="col-sm-3 control-label label" for="ipsSinValidacion" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="ipsSinValidacion"
+									value="#{recursoMBean.recursoSeleccionado.ipsSinValidacion}"
+									maxlength="4000" styleClass="form-control textoLargo"
+									disabled="#{!recursoMBean.recursoSeleccionado.validarPorIP}" />
+								<p:message for="ipsSinValidacion" />
+							</p:outputPanel>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['configuracion_de_mi_perfil']}" />
+					</legend>
+					<p:outputPanel styleClass="form-horizontal"
+						id="configuracionMiPerfil">
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['enviar_aviso_al_confirmar']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.miPerfilConHab}"
+										id="miPerfilAvisoConfirmar" />
+									<p:outputLabel
+										value="#{sessionMBean.textos['enviar_aviso_al_confirmar']}"
+										for="miPerfilAvisoConfirmar" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['vencimiento_aviso_al_confirmar']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="miPerfilConVencim"
+									value="#{recursoMBean.recursoSeleccionado.miPerfilConVencim}"
+									maxlength="10" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+								<p:message for="miPerfilConVencim" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<fieldset class="col-sm-9 col-sm-offset-3">
+							<LEGEND>
+								<h:outputText value="Acciones de aviso al confirmar" />
+							</LEGEND>
+							<p:outputPanel styleClass="form-group">
+								<p:outputPanel styleClass="campos-inline">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilConAcc1Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc1Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_con_1}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilConAcc1Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc1Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_con_1}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilConAcc1Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_con_1}"
+										id="miPerfilConAcc1Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilConAcc1Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilConAcc2Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc2Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_con_2}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilConAcc2Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc2Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_con_2}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilConAcc2Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_con_2}"
+										id="miPerfilConAcc2Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilConAcc2Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilConAcc3Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc3Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_con_3}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilConAcc3Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc3Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_con_3}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilConAcc3Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_con_3}"
+										id="miPerfilConAcc3Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilConAcc3Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilConAcc4Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc4Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_con_4}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilConAcc4Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc4Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_con_4}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilConAcc4Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_con_4}"
+										id="miPerfilConAcc4Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilConAcc4Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilConAcc5Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc5Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_con_5}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilConAcc5Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilConAcc5Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_con_5}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilConAcc5Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_con_5}"
+										id="miPerfilConAcc5Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilConAcc5Destacada" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</fieldset>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['enviar_aviso_al_cancelar']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.miPerfilCanHab}"
+										id="miPerfilAvisoCancelacion" />
+									<p:outputLabel
+										value="#{sessionMBean.textos['enviar_aviso_al_cancelar']}"
+										for="miPerfilAvisoCancelacion" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['vencimiento_aviso_al_cancelar']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="miPerfilCanVencim"
+									value="#{recursoMBean.recursoSeleccionado.miPerfilCanVencim}"
+									maxlength="10" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+								<p:message for="miPerfilCanVencim" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<fieldset class="col-sm-9 col-sm-offset-3">
+							<LEGEND>
+								<h:outputText value="Acciones de aviso al cancelar" />
+							</LEGEND>
+							<p:outputPanel styleClass="form-group">
+								<p:outputPanel styleClass="campos-inline">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilCanAcc1Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc1Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_can_1}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc1Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc1Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_can_1}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc1Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_can_1}"
+										id="miPerfilCanAcc1Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilCanAcc1Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilCanAcc2Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc2Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_can_2}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc2Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc2Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_can_2}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc2Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_can_2}"
+										id="miPerfilCanAcc2Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilCanAcc2Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilCanAcc3Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc3Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_can_3}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc3Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc3Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_can_3}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc3Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_can_3}"
+										id="miPerfilCanAcc3Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilCanAcc3Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilCanAcc4Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc4Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_can_4}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc4Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc4Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_can_4}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc4Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_can_4}"
+										id="miPerfilCanAcc4Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilCanAcc4Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilCanAcc5Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc5Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_can_5}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc5Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilCanAcc5Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_can_5}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilCanAcc5Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_can_5}"
+										id="miPerfilCanAcc5Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilCanAcc5Destacada" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</fieldset>
+
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['enviar_aviso_recordatorio']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<p:outputPanel>
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.miPerfilRecHab}"
+										id="miPerfilAvisoRecordatorio" />
+									<p:outputLabel
+										value="#{sessionMBean.textos['enviar_aviso_recordatorio']}"
+										for="miPerfilAvisoRecordatorio" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText
+								value="#{sessionMBean.textos['vencimiento_recordatorio']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="miPerfilRecVencim"
+									value="#{recursoMBean.recursoSeleccionado.miPerfilRecVencim}"
+									maxlength="10" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+								<p:message for="miPerfilRecVencim" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['hora_recordatorio']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="miPerfilRecHora"
+									value="#{recursoMBean.recursoSeleccionado.miPerfilRecHora}"
+									maxlength="10" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+								<p:message for="miPerfilRecHora" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<p:outputPanel styleClass="form-group">
+							<h:outputText value="#{sessionMBean.textos['dias_recordatorio']}"
+								styleClass="col-sm-3 control-label label" />
+							<p:outputPanel styleClass="col-sm-9">
+								<h:inputText id="miPerfilRecDias"
+									value="#{recursoMBean.recursoSeleccionado.miPerfilRecDias}"
+									maxlength="10" styleClass="form-control textoCorto"
+									converter="integerConverter" />
+								<p:message for="miPerfilRecDias" />
+							</p:outputPanel>
+						</p:outputPanel>
+						<fieldset class="col-sm-9 col-sm-offset-3">
+							<LEGEND>
+								<h:outputText value="Acciones de recordatorio" />
+							</LEGEND>
+							<p:outputPanel styleClass="form-group">
+								<p:outputPanel styleClass="campos-inline">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilRecAcc1Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc1Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_rec_1}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc1Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc1Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_rec_1}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc1Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_rec_1}"
+										id="miPerfilRecAcc1Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilRecAcc1Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilRecAcc2Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc2Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_rec_2}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc2Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc2Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_rec_2}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc2Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_rec_2}"
+										id="miPerfilRecAcc2Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilRecAcc2Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilRecAcc3Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc3Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_rec_3}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc3Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc3Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_rec_3}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc3Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_rec_3}"
+										id="miPerfilRecAcc3Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilRecAcc3Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilRecAcc4Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc4Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_rec_4}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc4Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc4Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_rec_4}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc4Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_rec_4}"
+										id="miPerfilRecAcc4Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilRecAcc4Destacada" />
+								</p:outputPanel>
+								
+								<p:outputPanel styleClass="campos-inline margen_sup">
+									<h:outputLabel value="#{sessionMBean.textos['acc_titulo']}"
+										for="miPerfilRecAcc5Tit"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc5Tit"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.titulo_rec_5}"
+										maxlength="100" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc5Tit" />
+									<h:outputLabel value="#{sessionMBean.textos['acc_url']}"
+										styleClass="label" />
+									<h:inputText id="miPerfilRecAcc5Url"
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.url_rec_5}"
+										maxlength="1024" styleClass="form-control" />
+									<p:message for="miPerfilRecAcc5Url" />
+									<p:selectBooleanCheckbox
+										value="#{recursoMBean.recursoSeleccionado.accionMiPerfil.destacada_rec_5}"
+										id="miPerfilRecAcc5Destacada" />
+									<p:outputLabel value="#{sessionMBean.textos['acc_destacada']}"
+										for="miPerfilRecAcc5Destacada" />
+								</p:outputPanel>
+							</p:outputPanel>
+						</fieldset>
+
+					</p:outputPanel>
+				</fieldset>
+
+				<ul class="form-action-buttons">
+					<li class="action-buttons-primary">
+						<ul>
+							<li><p:commandButton
+									value="#{sessionMBean.textos['guardar']}"
+									action="#{recursoMBean.guardar}"
+									styleClass="btn-lg btn-primario" update="form" /></li>
+						</ul>
+					</li>
+					<li class="action-buttons-second">
+						<ul>
+							<li class="float-left"><p:commandButton
+									value="#{sessionMBean.textos['cancelar']}" action="cancelar"
+									styleClass="btn-lg btn-link" update="form" /></li>
+						</ul>
+					</li>
+				</ul>
+			</h:form>
+			<h:form id="form2">
+				<fieldset>
+					<legend>
+						<h:outputText
+							value="#{sessionMBean.textos['informacion_adicional_del_recurso']}" />
+					</legend>
+					<p:outputPanel styleClass="botonesDerecha">
+						<p:commandButton id="agregarDatoLink"
+							value="#{sessionMBean.textos['agregar_informacion']}"
+							styleClass="btn btn-secundario"
+							actionListener="#{recursoMBean.mostrarDatoDelRecurso}"
+							update="form2:tablaDatos :form2:ap_modifDato :form2:ap_agregarDato" />
+					</p:outputPanel>
+					<p:dataTable id="tablaDatos"
+						value="#{sessionMBean.datosDelRecurso}" var="row"
+						binding="#{recursoMBean.datosDataTable}"
+						caption="#{sessionMBean.textos['informacion_adicional_del_recurso']}"
+						emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+						paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}"
+						paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}"
+						paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+						paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+						paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+						paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}">
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['orden']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.data.orden}"></h:outputText>
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['etiqueta']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.data.etiqueta}"></h:outputText>
+						</p:column>
+						<p:column>
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['valor']}"></h:outputText>
+							</f:facet>
+							<h:outputText value="#{row.data.valor}"></h:outputText>
+						</p:column>
+						<p:column styleClass="alinCentro">
+							<f:facet name="header">
+								<h:outputText value="#{sessionMBean.textos['acciones']}"></h:outputText>
+							</f:facet>
+							<p:commandButton id="modificarDatoLink"
+								actionListener="#{recursoMBean.seleccionarDato}"
+								update="form2:tablaDatos :form2:ap_modifDato :form2:ap_agregarDato"
+								icon="ui-icon-pencil"
+								title="#{sessionMBean.textos['modificar']}">
+							</p:commandButton>
+							<p:commandButton id="eliminarDatoLink"
+								oncomplete="PF('eliminarDato').show();"
+								actionListener="#{recursoMBean.selecDatoEliminar}"
+								icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}">
+							</p:commandButton>
+						</p:column>
+					</p:dataTable>
+					<p:outputPanel id="ap_modifDato">
+						<p:outputPanel rendered="#{sessionMBean.mostrarDato}"
+							id="modifDato">
+							<fieldset>
+								<legend>
+									<h:outputText value="#{sessionMBean.textos['modificar_dato']}" />
+								</legend>
+								<p:outputPanel styleClass="form-horizontal">
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['etiqueta']}"
+											styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="etiqueta" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="etiqueta"
+												value="#{sessionMBean.datoDelRecursoSeleccionado.etiqueta}"
+												maxlength="50" styleClass="form-control" />
+											<p:message for="idEtiqueta" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['valor']}"
+											styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="valor" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="valor"
+												value="#{sessionMBean.datoDelRecursoSeleccionado.valor}"
+												maxlength="100" styleClass="form-control" />
+											<p:message for="valor" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['orden']}"
+											styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="VOrden" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="VOrden"
+												value="#{sessionMBean.datoDelRecursoSeleccionado.orden}"
+												maxlength="5" styleClass="form-control textoCorto"
+												converter="integerConverter" />
+											<p:message for="VOrden" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+											<p:commandButton value="#{sessionMBean.textos['guardar']}"
+												actionListener="#{recursoMBean.guardarModifDato}"
+												update="form2:tablaDatos :form2:ap_modifDato"
+												styleClass="btn btn-secundario" />
+											<p:commandButton value="#{sessionMBean.textos['cancelar']}"
+												actionListener="#{recursoMBean.cancelarModifDato}"
+												update="form2:tablaDatos :form2:ap_modifDato"
+												styleClass="btn btn-link" />
+										</p:outputPanel>
+									</p:outputPanel>
+								</p:outputPanel>
+							</fieldset>
+						</p:outputPanel>
+					</p:outputPanel>
+					<p:outputPanel id="ap_agregarDato">
+						<p:outputPanel rendered="#{sessionMBean.mostrarAgregarDato}"
+							id="agregarDato">
+							<fieldset>
+								<legend>
+									<h:outputText value="#{sessionMBean.textos['agregar_dato']}" />
+								</legend>
+								<p:outputPanel styleClass="form-horizontal">
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['etiqueta']}"
+											styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="idEtiqueta" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText
+												value="#{recursoMBean.datoDelRecursoNuevo.etiqueta}"
+												maxlength="50" styleClass="form-control" id="idEtiqueta" />
+											<p:message for="idEtiqueta" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['valor']}"
+											styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="idValor" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText
+												value="#{recursoMBean.datoDelRecursoNuevo.valor}"
+												maxlength="100" styleClass="form-control" id="idValor" />
+											<p:message for="idValor" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputLabel value="#{sessionMBean.textos['orden']}"
+											styleClass="col-sm-3 control-label label formularioCampoRequerido"
+											for="VOrdDato" />
+										<p:outputPanel styleClass="col-sm-9">
+											<h:inputText id="VOrdDato"
+												value="#{recursoMBean.datoDelRecursoNuevo.orden}"
+												maxlength="5" styleClass="form-control textoCorto"
+												converter="integerConverter" />
+											<p:message for="VOrdDato" />
+										</p:outputPanel>
+									</p:outputPanel>
+									<p:outputPanel styleClass="form-group">
+										<p:outputPanel styleClass="col-sm-9 col-sm-offset-3">
+											<p:commandButton value="#{sessionMBean.textos['guardar']}"
+												actionListener="#{recursoMBean.agregarDatoDelRecurso}"
+												update="form2:tablaDatos :form2:ap_agregarDato"
+												styleClass="btn btn-secundario" />
+											<p:commandButton value="#{sessionMBean.textos['cancelar']}"
+												actionListener="#{recursoMBean.cancelarAgregarDato}"
+												update="form2:tablaDatos :form2:ap_agregarDato"
+												styleClass="btn btn-link" />
+										</p:outputPanel>
+									</p:outputPanel>
+								</p:outputPanel>
+							</fieldset>
+						</p:outputPanel>
+					</p:outputPanel>
+				</fieldset>
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>

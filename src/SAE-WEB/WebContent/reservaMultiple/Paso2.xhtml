@@ -1,0 +1,124 @@
+<ui:composition template="/reservaMultiple/Paso.template.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="parametroBean" value="#{multiplePaso2MBean}" />
+	<ui:param name="agenda_nombre" value="#{multiplePaso2MBean.agendaNombre}" />
+	<ui:param name="paso_numero" value="2" />
+	<ui:param name="paso_texto" value="#{sesionMBean.textos['seleccione_ubicacion']}" />
+	<ui:param name="hay_error" value="#{multiplePaso2MBean.errorInit}" />
+	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-6" />
+	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-5" />
+  <ui:param name="yaExisteReservaCamposClave" value="false" />
+  <ui:param name="recursoSinDisponibilidad" value="#{not multiplePaso2MBean.recursoTieneDisponibilidad}" />
+  
+	<ui:define name="descripcion">
+		<h:panelGroup id="infoRecurso" layout="block">
+			<p:outputPanel styleClass="infoDireccion" rendered="#{!multiplePaso2MBean.errorInit}">
+				<h:panelGroup >
+				  <iframe src="#{multiplePaso2MBean.urlMapa}" class="iframeMapa" title="#{sesionMBean.textos['mapa_de_locacion']}" />
+				</h:panelGroup>
+				<div class="direccion">
+					<h:outputText value="#{multiplePaso2MBean.direccionCompleta}" />
+				</div>
+				<div class="horario">
+					<h:outputText value="#{multiplePaso2MBean.horario}" />
+				</div>
+			</p:outputPanel>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{!multiplePaso2MBean.errorInit and multiplePaso2MBean.descripcion!=null}">
+        <pre>
+				  <h:outputFormat value="#{multiplePaso2MBean.descripcion}" />
+				</pre>
+			</p:outputPanel>
+			<h:panelGroup rendered="#{multiplePaso2MBean.infoRecurso != null}" styleClass="infoAdicional box-grey" layout="block">
+				<h:outputText value="#{sesionMBean.textos['informacion_adicional']}: " styleClass="tituloResalte" />
+				<p:dataList value="#{multiplePaso2MBean.infoRecurso}" var="row">
+					<h:outputText value="#{row.etiqueta}: " />
+					<h:outputText value="#{row.valor}" />
+				</p:dataList>
+			</h:panelGroup>
+      <p:outputPanel styleClass="descripcionAgenda">
+        <p:dataList styleClass="reserva-multiple" value="#{multiplePaso2MBean.reservas}" var="reserva" type="ordered" emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}">
+          <f:facet name="header">
+              <h:outputText value="#{sesionMBean.textos['reservas_incluidas']}: #{multiplePaso2MBean.reservas.size()}" />
+          </f:facet>
+          <h:outputText value="#{multiplePaso2MBean.describirReserva(reserva)}" />
+          <p:commandButton styleClass="btn-link" actionListener="#{multiplePaso2MBean.marcarReservaCancelar(reserva)}"
+            value="#{sesionMBean.textos['cancelar']}" oncomplete="PF('cancelarReserva').show();" />
+        </p:dataList>
+        
+	      <ul class="form-action-buttons">
+	        <li class="action-buttons-primary">
+	          <ul>
+	            <li>
+	              <h:commandButton id="botonConfirmarReservas" styleClass="btn-lg btn-secundario" 
+	                rendered="#{multiplePaso2MBean.tokenReserva.estado == 'P' and not empty multiplePaso2MBean.reservas}"
+	                value="#{sesionMBean.textos['confirmar_reservas']} #{multiplePaso2MBean.simboloSiguiente}" action="#{multiplePaso2MBean.confirmarReservas}" />
+	             </li>
+	            <li>
+	              <p:commandButton id="botonCancelarReservas" styleClass="btn-lg btn-link"
+	                rendered="#{multiplePaso2MBean.tokenReserva.estado == 'P' and not empty multiplePaso2MBean.reservas}" 
+	                value="#{sesionMBean.textos['cancelar_reservas']}" oncomplete="PF('cancelarReservas').show();" />
+	             </li>
+	          </ul>
+	        </li>
+	      </ul>
+        
+      </p:outputPanel>
+		</h:panelGroup>
+	</ui:define>
+	
+	<ui:define name="contenido">
+	
+		<h:inputHidden id="e" value="#{sesionMBean.empresaActual.id}" />
+		<h:inputHidden id="a" value="#{sesionMBean.agenda.id}" />
+		<p:outputPanel rendered="#{!multiplePaso2MBean.errorInit}" styleClass="form-horizontal">
+			<div id="recurso" class="form-group">
+			
+			  <p:outputPanel rendered="#{not empty multiplePaso2MBean.reservas}">
+	        <div class="ui-messages-warn ui-corner-all">
+	          <span class="ui-messages-warn-icon"></span>
+	          <p class="ui-messages-warn-title">#{sesionMBean.textos['no_es_posible_cambiar_de_recurso']}</p>
+	          <ul><li><span class="ui-messages-warn-summary">#{sesionMBean.textos['ya_hay_una_reserva']}</span></li></ul>
+	        </div>
+        </p:outputPanel>
+			
+				<h:outputFormat value="#{multiplePaso2MBean.etiquetaSeleccionDelRecurso}" styleClass="label control-label col-sm-4 col-md-5" />
+				<div class="col-sm-8 col-md-7">
+					<p:selectOneRadio value="#{multiplePaso2MBean.recursoId}" layout="responsive" columns="1" 
+					 disabled="#{not empty multiplePaso2MBean.reservas}" valueChangeListener="#{multiplePaso2MBean.cambioRecurso}" id="recursoId">
+						<p:ajax update="form" />
+						<f:selectItems value="#{multiplePaso2MBean.recursosItems}" />
+					</p:selectOneRadio>
+				</div>
+			</div>
+		</p:outputPanel>
+	</ui:define>
+	
+	<ui:define name="botones">
+		<p:outputPanel rendered="#{!multiplePaso2MBean.errorInit}">
+			<ul class="form-action-buttons">
+				<li class="action-buttons-primary">
+					<ul>
+						<li>
+						  <h:commandButton id="botonElegirHora" styleClass="btn-lg btn-primario" 
+						    rendered="#{multiplePaso2MBean.tokenReserva.estado == 'P'}"  
+						    value="#{sesionMBean.textos['elegir_dia_y_hora']} #{multiplePaso2MBean.simboloSiguiente}" action="#{multiplePaso2MBean.siguientePaso}" />
+			      </li>
+					</ul>
+				</li>
+        <li class="action-buttons-second">
+          <ul>
+            <li class="float-left">
+              <h:commandButton id="botonIdentificacion" styleClass="btn-lg btn-link"
+                rendered="#{multiplePaso2MBean.tokenReserva.estado == 'P'}"
+                value="#{multiplePaso2MBean.simboloAnterior} #{sesionMBean.textos['identificacion']}" action="#{multiplePaso2MBean.paso1()}" />
+            </li>
+          </ul>
+        </li>
+			</ul>
+		</p:outputPanel>
+	</ui:define>
+</ui:composition>

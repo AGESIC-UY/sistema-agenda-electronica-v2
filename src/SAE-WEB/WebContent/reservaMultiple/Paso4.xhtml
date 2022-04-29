@@ -1,0 +1,112 @@
+<ui:composition template="/reservaMultiple/Paso.template.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="parametroBean" value="#{multiplePaso4MBean}" />
+	<ui:param name="agenda_nombre" value="#{multiplePaso4MBean.agendaNombre}" />
+	<ui:param name="paso_numero" value="4" />
+	<ui:param name="paso_texto" value="#{sesionMBean.textos['datos_necesarios']}" />
+  <ui:param name="hay_error" value="#{multiplePaso4MBean.errorInit}" />
+	<ui:param name="clase_columna_izq" value="columnaIzquierda col-sm-8" />
+	<ui:param name="clase_columna_der" value="columnaDerecha col-sm-4" />
+  <ui:param name="yaExisteReservaCamposClave" value="#{multiplePaso4MBean.yaExisteReservaCamposClave}" />
+  <ui:param name="recursoSinDisponibilidad" value="false" />
+
+	<ui:define name="descripcion">
+     <p:outputPanel rendered="#{!multiplePaso4MBean.errorInit}">
+			<ul class="tips pasoTexto">
+				<li><h:outputText value="#{sesionMBean.textos['datos_marcados_obligatorios']}." /></li>
+			</ul>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{multiplePaso4MBean.descripcion != null}">
+			  <pre>
+				  <h:outputFormat value="#{multiplePaso4MBean.descripcion}" />
+				</pre>
+			</p:outputPanel>
+			<p:outputPanel styleClass="descripcionAgenda" rendered="#{multiplePaso4MBean.descripcionRecurso != null}">
+        <pre>
+  				<h:outputFormat value="#{multiplePaso4MBean.descripcionRecurso}" />
+        </pre>
+			</p:outputPanel>
+      <p:outputPanel styleClass="descripcionAgenda">
+        <p:dataList styleClass="reserva-multiple" value="#{multiplePaso4MBean.reservas}" var="reserva" type="ordered" emptyMessage="#{sesionMBean.textos['no_hay_datos_para_mostrar']}">
+          <f:facet name="header">
+              <h:outputText value="#{sesionMBean.textos['reservas_incluidas']}: #{multiplePaso4MBean.reservas.size()}" />
+          </f:facet>
+          <h:outputText value="#{multiplePaso4MBean.describirReserva(reserva)}" />
+          <p:commandButton styleClass="btn-link" actionListener="#{multiplePaso4MBean.marcarReservaCancelar(reserva)}"
+            value="#{sesionMBean.textos['cancelar']}" oncomplete="PF('cancelarReserva').show();" />
+        </p:dataList>
+        
+	      <ul class="form-action-buttons">
+	        <li class="action-buttons-primary">
+	          <ul>
+	             <li>
+                <h:commandButton id="botonConfirmarReservas" styleClass="btn-lg btn-secundario" rendered="#{multiplePaso4MBean.tokenReserva.estado == 'P'}" 
+                  value="#{sesionMBean.textos['confirmar_reservas']} #{multiplePaso4MBean.simboloSiguiente}" action="#{multiplePaso4MBean.confirmarReservas}" />
+               </li>
+	            <li>
+	              <p:commandButton styleClass="btn-lg btn-link" id="botonCancelarReservas" 
+	                rendered="#{multiplePaso4MBean.tokenReserva.estado == 'P'}" 
+	                value="#{sesionMBean.textos['cancelar_reservas']}" oncomplete="PF('cancelarReservas').show();" />
+	             </li>
+	          </ul>
+	        </li>
+	      </ul>
+        
+      </p:outputPanel>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="mensaje">
+     <p:outputPanel rendered="#{!multiplePaso4MBean.errorInit}">
+			<div class="box box-grey datosReserva">
+				<div class="fechaHoraReserva">
+					<h:outputText value="#{multiplePaso4MBean.diaSeleccionado}" styleClass="resaltado">
+						<f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sesionMBean.locale}" />
+					</h:outputText>
+					<h:outputText value=" a las " />
+					<h:outputText value="#{multiplePaso4MBean.horaSeleccionada}" styleClass="resaltado">
+						<f:convertDateTime type="time" pattern="#{sesionMBean.formatoHora}" timeZone="GMT" />
+					</h:outputText>
+					<h:outputText value=" hs" />
+				</div>
+				<div>
+					<h:outputText value="#{multiplePaso4MBean.recursoDescripcion}" />
+				</div>
+			</div>
+		</p:outputPanel>
+	</ui:define>
+
+	<ui:define name="contenido">
+		<p:outputPanel rendered="#{!multiplePaso4MBean.errorInit}">
+			<p:outputPanel id="formulario">
+				<h:panelGroup binding="#{multiplePaso4MBean.campos}" layout="block" />
+			</p:outputPanel>
+		</p:outputPanel>
+	</ui:define>
+	
+	<ui:define name="botones">
+	  <p:outputPanel rendered="#{!multiplePaso4MBean.errorInit}">
+			<ul class="form-action-buttons">
+				<li class="action-buttons-primary">
+					<ul>
+            <li>
+              <h:commandButton id="botonOtraReserva" styleClass="btn-lg btn-primario" rendered="#{multiplePaso4MBean.tokenReserva.estado == 'P'}"
+                value="#{sesionMBean.textos['otra_reserva']} #{multiplePaso4MBean.simboloSiguiente}" action="#{multiplePaso4MBean.otraReserva}" />
+            </li>
+					</ul>
+				</li>
+				<li class="action-buttons-second">
+					<ul>
+						<li class="float-left">
+						  <h:commandButton id="botonDiaHora" styleClass="btn-lg btn-link" rendered="#{multiplePaso4MBean.tokenReserva.estado == 'P'}"
+						    value="#{multiplePaso4MBean.simboloAnterior} #{sesionMBean.textos['dia_y_hora']}" action="pasoAnterior" />
+						</li>
+					</ul>
+				</li>
+			</ul>
+	  </p:outputPanel>
+	</ui:define>
+</ui:composition>

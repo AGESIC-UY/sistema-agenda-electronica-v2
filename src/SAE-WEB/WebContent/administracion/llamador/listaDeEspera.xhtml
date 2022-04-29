@@ -1,0 +1,160 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+  <ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{listaDeEsperaMBean.beforePhaseListaDeEspera}" >
+
+			<p:outputPanel rendered="#{sessionMBean.agendaMarcada != null and sessionMBean.recursoMarcado != null}">
+
+				<h:form>
+					<p:poll id="pollEspera" interval="300000" />
+          <button type="submit" class="ui-helper-hidden-accessible" value="dummy" tabindex="-1"/>
+				</h:form>
+
+				<h:form id="form1">
+					<p:outputPanel id="todo">
+						<div class="form-inline">
+							<div class="form-group">
+                <p:outputLabel value="#{sessionMBean.textos['atencion_presencial']}" for="atencionPresencial" rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="label control-label" />
+                <p:selectBooleanCheckbox id="atencionPresencial" value="#{listaDeEsperaMBean.atencionPresencial}" rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}">
+                  <p:ajax update="form1:todo" listener="#{listaDeEsperaMBean.cambioAtencionPresencial}" />
+                </p:selectBooleanCheckbox>
+								<h:outputLabel value="#{sessionMBean.textos['numero_de_puesto']}" styleClass="control-label label formularioCampoRequerido" for="puesto" />
+								<h:inputText size="3" maxlength="3" id="puesto" value="#{listaDeEsperaMBean.puesto}" styleClass="form-control" />
+							</div>
+							<p:commandButton value="#{sessionMBean.textos['llamar_al_siguiente']}" actionListener="#{listaDeEsperaMBean.siguiente}" update="form1:todo"
+								rendered="#{listaDeEsperaSessionMBean.estadosSeleccionado=='[R]' and !listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="btn-lg btn-primario" />
+						</div>
+
+						<p:outputPanel rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}" styleClass="form-inline alinDer margen_inf">
+							<div class="form-group">
+								<h:outputLabel value="#{sessionMBean.textos['mostrar']}" styleClass="label control-label" for="mostrar" />
+								<h:selectOneMenu id="mostrar" value="#{listaDeEsperaSessionMBean.estadosSeleccionado}" styleClass="control-label" valueChangeListener="#{listaDeEsperaMBean.cambiaSeleccionEstados}">
+									<p:ajax update="@all" process="@this" />
+									<f:selectItems value="#{listaDeEsperaMBean.itemsEstado}" />
+									<f:converter converterId="estadosConverter" />
+								</h:selectOneMenu>
+							</div>
+						</p:outputPanel>
+
+						<p:outputPanel rendered="#{listaDeEsperaMBean.mostrarDatosSiguiente}">
+
+							<p:outputPanel styleClass="recuadro margen_sup margen_inf">
+								<p:outputPanel styleClass="row">
+									<p:outputPanel styleClass="col-sm-8">
+                    <div>
+                      <h:outputText value="#{sessionMBean.textos['tramite']}: " />
+                      <h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.tramiteNombre}" styleClass="resaltado" /> 
+                      <h:outputText value="." />
+                    </div>
+										<div class="fechaHoraReserva">
+											<h:outputText value="#{sessionMBean.textos['numero']} " />
+											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.numero}" styleClass="resaltado" />
+											<h:outputText value=" - " />
+											<h:outputText value="#{sessionMBean.textos['documento']} " />
+											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.numeroDocumento}" styleClass="resaltado" />
+										</div>
+										<div>
+											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].fecha}"> 
+											  <f:convertDateTime type="date" pattern="dd 'de' MMMM 'de' yyyy" timeZone="GMT" locale="#{sessionMBean.locale}"/>
+											</h:outputText>
+											<h:outputText value=", " />
+											<h:outputText value="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].horaInicio}" rendered="#{not listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}" >
+												<f:convertDateTime type="time" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+											</h:outputText>
+                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" rendered="#{listaDeEsperaSessionMBean.siguienteReserva.disponibilidades[0].presencial}" />
+											<h:outputText value="." />
+										</div>
+									</p:outputPanel>
+
+									<p:outputPanel styleClass="col-sm-4">
+										<p:commandButton value="#{sessionMBean.textos['falto']}" actionListener="#{listaDeEsperaMBean.falto}" update="form1:todo" styleClass="btn-lg btn-secundario"
+											icon="ui-icon-closethick">
+										</p:commandButton>
+										<p:commandButton value="#{sessionMBean.textos['asistio']}" actionListener="#{listaDeEsperaMBean.asistio}" update="form1:todo" styleClass="btn-lg btn-primario"
+                      icon="ui-icon-check" />
+									</p:outputPanel>
+								</p:outputPanel>
+							</p:outputPanel>
+
+							<p:outputPanel id="siguienteBody">
+								<p:outputPanel id="camposDin" binding="#{listaDeEsperaMBean.camposSiguienteReserva}" />
+							</p:outputPanel>
+						</p:outputPanel>
+
+						<p:outputPanel id="mensajeNoHayEnEspera">
+							<h:outputText value="#{sessionMBean.textos['no_hay_personas_en_espera']}" rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente and empty listaDeEsperaSessionMBean.horarios}" />
+						</p:outputPanel>
+
+						<p:outputPanel id="tablaReservas" rendered="#{listaDeEsperaMBean.mostrarDatosSiguiente or not empty listaDeEsperaSessionMBean.horarios}">
+							<p:dataTable  id="tablaLlamados" rendered="#{!listaDeEsperaMBean.mostrarDatosSiguiente}" value="#{listaDeEsperaSessionMBean.horarios}" var="horario"
+								binding="#{listaDeEsperaMBean.tablaReservas}" styleClass="margen_sup listaReservas" caption="#{sessionMBean.textos['lista_de_espera']}"
+								emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}">
+								<p:columnGroup type="header">
+									<p:row>
+										<p:column headerText="#{sessionMBean.textos['numero']}" />
+										<p:column headerText="#{sessionMBean.textos['documento']}" />
+                    <p:column headerText="#{sessionMBean.textos['tramite']}" />
+										<p:column headerText="#{sessionMBean.textos['numero_de_puesto']}" styleClass="colPuesto"/>
+                    <p:column headerText="#{sessionMBean.textos['asistio']}" />
+										<p:column headerText="" styleClass="colLlamar"/>
+									</p:row>
+								</p:columnGroup>
+
+								<p:subTable id="tablaLlamadosPorHora" value="#{horario.listaEspera}" var="espera" binding="#{listaDeEsperaMBean.subTablaListaDeEspera}">
+									<f:facet name="header">
+									  <p:outputPanel>
+										  <p:outputPanel rendered="#{not listaDeEsperaMBean.atencionPresencial}"> 
+		                    <h:outputText value="#{horario.hora}">
+		                      <f:convertDateTime type="date" dateStyle="medium" pattern="#{sessionMBean.formatoFecha}" timeZone="GMT" />
+		                    </h:outputText>
+		                    <h:outputText value=" - " />
+												<h:outputText value="#{horario.hora}">
+													<f:convertDateTime type="time" dateStyle="medium" pattern="#{sessionMBean.formatoHora}" timeZone="GMT" />
+												</h:outputText>
+											</p:outputPanel>
+	                    <p:outputPanel rendered="#{listaDeEsperaMBean.atencionPresencial}"> 
+	                      <h:outputText value="#{sessionMBean.textos['atencion_presencial']}" />
+	                    </p:outputPanel>
+                    </p:outputPanel>
+									</f:facet>
+									<p:column>
+										<h:outputText value="#{espera.reserva.numero}" />
+									</p:column>
+									<p:column>
+										<h:outputText value="#{espera.reserva.numeroDocumento}" />
+									</p:column>
+                  <p:column>
+                    <h:outputText value="#{espera.reserva.tramiteNombre}" />
+                  </p:column>
+									<p:column styleClass="colPuesto">
+										<h:outputText value="#{espera.reserva.puestoLlamada}" rendered="#{espera.reserva.puestoLlamada != null}" />
+									</p:column>
+                  <p:column>
+                    <h:outputText value="#{espera.reserva.asistio}" converter="booleanConverter" rendered="#{espera.reserva.asistio != null}" />
+                  </p:column>
+									<p:column>
+										<p:commandLink id="volverALlamar" value="#{sessionMBean.textos['volver_a_llamar']}" rendered="#{espera.reserva.estado == 'U'}"
+											actionListener="#{listaDeEsperaMBean.llamar}" update="form1:todo" >
+										</p:commandLink>
+									</p:column>
+								</p:subTable>
+							</p:dataTable>
+							
+							<!-- Botón oculto obligatorio para cumplir con las reglas de accesibilidad -->
+							<button type="submit" class="ui-helper-hidden-accessible" value="dummy" tabindex="-1"/>
+
+						</p:outputPanel>
+
+					</p:outputPanel>
+				</h:form>
+			</p:outputPanel>
+
+		</f:view>
+	</ui:define>
+</ui:composition>

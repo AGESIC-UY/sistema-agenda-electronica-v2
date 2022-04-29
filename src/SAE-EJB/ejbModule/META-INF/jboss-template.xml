@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+
+<!DOCTYPE jboss PUBLIC
+  "-//JBoss//DTD JBOSS 5.0//EN"
+  "http://www.jboss.org/j2ee/dtd/jboss_5_0.dtd">
+
+<jboss>
+    <security-domain>@SAE_SECURITY_DOMAIN@</security-domain>
+
+    <enterprise-beans>
+
+        <session>
+            <ejb-name>AccionesBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/AccionesBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/AccionesBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>RecursosBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/RecursosBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/RecursosBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>AgendaGeneralBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/AgendaGeneralBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/AgendaGeneralBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>AgendasBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/AgendasBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/AgendasBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>AutocompletadosBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/AutocompletadosBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/AutocompletadosBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>ConsultasBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/ConsultasBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/ConsultasBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>AgendarReservasBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/AgendarReservasBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/AgendarReservasBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>DisponibilidadesBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/DisponibilidadesBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/DisponibilidadesBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>LlamadasBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/LlamadasBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/LlamadasBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>ValidacionesBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/ValidacionesBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/ValidacionesBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>DepurarReservasBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/DepurarReservasBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/DepurarReservasBean/local</local-jndi-name>
+        </session>
+
+        <session>
+            <ejb-name>ComunicacionesBean</ejb-name>
+            <jndi-name>@SAE_EJB_JNDI_BASE@/ComunicacionesBean/remote</jndi-name>
+            <local-jndi-name>@SAE_EJB_JNDI_BASE@/ComunicacionesBean/local</local-jndi-name>
+        </session>
+
+    </enterprise-beans>
+</jboss>

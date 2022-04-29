@@ -1,0 +1,116 @@
+<ui:composition template="/templates/layoutPublico.xhtml"
+	xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html"
+  xmlns:fn="http://java.sun.com/jsp/jstl/functions">
+  
+	<ui:define name="css">
+	</ui:define>
+
+	<ui:define name="script">
+	</ui:define>
+
+	<ui:define name="titulo">
+		<h:outputText value="#{agenda_nombre}" />
+	</ui:define>
+
+	<ui:define name="menu">
+		<h:form id="formMenu">
+			<h:panelGroup>
+				<h:outputLink value="#{sesionMBean.paginaDeRetorno}">
+					<h:outputText value="&#187; #{sesionMBean.textos['volver_a_la_pagina_principal']}" />
+				</h:outputLink>
+				<h:commandLink value="&#187; #{sesionMBean.textos['nueva_reserva']}" action="inicio" />
+			</h:panelGroup>
+		</h:form>
+	</ui:define>
+
+	<ui:define name="cuerpo">
+		<h:form id="form">
+			<div class="idioma">
+				<h:panelGroup rendered="#{not empty sesionMBean.idiomasSoportados}" layout="block">
+					<div class="form-inline">
+             <p:outputPanel styleClass="form-group" rendered="#{sesionMBean.mostrarFechaActual}">
+               <h:outputText value="#{sesionMBean.fechaActual}" />
+             </p:outputPanel>
+						<h:panelGroup class="form-group" rendered="#{fn:length(sesionMBean.idiomasSoportados) > 1}">
+							<h:outputLabel for="idioma" value="#{sesionMBean.textos['idioma']}" class="label" />
+							<h:selectOneMenu id="idioma" value="#{sesionMBean.idiomaActual}" valueChangeListener="#{sesionMBean.cambioIdiomaActual}" styleClass="form-control">
+								<p:ajax update="@all" process="@this" />
+								<f:selectItems value="#{sesionMBean.idiomasSoportados}" />
+							</h:selectOneMenu>
+						</h:panelGroup>
+					</div>
+				</h:panelGroup>
+			</div>
+			<div class="tituloPagina">
+				<h1>
+					<h:outputText value="#{agenda_nombre}" />
+				</h1>
+			</div>
+
+			<div>
+		    <p:messages id="mensajes" for="form" autoUpdate="true" 
+		      infoClass="mensajeInfo" warnClass="mensajeWarn" errorClass="mensajeError"  
+		      singleInfoTitle="#{sesionMBean.textos['mensaje_en_el_formulario_info']}" multiInfoTitle="#{sesionMBean.textos['mensajes_en_el_formulario_info']}"
+		      singleWarnTitle="#{sesionMBean.textos['mensaje_en_el_formulario_warn']}" multiWarnTitle="#{sesionMBean.textos['mensajes_en_el_formulario_warn']}" 
+		      singleErrorTitle="#{sesionMBean.textos['mensaje_en_el_formulario_error']}" multiErrorTitle="#{sesionMBean.textos['mensajes_en_el_formulario_error']}"
+		    />
+        <p:outputPanel id="warnSinCupos" styleClass="ui-messages ui-widget" aria-live="polite" rendered="#{recursoSinDisponibilidad}">
+          <div class="ui-messages-warn ui-corner-all">
+            <span class="ui-messages-warn-icon" />
+            <p class="ui-messages-warn-title">
+              <h:outputText value="#{sesionMBean.textos['no_hay_cupos_disponibles_para_el_recurso']}" />
+            </p>
+            <ul>
+              <li>
+                <span class="ui-messages-warn-summary">
+                  <h:outputText value="#{sesionMBean.textos['proximamente_se_añadiran_cupos']}" />
+                </span>
+              </li>
+            </ul>
+          </div>
+        </p:outputPanel>
+				<h:panelGroup rendered="#{not hay_error}" id="contenedorPaso" layout="block">
+					<h:panelGroup layout="block" rendered="#{paso_numero!=4}">
+						<ul class="wizard-nav-tabs wizard-nav-tabs-3">
+							<li class="#{(paso_numero == 1) ? 'active' : ''}">
+							  <h:outputText value="1" styleClass="wizard-step" /> 
+							  <h:outputText value="#{sesionMBean.textos['seleccionar_reserva']}" styleClass="wizard-step-description" />
+						  </li>
+							<li class="#{(paso_numero == 2) ? 'active' : ''}">
+							  <h:outputText value="2" styleClass="wizard-step" /> 
+						    <h:outputText value="#{sesionMBean.textos['dia_y_hora']}" styleClass="wizard-step-description" />
+					    </li>
+              <li class="#{(paso_numero == 3) ? 'active' : ''}">
+                <h:outputText value="2" styleClass="wizard-step" /> 
+                <h:outputText value="#{sesionMBean.textos['datos_necesarios']}" styleClass="wizard-step-description" />
+              </li>
+						</ul>
+					</h:panelGroup>
+
+					<ui:insert name="mensaje">
+						<h:outputText value="CONFIRMACIÓN DE HORA SELECCIONADA" rendered="#{paso_numero==2 or paso_numero==3}" />
+					</ui:insert>
+
+					<fieldset>
+						<legend>#{paso_texto}</legend>
+						<div class="row">
+							<div class="#{clase_columna_izq}">
+								<ui:insert name="contenido">CONTENIDO DEL PASO</ui:insert>
+							</div>
+							<div class="#{clase_columna_der}">
+								<ui:insert name="descripcion">DESCRIPCION DEL PASO</ui:insert>
+							</div>
+						</div>
+					</fieldset>
+					<ui:insert name="botones">
+					</ui:insert>
+
+				</h:panelGroup>
+			</div>
+		</h:form>
+	</ui:define>
+</ui:composition>

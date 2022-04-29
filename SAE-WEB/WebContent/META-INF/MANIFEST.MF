@@ -1,4 +1,0 @@
-Manifest-Version: 1.0
-Dependencies: org.apache.log4j org.hibernate1a
-Class-Path: 
-

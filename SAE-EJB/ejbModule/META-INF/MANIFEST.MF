@@ -1,7 +1,0 @@
-Manifest-Version: 1.0
-Class-Path: SAE-EJBClient.jar 
- SAE-Autocompletados-EJBClient.jar 
- SAE-Acciones-EJBClient.jar 
- SAE-Validaciones-EJBClient.jar
-Dependencies: org.apache.log4j
-

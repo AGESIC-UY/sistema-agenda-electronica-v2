@@ -1,0 +1,70 @@
+<ui:composition template="/templates/layout.xhtml"
+  xmlns="http://www.w3.org/1999/xhtml"
+  xmlns:p="http://primefaces.org/ui"
+  xmlns:ui="http://java.sun.com/jsf/facelets"
+  xmlns:f="http://java.sun.com/jsf/core"
+  xmlns:h="http://java.sun.com/jsf/html">
+	<ui:param name="nombre_pagina" value="#{sessionMBean.pantallaTitulo}" />
+	<ui:define name="cuerpo">
+		<f:view beforePhase="#{agendaMBean.beforePhaseModificarConsultar}" >
+
+			<p:dialog closable="false" shadowOpacity="0.4" autosized="false" widgetVar="eliminarAgenda" zindex="2000" modal="true" focus="elimRec:btn_eliminar">
+				<f:facet name="header">
+					<h:outputText value="#{sessionMBean.textos['confirmacion']}" />
+				</f:facet>
+				<h:form id="elimRec">
+          <h:outputText value="#{sessionMBean.textos['esta_seguro_que_desea_eliminar_la_agenda']}" />
+					<p:outputPanel styleClass="row panelBotonesPopUp">
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton id="btn_eliminar" update="form:panelForm" actionListener="#{agendaMBean.eliminar}" value="#{sessionMBean.textos['eliminar']}"
+								onclick="PF('eliminarAgenda').hide();" styleClass="btn-primario btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+						<p:outputPanel styleClass="col-sm-6">
+							<p:commandButton onclick="PF('eliminarAgenda').hide();" value="#{sessionMBean.textos['cancelar']}" styleClass="btn-link btn-100 btn">
+							</p:commandButton>
+						</p:outputPanel>
+					</p:outputPanel>
+				</h:form>
+			</p:dialog>
+			
+			<h:form id="form" rendered="#{sessionMBean.empresaActual != null}">
+			  <p:outputPanel id="panelForm">
+				<p:dataTable id="tablaAgendas" value="#{agendaMBean.agendasSeleccion}" var="row" binding="#{agendaMBean.agendasDataTable}" 
+					caption="#{sessionMBean.textos['listado_de_agendas']}" emptyMessage="#{sessionMBean.textos['no_hay_datos_para_mostrar']}"
+          paginator="true" rows="#{sessionMBean.tablasFilasPorPagina}"
+          paginatorTemplate="{FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink}" 
+          paginatorFirstPageLabel="#{sessionMBean.simboloAnterior}#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_primera']}"
+          paginatorPrevPageLabel="#{sessionMBean.simboloAnterior} #{sessionMBean.textos['pagina_anterior']}"
+          paginatorNextPageLabel="#{sessionMBean.textos['pagina_siguiente']} #{sessionMBean.simboloSiguiente}"
+          paginatorLastPageLabel="#{sessionMBean.textos['pagina_ultima']} #{sessionMBean.simboloSiguiente}#{sessionMBean.simboloSiguiente}"
+				>
+					<p:column headerText="#{sessionMBean.textos['identificador']}">
+						<h:outputText value="#{row.data.id}" />
+					</p:column>
+					<p:column headerText="#{sessionMBean.textos['nombre']}">
+						<h:outputText value="#{row.data.nombre}" />
+					</p:column>
+					<p:column headerText="#{sessionMBean.textos['descripcion']}">
+						<h:outputText value="#{row.data.descripcion}"/>
+					</p:column>
+					<p:column styleClass="alinCentro">
+						<f:facet name="header">
+							<h:outputText value="#{sessionMBean.textos['acciones']}" />
+						</f:facet>
+						<p:commandButton id="modificarAgenda" value="#{sessionMBean.textos['modificar']}" action="#{agendaMBean.modificar}" icon="ui-icon-pencil"
+							title="#{sessionMBean.textos['modificar']}" styleClass="ui-button-icon-only">
+						</p:commandButton>
+						<p:commandButton id="copiarAgeLink" value="#{sessionMBean.textos['copiar']}" actionListener="#{agendaMBean.copiar}"
+							update="form:panelForm" icon="ui-icon-copy" title="#{sessionMBean.textos['copiar']}" styleClass="ui-button-icon-only">
+						</p:commandButton>
+						<p:commandButton id="eliminarAgenda" value="#{sessionMBean.textos['eliminar']}" actionListener="#{agendaMBean.selecAgendaEliminar}"
+							oncomplete="PF('eliminarAgenda').show();" icon="ui-icon-trash" title="#{sessionMBean.textos['eliminar']}" styleClass="ui-button-icon-only">
+						</p:commandButton>
+					</p:column>
+				</p:dataTable>
+				</p:outputPanel>
+			</h:form>
+		</f:view>
+	</ui:define>
+</ui:composition>

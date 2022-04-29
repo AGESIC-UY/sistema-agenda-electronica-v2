@@ -1,0 +1,200 @@
+<project name="SAE-EJBClient" default="build" basedir="." xmlns:jacoco="antlib:org.jacoco.ant">
+
+  <!-- dependencias de compilacion -->
+  <property name="java.src" value="ejbModule" />
+  <property name="SAE-EAR.lib" value="../SAE-EAR/EarContent/lib" />
+  <!-- dependencias de empaquetado -->  
+  <property name="SAE-Validaciones-EJBClient.classes" value="../SAE-Validaciones-EJBClient/build/classes" />
+  <property name="SAE-Validaciones-EJBClient.build.xml" value="../SAE-Validaciones-EJBClient/build.xml" />
+  <property name="SAE-Acciones-EJBClient.classes" value="../SAE-Acciones-EJBClient/build/classes" />
+  <property name="SAE-Acciones-EJBClient.build.xml" value="../SAE-Acciones-EJBClient/build.xml" />
+  <property name="SAE-Autocompletados-EJBClient.classes" value="../SAE-Autocompletados-EJBClient/build/classes" />
+  <property name="SAE-Autocompletados-EJBClient.build.xml" value="../SAE-Autocompletados-EJBClient/build.xml" />
+  <property name="result.dir" location="build/jacoco"/>
+  <property name="result.report.dir" location="${result.dir}/site/jacoco"/>
+  <property name="result.exec.file" location="${result.dir}/jacoco.exec"/>
+  <taskdef uri="antlib:org.jacoco.ant" resource="org/jacoco/ant/antlib.xml">
+    <classpath path="../SAE-Config/libs/org.jacoco.ant-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/org.jacoco.core-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/org.jacoco.report-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/org.jacoco.agent-0.8.7.jar"/>
+    <classpath path="../SAE-Config/libs/asm-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-analysis-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-commons-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-tree-9.2.jar"/>
+    <classpath path="../SAE-Config/libs/asm-util-9.2.jar"/>
+  </taskdef>
+  <path id="test.classpath">
+    <pathelement path="build/test"/>
+    <pathelement path="build/classes"/>
+    <pathelement path="../SAE-EJBClient/build/classes"/>
+    <fileset dir="../SAE-Config/libs" includes="*.jar" />
+  </path>
+
+  <tstamp>
+    <format property="TODAY" pattern="yyyy-MM-dd HH:mm:ss" />
+  </tstamp>
+  
+  <!-- PATH -->
+  <path id="base.path">   
+    <fileset dir="../SAE-Config/libs">
+      <include name="**/*.jar" />
+    </fileset>
+  </path>
+
+  <target name="clean">
+
+    <sequential>
+      <mkdir dir="build" />
+      <delete quiet="true">
+        <fileset dir="build">
+          <include name="**/*" />
+        </fileset>
+      </delete>
+
+      <mkdir dir="build/classes" />
+      <mkdir dir="build/jar" />
+      <mkdir dir="build/test" />
+    </sequential>
+  </target>
+  
+
+  <target name="compile" depends="clean">
+
+    <manifest file="build/MANIFEST.MF">
+      <attribute name="Built-By" value="${user.name}" />
+      <attribute name="Built-Date" value="${TODAY}" />
+    </manifest>
+
+    <javac srcdir="${java.src}" destdir="build/classes" target="1.7" encoding="UTF-8" includeantruntime="false" debug="true">
+      <classpath>
+        <path refid="base.path" />
+      </classpath>
+    </javac>
+        <copy todir="build/classes">
+            <fileset dir="${java.src}" excludes="**/*.java" />
+        </copy>
+    <javac destdir="build/test" classpathref="test.classpath" srcdir="test" includeantruntime="false" debug="true"/>
+  </target>
+  
+  <target name="build" depends="compile,dependency,clean">
+
+    
+    <jar destfile="build/jar/${build.sae.service.ejb.client}.jar" 
+       filesetmanifest="merge" manifest="build/MANIFEST.MF"
+       duplicate="fail">
+      
+      <metainf dir="build/classes/META-INF" />
+      <fileset dir="build/classes">
+        <exclude name="META-INF/**"/>
+      </fileset>
+      <fileset dir="${SAE-Validaciones-EJBClient.classes}">
+        <include name="**/*"/>
+      </fileset>
+      <fileset dir="${SAE-Acciones-EJBClient.classes}">
+        <include name="**/*"/>
+      </fileset>
+      <fileset dir="${SAE-Autocompletados-EJBClient.classes}">
+        <include name="**/*"/>
+      </fileset>
+    </jar>
+
+  </target>
+
+  
+  <target name="dependency">
+    
+    <subant target="compile" buildpath="${SAE-Validaciones-EJBClient.build.xml}" />
+    <subant target="compile" buildpath="${SAE-Acciones-EJBClient.build.xml}" />
+    <subant target="compile" buildpath="${SAE-Autocompletados-EJBClient.build.xml}" />
+    
+  </target>
+
+  <target name="test" depends="compile">
+    <jacoco:coverage destfile="${result.exec.file}">
+      <junit showoutput="yes" fork="true" printsummary="yes" haltonfailure="yes" haltonerror="yes" failureProperty="test.failure" errorProperty="test.error">
+        <formatter type="plain" usefile="false"/>
+        <classpath refid="test.classpath"/>
+        <test name="uy.gub.imm.sae.entity.global.ConfiguracionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.EmpresaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.NovedadTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.OficinaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.OrganismoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.TextoGlobalTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.TokenTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.TramiteTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.TrazabilidadTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.UnidadEjecutoraTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.global.UsuarioTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AccionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AccionMiPerfilTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AccionPorDatoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AccionPorRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AgendaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AgrupacionDatoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AniosTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.AtencionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ComunicacionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ConstanteValidacionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.DatoASolicitarTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.DatoDelRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.DatoReservaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.DiasDeLaSemanaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.DiasDelMesTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.DisponibilidadTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.FraseCaptchaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.LlamadaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.MesesTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ParametroAccionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ParametrosAutocompletarTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ParametroValidacionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.PlantillaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.PreguntaCaptchaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.RecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.RecursoAudTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ReservaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.RolesUsuarioRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.RolesUsuarioRecursoIdTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ServicioAutocompletarTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ServicioAutocompletarPorDatoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ServicioPorRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.TextoAgendaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.TextoGlobalIdTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.TextoRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.TextoTenantTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.TokenReservaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.TramiteAgendaTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ValidacionTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ValidacionPorDatoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ValidacionPorRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ValorConstanteValidacionRecursoTest" outfile="result"/>
+        <test name="uy.gub.imm.sae.entity.ValorPosibleTest" outfile="result"/>
+      </junit>
+    </jacoco:coverage>
+  </target>
+  <target name="verifyNoError" if="test.error">
+    <fail message="JUnit test or tests errors."/>
+  </target>
+
+  <target name="verifyNoFailure" if="test.failure">
+    <fail message="JUnit test or tests failed."/>
+  </target>
+  <target name="report" depends="test">
+    <!--  Step 3: Create coverage report  -->
+    <jacoco:report>
+      <executiondata>
+        <file file="${result.exec.file}"/>
+      </executiondata>
+      <structure name="JaCoCo Ant">
+        <classfiles>
+          <fileset dir="build/classes"/>
+        </classfiles>
+        <sourcefiles encoding="UTF-8">
+          <fileset dir="${java.src}"/>
+        </sourcefiles>
+      </structure>
+      <html destdir="${result.report.dir}"/>
+      <xml destfile="${result.report.dir}/report.xml"/>
+    </jacoco:report>
+  </target>
+</project>
