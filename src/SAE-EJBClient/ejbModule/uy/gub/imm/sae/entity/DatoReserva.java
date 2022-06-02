@@ -53,9 +53,10 @@ public class DatoReserva implements Serializable{
 		this.id = id;
 	}
 
-	DatoReserva(Integer id, String valor) {
+	DatoReserva(Integer id, String valor, DatoASolicitar datoASolicitar) {
 		this.id = id;
 		this.valor = valor;
+		this.datoASolicitar = datoASolicitar;
 	}
 
 	@Id
@@ -105,7 +106,8 @@ public class DatoReserva implements Serializable{
 		if (this == o) return true;
 		if (o == null || getClass() != o.getClass()) return false;
 		DatoReserva that = (DatoReserva) o;
-		return Objects.equals(id, that.id) && Objects.equals(valor, that.valor);
+		return Objects.equals(id, that.id) && Objects.equals(valor, that.valor)
+				&& Objects.equals(datoASolicitar, that.datoASolicitar);
 	}
 
 	@Override

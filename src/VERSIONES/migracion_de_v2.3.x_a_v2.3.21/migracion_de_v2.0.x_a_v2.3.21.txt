@@ -171,7 +171,9 @@ En el module.xml lo único que se cambia es el nombre del jar, por ejemplo:
 
 Luego se recomienda borrar el contenido de la carpeta tmp del servidor.
 
-## Procedimiento de migración de una instalación de SAE versión 2.3.19 a la versión 2.3.20
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+## Procedimiento de migración de una instalación de SAE versión 2.3.19 a la versión 2.3.21
 
 No hay nada por hacer.
 

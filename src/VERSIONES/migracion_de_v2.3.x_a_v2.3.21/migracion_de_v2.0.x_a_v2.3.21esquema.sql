@@ -482,3 +482,7 @@ CREATE INDEX ae_tokens_reservas_estado_idx ON {esquema}.ae_tokens_reservas (esta
 -- 2.3.20
 
 -- Nada para hacer
+
+-- 2.3.21
+
+-- Nada para hacer

@@ -15,10 +15,18 @@ public class DatoReservaTest {
 
     @Test
     public void givenObjectsWithSameIdAndName_whenEqual_thenReturnTrue(){
-        DatoReserva datoReserva1 = new DatoReserva(1, "valor");
-        DatoReserva datoReserva2 = new DatoReserva(1, "valor");
+        DatoReserva datoReserva1 = new DatoReserva(1, "valor", null);
+        DatoReserva datoReserva2 = new DatoReserva(1, "valor", null);
 
         assertTrue(datoReserva1.equals(datoReserva2));
+    }
+
+    @Test
+    public void givenObjectsWithDifferentDatoSolicitar_whenEqual_thenReturnFalse(){
+        DatoReserva datoReserva1 = new DatoReserva(1, "valor", new DatoASolicitar(1));
+        DatoReserva datoReserva2 = new DatoReserva(1, "valor", new DatoASolicitar(2));
+
+        assertFalse(datoReserva1.equals(datoReserva2));
     }
 
     @Test

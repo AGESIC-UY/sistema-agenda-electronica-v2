@@ -357,3 +357,6 @@ Versión 2.3.19
 
 Versión 2.3.20
 * Se elimina la propiedad `escape="false"` de los campos outputText para evitar injección de código.
+
+Versión 2.3.21
+* Se ajusta implementación de equals de entidad DatoReserva para soportar agrupaciones.
