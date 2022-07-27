@@ -215,3 +215,235 @@ INSERT INTO global.ae_textos (codigo, texto) VALUES ('enviar_aviso_recordatorio'
 INSERT INTO global.ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva', 'No se pudo enviar una notificación al usuario; tome nota de los datos de la reserva');
 INSERT INTO global.ae_textos (codigo, texto) VALUES ('no_se_pudo_enviar_notificacion_de_cancelacion', 'No se pudo enviar una notificación al usuario');
 
+
+-- =======================================================================================================================
+-- 2.3.1
+
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('acc_titulo', 'Título');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('acc_url', 'URL');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('acc_destacada', 'Destacada');
+
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('debe_haber_una_unica_accion_de_confirmacion_destacada', 'Debe haber una (y solo una) acción de aviso al confirmar marcada como destacada, cuya URL no sea vacía.');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('debe_haber_una_unica_accion_de_cancelacion_destacada', 'Debe haber una (y solo una) acción de aviso al cancelar marcada como destacada, cuya URL no sea vacía.');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('debe_haber_una_unica_accion_de_recordatorio_destacada', 'Debe haber una (y solo una) acción de recordatorio marcada como destacada, cuya URL no sea vacía');
+
+
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('vencimiento_aviso_al_confirmar', 'Vencimiento de aviso al confirmar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('vencimiento_aviso_al_cancelar', 'Vencimiento de aviso al cancelar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('vencimiento_recordatorio', 'Vencimiento de recordatorio');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('hora_recordatorio', 'Hora de recordatorio');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('dias_recordatorio', 'Días de recordatorio');
+
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('textos_aviso_al_confirmar', 'Textos aviso al confirmar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('textos_aviso_al_cancelar', 'Textos aviso al cancelar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('textos_recordatorio', 'Textos recordatorio');
+
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_titulo_aviso_al_confirmar', 'Título del aviso al confirmar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_corto_aviso_al_confirmar', 'Texto corto del aviso al confirmar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_largo_aviso_al_confirmar', 'Texto largo del aviso al confirmar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_titulo_aviso_al_cancelar', 'Título del aviso al cancelar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_corto_aviso_al_cancelar', 'Texto corto del aviso al cancelar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_largo_aviso_al_cancelar', 'Texto largo del aviso al cancelar');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_titulo_recordatorio', 'Título del recordatorio');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_corto_recordatorio', 'Texto corto del recordatorio');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('texto_largo_recordatorio', 'Texto largo del recordatorio');
+
+INSERT INTO global.ae_configuracion(clave, valor) VALUES ('DOMINIO', 'https://localhost:443');
+INSERT INTO global.ae_configuracion(clave, valor) VALUES ('JSON_ESCAPE', 'false');
+
+-- =======================================================================================================================
+-- 2.3.2
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.3
+
+INSERT INTO global.ae_configuracion(clave, valor) VALUES ('MIPERFIL_OID', '');
+
+-- =======================================================================================================================
+-- 2.3.4
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.4.1
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.4.2
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.5
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.6
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.7
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.8
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.9
+
+-- RQF - Reporte de recursos por agenda
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('reporte_recursos_por_agenda','Reporte de Recursos por Agenda');
+
+-- =======================================================================================================================
+-- 2.3.10
+
+-- Encargo #30 - Nuevo servicio REST "Disponibilidades por recurso y tiempo" y servicios para vacunación COVID
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('la_fecha_hasta_debe_ser_posterior_a_la_fecha_desde', 'La fecha hasta debe ser posterior a la fecha desde');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('debe_especificar_la_fecha_reserva_dos', 'Debe especificar la fecha para la reserva de la segunda dosis');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('debe_especificar_el_tipo_doc_reserva_dos', 'Debe especificar el tipo de documento para la reserva de la segunda dosis');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('no_se_encuentra_la_disponibilidad2_especificada', 'No se encuentra la disponibilidad para la reserva de la segunda dosis');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('error_marcar_reservas_pares', 'Error: no se ha podido crear las reservas de primera y segunda dosis');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('debe_especificar_la_reserva_segunda', 'Debe especificar la reserva de la segunda dosis');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('la_reserva_primer_dosis_esta_utilizada', 'La reserva de primer dosis está utilizada');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('no_se_puede_cancelar_la_reserva_dos', 'No se puede cancelar la reserva de la segunda dosis por si sola, la cancelación se hace mediante la reserva de la primer dosis y el sistema cancela ambas reservas');
+INSERT INTO global.ae_textos (codigo, texto) VALUES ('no_existen_reservas_para_confirmar', 'No existen reservas para confirmar');
+
+-- =======================================================================================================================
+-- 2.3.11
+
+-- Modificación del servicio de novedades, se agrega campo boolean en la consulta de datos
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('envio_novedades_como_dato_extra', 'Envío a novedades como dato extra');
+INSERT INTO "global".ae_configuracion (clave, valor) VALUES('WS_NOVEDADES_XML_LOG', 'false');
+
+-- =======================================================================================================================
+-- 2.3.12
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.13
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.14
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('la_fecha_reserva_dos_debe_ser_posterior_a_la_fecha_reserva_uno', 'La fecha de la reserva dos debe ser posterior a la fecha de la reserva uno');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('error_marcar_reserva', 'Error: no se ha podido crear la reserva');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('reserva_pendiente_tiempo_max', 'Reserva pendiente tiempo máximo');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('reserva_multiple_pendiente_tiempo_max', 'Reserva múltiple pendiente tiempo máximo');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('reserva_pendiente_tiempo_max_debe_ser_mayor_a_cero', 'El tiempo máximo para una reserva pendiente debe ser mayor a cero');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('reserva_multiple_pendiente_tiempo_max_debe_ser_mayor_a_cero', 'El tiempo máximo para las reservas múltiples pendientes debe ser mayor a cero');
+
+
+-- =======================================================================================================================
+-- 2.3.15
+
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('mover_reservas', 'Mover reservas');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('datos_de_reservas_a_mover', 'Datos de las reservas a mover');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('agenda_origen', 'Agenda origen');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('recurso_origen', 'Recurso origen');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('agenda_destino', 'Agenda destino');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('recurso_destino', 'Recurso destino');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('fecha_reservas', 'Fecha de las reservas');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('enviar_correo', 'Enviar notificaciones a los usuarios');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('generar_novedades', 'Generar novedades');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_lista_de_agendas', 'No se pudo cargar la lista de agendas');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('no_se_pudo_cargar_lista_de_recursos', 'No se pudo cargar la lista de recursos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('confirmar_movimiento_reservas', 'Confirmar movimiento de reservas');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('ejecutar', 'Ejecutar');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('validar', 'Validar');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('correo_de_traslado', 'Correo de traslado');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('texto_para_el_correo_de_traslado', 'Texto para el correo de traslado');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda_origen', 'Nombre de la agenda de origen');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('nombre_del_recurso_origen', 'Nombre del recurso de origen');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('nombre_de_la_agenda_destino', 'Nombre de la agenda de destino');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('nombre_del_recurso_destino', 'Nombre del recurso de destino');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('no_se_puedo_mover_las_reservas', 'No se pudo mover todas las reservas');
+
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('paso_uno_datos_reservas_mover', 'Paso 1 - Datos de las reservas a mover');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('paso_dos_datos_reservas_mover', 'Paso 2 - Datos del recurso destino de las reservas');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('siguiente', 'Siguiente');
+INSERT INTO "global".ae_textos(codigo, texto)  VALUES('no_existen_reservas_recurso_origen', 'No existen reservas a mover en la fecha y horario seleccionado');
+INSERT INTO "global".ae_textos(codigo, texto)  VALUES('recurso_origen_recurso_destino_hora_inicio_distintas', 'Si el recurso origen es igual al recurso destino, las horas inicio deben ser distintas');
+INSERT INTO "global".ae_textos(codigo, texto) VALUES('no_se_validar_las_reservas', 'No se ha podido validar en el paso 2');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES('debe_seleccionar_agenda_recurso_destino', 'Debe seleccionar agenda destino y recurso destino');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('fecha_destino', 'Fecha destino');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('fecha_destino_vacia', 'Seleccione una fecha destino'); 
+
+
+
+-- =======================================================================================================================
+-- 2.3.15 - R1
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.15 - R2
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.16
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('envio_de_comunicacion', 'Envío de comunicación');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('aplica_envio_de_correo', 'Aplica envío de correo electrónico');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('actualizacion_masiva', 'Actualización Masiva');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('no_enviar_comunicacion_cancelacion', 'Tenga en cuenta que no se enviará una comunicación de cancelación');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('todos_los_recursos', 'Todos los recursos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('agendas_recursos', 'Agendas y Recursos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('aplicar_todos', 'Aplicar a todos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('seleccionar_recursos', 'Seleccionar Recursos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('aplicar_todos_recursos', 'Aplicar a todos los recursos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('mensaje_aplica_para_todos', 'En caso de estar seleccionado afectará a todos los recursos de todas las agendas de la empresa seleccionada.');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('recursos_agenda', 'Recursos de la agenda');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('recursos_confirmados', 'Recursos confirmados');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('confirmar_recursos', 'Confirmar recursos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('actualizacion_recursos', 'Se han modificado x recursos de la agenda actualmente seleccionada');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('actualizar_datos', 'Actualizar datos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('actualizacion_masiva_datos', 'Actualización masiva de datos');
+INSERT INTO "global".ae_textos (codigo, texto) VALUES ('carga_masiva', 'Carga Masiva');
+UPDATE "global".ae_textos SET texto='Correo de cambio de recurso' WHERE codigo='correo_de_traslado';
+UPDATE "global".ae_textos SET texto='Tenga en cuenta que no se ha podido enviar la notificación por correo electrónico; tome nota de los datos de la reserva.' WHERE codigo='no_se_pudo_enviar_notificacion_de_confirmacion_tome_nota_de_los_datos_de_la_reserva';
+INSERT INTO "global".ae_textos(codigo, texto) VALUES('carga_masiva_recursos_disponibilidades', 'Carga masiva de recursos y disponibilidades');
+
+INSERT INTO "global".ae_configuracion (clave, valor) VALUES('CARGA_MASIVA_DIAS_RECURSOS_NUEVOS', '30');
+INSERT INTO "global".ae_configuracion (clave, valor) VALUES('CARGA_MASIVA_DIAS_RECURSOS_EXISTENTES', '15');
+
+-- 2.3.17
+
+CREATE INDEX ae_novedades_intentos_idx ON "global".ae_novedades (intentos);
+CREATE INDEX ae_novedades_enviado_idx ON "global".ae_novedades (enviado);
+
+-- 2.3.17 R1
+
+update global.ae_textos set texto='Se han modificado x recursos' where codigo = 'actualizacion_recursos';
+INSERT INTO global.ae_textos(codigo, texto) VALUES ('reporte_errores_actualizacion_masiva_reservas', 'Reporte de errores de actualización masiva de recursos');
+
+-- =======================================================================================================================
+-- 2.3.19
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.20
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.21
+
+-- Nada para hacer
+
+-- =======================================================================================================================
+-- 2.3.22
+
+-- Nada para hacer
+
+-- =======================================================================================================================

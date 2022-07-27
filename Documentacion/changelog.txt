@@ -360,3 +360,6 @@ Versión 2.3.20
 
 Versión 2.3.21
 * Se ajusta implementación de equals de entidad DatoReserva para soportar agrupaciones.
+
+Versión 2.3.22
+* Se ajusta configuración de hibernate.
