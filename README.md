@@ -1,6 +1,6 @@
 # sistema-agenda-electronica-v2 
 
-[DESCONTINUADO] Este repositorio se dedica únicamente por cuestiones de compatibilidad, ya que la el soporte para esta versión del SAE ha caducado. Se recomienda utilizar la [versión 4 del Sistema de Agenda Electrónica](https://github.com/AGESIC-UY/sistema-agenda-electronica-v4) para futuros desarrollos.
+[DESCONTINUADO] Este repositorio se mantiene por cuestiones de compatibilidad con ramas que se hayan generado, ya que la el soporte para esta versión del SAE ha caducado. Se recomienda utilizar la [versión 4 del Sistema de Agenda Electrónica](https://github.com/AGESIC-UY/sistema-agenda-electronica-v4) para futuros desarrollos.
 
 Evolución v2 del sistema de agenda electronica
 
